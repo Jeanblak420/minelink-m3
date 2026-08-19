@@ -38,7 +38,7 @@ void main() {
         onLogout: () {},
         onNotifications: () {},
         onProfile: () {},
-        appBar: AppBar(title: const Text('Dashboard')),
+        title: 'Dashboard',
         // Mirror the real app: the body is a nested (go_router ShellRoute)
         // Navigator whose ModalRoute carries BlockSemantics — which drops the
         // semantics of everything painted before it (sidebar, in-body app bar).
@@ -68,12 +68,18 @@ void main() {
 
     // A top-level destination, two group headers, a leaf nested inside a group
     // (groups are open by default), and the footer action.
+    // 'Logout' is no longer a rail entry. The M3 redesign moved the per-user
+    // actions (profile, notifications, appearance, theme, sign out) into the
+    // identity flyout at the foot of the rail, which is where the super-admin
+    // console has always kept them and which is what "every role follows the
+    // console's UX" resolves to here. Sign-out is still one tap from the top
+    // bar's overflow as well, so nothing became harder to reach.
     for (final label in [
       'Dashboard',
       'Operations',
       'Logistics',
       'Supervisor & stockpiles',
-      'Logout',
+      'Iron Hills Mining',
     ]) {
       expect(
         find.bySemanticsLabel(RegExp(RegExp.escape(label))),

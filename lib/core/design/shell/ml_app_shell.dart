@@ -60,6 +60,8 @@ class MlAppShell extends StatefulWidget {
     this.overlay,
     this.showCanvasTexture = true,
     this.constrainContent = true,
+    this.navEnabled = true,
+    this.bottomNavOverride,
   });
 
   /// The destination tree for this session.
@@ -107,6 +109,28 @@ class MlAppShell extends StatefulWidget {
   /// Whether to cap and pad the content. False for a page that manages its own
   /// full-bleed layout (a map).
   final bool constrainContent;
+
+  /// Navigation is inert and visibly dimmed when false.
+  ///
+  /// This is a real product state, not a styling option: an employee whose role
+  /// has not been assigned yet is shown their own record and nothing else, and
+  /// handing that user a working destination tree was a privilege escalation
+  /// (closed in `f9add87`). Rendering the rail but refusing it is honest — the
+  /// user can see that the app has more in it and that they do not have it yet
+  /// — where an empty rail reads as a broken app.
+  final bool navEnabled;
+
+  /// Replaces the tree-derived bottom bar at compact width.
+  ///
+  /// A migration seam, and the only divergence left between the two shells. The
+  /// driver's phone bar (Dashboard · Trip · Profile) points at
+  /// `/portal/driver/{home,trip,profile}`, and the driver's nav tree names the
+  /// middle one "My routes" rather than "Trip" and carries Live map and
+  /// Compliance between them. Deriving the bar from the tree today would
+  /// silently relabel and reorder the driver's primary navigation, which is not
+  /// a change to make as a side effect of a shell rewrite. Remove this once the
+  /// driver tree is reconciled with the bar (Phase 2).
+  final Widget? bottomNavOverride;
 
   @override
   State<MlAppShell> createState() => _MlAppShellState();
@@ -170,7 +194,20 @@ class _MlAppShellState extends State<MlAppShell> {
       dark: isDark,
       texture: widget.showCanvasTexture,
       constrain: widget.constrainContent,
-      child: widget.child,
+      // A semantics boundary around the body, and it is not optional.
+      //
+      // The routed child hosts a nested (ShellRoute) Navigator whose ModalRoute
+      // carries `BlockSemantics`, which drops the semantics of everything
+      // painted *before* it — and the rail and the top bar paint first, in
+      // Row/Column order. Without this boundary the blocking escapes the body
+      // and a screen reader cannot see the navigation at all: not one
+      // destination, not the menu button, nothing.
+      //
+      // The console shell had this. The portal shell did not, so every company
+      // user — a mine supervisor, a load controller, a driver — had an
+      // unreachable rail. It moved here so that fixing it once fixes it for
+      // every caller, which is the whole argument for one shell.
+      child: Semantics(container: true, child: widget.child),
     );
 
     final scaffold = Scaffold(
@@ -178,25 +215,28 @@ class _MlAppShellState extends State<MlAppShell> {
       backgroundColor: chrome.canvasBase,
       appBar: _buildTopBar(context, windowClass, chrome),
       drawer: windowClass.usesBottomNav ? _buildDrawer(chrome) : null,
-      bottomNavigationBar:
-          windowClass.usesBottomNav ? _buildBottomBar(context) : null,
+      bottomNavigationBar: windowClass.usesBottomNav
+          ? (widget.bottomNavOverride ?? _buildBottomBar(context))
+          : null,
       floatingActionButton: widget.floatingActionButton,
       body: windowClass.usesRail
           ? Row(
               children: [
-                MlNavRail(
-                  tree: widget.tree,
-                  selectedRoute: widget.selectedRoute,
-                  onNavigate: widget.onNavigate,
-                  expanded: windowClass.usesExpandedRail && widget.expanded,
-                  badgeCounts: widget.badgeCounts,
-                  header: widget.railHeader,
-                  footer: widget.railFooter,
-                  showSearch: widget.tree.allLeaves.length > 8,
-                  onToggleExpanded: windowClass.usesExpandedRail &&
-                          widget.onExpandedChanged != null
-                      ? () => widget.onExpandedChanged!(!widget.expanded)
-                      : null,
+                _maybeLock(
+                  MlNavRail(
+                    tree: widget.tree,
+                    selectedRoute: widget.selectedRoute,
+                    onNavigate: widget.onNavigate,
+                    expanded: windowClass.usesExpandedRail && widget.expanded,
+                    badgeCounts: widget.badgeCounts,
+                    header: widget.railHeader,
+                    footer: widget.railFooter,
+                    showSearch: widget.tree.allLeaves.length > 8,
+                    onToggleExpanded: windowClass.usesExpandedRail &&
+                            widget.onExpandedChanged != null
+                        ? () => widget.onExpandedChanged!(!widget.expanded)
+                        : null,
+                  ),
                 ),
                 Expanded(child: workspace),
               ],
@@ -207,6 +247,17 @@ class _MlAppShellState extends State<MlAppShell> {
     if (widget.overlay == null) return scaffold;
     return Stack(children: [scaffold, widget.overlay!]);
   }
+
+  /// Dims and disables [child] when navigation is locked.
+  ///
+  /// `AbsorbPointer` rather than `IgnorePointer`: the taps must stop here, not
+  /// fall through to whatever is painted behind the rail.
+  Widget _maybeLock(Widget child) => widget.navEnabled
+      ? child
+      : Opacity(
+          opacity: 0.45,
+          child: AbsorbPointer(child: child),
+        );
 
   PreferredSizeWidget _buildTopBar(
     BuildContext context,
@@ -230,13 +281,17 @@ class _MlAppShellState extends State<MlAppShell> {
         ? Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Builder(
-                builder: (context) => IconButton(
-                  tooltip: 'Open navigation menu',
-                  icon: const Icon(Icons.menu_rounded),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                ),
-              ),
+              // `DrawerButton`, not a hand-rolled `IconButton(tooltip: …)`.
+              //
+              // A tooltip is not a semantics label. Measured on Flutter 3.44.8:
+              // an `IconButton` whose only text is its `tooltip` produces a
+              // semantics node a screen reader cannot address by that name —
+              // `find.bySemanticsLabel` finds nothing, for a bare one in a
+              // plain `Scaffold` app bar as much as for this one. So the
+              // control that opens navigation on every phone screen announced
+              // itself as an unlabelled button. `DrawerButton` is Flutter's
+              // widget for this and carries the localised label properly.
+              const DrawerButton(),
               if (widget.leading != null) widget.leading!,
             ],
           )
@@ -302,17 +357,19 @@ class _MlAppShellState extends State<MlAppShell> {
           bottomRight: Radius.circular(MlShape.extraLarge),
         ),
       ),
-      child: MlNavRail(
-        tree: widget.tree,
-        selectedRoute: widget.selectedRoute,
-        badgeCounts: widget.badgeCounts,
-        header: widget.drawerHeader ?? widget.railHeader,
-        footer: widget.railFooter,
-        showSearch: widget.tree.allLeaves.length > 8,
-        onNavigate: (route) {
-          Navigator.of(context).pop();
-          widget.onNavigate(route);
-        },
+      child: _maybeLock(
+        MlNavRail(
+          tree: widget.tree,
+          selectedRoute: widget.selectedRoute,
+          badgeCounts: widget.badgeCounts,
+          header: widget.drawerHeader ?? widget.railHeader,
+          footer: widget.railFooter,
+          showSearch: widget.tree.allLeaves.length > 8,
+          onNavigate: (route) {
+            Navigator.of(context).pop();
+            widget.onNavigate(route);
+          },
+        ),
       ),
     );
   }

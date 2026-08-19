@@ -129,7 +129,7 @@ void main() {
             onLogout: () {},
             onNotifications: () {},
             onProfile: () {},
-            appBar: AppBar(title: const Text('Dashboard')),
+            title: 'Dashboard',
             body: const Center(child: Text('page')),
           ),
         ));

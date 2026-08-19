@@ -113,7 +113,9 @@ class _SuperAdminShellLayoutState extends ConsumerState<SuperAdminShellLayout> {
 
     final shell = MlAppShell(
       tree: tree,
-      selectedRoute: _selectedRouteFor(location, tree),
+      // The raw location. The rail resolves it to the destination that owns it
+      // (longest match), so a detail page keeps its parent lit.
+      selectedRoute: location,
       onNavigate: (route) => context.go(route),
       badgeCounts: {MlNavBadge.unreadNotifications: unread},
       title: titles.title,
@@ -132,19 +134,14 @@ class _SuperAdminShellLayoutState extends ConsumerState<SuperAdminShellLayout> {
         const AnimatedNotificationBell(),
         _overflow(context),
       ],
-      // Semantics boundary: the child hosts the nested (ShellRoute) Navigator
-      // whose ModalRoute carries BlockSemantics, which drops the semantics of
-      // everything painted before it — the rail and the top bar. The boundary
-      // contains the blocking inside the body so navigation stays reachable by
-      // assistive tech.
-      child: Semantics(
-        container: true,
-        child: NavHistoryRecorder(
-          key: ValueKey(navLocation.fullLocation),
-          location: navLocation,
-          isRoot: location == '/super-admin',
-          child: widget.child,
-        ),
+      // The semantics boundary that used to be here is now inside MlAppShell,
+      // so the portal gets it too — it never had one, which left every company
+      // user's rail invisible to assistive tech.
+      child: NavHistoryRecorder(
+        key: ValueKey(navLocation.fullLocation),
+        location: navLocation,
+        isRoot: location == '/super-admin',
+        child: widget.child,
       ),
     );
 
@@ -158,27 +155,6 @@ class _SuperAdminShellLayoutState extends ConsumerState<SuperAdminShellLayout> {
       },
       child: ChatDock(child: shell),
     );
-  }
-
-  /// Which leaf the rail should light for [location].
-  ///
-  /// A detail route (`/super-admin/organizations/<id>`) is not itself a
-  /// destination, but the user is unambiguously *inside* Organizations and the
-  /// rail must say so. The old shell answered this with a per-tile `_active()`
-  /// call written out thirty times; this reads the tree instead, so a new
-  /// destination gets the behaviour for free.
-  ///
-  /// Longest match wins, or `/super-admin` would swallow every route beneath
-  /// it and the dashboard would look selected everywhere.
-  String? _selectedRouteFor(String location, List<MlNavNode> tree) {
-    String? best;
-    for (final leaf in tree.allLeaves) {
-      final route = leaf.route!;
-      if (location == route || location.startsWith('$route/')) {
-        if (best == null || route.length > best.length) best = route;
-      }
-    }
-    return best;
   }
 
   Widget _identity(BuildContext context) {

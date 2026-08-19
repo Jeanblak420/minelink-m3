@@ -36,10 +36,8 @@ import 'package:flutter_application_1/core/widgets/nav_history_recorder.dart';
 import 'package:flutter_application_1/features/tutorial/providers/tutorial_providers.dart';
 import 'package:flutter_application_1/features/tutorial/widgets/tutorial_overlay.dart';
 import 'package:flutter_application_1/core/design/tokens/ui_prefs.dart';
-import 'package:flutter_application_1/core/design/shell/ml_home_chip.dart';
 import 'package:flutter_application_1/core/design/components/ml_expiry_notice.dart';
 import 'package:flutter_application_1/features/portal/providers/company_access_provider.dart';
-import 'package:flutter_application_1/core/design/tokens/ml_rail_tokens.dart';
 import 'package:flutter_application_1/core/layout/text_scale.dart';
 
 /// The rail for a session with no operational surface: an employee whose role
@@ -422,187 +420,21 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
 
     final screenW = MediaQuery.sizeOf(context).width;
     final narrowNav = screenW < PortalScaffold.sidebarBreakpoint;
-    final compactActions = screenW < 520;
-    final leadingW = narrowNav ? (screenW < 360 ? 100.0 : 104.0) : null;
 
-    final Widget? overflowMenu = compactActions
-        ? PopupMenuButton<String>(
-            tooltip: 'More',
-            icon: const Icon(Icons.more_vert_rounded),
-            onSelected: (value) {
-              switch (value) {
-                case 'notifications':
-                  context.go('/notifications');
-                  return;
-                case 'tour':
-                  ref.read(tutorialOverlayProvider.notifier).show();
-                  return;
-                case 'profile':
-                  context.go('/profile');
-                  return;
-                case 'logout':
-                  LogoutService.logoutWithConfirmation(context, ref);
-                  return;
-                default:
-                  return;
-              }
-            },
-            itemBuilder: (context) => [
-              if (!vm.isEmployeeWithoutRole)
-                const PopupMenuItem(value: 'notifications', child: Text('Notifications')),
-              const PopupMenuItem(value: 'tour', child: Text('Take a tour')),
-              const PopupMenuItem(value: 'profile', child: Text('Profile')),
-              const PopupMenuItem(value: 'logout', child: Text('Sign out')),
-            ],
-          )
-        : null;
+    // The hand-built AppBar, the compact overflow menu and the home chip that
+    // used to be constructed here are gone: MlAppShell builds the top bar from
+    // `title` / `subtitle` / `actions` / `leading`, and the brand chip is the
+    // rail header. Roughly 180 lines, all of it a second copy of chrome the
+    // console already had.
 
     // Mine premium theme (mine/supplier only): when a Glass/Industrial
-    // direction is chosen on the Appearance page, skin the WHOLE mine portal —
-    // sidebar, app bar and every page. Non-mine workspaces get null and keep
-    // the default look untouched.
+    // direction is chosen on the Appearance page, skin the whole mine portal.
+    // Non-mine workspaces get null and keep the default look untouched.
     final appearance = ref.watch(mineAppearanceProvider);
     final minePalette = vm.isMineSupplier
         ? MinePremiumPalette.forDirection(appearance.direction)
         : null;
-    final semantic = minePalette?.semantic ?? MlSemantic.of(context);
     final themeMode = ref.watch(themeModeProvider);
-
-    // S5-11: was a hand-copied inline chip — same 38px box, same 11px radius,
-    // same glyph as the console's, written out again because the original was
-    // private. The two had already drifted: this one hardcoded the border and
-    // the ink for DARK in both themes, so on a light portal it drew an
-    // ice-blue glyph on a light rail. MlHomeChip is theme-aware and shared.
-    final homeChip = Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Tooltip(
-        message: 'Home',
-        child: MlHomeChip(
-          onTap: () {
-            ref.read(portalTabIndexProvider.notifier).state = 0;
-            context.go('/home');
-          },
-        ),
-      ),
-    );
-
-    final appBar = AppBar(
-      toolbarHeight: narrowNav ? kToolbarHeight : MlTokens.appBarHeight,
-      backgroundColor: semantic.surfaceCard,
-      leading: narrowNav
-          ? SizedBox(
-              width: leadingW,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    tooltip: 'Open navigation menu',
-                    icon: const Icon(Icons.menu_rounded),
-                    onPressed: () => _portalKey.currentState?.openDrawer(),
-                  ),
-                  const AppNavigationBackButton(),
-                ],
-              ),
-            )
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(width: 8),
-                const AppNavigationBackButton(),
-                const SizedBox(width: 6),
-                homeChip,
-              ],
-            ),
-      leadingWidth: narrowNav ? leadingW : 108,
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: semantic.borderCard),
-      ),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            sectionTitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.2,
-              color: semantic.textStrong,
-              fontSize: narrowNav ? (screenW < 400 ? 16 : 18) : 22,
-              height: 1.15,
-            ),
-          ),
-          Text(
-            '${vm.workspaceName} · ${vm.operatorName} · ${vm.roleLabel}',
-            maxLines: narrowNav ? 2 : 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 12,
-              color: mlRailSearchInk,
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        if (overflowMenu != null)
-          overflowMenu
-        else ...[
-          IconButton(
-            tooltip: 'Take a tour',
-            onPressed: () =>
-                ref.read(tutorialOverlayProvider.notifier).show(),
-            icon: ref.watch(tutorialSeenProvider)
-                ? const Icon(Icons.help_outline_rounded)
-                : Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      const Icon(Icons.help_outline_rounded),
-                      Positioned(
-                        right: -1,
-                        top: -1,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: MlTokens.accent,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
-          IconButton(
-            tooltip: themeMode == ThemeMode.dark
-                ? 'Switch to light theme'
-                : 'Switch to dark theme',
-            icon: Icon(
-              themeMode == ThemeMode.dark
-                  ? Icons.light_mode_outlined
-                  : Icons.dark_mode_outlined,
-            ),
-            onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
-          ),
-          if (!vm.isEmployeeWithoutRole) const WorkflowNotificationBell(),
-          if (!vm.isEmployeeWithoutRole) const AnimatedNotificationBell(),
-          IconButton(
-            tooltip: 'Profile',
-            icon: const Icon(Icons.person_outline),
-            onPressed: () => context.go('/profile'),
-          ),
-          IconButton(
-            tooltip: 'Sign out',
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: () => LogoutService.logoutWithConfirmation(context, ref),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ],
-    );
 
     final showChatFab =
         !vm.isEmployeeWithoutRole && !location.startsWith('/communications');
@@ -646,6 +478,63 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
       selectedRoute: selectedRoute,
       badgeCounts: badgeCounts,
       navLocked: vm.isEmployeeWithoutRole,
+      // The top bar's content, rather than a hand-built AppBar.
+      //
+      // This is where the portal and the console had most visibly diverged:
+      // the console carried a back button, a home chip, the title block, one
+      // bell and an overflow; the portal carried a menu, a back button, a home
+      // chip, the title block, a tour button, a theme toggle, TWO bells, a
+      // profile button and a sign-out button — nine controls, six of them
+      // actions that belong in a menu. They now share one bar, and the four
+      // that are per-user actions moved into the identity flyout at the foot
+      // of the rail, which is where the console has always kept them.
+      title: sectionTitle,
+      subtitle: '${vm.workspaceName} · ${vm.operatorName} · ${vm.roleLabel}',
+      leading: const AppNavigationBackButton(),
+      onBrandTap: () {
+        ref.read(portalTabIndexProvider.notifier).state = 0;
+        context.go('/home');
+      },
+      actions: [
+        IconButton(
+          tooltip: 'Take a tour',
+          onPressed: () => ref.read(tutorialOverlayProvider.notifier).show(),
+          icon: ref.watch(tutorialSeenProvider)
+              ? const Icon(Icons.help_outline_rounded)
+              : Badge(
+                  smallSize: 8,
+                  child: const Icon(Icons.help_outline_rounded),
+                ),
+        ),
+        if (!vm.isEmployeeWithoutRole) const WorkflowNotificationBell(),
+        if (!vm.isEmployeeWithoutRole) const AnimatedNotificationBell(),
+        PopupMenuButton<String>(
+          tooltip: 'More',
+          icon: const Icon(Icons.more_vert_rounded),
+          onSelected: (value) {
+            switch (value) {
+              case 'theme':
+                ref.read(themeModeProvider.notifier).toggle();
+              case 'profile':
+                context.go('/profile');
+              case 'signout':
+                LogoutService.logoutWithConfirmation(context, ref);
+            }
+          },
+          itemBuilder: (_) => [
+            PopupMenuItem(
+              value: 'theme',
+              child: Text(
+                themeMode == ThemeMode.dark
+                    ? 'Switch to light theme'
+                    : 'Switch to dark theme',
+              ),
+            ),
+            const PopupMenuItem(value: 'profile', child: Text('Profile')),
+            const PopupMenuItem(value: 'signout', child: Text('Sign out')),
+          ],
+        ),
+      ],
       sidebarBrandTitle: vm.workspaceName,
       userName: vm.operatorName,
       userMeta: vm.roleLabel,
@@ -668,7 +557,6 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
       // overlay (below) rather than a fixed FAB, so it can be repositioned.
       floatingAction: null,
       bottomNav: driverBottomNav,
-      appBar: appBar,
       sidebarExpanded: _portalSidebarExpanded,
       onSidebarExpandedChanged: (expanded) {
         setState(() => _portalSidebarExpanded = expanded);

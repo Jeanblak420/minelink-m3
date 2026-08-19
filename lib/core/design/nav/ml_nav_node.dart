@@ -194,4 +194,33 @@ extension MlNavTree on List<MlNavNode> {
   List<MlNavNode> filtered(String query) => map((n) => n.filtered(query))
       .whereType<MlNavNode>()
       .toList(growable: false);
+
+  /// Which destination [location] belongs to — **longest match wins**.
+  ///
+  /// A detail page is not itself a destination. `/portal/mine/trips/abc123` has
+  /// no rail entry, but the user is unambiguously inside Trips and the rail has
+  /// to say so; with exact equality every detail page in the app deselects the
+  /// whole rail, and the user loses their place the moment they open a record.
+  ///
+  /// Longest match, not first match, because the routes genuinely nest:
+  /// `/super-admin` is a prefix of every console route, so a first-match rule
+  /// would light Dashboard on all thirty of them. Likewise
+  /// `/super-admin/requests/buyer` against `/super-admin/requests/buyer-transport`
+  /// — a naive `startsWith` collapses two sibling destinations into one, which
+  /// is why the boundary is `'$route/'` and not `route`.
+  ///
+  /// Returns null when [location] is outside the tree entirely, which is
+  /// correct: nothing should be lit.
+  String? resolveSelected(String? location) {
+    if (location == null) return null;
+    String? best;
+    for (final leaf in allLeaves) {
+      final route = leaf.route;
+      if (route == null) continue;
+      if (location == route || location.startsWith('$route/')) {
+        if (best == null || route.length > best.length) best = route;
+      }
+    }
+    return best;
+  }
 }

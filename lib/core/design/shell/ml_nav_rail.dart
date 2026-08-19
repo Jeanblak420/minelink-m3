@@ -43,8 +43,11 @@ class MlNavRail extends StatefulWidget {
 
   final List<MlNavNode> tree;
 
-  /// The route currently on screen. A leaf is selected when it matches, and a
-  /// group is *open* when it contains the match.
+  /// The route currently on screen.
+  ///
+  /// Resolved against the tree by longest match ([MlNavTree.resolveSelected]),
+  /// so a detail page keeps its parent destination lit. Callers pass the raw
+  /// location; they do not have to know which of their routes are destinations.
   final String? selectedRoute;
 
   final ValueChanged<String> onNavigate;
@@ -94,8 +97,25 @@ class _MlNavRailState extends State<MlNavRail> {
     super.dispose();
   }
 
-  bool _isOpen(MlNavNode group) =>
-      _groupOverride[group.label] ?? group.contains(widget.selectedRoute);
+  /// The raw location resolved to the destination that owns it.
+  String? get _selected => widget.tree.resolveSelected(widget.selectedRoute);
+
+  /// Whether [group] is showing its children.
+  ///
+  /// Two rules, both from P7-03 and both deliberate:
+  ///
+  /// 1. **Open by default.** A rail whose groups start closed hides most of the
+  ///    app behind a click and makes the tree look smaller than it is. The
+  ///    filter box exists for narrowing; the default should be "you can see
+  ///    what there is".
+  /// 2. **The group holding the current route cannot be closed.** Otherwise the
+  ///    rail can be put into a state where nothing is highlighted while you are
+  ///    plainly on a page — you lose your place in your own navigation. The
+  ///    user's override is remembered but overruled while they are inside.
+  bool _isOpen(MlNavNode group) {
+    if (group.contains(_selected)) return true;
+    return _groupOverride[group.label] ?? true;
+  }
 
   int _countFor(MlNavNode node) {
     if (node.isGroup) {
@@ -167,7 +187,7 @@ class _MlNavRailState extends State<MlNavRail> {
                                   // inside a closed group is the same fault as not
                                   // matching them at all.
                                   open: _query.isNotEmpty || _isOpen(node),
-                                  selectedRoute: widget.selectedRoute,
+                                  selectedRoute: _selected,
                                   count: _countFor(node),
                                   countFor: _countFor,
                                   onToggle: () => setState(() {
@@ -179,7 +199,7 @@ class _MlNavRailState extends State<MlNavRail> {
                                 _RailTile(
                                   node: node,
                                   expanded: expanded,
-                                  selected: node.route == widget.selectedRoute,
+                                  selected: node.route == _selected,
                                   count: _countFor(node),
                                   onTap: () => widget.onNavigate(node.route!),
                                 ),
@@ -297,6 +317,16 @@ class _RailTile extends StatelessWidget {
         : icon;
 
     final tile = Semantics(
+      // `container: true` is load-bearing, not decoration. Without it the
+      // annotation merges into a neighbouring node instead of creating one, and
+      // the destination is simply absent from the semantics tree — a rail that
+      // a screen reader cannot enumerate. Caught by
+      // portal_scaffold_semantics_test, which walks the tree by label.
+      container: true,
+      // And the label has to be explicit, because the count has to be spoken.
+      // A badge renders "3" beside "Disputes"; read out in tree order that is
+      // "Disputes, 3", which is a list position, not a queue size.
+      excludeSemantics: true,
       selected: selected,
       button: true,
       label: count > 0 ? '${node.label}, $count pending' : node.label,
@@ -452,9 +482,13 @@ class _RailGroup extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 2),
           child: Semantics(
+            container: true,
+            excludeSemantics: true,
             button: true,
             expanded: open,
-            label: node.label,
+            label: count > 0
+                ? '${node.label}, $count pending'
+                : node.label,
             child: InkWell(
               onTap: onToggle,
               customBorder: MlShape.pillShape,
@@ -494,7 +528,13 @@ class _RailGroup extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (count > 0 && !open) ...[
+                      // The sum of the children's queues, shown whether the
+                      // group is open or shut. Open, it duplicates numbers
+                      // visible just below it — but it is the only figure that
+                      // survives the group being scrolled past or collapsed,
+                      // and a queue that disappears depending on a disclosure
+                      // state is a queue that gets missed.
+                      if (count > 0) ...[
                         Badge.count(count: count),
                         const SizedBox(width: 8),
                       ],
