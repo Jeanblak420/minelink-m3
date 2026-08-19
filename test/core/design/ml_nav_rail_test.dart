@@ -144,23 +144,41 @@ void main() {
       expect(find.text('Transporters'), findsOneWidget);
     });
 
-    testWidgets('a group not holding the route stays shut', (tester) async {
+    testWidgets('groups start open', (tester) async {
+      // A rail whose groups start closed hides most of the app behind a click
+      // and makes the tree look smaller than it is. The filter box is for
+      // narrowing; the default is "you can see what there is" (P7-03).
       await tester.pumpWidget(_host(expanded: true, selected: '/dash'));
       await tester.pumpAndSettle();
-      expect(find.text('Buyers'), findsNothing);
+      expect(find.text('Buyers'), findsOneWidget);
     });
 
-    testWidgets('tapping the header opens and closes it', (tester) async {
+    testWidgets('tapping the header closes and reopens it', (tester) async {
       await tester.pumpWidget(_host(expanded: true, selected: '/dash'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Insights'));
       await tester.pumpAndSettle();
       expect(find.text('Buyers'), findsOneWidget);
 
       await tester.tap(find.text('Insights'));
       await tester.pumpAndSettle();
       expect(find.text('Buyers'), findsNothing);
+
+      await tester.tap(find.text('Insights'));
+      await tester.pumpAndSettle();
+      expect(find.text('Buyers'), findsOneWidget);
+    });
+
+    testWidgets('the group you are inside cannot be closed', (tester) async {
+      // Otherwise the rail can be put into a state where nothing is
+      // highlighted while you are plainly on a page — you lose your place in
+      // your own navigation.
+      await tester.pumpWidget(
+        _host(expanded: true, selected: '/insights/buyer'),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Insights'));
+      await tester.pumpAndSettle();
+      expect(find.text('Buyers'), findsOneWidget);
     });
 
     testWidgets('a child navigates to its own route', (tester) async {
@@ -313,6 +331,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Close it, then reopen — the expand is the direction that drives
+      // AnimatedSize and the one that used to throw.
+      await tester.tap(find.text('Insights'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Insights'));
       await tester.pumpAndSettle();
 
