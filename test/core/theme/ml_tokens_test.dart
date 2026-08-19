@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_scheme.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 void main() {
@@ -64,8 +65,39 @@ void main() {
       expect(s.surfaceApp, const Color(0xFFF8FAFC));
       expect(s.surfaceCard, const Color(0xFFFFFFFF));
       expect(s.borderCard, const Color(0xFFE7EDF3));
-      expect(s.divider, const Color(0xFFE9EEF4));
       expect(s.textStrong, const Color(0xFF0F172A));
+    });
+
+    test('the three hairline greys are now one', () {
+      // `borderSubtle`, `borderCard` and `divider` were #E2E8F0, #E7EDF3 and
+      // #E9EEF4 — three separately-authored greys for one job, all within a
+      // couple of steps of each other. Nothing ever depended on the
+      // difference; it is below the threshold at which a 1px line is
+      // distinguishable. They now all read `ColorScheme.outlineVariant`.
+      //
+      // This is the collapse working, not a value being lost. Asserted so a
+      // future edit that re-splits them has to say why.
+      for (final b in Brightness.values) {
+        final s = MlSemantic.from(b);
+        expect(s.borderSubtle, s.borderCard);
+        expect(s.borderCard, s.divider);
+      }
+    });
+
+    test('MlSemantic is a view onto the ColorScheme, not a parallel palette', () {
+      // The point of the redesign in one assertion. These used to be
+      // hand-authored constants sitting beside a ColorScheme seeded from a
+      // different colour entirely, so `surfaceCard` and any scheme role that
+      // also meant "card" were unrelated values.
+      for (final b in Brightness.values) {
+        final scheme = MlScheme.of(b);
+        final s = MlSemantic.fromScheme(scheme);
+        expect(s.surfaceApp, scheme.surface);
+        expect(s.textStrong, scheme.onSurface);
+        expect(s.textMuted, scheme.onSurfaceVariant);
+        expect(s.borderStrong, scheme.outline);
+        expect(s.divider, scheme.outlineVariant);
+      }
     });
 
     test('dark surfaces match the [data-theme=dark] remap', () {

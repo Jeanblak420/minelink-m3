@@ -24,135 +24,33 @@
 // keeping a second copy of the role model in sync by hand (P7-07 / P4-09 —
 // today those two disagree).
 //
-// ## Why a local node type rather than `MlNavItem`
+// ## The node type has moved to `core/design/nav/` — as this comment planned
 //
-// `MlNavItem` (`super_admin/widgets/sidebar/minelink_sidebar_core.dart`) is
-// close, but it carries no route, and importing it here would point the portal
-// at the console — the exact dependency `PLAN.md` §6.3 exists to remove, since
-// both are due to move under `lib/core/design/` in Phase 5. `PortalNavNode`
-// stays self-contained until that extraction happens and the two can merge from
-// a shared home rather than across a feature boundary.
+// What used to stand here explained why the node type was local: `MlNavItem`
+// carried no route, and importing it would have pointed the portal at the
+// console. It ended "…until that extraction happens and the two can merge from
+// a shared home rather than across a feature boundary."
+//
+// The M3 redesign is that extraction. The model now lives at
+// `lib/core/design/nav/ml_nav_node.dart` as `MlNavNode` / `MlNavBadge`, the
+// console builds its tree in the same model, and one shell renders both.
+//
+// The two names below are **aliases**, not copies. Everything that referred to
+// `PortalNavNode` — the router's role guard, the badge providers, the tests —
+// keeps working unchanged, and there is exactly one class.
 // ============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/nav/ml_nav_node.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 
-/// A live queue whose size a nav leaf displays.
-///
-/// The tree names the *source*, never a number: this file has no providers and
-/// must not acquire any, or it stops being testable as a value. The rail
-/// resolves each of these to an integer and sums a group header from its
-/// children (P7-04 / P7-05).
-///
-/// The portal's badge today is a single boolean 8 px dot with no count, on one
-/// destination.
-enum PortalNavBadge {
-  /// Transport / product / buyer requests awaiting this org's action —
-  /// `sent_back` items it must resubmit, and its own `requested` items.
-  pendingRequests,
+export 'package:flutter_application_1/core/design/nav/ml_nav_node.dart';
 
-  /// Dispatches sent to this transporter that have not been accepted.
-  unacceptedDispatches,
+/// The portal's name for [MlNavNode]. One class, two names, no duplication.
+typedef PortalNavNode = MlNavNode;
 
-  /// Recon disputes open against a transaction this org is party to.
-  openDisputes,
-
-  /// Compliance documents expiring inside the reminder window.
-  expiringCompliance,
-
-  /// Unread rows in `notifications` for the signed-in user.
-  unreadNotifications,
-
-  /// Trucks at the gate awaiting a security check-in.
-  arrivalsAwaitingCheckIn,
-
-  /// Trips checked in but not yet weighed by the load controller.
-  loadsAwaitingWeigh,
-
-  /// Vehicles with a service schedule due by date or odometer.
-  maintenanceDue,
-}
-
-/// One entry in a portal navigation tree: either a **leaf** carrying a route,
-/// or a **group** carrying children and no route of its own.
-///
-/// Groups render as expandable dropdowns when the rail is expanded and as
-/// overlay flyouts when it is collapsed (P7-03). A group is never itself a
-/// destination — tapping the header opens or closes it.
-@immutable
-class PortalNavNode {
-  /// A destination. [route] is a real, resolvable path in `app_router.dart`;
-  /// there is no such thing as a leaf that goes nowhere, which is what keeps
-  /// dead entries out of the rail by construction.
-  const PortalNavNode.leaf({
-    required this.label,
-    required this.icon,
-    required String this.route,
-    this.badge,
-  }) : children = const <PortalNavNode>[];
-
-  /// A section header with children. Carries no route and no badge of its own —
-  /// its badge is the sum of its children's, computed at render time.
-  const PortalNavNode.group({
-    required this.label,
-    required this.icon,
-    required this.children,
-  })  : route = null,
-        badge = null;
-
-  final String label;
-  final IconData icon;
-
-  /// The destination path, or null on a group.
-  final String? route;
-
-  /// The queue this leaf counts, or null when it has none.
-  final PortalNavBadge? badge;
-
-  /// Child destinations, empty on a leaf.
-  final List<PortalNavNode> children;
-
-  bool get isGroup => children.isNotEmpty;
-
-  /// Every leaf at or below this node, in render order.
-  Iterable<PortalNavNode> get leaves sync* {
-    if (!isGroup) {
-      yield this;
-      return;
-    }
-    for (final child in children) {
-      yield* child.leaves;
-    }
-  }
-
-  /// True when this node, or any descendant, matches [query].
-  ///
-  /// The rail's search box uses this so a nested destination is findable
-  /// without expanding its group first — the flat list could only ever match
-  /// top-level labels (P7-06).
-  bool matches(String query) {
-    final q = query.trim().toLowerCase();
-    if (q.isEmpty) return true;
-    if (label.toLowerCase().contains(q)) return true;
-    return children.any((c) => c.matches(q));
-  }
-
-  /// A copy holding only the descendants that match [query], or null when
-  /// nothing in this branch does. A group whose own label matches is returned
-  /// whole, so searching "fleet" shows everything under Fleet.
-  PortalNavNode? filtered(String query) {
-    final q = query.trim().toLowerCase();
-    if (q.isEmpty) return this;
-    if (label.toLowerCase().contains(q)) return this;
-    if (!isGroup) return null;
-    final kept = children
-        .map((c) => c.filtered(q))
-        .whereType<PortalNavNode>()
-        .toList(growable: false);
-    if (kept.isEmpty) return null;
-    return PortalNavNode.group(label: label, icon: icon, children: kept);
-  }
-}
+/// The portal's name for [MlNavBadge].
+typedef PortalNavBadge = MlNavBadge;
 
 /// Builds the navigation tree for one (org type, role) pair.
 ///
