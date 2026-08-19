@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_scheme.dart';
+
 /// MineLink design tokens, ported 1:1 from
 /// `docs/new system design/minelink-new-design-v0.1/tokens/*.css`.
 ///
@@ -367,6 +369,26 @@ enum MlTone {
     }
   }
 
+  /// This tone's pair for [context]'s theme.
+  ///
+  /// Prefer this over `colors(Theme.of(context).brightness)` — it is the same
+  /// answer with one fewer thing to get wrong, and it is the seam through
+  /// which a tone could later become scheme-aware without touching call sites.
+  ///
+  /// **The hues themselves are deliberately not derived from the
+  /// `ColorScheme`.** M3 supplies exactly one semantic hue — `error`. These
+  /// seven carry *lifecycle* meaning (blue = in transit, amber = at mine,
+  /// green = loaded, orange = maintenance, red = declined) and that meaning is
+  /// fixed by the domain, not by the theme. Regenerating them from a tonal
+  /// palette would make "at mine" change hue when somebody picks a new accent
+  /// in Settings, which is a data-integrity problem dressed as a style choice.
+  /// A status hue is content, not chrome.
+  MlToneColors colorsOf(BuildContext context) =>
+      colors(Theme.of(context).brightness);
+
+  /// Tinted icon-well fill for this tone, for [context]'s theme.
+  Color wellOf(BuildContext context) => well(Theme.of(context).brightness);
+
   /// Tinted icon-well fill for this tone (feature/stat cards).
   Color well(Brightness brightness) {
     final dark = brightness == Brightness.dark;
@@ -453,47 +475,90 @@ class MlSemantic {
           divider: divider,
         );
 
-  static const _light = MlSemantic._(
-    surfaceApp: MlTokens.slate50,
-    surfaceCard: Color(0xFFFFFFFF),
-    surfaceRaised: Color(0xFFFFFFFF),
-    surfaceSunken: MlTokens.slate100,
-    textStrong: MlTokens.slate900,
-    textBody: MlTokens.slate700,
-    textMuted: MlTokens.slate600,
-    textFaint: MlTokens.slate400,
-    borderSubtle: MlTokens.slate200,
-    borderCard: Color(0xFFE7EDF3),
-    borderStrong: MlTokens.slate300,
-    borderAccent: MlTokens.cyan200,
-    divider: Color(0xFFE9EEF4),
-  );
+  /// Derives the whole semantic palette from a Material 3 [ColorScheme].
+  ///
+  /// **This is the change that makes the design system one system.** These
+  /// thirteen values used to be hand-authored constants living beside a
+  /// `ColorScheme` that was seeded from a different colour entirely, so
+  /// `MlSemantic.of(context).surfaceCard` and
+  /// `Theme.of(context).colorScheme.surfaceContainerLow` were unrelated
+  /// colours that both meant "card". Now there is one source and this is a
+  /// view onto it.
+  ///
+  /// ### Two places the mapping is not one-to-one, and why
+  ///
+  /// **1. `surfaceCard` reads a different role per brightness.** In light this
+  /// app puts white cards on a slate canvas — cards *lighter* than the page.
+  /// In dark, cards are lighter than the page too. But M3's container ladder
+  /// runs *darker* as it rises in light and *lighter* as it rises in dark, so
+  /// "one step above the canvas" is `surfaceContainerLowest` going one way and
+  /// `surfaceContainer` going the other. Naming that translation is exactly
+  /// what this class is for; hiding it inside the scheme would mean writing a
+  /// scheme that lies about which role is which.
+  ///
+  /// **2. The ink ladder has four steps and M3 has two.** M3 gives exactly
+  /// `onSurface` and `onSurfaceVariant`. This app's screens genuinely use four
+  /// weights — a table has a heading, a value, a unit and a hint in one row.
+  /// The two middle steps are therefore *derived* from the two real roles by
+  /// alpha rather than invented as new constants, so they cannot drift away
+  /// from the scheme when it changes.
+  static MlSemantic fromScheme(ColorScheme scheme) {
+    if (identical(scheme, _cachedScheme)) return _cached!;
+    final light = scheme.brightness == Brightness.light;
+    final built = MlSemantic._(
+      surfaceApp: scheme.surface,
+      surfaceCard:
+          light ? scheme.surfaceContainerLowest : scheme.surfaceContainer,
+      surfaceRaised:
+          light ? scheme.surfaceContainerLow : scheme.surfaceContainerHigh,
+      surfaceSunken:
+          light ? scheme.surfaceContainer : scheme.surfaceContainerLowest,
+      textStrong: scheme.onSurface,
+      textBody: scheme.onSurface.withValues(alpha: 0.86),
+      textMuted: scheme.onSurfaceVariant,
+      textFaint: scheme.onSurfaceVariant.withValues(alpha: 0.62),
+      // `borderSubtle`, `borderCard` and `divider` were three separate
+      // near-identical greys (#E2E8F0 / #E7EDF3 / #E9EEF4). Nothing ever
+      // depended on the difference — it is below the threshold at which a
+      // hairline is distinguishable — so they collapse onto one role.
+      borderSubtle: scheme.outlineVariant,
+      borderCard: scheme.outlineVariant,
+      borderStrong: scheme.outline,
+      borderAccent: scheme.primary.withValues(alpha: 0.45),
+      divider: scheme.outlineVariant,
+    );
+    _cachedScheme = scheme;
+    _cached = built;
+    return built;
+  }
 
-  static const _dark = MlSemantic._(
-    surfaceApp: Color(0xFF0A1424),
-    surfaceCard: Color(0xFF111C30),
-    surfaceRaised: Color(0xFF16243C),
-    surfaceSunken: Color(0xFF0B1526),
-    textStrong: Color(0xFFEEF3FA),
-    textBody: MlTokens.slate200,
-    textMuted: MlTokens.slate400,
-    textFaint: Color(0xFF5D6D8C),
-    borderSubtle: Color(0x2994A3B8),
-    borderCard: Color(0x2494A3B8),
-    borderStrong: Color(0x4294A3B8),
-    borderAccent: Color(0x6B22D3EE),
-    divider: Color(0x1F94A3B8),
-  );
+  // A one-entry memo. `Theme.of(context).colorScheme` hands back the same
+  // instance for the life of a theme, so `identical` hits on every call after
+  // the first and `of()` stays allocation-free on the hot path — it is called
+  // in the build method of most widgets in the app.
+  static ColorScheme? _cachedScheme;
+  static MlSemantic? _cached;
 
+  /// The palette for [brightness], from the canonical scheme of that
+  /// brightness.
+  ///
+  /// Prefer [of] wherever a `BuildContext` is available: this cannot see a
+  /// per-user accent or the high-contrast preference, because a `Brightness`
+  /// does not carry them. It exists for the handful of places that genuinely
+  /// have no context (a `paint()` on a custom painter given only a brightness,
+  /// a PDF being rendered off-screen).
   static MlSemantic from(Brightness brightness) =>
-      brightness == Brightness.dark ? _dark : _light;
+      fromScheme(MlScheme.of(brightness));
 
-  /// Resolves the active semantic palette. When an [MlSemanticScope] is present
-  /// above [context] (the mine premium themes install one over the whole mine
-  /// UI) its palette wins; otherwise the brightness-based light/dark default is
-  /// used, so all other surfaces are unaffected.
+  /// Resolves the active semantic palette.
+  ///
+  /// When an [MlSemanticScope] is present above [context] its palette wins;
+  /// otherwise the palette is derived from the theme's own `ColorScheme` — so
+  /// a per-user accent or the high-contrast preference flows through here
+  /// automatically instead of needing a parallel override.
   static MlSemantic of(BuildContext context) =>
-      MlSemanticScope.maybeOf(context) ?? from(Theme.of(context).brightness);
+      MlSemanticScope.maybeOf(context) ??
+      fromScheme(Theme.of(context).colorScheme);
 }
 
 /// Overrides [MlSemantic.of] for its subtree. Used to skin the entire mine

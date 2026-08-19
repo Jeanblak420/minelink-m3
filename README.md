@@ -1,284 +1,112 @@
-# Enterprise Flutter App with Supabase
+# MineLink M3
 
-A robust Flutter application for managing companies, employees, and role-based access control using Supabase as the backend.
+A **Material Design 3 redesign of MineLink**, built as a standalone project so
+the new look can be run, walked and judged in full before any of it is
+considered for the shipping app.
 
-## Features
+Created 2026-08-20.
 
-- **Authentication:** Email/Password Login & Logout
-- **User Types:** Company and Employee
-- **Organization Types:** Mine/Supplier, Buyer, Transporter
-- **Role-Based UI:** Different tabs visible based on user type and role
-- **Profile Management:** Edit company/employee information
-- **File Upload:** Upload profile pictures and documents
-- **Employee Management:** Companies can view and manage their employees
-- **Role Assignment:** Companies can assign roles to their employees
-- **Realtime Updates:** Instant data synchronization across clients
-- **Notifications:** Realtime notifications for important events
-- **Presence:** Track online status of users
-- **Broadcast:** Send and receive messages between connected clients
+---
 
-## Getting Started
+## 🛑 Read this first
 
-### Prerequisites
+This is **not** the MineLink you ship. The shipping app lives at:
 
-- Flutter SDK (Beta channel, version ^3.8.0-278.1.beta)
-- Dart SDK
-- Supabase account
-
-### Setup
-
-1. **Clone the repository**
-
-```bash
-git clone <repository-url>
-cd <repository-directory>
+```
+C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29
 ```
 
-2. **Install dependencies**
+That tree is **read-only** from this project. Nothing in it is edited, moved,
+deleted or replaced by any work done here. This project has its **own git
+repository** — no remote, no shared history, no merge path back.
+
+---
+
+## What this is
+
+The MineLink logistics platform — same features, same domain, same database —
+rebuilt on current Material Design 3:
+
+- **One `ColorScheme` as the single source of truth.** The shipping app grew
+  twelve token files alongside a Material scheme seeded from a colour
+  (`teal700`) that isn't the brand accent (`#22D3EE`). Here there is one
+  scheme, and the semantic layer reads *from* it rather than running parallel
+  to it.
+- **The M3 shape scale** — 4 / 8 / 12 / 16 / 28 / full.
+- **M3 motion** — the `Durations` and `Easing` token families.
+- **One shell for every role.** The shipping app has two shells and three
+  interchangeable sidebar skins, which is why the super-admin console and the
+  portal don't feel like the same product. Here every role gets the console's
+  layout and the console's placement of things, on M3 window size classes.
+- **Real M3 components** — `NavigationRail`, `NavigationBar`,
+  `NavigationDrawer`, `FilledButton` and its tonal/outlined siblings,
+  `SegmentedButton`, `SearchAnchor`, `Badge`, M3 chips and cards — instead of
+  hand-drawn `Container`s.
+
+The brand is unchanged on purpose: navy chrome, `#22D3EE` cyan, Plus Jakarta
+Sans / JetBrains Mono / Fraunces. It should read as MineLink, rebuilt.
+
+## What this is NOT
+
+- Not a mockup. It is the real app against the real database.
+- Not a fork you can merge. Different repository, deliberately.
+- Not a place to change the schema. See below.
+
+---
+
+## ⚠️ It writes to live production
+
+This project uses the **same Supabase projects as the shipping app**, and there
+is **no write guard** — that was an explicit decision.
+
+**Every button you press here does what it does in the real app.** Advancing a
+trip advances a real trip. Recording a load records a real load and mints a
+real waybill. Dispatching notifies real users on their real phones.
+
+Neither Supabase project has a staging counterpart (`CLAUDE.md` §10.2), and
+both are on the free plan.
+
+**`supabase/` in this project is frozen.** It is present so the app builds and
+so the schema is readable. No migration is ever created, applied or pushed from
+here.
+
+---
+
+## Running it
+
+Both apps can be installed and run side by side — the Android
+`applicationId`, the app label, the Windows binary name and the web title all
+differ from the shipping app's.
 
 ```bash
 flutter pub get
+
+# Web
+flutter run -d chrome --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_PUBLISHABLE_KEY=...
+
+# Windows
+flutter run -d windows
+
+# Android (installs as "MineLink M3", alongside the real "MineLink")
+flutter run -d <device>
 ```
 
-3. **Supabase configuration**
-
-- This repo targets the live Supabase project only.
-- The app reads its live configuration from `config/supabase.live.json`.
-- The database source of truth is `supabase/migrations/`, with the canonical baseline in `supabase/migrations/20260327000100_canonical_platform_reset.sql`.
-- Realtime, RLS, storage policies, RPCs, and required database objects are provisioned by the tracked migrations, not by ad hoc SQL snippets in the README.
-
-4. **Run the app**
+## Checks
 
 ```bash
-# Run on default port
-flutter run --dart-define-from-file=config/supabase.live.json
-
-# Run on specific port (61783)
-flutter run -d chrome --web-port=61783 --web-hostname=localhost --dart-define-from-file=config/supabase.live.json
-
-# Or use the provided scripts:
-# Windows: run_web.bat
-# PowerShell: run_web.ps1
-```
-
-For detailed testing instructions, see [TESTING.md](TESTING.md).
-
-## Project Structure
-
-```
-lib/
-├── core/
-│   ├── config/
-│   ├── routing/
-│   ├── services/
-│   ├── theme/
-│   └── utils/
-├── features/
-│   ├── auth/
-│   │   ├── models/
-│   │   ├── providers/
-│   │   ├── screens/
-│   │   ├── services/
-│   │   └── widgets/
-│   ├── company/
-│   │   ├── models/
-│   │   ├── providers/
-│   │   ├── screens/
-│   │   └── services/
-│   ├── employee/
-│   │   ├── models/
-│   │   ├── providers/
-│   │   ├── screens/
-│   │   └── services/
-│   ├── home/
-│   │   └── screens/
-│   ├── profile/
-│   │   └── screens/
-│   └── tabs/
-│       └── screens/
-├── app.dart
-└── main.dart
-```
-
-## User Flows
-
-Self-service signup has been removed. All accounts are provisioned by an
-administrator and the user signs in with the credentials they receive.
-
-### Company User Flow
-
-1. Created by a platform administrator via the super-admin console
-   (Register Company workflow in `/super-admin/register-company`,
-   backed by the `super-admin-create-company` edge function).
-2. Log in with email and password.
-3. View and manage employees.
-4. Assign roles to employees.
-5. Access role-based tabs based on organization type.
-
-### Employee User Flow
-
-1. Created by their company from the Employees screen
-   (uses the `company-user-admin` edge function with
-   `action: "create_employee"`).
-2. Log in with email and password.
-3. Access role-based tabs based on the assigned role.
-
-## Role-Based Tab Visibility
-
-### Mine/Supplier Organization
-
-- **Company:** Security, Load Controller, Admin, Management, Mine/Supplier tabs
-- **Security Employee:** Security tab
-- **Load Controller Employee:** Load Controller tab
-- **Supervisor/Foreman Employee:** Dashboard, Profile tabs
-- **Admin Employee:** Manage Employees (user management only)
-- **Management Employee:** Security, Load Controller, Admin, Management tabs
-
-### Buyer Organization
-
-- **Company:** Admin, Management, Buyer tabs
-- **Admin Employee:** Admin tab
-- **Management Employee:** Admin, Management tabs
-
-### Transporter Organization
-
-- **Company:** Driver, Admin, Management, Transporter tabs
-- **Driver Employee:** Driver tab
-- **Admin Employee:** Driver, Admin tabs
-- **Management Employee:** Driver, Admin, Management tabs
-
-## Realtime Features
-
-### Subscribing to Database Changes
-
-The app uses Supabase's realtime features to provide instant updates across clients. There are two main approaches:
-
-1. **Using Channels with PostgresChanges**
-
-```dart
-// Create a channel
-final realtimeChannel = supabase.channel('my_channel');
-
-// Subscribe to changes
-realtimeChannel
-  .onPostgresChanges(
-    event: PostgresChangeEvent.all,  // You can use .insert, .update, .delete instead of .all
-    schema: 'public',
-    table: 'companies',
-    callback: (payload) {
-      // Handle the change payload
-      print('Change received: $payload');
-    })
-  .subscribe();
-
-// Important: Remember to remove channel when no longer needed
-supabase.removeChannel(realtimeChannel);
-```
-
-2. **Using Stream API**
-
-```dart
-// Create a stream subscription
-final streamSubscription = supabase
-  .from('companies')
-  .stream(primaryKey: ['id'])
-  .order('name')
-  .limit(10)
-  .listen((snapshot) {
-    // Update your UI with the new data
-    print('snapshot: $snapshot');
-  });
-
-// Remember to cancel the subscription when done
-streamSubscription.cancel();
-```
-
-### Broadcast and Presence
-
-The app also supports broadcast for sending messages between clients and presence for tracking online status:
-
-```dart
-// Broadcast example
-final myChannel = supabase.channel('my_channel');
-
-// Listen for broadcast messages
-myChannel
-  .on(
-    RealtimeListenTypes.broadcast,
-    ChannelFilter(event: 'test-event'),
-    (payload, [ref]) {
-      print('Received broadcast: $payload');
-    },
-  )
-  .subscribe();
-
-// Send broadcast message
-myChannel.send(
-  type: RealtimeListenTypes.broadcast,
-  event: 'test-event',
-  payload: {'message': 'Hello world!'},
-);
-
-// Presence example
-myChannel
-  .onPresence(
-    event: PresenceEvent.sync,
-    callback: (payload) {
-      final onlineUsers = myChannel.presenceState();
-      // Handle sync event
-    })
-  .subscribe(((status, [_]) async {
-    if (status == RealtimeSubscribeStatus.subscribed) {
-      // Send the current user's state upon subscribing
-      await myChannel.track({'online_at': DateTime.now().toIso8601String()});
-    }
-  }));
-```
-
-### Testing Realtime Features
-
-You can test the realtime features using the provided command-line tool:
-
-```bash
-# Test realtime subscription to a table
-dart bin/realtime_test.dart subscription companies id
-
-# Test stream subscription to a table
-dart bin/realtime_test.dart stream employees id
-
-# Test broadcast feature
-dart bin/realtime_test.dart broadcast
-
-# Test presence feature
-dart bin/realtime_test.dart presence
-
-# Run all tests
-dart bin/realtime_test.dart all
-```
-
-## Testing
-
-### Running Tests
-
-Run the tests with:
-
-```bash
+flutter analyze
 flutter test
+dart tool/release_guards.dart
 ```
 
-### Testing the App
+---
 
-For detailed instructions on testing the app, including the employee sign-up and verification workflow, see [TESTING.md](TESTING.md).
+## Where the design lives
 
-### Troubleshooting
-
-If you encounter any issues while running the app, refer to the [TROUBLESHOOTING.md](TROUBLESHOOTING.md) guide for solutions to common problems.
-
-### Running on Port 61783
-
-To ensure the app always runs on port 61783, use one of the following methods:
-
-1. Use the provided batch file: `run_web.bat`
-2. Use the PowerShell script: `run_web.ps1`
-3. Run with VS Code using the "Flutter Web (Port 61783)" launch configuration
-4. Run the command: `flutter run -d chrome --web-port=61783 --web-hostname=localhost`
+| Path | What |
+|---|---|
+| `lib/core/design/m3/` | the design system — scheme, shape, motion, type |
+| `lib/core/design/tokens/` | the raw brand scale the scheme is built from |
+| `lib/core/design/shell/` | `MlAppShell`, the one shell every role uses |
+| `lib/core/design/components/` | shared components on M3 primitives |
+| `docs/redesign/` | the design decisions and why each was made |

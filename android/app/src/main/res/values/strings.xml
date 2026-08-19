@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MineLink</string>
+    <!-- Distinct from the shipping app's "MineLink" so the two launcher
+         icons are tellable apart on a device that has both installed. -->
+    <string name="app_name">MineLink M3</string>
     <!-- FCM default notification channel id, referenced from
          AndroidManifest.xml's com.google.firebase.messaging.default_notification_channel_id
          meta-data. Android 8+ requires an actual NotificationChannel with

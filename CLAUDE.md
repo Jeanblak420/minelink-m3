@@ -1,6 +1,49 @@
-# CLAUDE.md — MineLink
+# CLAUDE.md — MineLink **M3 redesign project**
 
-> ## ✅ This is the canonical MineLink working tree — you are in the right place.
+> ## 🛑 STOP — THIS IS NOT THE CANONICAL MINELINK TREE.
+>
+> This folder (`Music\SHOWME!\MineLink-M3`) is the **Material Design 3 redesign
+> project**, created 2026-08-20 at Jean's instruction. It is a *separate
+> product*, in a *separate git repository*, with **no remote and no shared
+> history**. Nothing here is ever merged into the shipping app.
+>
+> **The canonical, shipping MineLink lives at**
+> `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29`
+> — branch `feat/minelink-fork-merge`, repo `github.com/Jeanblak420/minelink-platform`.
+> **That tree is READ-ONLY from here. Never edit, move, delete or replace
+> anything inside it.** That is Jean's explicit standing instruction for this
+> project, stated in the strongest terms.
+>
+> Everything below this banner is inherited documentation describing the
+> shipping app. It remains accurate about the **domain, the database and the
+> business rules**, all of which this project shares. It is **out of date about
+> the UI**, which is the whole point of this project — see
+> `docs/redesign/` for what the design system actually is now.
+>
+> ### What differs from the shipping app
+>
+> | | Shipping MineLink | This project |
+> |---|---|---|
+> | Folder | `worktree-2026-05-05T11-53-29` | `MineLink-M3` |
+> | Git | `minelink-platform`, has remotes | independent, **no remote** |
+> | Android `applicationId` | `org.minelink` | `org.minelink.m3` |
+> | App name | MineLink | MineLink M3 |
+> | Windows binary | `minelink.exe` | `minelink_m3.exe` |
+> | Supabase | live production | **the same live production** |
+> | `supabase/` migrations | authored here | **FROZEN — never apply from this project** |
+>
+> ### Two rules that are not negotiable in this project
+>
+> 1. **Never write to the canonical tree.** Read from it if you must; never
+>    edit, add, remove or replace a single file in it.
+> 2. **Never apply a migration from here.** `supabase/` is copied so the app
+>    builds and the schema is readable. Both Supabase projects are production
+>    and there is no staging (§10.2). A redesign needs no schema change.
+>
+> ---
+>
+> ### Inherited banner from the shipping app, kept for the paths it records
+>
 >
 > Repo `github.com/Jeanblak420/minelink-platform`, active branch `feat/minelink-fork-merge`.
 > On Jean's machine this checkout lives at

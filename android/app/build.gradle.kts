@@ -44,6 +44,10 @@ android {
     // Unrelated to the Dart package name, which stays `flutter_application_1`
     // (CLAUDE.md §1) — the two namespaces do not interact.
     namespace = "org.minelink"
+    // NOTE: `namespace` stays `org.minelink` deliberately — it is the Kotlin
+    // package of MainActivity.kt and changing it would mean moving the source
+    // file. Only `applicationId` below differs, and that is the value Android
+    // actually uses to decide whether two installs are the same app.
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -57,7 +61,12 @@ android {
     }
 
     defaultConfig {
-        applicationId = "org.minelink"
+        // M3 REDESIGN PROJECT — distinct from the shipping app's
+        // `org.minelink` on purpose. Android treats applicationId as the
+        // installed app's identity, so sharing it would make installing this
+        // build *uninstall and replace* the real MineLink on the device.
+        // The two must sit side by side for the redesign to be comparable.
+        applicationId = "org.minelink.m3"
 
         // ── PINNED, not inherited (S10-3) ───────────────────────────────────
         //
