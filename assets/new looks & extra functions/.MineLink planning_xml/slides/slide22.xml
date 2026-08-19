@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+<p:cSld>
+<p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>
+<p:sp><p:nvSpPr><p:cNvPr id="4" name="TextBox 3"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{DEEAE63C-BB1B-7400-9B8A-33E61235C077}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="4129548" y="275303"/><a:ext cx="2084439" cy="461665"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>
+<p:txBody><a:bodyPr wrap="square" rtlCol="0"><a:spAutoFit/></a:bodyPr><a:lstStyle/>
+  <a:p><a:r><a:rPr lang="en-ZA" sz="2400" dirty="0"><a:solidFill><a:srgbClr val="00B0F0"/></a:solidFill><a:highlight><a:srgbClr val="FFFF00"/></a:highlight></a:rPr><a:t>Buyer / client </a:t></a:r></a:p>
+</p:txBody>
+</p:sp>
+
+<p:sp><p:nvSpPr><p:cNvPr id="5" name="Rectangle 4"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{5361C580-F5D9-6ABB-CA6E-FD7C9D4069B7}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="619431" y="1052052"/><a:ext cx="2330246" cy="3018503"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:style><a:lnRef idx="2"><a:schemeClr val="accent6"/></a:lnRef><a:fillRef idx="1"><a:schemeClr val="lt1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent6"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="dk1"/></a:fontRef></p:style>
+<p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/>
+  <a:p><a:pPr algn="ctr"/><a:endParaRPr lang="en-ZA"/></a:p>
+</p:txBody>
+</p:sp>
+
+<p:sp><p:nvSpPr><p:cNvPr id="6" name="TextBox 5"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{096BDDCC-5F3D-9106-5D57-11AB89673FEF}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="742335" y="1523999"/><a:ext cx="2025445" cy="784830"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>
+<p:txBody><a:bodyPr wrap="square" rtlCol="0"><a:spAutoFit/></a:bodyPr><a:lstStyle/>
+  <a:p><a:r><a:rPr lang="en-ZA" dirty="0"/><a:t>&gt;Site / location </a:t></a:r></a:p>
+
+  <a:p><a:r><a:rPr lang="en-ZA" sz="900" dirty="0"/><a:t>Might have more than one site, give him a drop down of which site he wants to view </a:t></a:r></a:p>
+</p:txBody>
+</p:sp>
+
+<p:sp><p:nvSpPr><p:cNvPr id="7" name="TextBox 6"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{A554C0CE-74FC-FFBE-95F9-28610B182C08}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="742335" y="2635694"/><a:ext cx="1794388" cy="369332"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>
+<p:txBody><a:bodyPr wrap="square" rtlCol="0"><a:spAutoFit/></a:bodyPr><a:lstStyle/>
+  <a:p><a:r><a:rPr lang="en-ZA" dirty="0"/><a:t>&gt;Overall recons </a:t></a:r></a:p>
+</p:txBody>
+</p:sp>
+
+<p:sp><p:nvSpPr><p:cNvPr id="8" name="Rectangle 7"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{8C6A48E4-7CCC-FC49-F014-DBE48ED379CF}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="3760838" y="1012722"/><a:ext cx="2271252" cy="3097161"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:style><a:lnRef idx="2"><a:schemeClr val="accent6"/></a:lnRef><a:fillRef idx="1"><a:schemeClr val="lt1"/></a:fillRef><a:effectRef idx="0"><a:schemeClr val="accent6"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="dk1"/></a:fontRef></p:style>
+<p:txBody><a:bodyPr rtlCol="0" anchor="ctr"/><a:lstStyle/>
+  <a:p><a:pPr algn="ctr"/><a:endParaRPr lang="en-ZA" dirty="0"/></a:p>
+</p:txBody>
+</p:sp>
+
+<p:sp><p:nvSpPr><p:cNvPr id="10" name="TextBox 9"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{CDDA9125-2B82-1D10-32D2-4363505E1AE9}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="3844412" y="1154667"/><a:ext cx="1946788" cy="1354217"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>
+<p:txBody><a:bodyPr wrap="square" rtlCol="0"><a:spAutoFit/></a:bodyPr><a:lstStyle/>
+  <a:p><a:r><a:rPr lang="en-ZA" b="1" dirty="0"/><a:t>Henny coal mine</a:t></a:r></a:p>
+
+  <a:p><a:endParaRPr lang="en-ZA" b="1" dirty="0"/></a:p>
+
+  <a:p><a:r><a:rPr lang="en-ZA" sz="1400" dirty="0"/><a:t>Recons </a:t></a:r></a:p>
+
+  <a:p><a:r><a:rPr lang="en-ZA" sz="1400" dirty="0"/><a:t>Upload spreadsheet </a:t></a:r><a:r><a:rPr lang="en-ZA" b="1" dirty="0"/><a:t> </a:t></a:r></a:p>
+
+  <a:p><a:r><a:rPr lang="en-ZA" sz="1400" dirty="0"/><a:t>sample results </a:t></a:r></a:p>
+</p:txBody>
+</p:sp>
+<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="12" name="Straight Arrow Connector 11"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{94A0D820-E0C2-7571-D0E3-AE0D573F262B}"/></a:ext></a:extLst></p:cNvPr><p:cNvCxnSpPr/><p:nvPr/></p:nvCxnSpPr><p:spPr><a:xfrm flipV="1"><a:off x="2635045" y="1339333"/><a:ext cx="1209367" cy="577081"/></a:xfrm><a:prstGeom prst="straightConnector1"><a:avLst/></a:prstGeom><a:ln><a:headEnd type="triangle"/><a:tailEnd type="triangle"/></a:ln></p:spPr><p:style><a:lnRef idx="2"><a:schemeClr val="accent1"/></a:lnRef><a:fillRef idx="0"><a:schemeClr val="accent1"/></a:fillRef><a:effectRef idx="1"><a:schemeClr val="accent1"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="tx1"/></a:fontRef></p:style></p:cxnSp>
+<p:sp><p:nvSpPr><p:cNvPr id="13" name="TextBox 12"><a:extLst><a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{F55C2BB4-5E14-961E-FB81-43DD58D9C26F}"/></a:ext></a:extLst></p:cNvPr><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="6971071" y="1154667"/><a:ext cx="3234813" cy="600164"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>
+<p:txBody><a:bodyPr wrap="square" rtlCol="0"><a:spAutoFit/></a:bodyPr><a:lstStyle/>
+  <a:p><a:r><a:rPr lang="en-ZA" sz="1100" b="1" dirty="0"><a:highlight><a:srgbClr val="C0C0C0"/></a:highlight></a:rPr><a:t>Will have to go into more detail here regarding the recons and uploading spreadsheet screens, we have to figure out how that will be done </a:t></a:r></a:p>
+</p:txBody>
+</p:sp>
+</p:spTree><p:extLst><p:ext uri="{BB962C8B-B14F-4D97-AF65-F5344CB8AC3E}"><p14:creationId xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" val="1716266203"/></p:ext></p:extLst></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>

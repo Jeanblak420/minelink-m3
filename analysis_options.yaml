@@ -1,0 +1,125 @@
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+#
+# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
+# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
+# invoked from the command line by running `flutter analyze`.
+
+# The following line activates a set of recommended lints for Flutter apps,
+# packages, and plugins designed to encourage good coding practices.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  # Reference/design-source material that is NOT part of the app build
+  # (never imported from lib/). Excluded so `flutter analyze` reports only
+  # real app issues instead of thousands from these uploaded snapshots.
+  exclude:
+    - "docs/new system design/**"
+    - "Looks of Pages within the app/**"
+
+linter:
+  # ── S9-3, reviewed 2026-08-15 ──────────────────────────────────────────────
+  #
+  # The gate's point: *"analyze is clean" means nothing if the rules are
+  # permissive.* Two findings from actually checking rather than assuming.
+  #
+  # 1. `flutter analyze` here FAILS ON `info`, not just on errors and warnings
+  #    — an `unnecessary_import` returned exit 1 during this session. So the
+  #    "analyze exit=0" claimed at every commit is a stronger statement than it
+  #    looks, and every rule below binds at its default severity without
+  #    needing an `errors:` block to promote it.
+  #
+  # 2. The file previously enabled NOTHING beyond flutter_lints' defaults. Each
+  #    rule below was trialled against the tree and its violation count
+  #    recorded, so this is a measured set rather than a wish-list.
+  #
+  # ENABLED — all report **zero** violations today, so they cost nothing now
+  # and stop the first regression rather than the hundredth:
+  rules:
+    # A subscription left open outlives the widget that made it. This app holds
+    # realtime channels for trips, notifications and chat.
+    cancel_subscriptions: true
+    # An unclosed sink. Turning this on found one: `watchLiveTrips` released
+    # its timers and realtime channel on cancel and never closed its own
+    # StreamController. Fixed; the rule now holds the line.
+    close_sinks: true
+    # A throw inside `finally` discards the exception that was already in
+    # flight — the original cause disappears and the symptom is reported.
+    throw_in_finally: true
+    # An expression statement that does nothing, which is almost always a
+    # half-finished edit.
+    unnecessary_statements: true
+    # Synchronous dart:io on the UI isolate.
+    avoid_slow_async_io: true
+    # An inferred return type is invisible in review; on a service method the
+    # difference between `Future<void>` and `void` is whether failures can be
+    # awaited at all.
+    always_declare_return_types: true
+    avoid_returning_null_for_void: true
+    # Cleared and enabled 2026-08-15 (the dedicated pass S9-3 called for).
+    # 22 violations going in, 0 coming out. See the block below for what the
+    # 22 actually were and — more importantly — what this rule cannot see.
+    unawaited_futures: true
+
+  # ── CONSIDERED AND NOT ENABLED, with the measured reason ──────────────────
+  #
+  # Recorded rather than dropped, so the next person does not re-derive it.
+  #
+  #   discarded_futures            220 violations, 217 of them in lib/.
+  #     NOT enabled, and the reason is the most useful thing measured in this
+  #     pass, so it is recorded in full above the shorter entries below.
+  #
+  #     `unawaited_futures` only fires **inside an `async` function body**.
+  #     A fire-and-forget DB write from a *synchronous* callback — an onTap, a
+  #     dispose(), a StateNotifier helper — is invisible to it. That is where
+  #     most of this codebase's fire-and-forget calls actually live, so the
+  #     rule is partly blind to the very defect class it was chosen for.
+  #     `discarded_futures` is the rule that covers the synchronous case.
+  #
+  #     The clearest demonstration is `unsubscribe()`. Three provider files
+  #     (auth_state, employee_provider, notification_provider) each call
+  #     `_channel?.unsubscribe()` in three places — nine identical calls.
+  #     `unawaited_futures` flagged exactly three of the nine: the three that
+  #     happen to sit in an `async` method. The other six differ only in the
+  #     modifier on their enclosing function.
+  #
+  #     Not enabled because 220 sites cannot be read in one pass, and wrapping
+  #     them mechanically is precisely the failure mode described at the foot
+  #     of this file. Most are genuinely fine (showDialog, context.push,
+  #     animation drives). The subset worth hunting is narrower than the rule:
+  #     *a Future that performs a DB write and has no error handler.* That
+  #     wants a targeted audit, not a lint.
+  #
+  #   unawaited_futures            ENABLED 2026-08-15 — was 22 violations,
+  #     now 0. What the 22 turned out to be, since the count alone misleads:
+  #     only 14 were in lib/ (4 of those in the `bin/realtime_test.dart` dev
+  #     CLI's helper), 2 were in a widget test and 6 in the root-level legacy
+  #     scratch scripts that S10-7 will archive. So 10 real product sites.
+  #     One was a genuine defect: `auth_state_listener` called `signOut()`
+  #     without awaiting and navigated to `/login` on the next line, while
+  #     `state.user` was still populated — and on signOut()'s failure branch
+  #     it stays populated, so the auth-gated redirect could bounce straight
+  #     back into the portal on a dead session. Two more (chat typing pings)
+  #     sat inside a try/catch that could not catch them: an unawaited
+  #     rejection escapes the try and becomes an unhandled zone error. The
+  #     rest were legitimately fire-and-forget and are now explicitly
+  #     `unawaited(...)`, which says so in the code rather than by omission.
+  #
+  #   avoid_dynamic_calls          84 violations, overwhelmingly `json['x']`
+  #     in `fromJson` constructors, which is the idiom the whole codebase uses
+  #     for Supabase rows. Enabling it would mean 84 suppressions and no
+  #     defects found.
+  #
+  #   no_adjacent_strings_in_list   5 violations, **all false positives** for
+  #     this codebase's style: they are single long interpolated strings
+  #     wrapped across lines inside a list, not a missing comma. The rule
+  #     cannot tell the two apart.
+  #
+  #   prefer_final_locals          13 violations. Style only; no defect class
+  #     behind it.
+  #
+  # A lint rule that has to be suppressed 84 times is not enforcing anything —
+  # it is training everyone to add `// ignore:` without reading it.
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options

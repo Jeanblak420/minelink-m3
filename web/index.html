@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <!--
+    No <meta name="viewport"> here on purpose. Flutter Web installs its own
+    viewport at startup and logs "Found an existing <meta name=viewport> tag …
+    This tag will be replaced." for any we ship, so ours only added console
+    noise — it never survived to affect layout.
+  -->
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="MineLink operations platform.">
+
+  <!-- Force hardware acceleration and disable WebGL software fallback -->
+  <meta name="hardware-acceleration" content="force">
+  <meta name="force-rendering" content="gpu">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="MineLink">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>MineLink</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Fix for Intl.v8BreakIterator deprecation warning -->
+  <script src="fix_intl_deprecation.js"></script>
+
+  <!-- Fix for WebGL SwiftShader deprecation warning -->
+  <script src="webgl_config.js"></script>
+
+  <!-- Session handler for browser events -->
+  <script src="session_handler.js"></script>
+  <!-- Fallback content in case Flutter fails to load -->
+  <style>
+    .flutter-loader-placeholder {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      font-family: 'Roboto', sans-serif;
+      color: #333;
+    }
+    .flutter-loader-spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #0175C2;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Fallback content that will be shown until Flutter loads -->
+  <div id="flutter-loading-indicator" class="flutter-loader-placeholder">
+    <div class="flutter-loader-spinner"></div>
+    <p>Loading application...</p>
+    <p id="loading-status">Initializing...</p>
+  </div>
+
+  <script>
+    // Update loading status
+    function updateLoadingStatus(message) {
+      const statusElement = document.getElementById('loading-status');
+      if (statusElement) {
+        statusElement.textContent = message;
+      }
+    }
+
+    // Remove loading indicator when Flutter is initialized
+    window.addEventListener('flutter-first-frame', function() {
+      updateLoadingStatus('Application loaded!');
+      const loadingIndicator = document.getElementById('flutter-loading-indicator');
+      if (loadingIndicator) {
+        loadingIndicator.style.display = 'none';
+      }
+    });
+
+    // Monitor for Flutter initialization
+    setTimeout(function() {
+      updateLoadingStatus('Loading Flutter engine...');
+    }, 1000);
+
+    // Load Flutter bootstrap script
+    updateLoadingStatus('Loading bootstrap script...');
+    const bootstrapScript = document.createElement('script');
+    bootstrapScript.src = 'flutter_bootstrap.js';
+    document.body.appendChild(bootstrapScript);
+  </script>
+</body>
+</html>

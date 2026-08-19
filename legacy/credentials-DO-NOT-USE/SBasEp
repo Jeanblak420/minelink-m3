@@ -1,0 +1,47 @@
+Pass: BuRG3rJ3@n1995@#!7705
+
+Project URL: https://kkcseqmpgzzrogatdoqi.supabase.co RESTful endpoint for querying and managing your database
+
+anonpublic: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtrY3NlcW1wZ3p6cm9nYXRkb3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzODM4ODcsImV4cCI6MjA2MTk1OTg4N30.G126pc4J8Xi4S5cVAgAtSrboaZyJ-1p7x5fYiN6VRII
+
+
+
+
+
+SUPABASE CLI
+
+supabase <command>
+
+npm run supabase -- <command>
+npm run supabase:start
+npm run supabase:stop
+npm run supabase:functions:new -- <function-name>
+npm run supabase:functions:serve
+npm run supabase:functions:deploy -- <function-name>
+
+
+# Windows Command Prompt
+supabase-cli.bat <command>
+
+# PowerShell
+./supabase-cli.ps1 <command>
+
+
+Please follow these steps to try again with your new password:
+
+1. Open your terminal (PowerShell or Command Prompt) in your project directory:
+cd "C:\Users\Somebody Someone\Desktop\Bryson Mansoor\TryMinGuideLikeBoltsays"
+
+2. Run the Supabase link command:
+supabase link
+
+-When prompted, select your project (kkcseqmpgzzrogatdoqi).
+-When asked for the database password, carefully type (or paste) your new password:
+-(No spaces, case-sensitive, include all special characters.)
+
+3. If the link is successful, run:
+supabase db push
+
+This will apply your pending migrations.
+If you encounter any errors, please copy and paste the exact error message here so I can help you further!
+

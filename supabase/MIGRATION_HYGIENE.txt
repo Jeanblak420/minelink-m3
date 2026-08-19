@@ -1,0 +1,81 @@
+Supabase migration hygiene (this repo)
+
+1. Source of truth for schema is supabase/migrations/*.sql in git, and the ledger
+   must agree with it. See MIGRATION_LEDGER.md for the current reconciliation.
+
+2. TIMESTAMP DRIFT IS NOT ACCEPTABLE. (Rescinded 2026-08-08; this file said the
+   opposite until 2026-08-12 and was wrong.)
+
+   This file used to read: "the dashboard may show different timestamp-prefixed
+   names than local files ... That does not duplicate DDL if the SQL body
+   matches; it only affects migration history ordering on the server."
+
+   That tolerance is what let the targets work end up with three applied
+   migrations against two files - one of them a `grant select` fix that existed
+   only in the database, without which realtime is live and silent. Neither side
+   was authoritative. As of the 2026-08-12 reconciliation the drift had reached
+   58 rows whose ledger stamp pointed at no file of that name.
+
+   The rule now:
+
+   a. One file per applied migration, named for what it did. Never fold a
+      follow-up fix into an earlier file - that makes the file list and the
+      ledger disagree.
+
+   b. `apply_migration` assigns its own timestamp. Until CLI access exists
+      (`supabase db push` needs SUPABASE_DB_PASSWORD, which is not in this
+      environment), every MCP apply must be followed by repointing the stamp at
+      the filename, IN ITS OWN CALL - never batched with a rollback:
+
+        update supabase_migrations.schema_migrations
+        set version = '<file timestamp>' where name = '<migration name>';
+
+      Then re-read the ledger and confirm the change landed. A repoint batched
+      with a rollback silently reverts, and has done so on this project before.
+
+   c. Mirror to a file in the same commit, without exception. An applied
+      migration with no file is unreproducible from git.
+
+3. VERIFY, DO NOT ASSUME, that a file matches what ran.
+
+   `supabase_migrations.schema_migrations.statements` holds the SQL that actually
+   executed. Compare it against the file rather than trusting that they match.
+   Normalise for whitespace, comments, and the `begin;`/`commit` wrapper the
+   files carry but `apply_migration` strips - without that last one, 18
+   migrations look like they differ when the only delta is those 15 characters.
+
+   `supabase/MIGRATION_LEDGER.md` records the method and the current result.
+
+   TRAP IN THE RECIPE ITSELF, hit 2026-08-15 (S9-6). The comparison usually
+   written for a function body is
+
+       md5(regexp_replace(btrim(p.prosrc), '\s+', ' ', 'g'))
+
+   and the obvious other half of it, in whatever scripting language, is
+   `md5(re.sub(r'\s+',' ', body.strip()))`. Those two are NOT the same
+   normalisation. Postgres `btrim(x)` with ONE argument trims **spaces only** -
+   not newlines - so the leading newline every `$function$` body starts with
+   survives, and `\s+` then collapses it into a leading space. A full `.strip()`
+   on the other side removes it. The two hashes differ, the lengths match
+   exactly, and it reads convincingly like real drift in a body you just
+   applied.
+
+   It cost a real investigation. If you get a mismatch with equal lengths,
+   check this before believing it: `body.strip(' ')`, not `body.strip()`, is
+   what matches `btrim`. Or sidestep it by trimming both sides the same way
+   explicitly, e.g. `btrim(prosrc, E' \t\n\r')`.
+
+4. Before pushing new migrations from CLI, list remote migrations and avoid
+   re-applying the same objects under a second filename.
+
+5. No duplicate timestamp prefixes. There were 6; they were resolved 2026-08-12.
+   Two involved applied migrations and were fixed by renaming the file onto the
+   stamp the ledger already held, not by repointing the ledger again.
+
+6. Demo seed: 20260511160000_portal_logistics_demo_seed.sql - optional rows;
+   skips if org mix / fleet vehicle missing. Note `[db.seed] enabled` in
+   config.toml (checklist gate S3-14).
+
+7. The stray root `migrations/` folder was archived to
+   legacy/root-migrations-archive/ on 2026-08-12. It was never part of the
+   Supabase migration chain and misled agents into treating it as current.

@@ -1,0 +1,16 @@
+{
+  "_what": "Names CLAUDE.md states that are correctly absent from this product. Each is accepted for a reason given below, not because the check was inconvenient.",
+  "_rule": "Only add an entry here when the name is genuinely NOT a claim about MineLink. If CLAUDE.md refers to something of ours that does not exist, fix the documentation instead — that is the whole point of this check.",
+  "_canary": "claims_check_corpus_canary_do_not_remove — this string exists ONLY in this file. claims_check.py --selftest asserts it is absent from the searched corpus, which proves baseline files are still excluded from it. Without that exclusion every entry below would satisfy the check it exists to excuse, simply by naming it.",
+  "accepted": {
+    "identifier:edge_logs": "A Supabase log SOURCE, queried through the management API by query_logs. Platform infrastructure, not a MineLink object. Named in the outage-diagnosis rule in CLAUDE.md 1.",
+    "identifier:get_project": "A Supabase MCP tool, not a MineLink function. CLAUDE.md names it as the thing that reported ACTIVE_HEALTHY through an entire outage.",
+    "identifier:list_migrations": "A Supabase MCP tool, not a MineLink function.",
+    "identifier:list_projects": "A Supabase MCP tool, not a MineLink function.",
+    "identifier:pause_project": "A Supabase MCP tool, not a MineLink function.",
+    "migration:20260504212635": "Deliberately a stamp with no file. CLAUDE.md 6 cites it as the FIRST failed attempt at stamping the seat-management repair: it is the ledger row's own 2026-05-04 date, and seat_reassignment_log has a foreign key to organization_seats, which is not created until 20260510181500. A file carrying this stamp would mean the lesson had been undone.",
+    "migration:20260510182000": "Deliberately a stamp with no file. CLAUDE.md 6 cites it as the SECOND failed attempt: the repair's RLS policy calls public.is_super_admin(), and Postgres validates a policy expression at creation, so it must follow 20260510183000. The repair landed at 20260510184000.",
+    "migration:20260817133116": "Deliberately a stamp with no file. CLAUDE.md 6 quotes it as the timestamp apply_migration assigned when the 20260817330000 repoint was silently rolled back — the defect tool/migration_ledger_check.py now catches. A file carrying this stamp would mean the example had been misunderstood.",
+    "path:config/supabase.local.json": "CLAUDE.md 1 names this path precisely in order to say the file does NOT exist and is deliberately not listed in pubspec.yaml — anything bundled from config/ is served at a public URL, which is how a live map token once leaked. The documentation is correct; only the checker is naive, since it cannot read a sentence."
+  }
+}

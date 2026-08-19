@@ -1,0 +1,105 @@
+A Mine / Supplier and Buyers app which will mainly be used to sell minerals like coal, copper, gold I mean any mineral which is obtained through mining.
+Which includes a map which shows on the map where what's being sold, for how much, who's selling it. the amount of what's being sold, on the map it will have a pin where the item is being sold. 
+The buyer should be able to click on this pin and expand to see everything, all the details of the mineral being sold. 
+Lets say its coal, the certificate of the quality of the coal, how many tons are available and any and all information which a buyer of minerals would like available to him in a normal world situation where someone is buying coal from a mine. 
+There has to be a way for the Mine / Mine / Supplier to upload all of the information of which the buyer needs, add a method/way strictly for company's to be able to add their locations on their company profile page. 
+The location the buyer will see on the map will be from the location the company added in their company profile. 
+Then the buyer should be able start a chat with the Mine / Supplier to get everything else sorted or cleared out if there is or was something which was unclear to him or if he'd like to arrange something or whatever the case might be. 
+You should be able to upload and send files and pictures on in the chat, the name of the each company should clearly be visible to see who you're talking to with a picture on the left hand side of the company name. 
+You should be able to click on the picture of the company then be taken to their company page to be able to view all the information of the company as it would be when setting up your company information except for in this case the person viewing 
+the other company's page which he got from the chat logo won't be able to edit anything on the page he is viewing. 
+All company's should be able to initiate a chat with any company or create a group chat which would be able to consist of 3 company's in the group chat at max, each company invited to the group chat should have the ability available to them to Accept or Decline the group chat,
+where Accept or Decline was selected by the invited Company a notification should be sent to the company which invited the company to Join the croup chat. The limitation here would be that only one of each organisation type is allowed per group chat. 
+The buyer should then be able to select how many tons he wants to buy and then when the buyer clicks on the Pay now button he should then have the options between Send Proof of Payment or to Pay now, if he clicks on Pay now and he hasn't uploaded his payment information yet, he'd then be 
+asked to upload his payment information at the bottom it will say 'already made a payment via eft? Click here to send "proof of payment"'. If he's payment information is already uploaded he wont be asked to upload it again (but he would be able to change, add new payment information 
+or remove his payment information), if his payment information is already been uploaded he'll then be able to click on buy now and he'll then receive a proforma invoice which will contain all of the payment information required by the buyer to complete the purchase. The following information 
+will be on the Proforma Invoice as well as on the invoice received after submitting proof of payment to the Mine / Supplier:
+
+<h3>Proforma invoice:</h3>
+
+Invoiced to: 'Company name',
+-'Company registration ref'
+Invoiced from: 'Company name',
+-'Company registration ref' 
+Proforma Invoice ref number: 'Each company's first invoice number will start by 1 with a matching first proforma invoice number of 1, For each Proforma invoice there should be an Invoice with a matching number (ONLY time there won't be a matching Invoice ref number to 
+a Proforma Invoice ref number is when a proforma invoice was not paid, so in this case if a new Proforma invoice is created with an previously unpaid proforma invoice, the new proforma invoice ref number will just be incremented by one and lets then say this new proforma gets paid 
+the invoice that follows will still have a matching ref to this proforma invoice) should the buyer submit proof of payment to the Mine / Supplier, the buyer uses proforma invoice's 'Proforma invoice ref number' and the Mine / Supplier then accepts the proof of payment, 
+only when accepted by Mine / Supplier an invoice is then automatically generated based on the accepted "Proforma invoice ref number", the information on the generated invoice will come from the Proforma invoice's "Proforma invoice ref number", the Generated invoice would basically 
+be an exact copy of the Proforma invoice, only difference between the 2 would be will be the title of each which is 'Invoice' and 'Proforma Invoice' and the date time stamp. The date time stamp the proforma invoice is generated after the buyer has selected the tons he wants and then gets stamped 
+as soon as the buyer clicks on buy now. 
+Product Name: (What type of mineral has been purchased)
+Product Description:
+Certificate of Analysis:
+Certificate of Conformity:
+Qty in TONS: (Qty = amount of 'Product name' purchased)
+Price per ton: (the currency symbol is an 'R' and the currency is in ZAR 'South African Rands')
+Total: (each line item multiplied by Qty = 'Total')
+Sub Total: (each line item's 'Total' added to each other = Subtotal)
+TAX 15% (15% of 'Total' = TAX 15%)
+Grand Total (Subtotal + Tax 15% = Grand Total)
+
+
+<h3>Invoice:</h3>
+
+Invoiced to: 'Company name',
+-'Company registration ref'
+Invoiced from: 'Company name',
+-'Company registration ref' 
+Invoice ref number: 'Each company's first invoice number will start by 1 with a matching first proforma invoice number of 1, For each Proforma invoice there should be an Invoice with a matching number (ONLY time there won't be a matching Invoice ref number to 
+a Proforma Invoice ref number is when a proforma invoice was not paid, so in this case if a new Proforma invoice is created with an previously unpaid proforma invoice, the new proforma invoice ref number will just be incremented by one and lets then say this new proforma gets paid 
+the invoice that follows will still have a matching ref to this proforma invoice) should the buyer submit proof of payment to the Mine / Supplier, the buyer uses proforma invoice's 'Proforma invoice ref number' and the Mine / Supplier then accepts the proof of payment, 
+only when accepted by Mine / Supplier an invoice is then automatically generated based on the accepted "Proforma invoice ref number", the information on the generated invoice will come from the Proforma invoice's "Proforma invoice ref number", the Generated invoice would basically 
+be an exact copy of the Proforma invoice, only difference between the 2 would be will be the title of each which is 'Invoice' and 'Proforma Invoice' and the date time stamp. The date time stamp the proforma invoice is generated after the buyer has selected the tons he wants and then gets stamped 
+as soon as the buyer clicks on buy now. 
+Product Name: (What type of mineral has been purchased)
+Product Description:
+Certificate of Analysis:
+Certificate of Conformity:
+Qty in TONS: (Qty = amount of 'Product name' purchased)
+Price per ton: (the currency symbol is an 'R' and the currency is in ZAR 'South African Rands')
+Total: (each line item multiplied by Qty = 'Total')
+Sub Total: (each line item's 'Total' added to each other = Subtotal)
+TAX 15% (15% of 'Total' = TAX 15%)
+Grand Total (Subtotal + Tax 15% = Grand Total)
+
+
+for the amount of products he selected to purchase. The proforma invoice will be automatically be generated based on the 
+Mine / Mine / Supplier that he's buying the products from, as well as based on the product he selected to buy and the amount of ton's he selected to buy along with his information as the 'billed to:' information. Each proforma invoice will have an auto generated invoice Reference number, each 
+'Company registration ref:' will be based on the Company's reference number which was automatically assigned to the company when they signed up, each company whether it's a Buyer, Mine / Supplier or Mine/Supplier will automatically be assigned a 'Company registration ref:' when they 
+sign up (Please create a function that 
+automatically assigns a 'Company registration ref:' to each company after they have supplied all of their company information requested on the company signup page when they click on the 'Register Company' button which is only clickable once all the company information has been supplied. 
+This reference number will be available to each company, displayed in the company's profile section with a declaration which will clearly indicate that the 'Company registration ref:' will be visible but will remain unchangeable, 
+this 'Company registration ref:' will be visible on the company's company profile to any other company who view's their profile). This reference number will be then be
+generated automatically based on the following:
+- Each 'Company registration ref:' will have a combination of 3 letters and a minimum of 3 numbers.
+- The 'Company registration ref:' will start with the 3 letter and will be followed by the minimum of 3 or more numbers. 
+- The 3 letters in the company's 'Company registration ref:' will be based on the company's name, should the name of the company consist of a single word: 
+* The first letter of the 3 letters in the company's 'Company registration ref:' will be based on the first letter of the company's name.
+* The second letter of the 3 letters in the company's 'Company registration ref:' will be based on the 4th letter of the company's name.
+* The third letter of the 3 letters in the company's 'Company registration ref:' will be based on the last letter of the company's name.
+- Should the name of the company consist of 2 words:
+* The first letter of the 3 letters in the company's 'Company registration ref:' will be based on the first letter of the first name in the company's name.
+* The second letter of the 3 letters in the company's 'Company registration ref:' will be based on the first letter of the company's second name's first letter.
+* The third letter of the 3 letters in the company's 'Company registration ref:' will be based on the last letter of the company's second name.
+- Should the name of the company consist of 3 words or more:
+* The first letter of the 3 letters in the company's 'Company registration ref:' will be based on the first letter of the first name in the company's name.
+* The second letter of the 3 letters in the company's 'Company registration ref:' will be based on the first letter of the company's second name's first letter.
+* The third letter of the 3 letters in the company's 'Company registration ref:' will be based on the first letter of the company's third name.
+-The numbers after the company's 'Company registration ref:' will consist of a minimum of 3 numbers but is not limited to 3 numbers:
+* The 3 or more numbers of each company's 'Company registration ref:' will start with '001' which should always be the case unless there are two company's who's 'Company registration ref:' has the same first 3 'Company registration ref:' letters, should this be the case for any company, the 3 numbers after the 3 
+letters of the company's (Company registration ref::) will then be automatically changed to '002' and should there be a third company who's 3 'Company registration ref' letters are the same then the number for that company will update automatically to 003.
+If the 3 numbers behind the company's 'Company registration ref' reaches 9 iterations, which means the first 001 automatically assigned to a company's 'Company registration ref' which comes after the 3 letters of the company's 'Company registration ref' has nine other company's that has 
+the same 3 'Company registration ref' letters assigned to them, which means the 3 numbers behind the 3 letters of each of these existing company's 'Company registration ref' has been incremented 9 times which would mean that there are now 10 company's registered with the same 3 letters of each of their 
+'Company registration ref' letters, this would mean that the 10th company's "Company registration ref:"'s 3 numbers which comes after the 3 letters should be =to "(Company registration ref's 3 letter would go here'010)".
+
+
+then be stored under the company's profile under the 
+management button tab under a clickable button like all the other buttons in there but this button will say View Purchase history). 
+Once the Buyer has uploaded his/her will then send a notification to the Mine / Supplier indicating how much tons of what was listed has been purchased and the amount in tons purchased will then be subtracted by the a original amount uploaded and the amount uploaded will then change by the amount 
+subtracted from it so that other company's who'd like to buy would be able to see how many tons are left to be purchased and know if there's any still available. Any of the product('s) uploaded for sale via the company should be.
+
+Then also please add a way for company's to be able to chat to their internal employees and visa versa, here the limitation would be as follow,
+Company's and managers have the ability to initiate a chat with any and everyone within their Company, The company should at any moment be able to click on a button which says 'End Chat' the chat between them self and whoever they're speaking to 
+will then be ended, the managers should be able to do the same except for they do not have the ability to end a chat with the company, only the company can end the chat.
+Admin's have the ability to initiate chat's with managers and with any other rolls besides Company's, they should also be able to end a chat between them and any other roles besides managers and the company.
+Any other role besides managers, admins and the company them self's should only be able to initiate a chat with admins and no one else, these roles won't have the ability to end chats with anyone, only other roles can end chat with these roles.

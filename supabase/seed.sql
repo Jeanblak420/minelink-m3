@@ -1,0 +1,1029 @@
+begin;
+
+set local search_path = public, auth, storage, extensions;
+
+-- Demo password for every seeded account:
+-- MineralGuide123!
+
+insert into auth.users (
+  instance_id,
+  id,
+  aud,
+  role,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  confirmed_at,
+  last_sign_in_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  created_at,
+  updated_at,
+  confirmation_token,
+  email_change,
+  email_change_token_new,
+  recovery_token
+)
+values
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '10000000-0000-0000-0000-000000000001',
+    'authenticated',
+    'authenticated',
+    'ironhills.owner@mineralguide.local',
+    crypt('MineralGuide123!', gen_salt('bf')),
+    '2026-01-15T08:00:00Z',
+    '2026-01-15T08:00:00Z',
+    '2026-03-28T07:50:00Z',
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"user_type":"company","display_name":"Iron Hills Mining"}'::jsonb,
+    '2026-01-15T08:00:00Z',
+    '2026-03-28T07:50:00Z',
+    '',
+    '',
+    '',
+    ''
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '10000000-0000-0000-0000-000000000002',
+    'authenticated',
+    'authenticated',
+    'atlasbuyer.owner@mineralguide.local',
+    crypt('MineralGuide123!', gen_salt('bf')),
+    '2026-01-15T08:05:00Z',
+    '2026-01-15T08:05:00Z',
+    '2026-03-28T07:55:00Z',
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"user_type":"company","display_name":"Atlas Buyer Group"}'::jsonb,
+    '2026-01-15T08:05:00Z',
+    '2026-03-28T07:55:00Z',
+    '',
+    '',
+    '',
+    ''
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '10000000-0000-0000-0000-000000000003',
+    'authenticated',
+    'authenticated',
+    'roadhaul.owner@mineralguide.local',
+    crypt('MineralGuide123!', gen_salt('bf')),
+    '2026-01-15T08:10:00Z',
+    '2026-01-15T08:10:00Z',
+    '2026-03-28T08:00:00Z',
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"user_type":"company","display_name":"Roadhaul Logistics"}'::jsonb,
+    '2026-01-15T08:10:00Z',
+    '2026-03-28T08:00:00Z',
+    '',
+    '',
+    '',
+    ''
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000001',
+    'authenticated',
+    'authenticated',
+    'ironhills.security@mineralguide.local',
+    crypt('MineralGuide123!', gen_salt('bf')),
+    '2026-01-16T09:00:00Z',
+    '2026-01-16T09:00:00Z',
+    '2026-03-28T08:02:00Z',
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"user_type":"employee","display_name":"Thabo Guard"}'::jsonb,
+    '2026-01-16T09:00:00Z',
+    '2026-03-28T08:02:00Z',
+    '',
+    '',
+    '',
+    ''
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000002',
+    'authenticated',
+    'authenticated',
+    'ironhills.controller@mineralguide.local',
+    crypt('MineralGuide123!', gen_salt('bf')),
+    '2026-01-16T09:05:00Z',
+    '2026-01-16T09:05:00Z',
+    '2026-03-28T08:04:00Z',
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"user_type":"employee","display_name":"Lerato Scale"}'::jsonb,
+    '2026-01-16T09:05:00Z',
+    '2026-03-28T08:04:00Z',
+    '',
+    '',
+    '',
+    ''
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000003',
+    'authenticated',
+    'authenticated',
+    'ironhills.admin@mineralguide.local',
+    crypt('MineralGuide123!', gen_salt('bf')),
+    '2026-01-16T09:10:00Z',
+    '2026-01-16T09:10:00Z',
+    '2026-03-28T08:06:00Z',
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"user_type":"employee","display_name":"Kabelo Admin"}'::jsonb,
+    '2026-01-16T09:10:00Z',
+    '2026-03-28T08:06:00Z',
+    '',
+    '',
+    '',
+    ''
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000004',
+    'authenticated',
+    'authenticated',
+    'ironhills.management@mineralguide.local',
+    crypt('MineralGuide123!', gen_salt('bf')),
+    '2026-01-16T09:15:00Z',
+    '2026-01-16T09:15:00Z',
+    '2026-03-28T08:08:00Z',
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"user_type":"employee","display_name":"Ayanda Manager"}'::jsonb,
+    '2026-01-16T09:15:00Z',
+    '2026-03-28T08:08:00Z',
+    '',
+    '',
+    '',
+    ''
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000005',
+    'authenticated',
+    'authenticated',
+    'atlasbuyer.admin@mineralguide.local',
+    crypt('MineralGuide123!', gen_salt('bf')),
+    '2026-01-17T09:00:00Z',
+    '2026-01-17T09:00:00Z',
+    '2026-03-28T08:10:00Z',
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"user_type":"employee","display_name":"Megan Buyer"}'::jsonb,
+    '2026-01-17T09:00:00Z',
+    '2026-03-28T08:10:00Z',
+    '',
+    '',
+    '',
+    ''
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000006',
+    'authenticated',
+    'authenticated',
+    'atlasbuyer.management@mineralguide.local',
+    crypt('MineralGuide123!', gen_salt('bf')),
+    '2026-01-17T09:05:00Z',
+    '2026-01-17T09:05:00Z',
+    '2026-03-28T08:12:00Z',
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"user_type":"employee","display_name":"Sipho Buyer"}'::jsonb,
+    '2026-01-17T09:05:00Z',
+    '2026-03-28T08:12:00Z',
+    '',
+    '',
+    '',
+    ''
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000007',
+    'authenticated',
+    'authenticated',
+    'roadhaul.driver@mineralguide.local',
+    crypt('MineralGuide123!', gen_salt('bf')),
+    '2026-01-18T09:00:00Z',
+    '2026-01-18T09:00:00Z',
+    '2026-03-28T08:14:00Z',
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"user_type":"employee","display_name":"Themba Driver"}'::jsonb,
+    '2026-01-18T09:00:00Z',
+    '2026-03-28T08:14:00Z',
+    '',
+    '',
+    '',
+    ''
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000008',
+    'authenticated',
+    'authenticated',
+    'roadhaul.admin@mineralguide.local',
+    crypt('MineralGuide123!', gen_salt('bf')),
+    '2026-01-18T09:05:00Z',
+    '2026-01-18T09:05:00Z',
+    '2026-03-28T08:16:00Z',
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"user_type":"employee","display_name":"Carla Dispatch"}'::jsonb,
+    '2026-01-18T09:05:00Z',
+    '2026-03-28T08:16:00Z',
+    '',
+    '',
+    '',
+    ''
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    '20000000-0000-0000-0000-000000000009',
+    'authenticated',
+    'authenticated',
+    'roadhaul.management@mineralguide.local',
+    crypt('MineralGuide123!', gen_salt('bf')),
+    '2026-01-18T09:10:00Z',
+    '2026-01-18T09:10:00Z',
+    '2026-03-28T08:18:00Z',
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"user_type":"employee","display_name":"Peter Fleet"}'::jsonb,
+    '2026-01-18T09:10:00Z',
+    '2026-03-28T08:18:00Z',
+    '',
+    '',
+    '',
+    ''
+  );
+
+insert into auth.identities (
+  id,
+  provider_id,
+  user_id,
+  identity_data,
+  provider,
+  last_sign_in_at,
+  created_at,
+  updated_at
+)
+values
+  (
+    '21000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000001',
+    '{"sub":"10000000-0000-0000-0000-000000000001","email":"ironhills.owner@mineralguide.local","email_verified":true}'::jsonb,
+    'email',
+    '2026-03-28T07:50:00Z',
+    '2026-01-15T08:00:00Z',
+    '2026-03-28T07:50:00Z'
+  ),
+  (
+    '21000000-0000-0000-0000-000000000002',
+    '10000000-0000-0000-0000-000000000002',
+    '10000000-0000-0000-0000-000000000002',
+    '{"sub":"10000000-0000-0000-0000-000000000002","email":"atlasbuyer.owner@mineralguide.local","email_verified":true}'::jsonb,
+    'email',
+    '2026-03-28T07:55:00Z',
+    '2026-01-15T08:05:00Z',
+    '2026-03-28T07:55:00Z'
+  ),
+  (
+    '21000000-0000-0000-0000-000000000003',
+    '10000000-0000-0000-0000-000000000003',
+    '10000000-0000-0000-0000-000000000003',
+    '{"sub":"10000000-0000-0000-0000-000000000003","email":"roadhaul.owner@mineralguide.local","email_verified":true}'::jsonb,
+    'email',
+    '2026-03-28T08:00:00Z',
+    '2026-01-15T08:10:00Z',
+    '2026-03-28T08:00:00Z'
+  ),
+  (
+    '21000000-0000-0000-0000-000000000004',
+    '20000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
+    '{"sub":"20000000-0000-0000-0000-000000000001","email":"ironhills.security@mineralguide.local","email_verified":true}'::jsonb,
+    'email',
+    '2026-03-28T08:02:00Z',
+    '2026-01-16T09:00:00Z',
+    '2026-03-28T08:02:00Z'
+  ),
+  (
+    '21000000-0000-0000-0000-000000000005',
+    '20000000-0000-0000-0000-000000000002',
+    '20000000-0000-0000-0000-000000000002',
+    '{"sub":"20000000-0000-0000-0000-000000000002","email":"ironhills.controller@mineralguide.local","email_verified":true}'::jsonb,
+    'email',
+    '2026-03-28T08:04:00Z',
+    '2026-01-16T09:05:00Z',
+    '2026-03-28T08:04:00Z'
+  ),
+  (
+    '21000000-0000-0000-0000-000000000006',
+    '20000000-0000-0000-0000-000000000003',
+    '20000000-0000-0000-0000-000000000003',
+    '{"sub":"20000000-0000-0000-0000-000000000003","email":"ironhills.admin@mineralguide.local","email_verified":true}'::jsonb,
+    'email',
+    '2026-03-28T08:06:00Z',
+    '2026-01-16T09:10:00Z',
+    '2026-03-28T08:06:00Z'
+  ),
+  (
+    '21000000-0000-0000-0000-000000000007',
+    '20000000-0000-0000-0000-000000000004',
+    '20000000-0000-0000-0000-000000000004',
+    '{"sub":"20000000-0000-0000-0000-000000000004","email":"ironhills.management@mineralguide.local","email_verified":true}'::jsonb,
+    'email',
+    '2026-03-28T08:08:00Z',
+    '2026-01-16T09:15:00Z',
+    '2026-03-28T08:08:00Z'
+  ),
+  (
+    '21000000-0000-0000-0000-000000000008',
+    '20000000-0000-0000-0000-000000000005',
+    '20000000-0000-0000-0000-000000000005',
+    '{"sub":"20000000-0000-0000-0000-000000000005","email":"atlasbuyer.admin@mineralguide.local","email_verified":true}'::jsonb,
+    'email',
+    '2026-03-28T08:10:00Z',
+    '2026-01-17T09:00:00Z',
+    '2026-03-28T08:10:00Z'
+  ),
+  (
+    '21000000-0000-0000-0000-000000000009',
+    '20000000-0000-0000-0000-000000000006',
+    '20000000-0000-0000-0000-000000000006',
+    '{"sub":"20000000-0000-0000-0000-000000000006","email":"atlasbuyer.management@mineralguide.local","email_verified":true}'::jsonb,
+    'email',
+    '2026-03-28T08:12:00Z',
+    '2026-01-17T09:05:00Z',
+    '2026-03-28T08:12:00Z'
+  ),
+  (
+    '21000000-0000-0000-0000-000000000010',
+    '20000000-0000-0000-0000-000000000007',
+    '20000000-0000-0000-0000-000000000007',
+    '{"sub":"20000000-0000-0000-0000-000000000007","email":"roadhaul.driver@mineralguide.local","email_verified":true}'::jsonb,
+    'email',
+    '2026-03-28T08:14:00Z',
+    '2026-01-18T09:00:00Z',
+    '2026-03-28T08:14:00Z'
+  ),
+  (
+    '21000000-0000-0000-0000-000000000011',
+    '20000000-0000-0000-0000-000000000008',
+    '20000000-0000-0000-0000-000000000008',
+    '{"sub":"20000000-0000-0000-0000-000000000008","email":"roadhaul.admin@mineralguide.local","email_verified":true}'::jsonb,
+    'email',
+    '2026-03-28T08:16:00Z',
+    '2026-01-18T09:05:00Z',
+    '2026-03-28T08:16:00Z'
+  ),
+  (
+    '21000000-0000-0000-0000-000000000012',
+    '20000000-0000-0000-0000-000000000009',
+    '20000000-0000-0000-0000-000000000009',
+    '{"sub":"20000000-0000-0000-0000-000000000009","email":"roadhaul.management@mineralguide.local","email_verified":true}'::jsonb,
+    'email',
+    '2026-03-28T08:18:00Z',
+    '2026-01-18T09:10:00Z',
+    '2026-03-28T08:18:00Z'
+  );
+
+insert into public.companies (
+  id,
+  user_id,
+  company_name,
+  whatsapp_number,
+  org_type,
+  ceo_first_name,
+  ceo_last_name,
+  created_at,
+  updated_at
+)
+values
+  (
+    '30000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000001',
+    'Iron Hills Mining',
+    '+27710000001',
+    'mineSupplier',
+    'Naledi',
+    'Dlamini',
+    '2026-01-15T08:00:00Z',
+    '2026-03-28T07:50:00Z'
+  ),
+  (
+    '30000000-0000-0000-0000-000000000002',
+    '10000000-0000-0000-0000-000000000002',
+    'Atlas Buyer Group',
+    '+27710000002',
+    'buyer',
+    'Priya',
+    'Naidoo',
+    '2026-01-15T08:05:00Z',
+    '2026-03-28T07:55:00Z'
+  ),
+  (
+    '30000000-0000-0000-0000-000000000003',
+    '10000000-0000-0000-0000-000000000003',
+    'Roadhaul Logistics',
+    '+27710000003',
+    'transporter',
+    'Johan',
+    'Smit',
+    '2026-01-15T08:10:00Z',
+    '2026-03-28T08:00:00Z'
+  );
+
+insert into public.employees (
+  id,
+  user_id,
+  first_name,
+  last_name,
+  whatsapp_number,
+  company_id,
+  role,
+  status,
+  is_south_african_citizen,
+  id_number,
+  license_document,
+  created_at,
+  updated_at
+)
+values
+  (
+    '40000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
+    'Thabo',
+    'Guard',
+    '+27720000001',
+    '30000000-0000-0000-0000-000000000001',
+    'security',
+    'active',
+    true,
+    '8001015009081',
+    null,
+    '2026-01-16T09:00:00Z',
+    '2026-03-28T08:02:00Z'
+  ),
+  (
+    '40000000-0000-0000-0000-000000000002',
+    '20000000-0000-0000-0000-000000000002',
+    'Lerato',
+    'Scale',
+    '+27720000002',
+    '30000000-0000-0000-0000-000000000001',
+    'controllerWB',
+    'active',
+    true,
+    '8102026009082',
+    null,
+    '2026-01-16T09:05:00Z',
+    '2026-03-28T08:04:00Z'
+  ),
+  (
+    '40000000-0000-0000-0000-000000000003',
+    '20000000-0000-0000-0000-000000000003',
+    'Kabelo',
+    'Admin',
+    '+27720000003',
+    '30000000-0000-0000-0000-000000000001',
+    'admin',
+    'active',
+    true,
+    '8203037009083',
+    null,
+    '2026-01-16T09:10:00Z',
+    '2026-03-28T08:06:00Z'
+  ),
+  (
+    '40000000-0000-0000-0000-000000000004',
+    '20000000-0000-0000-0000-000000000004',
+    'Ayanda',
+    'Manager',
+    '+27720000004',
+    '30000000-0000-0000-0000-000000000001',
+    'management',
+    'active',
+    true,
+    '8304048009084',
+    null,
+    '2026-01-16T09:15:00Z',
+    '2026-03-28T08:08:00Z'
+  ),
+  (
+    '40000000-0000-0000-0000-000000000005',
+    '20000000-0000-0000-0000-000000000005',
+    'Megan',
+    'Buyer',
+    '+27720000005',
+    '30000000-0000-0000-0000-000000000002',
+    'admin',
+    'active',
+    true,
+    '8405059009085',
+    null,
+    '2026-01-17T09:00:00Z',
+    '2026-03-28T08:10:00Z'
+  ),
+  (
+    '40000000-0000-0000-0000-000000000006',
+    '20000000-0000-0000-0000-000000000006',
+    'Sipho',
+    'Buyer',
+    '+27720000006',
+    '30000000-0000-0000-0000-000000000002',
+    'management',
+    'active',
+    true,
+    '8506060009086',
+    null,
+    '2026-01-17T09:05:00Z',
+    '2026-03-28T08:12:00Z'
+  ),
+  (
+    '40000000-0000-0000-0000-000000000007',
+    '20000000-0000-0000-0000-000000000007',
+    'Themba',
+    'Driver',
+    '+27720000007',
+    '30000000-0000-0000-0000-000000000003',
+    'driver',
+    'active',
+    true,
+    '8607071009087',
+    'Code EC1 on file',
+    '2026-01-18T09:00:00Z',
+    '2026-03-28T08:14:00Z'
+  ),
+  (
+    '40000000-0000-0000-0000-000000000008',
+    '20000000-0000-0000-0000-000000000008',
+    'Carla',
+    'Dispatch',
+    '+27720000008',
+    '30000000-0000-0000-0000-000000000003',
+    'admin',
+    'active',
+    true,
+    '8708082009088',
+    null,
+    '2026-01-18T09:05:00Z',
+    '2026-03-28T08:16:00Z'
+  ),
+  (
+    '40000000-0000-0000-0000-000000000009',
+    '20000000-0000-0000-0000-000000000009',
+    'Peter',
+    'Fleet',
+    '+27720000009',
+    '30000000-0000-0000-0000-000000000003',
+    'management',
+    'active',
+    true,
+    '8809093009089',
+    null,
+    '2026-01-18T09:10:00Z',
+    '2026-03-28T08:18:00Z'
+  );
+
+insert into public.employee_status_history (
+  id,
+  employee_id,
+  company_id,
+  status,
+  timestamp,
+  actioned_by_id,
+  actioned_by_name,
+  assigned_role
+)
+values
+  (
+    'f0000000-0000-0000-0000-000000000001',
+    '40000000-0000-0000-0000-000000000001',
+    '30000000-0000-0000-0000-000000000001',
+    'role_assigned',
+    '2026-01-16T09:00:00Z',
+    '10000000-0000-0000-0000-000000000001',
+    'Naledi Dlamini',
+    'security'
+  ),
+  (
+    'f0000000-0000-0000-0000-000000000002',
+    '40000000-0000-0000-0000-000000000002',
+    '30000000-0000-0000-0000-000000000001',
+    'role_assigned',
+    '2026-01-16T09:05:00Z',
+    '10000000-0000-0000-0000-000000000001',
+    'Naledi Dlamini',
+    'controllerWB'
+  ),
+  (
+    'f0000000-0000-0000-0000-000000000003',
+    '40000000-0000-0000-0000-000000000003',
+    '30000000-0000-0000-0000-000000000001',
+    'role_assigned',
+    '2026-01-16T09:10:00Z',
+    '10000000-0000-0000-0000-000000000001',
+    'Naledi Dlamini',
+    'admin'
+  ),
+  (
+    'f0000000-0000-0000-0000-000000000004',
+    '40000000-0000-0000-0000-000000000004',
+    '30000000-0000-0000-0000-000000000001',
+    'role_assigned',
+    '2026-01-16T09:15:00Z',
+    '10000000-0000-0000-0000-000000000001',
+    'Naledi Dlamini',
+    'management'
+  ),
+  (
+    'f0000000-0000-0000-0000-000000000005',
+    '40000000-0000-0000-0000-000000000005',
+    '30000000-0000-0000-0000-000000000002',
+    'role_assigned',
+    '2026-01-17T09:00:00Z',
+    '10000000-0000-0000-0000-000000000002',
+    'Priya Naidoo',
+    'admin'
+  ),
+  (
+    'f0000000-0000-0000-0000-000000000006',
+    '40000000-0000-0000-0000-000000000006',
+    '30000000-0000-0000-0000-000000000002',
+    'role_assigned',
+    '2026-01-17T09:05:00Z',
+    '10000000-0000-0000-0000-000000000002',
+    'Priya Naidoo',
+    'management'
+  ),
+  (
+    'f0000000-0000-0000-0000-000000000007',
+    '40000000-0000-0000-0000-000000000007',
+    '30000000-0000-0000-0000-000000000003',
+    'role_assigned',
+    '2026-01-18T09:00:00Z',
+    '10000000-0000-0000-0000-000000000003',
+    'Johan Smit',
+    'driver'
+  ),
+  (
+    'f0000000-0000-0000-0000-000000000008',
+    '40000000-0000-0000-0000-000000000008',
+    '30000000-0000-0000-0000-000000000003',
+    'role_assigned',
+    '2026-01-18T09:05:00Z',
+    '10000000-0000-0000-0000-000000000003',
+    'Johan Smit',
+    'admin'
+  ),
+  (
+    'f0000000-0000-0000-0000-000000000009',
+    '40000000-0000-0000-0000-000000000009',
+    '30000000-0000-0000-0000-000000000003',
+    'role_assigned',
+    '2026-01-18T09:10:00Z',
+    '10000000-0000-0000-0000-000000000003',
+    'Johan Smit',
+    'management'
+  );
+
+insert into public.fleet_vehicles (
+  id,
+  company_id,
+  vehicle_registration_number,
+  vehicle_registration_expiry_date,
+  first_trailer_regs,
+  second_trailer_regs,
+  assigned_driver_employee_id,
+  driver_user_id,
+  driver_first_name,
+  driver_last_name,
+  driver_id_number,
+  driver_is_south_african_citizen,
+  is_active,
+  created_at,
+  updated_at
+)
+values
+  (
+    '50000000-0000-0000-0000-000000000001',
+    '30000000-0000-0000-0000-000000000003',
+    'CA 123-456',
+    '2027-01-31T00:00:00Z',
+    'TRL-1001',
+    'TRL-1002',
+    '40000000-0000-0000-0000-000000000007',
+    '20000000-0000-0000-0000-000000000007',
+    'Themba',
+    'Driver',
+    '8607071009087',
+    true,
+    true,
+    '2026-02-10T10:00:00Z',
+    '2026-03-28T08:20:00Z'
+  ),
+  (
+    '50000000-0000-0000-0000-000000000002',
+    '30000000-0000-0000-0000-000000000003',
+    'CA 654-321',
+    '2027-05-31T00:00:00Z',
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    true,
+    '2026-02-11T10:00:00Z',
+    '2026-03-28T08:21:00Z'
+  );
+
+insert into public.minerals (
+  id,
+  company_id,
+  name,
+  grade,
+  description,
+  unit_of_measure,
+  created_by,
+  created_at,
+  updated_at
+)
+values
+  (
+    '60000000-0000-0000-0000-000000000001',
+    '30000000-0000-0000-0000-000000000001',
+    'Manganese Ore',
+    '44%',
+    'Demonstration mineral used for seeded live operations data.',
+    'ton',
+    '20000000-0000-0000-0000-000000000003',
+    '2026-02-15T11:00:00Z',
+    '2026-03-28T08:22:00Z'
+  );
+
+insert into public.transactions (
+  id,
+  mineral_id,
+  supplier_company_id,
+  buyer_company_id,
+  transporter_company_id,
+  reference_number,
+  status,
+  quantity,
+  created_by,
+  metadata,
+  created_at,
+  updated_at
+)
+values
+  (
+    '70000000-0000-0000-0000-000000000001',
+    '60000000-0000-0000-0000-000000000001',
+    '30000000-0000-0000-0000-000000000001',
+    '30000000-0000-0000-0000-000000000002',
+    '30000000-0000-0000-0000-000000000003',
+    'TXN-DEMO-001',
+    'in_transit',
+    42.5,
+    '20000000-0000-0000-0000-000000000003',
+    '{"destination":"Atlas Buyer Group","route":"Iron Hills to Johannesburg","priority":"demo"}'::jsonb,
+    '2026-03-01T08:00:00Z',
+    '2026-03-28T08:23:00Z'
+  );
+
+insert into public.weighbridge_records (
+  id,
+  transaction_id,
+  company_id,
+  vehicle_id,
+  direction,
+  gross_weight,
+  tare_weight,
+  net_weight,
+  recorded_by,
+  recorded_at,
+  created_at,
+  updated_at
+)
+values
+  (
+    '80000000-0000-0000-0000-000000000001',
+    '70000000-0000-0000-0000-000000000001',
+    '30000000-0000-0000-0000-000000000001',
+    '50000000-0000-0000-0000-000000000001',
+    'outbound',
+    58.7,
+    16.2,
+    42.5,
+    '20000000-0000-0000-0000-000000000002',
+    '2026-03-28T06:30:00Z',
+    '2026-03-28T06:30:00Z',
+    '2026-03-28T06:30:00Z'
+  );
+
+insert into public.mineral_loads (
+  id,
+  transaction_id,
+  vehicle_id,
+  mineral_id,
+  loader_employee_id,
+  notes,
+  loaded_at,
+  created_at,
+  updated_at
+)
+values
+  (
+    '90000000-0000-0000-0000-000000000001',
+    '70000000-0000-0000-0000-000000000001',
+    '50000000-0000-0000-0000-000000000001',
+    '60000000-0000-0000-0000-000000000001',
+    '40000000-0000-0000-0000-000000000002',
+    'Load sealed and dispatched for buyer intake.',
+    '2026-03-28T06:15:00Z',
+    '2026-03-28T06:15:00Z',
+    '2026-03-28T06:15:00Z'
+  );
+
+insert into public.security_incidents (
+  id,
+  company_id,
+  employee_id,
+  vehicle_id,
+  severity,
+  title,
+  description,
+  status,
+  reported_by,
+  occurred_at,
+  created_at,
+  updated_at
+)
+values
+  (
+    'a0000000-0000-0000-0000-000000000001',
+    '30000000-0000-0000-0000-000000000001',
+    '40000000-0000-0000-0000-000000000001',
+    '50000000-0000-0000-0000-000000000001',
+    'medium',
+    'Gate camera blind spot review',
+    'Security flagged a temporary blind spot near the outbound scale lane for follow-up.',
+    'open',
+    '20000000-0000-0000-0000-000000000001',
+    '2026-03-28T05:55:00Z',
+    '2026-03-28T05:55:00Z',
+    '2026-03-28T05:55:00Z'
+  );
+
+insert into public.gate_checks (
+  id,
+  company_id,
+  employee_id,
+  vehicle_id,
+  check_type,
+  gate_status,
+  notes,
+  checked_by,
+  checked_at,
+  created_at,
+  updated_at
+)
+values
+  (
+    'b0000000-0000-0000-0000-000000000001',
+    '30000000-0000-0000-0000-000000000001',
+    '40000000-0000-0000-0000-000000000001',
+    '50000000-0000-0000-0000-000000000001',
+    'entry',
+    'cleared',
+    'Vehicle and manifest matched against the active trip.',
+    '20000000-0000-0000-0000-000000000001',
+    '2026-03-28T05:45:00Z',
+    '2026-03-28T05:45:00Z',
+    '2026-03-28T05:45:00Z'
+  );
+
+insert into public.broadcast_messages (
+  id,
+  event,
+  payload,
+  created_by,
+  timestamp
+)
+values
+  (
+    'c0000000-0000-0000-0000-000000000001',
+    'company_announcement',
+    '{"company_id":"30000000-0000-0000-0000-000000000001","title":"Morning dispatch","message":"Security, controller, and admin teams are aligned for the seeded outbound manganese run.","importance":"high"}'::jsonb,
+    '10000000-0000-0000-0000-000000000001',
+    '2026-03-28T05:30:00Z'
+  ),
+  (
+    'c0000000-0000-0000-0000-000000000002',
+    'company_announcement',
+    '{"company_id":"30000000-0000-0000-0000-000000000002","title":"Buyer intake window","message":"Atlas Buyer Group is ready to receive the seeded mineral consignment and verify paperwork.","importance":"normal"}'::jsonb,
+    '10000000-0000-0000-0000-000000000002',
+    '2026-03-28T05:35:00Z'
+  ),
+  (
+    'c0000000-0000-0000-0000-000000000003',
+    'company_announcement',
+    '{"company_id":"30000000-0000-0000-0000-000000000003","title":"Fleet readiness","message":"Driver, admin, and management can all review the seeded trip and assigned vehicle in the transporter workspace.","importance":"high"}'::jsonb,
+    '10000000-0000-0000-0000-000000000003',
+    '2026-03-28T05:40:00Z'
+  );
+
+insert into public.chat_rooms (
+  id,
+  name,
+  participant_ids,
+  created_at,
+  last_message_content,
+  last_message_timestamp,
+  last_message_sender_id
+)
+values
+  (
+    'd0000000-0000-0000-0000-000000000001',
+    'Iron Hills Live Ops',
+    array[
+      '10000000-0000-0000-0000-000000000001'::uuid,
+      '20000000-0000-0000-0000-000000000001'::uuid,
+      '20000000-0000-0000-0000-000000000002'::uuid,
+      '20000000-0000-0000-0000-000000000003'::uuid,
+      '20000000-0000-0000-0000-000000000004'::uuid
+    ],
+    '2026-03-27T18:00:00Z',
+    'Outbound truck cleared. Controller has logged the final weights.',
+    '2026-03-28T06:31:00Z',
+    '20000000-0000-0000-0000-000000000002'
+  ),
+  (
+    'd0000000-0000-0000-0000-000000000002',
+    'Atlas Intake Desk',
+    array[
+      '10000000-0000-0000-0000-000000000002'::uuid,
+      '20000000-0000-0000-0000-000000000005'::uuid,
+      '20000000-0000-0000-0000-000000000006'::uuid
+    ],
+    '2026-03-27T18:15:00Z',
+    'Buyer admin has the seeded transaction reference ready for intake.',
+    '2026-03-28T06:40:00Z',
+    '20000000-0000-0000-0000-000000000005'
+  ),
+  (
+    'd0000000-0000-0000-0000-000000000003',
+    'Roadhaul Dispatch',
+    array[
+      '10000000-0000-0000-0000-000000000003'::uuid,
+      '20000000-0000-0000-0000-000000000007'::uuid,
+      '20000000-0000-0000-0000-000000000008'::uuid,
+      '20000000-0000-0000-0000-000000000009'::uuid
+    ],
+    '2026-03-27T18:30:00Z',
+    'Assigned driver is on the seeded route with vehicle CA 123-456.',
+    '2026-03-28T06:50:00Z',
+    '20000000-0000-0000-0000-000000000008'
+  );
+
+insert into public.chat_messages (
+  id,
+  chat_room_id,
+  content,
+  sender_id,
+  sender_name,
+  timestamp,
+  is_read
+)
+values
+  (
+    'e0000000-0000-0000-0000-000000000001',
+    'd0000000-0000-0000-0000-000000000001',
+    'Outbound truck cleared. Controller has logged the final weights.',
+    '20000000-0000-0000-0000-000000000002',
+    'Lerato Scale',
+    '2026-03-28T06:31:00Z',
+    true
+  ),
+  (
+    'e0000000-0000-0000-0000-000000000002',
+    'd0000000-0000-0000-0000-000000000002',
+    'Buyer admin has the seeded transaction reference ready for intake.',
+    '20000000-0000-0000-0000-000000000005',
+    'Megan Buyer',
+    '2026-03-28T06:40:00Z',
+    true
+  ),
+  (
+    'e0000000-0000-0000-0000-000000000003',
+    'd0000000-0000-0000-0000-000000000003',
+    'Assigned driver is on the seeded route with vehicle CA 123-456.',
+    '20000000-0000-0000-0000-000000000008',
+    'Carla Dispatch',
+    '2026-03-28T06:50:00Z',
+    true
+  );
+
+commit;

@@ -1,0 +1,281 @@
+// Layout sweep for the THREE ORG PORTALS — mine/supplier, buyer, transporter.
+//
+// The super-admin console has had `super_admin_overflow_sweep_test.dart` for
+// some time. The portals had NOTHING: not one widget test rendered a portal
+// dashboard. That is the half of the product every customer actually uses.
+//
+// Why this matters more than it sounds (CLAUDE.md §10.4): the console applies a
+// per-user text scale (0.85–1.3) and bold-text through MediaQuery, and portal
+// users get the same treatment. A tile that sits 1px inside its box at 1.0
+// overflows for anyone who nudged the slider. Both real bugs found in the
+// targets work only appeared at 1.3.
+//
+// The real fonts are loaded. Without them `flutter test` substitutes a face
+// where every glyph is one em wide, so a 9-character label at fontSize 9
+// measures 81px instead of ~45px — which both invents overflows that do not
+// exist and hides ones that do.
+
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:flutter_application_1/core/theme/app_theme.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
+import 'package:flutter_application_1/features/portal/providers/mirror_company_context_provider.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_loads_value_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_portal_dashboard_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_requests_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_waybills_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/compliance_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/earnings_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_production_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_quality_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_supplier_portal_dashboard_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/portal_tons_out_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/portal_trips_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_maintenance_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_portal_dashboard_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_routes_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/trucks_on_route_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_reconciliations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_routes_mines_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_truck_locations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/driver_app_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/driver_routes_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/fuel_costs_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/load_controller_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_locations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_reconciliations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_supplier_buyers_detail_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_supplier_truck_locations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/portal_own_company_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/request_transportation_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/security_checkin_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/stockpile_detail_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/supervisor_view_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_reconciliations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_request_tracking_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_truck_locations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_truck_positions_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/appearance_theme_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/drop_off_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/live_trip_map_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/loading_activity_detail_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/portal_trip_detail_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/stockpile_audit_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/tons_out_detail_screen.dart';
+
+/// Narrow phone, small tablet, desktop rail width. The 360 is the one that
+/// matters most: drivers and security run this on a phone.
+const _widths = <double>[360, 800, 1280];
+const _scales = <double>[0.85, 1.0, 1.3];
+
+Future<void> _loadFont(String family, List<String> files) async {
+  final loader = FontLoader(family);
+  var loaded = false;
+  for (final f in files) {
+    final file = File('assets/fonts/$f');
+    if (!file.existsSync()) continue;
+    loaded = true;
+    loader.addFont(file.readAsBytes().then((b) => ByteData.sublistView(b)));
+  }
+  if (loaded) await loader.load();
+}
+
+Future<void> _loadRealFonts() async {
+  await _loadFont('PlusJakartaSans', [
+    'PlusJakartaSans-Regular.ttf',
+    'PlusJakartaSans-Medium.ttf',
+    'PlusJakartaSans-SemiBold.ttf',
+    'PlusJakartaSans-Bold.ttf',
+    'PlusJakartaSans-ExtraBold.ttf',
+  ]);
+  await _loadFont('JetBrainsMono', [
+    'JetBrainsMono-Regular.ttf',
+    'JetBrainsMono-Medium.ttf',
+    'JetBrainsMono-Bold.ttf',
+  ]);
+  await _loadFont('Fraunces', ['Fraunces-Medium.ttf', 'Fraunces-SemiBold.ttf']);
+}
+
+void main() {
+  setUpAll(() async {
+    await _loadRealFonts();
+    // Portal screens touch Supabase.instance while building. A dummy instance
+    // gets them rendering; no request is ever made, so every provider resolves
+    // to its empty or error state — which is the state most likely to overflow,
+    // because an error message is longer than the figure it replaced.
+    SharedPreferences.setMockInitialValues({});
+    await Supabase.initialize(
+      url: 'http://localhost:54321',
+      anonKey: 'portal-overflow-sweep',
+    );
+  });
+
+  /// Renders [child] across every width × scale and fails on the first layout
+  /// fault, naming the exact corner so the failure is actionable.
+  Future<void> sweep(
+    WidgetTester tester,
+    Widget Function() child, {
+    bool boldText = false,
+  }) async {
+    for (final width in _widths) {
+      for (final scale in _scales) {
+        tester.view.physicalSize = Size(width, 1400);
+        tester.view.devicePixelRatio = 1.0;
+
+        final captured = <FlutterErrorDetails>[];
+        final previousOnError = FlutterError.onError;
+        FlutterError.onError = captured.add;
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              // Without a company id every portal screen short-circuits to
+              // "Company not loaded" — a Center with one short label, which
+              // cannot overflow. The sweep would then pass 27 times having
+              // laid out nothing. This is the difference between a real sweep
+              // and a green tick.
+              mirrorCompanyIdProvider.overrideWith((ref) => 'sweep-company'),
+            ],
+            child: MaterialApp(
+                          // The REAL app theme: a bare ThemeData leaves buttons on
+            // Material defaults, and default paddings differ from the app's,
+            // which changes what does and does not overflow.
+              theme: AppTheme.darkTheme,
+              builder: (context, c) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: TextScaler.linear(scale),
+                  boldText: boldText,
+                ),
+                child: c!,
+              ),
+              home: Builder(
+                builder: (context) => Scaffold(
+                  backgroundColor: MlSemantic.of(context).surfaceApp,
+                  body: SizedBox(width: width, child: child()),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 400));
+
+        FlutterError.onError = previousOnError;
+        tester.takeException();
+
+        // Only layout faults are in scope. Re-pumping one tester across 9
+        // corners also provokes provider-disposal races that belong to the
+        // harness, not the screen, and would make this sweep cry wolf.
+        bool isLayoutFault(FlutterErrorDetails d) {
+          final s = d.exception.toString();
+          return s.contains('overflowed') ||
+              s.contains('forces an infinite') ||
+              s.contains('BoxConstraints');
+        }
+
+        final layout = captured.where(isLayoutFault).toList();
+        if (layout.isNotEmpty) {
+          final where = layout
+              .map((d) => d
+                  .toDiagnosticsNode(style: DiagnosticsTreeStyle.error)
+                  .toStringDeep())
+              .join('\n');
+          fail('Layout error at width=$width textScale=$scale '
+              'boldText=$boldText\n$where');
+        }
+      }
+    }
+    addTearDown(tester.view.reset);
+  }
+
+  final screens = <String, Widget Function()>{
+    // Mine / supplier
+    'mine dashboard': () => const MineSupplierPortalDashboardScreen(),
+    'mine production': () => const MineProductionScreen(),
+    'mine quality': () => const MineQualityScreen(),
+    'tons out': () => const PortalTonsOutScreen(),
+    // Buyer
+    'buyer dashboard': () => const BuyerPortalDashboardScreen(),
+    'buyer loads & value': () => const BuyerLoadsValueScreen(),
+    'buyer requests': () => const BuyerRequestsScreen(),
+    'buyer waybills': () => const BuyerWaybillsScreen(),
+    // Transporter
+    'transporter dashboard': () => const TransporterPortalDashboardScreen(),
+    'transporter routes': () => const TransporterRoutesScreen(),
+    'transporter maintenance': () => const TransporterMaintenanceScreen(),
+    'trucks on route': () => const TrucksOnRouteScreen(),
+    // Shared
+    'trips': () => const PortalTripsScreen(basePath: '/portal/mine/trips'),
+    'compliance': () => const ComplianceScreen(),
+    'earnings': () => const EarningsScreen(),
+    // ---- second wave: the rest of the portal ---------------------------
+    // Mine / supplier
+    'mine reconciliations': () => const MineReconciliationsScreen(),
+    'mine locations': () => const MineLocationsScreen(),
+    'mine buyers detail': () => const MineSupplierBuyersDetailScreen(),
+    'mine truck locations': () => const MineSupplierTruckLocationsScreen(),
+    'supervisor view': () => const SupervisorViewScreen(),
+    'security check-in': () => const SecurityCheckinScreen(),
+    'load controller': () => const LoadControllerScreen(),
+    'stockpile detail': () => const StockpileDetailScreen(),
+    // Buyer
+    'buyer reconciliations': () => const BuyerReconciliationsScreen(),
+    'buyer routes & mines': () => const BuyerRoutesMinesScreen(),
+    'buyer truck locations': () => const BuyerTruckLocationsScreen(),
+    'request transportation': () => const RequestTransportationScreen(),
+    // Transporter
+    'transporter reconciliations': () => const TransporterReconciliationsScreen(),
+    'transporter request tracking': () => const TransporterRequestTrackingScreen(),
+    'transporter truck locations': () => const TransporterTruckLocationsScreen(),
+    'transporter truck positions': () => const TransporterTruckPositionsScreen(),
+    'fuel costs': () => const FuelCostsScreen(),
+    // Driver
+    'driver app': () => const DriverAppScreen(),
+    'driver routes': () => const DriverRoutesScreen(),
+    // Company
+    'own company': () => const PortalOwnCompanyScreen(),
+    // ---- third wave: detail routes and the remaining leaves -------------
+    'appearance & theme': () => const AppearanceThemeScreen(),
+    'live trip map': () => const LiveTripMapScreen(),
+    'loading activity detail': () => const LoadingActivityDetailScreen(),
+    'stockpile audit': () => const StockpileAuditScreen(),
+    // Detail routes take an id. A non-existent one is the RIGHT fixture here:
+    // it drives the not-found / error branch, which carries the longest text
+    // on the screen and is therefore the most likely corner to overflow.
+    'trip detail': () => const PortalTripDetailScreen(tripId: 'sweep-trip'),
+    'drop off': () => const DropOffScreen(tripId: 'sweep-trip'),
+    // Empty list, not a fabricated row: an empty table renders its empty
+    // state, and inventing rows here would be inventing data.
+    'tons out detail': () => const TonsOutDetailScreen(entries: []),
+  };
+
+  group('portal screens', () {
+    for (final entry in screens.entries) {
+      testWidgets('${entry.key} survives every width x text scale',
+          (tester) async {
+        await sweep(tester, entry.value);
+      });
+    }
+  });
+
+  group('portal screens, bold text', () {
+    // Bold text widens every glyph. Run it over the three dashboards, which
+    // are the densest layouts and the ones every user lands on.
+    for (final key in const [
+      'mine dashboard',
+      'buyer dashboard',
+      'transporter dashboard',
+    ]) {
+      testWidgets('$key survives bold text', (tester) async {
+        await sweep(tester, screens[key]!, boldText: true);
+      });
+    }
+  });
+}

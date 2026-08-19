@@ -1,0 +1,165 @@
+Please give me a proper full breakdown of a fully manageable, readable, interactive, responsive, real time based, 'Super_Global_Serial-Admin_Account-type' for a flutter app where when logged in to this specific account there should be a full complete 'Client-Enterprise-Organization-Management' section where 'Super_Global_Serial-Admin_Account-type' should/would/will then be able to see each and every single company/client/business, all of the different companies/businesses names that uses our app listed and grouped by categories of the 3x different Organization types in our app and then under each specific company, the 'Super_Global_Serial-Admin_Account-type' will/should then be able to see and manage each user under that specific company where the users should also then be grouped by categories of employee types, so each employee (user) in the app has to belong to a company.
+
+So what the ''Super_Global_Serial-Admin_Account-type'' should/would/must/will then be able to do is to generate 'UNIQUE' serial key's/serial tokens for each/all companies under each organization type, where each of these keys/tokens will basically grant each organization the ability to continue using the app, each key/token should/will be bound to a 'customizable set amount of days' which when the amount of days has been selected will tell the ''Super_Global_Serial-Admin_Account-type'' that this token will be valid until 'dd-mm-yyyy' are you sure you want to generate a serial/token for 'org type + company name' for ("custom selected amount of days displayed in numbers") of days, expiry date 'dd-mm-yyyy'? then 3x buttons will appear with the question asked which will be 'cancel' , 'edit', 'confirm, Yes I'm sure!'
+
+So when ''Super_Global_Serial-Admin_Account-type' is busy configuring/creating a serial/token key for the specific company under the specific org, it will have a customizable/configurable amount/number of individual users/employees allowed to be assigned to this/the specific company, so a number of user seats, where both the 'Super_Global_Serial-Admin_Account-type' and specific company which the serial/key is meant for will both then be able to see and manage each/all seats under their own company, see all the details of each user/employee that/which occupies a seat under the specific company, if a companies seats are now full and fully used up, the company should be able to request for extra seats if they require extra seats. '<jean@cyberhouse.co.za>' who will be/is the main 'Super_Global_Serial-Admin_Account-type', should/would be allowed to grant/give 1 person the same type of account which is 'Super_Global_Serial-Admin_Account-type' but this account type will be 'Super_Global_Serial-Admin_Account-type-main-child' which just means that this is the first and only child of the main 'Super_Global_Serial-Admin_Account-type' and that the parent of the child account the main 'Super_Global_Serial-Admin_Account-type' will be able to see and get any and all activities, actions, any and everything done by child will be logged automatically by the app and 'Super_Global_Serial-Admin_Account-type' will eb allowed to and can download any and all of these logs at any time. Also when a company's/org type's/specific company's keys/serials expires they should no longer have any access, capabilities and or features of the app working what so ever, all that they should be able to do is contact APP Support and view their profile, and same goes for all employees under each of these org types/companies/clients.
+
+Here's a quick small overview, with some extra explained information of how our app currently works so that you have as much detail as I can give you and as much needed information on of to give me a proper complete implementation workflow, implementation plan, implementation overview and all the necessary steps on getting started, starting from step 1 until how ever many steps are needed, will be needed for the implementation of everything just explained to work hand in hand with what I currently have and don't have in my app.
+
+1. Mine Supplier (mineSupplier)
+
+Goals & Overview The primary goal of a Mine Supplier is to extract, process, and sell minerals to Buyers. They are the origin point of the supply chain. Their system functions revolve around managing their mineral inventory, initiating transactions with buyers, and managing the physical loading and dispatching of transport vehicles.
+
+Organization Capabilities & Functions:
+
+Mineral Management: Can create, edit, and manage different types of minerals and their grades (e.g., Coal, Chrome) and unit measurements (tons).
+
+Transaction Initiation: Can create sales transactions (draft, scheduled) designating a specific Buyer and Transporter.
+
+Outbound Operations: Manages the loading of minerals onto vehicles (mineral_loads), outbound weighbridge recording (capturing gross/tare weights), and outbound gate security clearance.
+
+Employee Hierarchy (Highest to Lowest)
+
+Management (management)
+
+Functions & Capabilities: High-level oversight of the entire mining operation. They can view all company data, approve/reject employee requests to join the company, and oversee large-scale transactions and financial tracking.
+
+Goals: Ensure the mine operates profitably, compliance is met, and major buyer contracts are fulfilled.
+
+Admin (admin)
+
+Functions & Capabilities: Handles day-to-day operations. Can assign roles to new employees, manage fleet vehicles (if the mine owns internal vehicles), update company details, and manage standard mineral transaction paperwork.
+
+Goals: Ensure smooth administrative operations, proper staff role allocation, and accurate data entry.
+
+Weighbridge Controller (controllerWB)
+
+Functions & Capabilities: Operates the mine's weighbridge. Captures inbound (Tare/empty) weights and outbound (Gross/loaded) weights of trucks. Links these weights to specific transactions.
+
+Goals: Ensure accurate measurement of departing mineral loads so the company bills the Buyer correctly.
+
+Security (security)
+
+Functions & Capabilities: Manages the mine's physical gates. Logs vehicle entry and exit (gate_checks), clears or blocks vehicles, and reports/resolves security incidents (e.g., theft, safety breaches).
+
+Goals: Protect the mine's assets and ensure only authorized fleet vehicles enter and leave with legitimate transactions.
+
+Driver (driver) (Optional for Mine)
+
+Functions & Capabilities: If the mine operates internal vehicles, drivers are responsible for moving material within the mine site or to local depots. They are assigned to specific fleet_vehicles.
+
+1. Buyer (buyer)
+
+Goals & Overview The primary goal of a Buyer is to purchase and receive minerals from Mine Suppliers for their own use, processing, or resale. Their system functions revolve around receiving shipments, verifying weights upon arrival, and closing out transactions.
+
+Organization Capabilities & Functions:
+
+Transaction Fulfillment: Monitors inbound transactions that are in_transit.
+
+Inbound Operations: Manages the arrival of Transporter vehicles, conducts inbound gate security checks, and performs their own weighbridge checks to verify the Mine Supplier's claimed weight.
+
+Transaction Completion: Marks transactions as delivered and completed once materials are safely offloaded and verified.
+
+Employee Hierarchy (Highest to Lowest)
+
+Management (management)
+
+Functions & Capabilities: High-level oversight of purchasing. Monitors supply chain flow, ensures enough raw material is arriving, and manages the company profile.
+
+Goals: Ensure a steady, verified supply of minerals at the correct grade and weight.
+
+Admin (admin)
+
+Functions & Capabilities: Manages employee onboarding, verifies transaction documentation against physical receipts, and handles disputes.
+
+Goals: Streamline the receiving process and ensure personnel are properly placed.
+
+Weighbridge Controller (controllerWB)
+
+Functions & Capabilities: Operates the buyer's weighbridge. Weighs the inbound truck (Gross weight) and weighs it again after offloading (Tare weight) to calculate the exact Net weight received.
+
+Goals: Prevent shortchanging by verifying the exact amount of minerals received matches the Mine Supplier's dispatch record.
+
+Security (security)
+
+Functions & Capabilities: Manages the buyer's receiving gates. Verifies inbound trucks have a valid in_transit transaction before allowing entry. Reports security incidents at the receiving yard.
+
+Goals: Prevent unauthorized access and ensure safe, legitimate offloading of purchased goods.
+
+1. Transporter (transporter)
+
+Goals & Overview The primary goal of a Transporter is logistics—safely moving minerals from the Mine Supplier to the Buyer. Their system functions revolve entirely around fleet management, driver allocation, and tracking the in_transit phase of transactions.
+
+Organization Capabilities & Functions:
+
+Fleet Management: Creates and maintains fleet_vehicles (trucks, trailers, registration expiries).
+
+Driver Allocation: Assigns verified Driver employees to specific fleet vehicles.
+
+Logistics Tracking: Accepts transport jobs assigned by Suppliers/Buyers and updates status as the vehicle moves between locations.
+
+Employee Hierarchy (Highest to Lowest)
+
+Management (management)
+
+Functions & Capabilities: Oversees the logistics business. Monitors fleet health, major client contracts (with mines and buyers), and overall transport efficiency.
+
+Goals: Maximize vehicle uptime, ensure profitable transport routes, and maintain safety standards.
+
+Admin (admin)
+
+Functions & Capabilities: Heavy focus on compliance. Manages driver documentation (passports, work permits, licenses), vehicle registrations, and assigns drivers to trucks.
+
+Goals: Ensure no truck is legally grounded and drivers are properly licensed and assigned to the right vehicles.
+
+Driver (driver)
+
+Functions & Capabilities: The core operational role for a transporter. They operate the assigned fleet_vehicle, present their credentials and vehicle at Mine and Buyer gates, and transport the mineral load.
+
+Goals: Safely and efficiently move the assigned mineral load from Point A to Point B without loss or incident.
+
+Security (security) (Optional for Transporter)
+
+Functions & Capabilities: If the transporter has large overnight truck depots, security handles depot gate checks and incident reporting.
+
+The Ecosystem: How They Work Together
+
+The entire application is built around the lifecycle of a Transaction. Here is how the three organizations and their employees collaborate to complete a single cycle:
+
+Phase 1: Initiation (The Mine & The Transporter)
+
+Supplier Admin/Management creates a Transaction indicating they are selling 100 tons of Coal to a Buyer, utilizing a specific Transporter.
+
+Transporter Admin assigns a Driver to a specific truck (fleet_vehicle) and dispatches them to the Mine.
+
+Phase 2: Loading & Dispatch (The Mine)
+
+Supplier Security logs the Transporter's truck arriving at the mine gate (gate_check - entry).
+
+Supplier Weighbridge Controller weighs the empty truck (Tare weight).
+
+A mine employee (Loader) loads the truck (mineral_loads).
+
+Supplier Weighbridge Controller weighs the full truck (Gross weight) and calculates the Net weight. The transaction is marked in_transit.
+
+Supplier Security logs the truck leaving the mine (gate_check - exit).
+
+Phase 3: Transit (The Transporter)
+
+The Transporter Driver navigates the truck to the Buyer's location. If an accident or issue occurs on the road, a security_incident can be logged against that vehicle.
+
+Phase 4: Receiving & Completion (The Buyer)
+
+Buyer Security verifies the incoming truck matches an in_transit transaction and logs them in (gate_check - entry).
+
+Buyer Weighbridge Controller weighs the fully loaded truck (Gross weight) upon arrival to ensure no minerals were lost/stolen during transit.
+
+The truck is offloaded at the Buyer's facility.
+
+Buyer Weighbridge Controller weighs the empty truck (Tare weight) to finalize the exact received Net weight.
+
+The transaction is marked delivered and eventually completed by Buyer Admin/Management, triggering billing and finalizing the supply chain loop.
+
+Buyer Security logs the empty truck leaving the facility (gate_check - exit).
+
+This interconnected web ensures strict accountability, accurate billing, and physical security at every step of the mineral supply chain.

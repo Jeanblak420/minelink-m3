@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 116" fill="none">
+<ellipse cx="56" cy="108" rx="30" ry="6" fill="#000" opacity="0.28" />
+      <defs>
+        <linearGradient id="i3-buyB" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#5fe0f4" /><stop offset="1" stop-color="#0aa3c4" />
+        </linearGradient>
+        <linearGradient id="i3-buyA" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#7fe9f8" /><stop offset="1" stop-color="#22bcd8" />
+        </linearGradient>
+      </defs>
+      <rect x="24" y="48" width="64" height="54" rx="7" fill="#067488" transform="translate(0,4)" />
+      <rect x="24" y="48" width="64" height="54" rx="7" fill="url(#i3-buyB)" />
+      <rect x="46" y="66" width="20" height="36" rx="3" fill="#06485a" />
+      <rect x="31" y="60" width="12" height="14" rx="2" fill="#d6f6fb" opacity=".85" />
+      <rect x="69" y="60" width="12" height="14" rx="2" fill="#d6f6fb" opacity=".7" />
+      <path d="M16 46 L26 28 H86 L96 46 Z" fill="#0a93b3" transform="translate(0,3)" />
+      <path d="M16 46 L26 28 H86 L96 46 Z" fill="url(#i3-buyA)" />
+      <path d="M26 28 H86 L83 40 H29 Z" fill="#fff" opacity=".18" />
+</svg>

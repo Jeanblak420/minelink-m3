@@ -1,0 +1,57 @@
+{
+  "terminal.integrated.env.windows": {
+    "GH_CONFIG_DIR": "${workspaceFolder}\\.gh",
+    "Path": "${env:LOCALAPPDATA}\\Android\\sdk\\platform-tools;${env:LOCALAPPDATA}\\Android\\sdk\\emulator;${env:Path}"
+  },
+  "CodeGPT.apiKey": "CodeGPT Plus Beta",
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "deno.enablePaths": [
+    "supabase/functions"
+  ],
+  "deno.lint": true,
+  "deno.unstable": [
+    "bare-node-builtins",
+    "byonm",
+    "sloppy-imports",
+    "unsafe-proto",
+    "webgpu",
+    "broadcast-channel",
+    "worker-options",
+    "cron",
+    "kv",
+    "ffi",
+    "fs",
+    "http",
+    "net"
+  ],
+  "npm.packageManager": "npm",
+
+  // Refact configuration
+  "refact.apiKey": "${REFACT_API_KEY}",
+  "refact.supabase.anonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtrY3NlcW1wZ3p6cm9nYXRkb3FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzODM4ODcsImV4cCI6MjA2MTk1OTg4N30.G126pc4J8Xi4S5cVAgAtSrboaZyJ-1p7x5fYiN6VRII",
+  "refact.telemetry.enabled": false,
+  "refact.completion.enabled": true,
+  "refact.analysis.enabled": true,
+  "refact.github.repository": "Blak-42069/The_Mineral_Guide",
+  "refact.github.branch": "main",
+  "cmake.sourceDirectory": "C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/linux",
+
+  // --- C/C++ analysis (Flutter Windows runner) ---
+  // The native runner is built with MSVC via CMake (`flutter build windows`).
+  // Point IntelliSense at the real MSVC compiler + Flutter's generated headers
+  // so it stops emitting false "file not found" / STL-misparse errors.
+  // clangd is disabled so it doesn't double-report against cpptools.
+  "clangd.enable": false,
+  "C_Cpp.intelliSenseEngine": "default",
+  "C_Cpp.default.compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
+  "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
+  "C_Cpp.default.cStandard": "c17",
+  "C_Cpp.default.cppStandard": "c++17",
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/windows/runner",
+    "${workspaceFolder}/windows/flutter/ephemeral",
+    "${workspaceFolder}/windows/flutter/ephemeral/cpp_client_wrapper/include"
+  ]
+}

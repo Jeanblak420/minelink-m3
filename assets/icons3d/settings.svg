@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 116" fill="none">
+<ellipse cx="56" cy="108" rx="28" ry="6" fill="#000" opacity="0.28" />
+      <defs>
+        <linearGradient id="i3-gr" x1="0" y1="0" x2="0.4" y2="1">
+          <stop offset="0" stop-color="#a7b6ca" /><stop offset="1" stop-color="#5a6b85" />
+        </linearGradient>
+      </defs>
+      {Array.from({ length: 8 }).map((_, i) => (
+        <rect key="i" x="50" y="14" width="12" height="22" rx="4" fill="#34435d"
+          transform="`rotate(${i * 45" 56 58)`} />
+      ))}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <rect key="f' + i" x="50" y="12" width="12" height="20" rx="4" fill="url(#i3-gr)"
+          transform="`rotate(${i * 45" 56 56)`} />
+      ))}
+      <circle cx="56" cy="60" r="30" fill="#34435d" />
+      <circle cx="56" cy="56" r="30" fill="url(#i3-gr)" />
+      <circle cx="56" cy="56" r="13" fill="#2b384e" />
+      <path d="M40 44 C44 38 50 35 56 35" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".4" />
+</svg>

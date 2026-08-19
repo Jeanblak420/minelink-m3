@@ -1,0 +1,28 @@
+/* MineLink — Spacing scale (4px base grid) */
+
+:root {
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Common component paddings */
+  --pad-card: 20px;          /* hero / feature card inner padding */
+  --pad-card-sm: 16px;       /* compact stat card */
+  --gap-grid: 16px;          /* dashboard card grid gap */
+  --gap-stack: 12px;         /* vertical stack between rows */
+  --inset-page: 24px;        /* content area outer padding */
+
+  /* Layout */
+  --sidebar-w: 268px;        /* expanded rail */
+  --sidebar-w-collapsed: 76px;
+  --appbar-h: 72px;
+  --content-max: 1280px;
+}

@@ -1,0 +1,18 @@
+# clangd config for the Flutter Windows runner.
+#
+# These C++ files are built with MSVC via CMake (`flutter build windows`),
+# not with the editor's analyzer. Without this, clangd can't find Flutter's
+# generated headers (windows/flutter/ephemeral/...) and reports a cascade of
+# false errors in main.cpp and even inside MSVC's STL headers (<vector>, etc.).
+CompileFlags:
+  Add:
+    - -std=c++17
+    - --target=x86_64-pc-windows-msvc
+    - -fms-compatibility
+    - -fms-extensions
+    - -I.
+    - -I../flutter/ephemeral
+    - -I../flutter/ephemeral/cpp_client_wrapper/include
+    - -IC:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/windows/runner
+    - -IC:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/windows/flutter/ephemeral
+    - -IC:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/windows/flutter/ephemeral/cpp_client_wrapper/include

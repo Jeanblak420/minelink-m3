@@ -1,0 +1,21 @@
+-- Correcting a comment that described an intent the system does not honour.
+--
+-- 20260815120000 put this on `record_truck_load`:
+--   "Trips already dispatched can still be completed - set_trip_status and
+--    the POD path are deliberately NOT gated."
+--
+-- True of those two FUNCTIONS, and false of the system. 20260815097000 had
+-- already put a `guard_company_active` trigger on 20 tables, `trips`,
+-- `pod_uploads` and `vehicle_positions` among them, so advancing a trip or
+-- uploading a POD at an expired company fails at the trigger regardless of
+-- what the function checks. The carve-out I described does not exist.
+--
+-- Left as a note rather than as a change, because the trigger's rule --
+-- expiry stops ALL operational writes, in-flight or not -- is a defensible
+-- reading of the client's read-only ruling and was landed deliberately. What
+-- was not defensible was a comment claiming the opposite. **The in-flight
+-- question is worth the client settling explicitly**: today a company whose
+-- token lapses while a truck is loaded and on the road leaves that driver
+-- unable to record the delivery.
+comment on function public.record_truck_load(uuid, numeric, text, jsonb, jsonb) is
+  'Weighbridge load capture. Gated on is_company_staff_active() since S2-10 (2026-08-15) so an expired company is refused at the authorisation check rather than partway through the cascade this function runs (recon row, stockpile decrement, waybill). The underlying tables are independently covered by the guard_company_active trigger from 20260815097000; this makes the refusal early and legible, it is not the only thing stopping the write.';

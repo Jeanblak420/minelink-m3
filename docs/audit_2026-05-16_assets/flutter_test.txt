@@ -1,0 +1,80 @@
+00:00 +0: loading C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/core/config/supabase_config_test.dart
+00:00 +0: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/core/config/supabase_config_test.dart: SupabaseConfig does not embed a default Supabase project configuration
+00:00 +1: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/core/services/storage_asset_service_test.dart: parses a raw employee asset path with a default bucket
+00:00 +2: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/core/services/storage_asset_service_test.dart: parses a legacy public employee asset URL
+00:00 +3: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/core/services/storage_asset_service_test.dart: parses a signed chat file URL
+00:00 +4: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/core/services/storage_asset_service_test.dart: parses a bucket-qualified storage reference
+00:00 +5: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/core/services/storage_asset_service_test.dart: creates a bucket-qualified storable reference from a signed URL
+00:00 +6: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/core/services/storage_asset_service_test.dart: keeps external URLs unchanged when no storage bucket applies
+00:00 +7: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/operations/operations_access_policy_test.dart: OperationsAccessPolicy management access can see and create across all tabs
+00:00 +8: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/operations/operations_access_policy_test.dart: OperationsAccessPolicy security role can only create security and gate records
+00:00 +9: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/operations/operations_access_policy_test.dart: OperationsAccessPolicy controller role can only create weighbridge records
+00:00 +10: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/operations/operations_access_policy_test.dart: OperationsAccessPolicy driver role cannot create operational records
+00:00 +11: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: (setUpAll)
+supabase.supabase_flutter: INFO: ***** Supabase init completed ***** 
+00:00 +12: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: (setUpAll)
+00:00 +13: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: (setUpAll)
+00:00 +13: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:00 +14: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:00 +15: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:00 +16: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +17: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +18: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +19: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +20: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +21: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +22: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +23: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +24: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +25: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +26: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +27: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +28: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +29: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +30: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenRequestsScreen has no inner AppBar under shell
+00:01 +31: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenHistoryScreen uses in-body TabBar without AppBar
+00:01 +32: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenHistoryScreen uses in-body TabBar without AppBar
+00:01 +33: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenHistoryScreen uses in-body TabBar without AppBar
+00:01 +34: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout TokenHistoryScreen uses in-body TabBar without AppBar
+00:01 +35: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout CompanyTokenRequestsPanel stacks actions on narrow width
+00:01 +36: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: token parity layout CompanyTokenRequestsPanel uses wrap on wide width
+00:01 +37: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/features/super_admin/token_parity_layout_test.dart: (tearDownAll)
+00:01 +37: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/providers/fleet_provider_test.dart: (setUpAll)
+supabase.supabase_flutter: INFO: ***** Supabase init completed ***** 
+00:02 +37: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/providers/fleet_provider_test.dart: loadFleetVehicles updates provider state from the service
+00:02 +38: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/realtime_test.dart: Realtime-driven widget coverage AnimatedNotificationBell reacts to unread notification changes
+00:02 +39: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/realtime_test.dart: Realtime-driven widget coverage AnimatedNotificationBell reacts to unread notification changes
+00:02 +40: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/realtime_test.dart: Realtime-driven widget coverage AnimatedNotificationBell reacts to unread notification changes
+00:02 +41: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/realtime_test.dart: Realtime-driven widget coverage AnimatedNotificationBell reacts to unread notification changes
+00:02 +42: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/realtime_test.dart: Realtime-driven widget coverage AnimatedNotificationBell reacts to unread notification changes
+00:02 +42: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/services/fleet_service_test.dart: (setUpAll)
+supabase.supabase_flutter: INFO: ***** Supabase init completed ***** 
+00:02 +42: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/realtime_test.dart: Realtime-driven widget coverage AnimatedNotificationBell reacts to unread notification changes
+00:02 +43: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/services/fleet_service_test.dart: returns parsed fleet vehicles for a company
+00:02 +44: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/realtime_test.dart: Realtime-driven widget coverage EmployeeStatusTimeline renders the approved workflow path
+00:02 +44: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/services/fleet_service_test.dart: returns a single fleet vehicle by id
+[FleetService] DEBUG: Getting fleet vehicle with ID: vehicle-123
+00:02 +45: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/realtime_test.dart: Realtime-driven widget coverage EmployeeStatusTimeline renders the approved workflow path
+00:02 +46: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/realtime_test.dart: Realtime-driven widget coverage EmployeeStatusTimeline renders the approved workflow path
+00:02 +47: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/realtime_test.dart: Realtime-driven widget coverage EmployeeStatusTimeline renders the approved workflow path
+00:02 +48: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/realtime_test.dart: Realtime-driven widget coverage EmployeeStatusTimeline renders the declined workflow path
+00:08 +49: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/widgets/login_form_test.dart: (setUpAll)
+supabase.supabase_flutter: INFO: ***** Supabase init completed ***** 
+00:08 +49: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/widget_test.dart: Basic widget test
+00:09 +50: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/widgets/login_form_test.dart: renders the login fields and primary actions
+Cleared current user ID
+Cleared all cache for current user
+Cleared current user ID
+Cleared all cache for current user
+00:09 +51: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/widgets/login_form_test.dart: validates missing and malformed credentials
+Cleared current user ID
+Cleared all cache for current user
+Cleared current user ID
+Cleared all cache for current user
+00:09 +52: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/widgets/login_form_test.dart: submits valid credentials through the auth notifier
+Cleared current user ID
+Cleared all cache for current user
+Cleared current user ID
+Cleared all cache for current user
+00:09 +53: C:/Users/Somebody Someone/Music/TheMineral Guide/worktree-2026-05-05T11-53-29/test/widgets/login_form_test.dart: (tearDownAll)
+00:09 +53: All tests passed!

@@ -1,0 +1,13 @@
+.git
+.dart_tool
+**/build
+android/.gradle
+android/**/.cxx
+android/**/build
+ios/Pods
+ios/.symlinks
+node_modules
+**/*.zip
+**/Mine-Link_*.zip
+**/build.zip
+**/public_html_portal.zip

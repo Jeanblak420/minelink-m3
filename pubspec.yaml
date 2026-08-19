@@ -1,0 +1,168 @@
+name: flutter_application_1
+description: "MineLink — mineral logistics and bulk-commodity haulage operations platform."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  supabase_flutter: ^2.9.0
+  flutter_riverpod: ^2.4.10
+  go_router: ^13.2.0
+  cross_file: ^0.3.4+2
+  file_selector: ^1.1.0
+  image_picker: ^1.0.7
+  cached_network_image: ^3.3.1
+  loading_animation_widget: ^1.2.0+4
+  logger: ^2.0.2+1
+  shared_preferences: ^2.2.2
+  fl_chart: ^0.66.2
+  flutter_svg: ^2.0.10+1
+  intl: ^0.19.0
+  uuid: ^4.5.1
+  url_launcher: ^6.2.5
+  logging: ^1.2.0
+  # New dependencies for Supabase UI and MCP
+  supabase_auth_ui: ^0.5.5
+  infinite_scroll_pagination: ^3.2.0
+  web: ^1.1.1
+  share_plus: ^13.1.0
+  path_provider: ^2.1.5
+  pdf: ^3.12.0
+  printing: ^5.14.3
+  excel: ^4.0.6
+  # v8: in-flight tile requests are aborted natively on pan/zoom (the old
+  # flutter_map_cancellable_tile_provider plugin was folded into core).
+  flutter_map: ^8.3.1
+  latlong2: ^0.9.1
+  # Chat attachments: drag-and-drop files + paste images/files from clipboard.
+  desktop_drop: ^0.5.0
+  pasteboard: ^0.3.0
+  # Chat message sounds (Windows-safe audio playback).
+  audioplayers: ^6.1.0
+  # Free-tier geocoding for the Product Location picker (Nominatim / OSM).
+  http: ^1.2.2
+  # Live trip GPS tracking: driver position pings every 30s, incl. backgrounded
+  # (Android foreground service / iOS background location).
+  geolocator: ^13.0.2
+  # In-app turn-by-turn voice guidance for driver navigation (free, on-device).
+  flutter_tts: ^4.2.0
+  wakelock_plus: ^1.6.1
+  flutter_map_animations: ^0.10.0
+  flutter_map_marker_cluster: ^8.2.2
+  # Push notifications (R-2). Inert until android/app/google-services.json and
+  # ios/Runner/GoogleService-Info.plist exist — PushService degrades to a
+  # logged no-op, exactly as PlaceIndexConfig does for a paused extras project.
+  firebase_core: ^3.8.0
+  firebase_messaging: ^15.1.5
+  # app_version on a crash report (R-3). Without it a stack trace cannot be
+  # tied to a build, which is most of what makes one actionable.
+  package_info_plus: ^10.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.8
+  # Test-only. It was in `dependencies` until R-4 and shipped in the release
+  # binary. See tool/release_guards.dart `mockito-not-in-dependencies` — the
+  # guard is anchored to the `dependencies:` block itself, not to indent, so
+  # this plain entry here does not trip it.
+  mockito: ^5.4.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/branding/
+    - assets/mineralguide_logo.png
+    - assets/icons3d/
+    # P11-03 / P0-04 — this was `- config/`, which bundled the WHOLE directory
+    # into every web and Windows artifact, including
+    # `config/map_tiles.local.json` and the live Esri ArcGIS token inside its
+    # MAP_TILE_URL. On web that file was fetchable at
+    # /assets/config/map_tiles.local.json by anyone. Gitignoring it does not
+    # stop the asset bundler — the two are unrelated mechanisms, and this is
+    # exactly the gap that made a gitignored secret ship anyway.
+    #
+    # Only the Supabase config is declared now, because it is the only config
+    # file actually read from the bundle (supabase_config.dart -> rootBundle).
+    # The map-tile config is consumed by `--dart-define-from-file`, and
+    # MAP_TILE_URL is read via String.fromEnvironment in osm_tile_layer.dart —
+    # it was never loaded as an asset, so it never needed to ship.
+    #
+    # `config/supabase.local.json` is deliberately NOT listed: it does not exist
+    # in this repo, and declaring a missing asset fails the build. The loader
+    # probes the asset manifest and falls back to supabase.live.json, so a
+    # developer adding a local override must add it here too.
+    - config/supabase.live.json
+    # The SECOND Supabase project (Mine-Link_Extra_Data), which holds the
+    # Overture place index behind the location picker. Read from the bundle by
+    # place_index_config.dart, same as the file above, and it holds a
+    # PUBLISHABLE key only — the kind that is meant to ship in a client. No
+    # database password and no sbp_ management token belongs in either file.
+    - config/place_index.live.json
+    # The legal documents the sign-in screen asserts agreement to.
+    #
+    # They MOVED here from docs/legal/ rather than being copied: the
+    # `unreplaced-legal-placeholder` ratchet scans docs/legal, lib AND assets,
+    # its baseline is exactly 3, and a copy would have made it 6 and failed the
+    # build. Moving keeps the count at 3 and keeps the guard meaningful — it
+    # still has to read 0 before S10.
+    #
+    # Listed one by one, not as `- assets/legal/`, because a directory entry is
+    # what shipped a live ArcGIS token in every web build once (see the
+    # config/ comment above). Anything added to that folder must be declared
+    # here deliberately.
+    #
+    # Read from the bundle by `legal_documents.dart`, which shows the draft
+    # banner these files carry rather than hiding it.
+    - assets/legal/TERMS-OF-USE.placeholder.md
+    - assets/legal/PRIVACY-POLICY.placeholder.md
+    - assets/legal/DATA-RETENTION.placeholder.md
+    - web/icons/Icon-512.png
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/JetBrainsMono-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/JetBrainsMono-Bold.ttf
+          weight: 700
+    - family: Fraunces
+      fonts:
+        - asset: assets/fonts/Fraunces-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Fraunces-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/Fraunces-SemiBold.ttf
+          weight: 600
+    - family: Sora
+      fonts:
+        - asset: assets/fonts/Sora-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Sora-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Sora-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Sora-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Sora-ExtraBold.ttf
+          weight: 800

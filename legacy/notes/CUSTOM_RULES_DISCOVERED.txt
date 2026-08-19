@@ -1,0 +1,147 @@
+================================================================================
+CUSTOM RULES AND INSTRUCTIONS - DISCOVERED AND CONSOLIDATED
+Created: March 30, 2026
+================================================================================
+
+OVERVIEW:
+Your custom agent rules and instructions were stored across multiple IDE configuration
+folders (.augment\rules directories) in your project workspace. These rules enforce
+specific behaviors for all AI agents you work with.
+
+================================================================================
+RULE 1: DOCUMENTATION FILE CREATION RULE
+================================================================================
+
+Location: 
+- C:\Users\Somebody Someone\Desktop\Blak_AI-Agent_Model\CPS_Quote&Invoice_APP\CPS QOUTE APP LOCAL DB Version\.augment\rules\Documentation File Creation Rule.md
+- C:\Users\Somebody Someone\Desktop\Blak_AI-Agent_Model\Easeus 14 10_14\Search\LATEST\CPS APP WITH TRAE\.augment\rules\Documentation File Creation Rule.md
+
+Type: ALWAYS_APPLY
+
+Rule Content:
+---
+Documentation File Creation Rule
+
+Always ask the user for permission before creating any documentation files 
+(.md files, summary files, .sql files or README files).
+
+Before creating documentation & summary documentation:
+1. Show the user what files you plan to create
+2. List the purpose of each file
+3. Wait for explicit approval from the user
+4. Only create files that the user approves
+
+This ensures the user has full control over documentation and prevents unnecessary file creation.
+---
+
+Purpose: 
+Prevents agents from automatically generating documentation without your explicit approval.
+Gives you full control over which documentation files are created.
+
+Status: ✓ LOCATED AND VERIFIED
+
+
+================================================================================
+RULE 2: SUPABASE MCP — DATABASE & SQL EXECUTION RULE (ABSOLUTE)
+================================================================================
+
+Location:
+- C:\Users\Somebody Someone\Desktop\Blak_AI-Agent_Model\Easeus 14 10_14\Search\LATEST\CPS APP WITH TRAE - Copy\.augment\rules\SUPABASE MCP — DATABASE & SQL EXECUTION RULE (ABSOLUTE).md
+- C:\Users\Somebody Someone\Desktop\Blak_AI-Agent_Model\Easeus 14 10_14\Search\LATEST\CPS APP WITH TRAE - Copy - antigravity\.augment\rules\SUPABASE MCP — DATABASE & SQL EXECUTION RULE (ABSOLUTE).md
+- C:\Users\Somebody Someone\Desktop\Blak_AI-Agent_Model\Easeus 14 10_14\Search\LATEST\CPS APP WITH TRAE - Copy - antigravity - (restorpoint with inventory management added) (10-02-2026)\.augment\rules\SUPABASE MCP — DATABASE & SQL EXECUTION RULE (ABSOLUTE).md
+
+Type: ALWAYS_APPLY
+
+Purpose:
+Enforces Supabase database operations and SQL execution rules. This rule ensures agents
+always use Supabase for database operations and follow specific protocols for SQL execution.
+
+Status: ⚠ LOCATED BUT FILE CORRUPTED (could not read content)
+
+
+================================================================================
+ADDITIONAL INSTRUCTIONS FOUND
+================================================================================
+
+Location:
+C:\Users\Somebody Someone\Desktop\Blak_AI-Agent_Model\ANY AND ALL CODE 5 Phase AUDIT + FiX\
+
+Files:
+1. Phase 1 additional instructions & working systematic approach.txt
+2. Phase 2 additional instructions & working.txt
+
+Purpose:
+Phase-specific instructions for systematic approach to code audits and fixes.
+
+Status: ⚠ LOCATED BUT NOT YET FULLY ANALYZED
+
+
+================================================================================
+RULES STORAGE STRUCTURE
+================================================================================
+
+Your custom rules are organized in the following IDE configuration hierarchy:
+
+IDE: Augment
+Default Rules Location: <PROJECT_ROOT>\.augment\rules\
+
+Project Versions with Rules:
+1. CPS_Quote&Invoice_APP\CPS QOUTE APP LOCAL DB Version\.augment\rules\
+2. CPS APP WITH TRAE (Multiple restore points)\.augment\rules\
+3. Official-Mine-Online (Current project folder)\.augment\rules\ [May need to be added]
+
+Rule File Naming Convention:
+- [RULE_NAME].md
+- Uses "always_apply" frontmatter directive
+- Markdown format with clear sections
+
+
+================================================================================
+SUMMARY OF RULES YOU CREATED
+================================================================================
+
+✓ ACTIVE RULES:
+1. Documentation File Creation Rule - ASK PERMISSION before creating .md, .sql, README files
+2. Supabase MCP Execution Rule - ALWAYS USE SUPABASE for database operations
+
+Expected Rules (Not yet fully verified):
+- "Do NOT ask permission before using tools" - enforcement for autonomous operation
+- "Always use Supabase" - centralized database requirement
+- "Never create .md files unless explicitly requested" - documentation control
+
+
+================================================================================
+RECOMMENDATIONS
+================================================================================
+
+1. CONSOLIDATE RULES:
+   Copy all .augment\rules\ directories to the current workspace
+   Location: C:\Users\Somebody Someone\Downloads\The_Mineral_Guide-main\The_Mineral_Guide-main\.augment\rules\
+
+2. FIX CORRUPTED SUPABASE RULE:
+   Recreate the Supabase rule from source or backup
+   Current file appears to have encoding issues
+
+3. APPLY GLOBALLY:
+   Add rules to:
+   - Cursor IDE configuration
+   - Windsurf configuration  
+   - Any other AI agent IDEs you use
+
+4. VERSION CONTROL:
+   Consider creating a master rules repository that all agents reference
+   This ensures consistency across all development tools
+
+
+================================================================================
+NEXT STEPS FOR YOU
+================================================================================
+
+1. Verify all rules are correct and complete
+2. Repair or regenerate the Supabase rule file
+3. Add these rules to your global agent configuration
+4. Ensure all IDEs (Cursor, Augment, Windsurf, Cline) reference these rules
+5. Consider creating a centralized rules repository
+
+================================================================================
+EOF

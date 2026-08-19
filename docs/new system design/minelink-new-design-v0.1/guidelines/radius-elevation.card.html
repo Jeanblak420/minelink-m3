@@ -1,0 +1,21 @@
+<!-- @dsCard group="Spacing" viewport="700x180" name="Radius & Elevation" subtitle="Corner radii and soft slate shadows" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--surface-app);padding:22px;font-family:var(--font-sans)}
+  .row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .box{width:84px;height:84px;background:var(--surface-card);display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;font-size:10px;color:var(--text-muted);font-family:var(--font-mono)}
+  .b1{border-radius:var(--radius-sm);box-shadow:var(--shadow-xs)}
+  .b2{border-radius:var(--radius-md);box-shadow:var(--shadow-sm)}
+  .b3{border-radius:var(--radius-lg);box-shadow:var(--shadow-md)}
+  .b4{border-radius:var(--radius-xl);box-shadow:var(--shadow-lg)}
+  .b5{border-radius:var(--radius-xl);box-shadow:var(--shadow-hero);border:1px solid var(--border-accent)}
+</style></head>
+<body>
+  <div class="row">
+    <div class="box b1">8 · xs</div>
+    <div class="box b2">12 · sm</div>
+    <div class="box b3">16 · md</div>
+    <div class="box b4">20 · lg</div>
+    <div class="box b5">hero</div>
+  </div>
+</body></html>

@@ -1,0 +1,62 @@
+/* MineLink — Employee Register / editorial surface theme.
+ * SINGLE SOURCE OF TRUTH for the register's themed palette. Light = :root,
+ * dark = [data-theme="dark"] — the same [data-theme] switch the whole app uses.
+ * Consumed by ui_kits/shared/employee-register.jsx purely as var(--er-*), so the
+ * register flips with the app-wide theme automatically and never hard-codes color. */
+:root {
+  --er-bg: #f3eee4;
+  --er-veil: radial-gradient(1200px 560px at 80% -10%, rgba(160,120,70,.07), transparent 62%), radial-gradient(900px 480px at -5% 0%, rgba(120,110,90,.05), transparent 58%); /* @kind color */
+  --er-panel: #ffffff; /* @kind color */
+  --er-panel-hi: #ece5d7; /* @kind color */
+  --er-line: rgba(70,55,40,.14);
+  --er-line-soft: rgba(70,55,40,.08);
+  --er-chip: #f5f1e8;
+  --er-strong: #2b2419; --er-body: #4d4638; --er-muted: #8c8272; --er-faint: #b3a996;
+  --er-blue: #3f6aa0; --er-accent: #9c6a3c; --er-green: #4f9367; --er-amber: #bd8a3a; --er-red: #c05d42;
+  --er-hover-row: rgba(70,55,40,.045); --er-input-bg: #ffffff; --er-focus-bd: rgba(156,106,60,.5);
+  --er-sel-bg: #2b2419; --er-sel-fg: #f3eee4;
+  --er-ok-bg: rgba(79,147,103,.12); --er-ok-bd: rgba(79,147,103,.28); --er-ok-glow: rgba(79,147,103,.22); --er-ok-text: #3c6f4f;
+  --er-scrim: rgba(45,34,22,.42); --er-drawer-bg: #faf6ef;
+  --er-cta-bg: linear-gradient(150deg,#a9764a,#8a5e35); --er-cta-fg: #fff;
+  --er-red-bg: rgba(192,93,66,.12); --er-red-bd: rgba(192,93,66,.26);
+  --er-redbtn-bd: rgba(192,93,66,.3); --er-redbtn-bg: rgba(192,93,66,.1); --er-redbtn-fg: #a84b32;
+  --er-banner-fade: #ffffff; --er-role-chip-bg: rgba(0,0,0,.03); --er-ring: #ffffff;
+  --er-drawer-shadow: -30px 0 80px -24px rgba(70,55,40,.28); --er-emb-shadow: 0 20px 50px -28px rgba(70,55,40,.35);
+  --er-pres-online: #4f9367; --er-pres-away: #bd8a3a; --er-pres-offline: #b3a996;
+  --er-tone-blue-bg: #e9eef6; --er-tone-blue-fg: #3f6aa0; --er-tone-blue-bd: #d2ddec;
+  --er-tone-indigo-bg: #ebeaf6; --er-tone-indigo-fg: #5a56a0; --er-tone-indigo-bd: #d8d5ec;
+  --er-tone-amber-bg: #f5ead4; --er-tone-amber-fg: #9a6f2e; --er-tone-amber-bd: #e6d3ac;
+  --er-tone-green-bg: #e3efe6; --er-tone-green-fg: #3c6f4f; --er-tone-green-bd: #cae0cf;
+  --er-badge-tenure-bg: transparent; --er-badge-tenure-fg: #8c8272; --er-badge-tenure-bd: rgba(70,55,40,.16);
+  --er-badge-perm-bg: #efeadf; --er-badge-perm-fg: #6a6252; --er-badge-perm-bd: #ddd4c4;
+  --er-badge-danger-bg: #f6e3dc; --er-badge-danger-fg: #a84b32; --er-badge-danger-bd: #ecccc0;
+}
+
+[data-theme="dark"] {
+  --er-bg: #0a1120;
+  --er-veil: radial-gradient(1200px 520px at 78% -8%, rgba(58,110,180,.16), transparent 60%), radial-gradient(900px 460px at 0% 0%, rgba(40,70,120,.14), transparent 55%); /* @kind color */
+  --er-panel: linear-gradient(180deg, rgba(24,36,58,.72), rgba(15,23,40,.55)); /* @kind color */
+  --er-panel-hi: linear-gradient(180deg, rgba(32,48,76,.85), rgba(18,28,48,.6)); /* @kind color */
+  --er-line: rgba(120,150,200,.12);
+  --er-line-soft: rgba(120,150,200,.07);
+  --er-chip: rgba(120,150,200,.09);
+  --er-strong: #eaf0fa; --er-body: #c2cde0; --er-muted: #8a99b6; --er-faint: #5d6d8c;
+  --er-blue: #6aa4f0; --er-accent: #6aa4f0; --er-green: #5cc487; --er-amber: #e0a44a; --er-red: #e0715a;
+  --er-hover-row: rgba(120,150,200,.06); --er-input-bg: rgba(120,150,200,.06); --er-focus-bd: rgba(106,164,240,.4);
+  --er-sel-bg: rgba(106,164,240,.18); --er-sel-fg: #bcd6f9;
+  --er-ok-bg: rgba(92,196,135,.1); --er-ok-bd: rgba(92,196,135,.24); --er-ok-glow: rgba(92,196,135,.2); --er-ok-text: #9fd8b8;
+  --er-scrim: rgba(4,8,18,.62); --er-drawer-bg: #0c1424;
+  --er-cta-bg: linear-gradient(150deg,#3f7fd6,#2a63b8); --er-cta-fg: #fff;
+  --er-red-bg: rgba(224,113,90,.13); --er-red-bd: rgba(224,113,90,.24);
+  --er-redbtn-bd: rgba(224,113,90,.28); --er-redbtn-bg: rgba(224,113,90,.1); --er-redbtn-fg: #f0987f;
+  --er-banner-fade: rgba(15,23,40,.5); --er-role-chip-bg: rgba(255,255,255,.04); --er-ring: #0a1120;
+  --er-drawer-shadow: -30px 0 80px -20px rgba(0,0,0,.7); --er-emb-shadow: 0 24px 60px -30px rgba(0,0,0,.6);
+  --er-pres-online: #5cc487; --er-pres-away: #e0a44a; --er-pres-offline: #5d6d8c;
+  --er-tone-blue-bg: rgba(106,164,240,.14); --er-tone-blue-fg: #8fbcf6; --er-tone-blue-bd: rgba(106,164,240,.3);
+  --er-tone-indigo-bg: rgba(129,140,248,.14); --er-tone-indigo-fg: #a6b0f7; --er-tone-indigo-bd: rgba(129,140,248,.32);
+  --er-tone-amber-bg: rgba(224,164,74,.15); --er-tone-amber-fg: #e6b56b; --er-tone-amber-bd: rgba(224,164,74,.32);
+  --er-tone-green-bg: rgba(92,196,135,.14); --er-tone-green-fg: #84d5a6; --er-tone-green-bd: rgba(92,196,135,.3);
+  --er-badge-tenure-bg: transparent; --er-badge-tenure-fg: #8a99b6; --er-badge-tenure-bd: rgba(120,150,200,.12);
+  --er-badge-perm-bg: rgba(140,158,196,.12); --er-badge-perm-fg: #b3c0da; --er-badge-perm-bd: rgba(140,158,196,.22);
+  --er-badge-danger-bg: rgba(224,113,90,.14); --er-badge-danger-fg: #f0987f; --er-badge-danger-bd: rgba(224,113,90,.3);
+}

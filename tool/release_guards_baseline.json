@@ -1,0 +1,6 @@
+{
+  "no-hardcoded-brand-stat": 3,
+  "unreplaced-legal-placeholder": 3,
+  "committed-db-connection-string": 6,
+  "committed-test-credential": 14
+}

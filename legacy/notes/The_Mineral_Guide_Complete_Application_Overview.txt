@@ -1,0 +1,349 @@
+# THE MINERAL GUIDE - COMPLETE APPLICATION OVERVIEW
+
+## CORE ARCHITECTURE
+
+### Application Structure
+- Flutter-based mobile application with Supabase backend
+- Uses Flutter Riverpod for state management
+- Go Router for navigation
+- Feature-based architecture with clear separation of concerns
+- Comprehensive logging system for debugging and monitoring
+- Extensive error handling throughout the application
+
+### Project Organization
+```
+lib/
+├── core/                  # Core functionality and utilities
+│   ├── config/            # Configuration settings
+│   ├── routing/           # Routing configuration
+│   ├── services/          # Core services
+│   ├── theme/             # App theming
+│   └── utils/             # Utility functions
+├── features/              # Feature modules
+│   ├── auth/              # Authentication
+│   ├── company/           # Company management
+│   ├── employee/          # Employee management
+│   ├── fleet/             # Fleet management
+│   ├── home/              # Home screens
+│   ├── notifications/     # Notification system
+│   ├── profile/           # User profiles
+│   └── tabs/              # Role-based tab screens
+├── app.dart               # Main app widget
+└── main.dart              # Entry point
+```
+
+## DATABASE SCHEMA
+
+### Core Tables
+1. **companies** - Stores organization information
+   - id (UUID, primary key)
+   - user_id (UUID, references auth.users)
+   - company_name (TEXT)
+   - whatsapp_number (TEXT)
+   - org_type (TEXT)
+   - logo_url (TEXT)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+2. **employees** - Stores individual user information
+   - id (UUID, primary key)
+   - user_id (UUID, references auth.users)
+   - company_id (UUID, references companies)
+   - first_name (TEXT)
+   - last_name (TEXT)
+   - whatsapp_number (TEXT)
+   - profile_photo_url (TEXT)
+   - role (TEXT)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+3. **notifications** - Tracks system and user notifications
+   - id (UUID, primary key)
+   - user_id (UUID, references auth.users)
+   - employee_id (UUID, references employees)
+   - company_id (UUID, references companies)
+   - title (TEXT)
+   - message (TEXT)
+   - type (TEXT)
+   - is_read (BOOLEAN)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+   - actioned_by (TEXT)
+   - actioned_by_id (UUID, references auth.users)
+   - role_scope (TEXT)
+
+4. **employee_status_history** - Records employee status changes
+   - id (UUID, primary key)
+   - employee_id (UUID, references employees)
+   - company_id (UUID, references companies)
+   - status (TEXT)
+   - timestamp (TIMESTAMPTZ)
+   - actioned_by_id (UUID, references auth.users)
+   - actioned_by_name (TEXT)
+   - assigned_role (TEXT)
+
+5. **fleet_vehicles** - Manages transport vehicles and driver assignments
+   - id (UUID, primary key)
+   - company_id (UUID, references companies)
+   - vehicle_registration_number (TEXT)
+   - vehicle_registration_expiry_date (TIMESTAMPTZ)
+   - first_trailer_regs (TEXT)
+   - second_trailer_regs (TEXT)
+   - assigned_driver_id (UUID, references employees)
+   - is_active (BOOLEAN)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+6. **weighbridge_records** - Records mineral weighing operations
+   - id (UUID, primary key)
+   - company_id (UUID, references companies)
+   - truck_registration (TEXT)
+   - driver_name (TEXT)
+   - weight_tons (DECIMAL)
+   - mineral_type (TEXT)
+   - quality_grade (TEXT)
+   - weighing_timestamp (TIMESTAMPTZ)
+   - receipt_number (TEXT)
+   - receipt_url (TEXT)
+   - created_by (UUID, references employees)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+7. **security_incidents** - Tracks security-related events
+   - id (UUID, primary key)
+   - company_id (UUID, references companies)
+   - reported_by (UUID, references employees)
+   - incident_type (TEXT)
+   - description (TEXT)
+   - location (TEXT)
+   - incident_timestamp (TIMESTAMPTZ)
+   - severity (TEXT)
+   - status (TEXT)
+   - resolution (TEXT)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+8. **gate_checks** - Records vehicle entry/exit at facilities
+   - id (UUID, primary key)
+   - company_id (UUID, references companies)
+   - vehicle_id (UUID, references fleet_vehicles)
+   - checked_by (UUID, references employees)
+   - driver_id (UUID, references employees)
+   - entry_exit (TEXT)
+   - check_timestamp (TIMESTAMPTZ)
+   - documents_verified (BOOLEAN)
+   - notes (TEXT)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+9. **mineral_loads** - Tracks mineral shipments and details
+   - id (UUID, primary key)
+   - company_id (UUID, references companies)
+   - weighbridge_record_id (UUID, references weighbridge_records)
+   - mineral_type (TEXT)
+   - quantity_tons (DECIMAL)
+   - quality_grade (TEXT)
+   - source_location (TEXT)
+   - destination (TEXT)
+   - transport_vehicle_id (UUID, references fleet_vehicles)
+   - status (TEXT)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+10. **broadcast_messages** - Facilitates real-time communication
+    - id (UUID, primary key)
+    - sender_id (UUID, references auth.users)
+    - company_id (UUID, references companies)
+    - message (TEXT)
+    - timestamp (TIMESTAMPTZ)
+    - event (TEXT)
+    - payload (JSONB)
+
+## USER TYPES AND ROLES
+
+### User Types
+1. **Company** - Organization accounts
+2. **Employee** - Individual user accounts belonging to companies
+
+### Organization Types
+1. **Mine/Supplier** (mineSupplier) - Organizations that extract and sell minerals
+2. **Buyer** (buyer) - Organizations that purchase minerals
+3. **Transporter** (transporter) - Organizations that transport minerals
+
+### User Roles
+1. **Security** - For Mine/Supplier organizations
+2. **Controller/WB** - For Mine/Supplier organizations (weighbridge operators)
+3. **Admin** - For all organization types
+4. **Management** - For all organization types
+5. **Driver** - For Transporter organizations
+6. **Mine/Supplier** - Organization-specific role
+7. **Buyer** - Organization-specific role
+8. **Transporter** - Organization-specific role
+
+### Role Assignment
+- Users aren't automatically assigned a role
+- They remain with an unassigned role until manually assigned by an admin
+- Once assigned a role while logged in, users are redirected to the appropriate screen with a welcome message
+- Role assignment notifications are sent to users
+- Message displayed: 'Your role assignment has been Processed'
+
+## AUTHENTICATION FEATURES
+
+### Login
+- Email/password authentication
+- Session management with auto-refresh
+- Automatic redirection to home screen after login
+- Secure token handling and storage
+
+### Signup
+- Separate flows for Company and Employee registration
+- Email verification
+- Profile creation during signup
+- Document upload options (ID, passport, work visa, license)
+- Company registration reference generation based on company name
+
+### Password Management
+- Forgot password functionality
+- Password reset via email
+- Secure reset token handling
+
+## COMPANY FEATURES
+
+### Company Management
+- Company profile creation and editing
+- Organization type selection (Mine/Supplier, Buyer, Transporter)
+- Logo upload
+- Contact information management
+- Company registration reference system with automatic generation
+- Reference format: 3 letters + 3+ numbers (e.g., ABC001)
+- Letters derived from company name according to specific rules
+- Numbers incremented to ensure uniqueness
+
+### Employee Management
+- View and manage company employees
+- Assign roles to employees
+- Approve or decline employee join requests
+- Track employee status (pending, active, etc.)
+- Status column in employees table to track pending employees
+
+### Employee Dismissal System
+- Three-phase dismissal process:
+  1. Dismissal initiation with notifications
+  2. Employee appeal process
+  3. Final decision with account deletion protocol
+- Comprehensive error handling and form validation
+- Loading indicators for async operations
+- Responsive UI design
+- Clear status indicators throughout the process
+
+## FLEET MANAGEMENT SYSTEM
+
+### Vehicle Management
+- Add new vehicles with registration details
+- Track vehicle registration expiry dates
+- Manage trailer registrations
+- Mark vehicles as inactive instead of removing them
+- Separate tables for active and inactive vehicles
+- Ability to reactivate inactive vehicles with confirmation dialog
+
+### Driver Assignment
+- Assign drivers to vehicles
+- Unassign drivers from vehicles
+- View driver documents (ID, Passport, Work Permit, License)
+- 'View Doc' buttons for driver documents in active fleet list
+- Verify driver document URLs
+- Fix document URL issues
+
+### Access Control
+- Only available to users with Organization type = Transporter and role = Admin or higher
+- Strict data isolation between companies
+
+## MINERAL TRADING FEATURES
+
+### Map-Based Mineral Marketplace
+- Interactive map showing mineral sale locations
+- Pins indicating mineral availability and location
+- Detailed mineral information on pin expansion
+- Quality certificates and documentation
+
+### Mineral Transaction System
+- Buyers can select quantity to purchase
+- Proforma invoice generation
+- Payment processing with proof of payment
+- Final invoice generation
+- Transaction history tracking
+- Invoice reference number system
+- Tax calculation (15%)
+
+### Weighbridge Operations
+- Record truck and driver details
+- Record mineral weight in tons
+- Calculate revenue based on configured rates
+- Generate weighing receipts
+- Track weighbridge statistics
+
+### Mineral Tracking
+- Record mineral type, quality, and quantity
+- Track source and destination
+- Monitor inventory levels
+- Quality certification management
+
+## NOTIFICATION SYSTEM
+
+### Notification Types
+- Role assignment notifications
+- Employee join requests
+- Dismissal process notifications
+- Fleet management notifications
+- Profile updates
+- Welcome notifications
+- Role confirmation notifications
+- Action tracking notifications
+- Mineral purchase notifications
+
+### Notification Features
+- Role-based visibility:
+  - Companies see all users' actions
+  - Management sees actions of everyone below them
+  - Regular users only see their own actions unless specified
+- Automatic tracking of in-app events from registered users (not developer actions)
+- User and timestamp information included (first and last name with timestamp)
+- Read status tracking (users can see when they marked a notification as read)
+- Persistent notifications for users awaiting approval (visible even after page refresh)
+- Action stamping with user information
+- Metadata for additional context
+- Importance levels for prioritization
+
+### Email Notifications
+- Email notifications for critical events
+- SMTP or transactional email integration configured through environment secrets
+- SMTP port: 465
+- Preferred FROM_NAME: Support.NoReply@themineralguide.com
+- Customizable email templates
+- Management can make final decisions from notification buttons
+
+## COMMUNICATION FEATURES
+
+### Company-to-Company Chat
+- Direct messaging between companies
+- Group chat capability (max 3 companies)
+- File and image sharing
+- Company profile access from chat
+- Organization type restrictions in group chats (only one of each type per group)
+- Accept/Decline options for group chat invitations
+- Notification for invitation responses
+
+### Internal Company Chat
+- Company and managers can chat with any employee
+- Role-based chat initiation restrictions
+- Chat termination controls based on role hierarchy:
+  - Company can end chat with anyone
+  - Managers can end chats except with company
+  - Admins can initiate chats with managers and other roles (except company)
+  - Other roles can only initiate chats with admins
+
+### Broadcast Messaging
+- System-wide announcements
+- Company-specific broadcasts
+- Role-specific messaging
+- Real-time message delivery

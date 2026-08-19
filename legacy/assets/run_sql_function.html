@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>run_sql Function SQL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .copy-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .copy-button:hover {
+            background-color: #45a049;
+        }
+        .instructions {
+            background-color: #e7f3fe;
+            border-left: 6px solid #2196F3;
+            padding: 10px 20px;
+            margin: 20px 0;
+        }
+        .success-message {
+            display: none;
+            color: #4CAF50;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>run_sql Function SQL</h1>
+    
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Click the "Copy SQL" button below to copy the SQL to your clipboard</li>
+            <li>Go to <a href="https://app.supabase.com/project/kkcseqmpgzzrogatdoqi/sql" target="_blank">Supabase SQL Editor</a></li>
+            <li>Create a new query</li>
+            <li>Paste the SQL into the editor</li>
+            <li>Click "Run" to execute the query</li>
+        </ol>
+    </div>
+    
+    <button class="copy-button" onclick="copySQL()">Copy SQL</button>
+    <span id="success-message" class="success-message">Copied to clipboard!</span>
+    
+    <h3>SQL to Create run_sql Function:</h3>
+    <pre id="sql-content">-- Create a function to execute SQL queries
+-- This function is designed to be used with the Supabase RPC API
+-- It requires superuser privileges to execute arbitrary SQL
+-- SECURITY DEFINER means it will run with the privileges of the user who created it
+
+-- Drop the function if it already exists
+DROP FUNCTION IF EXISTS run_sql(text);
+
+-- Create the function
+CREATE OR REPLACE FUNCTION run_sql(query text)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  result JSONB;
+BEGIN
+  -- Execute the query and capture the result
+  EXECUTE 'SELECT jsonb_agg(row_to_json(t)) FROM (' || query || ') t' INTO result;
+  
+  -- If the query doesn't return any rows, return an empty array
+  IF result IS NULL THEN
+    RETURN '[]'::JSONB;
+  END IF;
+  
+  RETURN result;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Return error information as JSON
+    RETURN jsonb_build_object(
+      'error', true,
+      'message', SQLERRM,
+      'detail', SQLSTATE,
+      'query', query
+    );
+END;
+$$;
+
+-- Grant execute permission to authenticated users
+GRANT EXECUTE ON FUNCTION run_sql(text) TO authenticated;
+
+-- Add a comment to the function
+COMMENT ON FUNCTION run_sql(text) IS 'Executes a SQL query and returns the result as JSON. Requires superuser privileges.';</pre>
+
+    <script>
+        function copySQL() {
+            const sqlContent = document.getElementById('sql-content');
+            const successMessage = document.getElementById('success-message');
+            
+            // Create a range and select the text
+            const range = document.createRange();
+            range.selectNode(sqlContent);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            
+            // Copy the text
+            document.execCommand('copy');
+            
+            // Deselect the text
+            window.getSelection().removeAllRanges();
+            
+            // Show success message
+            successMessage.style.display = 'inline';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

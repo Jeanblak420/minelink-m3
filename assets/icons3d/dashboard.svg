@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 116" fill="none">
+<ellipse cx="56" cy="108" rx="30" ry="6" fill="#000" opacity="0.28" />
+      <defs>
+        <linearGradient id="i3-dbF" x1="0" y1="0" x2="0.3" y2="1">
+          <stop offset="0" stop-color="#5fe0f4" /><stop offset="1" stop-color="#0aa3c4" />
+        </linearGradient>
+        <radialGradient id="i3-dbDial" cx="0.4" cy="0.35" r="0.7">
+          <stop offset="0" stop-color="#11324a" /><stop offset="1" stop-color="#05202f" />
+        </radialGradient>
+      </defs>
+      <circle cx="56" cy="60" r="42" fill="#067994" />
+      <circle cx="56" cy="56" r="42" fill="url(#i3-dbF)" />
+      <circle cx="56" cy="56" r="31" fill="url(#i3-dbDial)" />
+      
+      {Array.from({ length: 9 }).map((_, i) => {
+        const a = (-210 + i * 30) * Math.PI / 180;
+        const r1 = 28, r2 = 22;
+        return (
+          <line key="i" x1="56 + r1 * Math.cos(a)" y1="56 + r1 * Math.sin(a)"
+            x2="56 + r2 * Math.cos(a)" y2="56 + r2 * Math.sin(a)"
+            stroke="#5fe0f4" stroke-width="2.5" stroke-linecap="round" opacity=".8" />
+        );
+      })}
+      
+      <line x1="56" y1="56" x2="74" y2="42" stroke="#ffce3d" stroke-width="4.5" stroke-linecap="round" />
+      <circle cx="56" cy="56" r="6" fill="#ffce3d" />
+</svg>

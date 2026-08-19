@@ -1,0 +1,23 @@
+-- S2-14 / S2-18. The two trigger functions that validate role-vs-org-type were
+-- granted EXECUTE to `anon` and `authenticated`, which is what Supabase's
+-- `anon_security_definer_function_executable` advisor flags: a SECURITY
+-- DEFINER function reachable, on paper, from an unauthenticated /rest/v1/rpc
+-- route.
+--
+-- Confirmed to be a sloppy grant rather than a live hole — calling one
+-- directly raises:
+--   ERROR: 0A000: trigger functions can only be called as triggers
+-- so the exposed route cannot actually run them.
+--
+-- Revoked anyway, because a grant nobody can use is still a grant somebody
+-- later reasons from.
+--
+-- Verified BEFORE applying that revoking does NOT disable enforcement: trigger
+-- functions are invoked by the executor, not through the calling user's
+-- EXECUTE privilege. In a rolled-back transaction, with EXECUTE already
+-- revoked from both roles, inserting a `security` employee into a buyer
+-- company still raised "Role security is not permitted for a buyer company".
+-- That check mattered: had the assumption been wrong, this migration would
+-- have silently switched off role/org-type validation on employees and seats.
+revoke execute on function public.enforce_employee_role_org_type() from anon, authenticated;
+revoke execute on function public.enforce_seat_role_org_type() from anon, authenticated;

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 116" fill="none">
+<ellipse cx="56" cy="108" rx="28" ry="6" fill="#000" opacity="0.28" />
+      <defs>
+        <linearGradient id="i3-coF" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#5fe0f4" /><stop offset="1" stop-color="#0aa3c4" />
+        </linearGradient>
+        <linearGradient id="i3-coS" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#0a93b3" /><stop offset="1" stop-color="#067088" />
+        </linearGradient>
+      </defs>
+      <rect x="22" y="30" width="40" height="72" rx="6" fill="#067488" transform="translate(0,4)" />
+      <rect x="22" y="30" width="40" height="72" rx="6" fill="url(#i3-coF)" />
+      <rect x="60" y="50" width="30" height="52" rx="6" fill="url(#i3-coS)" />
+      {[40, 56, 72].map((y) => [29, 41, 53].map((x) => (
+        <rect key="x + '-' + y" x="x" y="y" width="8" height="8" rx="2" fill="#eafaff" opacity=".9" />
+      )))}
+      {[62, 76].map((y) => [66, 78].map((x) => (
+        <rect key="s' + x + '-' + y" x="x" y="y" width="7" height="7" rx="2" fill="#d6f3fa" opacity=".75" />
+      )))}
+</svg>

@@ -1,0 +1,15 @@
+# Test configuration.
+#
+# `capture` tags the design-reference renderer (test/widgets/reference_capture_test.dart).
+# It rasterises whole screens to PNG and takes minutes per screen, so it is
+# EXCLUDED from the default run — a suite everybody skips because it is slow is
+# a suite that stops catching regressions.
+#
+# Run it deliberately when the reference needs regenerating:
+#     flutter test --run-skipped test/widgets/reference_capture_test.dart
+#
+# (--run-skipped, NOT --tags: a `skip:` in the tag config skips the test even
+#  when its tag is explicitly selected, which is a trap worth naming here.)
+tags:
+  capture:
+    skip: "design-reference capture; run explicitly with --tags capture"

@@ -1,0 +1,20 @@
+# Deliberately minimal.
+#
+# There is **no `* text=auto`** here, and that omission is the point: adding it
+# would renormalise line endings across the whole tree in one commit, which on
+# a repo several sessions write at once turns every open diff into a conflict.
+# The rules below name individual files that break in specific, known ways.
+
+# ── Gradle wrapper (S10-3a) ─────────────────────────────────────────────────
+# `gradlew` is a POSIX shell script executed by CI, which is Linux. Checked out
+# with CRLF it fails as `bad interpreter: /bin/sh^M` — and this machine has
+# `core.autocrlf=true`, so without this line that is exactly what a Windows
+# checkout would commit back. Pinning it is what makes "reproducible from a
+# clean clone" true on the platform that actually matters for it.
+android/gradlew         text eol=lf
+# The Windows launcher is the mirror case: cmd.exe needs CRLF.
+android/gradlew.bat     text eol=crlf
+# Never apply text filters to the wrapper jar. Git's binary detection would
+# almost certainly get this right on its own; "almost certainly" is not a
+# property worth relying on for the file that bootstraps every Android build.
+*.jar                   binary

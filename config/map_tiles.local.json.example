@@ -1,0 +1,6 @@
+{
+  "_comment": "Hosted map tiles — Esri ArcGIS Location Platform free tier (2M tiles/month, commercial use allowed). 1) Create a free account at https://location.arcgis.com 2) Create an API key with the 'Basemaps' privilege 3) Replace PASTE_YOUR_ARCGIS_KEY_HERE below 4) Copy this file to map_tiles.local.json (never commit the real key). run_web.ps1 picks the file up automatically. If the URL 404s, check the current template at https://developers.arcgis.com/rest/static-basemap-tiles/ — the app falls back to OpenStreetMap whenever this file is absent.",
+  "MAP_TILE_URL": "https://static-map-tiles-api.arcgis.com/arcgis/rest/services/static-basemap-tiles-service/v1/arcgis/streets/static/tile/{z}/{y}/{x}?token=PASTE_YOUR_ARCGIS_KEY_HERE",
+  "MAP_TILE_ATTRIBUTION": "Powered by Esri · © OpenStreetMap contributors",
+  "MAP_TILE_SIZE": "512"
+}

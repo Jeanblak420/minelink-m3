@@ -1,0 +1,79 @@
+Implementation Goal: Implement a company-bound Fleet Management system allowing authorized users (with Organisation type = Transporter and role type = Admins and above) to add vehicles and assign employees linked to company of organisation type = transporter  where employee has role = driver. Ensure strict data isolation between companies. 
+---
+
+**Implementation Steps:**
+
+**Step 1 - Database Schema Setup (Supabase):**
+* Create a new table named `fleet_vehicles`.
+* Define the exact columns specified:
+    * `id` (uuid, primary key, default: `gen_random_uuid()`)
+    * `vehicle_registration_expiry_date` (date, nullable)
+    * `vehicle_registration_number` (text, not null)
+    * `first_trailer_regs` (text, nullable)
+    * `second_trailer_regs` (text, nullable)
+    * `assigned_driver_id` (uuid, nullable, FK to `users`/`employees`.`user_id`)
+    * `driver_first_name` (text, nullable)
+    * `driver_last_name` (text, nullable)
+    * `driver_id_number` (text, nullable)
+    * `driver_passport_or_workers_permit` (text, nullable)
+    * `drivers_license_document` (text, nullable)
+    * `company_id` (uuid, not null, FK to `companies`.`id`)
+* Verify your `users` (or `employees`) table has necessary fields: `user_id`, `company_id`, `role`, `organization_type`, `first_name`, `last_name`, `id_number`, `passport_or_workers_permit`, `license_document`.
+* Add database indexes on `fleet_vehicles`.`company_id` and `fleet_vehicles`.`assigned_driver_id`. Consider unique constraints if needed (e.g., `(company_id, vehicle_registration_number)`).
+
+**Step 2 - Data Security & Access Control (Supabase RLS):**
+* Define Row Level Security policies on the `fleet_vehicles` table:
+    * **SELECT:** Allow read access only if the row's `company_id` matches the authenticated user's `company_id`.
+    * **INSERT:** Allow inserts only for users with `organization_type = 'transporter'`, `role = 'admin'` (or higher), and where the inserted `company_id` matches the user's `company_id`.
+    * **UPDATE:** Allow updates under the same role/type conditions as INSERT, and only on rows matching the user's `company_id`. Prevent updates to the `company_id` column itself.
+    * **DELETE:** Allow deletes under the same role/type conditions as INSERT, and only on rows matching the user's `company_id`.
+* Define RLS policies on the `users`/`employees` table:
+    * **SELECT:** Allow users to view other user records *only* if the target user's `company_id` matches the authenticated user's `company_id`.
+
+**Step 3 - Backend Logic: Implement Driver Assignment & Data Population:**
+* Create a Supabase Database Function (e.g., `handle_driver_assignment`) or implement backend logic callable from Flutter.
+* This logic should trigger when `assigned_driver_id` in `fleet_vehicles` is updated (or set initially) with a non-NULL value.
+* Inside the function/logic:
+    * Verify the assigned driver (`assigned_driver_id`) belongs to the *same* `company_id` as the vehicle and has `role = 'driver'`.
+    * Fetch the driver's details (`first_name`, `last_name`, `id_number`, etc.) from the `users`/`employees` table.
+    * Update the corresponding `fleet_vehicles` row, populating the `driver_first_name`, `driver_last_name`, `driver_id_number`, `driver_passport_or_workers_permit`, and `drivers_license_document` columns.
+* Consider using a database trigger on the `fleet_vehicles` table (on UPDATE of `assigned_driver_id`) to call this function automatically for robustness.
+
+**Step 4 - Backend Logic: Implement Driver Unassignment & Data Clearing:**
+* Extend the Supabase Function from Step 3 or create a separate one (e.g., `handle_driver_unassignment`).
+* This logic should trigger when `assigned_driver_id` in `fleet_vehicles` is updated to `NULL`.
+* Inside the function/logic:
+    * Update the corresponding `fleet_vehicles` row, setting `driver_first_name`, `driver_last_name`, `driver_id_number`, `driver_passport_or_workers_permit`, and `drivers_license_document` columns explicitly to `NULL`.
+* This can also be part of the same trigger logic from Step 3, handling the `NULL` case.
+
+**Step 5 - Flutter UI: Screen Setup, Role Check & Initial Data Fetching:**
+* Create a new screen/widget in Flutter for Fleet Management.
+* Implement logic to check if the currently logged-in user has `organization_type = 'transporter'` and `role = 'admin'` (or higher). Only render this screen if the conditions are met.
+* On screen load, fetch the list of `fleet_vehicles` associated with the admin's `company_id` using your Supabase client, respecting the RLS policies.
+
+**Step 6 - Flutter UI: Display Assigned and Unassigned Vehicle Lists:**
+* Process the fetched list of vehicles from Step 5.
+* Create two distinct visual sections (e.g., using `ListView.builder`, `DataTable`, or custom widgets) on the screen:
+    * **Section 1 (Assigned):** Filter and display vehicles where `assigned_driver_id` is NOT NULL. Show all required columns (`vehicle_registration_number`, `driver_first_name`, `driver_last_name`, etc.).
+    * **Section 2 (Unassigned):** Filter and display vehicles where `assigned_driver_id` is NULL. Show relevant vehicle columns (`vehicle_registration_number`, `expiry_date`, etc.).
+
+**Step 7 - Flutter UI: Implement "Add New Vehicle" Form & Functionality:**
+* Add a button (e.g., FloatingActionButton) accessible only to authorized admins on the Fleet Management screen.
+* On button press, display a dialog or navigate to a new form screen.
+* The form should capture: `vehicle_registration_number`, `vehicle_registration_expiry_date`, `1st_trailer_regs` (optional), `2nd_trailer_regs` (optional).
+* On form submission, call your Supabase client to insert a new record into the `fleet_vehicles` table. Ensure the admin's `company_id` is included, and `assigned_driver_id` is initially `NULL`. Refresh the vehicle lists (Step 6) upon successful insertion.
+
+**Step 8 - Flutter UI: Implement "Assign Driver" Selection & Update Workflow:**
+* For each vehicle listed in the "Unassigned" section (Step 6), provide an "Assign Driver" button/icon.
+* On button press:
+    * Fetch available drivers: Query Supabase for `users`/`employees` matching the admin's `company_id` and having `role = 'driver'`.
+    * *Crucially*: Filter this list further by excluding drivers whose `user_id` already appears in the `assigned_driver_id` column of *any* `fleet_vehicles` record for that company (ensure a driver isn't assigned to multiple vehicles simultaneously).
+    * Display these available drivers in a selection UI (e.g., dropdown, bottom sheet list) showing `first_name` and `last_name`.
+    * On driver selection, call your Supabase client to update the specific `fleet_vehicles` record, setting its `assigned_driver_id` to the selected driver's `user_id`.
+    * The backend logic (Step 3) should handle populating the related `driver_*` fields automatically. Refresh the vehicle lists (Step 6) to reflect the change (the vehicle should move from Unassigned to Assigned).
+
+**Step 9 - Flutter UI: Implement "Unassign Driver" Action:**
+* For each vehicle listed in the "Assigned" section (Step 6), provide an "Unassign Driver" or "Remove Driver" button/icon.
+* On button press (potentially after a confirmation dialog):
+    * Call your Supabase client to update the specific `fleet_vehicles` record, setting its `assigned_driver_id` to `NULL`.
+    * The backend logic (Step 4) should handle clearing the related `driver_*` fields automatically. Refresh the vehicle lists (Step 6) to reflect the change (the vehicle should move from Assigned to Unassigned).

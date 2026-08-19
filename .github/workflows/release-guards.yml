@@ -1,0 +1,56 @@
+# Release guards for Mine-Link v1.0 (checklist gates S1-5, S1-8).
+#
+# Before this file there was no CI in this repository at all — no
+# .github/workflows/ directory. The gates that say "a CI grep fails the build"
+# had nowhere to run, so nothing was enforced anywhere.
+name: release-guards
+
+on:
+  push:
+    branches: [chore/release-v1-hardening, feat/minelink-fork-merge]
+  pull_request:
+
+jobs:
+  guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+
+      # Proves each guard still catches a planted violation. Runs BEFORE the
+      # real scan on purpose: a grep that matches nothing passes the real scan
+      # too, and would report green forever.
+      - name: Guards bite (planted violations)
+        run: dart run tool/release_guards.dart --selftest
+
+      - name: Guards pass (working tree)
+        run: dart run tool/release_guards.dart
+
+      - name: Analyze
+        run: flutter analyze
+
+      # 689 tests green at 8e6a7b4 on 2026-08-12.
+      - name: Test
+        run: flutter test
+
+      # No secret may reach a build artifact. This is the S1-4 proof: the check
+      # is on the BUILT BUNDLE, not on the source.
+      - name: Build web and grep the bundle for secrets
+        run: |
+          flutter build web --release \
+            --dart-define-from-file=config/supabase.live.json
+          echo "--- scanning build/web for secrets ---"
+          if grep -rEl 'AAPT[A-Za-z0-9_-]{20,}' build/web; then
+            echo "::error::an ArcGIS token reached the web bundle"
+            exit 1
+          fi
+          if find build/web -path '*assets/config/map_tiles*' | grep -q .; then
+            echo "::error::config/map_tiles was bundled as an asset"
+            exit 1
+          fi
+          echo "no token literals and no map_tiles asset in build/web"

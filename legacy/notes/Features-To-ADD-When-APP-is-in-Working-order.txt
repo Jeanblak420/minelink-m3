@@ -1,0 +1,132 @@
+Make sure there's a state and fucntion (Handler) that continiously checks if a user is logged in or not.
+
+Add a in app messanger/chat feature where only management can initiate a chat. 
+add ticket system where users can submit tickets and management can respond.
+add ticket system where users can submit tickets to IT for support, broken features and bug fixes.
+
+(To be implemented upon confirmation of core application stability)
+
+1. - Implement Super Administrator Role:
+Introduce a "Super Administrator" role within the system, possessing the highest level of system-wide administrative privileges. This role must have comprehensive control over all application features, settings, user accounts, and company data. Key responsibilities shall include, but are not limited to:
+
+- Full user management capabilities (creation, modification, deactivation/deletion of all user types, including other administrators).
+- Management of all company profiles (creation, configuration updates including organization type, and removal).
+- Assignment and management of roles and permissions for all users across all companies.
+- Access to and oversight of all system activities, configurations, and features.
+- Monitoring of system-wide operational data and logs.
+
+2. - Develop Company-Specific Rate Configuration and Revenue Tracking:
+Implement a feature integrated into the company registration or configuration process that allows an administrator (likely the Super Administrator or a designated administrative role) to:
+
+- Register new company accounts within the system.
+- Assign initial roles to the users associated with the newly registered company.
+- Define and record the specific, agreed-upon rate per ton loaded for that company, denominated in South African Rand (ZAR).
+- The system must subsequently track every instance of a ton being loaded associated with that company.
+- Based on the recorded rate, the system should automatically calculate the revenue generated per ton loaded for the respective company.
+- Generate a secure, immutable (non-editable and non-deletable) financial report detailing the calculated revenue per ton loaded. Access to view this report must be strictly limited to users holding the Super Administrator role.
+
+3. - User Management:
+* Full CRUD Operations: Create, Read, Update, Delete all user accounts, including other administrators and standard users across all companies.
+* Role & Permission Management: Assign, modify, and revoke roles and specific permissions for any user. Define and manage the roles themselves (if roles are configurable).
+* Password Management: Reset passwords for any user. Enforce password policies.
+* Account Status Control: Activate, deactivate, or suspend user accounts.
+* (Optional but common) User Impersonation: Ability to log in as another user for troubleshooting purposes (this should be logged meticulously in audit trails).
+
+4. - Company/Organization Management:
+* Full CRUD Operations: Create, Read, Update, Delete all company profiles/accounts within the system.
+* Configuration Control: Modify all company-specific settings, including name, contact details, status, and crucially, the 'organization type' as requested.
+* User Association: Assign or unassign users to specific companies.
+
+5. - System Configuration & Settings:
+* Global Settings: Manage application-wide settings (e.g., default configurations, appearance/branding themes, notification settings, integration keys if applicable).
+* Feature Flags/Toggles: Enable or disable specific features across the application or for certain user groups/companies (if applicable).
+* Workflow Management: Define or modify core application workflows (if applicable).
+
+6. - Security & Auditing:
+* Audit Log Access: Unrestricted access to comprehensive system audit logs (tracking who did what, when). This includes logins, data changes, administrative actions, etc.
+* Security Policy Management: Configure system-wide security settings (e.g., session timeouts, multi-factor authentication requirements, IP whitelisting/blacklisting).
+* API Key Management: Manage API keys for integrations, if the system uses them.
+
+7. - Data & Reporting:
+* System-Wide Reporting: Access to all standard reports across all companies and users.
+* Exclusive Reporting: Access to restricted reports, such as the immutable revenue-per-ton report requested.
+* Data Management: Potentially includes access to data import/export functions or data purging capabilities (use with extreme caution).
+
+8. - Billing & Subscription Management (If Applicable):
+* If the application involves subscriptions or billing, the Super Admin should manage plans, view billing history, and potentially manage payment integrations.
+
+9. - System Health & Monitoring:
+* Access to dashboards or tools monitoring the application's performance, uptime, and resource usage.
+
+Important Considerations:
+
+Limit Super Admins: Due to the extensive power granted, the number of users assigned the Super Administrator role should be kept to an absolute minimum (ideally 1-2 trusted individuals).
+Auditing: All actions performed by a Super Administrator must be logged in detail within the system's audit trail for accountability.
+
+
+
+THIS IS A NON-NEGOTABLE IMPLEMENTATION FOR THE SYSTEM. THIS IS A NON-NEGOTABLE:
+
+
+* RBAC (Role-Based Access Control) (RBAC): Implement RBAC to ensure that users with different roles and permissions have access to only the data and features they need.
+* Security: Ensure that all data, including user credentials, is encrypted and securely stored.
+* Testing: Thoroughly test the system to ensure that all features and configurations work as expected.
+* Documentation: Maintain comprehensive documentation of the system's features and configuration options.
+* Training: Provide thorough training to all users, including Super Administrators, on the system's capabilities and limitations.
+* Feedback Mechanism: Implement a feedback mechanism for users to report issues or suggest improvements.
+* Regular Updates: Keep the system up to date with the latest security patches and feature enhancements.
+* Scalability: Design the system to scale as the number of users and companies grows.
+* Backup and Disaster Recovery: Implement robust backup and disaster recovery procedures to protect against data loss.
+* Performance Optimization: Optimize the system's performance to ensure smooth operation, especially for high-traffic scenarios.
+* Performance Testing: Conduct performance testing to ensure the system can handle the expected load.
+* Security Testing: Conduct security testing to identify vulnerabilities and ensure the system is secure.
+* Usability Testing: Conduct usability testing to ensure that the system is easy to use and navigate.
+* User Training: Provide comprehensive user training to ensure that all users understand how to use the system effectively.
+* Monitoring: Implement monitoring to track system performance and identify potential issues early.
+* Maintenance: Regularly maintain the system to ensure it is functioning properly and to address any issues that arise.
+* Backup and Restore: Implement a backup and restore strategy to ensure data is not lost in case of system failure or data corruption.
+* Security Audit: Conduct regular security audits to identify potential vulnerabilities and ensure the system is secure.
+
+
+This is the non-negotiable implementation for the system. This is a non-negotiable!
+
+The system should be designed with the following considerations:
+
+1. Role-Based Access Control (RBAC): Implement RBAC to ensure that users with different roles and permissions have access to only the data and features they need.
+2. Security: Ensure that all data, including user credentials, is encrypted and securely stored.
+3. Testing: Thoroughly test the system to ensure that all features and configurations work as expected.
+4. Documentation: Maintain comprehensive documentation of the system's features and configuration options.
+5. Training: Provide thorough training to all users, including Super Administrators, on the system's capabilities and limitations.
+6. Feedback Mechanism: Implement a feedback mechanism to allow users to report issues or suggest improvements.
+7. Regular Updates: Keep the system up to date with the latest security patches and feature enhancements.
+8. Scalability: Design the system to scale as the number of users and companies grows.
+9. Backup and Disaster Recovery: Implement robust backup and disaster recovery procedures to protect against data loss.
+10. Performance Optimization: Optimize the system's performance to ensure smooth operation, especially for high-traffic scenarios.
+11. Performance Testing: Conduct performance testing to ensure the system can handle the expected load.
+12. Security Testing: Conduct security testing to identify vulnerabilities and ensure the system is secure.
+13. Usability Testing: Conduct usability testing to ensure that the system is easy to use and navigate.
+14. User Training: Provide comprehensive user training to ensure that all users understand how to use the system effectively.
+15. Monitoring: Implement monitoring to track system performance and identify potential issues early.
+16. Maintenance: Regularly maintain the system to ensure it is functioning properly and to address any issues that arise.
+17. Backup and Restore: Implement a backup and restore strategy to ensure data is not lost in case of system failure or data corruption.
+18. Security Audit: Conduct regular security audits to identify potential vulnerabilities and ensure the system is secure.
+19. User Management: Implement user management features to allow for the creation, modification, and deletion of user accounts, including other administrators and standard users across all companies.
+20. Company Management: Implement company management features to allow for the creation, configuration updates, and removal of company profiles across all companies.
+21. Role and Permission Management: Implement role and permission management features to allow for the assignment, modification, and revocation of roles and specific permissions for any user.
+22. Password Management: Implement password management features to allow for the resetting of passwords for any user and the enforcement of password policies.
+23. Account Status Control: Implement account status control features to allow for the activation, deactivation, or suspension of user accounts.
+24. Audit Logging: Implement audit logging features to track all actions taken within the system by any user, including other administrators and standard users across all companies.
+25. Reporting: Implement reporting features to generate reports on various aspects of the system's performance, including user activity, system usage, and other relevant metrics.
+26. Integration: Implement integration features to allow for the seamless integration of the system with other systems or applications used by the company.
+27. Customization: Implement customization features to allow for the personalization of the system's appearance and functionality to meet the specific needs of each company.
+28. Scalability: Implement scalability features to allow for the growth of the system as the number of users and companies increases.
+29. Support: Implement support features to provide assistance to users with any issues or questions they may have regarding the system.
+30. Compliance: Ensure that the system complies with all relevant regulations and standards, such as GDPR, HIPAA, and other data protection laws.
+31. Security: Implement security features to protect the system from potential threats and vulnerabilities, including firewalls, intrusion detection systems, and other security measures.
+32. Performance: Optimize the system's performance to ensure smooth operation, especially for high-traffic scenarios.
+33. Scalability: Design the system to scale as the number of users and companies grows.
+34. Backup and Disaster Recovery: Implement robust backup and disaster recovery procedures to protect against data loss.
+
+These considerations are essential for ensuring that the system is secure, reliable, and user-friendly. Failure to implement these features will result in a subpar experience for users and potential security risks for the company.
+
+

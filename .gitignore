@@ -1,0 +1,83 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Local release drops (large binaries; zip and share outside git)
+/Mine-Link_windows/
+/Mine-Link_android/
+
+# Per-project GitHub CLI auth (bryson42069 for this repo only)
+.gh/
+
+# Local credentials sheet (plaintext passwords — never commit)
+active user accounts.txt
+
+# Test-run scratch output. Removed from tracking 2026-08-15 (S9-8): the
+# playwright login matrix and its account manifest carried the shared live
+# test password in plaintext, 37 occurrences, tracked since the initial
+# commit. Nothing in the repo reads this directory.
+/output/
+
+# Built web portal artifact (large; build & deploy outside git)
+/public_html_portal/
+
+# Transient MCP auth marker
+/authenticate/
+
+# Design-package scratch: full worktree snapshot + zip of the original repo
+# (215 MB of duplicates of content already in git — keep out of history).
+docs/new system design/minelink-new-design-v0.1/uploads/
+docs/new system design/minelink-new-design-v0.1/zip-of-original/
+
+# Local map-tile host key (see config/map_tiles.local.json.example)
+config/map_tiles.local.json
+
+# Firebase credentials for push notifications (see docs/push-setup.md). Never
+# commit a placeholder either — a fake one breaks the Gradle plugin with an
+# error that reads like a build bug, and a file that looks like a credential
+# is exactly the class of thing that once shipped a live ArcGIS token from
+# this repo (see the config/ comment in pubspec.yaml).
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist

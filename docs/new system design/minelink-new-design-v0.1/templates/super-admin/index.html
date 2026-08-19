@@ -1,0 +1,197 @@
+<!-- @dsCard group="Super Admin" viewport="1440x900" name="Super Global Admin" subtitle="Org management, token & seat serials with live countdown" -->
+<!-- @startingPoint section="Portals" subtitle="Super Global Serial Admin — organization & seat management" viewport="1440x900" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>MineLink — Super Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<style>
+  :root{ --font-sans:'Sora', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+  html,body{margin:0;height:100%;font-size:16px}
+  body{background:var(--surface-app)}
+  html[data-theme="dark"]{ --surface-app:#070c17 !important; }
+  #root{height:100vh}
+  .ml-hsearch::placeholder{ color:#657795; opacity:1; }
+  .ml-sidenav-search::placeholder{ color:#657795; opacity:1; }
+</style>
+<script src="../shared/theme.js"></script>
+</head><body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel" src="../shared/shell.jsx"></script>
+<script type="text/babel" src="../shared/employee-register.jsx"></script>
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="screens-extra.jsx"></script>
+<script type="text/babel">
+const { PortalShell } = window.MLShell;
+const S = window.AdminScreens;
+const NAV = [
+  { key: 'overview', label: 'Dashboard', icon: 'admin_panel_settings' },
+  { key: 'insights-group', label: 'Insights', icon: 'insights', children: [
+    { key: 'insights:transporter', label: 'Transporters', icon: 'local_shipping' },
+    { key: 'insights:buyer', label: 'Buyers', icon: 'shopping_bag' },
+    { key: 'insights:mineSupplier', label: 'Mines / Suppliers', icon: 'landscape' },
+  ] },
+  { key: 'orgs', label: 'Organizations', icon: 'business', badge: '24' },
+  { key: 'tokens-group', label: 'Tokens & Seats', icon: 'vpn_key', children: [
+    { key: 'members', label: 'Members & Tokens', icon: 'badge' },
+    { key: 'token-requests', label: 'Token & Seat Requests', icon: 'add_moderator', badge: '3' },
+    { key: 'token-history', label: 'Token & Seat History', icon: 'timeline' },
+  ] },
+  { key: 'requests-group', label: 'Requests', icon: 'assignment', badge: '4', children: [
+    { key: 'requests', label: 'Requested routes', icon: 'alt_route', badge: '1' },
+    { key: 'req-product', label: 'Requested product', icon: 'inventory_2', badge: '2' },
+    { key: 'req-buyer', label: 'Requested buyers', icon: 'group_add', badge: '1' },
+  ] },
+  { key: 'audit', label: 'Audit logs', icon: 'history' },
+];
+const SETTINGS_NAV = [
+  { key: 'profile', label: 'My profile', icon: 'account_circle' },
+  { key: 'account', label: 'Account & security', icon: 'lock' },
+  { key: 'notify-prefs', label: 'Notification preferences', icon: 'notifications_active' },
+  { key: 'appearance', label: 'Appearance & theme', icon: 'palette' },
+  { key: 'settings', label: 'Platform settings', icon: 'settings' },
+];
+const UTILITY_NAV = [
+  { key: 'notifications', label: 'Notifications', icon: 'notifications', badge: '1', badgeTone: 'red' },
+  { key: 'about', label: 'About', icon: 'info' },
+];
+const META = {
+  overview: { title: <span style={{ fontFamily: 'var(--font-serif)', fontSize: 24, fontWeight: 500, color: '#eaf2ff', letterSpacing: '-0.24px' }}>Global Admin · <em style={{ fontStyle: 'italic', color: '#8fd0ff' }}>Dashboard</em></span>, subtitle: 'Full system overview · Live · updated 4s ago' },
+  orgs: { title: 'Organizations', subtitle: 'All linked companies across org types' },
+  'orgs:active': { title: 'Organizations', subtitle: 'Active companies' },
+  'orgs:expired': { title: 'Organizations', subtitle: 'Companies with an expired token' },
+  'orgs:suspended': { title: 'Organizations', subtitle: 'Suspended companies' },
+  users: { title: 'Users', subtitle: 'All users across companies' },
+  members: { title: 'Org Members & Tokens', subtitle: 'Active members and those with expired tokens / inactive seats' },
+  requests: { title: 'Requested routes', subtitle: 'Buyer haulage requests — review, match & dispatch' },
+  'req-product': { title: 'Requested product', subtitle: 'Buyer product requests' },
+  'req-buyer': { title: 'Requested buyers', subtitle: 'Mine buyer-connection requests' },
+  'token-requests': { title: 'Org Token & Seat Requests', subtitle: 'Companies requesting new tokens or more seats — claim, approve, reject' },
+  'token-history': { title: 'Org Token & Seat History', subtitle: 'Token issue / renewal / revoke & seat changes per organization' },
+  audit: { title: 'Audit logs', subtitle: 'Every platform action, filterable & exportable' },
+  account: { title: 'Account & security', subtitle: 'Your sign-in email & password' },
+  settings: { title: 'Platform settings', subtitle: 'Platform-wide configuration' },
+  profile: { title: 'My profile', subtitle: 'Your super-admin account details' },
+  'notify-prefs': { title: 'Notification preferences', subtitle: 'What you get alerted about' },
+  appearance: { title: 'Appearance & theme', subtitle: 'Portal background, accent & mode' },
+  about: { title: 'About MineLink', subtitle: 'Platform version & support' },
+  register: { title: 'Register company', subtitle: 'Onboard a new organization & issue its token' },
+  'insights:transporter': { title: 'Organization insights', subtitle: 'Transporters — monthly rollups' },
+  'insights:buyer': { title: 'Organization insights', subtitle: 'Buyers — monthly rollups' },
+  'insights:mineSupplier': { title: 'Organization insights', subtitle: 'Mines / Suppliers — monthly rollups' },
+};
+const DSui = window.MineLinkDesignSystem_9acfde;
+const { Icon: IcU, Card: CardU, Button: BtnU, Input: InU, Switch: SwU, Avatar: AvU, Icon3D: Ic3U } = DSui;
+function HeaderActions() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+        <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', display: 'flex', pointerEvents: 'none' }}><IcU name="search" size={16} color="#657795" /></span>
+        <input className="ml-hsearch" placeholder="Search companies, users, requests..." style={{ width: 280, height: 38, maxWidth: '32vw', boxSizing: 'border-box', padding: '0 44px 0 36px', background: 'var(--surface-app)', border: '1px solid rgba(140,180,240,.22)', borderRadius: 11, fontFamily: 'var(--font-sans)', fontSize: 12.5, color: '#c8d5ec', outline: 'none' }} />
+        <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', display: 'inline-flex', alignItems: 'center', padding: '2px 6px', borderRadius: 6, border: '1px solid rgba(140,180,240,.22)', fontFamily: 'var(--font-mono)', fontSize: 10.5, fontWeight: 600, color: '#657795', pointerEvents: 'none' }}>⌘K</span>
+      </div>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 13px', borderRadius: 999, background: 'var(--status-done-bg)', color: 'var(--ml-green-700)', fontSize: 12.5, fontWeight: 700 }}><span style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--ml-green-500,#22c55e)' }} />Live</span>
+    </div>
+  );
+}
+function AdminProfile() {
+  return (
+    <div style={{ maxWidth: 560 }}>
+      <CardU padding={24}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 22 }}>
+          <AvU name="Sariel Admin" size={64} tone="cyan" />
+          <div><div style={{ fontSize: 19, fontWeight: 800, color: 'var(--text-strong)' }}>Sariel Admin</div><div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Super Global Admin · sariel.a@minelink.co.za</div></div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <InU label="Full name" defaultValue="Sariel Admin" icon="person" />
+          <InU label="Email" defaultValue="sariel.a@minelink.co.za" icon="mail" />
+          <InU label="Phone" defaultValue="+27 82 000 0000" icon="call" />
+          <BtnU icon="check_circle">Save profile</BtnU>
+        </div>
+      </CardU>
+    </div>
+  );
+}
+function NotifyPrefs() {
+  const [s, setS] = React.useState({ tokenExpiry: true, newRequests: true, suspensions: true, weekly: false });
+  const rows = [['tokenExpiry', 'Token expiry alerts', 'When a company token is within 7 days of expiry.'], ['newRequests', 'New requests', 'Route, product & buyer connection requests.'], ['suspensions', 'Suspensions', 'When a company is auto-suspended.'], ['weekly', 'Weekly summary', 'A digest of platform activity every Monday.']];
+  return (
+    <div style={{ maxWidth: 620 }}>
+      <CardU padding={22}>
+        {rows.map(([k, t, d]) => (
+          <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 0', borderBottom: '1px solid var(--divider)' }}>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 14.5, fontWeight: 700, color: 'var(--text-strong)' }}>{t}</div><div style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>{d}</div></div>
+            <SwU checked={s[k]} onChange={(v) => setS((p) => ({ ...p, [k]: v }))} />
+          </div>
+        ))}
+      </CardU>
+    </div>
+  );
+}
+function AppearanceSettings() {
+  const ref = React.useRef(null);
+  React.useEffect(() => { if (ref.current && window.MLTheme) window.MLTheme.renderSettings(ref.current); }, []);
+  return <div style={{ maxWidth: 780 }}><CardU padding={22}><div ref={ref} /></CardU></div>;
+}
+function AboutScreen() {
+  return (
+    <div style={{ maxWidth: 560 }}>
+      <CardU padding={24}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}><Ic3U name="console" size={48} /><div><div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-strong)' }}>MineLink Console</div><div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Super Global Admin · v3.4.0</div></div></div>
+        <p style={{ fontSize: 14, color: 'var(--text-body)', lineHeight: 1.6, margin: '0 0 16px' }}>Platform administration for mines, buyers and transporters — tokens, seats, organizations and live operations.</p>
+        <div style={{ display: 'flex', gap: 10 }}><BtnU variant="outline" icon="mail">Contact support</BtnU><BtnU variant="ghost" icon="description">Release notes</BtnU></div>
+      </CardU>
+    </div>
+  );
+}
+function App(){
+  const [tab, setTab] = React.useState('overview');
+  const [company, setCompany] = React.useState(null);
+  const [request, setRequest] = React.useState(null);
+  const [tokenReq, setTokenReq] = React.useState(null);
+  const [mirrorCo, setMirrorCo] = React.useState(null);
+  React.useEffect(() => { if (tab.indexOf('insights:') !== 0) setMirrorCo(null); }, [tab]);
+  // normalise deep-link keys → base tab + side effects
+  const go = (t, c) => {
+    if (t && t.indexOf('org:') === 0) { if (c) setCompany(c); return; }
+    setTab(t);
+  };
+  const onNav = (t) => { if (t === 'notifications') { window.location.href = '../notifications/index.html'; return; } setTab(t); };
+  const m = META[tab] || { title: 'Platform Admin', subtitle: 'Platform management' };
+  const navActive = tab.indexOf('orgs:') === 0 ? 'orgs' : tab;
+  let body;
+  if (tab === 'overview') body = <S.AdminOverview go={go}/>;
+  else if (tab.indexOf('insights:') === 0) body = mirrorCo ? <S.AdminCompanyMirror company={mirrorCo} onBack={() => setMirrorCo(null)}/> : <S.AdminInsights type={tab.split(':')[1]} openCompany={setMirrorCo}/>;
+  else if (tab === 'requests') body = <S.AdminRequests openRequest={setRequest}/>;
+  else if (tab === 'members') body = <S.AdminMembersTokens/>;
+  else if (tab === 'req-product') body = <S.AdminRequestedProduct/>;
+  else if (tab === 'req-buyer') body = <S.AdminRequestedBuyers/>;
+  else if (tab === 'token-requests') body = <S.AdminTokenRequests openRequest={setTokenReq}/>;
+  else if (tab === 'token-history') body = <S.AdminAuditLogs tokenOnly/>;
+  else if (tab === 'audit') body = <S.AdminAuditLogs/>;
+  else if (tab === 'account') body = <S.AdminAccountSecurity/>;
+  else if (tab === 'profile') body = <AdminProfile/>;
+  else if (tab === 'notify-prefs') body = <NotifyPrefs/>;
+  else if (tab === 'appearance') body = <AppearanceSettings/>;
+  else if (tab === 'about') body = <AboutScreen/>;
+  else if (tab === 'settings') body = <S.AdminPlatformSettings/>;
+  else if (tab === 'register') body = <S.AdminRegisterCompany go={go}/>;
+  else body = <S.AdminOrganizations openCompany={setCompany} onRegister={() => setTab('register')}/>; // orgs + orgs:* + users
+  return <div style={{height:'100%',position:'relative'}}>
+    <PortalShell brand="MineLink" brandSubtitle="super admin console" sectionLabel="SUPER ADMIN" nav={NAV} active={navActive} onNav={onNav}
+      settingsNav={SETTINGS_NAV} utilityNav={UTILITY_NAV} onLogout={() => window.location.href='../auth/index.html'}
+      chatUnread={4} onOpenChat={() => window.location.href='../chat/index.html'}
+      headerActions={<HeaderActions/>}
+      user={{ name: 'Sariel Admin', email: 'sariel.a@minelink.co.za', role: 'Super Global Admin' }} title={m.title} subtitle={m.subtitle}>{body}</PortalShell>
+    <S.CompanyPanel company={company} onClose={() => setCompany(null)}/>
+    <S.RequestPanel request={request} onClose={() => setRequest(null)}/>
+    <S.TokenRequestPanel request={tokenReq} onClose={() => setTokenReq(null)} SlideCmp={window.MLShell.SlideOver}/>
+  </div>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+<script src="../shared/appearance.js"></script>
+</body></html>

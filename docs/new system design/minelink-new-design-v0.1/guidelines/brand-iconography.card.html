@@ -1,0 +1,38 @@
+<!-- @dsCard group="Brand" viewport="760x320" name="Iconography" subtitle="Icon3D — soft-shaded faux-3D vector set (no images, no WebGL)" -->
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:#0c1a2b;padding:30px 32px 26px;font-family:var(--font-sans)}
+  .head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px}
+  .title{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#9fb3c8}
+  .note{font-size:10px;font-family:var(--font-mono,monospace);color:#62788f}
+  #root{display:grid;grid-template-columns:repeat(6,1fr);gap:30px 18px}
+  .cell{display:flex;flex-direction:column;align-items:center;gap:13px}
+  .lab{font-size:9px;letter-spacing:.02em;color:#7f93a8;font-family:var(--font-mono,monospace)}
+</style></head>
+<body>
+<div class="head">
+  <span class="title">Iconography · Icon3D set</span>
+  <span class="note">inline svg · soft gradients + side face + contact shadow · 0 assets</span>
+</div>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script>
+(async () => {
+  // Load the Icon3D source directly so the card is self-contained and does not
+  // depend on _ds_bundle.js regeneration timing.
+  const src = await (await fetch('../components/core/Icon3D.jsx')).text();
+  const stripped = src.replace(/import[^\n]*\n/, '').replace(/export /g, '');
+  const code = Babel.transform(stripped, { presets: ['react'] }).code +
+    '\nwindow.Icon3D = Icon3D; window.ICON3D_NAMES = ICON3D_NAMES;';
+  eval(code);
+  const cells = window.ICON3D_NAMES.map(n =>
+    React.createElement('div', { className: 'cell', key: n },
+      React.createElement(window.Icon3D, { name: n, size: 60 }),
+      React.createElement('span', { className: 'lab' }, n)));
+  ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(React.Fragment, null, cells));
+})();
+</script>
+</body></html>

@@ -1,0 +1,20 @@
+﻿Building Windows application...                                 
+flutter : Target dart_build failed : error : Building native assets failed. See the logs for more details. 
+[C:\Users\Somebody Someone\Desktop\Blak_AI-Agent_Model\ALL NEW BRYSON MINERAL 
+GUIDE\The_Mineral_Guide-main\build\windows\x64\flutter\flutter_assemble.vcxproj]
+At line:1 char:1
++ flutter build windows > build_log.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Target dart_bui...semble.vcxproj]:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+C:\Program Files (x86)\Microsoft Visual 
+Studio\2022\BuildTools\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(254,5): error MSB8066: Custom build for 
+'C:\Users\Somebody Someone\Desktop\Blak_AI-Agent_Model\ALL NEW BRYSON MINERAL GUIDE\The_Mineral_Guide-main\build\window
+s\x64\CMakeFiles\dbcc27cb39dd465956b996bb116af781\flutter_windows.dll.rule;C:\Users\Somebody 
+Someone\Desktop\Blak_AI-Agent_Model\ALL NEW BRYSON MINERAL 
+GUIDE\The_Mineral_Guide-main\build\windows\x64\CMakeFiles\2cce26daf62c990ac354a2c00f9d7ce8\flutter_assemble.rule' 
+exited with code 1. [C:\Users\Somebody Someone\Desktop\Blak_AI-Agent_Model\ALL NEW BRYSON MINERAL 
+GUIDE\The_Mineral_Guide-main\build\windows\x64\flutter\flutter_assemble.vcxproj]
+Building Windows application...                                    14.1s
+Build process failed.

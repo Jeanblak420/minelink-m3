@@ -1,0 +1,431 @@
+# THE MINERAL GUIDE - COMPREHENSIVE APPLICATION OVERVIEW
+
+## CORE ARCHITECTURE
+
+### Application Structure
+- Flutter-based mobile application with Supabase backend
+- Uses Flutter Riverpod for state management
+- Go Router for navigation
+- Feature-based architecture with clear separation of concerns
+- Comprehensive logging system for debugging and monitoring
+- Extensive error handling throughout the application
+
+### Project Organization
+```
+lib/
+├── core/                  # Core functionality and utilities
+│   ├── config/            # Configuration settings
+│   ├── routing/           # Routing configuration
+│   ├── services/          # Core services
+│   ├── theme/             # App theming
+│   └── utils/             # Utility functions
+├── features/              # Feature modules
+│   ├── auth/              # Authentication
+│   ├── company/           # Company management
+│   ├── employee/          # Employee management
+│   ├── fleet/             # Fleet management
+│   ├── home/              # Home screens
+│   ├── notifications/     # Notification system
+│   ├── profile/           # User profiles
+│   └── tabs/              # Role-based tab screens
+├── app.dart               # Main app widget
+└── main.dart              # Entry point
+```
+
+## DATABASE SCHEMA
+
+### Core Tables
+1. **companies** - Stores organization information
+2. **employees** - Stores individual user information
+3. **notifications** - Tracks system and user notifications
+4. **employee_status_history** - Records employee status changes
+5. **fleet_vehicles** - Manages transport vehicles and driver assignments
+6. **weighbridge_records** - Records mineral weighing operations
+7. **security_incidents** - Tracks security-related events
+8. **gate_checks** - Records vehicle entry/exit at facilities
+9. **mineral_loads** - Tracks mineral shipments and details
+10. **broadcast_messages** - Facilitates real-time communication
+
+## USER TYPES AND ROLES
+
+### User Types
+1. **Company** - Organization accounts
+2. **Employee** - Individual user accounts belonging to companies
+
+### Organization Types
+1. **Mine/Supplier** (mineSupplier) - Organizations that extract and sell minerals
+2. **Buyer** (buyer) - Organizations that purchase minerals
+3. **Transporter** (transporter) - Organizations that transport minerals
+
+### User Roles
+1. **Security** - For Mine/Supplier organizations
+2. **Controller/WB** - For Mine/Supplier organizations (weighbridge operators)
+3. **Admin** - For all organization types
+4. **Management** - For all organization types
+5. **Driver** - For Transporter organizations
+6. **Mine/Supplier** - Organization-specific role
+7. **Buyer** - Organization-specific role
+8. **Transporter** - Organization-specific role
+
+### Role Assignment
+- Users aren't automatically assigned a role
+- They remain with an unassigned role until manually assigned by an admin
+- Once assigned a role while logged in, users are redirected to the appropriate screen with a welcome message
+- Role assignment notifications are sent to users
+
+## AUTHENTICATION FEATURES
+
+### Login
+- Email/password authentication
+- Session management with auto-refresh
+- Automatic redirection to home screen after login
+
+### Signup
+- Separate flows for Company and Employee registration
+- Email verification
+- Profile creation during signup
+- Document upload options (ID, passport, work visa, license)
+- Company registration reference generation based on company name
+
+### Password Management
+- Forgot password functionality
+- Password reset via email
+
+## COMPANY FEATURES
+
+### Company Management
+- Company profile creation and editing
+- Organization type selection (Mine/Supplier, Buyer, Transporter)
+- Logo upload
+- Contact information management
+- Company registration reference system with automatic generation
+
+### Employee Management
+- View and manage company employees
+- Assign roles to employees
+- Approve or decline employee join requests
+- Track employee status (pending, active, etc.)
+
+### Employee Dismissal System
+- Three-phase dismissal process:
+  1. Dismissal initiation with notifications
+  2. Employee appeal process
+  3. Final decision with account deletion protocol
+- Comprehensive error handling and form validation
+- Loading indicators for async operations
+- Responsive UI design
+- Clear status indicators throughout the process
+
+## FLEET MANAGEMENT SYSTEM
+
+### Vehicle Management
+- Add new vehicles with registration details
+- Track vehicle registration expiry dates
+- Manage trailer registrations
+- Mark vehicles as inactive instead of removing them
+- Separate tables for active and inactive vehicles
+- Ability to reactivate inactive vehicles
+
+### Driver Assignment
+- Assign drivers to vehicles
+- Unassign drivers from vehicles
+- View driver documents (ID, Passport, Work Permit, License)
+- Verify driver document URLs
+- Fix document URL issues
+
+### Access Control
+- Only available to users with Organization type = Transporter and role = Admin or higher
+- Strict data isolation between companies
+
+## MINERAL TRADING FEATURES
+
+### Map-Based Mineral Marketplace
+- Interactive map showing mineral sale locations
+- Pins indicating mineral availability and location
+- Detailed mineral information on pin expansion
+- Quality certificates and documentation
+
+### Mineral Transaction System
+- Buyers can select quantity to purchase
+- Proforma invoice generation
+- Payment processing with proof of payment
+- Final invoice generation
+- Transaction history tracking
+
+### Weighbridge Operations
+- Record truck and driver details
+- Record mineral weight in tons
+- Calculate revenue based on configured rates
+- Generate weighing receipts
+- Track weighbridge statistics
+
+### Mineral Tracking
+- Record mineral type, quality, and quantity
+- Track source and destination
+- Monitor inventory levels
+- Quality certification management
+
+## NOTIFICATION SYSTEM
+
+### Notification Types
+- Role assignment notifications
+- Employee join requests
+- Dismissal process notifications
+- Fleet management notifications
+- Profile updates
+- Welcome notifications
+- Role confirmation notifications
+- Action tracking notifications
+- Mineral purchase notifications
+
+### Notification Features
+- Role-based visibility:
+  - Companies see all users' actions
+  - Management sees actions of everyone below them
+  - Regular users only see their own actions unless specified
+- Automatic tracking of in-app events from registered users
+- User and timestamp information included
+- Read status tracking
+- Persistent notifications for users awaiting approval
+- Action stamping with user information
+- Metadata for additional context
+- Importance levels for prioritization
+
+### Email Notifications
+- Email notifications for critical events
+- SMTP or transactional email integration configured through environment secrets
+- Customizable email templates
+- SendGrid API integration for reliable delivery
+
+## COMMUNICATION FEATURES
+
+### Company-to-Company Chat
+- Direct messaging between companies
+- Group chat capability (max 3 companies)
+- File and image sharing
+- Company profile access from chat
+- Organization type restrictions in group chats
+
+### Internal Company Chat
+- Company and managers can chat with any employee
+- Role-based chat initiation restrictions
+- Chat termination controls based on role hierarchy
+- Admin communication channels
+
+### Broadcast Messaging
+- System-wide announcements
+- Company-specific broadcasts
+- Role-specific messaging
+- Real-time message delivery
+
+### Presence Tracking
+- Monitor online status of users
+- Status updates (active, away, offline)
+- Last seen timestamps
+
+## CORE SERVICES
+
+### Database Service
+- CRUD operations for all entities
+- Real-time data synchronization
+- Caching for improved performance
+- Transaction support
+- Error handling and retry mechanisms
+- Broadcast messaging capabilities
+- Presence tracking for online status
+- Centralized subscription management
+- Automatic reconnection handling
+
+### Authentication Service
+- User authentication and session management
+- User type determination
+- Profile management
+- Password reset functionality
+- Session refresh and token management
+- Role-based access control enforcement
+
+### Notification Service
+- Create and manage notifications
+- Action stamping for audit trails
+- Role-based filtering
+- Email notification integration
+- Webhook support for external notifications
+- Importance levels for prioritization
+- Read status tracking
+- Persistent notifications for critical events
+
+### Fleet Service
+- Vehicle management
+- Driver assignment
+- Document handling
+- Vehicle status tracking
+- Driver document verification
+- Vehicle activation/deactivation
+- Document URL verification and repair
+- Trailer registration management
+
+### Employee Status Service
+- Track employee status changes
+- Manage dismissal process
+- Historical record keeping
+- Status transition validation
+- Audit trail for status changes
+- Appeal process management
+- Final decision handling
+- Status history visualization
+
+### Backend Workflow Service
+- Postgres RPC orchestration for workflow writes
+- Edge functions only where external integrations or managed-user flows require them
+- Retry logic for transient errors
+- Realtime-safe cross-client communication
+- Email notification delivery through configured providers
+
+### Action Tracking Service
+- Track user actions across the application
+- Create notifications based on actions
+- Role-based visibility for actions
+- Audit trail for user activities
+- Automatic metadata collection for context
+- Standardized implementation via ActionTrackingMixin
+- Consistent action tracking across all features
+- Timestamping of all actions
+
+## UI COMPONENTS
+
+### Role-Based Tabs
+- Different tab screens based on user role:
+  - Security Tab - For security personnel at mine/supplier organizations
+    - Security dashboard with active personnel stats
+    - Incident tracking and reporting
+    - Gate check management
+    - Pending approvals monitoring
+  - Controller/Weighbridge Tab - For weighbridge operators at mine/supplier organizations
+    - Weighbridge statistics (trucks weighed, tonnage, averages)
+    - New weighing entry with truck and driver details
+    - Weight recording in tons
+    - Weighing history and receipts
+  - Admin Tab - For administrative personnel across all organization types
+    - User management dashboard
+    - Role assignment controls
+    - Company configuration options
+    - System settings access
+  - Management Tab - For management personnel across all organization types
+    - Performance overview with data visualization
+    - Analytics dashboard with charts and metrics
+    - Team management tools
+    - Strategic planning features
+  - Driver Tab - For drivers in transporter organizations
+    - Trip management
+    - Document access
+    - Status reporting
+    - Load tracking
+  - Mine/Supplier Tab - For mine/supplier organization users
+    - Mineral tracking
+    - Production monitoring
+    - Inventory management
+    - Quality control
+  - Buyer Tab - For buyer organization users
+    - Purchase tracking
+    - Order management
+    - Supplier relationships
+    - Inventory monitoring
+
+### Common Widgets
+- Notification bell with unread count
+- Profile access button
+- Logout confirmation dialog
+- Form validation components
+- Loading indicators
+- Document viewers
+- Debug and developer tools buttons
+- Error message displays
+- Confirmation dialogs
+- Action buttons with loading states
+- Data visualization components (charts, graphs)
+- Statistics cards for dashboard metrics
+- Document upload widgets with progress indicators
+- Role-specific action buttons
+- User activity timelines
+
+## WORKFLOW PROCESSES
+
+### Company Registration Flow
+1. User selects "Sign up as Company"
+2. Provides company details (name, contact info, organization type)
+3. Creates account with email and password
+4. Uploads company logo (optional)
+5. Account is created and user is logged in
+6. Company dashboard is displayed with appropriate tabs based on organization type
+
+### Employee Registration Flow
+1. User selects "Sign up as Employee"
+2. Provides personal details (name, contact info)
+3. Creates account with email and password
+4. Uploads profile photo and required documents
+5. Account is created and user is logged in
+6. Employee is prompted to select a company to join
+7. Request is sent to the selected company
+8. Employee remains in "pending" status until approved
+
+### Company-Employee Linking Process
+1. Employee selects a company to join
+2. Company receives a notification of the join request
+3. Company admin can approve or decline the request
+4. If approved, employee is linked to the company
+5. Company can assign a role to the employee
+6. Employee receives a notification of role assignment
+7. Employee gains access to role-specific features
+
+### Employee Dismissal Process
+1. Company initiates dismissal with reason
+2. Employee receives notification and can submit appeal
+3. Company reviews appeal and makes final decision
+4. If dismissal is upheld, account is scheduled for deletion
+5. If dismissal is overturned, employee status is restored
+
+### Fleet Vehicle Management Process
+1. Admin adds new vehicle with registration details
+2. Vehicle appears in active fleet list
+3. Admin can assign a driver to the vehicle
+4. Driver documents are linked to the vehicle
+5. Admin can mark vehicle as inactive when needed
+6. Inactive vehicles can be reactivated
+
+### Weighbridge Operation Process
+1. Controller/WB user logs into the system
+2. Views weighbridge statistics dashboard
+3. Initiates new weighing with truck and driver details
+4. Records weight in tons
+5. System automatically calculates revenue based on configured rates
+6. Generates weighing receipt
+7. Updates statistics and history
+8. Data is available for reporting and analytics
+
+### Security Check Process
+1. Security personnel logs into the system
+2. Views security dashboard with active personnel and incidents
+3. Records gate checks and security incidents
+4. Verifies driver and vehicle documentation
+5. Approves or denies entry based on verification
+6. Logs all security activities
+7. Generates security reports
+
+### Mineral Tracking Process
+1. Mine/Supplier records mineral extraction details
+2. Weighbridge confirms mineral weight
+3. System tracks mineral type, quality, and quantity
+4. Buyer receives notification of available minerals
+5. Transaction is recorded when minerals are purchased
+6. Revenue is calculated based on configured rates
+7. Reports are generated for all parties
+
+### Mineral Purchase Process
+1. Buyer browses available minerals on map
+2. Selects mineral and quantity to purchase
+3. System generates proforma invoice
+4. Buyer submits payment or proof of payment
+5. Mine/Supplier approves payment
+6. System generates final invoice
+7. Mineral quantity is updated in inventory
+8. Transaction is recorded in purchase history

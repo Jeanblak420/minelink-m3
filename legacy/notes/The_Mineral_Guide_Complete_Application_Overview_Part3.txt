@@ -1,0 +1,226 @@
+# THE MINERAL GUIDE - COMPLETE APPLICATION OVERVIEW (PART 3)
+
+## SECURITY AND DATA ISOLATION
+
+### Row-Level Security
+- Supabase RLS policies ensure data isolation between companies
+- Users can only access data related to their company
+- Role-based access controls for sensitive operations
+- Table-specific security policies
+- Function-level security controls
+- Data access audit logging
+- Strict permission checks for all operations
+
+### Document Security
+- Secure storage of user documents in Supabase Storage
+- Access controls for document viewing
+- Document verification processes
+- Role-based document access
+- Structured storage paths for different document types:
+  - ID documents
+  - Passport documents
+  - Work visa documents
+  - License documents
+  - Company logos
+  - Profile photos
+  - Vehicle registration documents
+  - Weighbridge receipts
+  - Mineral quality certificates
+- Document expiry tracking
+- Automatic document verification workflows
+- Secure document sharing mechanisms
+
+### Authentication Security
+- Email verification for new accounts
+- Secure password reset process
+- Session management with automatic refresh
+- Logout functionality with confirmation
+- Token-based authentication
+- Session timeout controls
+- Login attempt monitoring
+- Secure credential storage
+- Password strength enforcement
+- Account lockout after failed attempts
+
+## TECHNICAL IMPLEMENTATION DETAILS
+
+### Supabase Configuration
+- Project URL: https://yftazblpmicqtamyiwyb.supabase.co
+- Publishable key is supplied at runtime with `SUPABASE_PUBLISHABLE_KEY`
+- Email delivery configuration is supplied through environment secrets
+- SMTP port: 465
+- Preferred FROM_NAME: Support.NoReply@themineralguide.com
+- Supabase CLI available for database migrations and edge function management
+- Row-Level Security (RLS) policies implemented for data isolation
+- Realtime features enabled for specific tables
+- Storage buckets configured for document storage with appropriate access controls
+
+### State Management
+- Flutter Riverpod for reactive state management
+- StateNotifier pattern for complex state handling
+- Provider pattern for services and utilities
+- Family providers for parameterized state
+- Provider scoping for dependency injection
+
+### Caching Strategy
+- Local caching for improved performance
+- Cache invalidation on data changes
+- Periodic cache refresh for real-time data
+- Session caching for user authentication
+
+### Real-time Updates
+- Supabase real-time subscriptions for data synchronization
+- RPC-driven writes with realtime subscriptions for critical operations
+- Periodic refresh timers as fallback
+- Channel-based communication
+- Presence tracking for online status
+- Broadcast messaging capabilities
+- Realtime debugging tools and test screens
+- PostgreSQL change event listeners
+- Table-specific subscriptions
+- Centralized subscription management
+- Automatic reconnection handling
+- Subscription status monitoring
+- Cross-client notification delivery
+- Real-time weighbridge data updates
+- Live fleet tracking updates
+- Instant notification delivery
+- Real-time document verification status updates
+- Live employee status tracking
+- Immediate action tracking and notification
+
+### Error Handling Strategy
+- Try-catch blocks for all async operations
+- User-friendly error messages
+- Detailed logging for debugging
+- Fallback mechanisms for critical operations
+- Graceful degradation when services are unavailable
+
+### Responsive Design
+- Adaptive layouts for different screen sizes
+- Responsive widgets that adjust to available space
+- Consistent theming across the application
+- Accessibility considerations for all UI elements
+
+### Testing Approach
+- Unit tests for core business logic
+- Widget tests for UI components
+- Integration tests for key user flows
+- Manual testing for edge cases and usability
+
+### Code Organization Principles
+- Feature-based architecture
+- Clear separation of concerns:
+  - Models: Data structures
+  - Services: Business logic
+  - Providers: State management
+  - Screens: UI components
+  - Widgets: Reusable UI elements
+  - Mixins: Shared behavior
+  - Utils: Helper functions
+- Dependency injection for testability
+- Consistent naming conventions
+- Mixins for shared functionality
+- Extension methods for code reuse
+- Utility classes for common operations
+- Centralized configuration management
+- Standardized error handling patterns
+- Consistent logging approach
+
+### Edge Functions and Backend RPCs
+- Supabase Edge Functions for targeted server-side operations
+- Database-owned RPCs for approvals, notifications, fleet, chat, and role workflows
+- `company-user-admin` for managed employee account creation
+- Deployment scripts for supported Edge Functions
+- Environment variable management
+- Error handling and retry logic
+- Logging and monitoring
+- Security and authentication
+- Cross-client communication through realtime and RPC flows
+
+## MAINTENANCE AND UTILITIES
+
+### Database Migrations
+- Supabase migrations for schema updates
+- Edge functions for complex operations
+- SQL scripts for database initialization and reset
+
+### Maintenance Scheduler
+- Periodic maintenance tasks
+- Database cleanup operations
+- Automated health checks
+
+### Error Handling
+- Comprehensive error handling throughout the app
+- User-friendly error messages
+- Logging for debugging
+- Fallback mechanisms for critical operations
+
+### Debugging Tools
+- Debug screens for testing and troubleshooting
+- Realtime debugging tools for Supabase connections
+- Diagnostic reports for system health
+- Database fix utilities for common issues
+- Document verification tools for fleet management
+- Supabase Debugger with comprehensive diagnostic capabilities
+- Realtime test utilities for channel testing
+- Fleet document verification and repair tools
+- Database connection monitoring
+- Subscription status monitoring
+- Error logging and reporting
+- Performance monitoring tools
+
+## PLANNED FUTURE ENHANCEMENTS
+
+### Super Administrator Features
+- Full user management capabilities
+- Management of all company profiles
+- Assignment and management of roles across all companies
+- System-wide monitoring and configuration
+- Access to system-wide reports and analytics
+- Billing and subscription management
+- Account status control (activation, deactivation, suspension)
+- System-wide audit logging
+- Data import/export capabilities
+- System health monitoring dashboard
+
+### Rate Configuration and Revenue Tracking
+- Company-specific rate configuration in South African Rand (ZAR)
+- Revenue tracking and reporting per ton loaded
+- Financial analytics dashboard with historical data
+- Secure, immutable financial reports with strict access controls
+- Per-ton loaded revenue calculation with automatic processing
+- Tonnage tracking across all companies
+- Load tracking with timestamps and driver information
+- Mineral type categorization and tracking
+- Weighbridge integration for accurate measurements
+- Audit trail for all financial transactions
+
+### Advanced Fleet Management
+- Vehicle maintenance scheduling
+- Fuel consumption tracking
+- Route planning and optimization
+- GPS integration for real-time tracking
+- Vehicle performance analytics
+
+### Communication Features
+- In-app messaging system
+- Chat functionality for management
+- Ticket system for user support
+- IT support ticket system for bug reporting
+
+### Additional Security Features
+- Two-factor authentication
+- Advanced audit logging
+- Security incident reporting
+- Compliance reporting
+
+## NON-NEGOTIABLE IMPLEMENTATION REQUIREMENTS
+
+- RBAC enforced everywhere
+- All sensitive data encrypted and securely stored
+- Comprehensive documentation and user training
+- Regular updates, monitoring, and maintenance
+- Feedback mechanisms for continuous improvement
+- Performance, security, and usability testing
+- Support for future integrations and extensibility

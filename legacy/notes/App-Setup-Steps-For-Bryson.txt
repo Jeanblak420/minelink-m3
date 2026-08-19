@@ -1,0 +1,75 @@
+
+
+Employee Joining Workflow
+
+Here is the breakdown of the employee joining process:
+
+Step 1 - Employee Action: Navigate Post-Signup
+
+-The employee is automatically navigated to the company selection screen after signing up.
+
+Step 2 - Employee Action: Select Company
+
+-The employee selects their intended company, [Company Name].
+
+Step 3 - System Action: Send Request to Admin, Management, or Company users
+
+-The system automatically sends an approval request notification to the designated users for [Company Name].
+
+Step 4 - System Action: Notify Employee of Pending Status
+
+-Simultaneously, the system displays a message to the employee: "Welcome! Thank you for registering with us. Your request to join [Company Name] as an employee has been sent to Management for approval and role assignment. Once management has approved your request and assigned you a role, you'll receive a notification message here. Please check back periodically."
+
+-Employee access is limited to the profile feature or Logout option.
+
+-This pending status message and limited access persist if the employee logs out and logs back in before the designated users for [Company Name] action is completed.
+
+Step 5 - Admin, Management, or Company users Action: Review Request
+
+-Admin, Management, or Company users for [Company Name] receive and review the employee's join request.
+
+Step 6 - Admin, Management, or Company users Action: Make Decision
+
+-Admin, Management, or Company users must choose one of two actions: Approve or Decline.
+
+Step 7 - System Action (Handling Decline): Notify Employee
+
+If Admin, Management, or Company users selects Decline:
+
+-The system sends a notification message to the employee: "Oops! [Company Name] has declined your request to join their company. If this was an error, please contact management or re-select the company you are employed with."
+
+Step 8 - System Action (Handling Decline): Await Employee Acknowledgement
+
+-The system waits for the employee to acknowledge the decline message (e.g., by clicking a "Got It" button).
+
+Step 9 - System Action (Handling Decline): Redirect Employee
+
+After the employee acknowledges the decline:
+
+-The system automatically redirects the employee back to the company selection screen (Return to Step 2).
+
+Step 10 - System Action (Handling Approval): Prompt for Role
+
+If Admin, Management, or Company users selects Approve:
+
+-The system prompts the Admin, Management, or Company users to assign a specific role to the employee within [Company Name].
+
+Step 11 - Admin, Management, or Company users Action (Handling Approval): Assign Role
+
+Following the prompt (if approved):
+
+-Admin, Management, or Company users selects and confirms the role for the employee.-Admin, Management, or Company users receives a notification which confirms the role assigned to employee.
+
+Step 12 - System Action (Handling Approval): Notify Employee of Success
+
+Once Admin, Management, or Company users has successfully approved and assigned a role:
+
+-The system sends a final notification message to the employee confirming successful joining and their assigned role (Note: The current message we have in place which starts with ‘Congratulations!‘).
+
+Step 13 - System Outcome: Activate Employee
+
+-The employee is now considered an active member of [Company Name] within the system.
+
+-The employee gains the permissions associated with their assigned role.
+
+-The employee can now proceed to use the application's features relevant to their role.

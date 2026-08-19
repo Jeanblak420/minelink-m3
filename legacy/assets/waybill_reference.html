@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MineLink — Manual Waybill (reference mockup)</title>
+<style>
+  /* ============================================================
+     WAYBILL REFERENCE MOCKUP  (visual target for Claude Code)
+     Reproduces the supplied VARSIWAVE / MANUAL WAYBILL image.
+     NOTE: this is an APPROXIMATION built from the reference image.
+     Before final implementation, request the actual image from the
+     user and match against it for pixel fidelity.
+     Values in [SQUARE BRACKETS] are auto-filled by the app — see the
+     field-mapping table in CLAUDE.md.
+     ============================================================ */
+
+  :root{
+    --paper:#F7EFCD;        /* cream waybill stock */
+    --ink:#111111;          /* near-black print */
+    --rule:#111111;         /* underline / box strokes */
+    --page:#d9d4c4;         /* surround behind the slip */
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:var(--page);
+    display:flex;
+    justify-content:center;
+    padding:32px 16px;
+    font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  /* Receipt-style slip: tall and narrow, ~1:2 like the image */
+  .waybill{
+    background:var(--paper);
+    width:440px;
+    border:3px solid var(--ink);
+    padding:26px 28px 30px;
+  }
+
+  /* ---- Header ---------------------------------------------- */
+  .company{
+    font-family:"Times New Roman",Georgia,serif;
+    font-weight:800;
+    font-size:58px;
+    line-height:.9;
+    letter-spacing:1px;
+    text-align:center;
+    /* condensed look of the reference */
+    transform:scaleX(.92);
+    transform-origin:center;
+    margin:0;
+    text-transform:uppercase;
+  }
+  .subtitle{
+    font-family:"Arial Narrow",Arial,sans-serif;
+    font-weight:800;
+    font-size:26px;
+    letter-spacing:5px;
+    text-align:center;
+    margin:2px 0 24px;
+    text-transform:uppercase;
+  }
+
+  /* ---- Boxed fields (NUMBER / SECTION) --------------------- */
+  .boxrow{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:14px;
+    justify-content:flex-end;
+  }
+  .boxrow .lbl{
+    font-weight:800;
+    font-size:19px;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .boxrow .box{
+    width:250px;
+    height:52px;
+    border:2.5px solid var(--ink);
+  }
+
+  /* ---- Ruled label lines ----------------------------------- */
+  .line{
+    display:flex;
+    align-items:flex-end;
+    gap:8px;
+    margin:16px 0;
+    font-weight:800;
+    font-size:17px;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+  }
+  .line .lbl{ white-space:nowrap; }
+  .line .fill{
+    flex:1 1 auto;
+    border-bottom:2px solid var(--rule);
+    min-height:20px;
+    /* auto-filled value sits on the rule */
+    font-weight:600;
+    font-size:15px;
+    line-height:20px;
+    padding:0 4px;
+    letter-spacing:.3px;
+    text-transform:none;
+    color:#333;
+  }
+  /* two fields sharing a row (PRODUCT / TONS, DATE / TIME) */
+  .line.split .fill.short{ flex:0 0 auto; width:120px; }
+
+  .sig .fill{ min-height:34px; } /* room for a signature image */
+  .sig .fill img{ height:30px; display:inline-block; vertical-align:bottom; }
+
+  /* heavy divider between dispatch block and received block */
+  .divider{
+    border:0;
+    border-top:4px solid var(--ink);
+    margin:22px 0 6px;
+  }
+
+  /* caption under the mockup, screen-only */
+  .caption{
+    max-width:440px;
+    margin:18px auto 0;
+    font-family:system-ui,sans-serif;
+    font-size:12px;
+    color:#4a4a4a;
+    line-height:1.5;
+  }
+  @media print{ .caption{ display:none; } body{ background:#fff; padding:0; } }
+</style>
+</head>
+<body>
+  <div class="waybill" role="img" aria-label="Manual waybill reference layout">
+
+    <!-- Header: company = SOURCE mine/supplier name (dynamic) -->
+    <h1 class="company">[SOURCE&nbsp;MINE]</h1>
+    <div class="subtitle">Manual Waybill</div>
+
+    <!-- Boxed fields -->
+    <div class="boxrow">
+      <span class="lbl">Number</span>
+      <span class="box"></span>
+    </div>
+    <div class="boxrow">
+      <span class="lbl">Section</span>
+      <span class="box"></span>
+    </div>
+
+    <!-- Ruled fields -->
+    <div class="line"><span class="lbl">Transporter:</span><span class="fill">[transporter name]</span></div>
+    <div class="line"><span class="lbl">Fleet/Registration No.:</span><span class="fill">[truck reg]</span></div>
+    <div class="line"><span class="lbl">Destination:</span><span class="fill">[offloading point]</span></div>
+
+    <div class="line"><span class="lbl">Truck Seal Serialno. 1:</span><span class="fill">[seal 1]</span></div>
+    <div class="line"><span class="lbl">Truck Seal Serialno. 2:</span><span class="fill">[seal 2]</span></div>
+    <div class="line"><span class="lbl">Truck Seal Serialno. 3:</span><span class="fill">[seal 3]</span></div>
+    <div class="line"><span class="lbl">Truck Seal Serialno. 4:</span><span class="fill">[seal 4]</span></div>
+
+    <div class="line split">
+      <span class="lbl">Product:</span><span class="fill">[commodity]</span>
+      <span class="lbl">Tons:</span><span class="fill short">[net weight]</span>
+    </div>
+
+    <!-- Dispatch block -->
+    <div class="line"><span class="lbl">Dispatched By:</span><span class="fill">[load controller name]</span></div>
+    <div class="line sig"><span class="lbl">Signature:</span><span class="fill">[load controller signature — auto]</span></div>
+    <div class="line split">
+      <span class="lbl">Date:</span><span class="fill short">[dispatch date]</span>
+      <span class="lbl">Time:</span><span class="fill short">[dispatch time]</span>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Received block -->
+    <div class="line"><span class="lbl">Received By:</span><span class="fill">[driver name]</span></div>
+    <div class="line sig"><span class="lbl">Signature:</span><span class="fill">[driver signature — auto]</span></div>
+    <div class="line split">
+      <span class="lbl">Date:</span><span class="fill short">[offload date]</span>
+      <span class="lbl">Time:</span><span class="fill short">[offload time]</span>
+    </div>
+
+  </div>
+
+  <p class="caption">
+    Reference approximation of the supplied Manual Waybill, for use as a visual target during
+    implementation. Fonts/spacing approximate the image — <strong>request the actual image from
+    the user before finalising</strong> and match against it. Bracketed values are auto-filled by
+    the app (see the waybill field-mapping table in CLAUDE.md); header and Section both show the
+    SOURCE mine/supplier name; the two signatures render the users' transparent-PNG profile
+    signatures automatically.
+  </p>
+</body>
+</html>

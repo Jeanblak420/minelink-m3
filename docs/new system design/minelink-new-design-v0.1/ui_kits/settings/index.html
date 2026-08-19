@@ -1,0 +1,86 @@
+<!-- @dsCard group="States & Account" viewport="1200x820" name="User Settings" subtitle="Account, notifications, security & themes (per-user)" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>MineLink — Settings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+<style>html,body{margin:0;height:100%}body{background:var(--surface-app)}#root{height:100vh}</style>
+</head><body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script src="../shared/appearance.js"></script>
+<script type="text/babel" src="../shared/shell.jsx"></script>
+<script type="text/babel">
+const { PortalShell } = window.MLShell;
+const { Icon, Switch, Input, Avatar } = window.MineLinkDesignSystem_9acfde;
+const NAV = [
+  { key: 'account', label: 'Account', icon: 'person' },
+  { key: 'themes', label: 'Themes & Appearance', icon: 'palette' },
+  { key: 'notifs', label: 'Notifications', icon: 'notifications' },
+  { key: 'security', label: 'Security', icon: 'lock' },
+];
+function ThemesPanel(){
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    let tries = 0;
+    const tick = () => {
+      if (ref.current && window.MLTheme && window.MLTheme.renderSettings) { window.MLTheme.renderSettings(ref.current); return; }
+      if (tries++ < 40) setTimeout(tick, 100);
+    };
+    tick();
+  }, []);
+  return (<div>
+    <div style={{display:'flex',alignItems:'center',gap:9,marginBottom:6}}><Icon name="palette" size={22} color="var(--accent)"/><h2 style={{margin:0,fontSize:19,fontWeight:800,color:'var(--text-strong)'}}>Themes & Appearance</h2></div>
+    <p style={{margin:'0 0 20px',fontSize:13.5,color:'var(--text-muted)'}}>Personalise how the app looks for you — mode, accent, and background (solids, gradients, animated & fully customizable). Saved to your account only.</p>
+    <div ref={ref}></div>
+  </div>);
+}
+function AccountPanel(){
+  return (<div style={{maxWidth:560}}>
+    <div style={{display:'flex',alignItems:'center',gap:9,marginBottom:18}}><Icon name="person" size={22} color="var(--accent)"/><h2 style={{margin:0,fontSize:19,fontWeight:800,color:'var(--text-strong)'}}>Account</h2></div>
+    <div style={{background:'var(--surface-card)',border:'1px solid var(--border-card)',borderRadius:16,padding:24}}>
+      <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:20}}><Avatar name="Eli Naidoo" size={64} tone="cyan"/><div><div style={{fontSize:18,fontWeight:800,color:'var(--text-strong)'}}>Eli Naidoo</div><div style={{fontSize:13,color:'var(--text-muted)'}}>Owner · Atlas Buyer Group</div></div></div>
+      <div style={{display:'flex',flexDirection:'column',gap:16}}>
+        <Input label="Display name" defaultValue="Eli Naidoo" icon="person"/>
+        <Input label="Email" defaultValue="eli@atlasbuyer.com" icon="mail"/>
+        <Input label="WhatsApp number" defaultValue="+27 82 555 0134" icon="chat"/>
+      </div>
+    </div>
+  </div>);
+}
+function NotifsPanel(){
+  const [s,setS]=React.useState({push:true,waybill:true,recon:true,chat:true,token:false});
+  return (<div style={{maxWidth:560}}>
+    <div style={{display:'flex',alignItems:'center',gap:9,marginBottom:18}}><Icon name="notifications" size={22} color="var(--accent)"/><h2 style={{margin:0,fontSize:19,fontWeight:800,color:'var(--text-strong)'}}>Notifications</h2></div>
+    <div style={{background:'var(--surface-card)',border:'1px solid var(--border-card)',borderRadius:16,padding:8}}>
+      {[['push','Push notifications','Alerts on this device'],['waybill','Waybill updates','Signed & pending waybills'],['recon','Reconciliation alerts','Variance & disputes'],['chat','New messages','Chat & group messages'],['token','Token & seat reminders','Expiry warnings']].map(([k,t,d],i)=>(
+        <div key={k} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 16px',borderBottom:i<4?'1px solid var(--divider)':'none'}}><div style={{flex:1}}><div style={{fontSize:14.5,fontWeight:700,color:'var(--text-strong)'}}>{t}</div><div style={{fontSize:12.5,color:'var(--text-muted)'}}>{d}</div></div><Switch checked={s[k]} onChange={(v)=>setS(p=>({...p,[k]:v}))}/></div>
+      ))}
+    </div>
+  </div>);
+}
+function SecurityPanel(){
+  return (<div style={{maxWidth:560}}>
+    <div style={{display:'flex',alignItems:'center',gap:9,marginBottom:18}}><Icon name="lock" size={22} color="var(--accent)"/><h2 style={{margin:0,fontSize:19,fontWeight:800,color:'var(--text-strong)'}}>Security</h2></div>
+    <div style={{background:'var(--surface-card)',border:'1px solid var(--border-card)',borderRadius:16,padding:24,display:'flex',flexDirection:'column',gap:16}}>
+      <Input label="Current password" type="password" icon="lock" placeholder="••••••••"/>
+      <Input label="New password" type="password" icon="lock_reset" placeholder="At least 10 characters"/>
+      <Input label="Confirm new password" type="password" icon="lock_reset" placeholder="Re-enter"/>
+    </div>
+  </div>);
+}
+function App(){
+  const [tab,setTab]=React.useState('themes');
+  window.__mlSettingsNav = () => setTab('themes');
+  const META={account:{t:'Account',s:'Your profile details'},themes:{t:'Themes & Appearance',s:'Personalise your view'},notifs:{t:'Notifications',s:'What you get alerted about'},security:{t:'Security',s:'Password & sign-in'}};
+  const m=META[tab];
+  let body;
+  if(tab==='themes')body=<ThemesPanel/>;else if(tab==='account')body=<AccountPanel/>;else if(tab==='notifs')body=<NotifsPanel/>;else body=<SecurityPanel/>;
+  return <PortalShell brand="MineLink" sectionLabel="SETTINGS" nav={NAV} active={tab} onNav={setTab}
+    user={{name:'Eli Naidoo',role:'Buyer · Atlas'}} title={m.t} subtitle={m.s}>{body}</PortalShell>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body></html>

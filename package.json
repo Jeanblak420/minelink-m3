@@ -1,0 +1,10 @@
+{
+  "name": "flutter_application_1",
+  "version": "1.0.0",
+  "description": "Flutter application with Supabase",
+  "scripts": {
+    "supabase": "\"C:\\Users\\Somebody Someone\\scoop\\shims\\supabase.exe\"",
+    "supabase:functions:new": "\"C:\\Users\\Somebody Someone\\scoop\\shims\\supabase.exe\" functions new",
+    "supabase:functions:deploy": "\"C:\\Users\\Somebody Someone\\scoop\\shims\\supabase.exe\" functions deploy"
+  }
+}

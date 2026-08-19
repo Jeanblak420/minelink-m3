@@ -1,0 +1,148 @@
+
+Notification System Requirements (Granular Breakdown):
+
+Step 1 - Delivery Mechanism:
+
+-Ensure notifications are delivered instantly upon issue.
+
+Step 2 - Delivery Scope:
+
+-Ensure instant delivery works for both logged-in and logged-out users.
+
+Step 3 - Admin Tab: Button Implementation:
+
+-Implement a clickable "Notifications" button within the Admin tab (ref: admin-notification.png).
+
+Step 4 - Admin Tab: Button Navigation:
+
+-Clicking the Admin tab "Notifications" button must navigate to a new, dedicated full-screen notification management page.
+
+Step 5 - Admin Tab: Distinction from Bell Icon:
+
+-Clarify that the Admin tab notification page is functionally distinct from the top-right bell icon.
+
+Step 6 - Bell Icon: Maintain Functionality:
+
+-Retain the existing functionality of the top-right notification bell icon.
+
+Step 7 - Bell Icon: View & Clear:
+
+-Allow users to view recent notifications via the bell icon.
+
+-Allow users to clear notifications from the bell icon's view (like a smartphone tray).
+
+Step 8 - Management Screen: Display Relevant Notifications:
+
+-On the dedicated management screen, display all notifications relevant to the viewing user (based on role).
+
+Step 9 - Management Screen: Mark as Read/Unread:
+
+-Allow users to mark individual notifications as "Read" or "Unread" on the management screen.
+
+Step 10 - Management Screen: No Deletion:
+
+-Crucially, prevent users from deleting any notifications on the management screen.
+
+Step 11 - Management Screen: Persistence:
+
+-Ensure the management screen provides a persistent, non-clearable notification history.
+
+Step 12 - Timestamping: Automatic Addition:
+
+-Automatically add a date and time stamp to every generated notification.
+
+Step 13 - Timestamping: Time Zone:
+
+-Consistently use the '(UTC+02:00) Harare, Pretoria' time zone for all timestamps.
+
+Step 14 - Timestamping: Non-Configurable:
+
+-Ensure the time zone setting cannot be changed by users or administrators.
+
+Step 15 - Timestamping: Display Format:
+
+-Display the date/time stamp in a smaller font size on each notification (ref: Notification-example.png).
+
+Step 16 - Universal Access: Individual Button:
+
+-Provide every user with a dedicated "Notifications" button leading to their management screen.
+
+Step 17 - Universal Access: Button Location:
+
+-Note that the exact location of this individual button might vary based on the user's primary interface.
+
+Step 18 - Filtering: Role-Based:
+
+-Filter notifications shown on the management screen based on the user's role and organization type (Mine/Supplier).
+
+Step 19 - Filtering: Company Role View:
+
+-Company Role (Mine/Supplier) can view notifications for all roles within their organization type.
+
+Step 20 - Filtering: Company Role Button Label (Specific Tab):
+
+-When Company Role accesses notifications via a specific role's tab (e.g., Security), label the button descriptively (e.g., "Security Notifications").
+
+Step 21 - Filtering: Company Role Button Label (General View):
+
+-When Company Role accesses their comprehensive view, label the button appropriately (e.g., "Mine/Supplier Notifications" or "Notifications").
+
+Step 22 - Filtering: Management Role View:
+
+-Management Role can view Management, Admin, Controller, and Security notifications. Button label: "Notifications".
+
+Step 23 - Filtering: Admin Role View:
+
+-Admin Role can view Admin, Controller, and Security notifications. Button label: "Notifications".
+
+Step 24 - Filtering: Controller Role View:
+
+-Controller Role can view only Controller notifications. Button label: "Notifications".
+
+Step 25 - Filtering: Security Role View:
+
+-Security Role can view only Security notifications. Button label: "Notifications".
+
+Step 26 - Action Stamp: Implementation:
+
+-For notifications triggered by user actions, add an "Actioned By: [User's First Name] [User's Last Name]" stamp.
+
+Step 27 - Action Stamp: Display Format:
+
+-Display the "Actioned By" stamp in a smaller font, near the date/time stamp (ref: Notification-example.png, e.g., bottom-left).
+
+Step 28 - Action Stamp: Name Source:
+
+-Use the First and Last names provided by the user during sign-up for the stamp.
+
+Step 29 - Action Stamp Exception: Condition:
+
+-Do not add the "Actioned By" stamp when a user changes their own profile picture.
+
+Step 30 - Action Stamp Exception: User Notification:
+
+-For the user changing their own picture, the notification text is: "You changed your profile picture".
+
+Step 31 - Action Stamp Exception: Observer Notification:
+
+-For Admin/Management/Company viewing this event, the text is: "[User's First Name] [User's Last Name] changed his/her profile picture".
+
+Step 32 - Action Stamp Inclusion: Condition:
+
+-Do add the "Actioned By" stamp when a user modifies another user's info or company profile (requires permissions).
+
+Step 33 - Action Stamp Inclusion: Notification Text:
+
+-The notification message for delegated actions should state the actor, action, and target (e.g., "Ben Kosi changed Piet Poes's Profile Picture").
+
+Step 34 - Action Stamp Inclusion: Stamp Content:
+
+-Ensure the corresponding "Actioned By: [Actor's Name]" stamp appears on notifications for delegated actions.
+
+Step 35 - Visual Structure: Adherence to Example:
+
+-Structure notification appearance generally according to Notification-example.png.
+
+Step 36 - Visual Structure: Element Priority:
+
+-Ensure the main message is prominent, with 'Actioned By' and Date/Time stamps clearly visible but less prominent (e.g., smaller text below/alongside).

@@ -1,0 +1,821 @@
+# THE MINERAL GUIDE - APPLICATION OVERVIEW
+
+## CORE ARCHITECTURE
+
+### Application Structure
+- Flutter-based mobile application with Supabase backend
+- Uses Flutter Riverpod for state management
+- Go Router for navigation
+- Follows a feature-based architecture with clear separation of concerns
+- Comprehensive logging system for debugging and monitoring
+- Extensive error handling throughout the application
+
+### Project Organization
+```
+lib/
+├── core/                  # Core functionality and utilities
+│   ├── config/            # Configuration settings
+│   ├── routing/           # Routing configuration
+│   ├── services/          # Core services
+│   ├── theme/             # App theming
+│   └── utils/             # Utility functions
+├── features/              # Feature modules
+│   ├── auth/              # Authentication
+│   ├── company/           # Company management
+│   ├── employee/          # Employee management
+│   ├── fleet/             # Fleet management
+│   ├── home/              # Home screens
+│   ├── notifications/     # Notification system
+│   ├── profile/           # User profiles
+│   └── tabs/              # Role-based tab screens
+├── app.dart               # Main app widget
+└── main.dart              # Entry point
+```
+
+## DATABASE SCHEMA
+
+### Core Tables
+1. **companies**
+   - id (UUID, primary key)
+   - user_id (UUID, references auth.users)
+   - company_name (TEXT)
+   - whatsapp_number (TEXT)
+   - org_type (TEXT)
+   - logo_url (TEXT)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+2. **employees**
+   - id (UUID, primary key)
+   - user_id (UUID, references auth.users)
+   - company_id (UUID, references companies)
+   - first_name (TEXT)
+   - last_name (TEXT)
+   - whatsapp_number (TEXT)
+   - profile_photo_url (TEXT)
+   - role (TEXT)
+   - status (TEXT) - For tracking pending employees
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+3. **notifications**
+   - id (UUID, primary key)
+   - user_id (UUID, references auth.users)
+   - employee_id (UUID, references employees)
+   - company_id (UUID, references companies)
+   - title (TEXT)
+   - message (TEXT)
+   - type (TEXT)
+   - is_read (BOOLEAN)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+   - actioned_by (TEXT)
+   - actioned_by_id (UUID, references auth.users)
+   - role_scope (TEXT)
+   - org_type (TEXT)
+   - metadata (JSONB)
+   - importance (TEXT)
+
+4. **employee_status_history**
+   - id (UUID, primary key)
+   - employee_id (UUID, references employees)
+   - company_id (UUID, references companies)
+   - status (TEXT)
+   - timestamp (TIMESTAMPTZ)
+
+5. **fleet_vehicles**
+   - id (UUID, primary key)
+   - vehicle_registration_expiry_date (DATE)
+   - vehicle_registration_number (TEXT)
+   - first_trailer_regs (TEXT)
+   - second_trailer_regs (TEXT)
+   - assigned_driver_id (UUID, references employees.user_id)
+   - driver_first_name (TEXT)
+   - driver_last_name (TEXT)
+   - driver_id_number (TEXT)
+   - driver_passport_or_workers_permit (TEXT)
+   - drivers_license_document (TEXT)
+   - driver_id_document_url (TEXT)
+   - driver_passport_document_url (TEXT)
+   - driver_work_visa_document_url (TEXT)
+   - driver_license_document_url (TEXT)
+   - driver_is_south_african_citizen (BOOLEAN)
+   - company_id (UUID, references companies)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+   - is_active (BOOLEAN)
+
+6. **weighbridge_records**
+   - id (UUID, primary key)
+   - company_id (UUID, references companies)
+   - truck_registration (TEXT)
+   - driver_name (TEXT)
+   - weight_tons (DECIMAL)
+   - mineral_type (TEXT)
+   - quality_grade (TEXT)
+   - weighing_timestamp (TIMESTAMPTZ)
+   - receipt_number (TEXT)
+   - receipt_url (TEXT)
+   - created_by (UUID, references employees)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+7. **security_incidents**
+   - id (UUID, primary key)
+   - company_id (UUID, references companies)
+   - reported_by (UUID, references employees)
+   - incident_type (TEXT)
+   - description (TEXT)
+   - location (TEXT)
+   - incident_timestamp (TIMESTAMPTZ)
+   - severity (TEXT)
+   - status (TEXT)
+   - resolution (TEXT)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+8. **gate_checks**
+   - id (UUID, primary key)
+   - company_id (UUID, references companies)
+   - vehicle_id (UUID, references fleet_vehicles)
+   - checked_by (UUID, references employees)
+   - driver_id (UUID, references employees)
+   - entry_exit (TEXT)
+   - check_timestamp (TIMESTAMPTZ)
+   - documents_verified (BOOLEAN)
+   - notes (TEXT)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+9. **mineral_loads**
+   - id (UUID, primary key)
+   - company_id (UUID, references companies)
+   - weighbridge_record_id (UUID, references weighbridge_records)
+   - mineral_type (TEXT)
+   - quantity_tons (DECIMAL)
+   - quality_grade (TEXT)
+   - source_location (TEXT)
+   - destination (TEXT)
+   - transport_vehicle_id (UUID, references fleet_vehicles)
+   - status (TEXT)
+   - created_at (TIMESTAMPTZ)
+   - updated_at (TIMESTAMPTZ)
+
+10. **broadcast_messages**
+    - id (UUID, primary key)
+    - sender_id (UUID, references auth.users)
+    - message (TEXT)
+    - channel (TEXT)
+    - metadata (JSONB)
+    - created_at (TIMESTAMPTZ)
+
+## USER TYPES AND ROLES
+
+### User Types
+1. **Company** - Organization accounts
+2. **Employee** - Individual user accounts belonging to companies
+
+### Organization Types
+1. **Mine/Supplier** (mineSupplier)
+2. **Buyer** (buyer)
+3. **Transporter** (transporter)
+
+### User Roles
+1. **Security** - For Mine/Supplier organizations
+2. **Controller/WB** - For Mine/Supplier organizations
+3. **Admin** - For all organization types
+4. **Management** - For all organization types
+5. **Driver** - For Transporter organizations
+6. **Mine/Supplier** - Organization-specific role
+7. **Buyer** - Organization-specific role
+8. **Transporter** - Organization-specific role
+
+### Role Assignment
+- Users aren't automatically assigned a role
+- They remain with an unassigned role until manually assigned by an admin
+- Once assigned a role while logged in, users are redirected to the appropriate screen with a welcome message
+
+## AUTHENTICATION FEATURES
+
+### Login
+- Email/password authentication
+- Session management with auto-refresh
+- Automatic redirection to home screen after login
+
+### Signup
+- Separate flows for Company and Employee registration
+- Email verification
+- Profile creation during signup
+- Document upload options (ID, passport, work visa, license)
+
+### Password Management
+- Forgot password functionality
+- Password reset via email
+
+## COMPANY FEATURES
+
+### Company Management
+- Company profile creation and editing
+- Organization type selection (Mine/Supplier, Buyer, Transporter)
+- Logo upload
+- Contact information management
+
+### Employee Management
+- View and manage company employees
+- Assign roles to employees
+- Approve or decline employee join requests
+- Track employee status (pending, active, etc.)
+
+### Employee Dismissal System
+- Three-phase dismissal process:
+  1. Dismissal initiation with notifications
+  2. Employee appeal process
+  3. Final decision with account deletion protocol
+- Comprehensive error handling and form validation
+- Loading indicators for async operations
+- Responsive UI design
+- Clear status indicators throughout the process
+
+## FLEET MANAGEMENT SYSTEM
+
+### Vehicle Management
+- Add new vehicles with registration details
+- Track vehicle registration expiry dates
+- Manage trailer registrations
+- Mark vehicles as inactive instead of removing them
+- Separate tables for active and inactive vehicles
+- Ability to reactivate inactive vehicles
+
+### Driver Assignment
+- Assign drivers to vehicles
+- Unassign drivers from vehicles
+- View driver documents (ID, Passport, Work Permit, License)
+- Verify driver document URLs
+- Fix document URL issues
+
+### Access Control
+- Only available to users with Organization type = Transporter and role = Admin or higher
+- Strict data isolation between companies
+
+## NOTIFICATION SYSTEM
+
+### Notification Types
+- Role assignment notifications
+- Employee join requests
+- Dismissal process notifications
+- Fleet management notifications
+- Profile updates
+- Welcome notifications
+- Role confirmation notifications
+- Action tracking notifications
+
+### Notification Features
+- Role-based visibility:
+  - Companies see all users' actions
+  - Management sees actions of everyone below them
+  - Regular users only see their own actions unless specified
+- Automatic tracking of in-app events from registered users
+- User and timestamp information included
+- Read status tracking
+- Persistent notifications for users awaiting approval
+- Action stamping with user information
+- Metadata for additional context
+- Importance levels for prioritization
+
+### Email Notifications
+- Email notifications for critical events
+- SMTP or transactional email integration configured through environment secrets
+- Customizable email templates
+- SendGrid API integration for reliable delivery
+
+## CORE SERVICES
+
+### Database Service
+- CRUD operations for all entities
+- Real-time data synchronization
+- Caching for improved performance
+- Transaction support
+- Error handling and retry mechanisms
+- Broadcast messaging capabilities
+- Presence tracking for online status
+- Centralized subscription management
+- Automatic reconnection handling
+
+### Authentication Service
+- User authentication and session management
+- User type determination
+- Profile management
+- Password reset functionality
+- Session refresh and token management
+- Role-based access control enforcement
+- User impersonation for troubleshooting (future)
+
+### Notification Service
+- Create and manage notifications
+- Action stamping for audit trails
+- Role-based filtering
+- Email notification integration
+- Webhook support for external notifications
+- Importance levels for prioritization
+- Read status tracking
+- Persistent notifications for critical events
+
+### Fleet Service
+- Vehicle management
+- Driver assignment
+- Document handling
+- Vehicle status tracking
+- Driver document verification
+- Vehicle activation/deactivation
+- Document URL verification and repair
+- Trailer registration management
+
+### Employee Status Service
+- Track employee status changes
+- Manage dismissal process
+- Historical record keeping
+- Status transition validation
+- Audit trail for status changes
+- Appeal process management
+- Final decision handling
+- Status history visualization
+
+### Backend Workflow Service
+- Postgres RPC orchestration for workflow writes
+- Edge functions only where external integrations or managed-user flows require them
+- Retry logic for transient errors
+- Realtime-safe cross-client communication
+- Email notification delivery through configured providers
+
+### Action Tracking Service
+- Track user actions across the application
+- Create notifications based on actions
+- Role-based visibility for actions
+- Audit trail for user activities
+- Automatic metadata collection for context
+- Standardized implementation via ActionTrackingMixin
+- Consistent action tracking across all features
+- Timestamping of all actions
+
+## UI COMPONENTS
+
+### Role-Based Tabs
+- Different tab screens based on user role:
+  - Security Tab - For security personnel at mine/supplier organizations
+    - Security dashboard with active personnel stats
+    - Incident tracking and reporting
+    - Gate check management
+    - Pending approvals monitoring
+  - Controller/Weighbridge Tab - For weighbridge operators at mine/supplier organizations
+    - Weighbridge statistics (trucks weighed, tonnage, averages)
+    - New weighing entry with truck and driver details
+    - Weight recording in tons
+    - Weighing history and receipts
+  - Admin Tab - For administrative personnel across all organization types
+    - User management dashboard
+    - Role assignment controls
+    - Company configuration options
+    - System settings access
+  - Management Tab - For management personnel across all organization types
+    - Performance overview with data visualization
+    - Analytics dashboard with charts and metrics
+    - Team management tools
+    - Strategic planning features
+  - Driver Tab - For drivers in transporter organizations
+    - Trip management
+    - Document access
+    - Status reporting
+    - Load tracking
+  - Mine/Supplier Tab - For mine/supplier organization users
+    - Mineral tracking
+    - Production monitoring
+    - Inventory management
+    - Quality control
+  - Buyer Tab - For buyer organization users
+    - Purchase tracking
+    - Order management
+    - Supplier relationships
+    - Inventory monitoring
+
+### Common Widgets
+- Notification bell with unread count
+- Profile access button
+- Logout confirmation dialog
+- Form validation components
+- Loading indicators
+- Document viewers
+- Debug and developer tools buttons
+- Error message displays
+- Confirmation dialogs
+- Action buttons with loading states
+- Data visualization components (charts, graphs)
+- Statistics cards for dashboard metrics
+- Document upload widgets with progress indicators
+- Role-specific action buttons
+- User activity timelines
+
+## MAINTENANCE AND UTILITIES
+
+### Database Migrations
+- Supabase migrations for schema updates
+- Edge functions for complex operations
+- SQL scripts for database initialization and reset
+
+### Maintenance Scheduler
+- Periodic maintenance tasks
+- Database cleanup operations
+- Automated health checks
+
+### Error Handling
+- Comprehensive error handling throughout the app
+- User-friendly error messages
+- Logging for debugging
+- Fallback mechanisms for critical operations
+
+### Debugging Tools
+- Debug screens for testing and troubleshooting
+- Realtime debugging tools for Supabase connections
+- Diagnostic reports for system health
+- Database fix utilities for common issues
+- Document verification tools for fleet management
+- Supabase Debugger with comprehensive diagnostic capabilities
+- Realtime test utilities for channel testing
+- Fleet document verification and repair tools
+- Database connection monitoring
+- Subscription status monitoring
+- Error logging and reporting
+- Performance monitoring tools
+
+## WORKFLOW PROCESSES
+
+### Company Registration Flow
+1. User selects "Sign up as Company"
+2. Provides company details (name, contact info, organization type)
+3. Creates account with email and password
+4. Uploads company logo (optional)
+5. Account is created and user is logged in
+6. Company dashboard is displayed with appropriate tabs based on organization type
+
+### Employee Registration Flow
+1. User selects "Sign up as Employee"
+2. Provides personal details (name, contact info)
+3. Creates account with email and password
+4. Uploads profile photo and required documents
+5. Account is created and user is logged in
+6. Employee is prompted to select a company to join
+7. Request is sent to the selected company
+8. Employee remains in "pending" status until approved
+
+### Company-Employee Linking Process
+1. Employee selects a company to join
+2. Company receives a notification of the join request
+3. Company admin can approve or decline the request
+4. If approved, employee is linked to the company
+5. Company can assign a role to the employee
+6. Employee receives a notification of role assignment
+7. Employee gains access to role-specific features
+
+### Employee Dismissal Process
+1. Company initiates dismissal with reason
+2. Employee receives notification and can submit appeal
+3. Company reviews appeal and makes final decision
+4. If dismissal is upheld, account is scheduled for deletion
+5. If dismissal is overturned, employee status is restored
+
+### Fleet Vehicle Management Process
+1. Admin adds new vehicle with registration details
+2. Vehicle appears in active fleet list
+3. Admin can assign a driver to the vehicle
+4. Driver documents are linked to the vehicle
+5. Admin can mark vehicle as inactive when needed
+6. Inactive vehicles can be reactivated
+
+### Weighbridge Operation Process
+1. Controller/WB user logs into the system
+2. Views weighbridge statistics dashboard
+3. Initiates new weighing with truck and driver details
+4. Records weight in tons
+5. System automatically calculates revenue based on configured rates
+6. Generates weighing receipt
+7. Updates statistics and history
+8. Data is available for reporting and analytics
+
+### Security Check Process
+1. Security personnel logs into the system
+2. Views security dashboard with active personnel and incidents
+3. Records gate checks and security incidents
+4. Verifies driver and vehicle documentation
+5. Approves or denies entry based on verification
+6. Logs all security activities
+7. Generates security reports
+
+### Mineral Tracking Process
+1. Mine/Supplier records mineral extraction details
+2. Weighbridge confirms mineral weight
+3. System tracks mineral type, quality, and quantity
+4. Buyer receives notification of available minerals
+5. Transaction is recorded when minerals are purchased
+6. Revenue is calculated based on configured rates
+7. Reports are generated for all parties
+
+## SECURITY AND DATA ISOLATION
+
+### Row-Level Security
+- Supabase RLS policies ensure data isolation between companies
+- Users can only access data related to their company
+- Role-based access controls for sensitive operations
+- Table-specific security policies
+- Function-level security controls
+- Data access audit logging
+- Strict permission checks for all operations
+
+### Document Security
+- Secure storage of user documents in Supabase Storage
+- Access controls for document viewing
+- Document verification processes
+- Role-based document access
+- Structured storage paths for different document types:
+  - ID documents
+  - Passport documents
+  - Work visa documents
+  - License documents
+  - Company logos
+  - Profile photos
+  - Vehicle registration documents
+  - Weighbridge receipts
+  - Mineral quality certificates
+- Document expiry tracking
+- Automatic document verification workflows
+- Secure document sharing mechanisms
+
+### Authentication Security
+- Email verification for new accounts
+- Secure password reset process
+- Session management with automatic refresh
+- Logout functionality with confirmation
+- Token-based authentication
+- Session timeout controls
+- Login attempt monitoring
+- Secure credential storage
+- Password strength enforcement
+- Account lockout after failed attempts
+
+### Security Tab Features
+- Security personnel dashboard
+- Gate check management
+- Incident reporting and tracking
+- Personnel monitoring
+- Access control management
+- Security alert system
+- Visitor management
+- Security log maintenance
+- Checkpoint verification
+- Document inspection tools
+- Vehicle entry/exit logging
+- Driver verification system
+- Incident severity classification
+- Security report generation
+- Real-time security alerts
+- Historical incident tracking
+- Security metrics and analytics
+- Checkpoint management
+- Security personnel scheduling
+- Incident response protocols
+
+## FUTURE ENHANCEMENTS
+
+### Super Administrator Features
+- Full user management capabilities
+- Management of all company profiles
+- Assignment and management of roles across all companies
+- System-wide monitoring and configuration
+- Access to system-wide reports and analytics
+- Billing and subscription management
+- Account status control (activation, deactivation, suspension)
+- System-wide audit logging
+- Data import/export capabilities
+- System health monitoring dashboard
+
+### Rate Configuration and Revenue Tracking
+- Company-specific rate configuration in South African Rand (ZAR)
+- Revenue tracking and reporting per ton loaded
+- Financial analytics dashboard with historical data
+- Secure, immutable financial reports with strict access controls
+- Per-ton loaded revenue calculation with automatic processing
+- Tonnage tracking across all companies
+- Load tracking with timestamps and driver information
+- Mineral type categorization and tracking
+- Weighbridge integration for accurate measurements
+- Audit trail for all financial transactions
+
+### Advanced Fleet Management
+- Vehicle maintenance scheduling
+- Fuel consumption tracking
+- Route planning and optimization
+- GPS integration for real-time tracking
+- Vehicle performance analytics
+
+### Communication Features
+- In-app messaging system
+- Chat functionality for management
+- Ticket system for user support
+- IT support ticket system for bug reporting
+
+### Additional Security Features
+- Two-factor authentication
+- Advanced audit logging
+- Security incident reporting
+- Compliance reporting
+
+## TECHNICAL IMPLEMENTATION DETAILS
+
+### Supabase Configuration
+- Project URL: https://yftazblpmicqtamyiwyb.supabase.co
+- Publishable key is supplied at runtime with `SUPABASE_PUBLISHABLE_KEY`
+- Email delivery configuration is supplied through environment secrets
+- SMTP port: 465
+- Preferred FROM_NAME: Support.NoReply@themineralguide.com
+- Supabase CLI available for database migrations and edge function management
+- Row-Level Security (RLS) policies implemented for data isolation
+- Realtime features enabled for specific tables
+- Storage buckets configured for document storage with appropriate access controls
+
+### State Management
+- Flutter Riverpod for reactive state management
+- StateNotifier pattern for complex state handling
+- Provider pattern for services and utilities
+- Family providers for parameterized state
+- Provider scoping for dependency injection
+
+### Caching Strategy
+- Local caching for improved performance
+- Cache invalidation on data changes
+- Periodic cache refresh for real-time data
+- Session caching for user authentication
+
+### Real-time Updates
+- Supabase real-time subscriptions for data synchronization
+- RPC-driven writes with realtime subscriptions for critical operations
+- Periodic refresh timers as fallback
+- Channel-based communication
+- Presence tracking for online status
+- Broadcast messaging capabilities
+- Realtime debugging tools and test screens
+- PostgreSQL change event listeners
+- Table-specific subscriptions
+- Centralized subscription management
+- Automatic reconnection handling
+- Subscription status monitoring
+- Cross-client notification delivery
+- Real-time weighbridge data updates
+- Live fleet tracking updates
+- Instant notification delivery
+- Real-time document verification status updates
+- Live employee status tracking
+- Immediate action tracking and notification
+- Diagnostic tools for realtime connection issues
+- Standalone test scripts for realtime features
+- Comprehensive troubleshooting guides
+- Connection status monitoring
+- Channel testing utilities
+- Broadcast channel testing
+- Presence channel testing
+- Realtime subscription testing
+- Realtime event filtering
+- Realtime event transformation
+
+### Error Handling Strategy
+- Try-catch blocks for all async operations
+- User-friendly error messages
+- Detailed logging for debugging
+- Fallback mechanisms for critical operations
+- Graceful degradation when services are unavailable
+
+### Responsive Design
+- Adaptive layouts for different screen sizes
+- Responsive widgets that adjust to available space
+- Consistent theming across the application
+- Accessibility considerations for all UI elements
+
+### Testing Approach
+- Unit tests for core business logic
+- Widget tests for UI components
+- Integration tests for key user flows
+- Manual testing for edge cases and usability
+
+### Code Organization Principles
+- Feature-based architecture
+- Clear separation of concerns:
+  - Models: Data structures
+  - Services: Business logic
+  - Providers: State management
+  - Screens: UI components
+  - Widgets: Reusable UI elements
+  - Mixins: Shared behavior
+  - Utils: Helper functions
+- Dependency injection for testability
+- Consistent naming conventions
+- Mixins for shared functionality
+- Extension methods for code reuse
+- Utility classes for common operations
+- Centralized configuration management
+- Standardized error handling patterns
+- Consistent logging approach
+
+### Edge Functions and Backend RPCs
+- Supabase Edge Functions for targeted server-side operations
+- Database-owned RPCs for approvals, notifications, fleet, chat, and role workflows
+- `company-user-admin` for managed employee account creation
+- Environment variable and secret management
+- Error handling and retry logic
+- Logging and monitoring
+- Security and authentication
+- Cross-client communication through realtime and RPC flows
+
+### Data Models
+- AppUser: Extended user model with role and type information
+- Company: Organization data model with organization type and contact details
+- Employee: User profile with company association, role, and status
+- Notification: System and user notifications with metadata and importance levels
+- FleetVehicle: Vehicle management data including registration and driver assignment
+- EmployeeStatusHistory: Historical employee status tracking for audit purposes
+- WeighbridgeRecord: Weighing data including truck, driver, and tonnage information
+- MineralLoad: Tracking of mineral loads with type, weight, and quality metrics
+- DocumentReference: Storage of document URLs with verification status
+- ActionRecord: Detailed tracking of user actions for audit purposes
+- BroadcastMessage: System for cross-client communication
+- RevenueRecord: Immutable financial records for revenue tracking
+- SecurityIncident: Tracking of security incidents and resolutions
+- GateCheck: Recording vehicle entry/exit and document verification
+- UserRole: Enumeration of available user roles with permissions
+- OrgType: Enumeration of organization types with specific capabilities
+- NotificationType: Classification of different notification categories
+- EmployeeStatus: Tracking of employee status transitions
+- DocumentType: Classification of document types for storage and verification
+- DebugReport: Diagnostic information for troubleshooting
+- RealtimeStatus: Monitoring of realtime connection status
+- SubscriptionStatus: Tracking of subscription health and activity
+
+## PLANNED & NON-NEGOTIABLE FEATURES (FUTURE ENHANCEMENTS)
+
+The following features and requirements are planned for future releases or are non-negotiable for system stability, security, and scalability. These are sourced from `Features-To-ADD-When-APP-is-in-Working-order.txt` and related planning documents.
+
+### Super Administrator Role & System-Wide Management
+- Super Administrator with full CRUD and configuration control over all users, companies, roles, and system settings
+- User impersonation for troubleshooting (with audit logging)
+- System-wide audit logs and operational monitoring
+- Strict limitation on number of Super Admins; all actions logged
+
+### Advanced Company & User Management
+- Company-specific rate configuration and immutable revenue-per-ton reporting
+- Full CRUD for companies and users, including role/permission management, password resets, account status control
+- User association/unassignment to companies
+- Global system settings, feature flags, workflow management
+
+### Security, Auditing, and Compliance
+- RBAC (Role-Based Access Control) for all features and data
+- Comprehensive audit logging (logins, data changes, admin actions, etc.)
+- Security policy management (session timeouts, MFA, IP whitelisting/blacklisting)
+- API key management for integrations
+- Regular security audits and penetration testing
+- Compliance with GDPR, HIPAA, and other relevant standards
+
+### Data, Reporting, and Billing
+- System-wide and exclusive reporting (including immutable financial reports)
+- Data import/export, purging (with caution)
+- Billing and subscription management (if applicable)
+- System health and performance monitoring dashboards
+
+### Support, Customization, and Scalability
+- In-app feedback and support ticketing (user-to-management, user-to-IT)
+- In-app chat/messenger (management-initiated)
+- Customization of appearance and workflows per company
+- Scalability and performance optimization for high-traffic scenarios
+- Robust backup, restore, and disaster recovery procedures
+
+### Non-Negotiable Implementation Requirements
+- RBAC enforced everywhere
+- All sensitive data encrypted and securely stored
+- Comprehensive documentation and user training
+- Regular updates, monitoring, and maintenance
+- Feedback mechanisms for continuous improvement
+- Performance, security, and usability testing
+- Support for future integrations and extensibility
+
+Failure to implement these features will result in a subpar experience and potential security risks.
+
+## REFERENCE: WORKFLOW & TESTING GUIDES
+
+For detailed, step-by-step user flows, QA, and real-time feature testing, see:
+- `App-Setup-Steps-For-Bryson.txt` (Employee joining and approval workflow)
+- `REALTIME_TESTING.md` (Real-time features and notification testing)
+- `TESTING.md` (General app testing, including sign-up, role assignment, and activation)
+- `company-bound-Fleet-Management-system-for-Bryson.txt` (Fleet management implementation and RLS enforcement)
+- `SUPABASE_REALTIME_TROUBLESHOOTING.md` (Troubleshooting guide for realtime features)
+- `REALTIME_FEATURES.md` (Documentation of realtime capabilities)
+- `Features-To-ADD-When-APP-is-in-Working-order.txt` (Planned future enhancements)
+- `supabase/migrations/20260327000100_canonical_platform_reset.sql` (Canonical schema, RLS, realtime, storage, RPCs, and core backend policies)
+- `supabase/migrations/` (Tracked live database migrations and follow-up hardening changes)
+- `fix_security_issues.ps1` (Security fix automation script)
+
+These documents provide granular instructions and acceptance criteria for all major workflows and features.

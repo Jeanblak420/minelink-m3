@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "denoland.vscode-deno",
+    "ms-azuretools.vscode-docker",
+    "supabase.postgrestools",
+    "supabase.vscode-supabase-extension",
+    "dbcode.dbcode",
+    "dart-code.flutter",
+    "refactstudio.refact"
+  ]
+}

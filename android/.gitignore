@@ -1,0 +1,40 @@
+# ── The Gradle wrapper is TRACKED. Do not re-ignore it. ─────────────────────
+#
+# `gradle-wrapper.jar`, `/gradlew` and `/gradlew.bat` used to be listed here —
+# they come that way from `flutter create`. The consequence (S10-3a) is that
+# **the Android build was not reproducible from a clean clone**: `./gradlew`
+# cannot start without its own jar, so a fresh checkout or a CI runner had
+# nothing to bootstrap with. Whatever jar happened to be on the developer's
+# disk was the build, and on this machine that was a Gradle 2.x-era jar
+# (build receipt 2015-12-21) which cannot bootstrap the declared
+# `gradle-8.12-all` at all — it fails with "Could not determine wrapper
+# version. No build receipt resource found."
+#
+# Checking the wrapper in is what Gradle itself recommends, and it is the only
+# thing that makes the declared Gradle version binding rather than advisory.
+#
+# ## The jar is a binary that executes on every build, so it is pinned
+#
+#   android/gradle/wrapper/gradle-wrapper.jar
+#   SHA-256 2db75c40782f5e8ba1fc278a5574bab070adccb2d21ca5a6e5ed840888448046
+#
+# Verified 2026-08-16 against Gradle's published wrapper checksums — the same
+# list `gradle/wrapper-validation-action` uses. The jar changes rarely, so that
+# value is shared by 8.10 through 8.13; it is the official one for the declared
+# 8.12.
+#
+# **If you upgrade Gradle, re-verify the new jar against that list before
+# committing it**, and add `gradle/actions/wrapper-validation` to CI when CI
+# exists. A swapped wrapper jar runs arbitrary code on every developer's
+# machine and every build agent, and it is the one file here nobody reads.
+/.gradle
+/captures/
+/local.properties
+GeneratedPluginRegistrant.java
+.cxx/
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/to/reference-keystore
+key.properties
+**/*.keystore
+**/*.jks

@@ -1,0 +1,422 @@
+================================================================================
+USER-IMPLEMENTED CUSTOM RULES, TOOLS, AND INSTRUCTIONS
+Compiled: March 29, 2026
+================================================================================
+
+================================================================================
+SECTION 1: CODEX CONFIGURATION (.codex)
+================================================================================
+
+Location: C:\Users\Somebody Someone\.codex\
+
+File: config.toml
+---
+model = "gpt-5.4"
+model_reasoning_effort = "xhigh"
+[mcp]
+remote_mcp_client_enabled = true
+[windows]
+sandbox = "elevated"
+
+[mcp_servers.supabase]
+url = "https://mcp.supabase.com/mcp?project_ref=tjrkhlcaoetvgqyutczv&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching%2Cstorage"
+bearer_token_env_var = "SUPABASE_ACCESS_TOKEN"
+[features]
+rmcp_client = true
+
+---
+
+Description: Codex configuration specifies:
+- Model: GPT-5.4
+- Reasoning effort: Extremely high (xhigh)
+- MCP Client: Enabled for remote connections
+- Windows Sandbox: Elevated privileges
+- Supabase MCP Server: Connected with specific project ref
+  Project Reference: tjrkhlcaoetvgqyutczv
+  Features: docs, account, database, debugging, development, functions, branching, storage
+  Authentication: SUPABASE_ACCESS_TOKEN environment variable
+- RMCP Client: Enabled
+
+File: default.rules
+---
+Prefix Rules for PowerShell Command Execution:
+
+1. SUPABASE_ACCESS_TOKEN Setup:
+   Command: [System.Environment]::SetEnvironmentVariable
+   Pattern: PowerShell 7 setting SUPABASE_ACCESS_TOKEN to "sbp_v0_400e5f2745d6e322c8d6a1841438e87e69ab456e"
+   Decision: ALLOW
+
+2. Flutter Windows Execution:
+   Command: flutter run -d windows
+   Decision: ALLOW
+
+3. Flutter Analysis:
+   Command: Flutter analyze with suppressed analytics
+   Environment Setup:
+     - APPDATA: .codex_appdata directory
+     - LOCALAPPDATA: .codex_appdata directory
+     - FLUTTER_ALREADY_LOCKED: true
+     - FLUTTER_SUPPRESS_ANALYTICS: true
+     - DART_SUPPRESS_ANALYTICS: true
+   Flutter Path: C:\FlutterDev\flutter\bin\flutter.bat
+   Flags: --suppress-analytics --no-version-check analyze
+   Decision: ALLOW
+
+4. Flutter Testing:
+   Command: Flutter test with same environment setup as analysis
+   Flags: --suppress-analytics --no-version-check test
+   Decision: ALLOW
+
+Description: Security rules defining which PowerShell commands are allowed to execute.
+These rules focus on Supabase authentication token setup and Flutter development operations.
+
+================================================================================
+SECTION 2: CODEIUM CONFIGURATION (.codeium)
+================================================================================
+
+Location: C:\Users\Somebody Someone\.codeium\
+
+Directory: memories\
+- Contains: global_rules.md (currently empty)
+
+Description: Codeium memory storage for global rules. Currently no custom rules stored.
+
+================================================================================
+SECTION 3: CONTINUE IDE CONFIGURATION (.continue)
+================================================================================
+
+Location: C:\Users\Somebody Someone\.continue\
+
+Primary Configuration: config.json
+Additional Config: config.ts (TypeScript configuration)
+TypeScript Config: tsconfig.json
+
+Session History: Multiple session files stored in sessions/ directory
+- Session 1: 2e99d452-3963-4dc2-a34f-03640269f7c8
+- Session 2: 49cbfc13-9315-452c-ab21-bad94209f383
+- Session 3: 560470cb-73b3-4577-b413-5be3c8a63070
+- Session 4: f478633f-9f35-49d1-a9c0-75ccd4bfcf08
+
+Global Context: globalContext.json maintained in index/
+
+Description: Continue IDE is configured with persistent session management and
+context preservation for multi-turn conversations. Configuration supports
+JavaScript/TypeScript development with customized settings.
+
+================================================================================
+SECTION 4: CUSTOM AGENTS & TOOLS DIRECTORIES (.agents & .qoder)
+================================================================================
+
+Location: C:\Users\Somebody Someone\.agents\
+
+Substructure:
+- skills/microsoft-foundry/
+  - foundry-agent/
+    - create/
+      - references/ (agent tools, framework, SDK operations, tool documentation)
+      - create.md (creation guide)
+      - create-prompt.md (prompt generation)
+    - deploy/
+      - deploy.md (deployment guide)
+    - eval-datasets/
+      - references/ (dataset comparison, curation, organization, versioning)
+      - eval-datasets.md
+    - invoke/
+      - invoke.md (agent invocation guide)
+    - observe/
+      - references/ (analysis, CI/CD monitoring, iteration, deployment)
+      - observe.md
+    - trace/
+      - references/ (failure analysis, latency analysis, traces)
+      - trace.md
+    - troubleshoot/
+      - troubleshoot.md
+    - troubleshoot.md
+
+  - models/
+    - deploy-model/
+      - capacity/
+      - customize/
+      - preset/
+      - deploy-model customization and preset options
+
+Tool Documentation:
+- agent-tools.md
+- agentframework.md
+- sdk-operations.md
+- tool-azure-ai-search.md
+- tool-bing-grounding.md
+- tool-file-search.md
+- tool-mcp.md
+- tool-memory.md
+- tool-web-search.md
+
+Alternative Agents Directory:
+Location: C:\Users\Somebody Someone\.qoder\agents
+Location: C:\Users\Somebody Someone\.qodo\agents
+
+Description: Microsoft Foundry agent framework toolkit with comprehensive guides for:
+- Agent creation and configuration
+- Deployment strategies
+- Dataset evaluation and versioning
+- Tracing and observability
+- Tool integration (Azure AI Search, Bing Grounding, File Search, MCP, Memory, Web Search)
+- Model deployment and customization
+
+================================================================================
+SECTION 5: VS CODE / CURSOR CUSTOM CONFIGURATIONS
+================================================================================
+
+Location: C:\Users\Somebody Someone\.cursor\projects\
+
+Custom Projects:
+1. CPS Quote Invoice Application
+   Path: c-Users-Somebody-Someone-Desktop-Blak-AI-Agent-Model-CPS-Quote-Invoice-APP-CPS-QOUTE-APP-LOCAL-DB-Version
+
+2. Mine Online Documentation
+   Path: c-Users-Somebody-Someone-Desktop-Blak-AI-Agent-Model-Mine-Online-doc-test
+
+3. Mine Online Backend
+   Path: c-Users-Somebody-Someone-Desktop-Blak-AI-Agent-Model-Mine-Online-mine-on-line-backend
+
+4. Mine Online Main Project
+   Path: c-Users-Somebody-Someone-Desktop-Blak-AI-Agent-Model-Mine-Online-Official-Mine-Online
+
+Description: Cursor IDE projects with persistent project history and configurations.
+
+================================================================================
+SECTION 6: OTHER CUSTOM TOOL CONFIGURATIONS
+================================================================================
+
+CodeGPT Configuration:
+Location: C:\Users\Somebody Someone\.codegpt\mcp_config.json
+Purpose: MCP configuration for CodeGPT integration
+
+Windsurf Configuration:
+Location: C:\Users\Somebody Someone\.codeium\windsurf\mcp_config.json
+Purpose: Windsurf IDE MCP server configuration
+
+Refact Configuration:
+Location: C:\Users\Somebody Someone\.config\refact\customization.yaml
+Purpose: Refact AI customization settings
+
+PureCode Configuration:
+Location: C:\Users\Somebody Someone\.purecode\.migrations\
+Purpose: Migration management for PureCode tool
+
+AI Completion Configuration:
+Location: C:\Users\Somebody Someone\.ai_completion\config.json
+Purpose: AI code completion settings
+
+================================================================================
+SECTION 7: SUPABASE INTEGRATION & AUTHENTICATION
+================================================================================
+
+Supabase Project Reference: tjrkhlcaoetvgqyutczv
+
+Authentication:
+- Token: sbp_v0_400e5f2745d6e322c8d6a1841438e87e69ab456e
+- Stored in Environment Variable: SUPABASE_ACCESS_TOKEN
+- Set via PowerShell: System.Environment setup
+
+Connected Features:
+1. Documentation (docs)
+2. Account management (account)
+3. Database operations (database)
+4. Debugging tools (debugging)
+5. Development features (development)
+6. Edge Functions (functions)
+7. Database branching (branching)
+8. File storage (storage)
+
+Integration Points:
+- Codex IDE: Primary MCP integration
+- Continue IDE: Potential integration
+- Remote MCP client enabled for cloud connectivity
+
+================================================================================
+SECTION 8: FLUTTER & DART DEVELOPMENT TOOLS
+================================================================================
+
+Flutter Installation Path: C:\FlutterDev\flutter\bin\flutter.bat
+
+Environment Variables (Customized for Codex):
+- APPDATA: Redirected to .codex_appdata
+- LOCALAPPDATA: Redirected to .codex_appdata
+- FLUTTER_ALREADY_LOCKED: true
+- FLUTTER_SUPPRESS_ANALYTICS: true
+- DART_SUPPRESS_ANALYTICS: true
+
+Allowed Commands:
+1. flutter run -d windows (Windows platform development)
+2. flutter analyze (Code analysis with analytics suppressed)
+3. flutter test (Testing with analytics suppressed)
+
+Purpose: Isolated Flutter development environment with analytics suppression
+to prevent telemetry collection during automated agent operations.
+
+================================================================================
+SECTION 9: SECURITY & SANDBOXING RULES
+================================================================================
+
+Windows Sandbox Configuration: Elevated
+- Allows elevated privilege execution in Codex environment
+- Necessary for Flutter and Supabase operations
+
+Access Control:
+- Supabase token stored securely in environment variable
+- PowerShell prefix rules explicitly whitelist allowed operations
+- Only specific Flutter commands are permitted
+- Analytics suppression prevents unwanted telemetry
+
+================================================================================
+SECTION 10: AUGMENT/CHECKPOINT SYSTEM
+================================================================================
+
+Location: C:\Users\Somebody Someone\.augment\checkpoint-documents\
+
+Purpose: Checkpoint document storage for Augment AI development workflows
+
+This system stores timestamped snapshots of development work including:
+- File analysis and modifications
+- Code implementation status
+- Document tracking with unique IDs
+- Multi-version history tracking
+
+Examples of tracked work:
+- PDF form implementation and analysis
+- Flutter/Dart code changes
+- SQL migrations and database operations
+- UI widget implementations
+- App configuration and testing
+
+The checkpoint system enables:
+1. Work recovery and restoration
+2. Version history and branching
+3. Collaborative development tracking
+4. Automated analysis and logging
+
+================================================================================
+SECTION 11: GIT & VERSION CONTROL CONFIGURATION
+================================================================================
+
+Git Configuration: C:\Users\Somebody Someone\.gitconfig
+Standard git configuration for version control operations
+
+Git Ignore Configuration: Multiple .gitignore files across projects
+Including Flutter-specific patterns (.dart_tool, build artifacts)
+
+Version Control Integration Points:
+- Cursor IDE: Git project tracking
+- Continue IDE: Session-based history
+- Augment: Checkpoint document versioning
+
+================================================================================
+SECTION 12: SUMMARY OF CUSTOM IMPLEMENTATIONS
+================================================================================
+
+Your Custom Implementation Stack:
+
+IDE/Editor Tools:
+✓ Codex (Primary with GPT-5.4 and xhigh reasoning)
+✓ Continue IDE (Multi-session support)
+✓ Codeium (Global memory storage)
+✓ Cursor IDE (Project tracking)
+✓ Windsurf IDE
+✓ Refact AI
+✓ PureCode
+✓ CodeGPT
+✓ AI Completion
+
+Cloud Services:
+✓ Supabase (Comprehensive integration with MCP)
+✓ Remote MCP client enabled for cloud connectivity
+
+Development Platforms:
+✓ Flutter (Windows development, analytics suppressed)
+✓ Dart (Analytics suppressed)
+✓ Node.js / JavaScript ecosystem
+
+AI Agents:
+✓ Microsoft Foundry Framework (comprehensive agent toolkit)
+✓ Custom agent configurations in .qoder and .qodo directories
+
+Security:
+✓ Elevated Windows sandbox mode
+✓ Environment-based token management
+✓ Whitelist-based command execution rules
+
+Persistence & Tracking:
+✓ Augment checkpoint system for development history
+✓ Session-based continuation for IDE workflows
+✓ Project-based organization in Cursor
+
+================================================================================
+SECTION 13: ENVIRONMENT SETUP FOR AGENTS
+================================================================================
+
+When running agent-based operations, the following is initialized:
+
+Environment Setup (Codex):
+```powershell
+$env:SUPABASE_ACCESS_TOKEN = "sbp_v0_400e5f2745d6e322c8d6a1841438e87e69ab456e"
+$env:APPDATA = ".codex_appdata"
+$env:LOCALAPPDATA = ".codex_appdata"
+$env:FLUTTER_ALREADY_LOCKED = "true"
+$env:FLUTTER_SUPPRESS_ANALYTICS = "true"
+$env:DART_SUPPRESS_ANALYTICS = "true"
+```
+
+This environment setup ensures:
+1. Supabase authentication is available
+2. Flutter uses isolated data directories
+3. No analytics are collected
+4. Concurrent Flutter operations are prevented
+5. Isolated development environment for agents
+
+================================================================================
+SECTION 14: RECOMMENDED AGENT USAGE PATTERNS
+================================================================================
+
+Based on your configuration:
+
+1. For Flutter Development:
+   - Use Codex with Continue IDE for session persistence
+   - Ensure FLUTTER_SUPPRESS_ANALYTICS and DART_SUPPRESS_ANALYTICS are set
+   - Use .codex_appdata directory for isolated state
+
+2. For Supabase Operations:
+   - Use Codex with MCP integration
+   - Verify SUPABASE_ACCESS_TOKEN is set
+   - Use available features: docs, database, functions, storage, branching
+
+3. For Code Analysis:
+   - Use Continue IDE for multi-session context
+   - Use Augment checkpoint system for tracking changes
+   - Reference Microsoft Foundry agent framework for complex operations
+
+4. For Multi-Agent Coordination:
+   - Store global rules in .codeium\memories\
+   - Use Augment checkpoints for coordination state
+   - Reference .agents\skills\ for agent configurations
+
+================================================================================
+END OF CUSTOM RULES AND TOOLS DOCUMENTATION
+================================================================================
+
+Document compiled from your personal system configurations:
+- C:\Users\Somebody Someone\.codex\
+- C:\Users\Somebody Someone\.codeium\
+- C:\Users\Somebody Someone\.continue\
+- C:\Users\Somebody Someone\.agents\
+- C:\Users\Somebody Someone\.cursor\
+- Environment variable configurations
+- Supabase authentication
+
+Total custom tool configurations found: 15+
+Primary implementation model: GPT-5.4 (Codex)
+Cloud backend: Supabase (tjrkhlcaoetvgqyutczv)
+Development platform: Flutter/Dart (Windows target)
+Agent framework: Microsoft Foundry
+
+Status: All custom configurations are active and operational.

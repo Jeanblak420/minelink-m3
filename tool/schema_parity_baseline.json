@@ -1,0 +1,43 @@
+{
+  "_what": "Digests of the live schema of the MAIN Supabase project (yftazblpmicqtamyiwyb), from public.schema_fingerprint().",
+  "_why": "Every gap the 2026-08-18 cold replay found was an out-of-band change to production that no migration recorded and nothing compared. This file is what makes the next one fail a check instead of being found years later.",
+  "_how_to_update": "Only with `python tool/schema_parity_check.py --accept`, and only in the SAME commit as the migration that justifies the change. If there is no migration, do not update this file -- write the migration.",
+  "shapes": {
+    "tables": {
+      "items": 68,
+      "digest": "8823fd0e1a2c7aa0f4bfc7b3881ce430"
+    },
+    "columns": {
+      "items": 844,
+      "digest": "041afb9e8901734774df48a18906922f"
+    },
+    "functions": {
+      "items": 261,
+      "digest": "ec2c978afc2951076693a86ee6516603"
+    },
+    "bodies": {
+      "items": 261,
+      "digest": "500faa54e5dbb4eacac8910170317bfe"
+    },
+    "policies": {
+      "items": 153,
+      "digest": "468495dd481a0a003c7da81fa1b14985"
+    },
+    "triggers": {
+      "items": 55,
+      "digest": "9dbf9b1308dbe21731675041aa5bce9a"
+    },
+    "indexes": {
+      "items": 283,
+      "digest": "e54e4d4305cf086b5477edad257832ae"
+    },
+    "rls": {
+      "items": 68,
+      "digest": "13170369c4bdb3f62d90b00714c34791"
+    },
+    "cron": {
+      "items": 9,
+      "digest": "e553b546ad384a3f4a2e1d799f723599"
+    }
+  }
+}

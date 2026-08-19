@@ -1,0 +1,102 @@
+/* MineLink — Semantic aliases. Reference these in components, not raw scale steps. */
+
+:root {
+  /* Surfaces */
+  --surface-app: var(--ml-slate-50);       /* page / scaffold background */
+  --surface-card: var(--ml-white);          /* card, dialog, sheet */
+  --surface-raised: var(--ml-white);
+  --surface-sunken: var(--ml-slate-100);    /* input fill, inset wells */
+  --surface-chrome: var(--ml-navy-800);     /* sidebar / portal shell */
+  --surface-chrome-deep: var(--ml-navy-950);
+
+  /* Text */
+  --text-strong: var(--ml-slate-900);       /* headings, primary values */
+  --text-body: var(--ml-slate-700);         /* default body copy */
+  --text-muted: var(--ml-slate-600);        /* helper, subtitle, captions */
+  --text-faint: var(--ml-slate-400);        /* placeholder, disabled */
+  --text-on-accent: var(--ml-white);
+  --text-on-chrome: var(--ml-slate-200);    /* sidebar labels */
+  --text-on-chrome-muted: var(--ml-slate-400);
+
+  /* Brand / interactive */
+  --accent: var(--ml-cyan-500);
+  --accent-hover: var(--ml-cyan-600);
+  --accent-press: var(--ml-cyan-700);
+  --accent-soft: var(--ml-cyan-50);
+  --on-accent: var(--ml-white);
+
+  /* Borders & dividers */
+  --border-subtle: var(--ml-slate-200);
+  --border-card: #e7edf3;                    /* outlineVariant @ ~40% on white */
+  --border-strong: var(--ml-slate-300);
+  --border-accent: var(--ml-cyan-200);
+  --divider: #e9eef4;
+
+  /* Status — foreground / background pairs */
+  --status-transit-fg: var(--ml-blue-600);
+  --status-transit-bg: var(--ml-blue-50);
+  --status-atmine-fg: var(--ml-amber-700);
+  --status-atmine-bg: var(--ml-amber-50);
+  --status-done-fg: var(--ml-green-700);
+  --status-done-bg: var(--ml-green-50);
+  --status-warn-fg: var(--ml-orange-700);
+  --status-warn-bg: var(--ml-orange-50);
+  --status-error-fg: var(--ml-red-600);
+  --status-error-bg: var(--ml-red-50);
+
+  /* Action button hues beyond the cyan primary */
+  --action-go: var(--ml-green-600);          /* confirm / mark arrived */
+  --action-go-deep: var(--ml-green-700);
+  --action-leave: var(--ml-orange-500);       /* mark departed / left */
+  --action-leave-deep: var(--ml-orange-600);
+
+  /* Focus ring */
+  --focus-ring: var(--ml-cyan-500);
+}
+
+/* ============================================================
+ * DARK THEME — activated by [data-theme="dark"] on <html>.
+ * Mirrors AppTheme.darkTheme. Every surface/text/border/status
+ * token is remapped so all chrome + screens that reference the
+ * semantic vars adapt automatically. */
+[data-theme="dark"] {
+  /* Surfaces */
+  --surface-app: #0a1424;
+  --surface-card: #111c30;
+  --surface-raised: #16243c;
+  --surface-sunken: #0b1526;
+  --surface-chrome: var(--ml-navy-950);
+  --surface-chrome-deep: #01040c;
+
+  /* Text */
+  --text-strong: #eef3fa;
+  --text-body: var(--ml-slate-200);
+  --text-muted: var(--ml-slate-400);
+  --text-faint: #5d6d8c;
+  --text-on-accent: #04222b;
+  --text-on-chrome: var(--ml-slate-200);
+  --text-on-chrome-muted: var(--ml-slate-400);
+
+  /* Brand / interactive */
+  --accent-soft: rgba(0,181,216,.14);
+
+  /* Borders & dividers */
+  --border-subtle: rgba(148,163,184,.16);
+  --border-card: rgba(148,163,184,.14);
+  --border-strong: rgba(148,163,184,.26);
+  --border-accent: rgba(0,181,216,.42);
+  --divider: rgba(148,163,184,.12);
+
+  /* Status — brighten fg, translucent bg for dark surfaces */
+  --status-transit-fg: #7ab0ff;   --status-transit-bg: rgba(37,99,235,.18);
+  --status-atmine-fg:  #e6b56b;    --status-atmine-bg:  rgba(180,83,9,.20);
+  --status-done-fg:    #5cc487;    --status-done-bg:    rgba(21,128,61,.20);
+  --status-warn-fg:    #fb923c;    --status-warn-bg:    rgba(194,65,12,.20);
+  --status-error-fg:   #f0715a;    --status-error-bg:   rgba(220,38,38,.20);
+
+  /* Tinted icon wells */
+  --ml-well-cyan:  rgba(0,181,216,.14);
+  --ml-well-amber: rgba(224,164,74,.16);
+  --ml-well-green: rgba(92,196,135,.14);
+  --ml-well-blue:  rgba(106,164,240,.14);
+}

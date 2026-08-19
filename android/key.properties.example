@@ -1,0 +1,17 @@
+# Copy to `android/key.properties` and fill in. That file is gitignored and must
+# stay that way: together with the keystore it IS the ability to publish updates
+# to this app.
+#
+# Generate the upload keystore once (and never lose it — Play keys the app on
+# this signature, so losing it means the app can never be updated again, only
+# republished as a new listing that no existing install will update to):
+#
+#   keytool -genkey -v -keystore <path>/minelink-upload.jks \
+#           -keyalg RSA -keysize 2048 -validity 10000 -alias minelink
+#
+# Back the .jks up somewhere that survives this machine.
+
+storeFile=C:/absolute/path/to/minelink-upload.jks
+storePassword=
+keyAlias=minelink
+keyPassword=

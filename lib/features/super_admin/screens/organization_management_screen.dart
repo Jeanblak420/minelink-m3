@@ -1,0 +1,725 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/components/ml_page_header.dart';
+import 'package:flutter_application_1/core/design/components/ml_page_body.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_application_1/features/super_admin/data/models/organization_status.dart';
+import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
+import 'package:flutter_application_1/features/super_admin/utils/organization_search.dart';
+import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
+
+/// Organization-management screen — the design's paginated table: one card with
+/// a search + org-type + status filter bar, a compact Company/Org-type/Seats/
+/// Token-expiry table, and a pagination footer.
+///
+/// Accepts an optional `?status=<...>` query param so the dashboard's
+/// Platform-registry cards can deep-link straight to a filtered view.
+class OrganizationManagementScreen extends ConsumerStatefulWidget {
+  final String? initialStatusFilter;
+  const OrganizationManagementScreen({super.key, this.initialStatusFilter});
+
+  @override
+  ConsumerState<OrganizationManagementScreen> createState() =>
+      _OrganizationManagementScreenState();
+}
+
+class _OrganizationManagementScreenState
+    extends ConsumerState<OrganizationManagementScreen> {
+  String _query = '';
+  String _type = 'all'; // all | mineSupplier | buyer | transporter
+  OrganizationStatus? _status;
+  int _perPage = 10;
+  int _page = 1;
+
+  // Org-type hues come from MlOrgTone now — one palette, matching the design
+  // reference's MINE amber / BUYER violet / TRANSPORTER cyan badges. This file
+  // used to carry its own blue/purple/orange trio, duplicated verbatim in
+  // request_review_screen, so a buyer was purple here and violet on the console.
+
+  @override
+  void initState() {
+    super.initState();
+    _status = _parseStatus(widget.initialStatusFilter);
+  }
+
+  @override
+  void didUpdateWidget(covariant OrganizationManagementScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialStatusFilter != widget.initialStatusFilter) {
+      setState(() => _status = _parseStatus(widget.initialStatusFilter));
+    }
+  }
+
+  static OrganizationStatus? _parseStatus(String? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    final parsed = OrganizationStatus.fromString(raw);
+    if (parsed == OrganizationStatus.pendingActivation &&
+        raw != 'pendingActivation') {
+      return null;
+    }
+    return parsed;
+  }
+
+  Color _typeColor(String? t, Brightness brightness) => switch (t) {
+    'buyer' => MlOrgTone.buyer.colors(brightness).fg,
+    'mineSupplier' => MlOrgTone.mineSupplier.colors(brightness).fg,
+    _ => MlOrgTone.transporter.colors(brightness).fg,
+  };
+
+  IconData _typeIcon(String? t) => switch (t) {
+    'mineSupplier' => Icons.terrain_rounded,
+    'buyer' => Icons.shopping_bag_outlined,
+    'transporter' => Icons.local_shipping_outlined,
+    _ => Icons.business_rounded,
+  };
+
+  String _typeLabel(String? t) => switch (t) {
+    'mineSupplier' => 'Mine',
+    'buyer' => 'Buyer',
+    'transporter' => 'Transporter',
+    _ => t ?? '—',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final s = MlSemantic.of(context);
+    final orgsAsync = ref.watch(organizationsProvider);
+    final roleAsync = ref.watch(currentPlatformRoleProvider);
+
+    // Every super global admin has full rights, including registering companies.
+    final canRegister = roleAsync.maybeWhen(
+      data: (role) => role.isSuperAdmin,
+      orElse: () => false,
+    );
+
+    return Scaffold(
+      body: MlPageBody(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            MlPageHeader(
+              title: 'Organizations',
+              meta: orgsAsync.valueOrNull == null
+                  ? null
+                  : mlCount(orgsAsync.value!.length, 'company', 'companies'),
+              actions: [
+                // Was a hand-styled `FilledButton.icon` re-specifying the
+                // accent, the ink and a 10px radius — the system's own solid
+                // cyan primary, written out again slightly differently.
+                if (canRegister)
+                  MlButton.primary(
+                    label: 'Register company',
+                    icon: Icons.add_rounded,
+                    compact: true,
+                    onPressed: () =>
+                        context.go('/super-admin/register-company'),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: s.surfaceCard,
+                borderRadius: BorderRadius.circular(MlTokens.rXl),
+                border: Border.all(color: s.borderCard),
+                boxShadow: MlTokens.shadowSm,
+              ),
+              padding: const EdgeInsets.all(22),
+              child: orgsAsync.when(
+                loading: () => const SizedBox(
+                  height: 200,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (e, _) => MlEmptyState(
+                  icon: Icons.error_outline,
+                  title: 'Could not load organizations',
+                  message: friendlyError(e),
+                  action: MlButton.primary(
+                    label: 'Retry',
+                    icon: Icons.refresh,
+                    onPressed: () => ref.invalidate(organizationsProvider),
+                  ),
+                ),
+                data: (orgs) => _content(context, s, orgs),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _content(
+    BuildContext context,
+    MlSemantic s,
+    List<Map<String, dynamic>> orgs,
+  ) {
+    // Filter.
+    var filtered = orgs.where((o) {
+      if (_type != 'all' && o['org_type'] != _type) return false;
+      if (_status != null && (o['status'] as String?) != _status!.name) {
+        return false;
+      }
+      if (_query.isNotEmpty && !OrganizationSearch.matches(o, _query)) {
+        return false;
+      }
+      return true;
+    }).toList();
+    // Most-recent first.
+    filtered.sort((a, b) {
+      final ax = (a['updated_at'] ?? a['created_at'] ?? '') as String;
+      final bx = (b['updated_at'] ?? b['created_at'] ?? '') as String;
+      return bx.compareTo(ax);
+    });
+
+    final total = filtered.length;
+    final pages = (total / _perPage).ceil().clamp(1, 9999);
+    final page = _page.clamp(1, pages);
+    final start = (page - 1) * _perPage;
+    final shown = filtered.skip(start).take(_perPage).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Filter bar ──
+        Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 40,
+                child: TextField(
+                  onChanged: (v) => setState(() {
+                    _query = v.trim().toLowerCase();
+                    _page = 1;
+                  }),
+                  style: TextStyle(fontSize: 13.5, color: s.textBody),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    hintText: 'Search name, owner, email, serial…',
+                    hintStyle: TextStyle(fontSize: 13.5, color: s.textFaint),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: 18,
+                      color: s.textMuted,
+                    ),
+                    filled: true,
+                    fillColor: s.surfaceSunken,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: s.borderCard),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: s.borderCard),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            _dropdown<String>(
+              context: context,
+              value: _type,
+              onChanged: (v) => setState(() {
+                _type = v ?? 'all';
+                _page = 1;
+              }),
+              items: const [
+                DropdownMenuItem(value: 'all', child: Text('All org types')),
+                DropdownMenuItem(value: 'mineSupplier', child: Text('Mine')),
+                DropdownMenuItem(value: 'buyer', child: Text('Buyer')),
+                DropdownMenuItem(
+                  value: 'transporter',
+                  child: Text('Transporter'),
+                ),
+              ],
+            ),
+            const SizedBox(width: 10),
+            _dropdown<OrganizationStatus?>(
+              context: context,
+              value: _status,
+              onChanged: (v) => setState(() {
+                _status = v;
+                _page = 1;
+              }),
+              items: [
+                const DropdownMenuItem(
+                  value: null,
+                  child: Text('All statuses'),
+                ),
+                for (final st in const [
+                  OrganizationStatus.active,
+                  OrganizationStatus.expired,
+                  OrganizationStatus.suspended,
+                  OrganizationStatus.pendingActivation,
+                ])
+                  DropdownMenuItem(value: st, child: Text(st.displayName)),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // ── Table ──
+        if (shown.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            child: Center(
+              child: Text(
+                'No organizations match these filters.',
+                style: TextStyle(color: s.textFaint, fontSize: 14),
+              ),
+            ),
+          )
+        else ...[
+          _headerRow(s),
+          for (final o in shown) _dataRow(context, s, o),
+        ],
+        // ── Pagination footer ──
+        Container(
+          margin: const EdgeInsets.only(top: 16),
+          padding: const EdgeInsets.only(top: 16),
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: s.divider)),
+          ),
+          child: Row(
+            children: [
+              Text(
+                total == 0
+                    ? '0'
+                    : '${start + 1}–${(start + _perPage).clamp(0, total)} of $total',
+                style: TextStyle(fontSize: 13, color: s.textMuted),
+              ),
+              const SizedBox(width: 14),
+              _dropdown<int>(
+                context: context,
+                value: _perPage,
+                dense: true,
+                onChanged: (v) => setState(() {
+                  _perPage = v ?? 10;
+                  _page = 1;
+                }),
+                items: [
+                  for (final n in const [5, 10, 25, 50])
+                    DropdownMenuItem(value: n, child: Text('$n / page')),
+                ],
+              ),
+              const Spacer(),
+              _pageBtn(
+                s,
+                Icons.chevron_left_rounded,
+                enabled: page > 1,
+                onTap: () => setState(() => _page = page - 1),
+              ),
+              for (var p = 1; p <= pages; p++)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  child: _pageNum(
+                    s,
+                    p,
+                    selected: p == page,
+                    onTap: () => setState(() => _page = p),
+                  ),
+                ),
+              _pageBtn(
+                s,
+                Icons.chevron_right_rounded,
+                enabled: page < pages,
+                onTap: () => setState(() => _page = page + 1),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ───────────────────────── table ─────────────────────────
+  Widget _headerRow(MlSemantic s) {
+    final st = TextStyle(
+      fontFamily: MlTokens.fontSans,
+      fontSize: 11,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.7,
+      color: s.textFaint,
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Expanded(flex: 16, child: Text('COMPANY', style: st)),
+          Expanded(flex: 10, child: Text('ORG TYPE', style: st)),
+          Expanded(
+            flex: 9,
+            child: Text('SEATS', textAlign: TextAlign.center, style: st),
+          ),
+          Expanded(flex: 13, child: Text('TOKEN EXPIRY', style: st)),
+          const SizedBox(width: 44),
+        ],
+      ),
+    );
+  }
+
+  Widget _dataRow(BuildContext context, MlSemantic s, Map<String, dynamic> o) {
+    final name = (o['company_name'] as String?)?.trim().isNotEmpty == true
+        ? o['company_name'] as String
+        : 'Unnamed';
+    final type = o['org_type'] as String?;
+    final seatLimit = (o['seat_limit'] as num?)?.toInt() ?? 0;
+    final seatsUsed = (o['seats_used'] as num?)?.toInt() ?? 0;
+    final over = seatLimit > 0 && seatsUsed > seatLimit;
+    final exp = _expiry(o['token_expires_at'] as String?);
+    final tc = _typeColor(type, Theme.of(context).brightness);
+
+    String subline = '';
+    final op = o['owner_profile'];
+    if (op is Map) {
+      subline = (op['email'] as String?)?.trim() ?? '';
+    }
+
+    void open() => context.go('/super-admin/organization/${o['id']}');
+
+    return InkWell(
+      onTap: open,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: s.divider)),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            // Company
+            Expanded(
+              flex: 16,
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: tc.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: tc.withValues(alpha: 0.28)),
+                    ),
+                    child: Icon(_typeIcon(type), size: 17, color: tc),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: MlTokens.fontSans,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: s.textStrong,
+                          ),
+                        ),
+                        if (subline.isNotEmpty)
+                          Text(
+                            subline,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: MlTokens.fontMono,
+                              fontSize: 12,
+                              color: s.textFaint,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Org type pill
+            Expanded(
+              flex: 10,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: s.surfaceSunken,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: tc,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      // Flexible, so the label can ellipsize inside the pill.
+                      // A Row gives an unflexed child unbounded width, so
+                      // `overflow` never engages and the pill simply runs past
+                      // its column (CLAUDE.md §10.4). "MINE / SUPPLIER" at a
+                      // 2.0 text scale overflowed the 1024px layout by 14px.
+                      // The only flexible child here, so flex: 1 is right: it
+                      // takes whatever the 6px dot and 6px gap leave.
+                      Flexible(
+                        child: Text(
+                          _typeLabel(type).toUpperCase(),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: TextStyle(
+                            fontFamily: MlTokens.fontSans,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            color: tc,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // Seats
+            Expanded(
+              flex: 9,
+              child: Text(
+                '$seatsUsed/$seatLimit',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: MlTokens.fontMono,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: over ? MlTokens.orange600 : s.textBody,
+                ),
+              ),
+            ),
+            // Token expiry
+            Expanded(
+              flex: 13,
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: exp.dot.colors(Theme.of(context).brightness).fg,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      exp.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: MlTokens.fontMono,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: exp.expired ? MlTokens.red600 : s.textBody,
+                      ),
+                    ),
+                  ),
+                  if (exp.date != null) ...[
+                    const SizedBox(width: 8),
+                    // Flexible too, and for the OTHER reason: unflexed, this
+                    // date claimed its natural width first and left the status
+                    // label beside it with nothing, so the label's ellipsis
+                    // ate the word while the date sat there in full. Both
+                    // shrink now, and the status — the part that says whether
+                    // the token has expired — is the one that keeps its space.
+                    Flexible(
+                      child: Text(
+                        exp.date!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 11.5, color: s.textFaint),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 44,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: s.textFaint,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ───────────────────────── controls ─────────────────────────
+  Widget _dropdown<T>({
+    required BuildContext context,
+    required T value,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?> onChanged,
+    bool dense = false,
+  }) {
+    final s = MlSemantic.of(context);
+    return Container(
+      height: 40,
+      padding: EdgeInsets.symmetric(horizontal: dense ? 10 : 12),
+      decoration: BoxDecoration(
+        color: s.surfaceCard,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: s.borderCard),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          value: value,
+          items: items,
+          onChanged: onChanged,
+          isDense: true,
+          borderRadius: BorderRadius.circular(12),
+          icon: Icon(Icons.expand_more, size: 18, color: s.textMuted),
+          style: TextStyle(
+            fontFamily: MlTokens.fontSans,
+            fontSize: dense ? 13 : 13.5,
+            fontWeight: FontWeight.w600,
+            color: s.textBody,
+          ),
+          dropdownColor: s.surfaceCard,
+        ),
+      ),
+    );
+  }
+
+  Widget _pageBtn(
+    MlSemantic s,
+    IconData icon, {
+    required bool enabled,
+    required VoidCallback onTap,
+  }) {
+    return Opacity(
+      opacity: enabled ? 1 : 0.4,
+      child: Material(
+        color: s.surfaceCard,
+        borderRadius: BorderRadius.circular(9),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(9),
+          onTap: enabled ? onTap : null,
+          child: Container(
+            width: 34,
+            height: 34,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(color: s.borderCard),
+            ),
+            child: Icon(icon, size: 18, color: s.textBody),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _pageNum(
+    MlSemantic s,
+    int p, {
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    const accent = MlTokens.accent;
+    return Material(
+      color: selected ? accent : s.surfaceCard,
+      borderRadius: BorderRadius.circular(9),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(9),
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 34),
+          height: 34,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(9),
+            border: Border.all(color: selected ? accent : s.borderCard),
+          ),
+          child: Text(
+            '$p',
+            style: TextStyle(
+              fontFamily: MlTokens.fontSans,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+              color: selected ? MlTokens.inkOnFill : s.textBody,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Token state for the org list.
+  ///
+  /// **A company with no token used to render a GREEN dot labelled "No token"**
+  /// — the same green as a token with a year left on it, so the one state that
+  /// stops an organisation working read as the healthiest thing on the row. It
+  /// is now `error`, alongside expired, because the consequence is the same:
+  /// `is_company_active` is false and the company can do nothing.
+  ///
+  /// An unparseable expiry was green too. It is `neutral` — unknown is not
+  /// well, and it is not a failure either.
+  ///
+  /// Returns a tone rather than a `Color` so the caller resolves it against the
+  /// active brightness. The three raw `Color(0xFF…)` literals this replaces
+  /// were fixed hues that did not move between light and dark (S5-19).
+  _ExpiryInfo _expiry(String? iso) {
+    if (iso == null) {
+      return const _ExpiryInfo('No token', true, MlTone.error, null);
+    }
+    final exp = DateTime.tryParse(iso);
+    if (exp == null) return const _ExpiryInfo('—', false, MlTone.neutral, null);
+    final now = DateTime.now();
+    final date = DateFormat("d MMM ''yy").format(MlTime.sast(exp));
+    final diff = exp.difference(now);
+    if (diff.isNegative) {
+      return _ExpiryInfo(
+        'Expired · ${-diff.inDays}d ago',
+        true,
+        MlTone.error,
+        date,
+      );
+    }
+    final days = diff.inDays;
+    final hours = diff.inHours % 24;
+    return _ExpiryInfo(
+      '${days}d ${hours.toString().padLeft(2, '0')}h left',
+      false,
+      days < 7 ? MlTone.warn : MlTone.done,
+      date,
+    );
+  }
+}
+
+class _ExpiryInfo {
+  final String label;
+  final bool expired;
+
+  /// Semantic tone, resolved against brightness at the render site.
+  final MlTone dot;
+  final String? date;
+  const _ExpiryInfo(this.label, this.expired, this.dot, this.date);
+}

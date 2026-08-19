@@ -1,0 +1,59 @@
+/* MineLink — Core color palette
+ * Source of truth: lib/core/theme/app_theme.dart, lib/features/portal/portal_colors.dart
+ * Slate-based neutral system with a deep-navy portal chrome and a cyan brand accent. */
+
+:root {
+  /* ---- Brand ---- */
+  --ml-cyan-50:  #e6fbff;
+  --ml-cyan-100: #cbf3fb;
+  --ml-cyan-200: #9fe7f4;
+  --ml-cyan-300: #5fd6ea;
+  --ml-cyan-400: #22c2de;
+  --ml-cyan-500: #00b5d8;   /* PortalColors.accent — primary brand accent */
+  --ml-cyan-600: #0496b6;
+  --ml-cyan-700: #0a7791;
+  --ml-teal-700: #0f6e8c;   /* Material seed color */
+
+  /* ---- Portal navy chrome (sidebar / app shell) ---- */
+  --ml-navy-700: #0b2545;
+  --ml-navy-800: #0b192e;   /* PortalColors.sidebarLight */
+  --ml-navy-900: #060f20;
+  --ml-navy-950: #020617;   /* PortalColors.sidebarDark / slate-950 */
+
+  /* ---- Slate neutral scale ---- */
+  --ml-slate-50:  #f8fafc;  /* scaffold background (light) */
+  --ml-slate-100: #f1f5f9;  /* input fill, chip fill */
+  --ml-slate-200: #e2e8f0;  /* sidebar onBackground, borders */
+  --ml-slate-300: #cbd5e1;
+  --ml-slate-400: #94a3b8;  /* sidebar muted, placeholder */
+  --ml-slate-500: #64748b;
+  --ml-slate-600: #475569;  /* onSurfaceVariant — helper / subtitle text */
+  --ml-slate-700: #334155;
+  --ml-slate-800: #1e293b;  /* card surface (dark), snackbar */
+  --ml-slate-900: #0f172a;  /* scaffold background (dark), primary text */
+  --ml-slate-950: #020617;
+
+  --ml-white: #ffffff;
+  --ml-black: #000000;
+
+  /* ---- Status hues (trip / truck lifecycle) ---- */
+  --ml-blue-50:   #eff6ff;  /* OTW TO LOADING bg */
+  --ml-blue-600:  #2563eb;  /* OTW TO LOADING fg */
+  --ml-amber-50:  #fef3c7;  /* AT MINE bg */
+  --ml-amber-700: #b45309;  /* AT MINE fg */
+  --ml-green-50:  #dcfce7;  /* LOADED / Available bg */
+  --ml-green-600: #16a34a;  /* confirm / arrived */
+  --ml-green-700: #15803d;  /* LOADED / Available fg */
+  --ml-orange-50:  #ffedd5; /* Maintenance bg */
+  --ml-orange-500: #f97316; /* departure / "Mark Left" */
+  --ml-orange-600: #ea580c;
+  --ml-orange-700: #c2410c; /* Maintenance fg */
+  --ml-red-50:   #fee2e2;
+  --ml-red-600:  #dc2626;   /* error / destructive */
+
+  /* ---- Tinted icon wells (feature cards) ---- */
+  --ml-well-cyan:   #e2f6fb;
+  --ml-well-amber:  #fdeedd;
+  --ml-well-green:  #e3f5ea;
+  --ml-well-blue:   #e7effe;
+}

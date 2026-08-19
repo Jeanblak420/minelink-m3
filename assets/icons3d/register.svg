@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 116" fill="none">
+<ellipse cx="56" cy="108" rx="28" ry="6" fill="#000" opacity="0.28" />
+      <defs>
+        <linearGradient id="i3-regF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fe0f4" /><stop offset="1" stop-color="#0aa3c4" /></linearGradient>
+        <linearGradient id="i3-regP" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#5ceb9a" /><stop offset="1" stop-color="#16a04c" /></linearGradient>
+      </defs>
+      <rect x="22" y="30" width="46" height="72" rx="7" fill="#067488" transform="translate(0,4)" />
+      <rect x="22" y="30" width="46" height="72" rx="7" fill="url(#i3-regF)" />
+      {[42, 58, 74].map((y) => [29, 45].map((x) => (
+        <rect key="x + '-' + y" x="x" y="y" width="9" height="9" rx="2" fill="#eafaff" opacity=".9" />
+      )))}
+      <circle cx="80" cy="76" r="20" fill="#0e7a3a" transform="translate(0,3)" />
+      <circle cx="80" cy="73" r="20" fill="url(#i3-regP)" />
+      <rect x="76" y="64" width="8" height="18" rx="4" fill="#fff" />
+      <rect x="71" y="69" width="18" height="8" rx="4" fill="#fff" />
+</svg>

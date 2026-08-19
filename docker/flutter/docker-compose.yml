@@ -1,0 +1,44 @@
+# Build release APK inside Linux (Android SDK inside image; no Windows path / subst issues).
+#
+# From repo root (PowerShell):
+#   docker compose -f docker/flutter/docker-compose.yml run --rm flutter-apk
+#
+# Or:  powershell -File scripts/docker_flutter_apk.ps1
+#
+# Output: build/app/outputs/flutter-apk/app-release.apk (on your host via bind mount).
+
+services:
+  flutter-apk:
+    image: ghcr.io/cirruslabs/flutter:stable
+    environment:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Xmx4g"
+    working_dir: /workspace
+    volumes:
+      - ../../:/workspace
+    command:
+      - sh
+      - -c
+      - >-
+        set -e;
+        git config --global --add safe.directory /workspace 2>/dev/null || true;
+        flutter config --no-analytics;
+        flutter pub get;
+        flutter build apk --release --dart-define-from-file=config/supabase.live.json
+
+  # Optional: Android in Docker = browser only (noVNC). For a real phone window on Windows,
+  # use scripts/open_native_android_emulator.ps1 instead (Android Studio emulator).
+  #   powershell -File scripts/docker_android_emulator.ps1
+  #   or: docker compose -f docker/flutter/docker-compose.yml --profile browser-android up -d android-nvc
+  # UI: http://localhost:6080  |  adb: adb connect 127.0.0.1:5555
+  android-nvc:
+    profiles: ["browser-android"]
+    image: budtmo/docker-android:emulator_14.0
+    privileged: true
+    shm_size: "2gb"
+    environment:
+      EMULATOR_DEVICE: "Samsung Galaxy S10"
+      WEB_VNC: "true"
+    ports:
+      - "6080:6080"
+      - "5554:5554"
+      - "5555:5555"

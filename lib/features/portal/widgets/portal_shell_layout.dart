@@ -1,0 +1,763 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_application_1/core/navigation/app_sidebar_prefs.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
+import 'package:flutter_application_1/core/theme/theme_mode_provider.dart';
+import 'package:flutter_application_1/core/routing/ml_route_title.dart';
+import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
+import 'package:flutter_application_1/features/profile_setup/widgets/profile_setup_banner.dart';
+import 'package:flutter_application_1/features/auth/services/logout_service.dart';
+import 'package:flutter_application_1/features/chat/widgets/chat_dock.dart';
+import 'package:flutter_application_1/features/company/providers/company_provider.dart';
+import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
+import 'package:flutter_application_1/features/employee/providers/employee_status_provider.dart';
+import 'package:flutter_application_1/features/employee/screens/company_selection_screen.dart';
+import 'package:flutter_application_1/features/employee/widgets/approval_pending_overlay.dart';
+import 'package:flutter_application_1/features/notifications/providers/notification_provider.dart';
+import 'package:flutter_application_1/features/notifications/widgets/animated_notification_bell.dart';
+import 'package:flutter_application_1/features/notifications/widgets/welcome_notification.dart';
+import 'package:flutter_application_1/features/portal/providers/portal_tab_index_provider.dart';
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
+import 'package:flutter_application_1/features/portal/nav/portal_nav.dart';
+import 'package:flutter_application_1/features/portal/nav/portal_nav_badges.dart';
+import 'package:flutter_application_1/features/portal/portal_navigation.dart';
+import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
+import 'package:flutter_application_1/features/portal/screens/driver_app_screen.dart';
+import 'package:flutter_application_1/features/portal/providers/portal_workspace_provider.dart';
+import 'package:flutter_application_1/features/portal/providers/mine_appearance_provider.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_mine_premium_theme.dart';
+import 'package:flutter_application_1/features/portal/widgets/portal_scaffold.dart';
+import 'package:flutter_application_1/features/portal/widgets/workflow_notification_bell.dart';
+import 'package:flutter_application_1/core/widgets/app_navigation_back_button.dart';
+import 'package:flutter_application_1/core/navigation/nav_history_provider.dart';
+import 'package:flutter_application_1/core/navigation/nav_back.dart';
+import 'package:flutter_application_1/core/widgets/nav_history_recorder.dart';
+import 'package:flutter_application_1/features/tutorial/providers/tutorial_providers.dart';
+import 'package:flutter_application_1/features/tutorial/widgets/tutorial_overlay.dart';
+import 'package:flutter_application_1/core/design/tokens/ui_prefs.dart';
+import 'package:flutter_application_1/core/design/shell/ml_home_chip.dart';
+import 'package:flutter_application_1/core/design/components/ml_expiry_notice.dart';
+import 'package:flutter_application_1/features/portal/providers/company_access_provider.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_rail_tokens.dart';
+import 'package:flutter_application_1/core/layout/text_scale.dart';
+
+/// The rail for a session with no operational surface: an employee whose role
+/// has not been assigned yet, or a workspace whose org type has not resolved.
+///
+/// Never an empty list. An empty rail reads as a broken app rather than a
+/// pending one, and leaves no route to the user's own record — which is the
+/// one thing the waiting overlay promises they can still reach.
+const List<PortalNavNode> _waitingNav = [
+  PortalNavNode.leaf(
+    label: 'My profile',
+    icon: Icons.person_outline_rounded,
+    route: '/profile',
+  ),
+];
+
+/// The section prefixes and the segment split moved to
+/// `core/routing/ml_route_title.dart` with the title table they feed (S5-12).
+/// Aliased here so the sidebar-selection code below reads unchanged.
+String? _portalAliasSegment(String path) => mlPortalAliasSegment(path);
+
+/// Sidebar tab label hosting the equivalent screen for a `/portal/{org}/...`
+/// alias, or null when the alias has no sidebar tab (ops-hub tabs, employees,
+/// company, notifications, locations). Labels not present in an org's tab
+/// set simply resolve to no selection via `indexWhere` (-1).
+String? _portalAliasTabLabel(String segment) {
+  switch (segment) {
+    case 'security':
+    case 'gate':
+      return 'Security';
+    case 'weighbridge':
+      return 'Controller';
+    case 'stockpiles':
+      return 'Supervisor';
+    case 'reconciliations':
+    case 'tons-out':
+      return 'Reconciliations';
+    case 'requests':
+    case 'orders':
+      return 'Requests';
+    case 'live-map':
+      return 'Live map';
+    case 'waybills':
+      return 'Waybills';
+    case 'fleet':
+      return 'Fleet / routes';
+    case 'trucks-on-route':
+      return 'Trucks On Route';
+    case 'maintenance':
+      return 'Maintenance';
+    case 'drivers':
+      return 'Driver';
+    case 'profile':
+      return 'Profile';
+    default:
+      return null;
+  }
+}
+
+/// Sidebar selected index for the current location: the active tab on
+/// `/home`, the hosting tab for a `/portal/{org}` alias (phase-2 T3), and -1
+/// (no highlight) for every other routed page — matching prior behavior.
+int portalShellSelectedIndex(
+    String path, List<PortalTabItem> tabs, int homeTabIndex) {
+  if (path == '/home') return homeTabIndex.clamp(0, tabs.length - 1);
+  final segment = _portalAliasSegment(path);
+  if (segment == null) return -1;
+  if (segment.isEmpty) {
+    // Section dashboard → the org's Overview (mine/transporter) or
+    // Dashboard (buyer / employee shells) tab.
+    final overview = tabs.indexWhere((t) => t.label == 'Overview');
+    if (overview >= 0) return overview;
+    return tabs.indexWhere((t) => t.label == 'Dashboard');
+  }
+  final label = _portalAliasTabLabel(segment);
+  if (label == null) return -1;
+  return tabs.indexWhere((t) => t.label == label);
+}
+
+/// The portal shell's page title.
+///
+/// A thin adapter now: the table itself lives in
+/// `core/routing/ml_route_title.dart`, shared with the console (S5-12). This
+/// maps the portal's own `PortalTabItem`s down to the labels the resolver
+/// needs, which is the one piece of per-session state a title depends on.
+String portalShellSectionTitle(
+    Uri uri, List<PortalTabItem> tabs, int homeTabIndex) {
+  return mlRouteTitle(
+    uri,
+    tabs: MlPortalTabs([for (final t in tabs) t.label], homeTabIndex),
+  ).title;
+}
+
+/// Shell chrome around authenticated logistics workspace routes.
+class PortalShellLayout extends ConsumerStatefulWidget {
+  final Widget child;
+
+  const PortalShellLayout({super.key, required this.child});
+
+  @override
+  ConsumerState<PortalShellLayout> createState() => _PortalShellLayoutState();
+}
+
+class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
+  bool _dialogOpen = false;
+  final GlobalKey<ScaffoldState> _portalKey = GlobalKey<ScaffoldState>();
+  bool _portalSidebarExpanded = true;
+
+  @override
+  void initState() {
+    super.initState();
+    AppSidebarPrefs.readPortalExpanded().then((v) {
+      if (mounted) setState(() => _portalSidebarExpanded = v);
+    });
+  }
+
+  Future<void> _syncManagedContext() async {
+    final employee = ref.read(employeeProvider).employee;
+    final companyNotifier = ref.read(companyProvider.notifier);
+
+    final canManage = employee != null &&
+        employee.companyId != null &&
+        employee.status == 'active' &&
+        (employee.role == UserRole.admin || employee.role == UserRole.management);
+
+    if (canManage) {
+      await companyNotifier.loadManagedCompanyContext(employee.companyId!);
+      return;
+    }
+
+    companyNotifier.clearContext();
+  }
+
+  void _scheduleManagedSync() {
+    final authState = ref.read(authStateProvider);
+    final employeeState = ref.read(employeeProvider);
+    final companyState = ref.read(companyProvider);
+    if (!portalNeedsManagedSync(authState, employeeState, companyState)) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _syncManagedContext();
+      }
+    });
+  }
+
+  void _maybeShowRoleDialog(AuthState authState, EmployeeState employeeState) {
+    if (_dialogOpen ||
+        authState.userType?.isEmployee != true ||
+        !employeeState.roleJustAssigned ||
+        employeeState.employee?.role == null) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _dialogOpen) {
+        return;
+      }
+
+      _dialogOpen = true;
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const WelcomeNotification(),
+      ).then((_) {
+        _dialogOpen = false;
+        final userId = authState.user?.id;
+        if (!mounted || userId == null) {
+          return;
+        }
+        ref.read(employeeProvider.notifier).loadEmployeeProfile(userId);
+        ref.read(notificationProvider.notifier).loadNotifications(userId);
+      });
+    });
+  }
+
+  Widget _statusScaffold(PortalWorkspaceModel vm) {
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // A platform admin is not a workspace that failed to load —
+                // they simply have no company of their own. Same reasoning as
+                // PortalWorkspacePhase.platformAdminObserver.
+                if (vm.phase == PortalWorkspacePhase.platformAdminObserver)
+                  Icon(Icons.admin_panel_settings_outlined,
+                      size: 48, color: Theme.of(context).colorScheme.primary)
+                else if (vm.retryAction == PortalRetryAction.none)
+                  const CircularProgressIndicator()
+                else
+                  Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                const SizedBox(height: 24),
+                Text(
+                  vm.title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  vm.message,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                if (vm.retryAction != PortalRetryAction.none) ...[
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: () {
+                      final auth = ref.read(authStateProvider).user;
+                      if (auth == null) {
+                        return;
+                      }
+                      if (vm.retryAction == PortalRetryAction.companyProfile) {
+                        ref.read(companyProvider.notifier).loadCompanyProfile(auth.id);
+                      } else {
+                        ref.read(employeeProvider.notifier).loadEmployeeProfile(auth.id);
+                      }
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
+                  ),
+                ],
+                if (vm.phase == PortalWorkspacePhase.platformAdminObserver) ...[
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: () => context.go('/super-admin'),
+                    icon: const Icon(Icons.dashboard_outlined, size: 18),
+                    label: const Text('Open the admin console'),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // S5-3 (P5-06): the org portals now honour the SAME per-user accessibility
+    // settings the console has had — text scale and bold text — applied here,
+    // once, so every portal screen inherits them the way every console screen
+    // already did. Before this, a mine supervisor who needed larger text
+    // simply had no way to get it: the setting existed, but only super admins
+    // were behind a shell that read it.
+    final uiPrefs = ref.watch(uiPrefsProvider);
+    final media = MediaQuery.of(context);
+    return MediaQuery(
+      data: media.copyWith(
+        // Multiplied onto the platform's scaler, not substituted for it — the
+        // same rule the bold-text line below already followed. Substituting
+        // meant a driver who had set 200% at the OS level got 100%, because
+        // the in-app slider they had never opened defaults to 1.0.
+        // See lib/core/layout/text_scale.dart.
+        textScaler: mlTextScaler(media.textScaler, uiPrefs.textScale),
+        // OR, not override: a user who set bold text at the OS level keeps it
+        // even if the in-app toggle is off.
+        boldText: media.boldText || uiPrefs.boldText,
+      ),
+      child: _buildShell(context),
+    );
+  }
+
+  Widget _buildShell(BuildContext context) {
+    final vm = ref.watch(portalWorkspaceProvider);
+    final authState = ref.watch(authStateProvider);
+    final employeeState = ref.watch(employeeProvider);
+    final homeTabIndex = ref.watch(portalTabIndexProvider);
+
+    _scheduleManagedSync();
+
+    switch (vm.phase) {
+      case PortalWorkspacePhase.selectingCompany:
+        return const CompanySelectionScreen();
+      case PortalWorkspacePhase.ready:
+        break;
+      default:
+        return _statusScaffold(vm);
+    }
+
+    // Drivers get the mobile-first 3-tab shell (Dashboard · Trip · Profile,
+    // spec 2026-07-16 §5) instead of the sidebar chrome — on /home only, so
+    // pushed routes (/profile, /notifications, /chat/...) keep normal chrome.
+    final shellPath = GoRouterState.of(context).uri.path;
+    final isDriverEmployee = authState.userType?.isEmployee == true &&
+        employeeState.employee?.role == UserRole.driver;
+    if (shellPath == '/home' && isDriverEmployee) {
+      return const DriverAppScreen();
+    }
+    // Phase-2 nav merge (T2): /portal/driver/{home,trip,profile} deep-link
+    // the same self-chromed driver app — render the routed child bare so the
+    // sidebar chrome isn't doubled around the driver shell's own scaffold.
+    if (isDriverEmployee &&
+        const {
+          '/portal/driver/home',
+          '/portal/driver/trip',
+          '/portal/driver/profile',
+        }.contains(shellPath)) {
+      return widget.child;
+    }
+
+    final tabs = vm.tabs!;
+    final uri = GoRouterState.of(context).uri;
+    final location = uri.path;
+    final navIndex = portalShellSelectedIndex(location, tabs, homeTabIndex);
+    final sectionTitle = portalShellSectionTitle(uri, tabs, navIndex);
+    final onHome = location == '/home';
+    final navLocation = NavLocation(
+      path: location,
+      query: uri.queryParameters,
+      homeTabIndex: onHome ? navIndex : null,
+    );
+    final isRootScreen = onHome && navIndex == 0;
+
+    // The sectioned destination tree for this session (P7-01). An employee
+    // still waiting for a role assignment gets no org tree at all — handing
+    // that user one was the privilege escalation closed in `f9add87` — so
+    // they get their own record and nothing else, which is exactly what the
+    // waiting overlay promises them.
+    final isCompanyAccount = authState.userType?.isCompany == true;
+    final orgType = isCompanyAccount
+        ? ref.watch(companyProvider).company?.orgType
+        : employeeState.company?.orgType;
+    final navTree = (vm.isEmployeeWithoutRole || orgType == null)
+        ? _waitingNav
+        : portalNavTree(
+            orgType: orgType,
+            role: isCompanyAccount ? null : employeeState.employee?.role,
+          );
+    // `/home` is the post-login landing and renders the org's dashboard, so it
+    // selects the same leaf the dashboard route does. Phase 12 removes the
+    // route; until then the two are the same page under two addresses and the
+    // rail must not look unselected on one of them.
+    final dashboardRoute = navTree.first.isGroup
+        ? navTree.first.leaves.first.route!
+        : navTree.first.route!;
+    final selectedRoute = onHome ? dashboardRoute : location;
+
+    // Live queue counts for the badges this tree names, and only those
+    // (P7-05). Resolved against the company whose workspace is on screen —
+    // which under the platform admin's company-mirror is the observed company,
+    // not the admin's own.
+    final badgeCompanyId = resolvePortalCompanyId(ref);
+    final badgeCounts = (orgType == null || badgeCompanyId == null)
+        ? const <PortalNavBadge, int>{}
+        : ref.watch(portalNavBadgeCountsProvider((
+            orgType: orgType,
+            role: isCompanyAccount ? null : employeeState.employee?.role,
+            companyId: badgeCompanyId,
+          )));
+
+    _maybeShowRoleDialog(authState, employeeState);
+
+    ref.listen(portalWorkspaceProvider, (prev, next) {
+      if (prev?.tabs?.length != next.tabs?.length && next.tabs != null) {
+        final i = ref.read(portalTabIndexProvider);
+        if (i >= next.tabs!.length) {
+          ref.read(portalTabIndexProvider.notifier).state = 0;
+        }
+      }
+    });
+
+    if (vm.isEmployeeWithoutRole) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final employee = employeeState.employee;
+        if (!mounted || employee == null) {
+          return;
+        }
+        ref.read(employeeStatusProvider.notifier).loadEmployeeStatusHistory(employee.id);
+      });
+    }
+
+    final screenW = MediaQuery.sizeOf(context).width;
+    final narrowNav = screenW < PortalScaffold.sidebarBreakpoint;
+    final compactActions = screenW < 520;
+    final leadingW = narrowNav ? (screenW < 360 ? 100.0 : 104.0) : null;
+
+    final Widget? overflowMenu = compactActions
+        ? PopupMenuButton<String>(
+            tooltip: 'More',
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (value) {
+              switch (value) {
+                case 'notifications':
+                  context.go('/notifications');
+                  return;
+                case 'tour':
+                  ref.read(tutorialOverlayProvider.notifier).show();
+                  return;
+                case 'profile':
+                  context.go('/profile');
+                  return;
+                case 'logout':
+                  LogoutService.logoutWithConfirmation(context, ref);
+                  return;
+                default:
+                  return;
+              }
+            },
+            itemBuilder: (context) => [
+              if (!vm.isEmployeeWithoutRole)
+                const PopupMenuItem(value: 'notifications', child: Text('Notifications')),
+              const PopupMenuItem(value: 'tour', child: Text('Take a tour')),
+              const PopupMenuItem(value: 'profile', child: Text('Profile')),
+              const PopupMenuItem(value: 'logout', child: Text('Sign out')),
+            ],
+          )
+        : null;
+
+    // Mine premium theme (mine/supplier only): when a Glass/Industrial
+    // direction is chosen on the Appearance page, skin the WHOLE mine portal —
+    // sidebar, app bar and every page. Non-mine workspaces get null and keep
+    // the default look untouched.
+    final appearance = ref.watch(mineAppearanceProvider);
+    final minePalette = vm.isMineSupplier
+        ? MinePremiumPalette.forDirection(appearance.direction)
+        : null;
+    final semantic = minePalette?.semantic ?? MlSemantic.of(context);
+    final themeMode = ref.watch(themeModeProvider);
+
+    // S5-11: was a hand-copied inline chip — same 38px box, same 11px radius,
+    // same glyph as the console's, written out again because the original was
+    // private. The two had already drifted: this one hardcoded the border and
+    // the ink for DARK in both themes, so on a light portal it drew an
+    // ice-blue glyph on a light rail. MlHomeChip is theme-aware and shared.
+    final homeChip = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Tooltip(
+        message: 'Home',
+        child: MlHomeChip(
+          onTap: () {
+            ref.read(portalTabIndexProvider.notifier).state = 0;
+            context.go('/home');
+          },
+        ),
+      ),
+    );
+
+    final appBar = AppBar(
+      toolbarHeight: narrowNav ? kToolbarHeight : MlTokens.appBarHeight,
+      backgroundColor: semantic.surfaceCard,
+      leading: narrowNav
+          ? SizedBox(
+              width: leadingW,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: 'Open navigation menu',
+                    icon: const Icon(Icons.menu_rounded),
+                    onPressed: () => _portalKey.currentState?.openDrawer(),
+                  ),
+                  const AppNavigationBackButton(),
+                ],
+              ),
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(width: 8),
+                const AppNavigationBackButton(),
+                const SizedBox(width: 6),
+                homeChip,
+              ],
+            ),
+      leadingWidth: narrowNav ? leadingW : 108,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(height: 1, color: semantic.borderCard),
+      ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            sectionTitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: MlTokens.fontSans,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.2,
+              color: semantic.textStrong,
+              fontSize: narrowNav ? (screenW < 400 ? 16 : 18) : 22,
+              height: 1.15,
+            ),
+          ),
+          Text(
+            '${vm.workspaceName} · ${vm.operatorName} · ${vm.roleLabel}',
+            maxLines: narrowNav ? 2 : 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: MlTokens.fontSans,
+              fontSize: 12,
+              color: mlRailSearchInk,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        if (overflowMenu != null)
+          overflowMenu
+        else ...[
+          IconButton(
+            tooltip: 'Take a tour',
+            onPressed: () =>
+                ref.read(tutorialOverlayProvider.notifier).show(),
+            icon: ref.watch(tutorialSeenProvider)
+                ? const Icon(Icons.help_outline_rounded)
+                : Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Icon(Icons.help_outline_rounded),
+                      Positioned(
+                        right: -1,
+                        top: -1,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: MlTokens.accent,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+          IconButton(
+            tooltip: themeMode == ThemeMode.dark
+                ? 'Switch to light theme'
+                : 'Switch to dark theme',
+            icon: Icon(
+              themeMode == ThemeMode.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
+            ),
+            onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
+          ),
+          if (!vm.isEmployeeWithoutRole) const WorkflowNotificationBell(),
+          if (!vm.isEmployeeWithoutRole) const AnimatedNotificationBell(),
+          IconButton(
+            tooltip: 'Profile',
+            icon: const Icon(Icons.person_outline),
+            onPressed: () => context.go('/profile'),
+          ),
+          IconButton(
+            tooltip: 'Sign out',
+            icon: const Icon(Icons.logout_rounded),
+            onPressed: () => LogoutService.logoutWithConfirmation(context, ref),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ],
+    );
+
+    final showChatFab =
+        !vm.isEmployeeWithoutRole && !location.startsWith('/communications');
+
+    // Driver mobile: a phone-style Dashboard / Trip / Profile bottom bar (the
+    // drawer still holds Live map / Truck locations / positions / Driver, so no
+    // feature is lost). Only on the narrow (mobile) layout.
+    Widget? driverBottomNav;
+    if (narrowNav &&
+        employeeState.employee?.role == UserRole.driver &&
+        !vm.isEmployeeWithoutRole) {
+      const targets = [
+        '/portal/driver/home',
+        '/portal/driver/trip',
+        '/portal/driver/profile',
+      ];
+      final sel = targets.indexOf(selectedRoute);
+      driverBottomNav = NavigationBar(
+        selectedIndex: sel < 0 ? 0 : sel,
+        onDestinationSelected: (i) => context.go(targets[i]),
+        destinations: const [
+          NavigationDestination(
+              icon: Icon(Icons.grid_view_outlined),
+              selectedIcon: Icon(Icons.grid_view_rounded),
+              label: 'Dashboard'),
+          NavigationDestination(
+              icon: Icon(Icons.local_shipping_outlined),
+              selectedIcon: Icon(Icons.local_shipping),
+              label: 'Trip'),
+          NavigationDestination(
+              icon: Icon(Icons.person_outline),
+              selectedIcon: Icon(Icons.person),
+              label: 'Profile'),
+        ],
+      );
+    }
+
+    final shellBody = PortalScaffold(
+      scaffoldKey: _portalKey,
+      nav: navTree,
+      selectedRoute: selectedRoute,
+      badgeCounts: badgeCounts,
+      navLocked: vm.isEmployeeWithoutRole,
+      sidebarBrandTitle: vm.workspaceName,
+      userName: vm.operatorName,
+      userMeta: vm.roleLabel,
+      // Read straight off the session rather than added to
+      // PortalWorkspaceModel: the address is auth's, not the workspace's, and
+      // the shell already watches authState above.
+      userEmail: authState.user?.email,
+      userAvatarUrl: vm.avatarUrl,
+      premiumPalette: minePalette,
+      onLogout: () => LogoutService.logoutWithConfirmation(context, ref),
+      onNotifications: vm.isEmployeeWithoutRole
+          ? null
+          : () => context.go('/notifications'),
+      notificationsBadge:
+          ref.watch(notificationProvider).unreadCount > 0,
+      onProfile: () => context.go('/profile'),
+      onToggleTheme: () => ref.read(themeModeProvider.notifier).toggle(),
+      onAppearance: () => context.go('/appearance'),
+      // The floating chat launcher is provided by the draggable [ChatDock]
+      // overlay (below) rather than a fixed FAB, so it can be repositioned.
+      floatingAction: null,
+      bottomNav: driverBottomNav,
+      appBar: appBar,
+      sidebarExpanded: _portalSidebarExpanded,
+      onSidebarExpandedChanged: (expanded) {
+        setState(() => _portalSidebarExpanded = expanded);
+        AppSidebarPrefs.writePortalExpanded(expanded);
+      },
+      body: Column(
+        children: [
+          // Account-setup nag: renders nothing once setup is complete, and is
+          // suppressed on the setup screen itself.
+          if (!navLocation.fullLocation.startsWith('/account-setup'))
+            const ProfileSetupBanner(),
+          // Licence state, on EVERY portal screen rather than one notices page.
+          // Token expiry is enforced in the database (migration 20260815094000),
+          // so without this the block is silent: a write is refused by RLS and
+          // nothing says a lapsed token caused it or that renewing fixes it.
+          // It renders nothing while the company is active, and is suppressed on
+          // /profile — the one screen whose whole job is the renewal request the
+          // notice points at, where repeating it would be noise.
+          if (!navLocation.fullLocation.startsWith('/profile'))
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: MlExpiryNotice(
+                access: companyAccessOf(ref),
+                onRequestRenewal: () => context.go('/profile'),
+                onMessageMineLink: () => context.go('/messages'),
+                onExplain: () => context.go('/expired-access'),
+                compact: MediaQuery.of(context).size.width < 720,
+              ),
+            ),
+          Expanded(
+            child: NavHistoryRecorder(
+              key: ValueKey(navLocation.fullLocation),
+              location: navLocation,
+              isRoot: isRootScreen,
+              child: widget.child,
+            ),
+          ),
+        ],
+      ),
+      onNavigate: (route) => context.go(route),
+    );
+
+    // The waiting-for-role overlay promises "you can only access your Profile"
+    // — so leave /profile usable, and /account-setup with it: employees are
+    // asked (banner + daily reminder deep-link) to complete their profile,
+    // documents and signature while they wait for a role.
+    // `/home` joins them at S2-7. It renders `WaitingForRoleScreen` for this
+    // user — `resolvePortalTabs` gives a no-role employee exactly that one tab
+    // — and the overlay is a near-duplicate of it: same status history, same
+    // message. Stacking them put the waiting screen behind a 70% scrim showing
+    // a second copy of itself. Now that the router sends every other path
+    // here, that doubling would be the primary experience rather than an edge.
+    final overlayExempt = location == '/home' ||
+        location == '/profile' ||
+        location == '/account-setup';
+    Widget content = vm.isEmployeeWithoutRole && !overlayExempt
+        ? Stack(children: [shellBody, const ApprovalPendingOverlay()])
+        : shellBody;
+
+    if (showChatFab) {
+      content = ChatDock(child: content);
+    }
+
+    // Guided "Take a tour" overlay — renders nothing until launched from the
+    // help button (or the compact overflow menu), so it never blocks normal
+    // app use. Mounted here so it covers the whole shell and still sits
+    // inside the mine premium theme/semantic scope when one is installed.
+    content = Stack(children: [content, const TutorialOverlay()]);
+
+    content = PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (ref.read(navHistoryProvider.notifier).canGoBack) {
+          navigateBack(context, ref);
+        }
+      },
+      child: content,
+    );
+
+    // Install the premium Material theme + semantic scope over the entire mine
+    // portal so every page, dialog and control adopts the chosen direction.
+    if (minePalette != null) {
+      content = Theme(
+        data: minePalette.themeData,
+        child: MlSemanticScope(semantic: minePalette.semantic, child: content),
+      );
+    }
+
+    return content;
+  }
+}

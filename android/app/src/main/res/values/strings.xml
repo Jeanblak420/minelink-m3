@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MineLink</string>
+    <!-- FCM default notification channel id, referenced from
+         AndroidManifest.xml's com.google.firebase.messaging.default_notification_channel_id
+         meta-data. Android 8+ requires an actual NotificationChannel with
+         this id to show a heads-up notification while the app is
+         backgrounded/killed; create it when wiring local notification
+         display (see docs/push-setup.md). -->
+    <string name="default_notification_channel_id">push_default</string>
+</resources>

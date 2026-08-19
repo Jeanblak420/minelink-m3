@@ -1,0 +1,19 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Status Hues" subtitle="Trip & truck lifecycle — pill fg/bg pairs" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+  body{margin:0;background:var(--surface-card);padding:20px;font-family:var(--font-sans)}
+  .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .pill{padding:6px 14px;border-radius:var(--radius-pill);font-size:12px;font-weight:700;letter-spacing:.02em}
+  .meta{width:100%;margin-top:8px;display:flex;gap:18px;font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+</style></head>
+<body>
+  <div class="row">
+    <span class="pill" style="color:var(--status-transit-fg);background:var(--status-transit-bg)">OTW TO LOADING</span>
+    <span class="pill" style="color:var(--status-atmine-fg);background:var(--status-atmine-bg)">AT MINE</span>
+    <span class="pill" style="color:var(--status-done-fg);background:var(--status-done-bg)">LOADED</span>
+    <span class="pill" style="color:var(--status-done-fg);background:var(--status-done-bg)">AVAILABLE</span>
+    <span class="pill" style="color:var(--status-warn-fg);background:var(--status-warn-bg)">MAINTENANCE</span>
+    <span class="pill" style="color:var(--status-error-fg);background:var(--status-error-bg)">DECLINED</span>
+  </div>
+  <div class="meta"><span>transit · blue 600/50</span><span>atmine · amber 700/50</span><span>done · green 700/50</span><span>warn · orange 700/50</span></div>
+</body></html>
