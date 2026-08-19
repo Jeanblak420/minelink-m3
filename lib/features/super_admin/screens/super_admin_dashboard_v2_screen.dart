@@ -9,7 +9,7 @@ import 'package:flutter_application_1/features/super_admin/data/models/company_m
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screen_dashboard.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screens_core.dart';
-import 'package:flutter_application_1/features/super_admin/widgets/sidebar/console_sidebar_bridge.dart';
+import 'package:flutter_application_1/features/super_admin/nav/console_nav_ids.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_console_palettes.dart';

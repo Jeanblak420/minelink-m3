@@ -35,78 +35,23 @@ enum ConsoleAccent {
       values.firstWhere((a) => a.id == id, orElse: () => defaultAccent);
 }
 
-/// Which sidebar the console renders. All five ship; the choice is per-user
-/// (Settings → User Preferences → Console sidebar).
-///
-///  - [classic] — the console's own rail: navy/white, blue active tiles.
-///  - [haul] / [weighbridge] — the two design drops in their delivered gold
-///    palettes (vendored under `widgets/sidebar/`).
-///  - [haulMineLink] / [weighbridgeMineLink] — the same two layouts exactly,
-///    recoloured to the app's design tokens. Unlike the gold originals these
-///    follow the accent chosen above them.
-enum ConsoleSidebarSkin {
-  app(
-    'app',
-    'App nav',
-    'The console default. Opens as a 68px rail and slides to 260px; collapses itself again after every jump, with search and tooltips on the rail.',
-  ),
-  classic(
-    'classic',
-    'Classic',
-    'The console rail as built — navy in dark, white in light, blue active tiles and cyan count pills.',
-  ),
-  haul(
-    'haul',
-    'Haul',
-    'Gold on graphite. Detaches into a floating capsule when collapsed; submenus hang off a chain thread.',
-  ),
-  haulMineLink(
-    'haul-ml',
-    'Haul · MineLink',
-    'The Haul layout exactly, in the app palette — navy chrome, your accent instead of gold.',
-  ),
-  weighbridge(
-    'weighbridge',
-    'Weighbridge',
-    'Set like a manifest. Ruled rows, a solid ink active block and counts typeset in an aligned tally column.',
-  ),
-  weighbridgeMineLink(
-    'weighbridge-ml',
-    'Weighbridge · MineLink',
-    'The Weighbridge layout exactly, in the app palette — slate surfaces, your accent in the tally column.',
-  );
 
-  final String id;
-  final String label;
-  final String description;
-  const ConsoleSidebarSkin(this.id, this.label, this.description);
-
-  /// The app-nav rail: its own layout, sharing the Glass palette with the
-  /// insights screens.
-  bool get isApp => this == app;
-
-  /// True for both Haul variants — they share one layout, two palettes.
-  bool get isHaul => this == haul || this == haulMineLink;
-
-  /// True for both Weighbridge variants.
-  bool get isWeighbridge =>
-      this == weighbridge || this == weighbridgeMineLink;
-
-  /// True when the rail is recoloured from `MlTokens` and tracks the console
-  /// accent, rather than carrying the drop's own gold palette.
-  bool get usesAppPalette =>
-      this == haulMineLink || this == weighbridgeMineLink;
-
-  /// Console default (user decision 2026-08-08). Applies to any admin who
-  /// hasn't picked a rail; saved choices are untouched.
-  static const ConsoleSidebarSkin defaultSkin = app;
-
-  static ConsoleSidebarSkin parse(String? id) =>
-      values.firstWhere((s) => s.id == id, orElse: () => defaultSkin);
-}
+// `ConsoleSidebarSkin` was removed by the M3 redesign.
+//
+// The console shipped FIVE interchangeable navigation rails as a per-user
+// preference — three layouts, two of them also in a second palette — across
+// roughly 4,600 lines under `widgets/sidebar/`. Each was a complete
+// re-implementation of the same thirty destinations, so a destination added
+// to one and forgotten in the others simply did not exist for the admins who
+// had picked those. Exactly that had happened: Targets was reachable from
+// some rails and not from the default one.
+//
+// There is now one rail (`MlNavRail`) rendering one tree (`consoleNavTree`),
+// shown to every role on every platform. A saved `sidebar` value in stored
+// preferences is simply ignored on read, so nothing has to migrate.
 
 /// Per-user Super-Admin console preferences (design: "Saved to your account
-/// only"). Appearance/Display: mode, accent, canvas texture, sidebar skin.
+/// only"). Appearance/Display: mode, accent, canvas texture.
 /// Accessibility: text size, high contrast, bold text.
 @immutable
 class UiPrefs {
@@ -118,9 +63,6 @@ class UiPrefs {
   /// Engineering dot-grid + brand washes behind the light workspace canvas.
   final bool canvasTexture;
 
-  /// Which of the three sidebars the console renders.
-  final ConsoleSidebarSkin sidebar;
-
   /// Text scale factor (1.0 = default). Clamped to [0.85, 1.3].
   final double textScale;
   final bool highContrast;
@@ -130,7 +72,6 @@ class UiPrefs {
     this.darkMode = true,
     this.accent = ConsoleAccent.defaultAccent,
     this.canvasTexture = true,
-    this.sidebar = ConsoleSidebarSkin.defaultSkin,
     this.textScale = 1.0,
     this.highContrast = false,
     this.boldText = false,
@@ -140,7 +81,6 @@ class UiPrefs {
     bool? darkMode,
     ConsoleAccent? accent,
     bool? canvasTexture,
-    ConsoleSidebarSkin? sidebar,
     double? textScale,
     bool? highContrast,
     bool? boldText,
@@ -149,7 +89,6 @@ class UiPrefs {
       darkMode: darkMode ?? this.darkMode,
       accent: accent ?? this.accent,
       canvasTexture: canvasTexture ?? this.canvasTexture,
-      sidebar: sidebar ?? this.sidebar,
       textScale: (textScale ?? this.textScale).clamp(0.85, 1.3),
       highContrast: highContrast ?? this.highContrast,
       boldText: boldText ?? this.boldText,
@@ -160,7 +99,6 @@ class UiPrefs {
         'dark': darkMode,
         'accent': accent.id,
         'canvas': canvasTexture,
-        'sidebar': sidebar.id,
         'scale': textScale,
         'contrast': highContrast,
         'bold': boldText,
@@ -170,7 +108,9 @@ class UiPrefs {
         darkMode: j['dark'] as bool? ?? true,
         accent: ConsoleAccent.parse(j['accent'] as String?),
         canvasTexture: j['canvas'] as bool? ?? true,
-        sidebar: ConsoleSidebarSkin.parse(j['sidebar'] as String?),
+        // A stored `sidebar` key from before the M3 redesign is deliberately
+        // read and discarded — there is one rail now, so there is nothing for
+        // it to select and nothing to migrate.
         textScale:
             ((j['scale'] as num?)?.toDouble() ?? 1.0).clamp(0.85, 1.3),
         highContrast: j['contrast'] as bool? ?? false,
@@ -266,7 +206,6 @@ class UiPrefsNotifier extends StateNotifier<UiPrefs> {
   void setDarkMode(bool v) => update((p) => p.copyWith(darkMode: v));
   void setAccent(ConsoleAccent a) => update((p) => p.copyWith(accent: a));
   void setCanvasTexture(bool v) => update((p) => p.copyWith(canvasTexture: v));
-  void setSidebar(ConsoleSidebarSkin s) => update((p) => p.copyWith(sidebar: s));
   void setTextScale(double v) => update((p) => p.copyWith(textScale: v));
   void setHighContrast(bool v) => update((p) => p.copyWith(highContrast: v));
   void setBoldText(bool v) => update((p) => p.copyWith(boldText: v));
