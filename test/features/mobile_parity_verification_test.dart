@@ -29,9 +29,25 @@ void main() {
   });
 
   group('mobile parity verification', () {
-    testWidgets('SuperAdminShellLayout shows menu drawer control below 900px', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(400, 800));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
+    // ⚠️ These two tests used `tester.binding.setSurfaceSize`, which does NOT
+    // reach `MediaQuery` — measured on Flutter 3.44.8:
+    //
+    //   setSurfaceSize(Size(400, 800))  -> MediaQuery.sizeOf(context).width == 800
+    //   tester.view.physicalSize = ...  -> MediaQuery.sizeOf(context).width == 400
+    //
+    // So "below 900px" was never exercised below 900px. It ran at the default
+    // 800 and passed because 800 < 900 anyway — a green test that proved
+    // nothing about the width in its own name. The M3 breakpoints put 800 in
+    // `medium` (a collapsed rail, no drawer), which is what finally made it
+    // fail and exposed this.
+    //
+    // The other 25 layout tests in this suite already use
+    // `tester.view.physicalSize`. Only three files used the other call.
+    testWidgets('at phone width the shell offers a drawer and a menu button',
+        (tester) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
 
       final router = GoRouter(
         routes: [
@@ -68,9 +84,11 @@ void main() {
       expect(scaffold.drawer, isNotNull);
     });
 
-    testWidgets('SuperAdminShellLayout uses persistent sidebar at wide width', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1000, 800));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
+    testWidgets('at desktop width the shell uses a persistent rail, no drawer',
+        (tester) async {
+      tester.view.physicalSize = const Size(1200, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
 
       final router = GoRouter(
         routes: [
@@ -84,18 +102,15 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(size: Size(1000, 800)),
-          child: ProviderScope(
-            overrides: [
-              currentPlatformRoleProvider.overrideWith(
-                (ref) async => PlatformRole.superGlobalSerialAdminMain,
-              ),
-            ],
-            child: MaterialApp.router(
-              theme: AppTheme.lightTheme,
-              routerConfig: router,
+        ProviderScope(
+          overrides: [
+            currentPlatformRoleProvider.overrideWith(
+              (ref) async => PlatformRole.superGlobalSerialAdminMain,
             ),
+          ],
+          child: MaterialApp.router(
+            theme: AppTheme.lightTheme,
+            routerConfig: router,
           ),
         ),
       );

@@ -215,6 +215,32 @@ class _MlAppShellState extends State<MlAppShell> {
   ) {
     final text = Theme.of(context).textTheme;
     final subtitle = widget.subtitle;
+    final compact = windowClass.usesBottomNav;
+
+    // The menu button has to be built explicitly.
+    //
+    // `AppBar` only inserts the drawer button when `leading` is null — and at
+    // compact width this shell always has a leading (the back button). So
+    // passing one silently removed the only app-bar affordance for opening
+    // navigation. The bottom bar's "More" tab still reached the drawer, so
+    // nothing was strictly unreachable, which is exactly why this would have
+    // survived a walkthrough: the hamburger is simply absent on a phone and
+    // the drawer looks like it was never wired.
+    final Widget? leading = compact
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Builder(
+                builder: (context) => IconButton(
+                  tooltip: 'Open navigation menu',
+                  icon: const Icon(Icons.menu_rounded),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              ),
+              if (widget.leading != null) widget.leading!,
+            ],
+          )
+        : widget.leading;
 
     return AppBar(
       backgroundColor: chrome.topBarSurface,
@@ -225,9 +251,14 @@ class _MlAppShellState extends State<MlAppShell> {
       // stops using elevation to do it. M3 drops shadows from the app bar;
       // without a border the bar and the workspace merge on scroll.
       shape: Border(bottom: BorderSide(color: chrome.topBarBorder)),
-      titleSpacing: widget.leading == null ? 20 : 8,
-      leading: widget.leading,
-      automaticallyImplyLeading: widget.leading == null,
+      titleSpacing: leading == null ? 20 : 8,
+      leading: leading,
+      // Two icons need room; one leaves the default alone. 112, not 96: the
+      // icon-button theme sets a 44dp minimum touch target, so two of them plus
+      // their padding is 98 and a 96dp box overflows by 2 — which paints the
+      // yellow-and-black bars across the top-left corner of every phone screen.
+      leadingWidth: compact && widget.leading != null ? 112 : null,
+      automaticallyImplyLeading: leading == null,
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
