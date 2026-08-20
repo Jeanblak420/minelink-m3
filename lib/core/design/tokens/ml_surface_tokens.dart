@@ -13,6 +13,7 @@
 //
 // Zero package dependencies: Flutter SDK only.
 
+import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter/material.dart';
 
 // ===========================================================================
@@ -84,16 +85,29 @@ class MlGlass {
   final Color glassBottom;
   final Color glassBase;
 
-  static const String sans = 'PlusJakartaSans';
-  static const String mono = 'JetBrainsMono';
+  // ---- The three faces, named once ----
+  //
+  // These were their own string literals — 'PlusJakartaSans', 'JetBrainsMono'
+  // and 'Fraunces' spelled out here as well as in [MlTokens]. Two names for
+  // one font, 153 uses on this side and 519 on the other, and nothing keeping
+  // them in step: renaming an asset in `pubspec.yaml` would have fixed one
+  // half of the product and silently broken the other, because a Flutter
+  // `fontFamily` that does not resolve does not throw — it falls back.
+  //
+  // Aliases now. `MlTokens` is the raw scale and this is a surface palette, so
+  // the raw scale is where a face name belongs.
+  static const String sans = MlTokens.fontSans;
+  static const String mono = MlTokens.fontMono;
 
-  /// Instrument Serif — the flagship numeral face.
-  static const String display = 'Fraunces';
+  /// The flagship numeral face.
+  static const String display = MlTokens.fontSerif;
 
-  static const double rSm = 6;
-  static const double r = 10;
-  static const double rLg = 14;
-  static const double rXl = 20;
+  // MlGlass used to carry four radii of its own — rSm 6, r 10, rLg 14, rXl 20,
+  // a FOURTH set of corner values beside MlShape, MlTokens.r* and the literals
+  // scattered through the screens. They are deleted rather than aliased: a
+  // grep found ZERO uses. Aliasing them would have preserved a fourth name for
+  // the shape scale that nothing needed, which is how a token file grows.
+  // MlShape is the scale; there is no second opinion to keep in step.
 
   static const MlGlass dark = MlGlass(
     isDark: true,

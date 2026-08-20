@@ -19,14 +19,19 @@
 // EQUALITY test rather than a "close enough" one: a 1px difference is exactly
 // what the old state was, and a test that tolerated 1px would have passed
 // throughout it.
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 
 void main() {
+  _oneFaceEachTests();
+
   final scale = MlTypeScale.textTheme(const Color(0xFF000000));
 
   group('every MlTokens size is a slot in the theme', () {
@@ -107,5 +112,41 @@ void main() {
       expect(theme.textTheme.bodyMedium?.fontFamily, MlTokens.fontSans);
       expect(theme.textTheme.displayLarge?.fontFamily, MlTokens.fontSerif);
     }
+  });
+}
+
+/// The three faces must have ONE definition each.
+///
+/// `MlGlass.sans/mono/display` were their own string literals —
+/// 'PlusJakartaSans', 'JetBrainsMono' and 'Fraunces' spelled out a second time
+/// alongside `MlTokens`. 153 uses on one side, 519 on the other, and nothing
+/// keeping them in step.
+///
+/// The failure mode is quiet, which is what makes it worth a test: a Flutter
+/// `fontFamily` that does not resolve **does not throw** — it falls back. So
+/// renaming an asset in `pubspec.yaml` would have fixed one half of the product
+/// and silently changed the typeface of the other, with nothing red anywhere.
+void _oneFaceEachTests() {
+  group('one definition per typeface', () {
+    test('MlGlass names the same faces as MlTokens', () {
+      expect(MlGlass.sans, MlTokens.fontSans);
+      expect(MlGlass.mono, MlTokens.fontMono);
+      expect(MlGlass.display, MlTokens.fontSerif);
+    });
+
+    test('and those three names are the ones pubspec declares', () {
+      // If this fails the app renders in a fallback face and nothing throws.
+      final pubspec = File('pubspec.yaml').readAsStringSync();
+      for (final family in [
+        MlTokens.fontSans,
+        MlTokens.fontMono,
+        MlTokens.fontSerif,
+      ]) {
+        expect(pubspec, contains('family: $family'),
+            reason: '$family is used as a fontFamily but pubspec.yaml declares '
+                'no such family. Flutter falls back silently, so this is '
+                'invisible at runtime.');
+      }
+    });
   });
 }
