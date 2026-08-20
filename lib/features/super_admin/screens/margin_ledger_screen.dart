@@ -430,13 +430,32 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
         columns: const [
           MlColumn('Date', flex: 3),
           MlColumn('Route', flex: 3),
-          MlColumn('Mine (source)', flex: 4),
+          // Trimmed from 4. The identity columns were taking width the FIGURES
+          // needed: at flex 4 here and flex 2 on "Margin earned" the money
+          // column could not hold `R 141,306.00` on a 1600px window, and the
+          // table had to scroll to show the number the screen exists for.
+          MlColumn('Mine (source)', flex: 3),
           MlColumn('Transporter · buyer', flex: 3),
-          MlColumn('Tons moved', flex: 2, align: TextAlign.right),
-          MlColumn('Agreed / ton', flex: 2, align: TextAlign.right),
-          MlColumn('Your cut / ton', flex: 2, align: TextAlign.right),
-          MlColumn('Transporter / ton', flex: 2, align: TextAlign.right),
-          MlColumn('Margin earned', flex: 2, align: TextAlign.right),
+          // The five money columns declare what their FIGURES need, because
+          // their figures are the point of the screen and a flex weight cannot
+          // know how big a number is. Photographed 2026-08-20 on a 1600px
+          // window: `R 141,306.00` — the largest margin in the ledger — was
+          // ellipsised to the single character `R`.
+          //
+          // "Transporter / ton" is the widest HEADER rather than the widest
+          // figure; with two-line headers it only has to hold "TRANSPORTER".
+          MlColumn('Tons moved', flex: 2, align: TextAlign.right, minWidth: 78),
+          MlColumn('Agreed / ton',
+              flex: 2, align: TextAlign.right, minWidth: 82),
+          MlColumn('Your cut / ton',
+              flex: 2, align: TextAlign.right, minWidth: 78),
+          MlColumn('Transporter / ton',
+              flex: 2, align: TextAlign.right, minWidth: 92),
+          // Flex 3, not 2: this is the figure the whole ledger is for, and it
+          // is the widest of them. `minWidth` still holds the floor — on a
+          // narrower window the table scrolls rather than eating the number.
+          MlColumn('Margin earned',
+              flex: 3, align: TextAlign.right, minWidth: 104),
         ],
         rows: [
           for (final e in visible)

@@ -46,12 +46,15 @@ import 'package:flutter_application_1/features/portal/screens/mine_reconciliatio
 import 'package:flutter_application_1/features/portal/screens/mine_supplier_portal_dashboard_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/transporter_reconciliations_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/recon_tables_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/margin_ledger_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/super_admin_org_insights_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/transporter_portal_dashboard_screen.dart';
 import 'package:flutter_application_1/features/portal/nav/portal_nav.dart';
 import 'package:flutter_application_1/features/profile_setup/screens/profile_setup_screen.dart';
 import 'package:flutter_application_1/features/super_admin/nav/console_nav.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screen_dashboard.dart';
 
+import '../fixtures/console_capture_fixtures.dart';
 import '../fixtures/ml_sample_data.dart';
 import '../fixtures/portal_capture_fixtures.dart';
 import '../fixtures/screen_fixtures.dart';
@@ -934,6 +937,65 @@ void main() {
         ),
         const Size(412, 915),
         'portal-transporter-phone-dark',
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // The console's OWN screens, inside the console's chrome.
+  //
+  // Everything in the `console` group below photographs the platform dashboard.
+  // These are the two screens an admin spends money and judgement in — the
+  // margin ledger (the platform's private pricing record, which no other party
+  // may ever see) and the per-org-type insights board.
+  //
+  // Their fixtures are in `console_capture_fixtures.dart`, kept apart from the
+  // portal's on purpose: a console fixture is the platform's view of everybody,
+  // which is exactly the data that must never leak into a portal render.
+  group('the console spends money here', () {
+    testWidgets('margin ledger — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const MarginLedgerScreen(),
+          extraOverrides: consoleCaptureOverrides(),
+        ),
+        const Size(1600, 1500),
+        'screen-margin-ledger-desktop-dark',
+      );
+    });
+
+    testWidgets('margin ledger — phone dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const MarginLedgerScreen(),
+          extraOverrides: consoleCaptureOverrides(),
+        ),
+        const Size(412, 1700),
+        'screen-margin-ledger-phone-dark',
+      );
+    });
+
+    testWidgets('org insights — transporters, desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const SuperAdminOrgInsightsScreen(orgType: 'transporter'),
+          extraOverrides: [
+            ...consoleCaptureOverrides(),
+            // The board reads the raw recon rows for its own derivations, so it
+            // needs the portal fixture too. Without it half the screen renders
+            // from an empty list and the picture is of a quiet month rather
+            // than of the design.
+            ...portalCaptureOverrides(),
+          ],
+        ),
+        const Size(1600, 2100),
+        'screen-org-insights-desktop-dark',
       );
     });
   });

@@ -92,7 +92,17 @@ class MlDataTable extends StatelessWidget {
               c,
               Text(
                 c.label.toUpperCase(),
-                maxLines: 1,
+                // TWO lines. A header is two or three short words and the
+                // column is sized for its DATA, not for its label — so at one
+                // line the margin ledger read "YOUR CUT / T…", "TRANSPORTE…"
+                // and "MARGIN EAR…", which between them name the three figures
+                // the platform's whole commercial model is made of.
+                //
+                // Wrapping at the space or the slash costs a line of chrome and
+                // keeps the words. The column still has to be wide enough for
+                // the widest single WORD — declare `MlColumn.minWidth` when the
+                // data is wider than that.
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: context.mlText.overline.copyWith(
                   color: semantic.textFaint,

@@ -1074,7 +1074,11 @@ class _SuperAdminOrgInsightsScreenState
               Expanded(
                 child: mini(
                   'Routes rested',
-                  d.routesRested.toString().padLeft(2, '0'),
+                  // NOT zero-padded. It was the only one of the four readouts
+                  // in this block that was, so a quiet week rendered "00"
+                  // beside "4" and "10" — which reads as a broken value rather
+                  // than as none.
+                  '${d.routesRested}',
                   color: MlControlRoom.cyanText,
                 ),
               ),
@@ -1504,7 +1508,6 @@ class _SuperAdminOrgInsightsScreenState
     _Derived d,
   ) {
     final util = d.utilPctFor(s);
-    final completion = d.completionPctFor(s);
     final pod = d.podPctFor(s.companyName);
     final lastActive = d.lastActiveFor(s.companyName);
     final tempo = d.dailyTons(s.companyName);
@@ -1546,11 +1549,16 @@ class _SuperAdminOrgInsightsScreenState
         ),
     ];
 
+    // `mlCount` on every countable, because this line read "1 routes" for the
+    // smallest haulier in the fixture and "1 employees" would do the same. The
+    // shared formatter exists for exactly this and the transporter leaderboard
+    // beside this screen already uses the rule; two spellings of the same fact
+    // in one console is how "the nav menus have the wrong stuff in them" starts.
     final metaParts = [
-      '${s.employees} employees',
-      '${s.drivers} drivers',
+      mlCount(s.employees, 'employee'),
+      mlCount(s.drivers, 'driver'),
       if (_hasFleet) '${s.fleetVehicles} fleet',
-      '${s.routesDistinct} routes',
+      mlCount(s.routesDistinct, 'route'),
       if (lastActive != null) 'last active $lastActive',
     ];
 
@@ -1754,9 +1762,27 @@ class _SuperAdminOrgInsightsScreenState
       children: [
         meter('Utilisation', util),
         const SizedBox(height: 15),
-        // Design labels this row "On-time"; the figure is our recorded
-        // waybill-completion rate for the company.
-        meter('On-time', completion),
+        // THE REAL ON-TIME FIGURE, not the waybill-completion rate.
+        //
+        // This row was labelled "On-time" and fed `completionPctFor(s)`, with a
+        // comment saying so out loud — "Design labels this row 'On-time'; the
+        // figure is our recorded waybill-completion rate". That was honest in
+        // the source and invisible on the screen, and it stopped being
+        // necessary when `CompanyMonthlyOpsStats` gained `onTimeTrips` /
+        // `dueTrips` from `public.trip_is_on_time`.
+        //
+        // Measured against the fixture on 2026-08-20: a haulier with 6 of 20
+        // loads delivered on time rendered **91%**. The transporter leaderboard
+        // — the other screen in this console that reports on-time for the same
+        // companies — was already reading the real measure, so the two boards
+        // disagreed about the same haulier.
+        //
+        // `meter` renders null as a dash and an empty bar, which is exactly
+        // what the model demands: "only a reader holding both can tell 'nothing
+        // to measure yet' (0 of 0) from 'every load was late' (0 of 9)". A
+        // company with no judgeable trips used to draw a 0% bar, which says the
+        // second when it means the first.
+        meter('On-time', s.onTimePercent),
         const SizedBox(height: 22),
         Material(
           color: MlControlRoom.surfaceTile,
