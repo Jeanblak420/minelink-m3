@@ -49,6 +49,7 @@ import 'package:flutter_application_1/features/portal/models/logistics_models.da
 import 'package:flutter_application_1/features/portal/models/mine_trip.dart';
 import 'package:flutter_application_1/features/portal/models/production_entry.dart';
 import 'package:flutter_application_1/features/portal/models/raw_recon_row.dart';
+import 'package:flutter_application_1/features/portal/models/request_tracking.dart';
 import 'package:flutter_application_1/features/portal/models/recon_dispute.dart';
 import 'package:flutter_application_1/features/portal/models/trip_reconciliation.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_entry.dart';
@@ -601,6 +602,63 @@ final List<TransportationRequest> kAdminBuyerRequests = [
   ),
 ];
 
+/// Request tracking — how far each linked order has actually got.
+///
+/// One order part-delivered, one finished and one that has been linked but not
+/// rolled a wheel. A tracking log where every row is complete cannot show the
+/// progress treatment, and one where every row is at zero cannot show the
+/// completed one.
+final List<RequestTrackingRow> kRequestTracking = [
+  RequestTrackingRow(
+    requestId: 'areq-4',
+    requestType: 'transportation',
+    status: 'linked',
+    requesterName: 'Atlas Buyer Group',
+    supplierName: 'Iron Hills Mining',
+    transporterNames: 'Roadhaul Logistics',
+    commodity: 'Chrome',
+    loadingPoint: 'Iron Hills Mining',
+    offloadingPoint: 'Richards Bay',
+    tripsTotal: 34,
+    tripsCompleted: 21,
+    tonsDelivered: 742.60,
+    isCompleted: false,
+    updatedAt: _ago(const Duration(hours: 4)),
+  ),
+  RequestTrackingRow(
+    requestId: 'req-1',
+    requestType: 'transportation',
+    status: 'linked',
+    requesterName: 'Northvale Alloys',
+    supplierName: 'Sable Ridge Chrome',
+    transporterNames: 'Northline Carriers, Vaal Bulk Movers',
+    commodity: 'Manganese',
+    loadingPoint: 'Sable Ridge Chrome',
+    offloadingPoint: 'Maputo',
+    tripsTotal: 12,
+    tripsCompleted: 12,
+    tonsDelivered: 408.30,
+    isCompleted: true,
+    updatedAt: _ago(const Duration(days: 2)),
+  ),
+  RequestTrackingRow(
+    requestId: 'req-2',
+    requestType: 'transportation',
+    status: 'linked',
+    requesterName: 'Atlas Buyer Group',
+    supplierName: 'Iron Hills Mining',
+    transporterNames: 'Roadhaul Logistics',
+    commodity: 'Chrome',
+    loadingPoint: 'Iron Hills Mining',
+    offloadingPoint: 'Richards Bay',
+    tripsTotal: 8,
+    tripsCompleted: 0,
+    tonsDelivered: 0,
+    isCompleted: false,
+    updatedAt: _ago(const Duration(hours: 30)),
+  ),
+];
+
 /// The companies the admin picks from when linking and dispatching.
 const List<({String id, String name})> kTransporterCompanies = [
   (id: 'co-transporter', name: 'Roadhaul Logistics'),
@@ -965,6 +1023,7 @@ List<Override> portalCaptureOverrides() => [
           .overrideWith((ref, _) async => kTransporterCompanies),
       mineCompaniesProvider.overrideWith((ref, _) async => kMineCompanies),
       buyerCompaniesProvider.overrideWith((ref, _) async => kBuyerCompanies),
+      requestTrackingProvider.overrideWith((ref, _) async => kRequestTracking),
       // Only the linked request has a transporter on it. A fixture where every
       // row is dispatched cannot show the panel's own empty state.
       requestDispatchedTransportersProvider.overrideWith(

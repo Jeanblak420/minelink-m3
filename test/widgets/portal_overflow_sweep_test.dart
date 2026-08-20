@@ -316,6 +316,14 @@ void main() {
       'mine quality',
       'mine production',
       'driver routes',
+      // Second batch, 2026-08-20. Every one of these is reached by the capture
+      // fixtures and was sweeping its EMPTY state before.
+      'transporter routes',
+      'transporter maintenance',
+      'trucks on route',
+      'trips',
+      'buyer requests',
+      'supervisor view',
     ];
     for (final key in withData) {
       testWidgets('$key survives every width x text scale, WITH ROWS',

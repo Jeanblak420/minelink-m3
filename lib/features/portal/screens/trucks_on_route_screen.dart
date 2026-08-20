@@ -211,6 +211,7 @@ class _OnRouteCard extends ConsumerWidget {
       child: LayoutBuilder(builder: (context, c) {
         final narrow = c.maxWidth < 640;
         final identity = Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             const MlIconWell(
               icon: Icons.local_shipping_outlined,
@@ -219,7 +220,21 @@ class _OnRouteCard extends ConsumerWidget {
               radius: 12,
             ),
             const SizedBox(width: 14),
-            MlPlatePill(status.registration, fontSize: 14),
+            // `Flexible`, because a plate pill is fixed content in a `Row`.
+            //
+            // A non-flex child of a Row is laid out against UNBOUNDED width
+            // (CLAUDE.md §10.4, first rule), so the pill's own
+            // `overflow: ellipsis` never engaged and it ran 21px past the card
+            // at 360px × text scale 1.3 — a 48px icon well plus 14px plus a
+            // registration at 1.3 does not fit 188px, and something has to
+            // give. Ellipsising a plate is a real loss; painting the overflow
+            // stripe over the badge beside it loses the same characters AND
+            // the neighbour.
+            //
+            // Third time this exact shape has bitten this session — the recon
+            // and quality tables were the other two, and they are fixed by
+            // `MlColumn.minWidth` because a table can widen. A card cannot.
+            Flexible(child: MlPlatePill(status.registration, fontSize: 14)),
           ],
         );
         final fields = Wrap(

@@ -64,7 +64,10 @@ import 'package:flutter_application_1/features/super_admin/widgets/transporters_
 import 'package:flutter_application_1/features/super_admin/widgets/transporters_overview/transporters_overview_body.dart';
 import 'package:flutter_application_1/core/layout/text_scale.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
+import '../fixtures/console_capture_fixtures.dart';
 import '../fixtures/ml_sample_data.dart';
+import '../fixtures/portal_capture_fixtures.dart';
+import '../fixtures/screen_fixtures.dart';
 import '../test_helpers/real_fonts.dart';
 
 /// Widths the console content area actually sees. 1612 is the measured value
@@ -132,9 +135,10 @@ void main() {
     Widget Function() child, {
     List<Override> overrides = const [],
     bool boldText = false,
+    List<double> scales = _scales,
   }) async {
     for (final width in _widths) {
-      for (final scale in _scales) {
+      for (final scale in scales) {
         tester.view.physicalSize = Size(width, 1400);
         tester.view.devicePixelRatio = 1.0;
 
@@ -366,6 +370,46 @@ void main() {
       testWidgets('${entry.key} survives every width x text scale',
           (tester) async {
         await sweep(tester, entry.value, overrides: consoleOverrides);
+      });
+    }
+
+    // ── The same screens, WITH ROWS IN THEM. ────────────────────────────
+    //
+    // `consoleOverrides` fakes the dashboard's counters, but the LIST screens
+    // above are swept against the dummy Supabase, so their own providers reject
+    // and each one lays out an empty or error state. The comment on that map
+    // says so — "these sweep the loading/empty/error layouts" — and that is a
+    // real corner. It is also only half a job: an empty table has no plate pill
+    // to overflow, no six-figure Rand figure to ellipsise and no long company
+    // name to break a row.
+    //
+    // The portal sweep gained the same second pass on 2026-08-20 and it found
+    // seven failing screens immediately. This is the console's half, using the
+    // fixtures the render harness already installs.
+    //
+    // Two text scales rather than five: the data pass is several times the work
+    // per screen and 1.0/1.3 are the ends of the range `ConsolePrefs` offers.
+    // 1.6 and 2.0 stay on the empty pass, where they are cheap.
+    const withData = [
+      'recon tables',
+      'margin ledger',
+      'dispute inbox',
+      'request tracking',
+    ];
+    for (final key in withData) {
+      testWidgets('$key survives every width x text scale, WITH ROWS',
+          (tester) async {
+        await sweep(
+          tester,
+          screens[key]!,
+          overrides: [
+            ...consoleOverrides,
+            ...companyScopeOverrides(),
+            ...consoleCaptureOverrides(),
+            ...portalCaptureOverrides(),
+          ],
+          scales: const [1.0, 1.3],
+        );
       });
     }
 

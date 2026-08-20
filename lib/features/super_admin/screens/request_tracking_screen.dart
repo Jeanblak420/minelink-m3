@@ -1277,7 +1277,21 @@ class _TripsCell extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          SizedBox(
+          // The BAR gives way, not the count.
+          //
+          // This cell is `[30px bar][8][21/34]`, all unflexed, in a column that
+          // is 79.6px wide at 1024px x text scale 1.3 — and the mono count
+          // alone is ~47px there, so the row ran 10px over. Measured 2026-08-20
+          // the moment `requestTrackingProvider` got a fixture; this screen had
+          // been sweeping its empty state, where there are no rows and so no
+          // cell.
+          //
+          // `Flexible` on the bar rather than on the text because the count is
+          // the information and the bar is the picture of it: "21/34" truncated
+          // to "21/…" loses the total, while a 24px bar instead of a 30px one
+          // loses nothing at all.
+          Flexible(
+            child: SizedBox(
             width: 30,
             height: 4,
             child: DecoratedBox(
@@ -1297,6 +1311,7 @@ class _TripsCell extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
             ),
           ),
           const SizedBox(width: 8),
