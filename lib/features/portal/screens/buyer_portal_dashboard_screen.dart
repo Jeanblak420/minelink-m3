@@ -169,8 +169,16 @@ class _BuyerPortalDashboardScreenState
               ),
               PortalKpi(
                 label: 'Payable',
-                value: payable == null ? null : _rand(payable),
-                unit: 'R',
+                // `R` PREFIXES the figure and is not a unit.
+                //
+                // This passed `unit: 'R'`, which the tile renders after the
+                // number in the small muted style it uses for "t" and "%" — so
+                // the dashboard read "29 159 R" while the same file writes
+                // "R29 159" for its peak-per-day caption and its table, and the
+                // margin ledger writes "R 141,306.00". Three spellings of one
+                // currency, one of them treating a currency symbol as a unit of
+                // measure. Photographed 2026-08-20 on the phone dashboards.
+                value: payable == null ? null : 'R${_rand(payable)}',
                 sublabel: 'At the agreed rate, after quality penalty',
                 icon: Icons.account_balance_wallet_outlined,
                 tone: MlTone.done,

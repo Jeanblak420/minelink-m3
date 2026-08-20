@@ -180,8 +180,16 @@ class _TransporterPortalDashboardScreenState
               ),
               PortalKpi(
                 label: 'Revenue',
-                value: revenue == null ? null : _rand(revenue),
-                unit: 'R',
+                // `R` PREFIXES the figure and is not a unit.
+                //
+                // This passed `unit: 'R'`, which the tile renders after the
+                // number in the small muted style it uses for "t" and "%" — so
+                // the dashboard read "29 159 R" while the same file writes
+                // "R29 159" for its peak-per-day caption and its table, and the
+                // margin ledger writes "R 141,306.00". Three spellings of one
+                // currency, one of them treating a currency symbol as a unit of
+                // measure. Photographed 2026-08-20 on the phone dashboards.
+                value: revenue == null ? null : 'R${_rand(revenue)}',
                 sublabel: 'At your rate per ton, before costs',
                 icon: Icons.account_balance_wallet_outlined,
                 tone: MlTone.done,

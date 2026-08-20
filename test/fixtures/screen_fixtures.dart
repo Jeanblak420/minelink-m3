@@ -455,6 +455,14 @@ List<FleetVehicle> fixtureFleet() => [
         vehicleOdometerKm: 412300,
         firstTrailerRegs: 'CK 85 RT GP',
         secondTrailerRegs: 'CK 86 RT GP',
+        // `assignedDriverId` AND the name. The fleet register's Assigned /
+        // Unassigned chip reads `vehicle.assignedDriverId != null` and nothing
+        // else, so a fixture carrying only the name described a truck with a
+        // driver whose assignment did not exist — a state the real data cannot
+        // hold. Every truck in the register photographed as "Unassigned",
+        // which is half the badge and the wrong half. Found 2026-08-20 when
+        // the fleet screen was first rendered at phone width.
+        assignedDriverId: 'emp-1',
         driverFirstName: 'Sipho',
         driverLastName: 'Ndlovu',
       ),
@@ -468,6 +476,7 @@ List<FleetVehicle> fixtureFleet() => [
         vehicleYearModel: 2019,
         vehicleOdometerKm: 688140,
         firstTrailerRegs: 'JD 23 PL MP',
+        assignedDriverId: 'emp-2',
         driverFirstName: 'Thandi',
         driverLastName: 'Mokoena',
       ),

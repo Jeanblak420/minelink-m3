@@ -471,6 +471,12 @@ void main() {
           orgType: OrgType.transporter,
           role: UserRole.admin,
           selectedRoute: '/portal/transporter',
+          // The capture fixtures, so the register shows the THREE fleet states
+          // this screen exists for. Without them `fleetStatusProvider` and
+          // `vehicleDriversProvider` reject, every truck renders "Unassigned"
+          // and the on-route/in-maintenance treatments — the derived states
+          // CLAUDE.md §4 describes — are absent from the picture entirely.
+          extraOverrides: portalCaptureOverrides(),
         ),
         const Size(1600, 1400),
         'screen-fleet-desktop-dark',
@@ -549,6 +555,45 @@ void main() {
         ),
         const Size(412, 1000),
         'screen-employees-phone-dark',
+      );
+    });
+
+    // Fleet and Operations on a phone. A transporter's admin runs the fleet
+    // from a truck stop; the operations hub is the tab set a weighbridge
+    // controller lives in. Both were desktop-only.
+    testWidgets('fleet management — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const FleetManagementScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Fleet',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 1900),
+        'screen-fleet-phone-dark',
+      );
+    });
+
+    testWidgets('operations hub — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const OperationsHubScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Operations',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+          extraOverrides: [operationsOverride()],
+        ),
+        const Size(412, 1700),
+        'screen-operations-hub-phone-dark',
       );
     });
 
@@ -842,6 +887,66 @@ void main() {
         ),
         const Size(1600, 1900),
         'dash-buyer-desktop-light',
+      );
+    });
+
+    // THE SAME THREE DASHBOARDS ON A PHONE.
+    //
+    // These are the screens every customer lands on, and until now all three
+    // had only ever been photographed at 1600px. A mine supervisor and a
+    // transporter's admin both open this on a handset; the desktop picture says
+    // nothing about whether the tile grid, the stat cards or the queues reflow.
+    testWidgets('transporter dashboard — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const TransporterPortalDashboardScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Transporter workspace',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 2400),
+        'dash-transporter-phone-dark',
+      );
+    });
+
+    testWidgets('mine dashboard — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const MineSupplierPortalDashboardScreen(),
+          title: 'Fixture Chrome Mine',
+          subtitle: 'Mine workspace',
+          orgType: OrgType.mineSupplier,
+          role: UserRole.admin,
+          selectedRoute: '/portal/mine',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 2400),
+        'dash-mine-phone-dark',
+      );
+    });
+
+    testWidgets('buyer dashboard — phone light', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.light,
+          child: const BuyerPortalDashboardScreen(),
+          title: 'Fixture Metals',
+          subtitle: 'Buyer workspace',
+          orgType: OrgType.buyer,
+          role: UserRole.admin,
+          selectedRoute: '/portal/buyer',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 2400),
+        'dash-buyer-phone-light',
       );
     });
 
