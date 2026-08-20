@@ -823,6 +823,10 @@ class _LogCostDialogState extends ConsumerState<_LogCostDialog> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<OperatingCostKind>(
+                // A DropdownButtonFormField lays its selected item out at its NATURAL
+                // width and sizes to the WIDEST item in the list, so one long option
+                // decides the control's width whatever is selected (CLAUDE.md §10.4).
+                isExpanded: true,
                 initialValue: _kind,
                 decoration: const InputDecoration(labelText: 'Kind'),
                 items: [

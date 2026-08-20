@@ -4729,39 +4729,49 @@ class _PerContactSounds extends ConsumerWidget {
                             )),
                       ),
                       const SizedBox(width: 8),
-                      DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: prefs.perContactSound[c.userId] ?? '',
-                          isDense: true,
-                          dropdownColor: pal.header,
-                          borderRadius: MlShape.radiusMedium,
-                          style:
-                              context.mlText.bodyMedium.copyWith(
-                                color: pal.bodyText,
-                              ),
-                          iconEnabledColor: pal.accent,
-                          items: [
-                            const DropdownMenuItem(
-                                value: '', child: Text('Default')),
-                            for (final id in ChatSoundService.incomingTones)
-                              DropdownMenuItem(
-                                  value: id,
-                                  child: Text(
-                                      ChatSoundService.labels[id] ?? id)),
-                            for (final id in ChatSoundService.cpsTones)
-                              DropdownMenuItem(
-                                  value: id,
-                                  child: Text(
-                                      '${ChatSoundService.cpsLabels[id] ?? id} (CPS)')),
-                          ],
-                          onChanged: (v) {
-                            ctrl.setContactSound(
-                                c.userId, (v == null || v.isEmpty) ? null : v);
-                            final play = (v == null || v.isEmpty)
-                                ? prefs.incomingSound
-                                : v;
-                            ChatSoundService.instance.play(play);
-                          },
+                      // Capped and expanded. A DropdownButton sizes to its
+                      // WIDEST item, and the widest here is a CPS tone name
+                      // with " (CPS)" after it — unflexed beside an `Expanded`
+                      // contact name, that tone name decides how much room is
+                      // left for the person it belongs to, and at a large text
+                      // size the answer is none.
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 150),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: prefs.perContactSound[c.userId] ?? '',
+                            isExpanded: true,
+                            isDense: true,
+                            dropdownColor: pal.header,
+                            borderRadius: MlShape.radiusMedium,
+                            style:
+                                context.mlText.bodyMedium.copyWith(
+                                  color: pal.bodyText,
+                                ),
+                            iconEnabledColor: pal.accent,
+                            items: [
+                              const DropdownMenuItem(
+                                  value: '', child: Text('Default')),
+                              for (final id in ChatSoundService.incomingTones)
+                                DropdownMenuItem(
+                                    value: id,
+                                    child: Text(
+                                        ChatSoundService.labels[id] ?? id)),
+                              for (final id in ChatSoundService.cpsTones)
+                                DropdownMenuItem(
+                                    value: id,
+                                    child: Text(
+                                        '${ChatSoundService.cpsLabels[id] ?? id} (CPS)')),
+                            ],
+                            onChanged: (v) {
+                              ctrl.setContactSound(
+                                  c.userId, (v == null || v.isEmpty) ? null : v);
+                              final play = (v == null || v.isEmpty)
+                                  ? prefs.incomingSound
+                                  : v;
+                              ChatSoundService.instance.play(play);
+                            },
+                          ),
                         ),
                       ),
                       IconButton(

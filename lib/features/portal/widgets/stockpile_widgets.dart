@@ -365,6 +365,10 @@ class _AddStockpileDialogState extends State<_AddStockpileDialog> {
                 const SizedBox(height: 12),
                 if (widget.buyerOptions.isNotEmpty)
                   DropdownButtonFormField<String>(
+                    // A DropdownButtonFormField lays its selected item out at its NATURAL
+                    // width and sizes to the WIDEST item in the list, so one long option
+                    // decides the control's width whatever is selected (CLAUDE.md §10.4).
+                    isExpanded: true,
                     initialValue: _buyer,
                     decoration: const InputDecoration(
                       labelText: 'For buyer',
@@ -490,6 +494,10 @@ class _MineralFields extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
+          // A DropdownButtonFormField lays its selected item out at its NATURAL
+          // width and sizes to the WIDEST item in the list, so one long option
+          // decides the control's width whatever is selected (CLAUDE.md §10.4).
+          isExpanded: true,
           initialValue: unit,
           decoration: const InputDecoration(
             labelText: 'Unit of measure',

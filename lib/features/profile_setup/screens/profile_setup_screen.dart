@@ -604,6 +604,10 @@ class _FieldEditDialogState extends ConsumerState<_FieldEditDialog> {
               )
             else if (_isGrade)
               DropdownButtonFormField<String>(
+                // A DropdownButtonFormField lays its selected item out at its NATURAL
+                // width and sizes to the WIDEST item in the list, so one long option
+                // decides the control's width whatever is selected (CLAUDE.md §10.4).
+                isExpanded: true,
                 initialValue: _grade,
                 decoration: const InputDecoration(labelText: 'PSIRA grade'),
                 items: const [

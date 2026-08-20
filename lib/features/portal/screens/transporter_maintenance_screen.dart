@@ -232,6 +232,10 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     DropdownButtonFormField<String>(
+                      // A DropdownButtonFormField lays its selected item out at its NATURAL
+                      // width and sizes to the WIDEST item in the list, so one long option
+                      // decides the control's width whatever is selected (CLAUDE.md §10.4).
+                      isExpanded: true,
                       initialValue: vehicleId,
                       decoration: const InputDecoration(labelText: 'Vehicle'),
                       items: [
@@ -245,6 +249,10 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<MaintenanceKind>(
+                      // A DropdownButtonFormField lays its selected item out at its NATURAL
+                      // width and sizes to the WIDEST item in the list, so one long option
+                      // decides the control's width whatever is selected (CLAUDE.md §10.4).
+                      isExpanded: true,
                       initialValue: kind,
                       decoration: const InputDecoration(labelText: 'Kind'),
                       items: [
@@ -496,6 +504,10 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
                   children: [
                     if (fleet.isNotEmpty)
                       DropdownButtonFormField<String>(
+                        // A DropdownButtonFormField lays its selected item out at its NATURAL
+                        // width and sizes to the WIDEST item in the list, so one long option
+                        // decides the control's width whatever is selected (CLAUDE.md §10.4).
+                        isExpanded: true,
                         initialValue:
                             fleet.any((v) => v.vehicleId == vehicleId)
                                 ? vehicleId

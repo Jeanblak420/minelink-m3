@@ -218,21 +218,40 @@ class _DriverAssignmentDialogState
                               ),
                             )
                           else
-                            Row(
+                            // A Wrap, not a Row. Both children are unflexed and
+                            // neither can ellipsize its way out of trouble — a
+                            // clamped button truncates its hit target, not just
+                            // its label — so at an accessibility text size in a
+                            // dialog the only correct answer is for the button
+                            // to drop onto its own line.
+                            Wrap(
+                              spacing: 10,
+                              runSpacing: 8,
+                              crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                DropdownButton<int>(
-                                  value: _requestedLimit,
-                                  items: [
-                                    for (var n = maxDrivers + 1; n <= 5; n++)
-                                      DropdownMenuItem(
-                                        value: n,
-                                        child: Text('$n drivers'),
-                                      ),
-                                  ],
-                                  onChanged: (v) =>
-                                      setState(() => _requestedLimit = v ?? 3),
+                                // Capped rather than left to size itself: in a
+                                // Wrap, `isExpanded` alone would claim the
+                                // whole line and put the button below it at
+                                // every width, not only the narrow ones.
+                                ConstrainedBox(
+                                  constraints:
+                                      const BoxConstraints(maxWidth: 160),
+                                  child: DropdownButton<int>(
+                                    value: _requestedLimit,
+                                    isExpanded: true,
+                                    items: [
+                                      for (var n = maxDrivers + 1; n <= 5; n++)
+                                        DropdownMenuItem(
+                                          value: n,
+                                          child: Text('$n drivers',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis),
+                                        ),
+                                    ],
+                                    onChanged: (v) => setState(
+                                        () => _requestedLimit = v ?? 3),
+                                  ),
                                 ),
-                                const SizedBox(width: 10),
                                 FilledButton(
                                   onPressed: _busy ? null : _sendLimitRequest,
                                   child: const Text('Send request'),

@@ -341,6 +341,10 @@ Future<void> _showRequestDialog({
                     if (showTransaction) ...[
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
+                        // A DropdownButtonFormField lays its selected item out at its NATURAL
+                        // width and sizes to the WIDEST item in the list, so one long option
+                        // decides the control's width whatever is selected (CLAUDE.md §10.4).
+                        isExpanded: true,
                         initialValue: transactionKind,
                         decoration: const InputDecoration(
                           labelText: 'Transaction',

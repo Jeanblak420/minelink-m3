@@ -1102,6 +1102,10 @@ class _TruckListDialogState extends State<_TruckListDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<String?>(
+              // A DropdownButtonFormField lays its selected item out at its NATURAL
+              // width and sizes to the WIDEST item in the list, so one long option
+              // decides the control's width whatever is selected (CLAUDE.md §10.4).
+              isExpanded: true,
               initialValue: _buyer,
               decoration: const InputDecoration(
                 labelText: 'Filter by buyer',
