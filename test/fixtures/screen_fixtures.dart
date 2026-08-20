@@ -27,6 +27,8 @@ import 'package:flutter_application_1/features/company/services/company_service.
 import 'package:flutter_application_1/features/employee/models/employee_model.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
 import 'package:flutter_application_1/features/employee/services/employee_service.dart';
+import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_model.dart';
+import 'package:flutter_application_1/features/fleet/providers/fleet_provider.dart';
 import 'package:flutter_application_1/features/notifications/services/notification_service.dart';
 import 'package:flutter_application_1/features/portal/portal_navigation.dart';
 import 'package:flutter_application_1/features/portal/providers/portal_workspace_provider.dart';
@@ -386,4 +388,85 @@ List<Override> companyScopeOverrides({
       companyOverride(canManageEmployees: canManageEmployees),
       employeeOverride(role: role),
       companyAccessOverride(canManageEmployees: canManageEmployees),
+      fleetOverride(),
     ];
+
+// ---------------------------------------------------------------------------
+// Fleet
+// ---------------------------------------------------------------------------
+
+/// Three trucks, so a fleet screen lays out a real list.
+List<FleetVehicle> fixtureFleet() => [
+      FleetVehicle(
+        id: 'FIXTURE-vehicle-1',
+        companyId: 'FIXTURE-company',
+        createdAt: _fixtureDate,
+        vehicleRegistrationNumber: 'CK 84 RT GP',
+        vehicleMake: 'Scania',
+        vehicleType: 'Interlink',
+        vehicleYearModel: 2021,
+        vehicleOdometerKm: 412300,
+        firstTrailerRegs: 'CK 85 RT GP',
+        secondTrailerRegs: 'CK 86 RT GP',
+        driverFirstName: 'Second',
+        driverLastName: 'Driver',
+      ),
+      FleetVehicle(
+        id: 'FIXTURE-vehicle-2',
+        companyId: 'FIXTURE-company',
+        createdAt: _fixtureDate,
+        vehicleRegistrationNumber: 'DR 12 KM GP',
+        vehicleMake: 'Volvo',
+        vehicleType: 'Side tipper',
+        vehicleYearModel: 2019,
+        vehicleOdometerKm: 688140,
+        firstTrailerRegs: 'DR 13 KM GP',
+      ),
+      FleetVehicle(
+        id: 'FIXTURE-vehicle-3',
+        companyId: 'FIXTURE-company',
+        createdAt: _fixtureDate,
+        vehicleRegistrationNumber: 'MN 07 PL GP',
+        vehicleMake: 'MAN',
+        vehicleType: 'Flat deck',
+        vehicleYearModel: 2023,
+        vehicleOdometerKm: 91500,
+      ),
+    ];
+
+/// A [FleetNotifier] whose state is pinned, like the three above.
+///
+/// Without this the fleet screen sits on `isLoading` and renders a
+/// `CircularProgressIndicator` — which is not only an empty picture but a
+/// NON-DETERMINISTIC one: the spinner's arc lands at a slightly different angle
+/// depending on microtask ordering, so a golden of it fails against itself. A
+/// render that cannot reproduce is not evidence.
+class FixtureFleetNotifier extends FleetNotifier {
+  FixtureFleetNotifier(
+    super.fleetService,
+    super.ref,
+    super.companyId, {
+    required FleetState fixture,
+  }) {
+    state = fixture;
+    _pinned = true;
+  }
+
+  bool _pinned = false;
+
+  @override
+  set state(FleetState value) {
+    if (_pinned) return;
+    super.state = value;
+  }
+}
+
+/// The fleet for the fixture company.
+Override fleetOverride() {
+  return fleetProvider.overrideWith((ref, companyId) => FixtureFleetNotifier(
+        ref.watch(fleetServiceProvider),
+        ref,
+        companyId,
+        fixture: FleetState(vehicles: fixtureFleet()),
+      ));
+}

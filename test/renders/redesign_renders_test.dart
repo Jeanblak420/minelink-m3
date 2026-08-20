@@ -16,6 +16,8 @@
 // what actually fail on a regression. Keeping the two apart matters — a golden
 // that fails on every intentional change teaches people to regenerate without
 // looking, which is worse than having no golden at all.
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,14 +32,20 @@ import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/core/widgets/user_identity_flyout.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/auth/screens/login_screen.dart';
+import 'package:flutter_application_1/features/company/screens/company_employees_screen.dart';
+import 'package:flutter_application_1/features/employee/screens/employee_profile_screen.dart';
 import 'package:flutter_application_1/features/portal/nav/portal_nav.dart';
+import 'package:flutter_application_1/features/profile_setup/screens/profile_setup_screen.dart';
 import 'package:flutter_application_1/features/super_admin/nav/console_nav.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screen_dashboard.dart';
 
 import '../fixtures/ml_sample_data.dart';
+import '../fixtures/screen_fixtures.dart';
 import '../test_helpers/real_fonts.dart';
 
 void main() {
+  _noOrphanGoldensTest();
+
   setUpAll(() async {
     await loadRealFonts();
     final icons = await loadMaterialIcons();
@@ -154,6 +162,7 @@ void main() {
     // animations (the live pill, the bell).
     await tester.pump(const Duration(milliseconds: 900));
 
+
     FlutterError.onError = previousOnError;
     tester.takeException();
 
@@ -256,6 +265,200 @@ void main() {
     testWidgets('login phone dark', (tester) async {
       await shoot(tester, login(Brightness.dark), const Size(412, 915),
           'login-phone-dark');
+    });
+  });
+
+  /// A REAL screen inside the real portal shell.
+  ///
+  /// Distinct from [portal], which renders the shell around a labelled
+  /// placeholder. That one exists to show the rail and the reflow; this one
+  /// exists to show the screens themselves, and it became possible only when
+  /// `test/fixtures/screen_fixtures.dart` learned to supply the company, the
+  /// session and the roster each of these gates on. Before that they rendered
+  /// spinners and error lines — measured: eight of nineteen painted fewer than
+  /// three text runs, and `fleet_management` painted "Company information not
+  /// available."
+  ///
+  /// The data is obviously fake — Fixture Haulage, FIXTURE- ids, a 2020
+  /// timestamp — so nothing in these images can be mistaken for a real
+  /// company's figures. What is real is every pixel of layout, type, colour
+  /// and shape.
+  Widget screen({
+    required Brightness brightness,
+    required Widget child,
+    required String title,
+    required String subtitle,
+    required OrgType orgType,
+    required UserRole role,
+    required String selectedRoute,
+    bool railExpanded = true,
+    List<Override> extraOverrides = const [],
+  }) {
+    return ProviderScope(
+      overrides: [...companyScopeOverrides(role: role), ...extraOverrides],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.build(brightness),
+        home: MlAppShell(
+          tree: portalNavTree(orgType: orgType, role: role),
+          selectedRoute: selectedRoute,
+          onNavigate: (_) {},
+          title: title,
+          subtitle: subtitle,
+          expanded: railExpanded,
+          onExpandedChanged: (_) {},
+          badgeCounts: const {
+            MlNavBadge.pendingRequests: 2,
+            MlNavBadge.unreadNotifications: 5,
+          },
+          railHeader: MlRailBrand(
+            expanded: railExpanded,
+            subtitle: 'ADMIN',
+            onTap: () {},
+          ),
+          railFooter: MlRailIdentity(
+            expanded: railExpanded,
+            identity: const UserIdentity(
+              name: 'Fixture Operator',
+              email: 'operator@fixture.co.za',
+              roleLabel: 'Admin',
+            ),
+            onOpenProfile: () {},
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.notifications_outlined),
+            ),
+          ],
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  group('real screens, real layout', () {
+    // 🚨 THREE SCREENS ARE DELIBERATELY ABSENT: fleet management, the
+    // operations hub and the communications hub. The reason is a real property
+    // of the app and worth keeping.
+    //
+    // All three reach the network while building — `FleetNotifier` opens a
+    // Supabase realtime channel UNCONDITIONALLY in its constructor (not behind
+    // a company gate like the others), and the two hubs issue queries. Against
+    // the dummy localhost instance these tests use, that is a real socket
+    // attempt, and it leaves a pending timer. A golden test then fails on "A Timer is
+    // still pending even after the widget tree was disposed" — which is a true
+    // statement, not a harness artefact.
+    //
+    // A SWEEP survives this and a GOLDEN does not, because a sweep pumps and
+    // ends while `expectLater(matchesGoldenFile)` keeps the test body alive
+    // long enough for the invariant check to see the timer. So both screens ARE
+    // covered for layout at every width and text scale by
+    // untested_screens_sweep_test; what they lack is a picture.
+    //
+    // Faking one by stubbing realtime would be a picture of a stub, so there
+    // isn't one. Rendering these properly needs a Supabase transport fake,
+    // which is a piece of test infrastructure rather than a design task.
+    //
+    // Pumping past the retry does not help: the reconnect reschedules itself,
+    // so each pump creates another timer. That was worth trying and worth
+    // recording as tried.
+    //
+    // A golden diff hid this for a while: the first attempts reported "Pixel
+    // test failed, 0.04%, 895px" and I went hunting for an animation. Deleting
+    // the golden let the actual error surface. A failing comparison can mask a
+    // failing test.
+
+    testWidgets('profile setup — desktop light', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.light,
+          child: const ProfileSetupScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Profile setup',
+          orgType: OrgType.transporter,
+          role: UserRole.driver,
+          selectedRoute: '/portal/driver',
+          extraOverrides: [profileSetupOverride()],
+        ),
+        const Size(1400, 1500),
+        'screen-profile-setup-desktop-light',
+      );
+    });
+
+    testWidgets('company employees — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const CompanyEmployeesScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'People',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+        ),
+        const Size(1600, 1200),
+        'screen-employees-desktop-dark',
+      );
+    });
+
+    testWidgets('employee profile — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const EmployeeProfileScreen(
+            employeeId: 'FIXTURE-employee',
+            canManage: true,
+            inPortal: true,
+          ),
+          title: 'Fixture Haulage',
+          subtitle: 'People',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+        ),
+        const Size(1600, 1400),
+        'screen-employee-profile-desktop-dark',
+      );
+    });
+
+    // The phone is where the reflow work of this phase actually shows.
+    testWidgets('company employees — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const CompanyEmployeesScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'People',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+        ),
+        const Size(412, 1000),
+        'screen-employees-phone-dark',
+      );
+    });
+
+    testWidgets('profile setup — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const ProfileSetupScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Profile setup',
+          orgType: OrgType.transporter,
+          role: UserRole.driver,
+          selectedRoute: '/portal/driver',
+          extraOverrides: [profileSetupOverride()],
+        ),
+        const Size(412, 1100),
+        'screen-profile-setup-phone-dark',
+      );
     });
   });
 
@@ -450,4 +653,35 @@ class _PortalBodyPlaceholder extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Every PNG in `docs/redesign/renders/` must be one this file still produces.
+///
+/// An orphan golden is a stale picture with nobody to update it: it survives
+/// `--update-goldens`, it survives review, and it goes on being the answer when
+/// somebody asks what a screen looks like. Three screens were dropped from this
+/// file for leaving pending timers, and one of their images stayed behind —
+/// which is exactly how a render that no longer reflects the app becomes the
+/// one people look at.
+void _noOrphanGoldensTest() {
+  test('no golden in docs/redesign/renders/ is orphaned', () {
+    final source = File('test/renders/redesign_renders_test.dart')
+        .readAsStringSync();
+    final dir = Directory('docs/redesign/renders');
+    final orphans = <String>[];
+    for (final f in dir.listSync().whereType<File>()) {
+      final name = f.uri.pathSegments.last;
+      if (!name.endsWith('.png')) continue;
+      final stem = name.substring(0, name.length - 4);
+      if (!source.contains("'$stem'")) orphans.add(name);
+    }
+    expect(
+      orphans,
+      isEmpty,
+      reason: 'These images are in docs/redesign/renders/ but nothing here '
+          'generates them any more, so nothing will ever update them:\n'
+          '  ${orphans.join('\n  ')}\n'
+          'Delete them, or restore the test that made them.',
+    );
+  });
 }
