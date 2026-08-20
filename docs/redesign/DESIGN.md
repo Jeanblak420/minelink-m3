@@ -795,3 +795,53 @@ it misses is the half with tables in it: with no rows there is no plate to
 overflow. A second pass now sweeps sixteen screens with the capture fixtures
 installed. It found **seven failing screens immediately**, at 360px.
 
+### 10.5 One shape accounts for three of the last four defects
+
+A table of `Expanded` columns with no minimum. It is not an overflow and it is
+not a crash — it **compresses**, and compression is a layout that fits.
+
+| screen | what it did |
+|---|---|
+| organizations registry | four columns, ~70px each at 412px. Every cell truncated: "Iron …", "MI…", "10…". A registry where no column can be read is a **blank** registry, not a narrow one. |
+| targets · All months | ATTAINMENT had 118.8px for content needing 154.9 — a bar, `117%` and a `SURPASSED` badge. The locked TARGET field had 46px for 55.2. 22 overflows on one screen. |
+| targets · Target history | five flexed columns plus a fixed 116px badge column. At 360px the attainment cell had 44.2px for a `117%` needing 54, with the bar squeezed to nothing — a percentage with a blank space where its meter belongs. It fit at 412 by a hair, which is why the first pass missed it. |
+
+All three now go through **`MlWideTable`**, and this is the rule that came out
+of it: **the `minWidth` is derived, never picked.** Take the widest cell's
+content, divide by that column's share of the flex total, add any fixed
+columns, and multiply by the live text scaler —
+
+```dart
+double _minWidth(BuildContext context) {
+  const attainmentCell = 212.0;      // bar 56 + 10 + pct 44 + 8 + badge ~94
+  const attainmentShare = 36 / 100;  // its flex, over the row's flex total
+  final scale = MediaQuery.textScalerOf(context).scale(12) / 12;
+  return (attainmentCell / attainmentShare) * scale;
+}
+```
+
+The scaler matters as much as the arithmetic. The console gives every admin a
+text-size slider (`ConsolePrefs.textScale`) and the shell composes it with the
+platform's, so a hard-coded minimum is correct at exactly one setting. This is
+the same fault `MlDataTable` had in its first version, one layer up.
+
+Two things it must NOT do. It must not scroll when the content fits — a
+scrollbar over a table that fits is a promise of columns that are not there, and
+each of these is pinned by a "does NOT scroll at 1600px" case. And the controls
+that filter a table stay **outside** the scroll view: a filter that slides away
+from the rows it filters is worse than a narrow one.
+
+### 10.6 The band that ate its own title
+
+`TargetsBand` put the screen's name in a `Flexible` and its two scope tags
+unflexed. A `Row` hands an unflexed child its natural width, so on a phone the
+tags took 190px and the title was cut to **"Plat…"** — four characters of
+"Platform targets", beside decoration reading PLATFORM-WIDE and CYCLE LOCKED.
+
+It is a `Wrap` now, and the order of sacrifice is the point: the scope tag
+repeats what the title already says, and the lock state is said again on the
+cycle card below, so the tags are what should drop to a second line. A `Wrap`
+bounds a horizontal child to its own `maxWidth`, so a long company name on the
+by-company screen still ellipsises — the fix does not cost the behaviour the
+`Flexible` was there for.
+

@@ -378,6 +378,18 @@ Every line below was executed at the end of the Phase 4 session, in this order.
 - **Money is prefixed and grouped one way**, on both dashboards.
 - **22 portal screens and 4 console screens survive 360/800/1280 × 1.0/1.3 WITH
   REAL ROWS IN THEM** — not the empty states the sweeps had been passing over.
+- **No console table compresses on a phone.** The organizations registry
+  (`organizations_registry_test.dart`) and both targets tables
+  (`targets_phone_width_test.dart`) are checked at 360 and 412 for zero
+  overflows and un-truncated key columns, and at 1600 for **no scrollbar** —
+  because a scrollbar over content that fits is a promise of more.
+- **The targets board still says which board it is** at 360 and 412. Its title
+  was being cut to "Plat…" by two unflexed scope tags.
+- **Both bite.** Restoring the `Row` cut the title again; neutering the two
+  derived `minWidth`s failed four of the seven targets cases. A sabotage that
+  does not restore the original expression verbatim proves nothing — deleting
+  the `Wrap` left the title unflexed, which stopped it ellipsising and started
+  it overflowing, and the assertion under test passed on a different fault.
 
 ### What is still NOT proven
 
@@ -391,4 +403,13 @@ Unchanged from Phase 3 except where noted:
 - **The due-diligence gate has never been photographed or driven** — preview,
   confirm, the green tick, the transporter list, the final confirm. `shoot()`
   can interact now (`act:`), so the mechanism exists; the sequence does not.
+- **`flutter build web --release` and `flutter build apk --debug` were last run
+  at commit `ed9ebcd`.** Everything since is layout and test work under
+  `lib/features/super_admin/**` and `test/**` with no new dependency, plugin or
+  platform code — but neither has been re-run, and "cannot plausibly have
+  broken" is not evidence.
+- **The targets org-type and company scopes have no picture.** Only the platform
+  scope has been rendered. The other two carry a selector it does not, and
+  `TargetsPage`'s half-viewport cap exists *because* the org-type band once
+  overflowed by 60px.
 - **Windows** — two pre-existing faults, neither this project's.
