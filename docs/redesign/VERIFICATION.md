@@ -19,7 +19,7 @@ project.
 | `dart tool/release_guards.dart` | **20 / 20 PASS** |
 | `flutter build web` (dart2js) | **succeeded** — `main.dart.js`, 7.9 MB |
 | `flutter build windows --debug` | ❌ **blocked — twice, neither cause is the redesign.** See below |
-| Renders at 6 size/theme combinations | generated, `docs/redesign/renders/` |
+| Renders — 13 screens/sizes/themes | generated, `docs/redesign/renders/` |
 
 ### Windows does not build, and it is not this project's fault
 
@@ -73,6 +73,28 @@ tests pass", and both are made here.
 ---
 
 ## What the renders prove, and what they do not
+
+### What there are pictures of
+
+| file | what it shows |
+|---|---|
+| `login-desktop-dark`, `login-phone-dark` | the only screen every user of the product sees |
+| `console-desktop-dark`, `-light`, `-rail-collapsed` | the platform admin's landing screen, the design reference |
+| `console-medium-dark` | the rail narrowing, nothing removed |
+| `console-phone-dark`, `-light` | bottom bar and drawer |
+| `portal-transporter-desktop-dark` | the transporter rail: Operations / Fleet / Money / Tracking / Reconciliation / Company |
+| `portal-mine-desktop-dark` | the mine rail — a different tree from the same shell |
+| `portal-buyer-desktop-light` | the buyer rail, in light |
+| `portal-transporter-phone-dark` | that same tree reflowed to a bottom bar |
+| `portal-driver-phone-dark` | the driver's five destinations: Dashboard · My routes · Live map · Compliance · More |
+
+The portal shots deliberately carry a **placeholder body**, and say so on the
+image. Those dashboards need a company, a session and live providers; a picture
+of a spinner or an error is not a picture of the design. What is real in every
+one of them is the thing the brief actually asked about — *"the placement of
+everything"*: the rail and its grouping for that role, the top bar, the canvas,
+and how all of it reflows onto a phone. That is what differs between the four
+roles, and it is what these show.
 
 `test/renders/redesign_renders_test.dart` renders the **real** console screens —
 real widgets, the real shell, the real fonts, and the Material icon font — at

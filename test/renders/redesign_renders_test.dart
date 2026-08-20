@@ -24,11 +24,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 // wants the design system's.
 import 'package:supabase_flutter/supabase_flutter.dart' hide UserIdentity;
 
-import 'package:flutter_application_1/core/design/nav/ml_nav_node.dart';
 import 'package:flutter_application_1/core/design/shell/ml_app_shell.dart';
 import 'package:flutter_application_1/core/design/shell/ml_rail_blocks.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/core/widgets/user_identity_flyout.dart';
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
+import 'package:flutter_application_1/features/auth/screens/login_screen.dart';
+import 'package:flutter_application_1/features/portal/nav/portal_nav.dart';
 import 'package:flutter_application_1/features/super_admin/nav/console_nav.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screen_dashboard.dart';
 
@@ -171,6 +173,188 @@ void main() {
     );
   }
 
+  /// A portal shell for one org type and role.
+  ///
+  /// The BODY is deliberately an empty-state placeholder rather than a real
+  /// portal dashboard. Those screens need a company, a session and live
+  /// providers; rendering one here would show a spinner or an error, and a
+  /// picture of an error state is not a picture of the design.
+  ///
+  /// What these renders are FOR is the thing Jean actually asked about — "the
+  /// placement of everything" — which is the shell: the rail, its grouping and
+  /// ordering for that role, the top bar, the workspace canvas, and how all of
+  /// it reflows onto a phone. That is real in every one of these, and it is
+  /// exactly what differs between the four roles.
+  Widget portal({
+    required Brightness brightness,
+    required OrgType orgType,
+    required UserRole? role,
+    required String title,
+    required String subtitle,
+    required String roleLabel,
+    required String selectedRoute,
+    bool railExpanded = true,
+  }) {
+    final tree = portalNavTree(orgType: orgType, role: role);
+    return ProviderScope(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.build(brightness),
+        home: MlAppShell(
+          tree: tree,
+          selectedRoute: selectedRoute,
+          onNavigate: (_) {},
+          title: title,
+          subtitle: subtitle,
+          expanded: railExpanded,
+          onExpandedChanged: (_) {},
+          badgeCounts: const {
+            MlNavBadge.pendingRequests: 2,
+            MlNavBadge.unreadNotifications: 5,
+          },
+          railHeader: MlRailBrand(
+            expanded: railExpanded,
+            subtitle: roleLabel.toUpperCase(),
+            onTap: () {},
+          ),
+          railFooter: MlRailIdentity(
+            expanded: railExpanded,
+            identity: UserIdentity(
+              name: 'Fixture Operator',
+              email: 'operator@fixture.co.za',
+              roleLabel: roleLabel,
+            ),
+            onOpenProfile: () {},
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.notifications_outlined),
+            ),
+          ],
+          child: const _PortalBodyPlaceholder(),
+        ),
+      ),
+    );
+  }
+
+  /// The login screen — the only screen in the product every single user sees,
+  /// and the only one that had no picture.
+  Widget login(Brightness brightness) => ProviderScope(
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.build(brightness),
+          home: const LoginScreen(),
+        ),
+      );
+
+  group('auth', () {
+    testWidgets('login desktop dark', (tester) async {
+      await shoot(tester, login(Brightness.dark), const Size(1440, 1000),
+          'login-desktop-dark');
+    });
+    testWidgets('login phone dark', (tester) async {
+      await shoot(tester, login(Brightness.dark), const Size(412, 915),
+          'login-phone-dark');
+    });
+  });
+
+  group('portal — one shell, four roles', () {
+    testWidgets('transporter desktop dark', (tester) async {
+      await shoot(
+        tester,
+        portal(
+          brightness: Brightness.dark,
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          title: 'Fixture Haulage',
+          subtitle: 'Transporter workspace',
+          roleLabel: 'Admin',
+          selectedRoute: '/portal/transporter',
+        ),
+        // Tall enough for the whole rail. At 1400 the last group was
+        // clipped mid-item -- it scrolls in the app, but in a PICTURE a
+        // half-drawn row reads as a layout bug rather than as a scroll.
+        const Size(1600, 1750),
+        'portal-transporter-desktop-dark',
+      );
+    });
+
+    testWidgets('mine / supplier desktop dark', (tester) async {
+      await shoot(
+        tester,
+        portal(
+          brightness: Brightness.dark,
+          orgType: OrgType.mineSupplier,
+          role: UserRole.admin,
+          title: 'Iron Hills Mining',
+          subtitle: 'Mine workspace',
+          roleLabel: 'Admin',
+          selectedRoute: '/portal/mine',
+        ),
+        // Tall enough for the whole rail. At 1400 the last group was
+        // clipped mid-item -- it scrolls in the app, but in a PICTURE a
+        // half-drawn row reads as a layout bug rather than as a scroll.
+        const Size(1600, 1750),
+        'portal-mine-desktop-dark',
+      );
+    });
+
+    testWidgets('buyer desktop light', (tester) async {
+      await shoot(
+        tester,
+        portal(
+          brightness: Brightness.light,
+          orgType: OrgType.buyer,
+          role: UserRole.admin,
+          title: 'Fixture Metals',
+          subtitle: 'Buyer workspace',
+          roleLabel: 'Admin',
+          selectedRoute: '/portal/buyer',
+        ),
+        // Tall enough for the whole rail. At 1400 the last group was
+        // clipped mid-item -- it scrolls in the app, but in a PICTURE a
+        // half-drawn row reads as a layout bug rather than as a scroll.
+        const Size(1600, 1750),
+        'portal-buyer-desktop-light',
+      );
+    });
+
+    testWidgets('driver phone — the rail becomes a bottom bar', (tester) async {
+      await shoot(
+        tester,
+        portal(
+          brightness: Brightness.dark,
+          orgType: OrgType.transporter,
+          role: UserRole.driver,
+          title: 'Fixture Haulage',
+          subtitle: 'Driver',
+          roleLabel: 'Driver',
+          selectedRoute: '/portal/driver',
+        ),
+        const Size(412, 915),
+        'portal-driver-phone-dark',
+      );
+    });
+
+    testWidgets('transporter phone — the same tree, reflowed', (tester) async {
+      await shoot(
+        tester,
+        portal(
+          brightness: Brightness.dark,
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          title: 'Fixture Haulage',
+          subtitle: 'Transporter workspace',
+          roleLabel: 'Admin',
+          selectedRoute: '/portal/transporter',
+        ),
+        const Size(412, 915),
+        'portal-transporter-phone-dark',
+      );
+    });
+  });
+
   group('console', () {
     testWidgets('desktop dark — expanded rail', (tester) async {
       await shoot(
@@ -227,4 +411,43 @@ void main() {
       );
     });
   });
+}
+
+/// Stands in for a portal dashboard in the shell renders.
+///
+/// It says what it is, on the image, so nobody can mistake one of these for a
+/// screenshot of a working dashboard.
+class _PortalBodyPlaceholder extends StatelessWidget {
+  const _PortalBodyPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.dashboard_customize_outlined,
+                size: 44, color: scheme.onSurfaceVariant),
+            const SizedBox(height: 14),
+            Text('Workspace body',
+                textAlign: TextAlign.center,
+                style: text.titleMedium?.copyWith(color: scheme.onSurface)),
+            const SizedBox(height: 6),
+            Text(
+              'These renders are of the SHELL — the rail, its grouping for '
+              'this role, the top bar and the canvas. The dashboards need a '
+              'live session; a picture of their loading state would not be a '
+              'picture of the design.',
+              textAlign: TextAlign.center,
+              style: text.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
