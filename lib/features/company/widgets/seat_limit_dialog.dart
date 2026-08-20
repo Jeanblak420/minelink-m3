@@ -130,7 +130,7 @@ Future<void> showSeatLimitDialog(
                   Text(
                     error!,
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 13,
                       color: Theme.of(ctx).colorScheme.error,
                     ),
                   ),

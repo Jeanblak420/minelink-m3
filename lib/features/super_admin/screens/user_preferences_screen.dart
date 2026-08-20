@@ -335,7 +335,7 @@ class _SwitchRow extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 14.5,
+                  fontSize: 15,
                   fontWeight: FontWeight.w700,
                   color: s.textStrong,
                 ),
@@ -343,7 +343,7 @@ class _SwitchRow extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 description,
-                style: TextStyle(fontSize: 12.5, color: s.textMuted),
+                style: TextStyle(fontSize: 13, color: s.textMuted),
               ),
             ],
           ),

@@ -201,7 +201,7 @@ class _RequestCard extends StatelessWidget {
           ),
           Text(
             'by ${r.requestedByName ?? '—'} · ${dateFmt.format(MlTime.sast(r.createdAt))}',
-            style: TextStyle(fontSize: 12.5, color: semantic.textFaint),
+            style: TextStyle(fontSize: 13, color: semantic.textFaint),
           ),
           if (r.isPending) ...[
             MlButton.go(

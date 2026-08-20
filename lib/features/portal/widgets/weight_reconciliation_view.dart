@@ -281,7 +281,7 @@ class WeightReconciliationView extends ConsumerWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          fontSize: 13.5,
+          fontSize: 14,
           color: MlSemantic.of(context).textBody,
         ),
       );
@@ -321,7 +321,7 @@ class WeightReconciliationView extends ConsumerWidget {
           '$sign${v.abs().toStringAsFixed(2)} t',
           style: TextStyle(
             fontFamily: MlTokens.fontMono,
-            fontSize: 12.5,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
             color: tone.fg,
             fontFeatures: const [FontFeature.tabularFigures()],

@@ -129,7 +129,7 @@ class MlShortTermChart extends StatelessWidget {
             const SizedBox(width: 7),
             Text(label,
                 style: TextStyle(
-                    fontFamily: MlGlass.sans, fontSize: 10.5, color: t.inkMid)),
+                    fontFamily: MlGlass.sans, fontSize: 11, color: t.inkMid)),
           ],
         );
 
@@ -303,7 +303,7 @@ class MlHorizonChart extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: MlGlass.sans,
-                          fontSize: 9.5,
+                          fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: data.horizonReached(kMlHorizons[i])
                               ? t.ink

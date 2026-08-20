@@ -235,7 +235,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                           title: Text(p.label,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 12.5)),
+                              style: const TextStyle(fontSize: 13)),
                           onTap: () {
                             _search.text = p.label.split(',').first;
                             _select(p.point);

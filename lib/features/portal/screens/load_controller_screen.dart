@@ -278,7 +278,7 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
       maxLines: 1,
       style: TextStyle(
         fontFamily: MlTokens.fontMono,
-        fontSize: 13.5,
+        fontSize: 14,
         color: MlSemantic.of(context).textMuted,
         fontFeatures: const [FontFeature.tabularFigures()],
       ),
@@ -686,7 +686,7 @@ class _RecordLoadSheetState extends ConsumerState<_RecordLoadSheet> {
           '${trip.transporterName ?? 'Transporter'} · ${trip.buyerLabel} · ${trip.materialLabel}',
           style: TextStyle(
             fontFamily: MlTokens.fontSans,
-            fontSize: 13.5,
+            fontSize: 14,
             height: 1.6,
             color: semantic.textMuted,
           ),
@@ -887,7 +887,7 @@ class _RecordLoadSheetState extends ConsumerState<_RecordLoadSheet> {
                   child: Text(
                     _error!,
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 13,
                       color:
                           MlTone.error.colors(Theme.of(context).brightness).fg,
                     ),

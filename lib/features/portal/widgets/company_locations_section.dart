@@ -50,7 +50,7 @@ class CompanyLocationsSection extends ConsumerWidget {
                   ),
                   Text(
                     'Drivers are routed to the primary location automatically.',
-                    style: TextStyle(fontSize: 12.5, color: semantic.textMuted),
+                    style: TextStyle(fontSize: 13, color: semantic.textMuted),
                   ),
                 ],
               );
@@ -167,7 +167,7 @@ class CompanyLocationsSection extends ConsumerWidget {
                             '${l.isPrimary ? ' · Primary' : ''}',
                   style: TextStyle(
                     fontFamily: 'JetBrainsMono',
-                    fontSize: 11.5,
+                    fontSize: 12,
                     color: semantic.textMuted,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
@@ -400,7 +400,7 @@ class _LocationEditDialogState extends State<_LocationEditDialog> {
                 child: Text(
                   _error!,
                   style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 13,
                     color: MlTone.error.colors(Theme.of(context).brightness).fg,
                   ),
                 ),

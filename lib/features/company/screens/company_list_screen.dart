@@ -94,7 +94,7 @@ class CompanyListScreen extends ConsumerWidget {
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
                       fontWeight: FontWeight.w800,
-                      fontSize: 15.5,
+                      fontSize: 16,
                       color: semantic.textStrong,
                     ),
                   ),
@@ -103,7 +103,7 @@ class CompanyListScreen extends ConsumerWidget {
                     company.whatsappNumber,
                     style: TextStyle(
                       fontFamily: MlTokens.fontMono,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       color: semantic.textMuted,
                     ),
                   ),

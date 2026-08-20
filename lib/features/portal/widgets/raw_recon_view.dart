@@ -378,7 +378,7 @@ class _RawReconViewState extends ConsumerState<RawReconView> {
                       'Total Tons = ${_totalTons(filtered).toStringAsFixed(2)}',
                       style: TextStyle(
                         fontFamily: MlTokens.fontMono,
-                        fontSize: 13.5,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: semantic.textStrong,
                         fontFeatures: const [FontFeature.tabularFigures()],
@@ -700,7 +700,7 @@ class _ExcelReconTable extends StatelessWidget {
         softWrap: true,
         style: TextStyle(
           fontFamily: MlTokens.fontMono,
-          fontSize: 12.5,
+          fontSize: 13,
           fontWeight: FontWeight.w700,
           height: 1.25,
           color: MlTokens.accent,
@@ -721,7 +721,7 @@ class _ExcelReconTable extends StatelessWidget {
         softWrap: true,
         style: TextStyle(
           fontFamily: MlTokens.fontSans,
-          fontSize: 12.5,
+          fontSize: 13,
           fontWeight: FontWeight.w700,
           height: 1.25,
           color: MlTokens.accent,
@@ -741,7 +741,7 @@ class _ExcelReconTable extends StatelessWidget {
       softWrap: true,
       style: TextStyle(
         fontFamily: c.mono ? MlTokens.fontMono : MlTokens.fontSans,
-        fontSize: 12.5,
+        fontSize: 13,
         fontWeight: c.mono ? FontWeight.w600 : FontWeight.w500,
         height: 1.25,
         color: c.right || c.mono ? semantic.textStrong : semantic.textBody,

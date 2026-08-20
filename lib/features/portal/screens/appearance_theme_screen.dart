@@ -203,7 +203,7 @@ class _SectionCard extends StatelessWidget {
             subtitle,
             style: TextStyle(
               fontFamily: MlTokens.fontSans,
-              fontSize: 12.5,
+              fontSize: 13,
               color: semantic.textMuted,
             ),
           ),
@@ -262,7 +262,7 @@ class _ChoiceChipTile extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 13.5,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: selected ? semantic.textStrong : semantic.textBody,
                 ),
@@ -319,7 +319,7 @@ class _ThemeDirectionTile extends StatelessWidget {
                       direction.label,
                       style: TextStyle(
                         fontFamily: MlTokens.fontSans,
-                        fontSize: 14.5,
+                        fontSize: 15,
                         fontWeight: FontWeight.w800,
                         color: semantic.textStrong,
                       ),
@@ -329,7 +329,7 @@ class _ThemeDirectionTile extends StatelessWidget {
                       _describe(direction),
                       style: TextStyle(
                         fontFamily: MlTokens.fontSans,
-                        fontSize: 12.5,
+                        fontSize: 13,
                         color: semantic.textMuted,
                         height: 1.4,
                       ),

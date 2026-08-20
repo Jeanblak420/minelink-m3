@@ -241,7 +241,7 @@ class _Body extends ConsumerWidget {
           Text(
             '$unpriced load(s) have no rate yet — pricing is set when the '
             'MineLink admin links the order.',
-            style: TextStyle(fontSize: 12.5, color: semantic.textMuted),
+            style: TextStyle(fontSize: 13, color: semantic.textMuted),
           ),
         ],
         const SizedBox(height: 16),
@@ -359,7 +359,7 @@ class _Body extends ConsumerWidget {
     maxLines: 1,
     style: TextStyle(
       fontFamily: MlTokens.fontMono,
-      fontSize: 12.5,
+      fontSize: 13,
       fontWeight: FontWeight.w600,
       color: muted
           ? MlSemantic.of(context).textFaint
@@ -394,7 +394,7 @@ class _Body extends ConsumerWidget {
     if (!r.hasInvoice) {
       return Text(
         'Not captured',
-        style: TextStyle(fontSize: 12.5, color: semantic.textFaint),
+        style: TextStyle(fontSize: 13, color: semantic.textFaint),
       );
     }
     return Column(
@@ -440,7 +440,7 @@ class _Body extends ConsumerWidget {
           '${v > 0 ? '+' : ''}${BuyerLoadsValueScreen.money(v, r.currency)}',
           style: TextStyle(
             fontFamily: MlTokens.fontMono,
-            fontSize: 11.5,
+            fontSize: 12,
             fontWeight: FontWeight.w700,
             color: colors.fg,
             fontFeatures: const [FontFeature.tabularFigures()],
@@ -588,7 +588,7 @@ class _InvoiceDialogState extends ConsumerState<_InvoiceDialog> {
                   if (r.deliveredTons != null)
                     'delivered ${r.deliveredTons!.toStringAsFixed(2)} t',
                 ].join(' · '),
-                style: TextStyle(fontSize: 12.5, color: semantic.textMuted),
+                style: TextStyle(fontSize: 13, color: semantic.textMuted),
               ),
               const SizedBox(height: 14),
               TextField(

@@ -428,7 +428,7 @@ class _Line extends StatelessWidget {
                 ),
                 Text(
                   secondary,
-                  style: TextStyle(fontSize: 12.5, color: semantic.textMuted),
+                  style: TextStyle(fontSize: 13, color: semantic.textMuted),
                 ),
               ],
             ),
@@ -651,7 +651,7 @@ class _LogFuelDialogState extends ConsumerState<_LogFuelDialog> {
                   child: Text(
                     '≈ R${_num1.format(ppl)} / litre',
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 13,
                       color: MlSemantic.of(context).textMuted,
                     ),
                   ),
@@ -678,7 +678,7 @@ class _LogFuelDialogState extends ConsumerState<_LogFuelDialog> {
                   child: Text(
                     sinceLast,
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: sinceLastWarn
                           ? MlTone.error.colors(Theme.of(context).brightness).fg

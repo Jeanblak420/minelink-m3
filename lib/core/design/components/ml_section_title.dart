@@ -168,7 +168,7 @@ class MlSectionTitle extends StatelessWidget {
                   subtitle!,
                   style: TextStyle(
                     fontFamily: MlGlass.sans,
-                    fontSize: 11.5,
+                    fontSize: 12,
                     height: 1.4,
                     color: glass.inkMid,
                   ),
@@ -259,7 +259,7 @@ class MlSectionTitle extends StatelessWidget {
                   '$link →',
                   style: TextStyle(
                     fontFamily: MlGlass.sans,
-                    fontSize: 11.5,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: glass.accent,
                   ),

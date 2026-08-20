@@ -111,7 +111,7 @@ class NotificationCard extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: MlTokens.fontSans,
-                          fontSize: 14.5,
+                          fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: semantic.textStrong,
                           height: 1.25,
@@ -156,7 +156,7 @@ class NotificationCard extends ConsumerWidget {
                     ],
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       color: semantic.textFaint,
                     ),
                   ),

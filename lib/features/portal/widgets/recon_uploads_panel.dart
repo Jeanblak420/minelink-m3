@@ -245,7 +245,7 @@ class _ReconUploadsPanelState extends ConsumerState<ReconUploadsPanel> {
             label,
             style: TextStyle(
               fontWeight: FontWeight.w700,
-              fontSize: 13.5,
+              fontSize: 14,
               color: semantic.textStrong,
             ),
           ),

@@ -145,7 +145,7 @@ class _OrgTypeAuditTab extends ConsumerWidget {
                         '${entries.length} events · org $oid',
                         style: TextStyle(
                           fontFamily: MlTokens.fontSans,
-                          fontSize: 12.5,
+                          fontSize: 13,
                           color: semantic.textMuted,
                         ),
                       ),
@@ -172,7 +172,7 @@ class _OrgTypeAuditTab extends ConsumerWidget {
                               DateFormat('yyyy-MM-dd HH:mm:ss').format(MlTime.sast(log.createdAt)),
                               style: TextStyle(
                                 fontFamily: MlTokens.fontMono,
-                                fontSize: 11.5,
+                                fontSize: 12,
                                 color: semantic.textFaint,
                               ),
                             ),

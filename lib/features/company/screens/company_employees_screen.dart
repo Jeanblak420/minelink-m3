@@ -672,7 +672,7 @@ class _CompanyEmployeesScreenState
             'This employee has been accepted but cannot use the app until assigned a role.',
             style: TextStyle(
               fontFamily: MlTokens.fontSans,
-              fontSize: 12.5,
+              fontSize: 13,
               color: MlSemantic.of(context).textMuted,
             ),
           ),
@@ -1040,7 +1040,7 @@ class _RegisterGroup extends StatelessWidget {
                       '${people.length}',
                       style: TextStyle(
                         fontFamily: MlTokens.fontMono,
-                        fontSize: 12.5,
+                        fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: semantic.textFaint,
                       ),
@@ -1053,7 +1053,7 @@ class _RegisterGroup extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontFamily: MlTokens.fontSans,
-                        fontSize: 11.5,
+                        fontSize: 12,
                         color: semantic.textMuted,
                       ),
                     ),
@@ -1154,7 +1154,7 @@ class _RegisterRowState extends State<_RegisterRow> {
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
                   fontWeight: FontWeight.w800,
-                  fontSize: 13.5,
+                  fontSize: 14,
                   color: toneColors.fg,
                 ),
               )
@@ -1204,7 +1204,7 @@ class _RegisterRowState extends State<_RegisterRow> {
                           style: TextStyle(
                             fontFamily: MlTokens.fontSans,
                             fontWeight: FontWeight.w800,
-                            fontSize: 14.5,
+                            fontSize: 15,
                             color: semantic.textStrong,
                           ),
                         ),
@@ -1220,7 +1220,7 @@ class _RegisterRowState extends State<_RegisterRow> {
                             widget.code,
                             style: TextStyle(
                               fontFamily: MlTokens.fontMono,
-                              fontSize: 10.5,
+                              fontSize: 11,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.3,
                               color: semantic.textFaint,

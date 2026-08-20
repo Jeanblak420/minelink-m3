@@ -409,7 +409,7 @@ class MlStat extends StatelessWidget {
           label.toUpperCase(),
           style: TextStyle(
             fontFamily: MlGlass.sans,
-            fontSize: 9.5,
+            fontSize: 10,
             letterSpacing: 1.15,
             fontWeight: FontWeight.w600,
             color: t.inkMid,
@@ -568,7 +568,7 @@ class MlSectionHead extends StatelessWidget {
                   subtitle!,
                   style: TextStyle(
                       fontFamily: MlGlass.sans,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       height: 1.4,
                       color: t.inkMid),
                 ),
@@ -596,7 +596,7 @@ class MlSectionHead extends StatelessWidget {
                     child: Text('$link →',
                         style: TextStyle(
                           fontFamily: MlGlass.sans,
-                          fontSize: 11.5,
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: t.accent2,
                         )),

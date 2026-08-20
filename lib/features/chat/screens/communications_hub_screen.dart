@@ -440,7 +440,7 @@ class _AnnouncementsTab extends StatelessWidget {
                                   announcement.title,
                                   style: TextStyle(
                                     fontFamily: MlTokens.fontSans,
-                                    fontSize: 14.5,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w700,
                                     color: semantic.textStrong,
                                   ),
@@ -472,7 +472,7 @@ class _AnnouncementsTab extends StatelessWidget {
                             ).format(MlTime.sast(announcement.timestamp)),
                             style: TextStyle(
                               fontFamily: MlTokens.fontMono,
-                              fontSize: 11.5,
+                              fontSize: 12,
                               color: semantic.textFaint,
                             ),
                           ),
@@ -607,7 +607,7 @@ class _ChatRoomsTab extends StatelessWidget {
                                   room.name,
                                   style: TextStyle(
                                     fontFamily: MlTokens.fontSans,
-                                    fontSize: 14.5,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w700,
                                     color: semantic.textStrong,
                                   ),

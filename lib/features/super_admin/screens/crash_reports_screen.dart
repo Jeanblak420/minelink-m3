@@ -309,7 +309,7 @@ class _CrashReportCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontFamily: MlTokens.fontMono,
-                              fontSize: 11.5,
+                              fontSize: 12,
                               color: semantic.textFaint,
                             ),
                           ),
@@ -363,7 +363,7 @@ class _CrashReportCard extends StatelessWidget {
                     report.stack!,
                     style: TextStyle(
                       fontFamily: MlTokens.fontMono,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       height: 1.4,
                       color: semantic.textBody,
                     ),
@@ -375,7 +375,7 @@ class _CrashReportCard extends StatelessWidget {
                 'No stack trace recorded.',
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 12.5,
+                  fontSize: 13,
                   color: semantic.textFaint,
                 ),
               ),

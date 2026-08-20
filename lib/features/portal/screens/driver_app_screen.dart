@@ -374,7 +374,7 @@ class _DashboardHeader extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                       color: semantic.textStrong)),
               Text(subtitle,
-                  style: TextStyle(fontSize: 13.5, color: semantic.textMuted)),
+                  style: TextStyle(fontSize: 14, color: semantic.textMuted)),
             ],
           ),
         ),
@@ -458,7 +458,7 @@ class _ActiveTripHero extends StatelessWidget {
                       borderRadius: MlShape.pill),
                   child: Text(statusLabel,
                       style: const TextStyle(
-                          fontSize: 11.5,
+                          fontSize: 12,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.4,
                           color: MlTokens.inkOnFill)),
@@ -594,7 +594,7 @@ class _MiniStat extends StatelessWidget {
           ),
           const SizedBox(height: 1),
           Text(label,
-              style: TextStyle(fontSize: 12.5, color: semantic.textMuted)),
+              style: TextStyle(fontSize: 13, color: semantic.textMuted)),
         ],
       ),
     );
@@ -645,7 +645,7 @@ class _WeekChartCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text('This week',
                         style: TextStyle(
-                            fontSize: 12.5, color: semantic.textMuted)),
+                            fontSize: 13, color: semantic.textMuted)),
                   ],
                 ),
               ),
@@ -859,7 +859,7 @@ class DriverProfileTab extends ConsumerWidget {
                 Text(
                     'Driver · ${employeeState.company?.companyName ?? ''}',
                     style:
-                        TextStyle(fontSize: 13.5, color: semantic.textMuted)),
+                        TextStyle(fontSize: 14, color: semantic.textMuted)),
                 const SizedBox(height: 12),
                 MlPlatePill(myVehicle?.vehicleRegistrationNumber ?? '—',
                     fontSize: 12),
@@ -1023,13 +1023,13 @@ class _ProfileRow extends StatelessWidget {
                 children: [
                   Text(label,
                       style: TextStyle(
-                          fontSize: 14.5,
+                          fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: semantic.textStrong)),
                   const SizedBox(height: 1),
                   Text(value,
                       style: TextStyle(
-                          fontSize: 12.5, color: semantic.textMuted)),
+                          fontSize: 13, color: semantic.textMuted)),
                 ],
               ),
             ),

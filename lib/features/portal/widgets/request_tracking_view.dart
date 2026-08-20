@@ -154,7 +154,7 @@ class RequestTrackingView extends ConsumerWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          fontSize: 12.5,
+          fontSize: 13,
           fontWeight: strong ? FontWeight.w700 : FontWeight.w400,
           color: strong
               ? MlSemantic.of(context).textStrong
@@ -168,7 +168,7 @@ class RequestTrackingView extends ConsumerWidget {
     maxLines: 1,
     style: TextStyle(
       fontFamily: MlTokens.fontMono,
-      fontSize: 12.5,
+      fontSize: 13,
       fontWeight: FontWeight.w600,
       color: MlSemantic.of(context).textStrong,
       fontFeatures: const [FontFeature.tabularFigures()],

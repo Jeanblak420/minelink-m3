@@ -501,7 +501,7 @@ class _RequestCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontFamily: MlTokens.fontMono,
-                              fontSize: 11.5,
+                              fontSize: 12,
                               color: semantic.textFaint,
                             ),
                           ),
@@ -535,7 +535,7 @@ class _RequestCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: MlTokens.fontSans,
-                          fontSize: 12.5,
+                          fontSize: 13,
                           color: semantic.textBody,
                         ),
                       ),

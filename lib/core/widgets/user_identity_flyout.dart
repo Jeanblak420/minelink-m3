@@ -370,7 +370,7 @@ class UserIdentityCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontFamily: MlTokens.fontMono,
-                              fontSize: 10.5,
+                              fontSize: 11,
                               height: 1.35,
                               color: semantic.textMuted,
                             ),
@@ -556,7 +556,7 @@ class _ActionRowState extends State<_ActionRow> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: _hovered ? widget.accent : tint,
                     ),

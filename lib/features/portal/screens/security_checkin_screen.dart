@@ -241,7 +241,7 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                             Text('Gate control — arrivals & departures',
                                 style: TextStyle(
                                   fontFamily: MlTokens.fontSans,
-                                  fontSize: 12.5,
+                                  fontSize: 13,
                                   color: semantic.textMuted,
                                 )),
                           ],
@@ -496,7 +496,7 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                                           .format(MlTime.sast(t.updatedAt)),
                                       style: TextStyle(
                                         fontFamily: MlTokens.fontMono,
-                                        fontSize: 12.5,
+                                        fontSize: 13,
                                         color: semantic.textFaint,
                                         fontFeatures: const [FontFeature.tabularFigures()],
                                       ),
@@ -654,7 +654,7 @@ class _PendingGateConfirmationsState
                           Text(_tripLabel(c),
                               style: const TextStyle(
                                 fontFamily: MlTokens.fontMono,
-                                fontSize: 13.5,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.6,
                                 fontFeatures: [FontFeature.tabularFigures()],
@@ -753,7 +753,7 @@ class _MiniStat extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: MlTokens.fontSans,
-                fontSize: 11.5,
+                fontSize: 12,
                 color: semantic.textMuted,
               )),
         ],
@@ -839,7 +839,7 @@ class _GateTruck extends StatelessWidget {
                     Text(label,
                         style: TextStyle(
                           fontFamily: MlTokens.fontSans,
-                          fontSize: 10.5,
+                          fontSize: 11,
                           color: semantic.textFaint,
                         )),
                     Text(val,
@@ -847,7 +847,7 @@ class _GateTruck extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: MlTokens.fontSans,
-                          fontSize: 13.5,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: semantic.textStrong,
                         )),

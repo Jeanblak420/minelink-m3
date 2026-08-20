@@ -162,7 +162,7 @@ class _QualityCertDialogState extends ConsumerState<_QualityCertDialog> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontSize: 12.5, color: semantic.textMuted),
+                          fontSize: 13, color: semantic.textMuted),
                     ),
                   ),
                 ],

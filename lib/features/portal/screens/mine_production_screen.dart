@@ -285,7 +285,7 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 13,
                             color: semantic.textMuted,
                           ),
                         ),
@@ -294,7 +294,7 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 13,
                             color: semantic.textMuted,
                           ),
                         ),
@@ -519,7 +519,7 @@ class _ReportSection extends StatelessWidget {
           '${v > 0 ? '+' : ''}${v.toStringAsFixed(2)} t',
           style: TextStyle(
             fontFamily: MlTokens.fontMono,
-            fontSize: 11.5,
+            fontSize: 12,
             fontWeight: FontWeight.w700,
             color: colors.fg,
             fontFeatures: const [FontFeature.tabularFigures()],
@@ -569,7 +569,7 @@ class _ProductionPileCard extends StatelessWidget {
                     Text(
                       'ROM / production pile',
                       style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: 12,
                         color: semantic.textFaint,
                       ),
                     ),
@@ -598,7 +598,7 @@ class _ProductionPileCard extends StatelessWidget {
               ].join(' · '),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 12.5, color: semantic.textMuted),
+              style: TextStyle(fontSize: 13, color: semantic.textMuted),
             ),
           ],
           const SizedBox(height: 12),

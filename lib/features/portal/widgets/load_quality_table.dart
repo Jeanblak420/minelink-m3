@@ -166,7 +166,7 @@ class LoadQualityTable extends ConsumerWidget {
                   Text(
                     '$certified of ${rows.length} load(s) certified',
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: semantic.textMuted,
                     ),
@@ -261,7 +261,7 @@ class LoadQualityTable extends ConsumerWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 11.5,
+                fontSize: 12,
                 fontFamily: MlTokens.fontMono,
                 color: MlSemantic.of(context).textMuted,
                 fontFeatures: const [FontFeature.tabularFigures()],
@@ -324,7 +324,7 @@ class LoadQualityTable extends ConsumerWidget {
           '${_p(actual)}${spec != null ? ' / ${_p(spec)}' : ''}',
           style: TextStyle(
             fontFamily: MlTokens.fontMono,
-            fontSize: 11.5,
+            fontSize: 12,
             fontWeight: FontWeight.w700,
             color: colors.fg,
             fontFeatures: const [FontFeature.tabularFigures()],
@@ -360,7 +360,7 @@ class LoadQualityTable extends ConsumerWidget {
             _t(r.payableTons),
             style: TextStyle(
               fontFamily: MlTokens.fontMono,
-              fontSize: 11.5,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
               color: colors.fg,
               fontFeatures: const [FontFeature.tabularFigures()],

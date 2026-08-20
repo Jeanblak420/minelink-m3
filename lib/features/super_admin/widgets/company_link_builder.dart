@@ -119,7 +119,7 @@ class _CompanyLinkBuilderState extends ConsumerState<CompanyLinkBuilder> {
           children: [
             Text(title,
                 style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: semantic.textFaint)),
             const SizedBox(height: 8),

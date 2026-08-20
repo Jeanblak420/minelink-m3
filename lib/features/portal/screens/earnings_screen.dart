@@ -240,7 +240,7 @@ class _EarningsBody extends StatelessWidget {
                   '$unpriced delivered trip(s) have no rate set yet, so their '
                   'revenue is not counted. They show as "—" below.',
                   style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 13,
                     color: MlSemantic.of(context).textMuted,
                   ),
                 ),
@@ -381,7 +381,7 @@ class _EarningsBody extends StatelessWidget {
                 'trip count directly; a vehicle\'s untagged fuel, tyres, tolls '
                 'and maintenance are split across its trips by tonnage.',
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: 13,
                   color: MlSemantic.of(context).textMuted,
                 ),
               ),
@@ -423,7 +423,7 @@ class _EarningsBody extends StatelessWidget {
     s,
     maxLines: 1,
     overflow: TextOverflow.ellipsis,
-    style: TextStyle(fontSize: 13.5, color: MlSemantic.of(context).textBody),
+    style: TextStyle(fontSize: 14, color: MlSemantic.of(context).textBody),
   );
 
   Widget _mono(

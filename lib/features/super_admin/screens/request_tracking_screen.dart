@@ -552,7 +552,7 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
                       _dateFmt.format(MlTime.sast(r.updatedAt)),
                       maxLines: 1,
                       style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: semantic.textBody,
                       ),
@@ -1106,7 +1106,7 @@ class _TypeCell extends StatelessWidget {
             row.typeLabel,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 12.5, color: semantic.textBody),
+            style: TextStyle(fontSize: 13, color: semantic.textBody),
           ),
         ),
       ],
@@ -1188,7 +1188,7 @@ class _PartyChip extends StatelessWidget {
     if (n == null || n.isEmpty) {
       return Text(
         '—',
-        style: TextStyle(fontSize: 12.5, color: semantic.textFaint),
+        style: TextStyle(fontSize: 13, color: semantic.textFaint),
       );
     }
     return Tooltip(
@@ -1203,7 +1203,7 @@ class _PartyChip extends StatelessWidget {
               n,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 12.5, color: semantic.textBody),
+              style: TextStyle(fontSize: 13, color: semantic.textBody),
             ),
           ),
         ],
@@ -1293,7 +1293,7 @@ class _TripsCell extends StatelessWidget {
       return Text(
         '—',
         textAlign: TextAlign.right,
-        style: TextStyle(fontSize: 12.5, color: semantic.textFaint),
+        style: TextStyle(fontSize: 13, color: semantic.textFaint),
       );
     }
     final fillColor = MlTone.transit.colors(Theme.of(context).brightness).fg;
@@ -1334,7 +1334,7 @@ class _TripsCell extends StatelessWidget {
                   text: '${row.tripsCompleted}',
                   style: TextStyle(
                     fontFamily: MlTokens.fontMono,
-                    fontSize: 12.5,
+                    fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: semantic.textStrong,
                   ),
@@ -1343,7 +1343,7 @@ class _TripsCell extends StatelessWidget {
                   text: '/${row.tripsTotal}',
                   style: TextStyle(
                     fontFamily: MlTokens.fontMono,
-                    fontSize: 12.5,
+                    fontSize: 13,
                     color: semantic.textFaint,
                   ),
                 ),
@@ -1369,7 +1369,7 @@ class _TonsCell extends StatelessWidget {
       return Text(
         '—',
         textAlign: TextAlign.right,
-        style: TextStyle(fontSize: 12.5, color: semantic.textFaint),
+        style: TextStyle(fontSize: 13, color: semantic.textFaint),
       );
     }
     return Row(
@@ -1382,7 +1382,7 @@ class _TonsCell extends StatelessWidget {
           maxLines: 1,
           style: TextStyle(
             fontFamily: MlTokens.fontMono,
-            fontSize: 12.5,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
             color: semantic.textStrong,
           ),
@@ -1392,7 +1392,7 @@ class _TonsCell extends StatelessWidget {
           't',
           style: TextStyle(
             fontFamily: MlTokens.fontMono,
-            fontSize: 10.5,
+            fontSize: 11,
             color: semantic.textFaint,
           ),
         ),

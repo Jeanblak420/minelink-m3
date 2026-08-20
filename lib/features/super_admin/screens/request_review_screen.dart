@@ -413,7 +413,7 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
                       style: TextStyle(
                         fontFamily: MlTokens.fontSans,
                         fontWeight: FontWeight.w700,
-                        fontSize: 14.5,
+                        fontSize: 15,
                         color: s.textStrong,
                       ),
                     ),
@@ -422,7 +422,7 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
                       summary.isEmpty ? 'No details' : summary,
                       style: TextStyle(
                         fontFamily: MlTokens.fontSans,
-                        fontSize: 12.5,
+                        fontSize: 13,
                         color: s.textMuted,
                       ),
                     ),
@@ -808,7 +808,7 @@ class _FilterTab extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 13.5,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: selected ? MlTokens.inkOnFill : s.textBody,
                 ),
@@ -1396,7 +1396,7 @@ class _CompanyProfileDialog extends StatelessWidget {
             child: Text(
               v,
               style: const TextStyle(
-                fontSize: 13.5,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1738,7 +1738,7 @@ class _SelectedPartiesSummary extends StatelessWidget {
             child: Text(
               value,
               style: const TextStyle(
-                fontSize: 13.5,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -124,7 +124,7 @@ class TargetsBand extends StatelessWidget {
                   subtitle,
                   style: TextStyle(
                     fontFamily: MlGlass.sans,
-                    fontSize: 11.5,
+                    fontSize: 12,
                     height: 1.5,
                     color: t.inkMid,
                   ),
@@ -194,7 +194,7 @@ class TargetsBand extends StatelessWidget {
             label,
             style: TextStyle(
               fontFamily: MlGlass.sans,
-              fontSize: 8.5,
+              fontSize: 9,
               letterSpacing: 1.1,
               fontWeight: FontWeight.w700,
               color: t.inkLo,
@@ -216,7 +216,7 @@ class TargetsBand extends StatelessWidget {
             sub,
             style: TextStyle(
               fontFamily: MlGlass.sans,
-              fontSize: 9.5,
+              fontSize: 10,
               color: t.inkXlo,
             ),
           ),
@@ -234,7 +234,7 @@ class TargetsBand extends StatelessWidget {
           label,
           style: TextStyle(
             fontFamily: MlGlass.sans,
-            fontSize: 8.5,
+            fontSize: 9,
             letterSpacing: 0.8,
             fontWeight: FontWeight.w700,
             color: color,

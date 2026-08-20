@@ -115,7 +115,7 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
               'COMPANY',
               style: TextStyle(
                 fontFamily: MlGlass.sans,
-                fontSize: 8.5,
+                fontSize: 9,
                 letterSpacing: 1.1,
                 fontWeight: FontWeight.w700,
                 color: t.inkLo,
@@ -141,7 +141,7 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
                         : 'Search ${companies.length} organizations',
                     hintStyle: TextStyle(
                       fontFamily: MlGlass.sans,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       color: t.inkLo,
                     ),
                     prefixIcon:
@@ -208,7 +208,7 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
             'No organization matches "$_query".',
             style: TextStyle(
               fontFamily: MlGlass.sans,
-              fontSize: 11.5,
+              fontSize: 12,
               color: t.inkMid,
             ),
           ),
@@ -246,7 +246,7 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: MlGlass.sans,
-                fontSize: 11.5,
+                fontSize: 12,
                 height: 1.55,
                 color: t.inkXlo,
               ),

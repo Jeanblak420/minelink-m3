@@ -145,7 +145,7 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
                 label,
                 style: TextStyle(
                   fontFamily: MlGlass.sans,
-                  fontSize: 12.5,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: on ? t.accent2 : t.inkMid,
                 ),
@@ -197,7 +197,7 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
                   'nothing changes until the cycle has run its full 365 days.',
           style: TextStyle(
               fontFamily: MlGlass.sans,
-              fontSize: 11.5,
+              fontSize: 12,
               height: 1.5,
               color: t.inkMid),
         ),
@@ -497,7 +497,7 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
           body,
           style: TextStyle(
             fontFamily: MlGlass.sans,
-            fontSize: 12.5,
+            fontSize: 13,
             height: 1.55,
             color: t.inkMid,
           ),
@@ -568,7 +568,7 @@ class _CycleCompleteBanner extends StatelessWidget {
                 Text('Your 12-month cycle has closed',
                     style: TextStyle(
                       fontFamily: MlGlass.sans,
-                      fontSize: 13.5,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: t.inkHi,
                     )),
@@ -579,7 +579,7 @@ class _CycleCompleteBanner extends StatelessWidget {
                   'targets for the next cycle.',
                   style: TextStyle(
                       fontFamily: MlGlass.sans,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       height: 1.5,
                       color: t.inkMid),
                 ),
@@ -667,7 +667,7 @@ class _CycleCard extends StatelessWidget {
                     Text('OF 365 DAYS',
                         style: TextStyle(
                           fontFamily: MlGlass.sans,
-                          fontSize: 7.5,
+                          fontSize: 8,
                           letterSpacing: 1.1,
                           fontWeight: FontWeight.w600,
                           color: t.inkMid,
@@ -702,7 +702,7 @@ class _CycleCard extends StatelessWidget {
                             'once the full 12-month cycle has run.',
                 style: TextStyle(
                     fontFamily: MlGlass.sans,
-                    fontSize: 11.5,
+                    fontSize: 12,
                     height: 1.5,
                     color: t.inkMid),
               ),
@@ -869,7 +869,7 @@ class _LockWarning extends StatelessWidget {
                   '${unset > 0 ? '\n\n$unset horizon${unset == 1 ? '' : 's'} still without a target.' : ''}',
                   style: TextStyle(
                       fontFamily: MlGlass.sans,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       height: 1.5,
                       color: t.inkMid),
                 ),
@@ -1027,7 +1027,7 @@ class _MonthTable extends StatelessWidget {
                     m.target > 0 ? '${mlTons(m.target, decimals: 0)} t' : '—',
                     style: TextStyle(
                       fontFamily: MlGlass.mono,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       color: m.target > 0 ? t.ink : t.inkLo,
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
@@ -1039,7 +1039,7 @@ class _MonthTable extends StatelessWidget {
               m.hasActuals ? '${mlTons(m.total)} t' : '—',
               style: TextStyle(
                 fontFamily: MlGlass.mono,
-                fontSize: 11.5,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: m.hasActuals ? t.inkHi : t.inkXlo,
                 fontFeatures: const [FontFeature.tabularFigures()],
@@ -1075,7 +1075,7 @@ class _MonthTable extends StatelessWidget {
                 : Text('awaiting actuals',
                     style: TextStyle(
                         fontFamily: MlGlass.sans,
-                        fontSize: 10.5,
+                        fontSize: 11,
                         color: t.inkXlo)),
           ),
         ],
@@ -1100,7 +1100,7 @@ class _MonthTable extends StatelessWidget {
             Text(
               target > 0 ? '${mlTons(target, decimals: 0)} t' : 'no target',
               style: TextStyle(
-                  fontFamily: MlGlass.mono, fontSize: 11.5, color: t.inkMid),
+                  fontFamily: MlGlass.mono, fontSize: 12, color: t.inkMid),
             ),
           ],
         ),
@@ -1170,7 +1170,7 @@ class _HorizonLadder extends StatelessWidget {
                 Text(z.name,
                     style: TextStyle(
                       fontFamily: MlGlass.sans,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: t.inkHi,
                     )),
@@ -1363,7 +1363,7 @@ class _TargetHistory extends StatelessWidget {
                 Text(label,
                     style: TextStyle(
                       fontFamily: MlGlass.sans,
-                      fontSize: 9.5,
+                      fontSize: 10,
                       letterSpacing: 0.8,
                       fontWeight: FontWeight.w600,
                       color: t.inkMid,
@@ -1408,7 +1408,7 @@ class _TargetHistory extends StatelessWidget {
             child: Text(
               m.target > 0 ? '${mlTons(m.target, decimals: 0)} t' : '—',
               style: TextStyle(
-                  fontFamily: MlGlass.mono, fontSize: 11.5, color: t.inkMid),
+                  fontFamily: MlGlass.mono, fontSize: 12, color: t.inkMid),
             ),
           ),
           Expanded(
@@ -1416,7 +1416,7 @@ class _TargetHistory extends StatelessWidget {
             child: Text('${mlTons(m.total)} t',
                 style: TextStyle(
                   fontFamily: MlGlass.mono,
-                  fontSize: 11.5,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: t.inkHi,
                 )),
@@ -1429,7 +1429,7 @@ class _TargetHistory extends StatelessWidget {
                   : '—',
               style: TextStyle(
                 fontFamily: MlGlass.mono,
-                fontSize: 11.5,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: variance >= 0 ? t.good : t.bad,
               ),
@@ -1546,7 +1546,7 @@ class _CycleArchive extends StatelessWidget {
               Text(c.label,
                   style: TextStyle(
                       fontFamily: MlGlass.sans,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: t.inkHi)),
               const SizedBox(width: 10),
@@ -1556,7 +1556,7 @@ class _CycleArchive extends StatelessWidget {
               Text('closed cycle · read-only',
                   style: TextStyle(
                       fontFamily: MlGlass.sans,
-                      fontSize: 10.5,
+                      fontSize: 11,
                       color: t.inkLo)),
             ],
           ),
@@ -1602,7 +1602,7 @@ class _CycleArchive extends StatelessWidget {
                       '${mlTons(act, decimals: 0)} / ${mlTons(tgt, decimals: 0)}',
                       style: TextStyle(
                           fontFamily: MlGlass.mono,
-                          fontSize: 9.5,
+                          fontSize: 10,
                           color: t.inkLo),
                     ),
                     const SizedBox(height: 7),
@@ -1787,7 +1787,7 @@ class _StatusBadge extends StatelessWidget {
             Text(label,
                 style: TextStyle(
                   fontFamily: MlGlass.sans,
-                  fontSize: 9.5,
+                  fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.7,
                   color: color,

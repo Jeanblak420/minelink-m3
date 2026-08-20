@@ -210,7 +210,7 @@ class _Markdownish extends StatelessWidget {
           ),
           child: Text(
             _plain(line.replaceFirst(RegExp(r'^>\s?'), '')),
-            style: body.copyWith(fontSize: 12.5),
+            style: body.copyWith(fontSize: 13),
           ),
         ));
         continue;

@@ -64,7 +64,7 @@ class MlDataTable extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 11.5,
+                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.0,
                   color: semantic.textFaint,

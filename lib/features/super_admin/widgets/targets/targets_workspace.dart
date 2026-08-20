@@ -101,7 +101,7 @@ class _TargetsWorkspaceState extends ConsumerState<TargetsWorkspace> {
                   message,
                   style: TextStyle(
                     fontFamily: MlGlass.sans,
-                    fontSize: 12.5,
+                    fontSize: 13,
                     color: t.inkHi,
                   ),
                 ),

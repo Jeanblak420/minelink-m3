@@ -179,7 +179,7 @@ class _RouteSpecTile extends ConsumerWidget {
                     ].join(' · ')
                   : 'No spec set — loads on this route are not penalised.',
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: 13,
                 color: spec.hasSpec ? semantic.textBody : semantic.textFaint,
               ),
             ),

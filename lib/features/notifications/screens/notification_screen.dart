@@ -218,7 +218,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
               label,
               style: TextStyle(
                 fontFamily: MlTokens.fontSans,
-                fontSize: 13.5,
+                fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: selected ? MlTokens.inkOnFill : semantic.textBody,
               ),

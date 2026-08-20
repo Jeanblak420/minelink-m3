@@ -315,7 +315,7 @@ class MlBanner extends StatelessWidget {
               message,
               style: TextStyle(
                 fontFamily: MlAuth.sans,
-                fontSize: 12.5,
+                fontSize: 13,
                 height: 1.5,
                 color: error ? MlAuth.inkOnBad : MlAuth.inkOnAccentBanner,
               ),
@@ -401,7 +401,7 @@ class MlMotionNotice extends StatelessWidget {
                     'Animation is switched off on this device',
                     style: TextStyle(
                       fontFamily: MlAuth.sans,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       fontWeight: FontWeight.w700,
                       height: 1.35,
                       color: MlAuth.inkHi,

@@ -111,7 +111,7 @@ class _MineAnchorsSection extends ConsumerWidget {
                       'Main Gate, Weighbridge and Loading Point — used to '
                       'auto-generate each trip\'s waypoint sequence.',
                       style: TextStyle(
-                          fontSize: 12.5, color: semantic.textMuted)),
+                          fontSize: 13, color: semantic.textMuted)),
                 ],
               ),
             ),
@@ -232,7 +232,7 @@ class _AnchorRow extends ConsumerWidget {
                 style: TextStyle(
                     fontFamily:
                         _configured ? MlTokens.fontMono : MlTokens.fontSans,
-                    fontSize: 11.5,
+                    fontSize: 12,
                     color: semantic.textMuted),
               ),
             ],
@@ -376,7 +376,7 @@ class _AnchorEditDialogState extends State<_AnchorEditDialog> {
               alignment: Alignment.centerLeft,
               child: Text(_error!,
                   style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 13,
                       color: MlTone.error
                           .colors(Theme.of(context).brightness)
                           .fg)),

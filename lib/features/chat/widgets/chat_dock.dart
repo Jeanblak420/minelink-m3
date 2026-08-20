@@ -634,7 +634,7 @@ class _TitleBar extends StatelessWidget {
               style: TextStyle(
                 fontFamily: MlTokens.fontSans,
                 fontWeight: FontWeight.w700,
-                fontSize: 13.5,
+                fontSize: 14,
                 color: pal.headerText,
               ),
             ),
@@ -770,12 +770,12 @@ class _ContentHeader extends StatelessWidget {
                     style: TextStyle(
                         fontFamily: MlTokens.fontSans,
                         fontWeight: FontWeight.w800,
-                        fontSize: 14.5,
+                        fontSize: 15,
                         color: pal.bodyText)),
                 Text(subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 11.5, color: pal.bodySubtle)),
+                    style: TextStyle(fontSize: 12, color: pal.bodySubtle)),
               ],
             ),
           ),
@@ -1199,7 +1199,7 @@ class _ConversationsList extends ConsumerWidget {
                                     fontWeight: hasUnread
                                         ? FontWeight.w800
                                         : FontWeight.w700,
-                                    fontSize: 13.5,
+                                    fontSize: 14,
                                     color: pal.accent,
                                   ),
                                 ),
@@ -1210,7 +1210,7 @@ class _ConversationsList extends ConsumerWidget {
                                       .format(c.lastMessageTimestamp!),
                                   style: TextStyle(
                                     fontFamily: MlTokens.fontMono,
-                                    fontSize: 10.5,
+                                    fontSize: 11,
                                     fontWeight: hasUnread
                                         ? FontWeight.w700
                                         : FontWeight.w500,
@@ -1266,7 +1266,7 @@ class _ConversationsList extends ConsumerWidget {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          fontSize: 12.5,
+                                          fontSize: 13,
                                           fontWeight: FontWeight.w600,
                                           fontStyle: FontStyle.italic,
                                           color: MlChatTone.online,
@@ -1280,7 +1280,7 @@ class _ConversationsList extends ConsumerWidget {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          fontSize: 12.5,
+                                          fontSize: 13,
                                           fontWeight: hasUnread
                                               ? FontWeight.w600
                                               : FontWeight.w400,
@@ -1309,7 +1309,7 @@ class _ConversationsList extends ConsumerWidget {
                                         : '${c.unreadCount}',
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(
-                                      fontSize: 10.5,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w800,
                                       color: MlTokens.inkOnFill,
                                     ),
@@ -1444,7 +1444,7 @@ class _ContactsListState extends ConsumerState<_ContactsList> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         fontFamily: MlTokens.fontSans,
-                        fontSize: 10.5,
+                        fontSize: 11,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.8,
                         color: pal.accent)),
@@ -1453,7 +1453,7 @@ class _ContactsListState extends ConsumerState<_ContactsList> {
               Text('${subs[k]!.length}',
                   style: TextStyle(
                       fontFamily: MlTokens.fontMono,
-                      fontSize: 10.5,
+                      fontSize: 11,
                       color: pal.bodySubtle)),
               const SizedBox(width: 4),
               AnimatedRotation(
@@ -1577,7 +1577,7 @@ class _ContactTile extends ConsumerWidget {
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
                       fontWeight: FontWeight.w700,
-                      fontSize: 13.5,
+                      fontSize: 14,
                       color: pal.bodyText,
                     ),
                   ),
@@ -1585,7 +1585,7 @@ class _ContactTile extends ConsumerWidget {
                     pal: pal,
                     userId: contact.userId,
                     dbLastSeen: contact.lastSeenAt,
-                    fontSize: 11.5,
+                    fontSize: 12,
                   ),
                 ],
               ),
@@ -2274,7 +2274,7 @@ class _DateSeparator extends StatelessWidget {
             style: TextStyle(
               fontFamily: MlTokens.fontSans,
               color: pal.bodyText,
-              fontSize: 12.5,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -2448,7 +2448,7 @@ class _MessageText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseStyle = TextStyle(fontSize: 13.5, color: color, height: 1.35);
+    final baseStyle = TextStyle(fontSize: 14, color: color, height: 1.35);
     final matches = _kMentionToken.allMatches(text).toList();
     if (matches.isEmpty) return Text(text, style: baseStyle);
 
@@ -2591,7 +2591,7 @@ class _ReplyQuote extends StatelessWidget {
                       preview,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: textColor, fontSize: 11.5),
+                      style: TextStyle(color: textColor, fontSize: 12),
                     ),
                 ],
               ),
@@ -3637,12 +3637,12 @@ class _ComposerState extends ConsumerState<_Composer> {
                         style: TextStyle(
                             fontFamily: MlTokens.fontSans,
                             fontWeight: FontWeight.w700,
-                            fontSize: 12.5,
+                            fontSize: 13,
                             color: pal.bodyText)),
                     const SizedBox(height: 2),
                     Text(body,
                         style: TextStyle(
-                            fontSize: 11.5, height: 1.35, color: pal.bodySubtle)),
+                            fontSize: 12, height: 1.35, color: pal.bodySubtle)),
                   ],
                 ),
               ),
@@ -3844,7 +3844,7 @@ class _ComposerState extends ConsumerState<_Composer> {
                       if (_showEmoji) setState(() => _showEmoji = false);
                     },
                     cursorColor: pal.accent,
-                    style: TextStyle(fontSize: 13.5, color: pal.bodyText),
+                    style: TextStyle(fontSize: 14, color: pal.bodyText),
                     decoration: InputDecoration(
                       hintText: 'Write a message…',
                       hintStyle: TextStyle(color: pal.bodySubtle),
@@ -4008,7 +4008,7 @@ class _ProfileView extends StatelessWidget {
                       pal: pal,
                       userId: contact.userId,
                       dbLastSeen: contact.lastSeenAt,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       weight: FontWeight.w600,
                     ),
                     const SizedBox(height: 10),
@@ -4143,7 +4143,7 @@ class _InfoRow extends StatelessWidget {
               children: [
                 Text(label,
                     style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: 12,
                         letterSpacing: 0.3,
                         color: pal.bodySubtle)),
                 const SizedBox(height: 2),
@@ -4389,7 +4389,7 @@ class _SettingsView extends ConsumerWidget {
                         'Tip: grab free tones from Pixabay or Mixkit, then pick '
                         'them with Custom…',
                         style: TextStyle(
-                            fontSize: 11.5, height: 1.3, color: pal.bodySubtle),
+                            fontSize: 12, height: 1.3, color: pal.bodySubtle),
                       ),
                     ],
                   ],
@@ -4494,7 +4494,7 @@ class _ThemeTile extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            fontSize: 11.5,
+                            fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: p.headerText)),
                   ),
@@ -4558,7 +4558,7 @@ class _BubblePreview extends StatelessWidget {
                   child: Text('Johan Steyn',
                       style: TextStyle(
                           fontWeight: FontWeight.w800,
-                          fontSize: 12.5,
+                          fontSize: 13,
                           color: pal.senderName)),
                 ),
                 Text('Trucks are loaded and ready to roll.',
@@ -4567,7 +4567,7 @@ class _BubblePreview extends StatelessWidget {
                 Text('09:19',
                     style: TextStyle(
                         fontFamily: MlTokens.fontMono,
-                        fontSize: 10.5,
+                        fontSize: 11,
                         color: pal.incomingText.withValues(alpha: 0.6))),
               ],
             ),
@@ -4596,7 +4596,7 @@ class _BubblePreview extends StatelessWidget {
                   Text('09:20 ✓✓',
                       style: TextStyle(
                           fontFamily: MlTokens.fontMono,
-                          fontSize: 10.5,
+                          fontSize: 11,
                           color: pal.outgoingText.withValues(alpha: 0.7))),
                 ],
               ),
@@ -4757,7 +4757,7 @@ class _PerContactSounds extends ConsumerWidget {
                           dropdownColor: pal.header,
                           borderRadius: MlShape.radiusMedium,
                           style:
-                              TextStyle(color: pal.bodyText, fontSize: 12.5),
+                              TextStyle(color: pal.bodyText, fontSize: 13),
                           iconEnabledColor: pal.accent,
                           items: [
                             const DropdownMenuItem(
@@ -4951,7 +4951,7 @@ class _Empty extends StatelessWidget {
             const SizedBox(height: 6),
             Text(message,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12.5, height: 1.4, color: pal.bodySubtle)),
+                style: TextStyle(fontSize: 13, height: 1.4, color: pal.bodySubtle)),
           ],
         ),
       ),
@@ -5310,7 +5310,7 @@ class _SupportHome extends ConsumerWidget {
                                 children: [
                                   Text(n.text,
                                       style: TextStyle(
-                                          fontSize: 12.5,
+                                          fontSize: 13,
                                           height: 1.4,
                                           color: pal.bodyText)),
                                   const SizedBox(height: 2),
@@ -5447,7 +5447,7 @@ class _InboxTogglesState extends ConsumerState<_InboxToggles> {
                         children: [
                           Text(a.name,
                               style: TextStyle(
-                                  fontSize: 13.5,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: pal.bodyText)),
                           Text(
@@ -5455,7 +5455,7 @@ class _InboxTogglesState extends ConsumerState<_InboxToggles> {
                                   ? 'Receiving new tickets'
                                   : 'Not receiving tickets',
                               style: TextStyle(
-                                  fontSize: 11.5, color: pal.bodySubtle)),
+                                  fontSize: 12, color: pal.bodySubtle)),
                         ],
                       ),
                     ),
@@ -5494,7 +5494,7 @@ class _InboxTogglesState extends ConsumerState<_InboxToggles> {
                       'Both admins can be assigned. Whoever accepts a ticket '
                       'becomes its handler and it moves to In progress.',
                       style: TextStyle(
-                          fontSize: 11.5, height: 1.4, color: pal.bodySubtle),
+                          fontSize: 12, height: 1.4, color: pal.bodySubtle),
                     ),
                   ),
                 ],
@@ -5576,7 +5576,7 @@ class _NewTicketFormState extends ConsumerState<_NewTicketForm> {
         padding: const EdgeInsets.only(bottom: 6),
         child: Text(t,
             style: TextStyle(
-                fontSize: 12.5,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: pal.bodyText)),
       );
@@ -5935,7 +5935,7 @@ class _TicketViewState extends ConsumerState<_TicketView> {
                       Expanded(
                         child: Text(
                           '${ticket!.acceptedByName} is handling this ticket.',
-                          style: TextStyle(fontSize: 12.5, color: pal.bodyText),
+                          style: TextStyle(fontSize: 13, color: pal.bodyText),
                         ),
                       ),
                     ],
@@ -6084,7 +6084,7 @@ class _TicketViewState extends ConsumerState<_TicketView> {
                     textInputAction: TextInputAction.send,
                     onSubmitted: (_) => _send(),
                     cursorColor: pal.accent,
-                    style: TextStyle(fontSize: 13.5, color: pal.bodyText),
+                    style: TextStyle(fontSize: 14, color: pal.bodyText),
                     decoration: InputDecoration(
                       hintText: widget.isAdmin
                           ? 'Ask the user a question…'

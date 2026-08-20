@@ -384,7 +384,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                         message.senderName,
                         style: const TextStyle(
                           fontFamily: MlTokens.fontSans,
-                          fontSize: 12.5,
+                          fontSize: 13,
                           color: MlTokens.accentHover,
                           fontWeight: FontWeight.w800,
                         ),
@@ -418,7 +418,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                             message.content,
                             style: TextStyle(
                               fontFamily: MlTokens.fontSans,
-                              fontSize: 14.5,
+                              fontSize: 15,
                               height: 1.45,
                               color: isCurrentUser
                                   ? MlTokens.inkOnFill
@@ -445,7 +445,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                                   DateFormat.Hm().format(message.timestamp),
                                   style: TextStyle(
                                     fontFamily: MlTokens.fontMono,
-                                    fontSize: 10.5,
+                                    fontSize: 11,
                                     color: isCurrentUser
                                         ? MlTokens.overlayLight.withValues(alpha: 0.68)
                                         : semantic.textFaint,
@@ -549,7 +549,7 @@ class _ChatWidgetState extends State<ChatWidget> {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: MlTokens.fontSans,
-                fontSize: 12.5,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: fg,
               ),
@@ -634,7 +634,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                   message.fileName ?? 'File',
                   style: TextStyle(
                     fontFamily: MlTokens.fontSans,
-                    fontSize: 12.5,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: chipFg,
                   ),
@@ -695,7 +695,7 @@ class _ChatWidgetState extends State<ChatWidget> {
         typingText,
         style: const TextStyle(
           fontFamily: MlTokens.fontSans,
-          fontSize: 12.5,
+          fontSize: 13,
           color: MlTokens.accentHover,
           fontWeight: FontWeight.w700,
           fontStyle: FontStyle.italic,
@@ -741,7 +741,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: MlTokens.fontSans,
-                    fontSize: 12.5,
+                    fontSize: 13,
                     color: semantic.textMuted,
                   ),
                 ),
@@ -792,7 +792,7 @@ class _ChatWidgetState extends State<ChatWidget> {
               onSubmitted: (_) => _sendMessage(),
               style: TextStyle(
                 fontFamily: MlTokens.fontSans,
-                fontSize: 14.5,
+                fontSize: 15,
                 color: semantic.textStrong,
               ),
               cursorColor: MlTokens.accent,
@@ -800,7 +800,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                 hintText: 'Type a message…',
                 hintStyle: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 14.5,
+                  fontSize: 15,
                   color: semantic.textFaint,
                 ),
                 border: OutlineInputBorder(

@@ -87,7 +87,7 @@ class TargetsOrgTypeScreen extends ConsumerWidget {
                   'ORG TYPE',
                   style: TextStyle(
                     fontFamily: MlGlass.sans,
-                    fontSize: 8.5,
+                    fontSize: 9,
                     letterSpacing: 1.1,
                     fontWeight: FontWeight.w700,
                     color: t.inkLo,

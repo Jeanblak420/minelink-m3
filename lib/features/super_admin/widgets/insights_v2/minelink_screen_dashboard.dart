@@ -293,7 +293,7 @@ class _OrgCard extends StatelessWidget {
                       Text(agg.subtitle,
                           style: TextStyle(
                               fontFamily: MlGlass.sans,
-                              fontSize: 10.5,
+                              fontSize: 11,
                               color: t.inkMid)),
                     ],
                   ),
@@ -410,7 +410,7 @@ class _PendingCard extends StatelessWidget {
                   Text(req.label,
                       style: TextStyle(
                         fontFamily: MlGlass.sans,
-                        fontSize: 13.5,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: t.inkHi,
                       )),
@@ -467,7 +467,7 @@ class _NewBadge extends StatelessWidget {
           Text('NEW',
               style: TextStyle(
                 fontFamily: MlGlass.sans,
-                fontSize: 9.5,
+                fontSize: 10,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.6,
                 color: t.good,
@@ -559,7 +559,7 @@ class _RegistryTile extends StatelessWidget {
             Text(stat.label,
                 style: TextStyle(
                   fontFamily: MlGlass.sans,
-                  fontSize: 12.5,
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: t.inkHi,
                 )),
@@ -567,7 +567,7 @@ class _RegistryTile extends StatelessWidget {
             Text(stat.sub,
                 style: TextStyle(
                     fontFamily: MlGlass.mono,
-                    fontSize: 10.5,
+                    fontSize: 11,
                     color: t.inkLo)),
           ],
         ),
@@ -675,14 +675,14 @@ class _Delta extends StatelessWidget {
           const SizedBox(width: 5),
         ],
         if (triangle) ...[
-          Text('▲', style: TextStyle(fontSize: 7.5, height: 1, color: c)),
+          Text('▲', style: TextStyle(fontSize: 8, height: 1, color: c)),
           const SizedBox(width: 4),
         ],
         Text(
           suffix ? '$label · 24h' : label!,
           style: TextStyle(
             fontFamily: MlGlass.mono,
-            fontSize: 10.5,
+            fontSize: 11,
             fontWeight: FontWeight.w600,
             color: c,
           ),
@@ -750,7 +750,7 @@ class _ExpiredBanner extends StatelessWidget {
                   Text('Expired token requests',
                       style: TextStyle(
                         fontFamily: MlGlass.sans,
-                        fontSize: 13.5,
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: t.inkHi,
                       )),
@@ -764,7 +764,7 @@ class _ExpiredBanner extends StatelessWidget {
                     'approvals or action from the Admin panel.',
                     style: TextStyle(
                       fontFamily: MlGlass.sans,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       height: 1.45,
                       color: t.inkMid,
                     ),
@@ -790,7 +790,7 @@ class _ExpiredBanner extends StatelessWidget {
                   Text('Review',
                       style: TextStyle(
                         fontFamily: MlGlass.sans,
-                        fontSize: 11.5,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: t.warn,
                       )),
@@ -1012,7 +1012,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                       'flagged for upgrade.',
                       style: TextStyle(
                           fontFamily: MlGlass.sans,
-                          fontSize: 11.5,
+                          fontSize: 12,
                           color: t.inkMid),
                     ),
                   ],
@@ -1074,7 +1074,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                             fontFamily: MlGlass.sans,
-                                            fontSize: 11.5,
+                                            fontSize: 12,
                                             color:
                                                 sel ? t.accent2 : t.inkMid)),
                                   ),
@@ -1134,7 +1134,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontFamily: MlGlass.sans,
-                            fontSize: 12.5,
+                            fontSize: 13,
                             color: t.inkMid),
                       ),
                     ),
@@ -1332,7 +1332,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                           fontFamily: MlGlass.sans,
-                          fontSize: 10.5,
+                          fontSize: 11,
                           color: t.inkLo)),
                 ),
               ],
@@ -1518,7 +1518,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                             fontFamily: MlGlass.sans,
-                            fontSize: 10.5,
+                            fontSize: 11,
                             color: t.inkLo)),
                   ),
                 ],
@@ -1583,7 +1583,7 @@ class _ManageAllState extends State<_ManageAll> {
               Text('Manage all',
                   style: TextStyle(
                     fontFamily: MlGlass.sans,
-                    fontSize: 11.5,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: t.accent2,
                   )),

@@ -135,7 +135,7 @@ class _ChatConnectionsScreenState extends ConsumerState<ChatConnectionsScreen> {
           Text(
             'Companies tied together by an accepted request or transaction. They are '
             'NOT linked automatically — review and connect the ones you want.',
-            style: TextStyle(fontSize: 12.5, color: semantic.textFaint),
+            style: TextStyle(fontSize: 13, color: semantic.textFaint),
           ),
           const SizedBox(height: 10),
           _recommendations(
@@ -405,7 +405,7 @@ class _RecommendationCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             '$aType  ·  $bType',
-            style: TextStyle(fontSize: 12.5, color: semantic.textFaint),
+            style: TextStyle(fontSize: 13, color: semantic.textFaint),
           ),
           const SizedBox(height: 6),
           Text(
@@ -498,7 +498,7 @@ class _ConnectionCard extends StatelessWidget {
                   '${when != null ? '  ·  ${revoked ? 'Revoked' : 'Linked'} ${dateFmt.format(MlTime.sast(when))}' : ''}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12.5, color: semantic.textFaint),
+                  style: TextStyle(fontSize: 13, color: semantic.textFaint),
                 ),
               ],
             ),

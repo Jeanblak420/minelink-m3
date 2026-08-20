@@ -229,7 +229,7 @@ class _Stat extends StatelessWidget {
               Text(label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12.5, color: semantic.textMuted)),
+                  style: TextStyle(fontSize: 13, color: semantic.textMuted)),
             ],
           ),
         ),

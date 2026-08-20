@@ -112,7 +112,7 @@ class RouteMarketplaceScreen extends ConsumerWidget {
               'public in a later release — requesters will then browse the '
               'routes each transporter offers and has successfully completed.',
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: MlTone.atMine.colors(Theme.of(context).brightness).fg,
               ),

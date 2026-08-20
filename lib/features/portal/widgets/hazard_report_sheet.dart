@@ -79,7 +79,7 @@ class _HazardReportSheetState extends State<HazardReportSheet> {
                             color: semantic.textStrong)),
                     Text('Placed at your current position on the road.',
                         style: TextStyle(
-                            fontSize: 12.5, color: semantic.textMuted)),
+                            fontSize: 13, color: semantic.textMuted)),
                   ],
                 ),
               ),

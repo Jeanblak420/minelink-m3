@@ -548,7 +548,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontFamily: MlAuth.sans,
-            fontSize: 12.5,
+            fontSize: 13,
             height: 1.6,
             color: MlAuth.inkMid,
           ),
@@ -650,7 +650,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
                   padding: EdgeInsets.zero,
                   textStyle: const TextStyle(
                     fontFamily: MlAuth.sans,
-                    fontSize: 12.5,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -665,7 +665,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
                     padding: EdgeInsets.zero,
                     textStyle: const TextStyle(
                       fontFamily: MlAuth.sans,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -741,7 +741,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: MlAuth.sans,
-                    fontSize: 12.5,
+                    fontSize: 13,
                     color: MlAuth.inkMid,
                   ),
                 ),
@@ -765,7 +765,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             fontFamily: MlAuth.sans,
-            fontSize: 12.5,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -782,7 +782,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
                 'OR',
                 style: TextStyle(
                   fontFamily: MlAuth.sans,
-                  fontSize: 10.5,
+                  fontSize: 11,
                   letterSpacing: 1.7,
                   fontWeight: FontWeight.w700,
                   color: MlAuth.inkXlo,

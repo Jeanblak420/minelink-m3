@@ -31,7 +31,7 @@ class SaHeaderLink extends StatelessWidget {
         '$label →',
         style: TextStyle(
           fontFamily: kConsoleSans,
-          fontSize: 12.5,
+          fontSize: 13,
           fontWeight: FontWeight.w700,
           color: Theme.of(context).colorScheme.primary,
         ),
@@ -304,7 +304,7 @@ class SaOrgTypeCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontFamily: kConsoleSans,
-                            fontSize: 11.5,
+                            fontSize: 12,
                             height: 1.4,
                             color: kConsoleSubInk,
                           ),
@@ -343,7 +343,7 @@ class SaOrgTypeCard extends StatelessWidget {
                                 m.$1.toUpperCase(),
                                 style: const TextStyle(
                                   fontFamily: kConsoleSans,
-                                  fontSize: 9.5,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 1.33,
                                   // Design hardcodes #465774 on these
@@ -531,7 +531,7 @@ class SaStatTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontFamily: MlTokens.fontMono,
-                            fontSize: 11.5,
+                            fontSize: 12,
                             color: s.textFaint,
                           ),
                         ),

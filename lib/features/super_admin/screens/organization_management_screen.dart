@@ -214,11 +214,11 @@ class _OrganizationManagementScreenState
                     _query = v.trim().toLowerCase();
                     _page = 1;
                   }),
-                  style: TextStyle(fontSize: 13.5, color: s.textBody),
+                  style: TextStyle(fontSize: 14, color: s.textBody),
                   decoration: InputDecoration(
                     isDense: true,
                     hintText: 'Search name, owner, email, serial…',
-                    hintStyle: TextStyle(fontSize: 13.5, color: s.textFaint),
+                    hintStyle: TextStyle(fontSize: 14, color: s.textFaint),
                     prefixIcon: Icon(
                       Icons.search,
                       size: 18,
@@ -597,7 +597,7 @@ class _OrganizationManagementScreenState
                         exp.date!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 11.5, color: s.textFaint),
+                        style: TextStyle(fontSize: 12, color: s.textFaint),
                       ),
                     ),
                   ],
@@ -727,7 +727,7 @@ class _OrganizationManagementScreenState
             '$p',
             style: TextStyle(
               fontFamily: MlTokens.fontSans,
-              fontSize: 13.5,
+              fontSize: 14,
               fontWeight: FontWeight.w700,
               color: selected ? MlTokens.inkOnFill : s.textBody,
             ),

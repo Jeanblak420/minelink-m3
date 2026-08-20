@@ -143,7 +143,7 @@ class _DropOffScreenState extends ConsumerState<DropOffScreen> {
                             'The last stop of the trip\'s waypoint sequence — '
                             'where the load is delivered.',
                             style: TextStyle(
-                                fontSize: 12.5, color: semantic.textMuted)),
+                                fontSize: 13, color: semantic.textMuted)),
                       ],
                     ),
                   ),
@@ -192,7 +192,7 @@ class _DropOffScreenState extends ConsumerState<DropOffScreen> {
                         '${_point!.longitude.toStringAsFixed(6)}',
                         style: TextStyle(
                             fontFamily: MlTokens.fontMono,
-                            fontSize: 11.5,
+                            fontSize: 12,
                             color: semantic.textMuted,
                             fontFeatures: const [FontFeature.tabularFigures()],
                           )),

@@ -478,7 +478,7 @@ class ReconExporter {
           children: [
             pw.Text(heading,
                 style: pw.TextStyle(
-                    font: fontBold, fontSize: 8.5, color: PdfColors.cyan900)),
+                    font: fontBold, fontSize: 9, color: PdfColors.cyan900)),
             for (final e in entries.entries)
               pw.Text('${e.key}: ${e.value}',
                   style: pw.TextStyle(

@@ -525,7 +525,7 @@ class _EmployeeRegisterScreenState
               _syncedLabel,
               style: TextStyle(
                 fontFamily: MlTokens.fontSans,
-                fontSize: 12.5,
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: _p.green,
               ),
@@ -548,7 +548,7 @@ class _EmployeeRegisterScreenState
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 12.5,
+                  fontSize: 13,
                   letterSpacing: 1.6,
                   fontWeight: FontWeight.w800,
                   color: _p.blue,
@@ -581,7 +581,7 @@ class _EmployeeRegisterScreenState
           text: TextSpan(
             style: TextStyle(
               fontFamily: MlTokens.fontSans,
-              fontSize: 13.5,
+              fontSize: 14,
               height: 1.55,
               color: _p.textMuted,
             ),
@@ -623,7 +623,7 @@ class _EmployeeRegisterScreenState
                     'Read-only',
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: _p.textMuted,
                     ),
@@ -693,7 +693,7 @@ class _EmployeeRegisterScreenState
                     label.toUpperCase(),
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
-                      fontSize: 10.5,
+                      fontSize: 11,
                       letterSpacing: 1.1,
                       fontWeight: FontWeight.w800,
                       color: _p.textMuted,
@@ -734,7 +734,7 @@ class _EmployeeRegisterScreenState
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       color: _p.textMuted,
                     ),
                   ),
@@ -819,7 +819,7 @@ class _EmployeeRegisterScreenState
             label,
             style: TextStyle(
               fontFamily: MlTokens.fontSans,
-              fontSize: 12.5,
+              fontSize: 13,
               fontWeight: FontWeight.w700,
               color: active ? _p.blue : _p.textMuted,
             ),
@@ -974,7 +974,7 @@ class _EmployeeRegisterScreenState
                         : 'Filter: ${_roleFilter!.label}',
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: _roleFilter == null ? _p.textMuted : _p.blue,
                     ),
@@ -997,7 +997,7 @@ class _EmployeeRegisterScreenState
                 iconEnabledColor: _p.textMuted,
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 12.5,
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: _p.textStrong,
                 ),
@@ -1214,7 +1214,7 @@ class _RoleSection extends StatelessWidget {
               '$n $label',
               style: TextStyle(
                 fontFamily: MlTokens.fontSans,
-                fontSize: 11.5,
+                fontSize: 12,
                 fontWeight: FontWeight.w700,
                 color: pal.textMuted,
               ),
@@ -1250,7 +1250,7 @@ class _RoleSection extends StatelessWidget {
               expiring ? '$docsExpiring expiring · 30d' : 'Docs valid',
               style: TextStyle(
                 fontFamily: MlTokens.fontSans,
-                fontSize: 11.5,
+                fontSize: 12,
                 fontWeight: FontWeight.w700,
                 color: expiring ? c : pal.textMuted,
               ),
@@ -1393,7 +1393,7 @@ class _RoleSection extends StatelessWidget {
                             '$total ${total == 1 ? 'person' : 'people'}',
                             style: TextStyle(
                               fontFamily: MlTokens.fontMono,
-                              fontSize: 10.5,
+                              fontSize: 11,
                               color: pal.textMuted,
                             ),
                           ),
@@ -1405,7 +1405,7 @@ class _RoleSection extends StatelessWidget {
                       group.description,
                       style: TextStyle(
                         fontFamily: MlTokens.fontSans,
-                        fontSize: 12.5,
+                        fontSize: 13,
                         color: pal.textMuted,
                       ),
                     ),
@@ -1652,7 +1652,7 @@ class _MemberCard extends ConsumerWidget {
                         e.fullName.trim().isEmpty ? 'Employee' : e.fullName,
                         style: TextStyle(
                           fontFamily: MlTokens.fontSans,
-                          fontSize: 14.5,
+                          fontSize: 15,
                           fontWeight: FontWeight.w800,
                           color: pal.textStrong,
                         ),
@@ -1671,7 +1671,7 @@ class _MemberCard extends ConsumerWidget {
                           code,
                           style: TextStyle(
                             fontFamily: MlTokens.fontMono,
-                            fontSize: 10.5,
+                            fontSize: 11,
                             color: pal.textMuted,
                           ),
                         ),

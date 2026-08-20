@@ -302,7 +302,7 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
                 'All mines',
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 12.5,
+                  fontSize: 13,
                   fontWeight: focused ? FontWeight.w600 : FontWeight.w800,
                   color: focused ? semantic.textStrong : accent,
                 ),
@@ -341,7 +341,7 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       fontWeight: name == _mineFilter
                           ? FontWeight.w800
                           : FontWeight.w600,
@@ -392,7 +392,7 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 12.5,
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: semantic.textStrong,
                 ),
@@ -522,7 +522,7 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
       overflow: TextOverflow.ellipsis,
       style: TextStyle(
         fontFamily: MlTokens.fontSans,
-        fontSize: 13.5,
+        fontSize: 14,
         fontWeight: strong ? FontWeight.w700 : FontWeight.w400,
         color: strong ? semantic.textStrong : semantic.textBody,
       ),
@@ -547,7 +547,7 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontFamily: MlTokens.fontSans,
-            fontSize: 13.5,
+            fontSize: 14,
             fontWeight: strong ? FontWeight.w700 : FontWeight.w400,
             color: strong ? semantic.textStrong : semantic.textBody,
           ),

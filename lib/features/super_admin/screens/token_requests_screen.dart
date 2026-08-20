@@ -153,7 +153,7 @@ class _TokenRequestsScreenState extends ConsumerState<TokenRequestsScreen> {
                             const SizedBox(height: 2),
                             Text(
                               'Created: ${df.format(MlTime.sast(r.createdAt))}',
-                              style: TextStyle(fontFamily: MlTokens.fontMono, fontSize: 11.5, color: semantic.textFaint),
+                              style: TextStyle(fontFamily: MlTokens.fontMono, fontSize: 12, color: semantic.textFaint),
                             ),
                             if (r.isInProgress && r.handlingDisplayName != null)
                               Padding(
@@ -162,7 +162,7 @@ class _TokenRequestsScreenState extends ConsumerState<TokenRequestsScreen> {
                                   'Handled by: ${r.handlingDisplayName}',
                                   style: const TextStyle(
                                     fontFamily: MlTokens.fontSans,
-                                    fontSize: 12.5,
+                                    fontSize: 13,
                                     color: MlTokens.accentHover,
                                     fontWeight: FontWeight.w600,
                                   ),

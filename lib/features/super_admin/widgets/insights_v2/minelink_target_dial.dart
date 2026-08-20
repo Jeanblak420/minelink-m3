@@ -185,7 +185,7 @@ class _MlTargetDialState extends State<MlTargetDial> {
                     widget.errorText!,
                     style: TextStyle(
                       fontFamily: MlGlass.sans,
-                      fontSize: 9.5,
+                      fontSize: 10,
                       height: 1.4,
                       color: t.bad,
                     ),
@@ -223,7 +223,7 @@ class _MlTargetDialState extends State<MlTargetDial> {
                     widget.sublabel!.toUpperCase(),
                     style: TextStyle(
                       fontFamily: MlGlass.sans,
-                      fontSize: 8.5,
+                      fontSize: 9,
                       letterSpacing: 0.7,
                       color: t.inkLo,
                     ),
@@ -333,7 +333,7 @@ class _MlTargetDialState extends State<MlTargetDial> {
                     widget.note!,
                     style: TextStyle(
                         fontFamily: MlGlass.sans,
-                        fontSize: 9.5,
+                        fontSize: 10,
                         height: 1.4,
                         color: t.inkXlo),
                   ),
@@ -444,7 +444,7 @@ class _MlTargetDialState extends State<MlTargetDial> {
         const SizedBox(width: 6),
         Text('t',
             style: TextStyle(
-                fontFamily: MlGlass.mono, fontSize: 9.5, color: t.inkLo)),
+                fontFamily: MlGlass.mono, fontSize: 10, color: t.inkLo)),
       ],
     );
   }
@@ -465,7 +465,7 @@ class _MlTargetDialState extends State<MlTargetDial> {
               widget.lockedNote,
               style: TextStyle(
                 fontFamily: MlGlass.sans,
-                fontSize: 9.5,
+                fontSize: 10,
                 fontWeight: FontWeight.w600,
                 color: t.inkLo,
               ),

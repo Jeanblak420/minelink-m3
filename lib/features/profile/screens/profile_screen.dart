@@ -1066,7 +1066,7 @@ class _LegalCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             'What you agreed to when you signed in.',
-            style: TextStyle(fontSize: 12.5, color: scheme.onSurfaceVariant),
+            style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant),
           ),
           const SizedBox(height: 10),
           for (final doc in LegalDocument.all)

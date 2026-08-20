@@ -191,7 +191,7 @@ class _DisputeRowCard extends StatelessWidget {
             '${d.claimedTons != null ? ' · claimed ${_t(d.claimedTons)}' : ''}',
             style: TextStyle(
               fontFamily: MlTokens.fontMono,
-              fontSize: 12.5,
+              fontSize: 13,
               color: semantic.textMuted,
             ),
           ),

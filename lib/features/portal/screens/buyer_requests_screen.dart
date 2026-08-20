@@ -390,7 +390,7 @@ class _AllocatedTrucksSection extends ConsumerWidget {
           return Text(
             'Allocated trucks: none yet — the transporter has not accepted '
             'the route.',
-            style: TextStyle(fontSize: 12.5, color: scheme.onSurfaceVariant),
+            style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant),
           );
         }
         return Column(
@@ -425,7 +425,7 @@ class _AllocatedTrucksSection extends ConsumerWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        MlPlatePill(t.truckReg ?? '—', fontSize: 11.5),
+                        MlPlatePill(t.truckReg ?? '—', fontSize: 12),
                         const SizedBox(width: 8),
                         Text(
                           [

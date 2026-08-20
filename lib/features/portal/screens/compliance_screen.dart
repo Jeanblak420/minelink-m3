@@ -310,13 +310,13 @@ class _DocCard extends ConsumerWidget {
                 const SizedBox(height: 2),
                 Text(
                   _expiryText(),
-                  style: TextStyle(fontSize: 12.5, color: semantic.textMuted),
+                  style: TextStyle(fontSize: 13, color: semantic.textMuted),
                 ),
                 if (d.notes != null) ...[
                   const SizedBox(height: 4),
                   Text(
                     d.notes!,
-                    style: TextStyle(fontSize: 12.5, color: semantic.textFaint),
+                    style: TextStyle(fontSize: 13, color: semantic.textFaint),
                   ),
                 ],
               ],

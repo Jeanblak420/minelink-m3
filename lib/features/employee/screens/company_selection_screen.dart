@@ -177,7 +177,7 @@ class _CompanySelectionScreenState
                               company.orgType.label,
                               style: TextStyle(
                                 fontFamily: MlTokens.fontSans,
-                                fontSize: 12.5,
+                                fontSize: 13,
                                 color: semantic.textMuted,
                               ),
                             ),

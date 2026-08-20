@@ -544,7 +544,7 @@ class _ChatConnectionsSection extends ConsumerWidget {
         ),
         const SizedBox(height: 4),
         Text('Companies this organization can message in MineLink Messenger.',
-            style: TextStyle(fontSize: 12.5, color: semantic.textFaint)),
+            style: TextStyle(fontSize: 13, color: semantic.textFaint)),
         const SizedBox(height: 12),
         if (mine.isEmpty)
           Text('No chat links yet.',
@@ -605,7 +605,7 @@ class _ChatConnectionsSection extends ConsumerWidget {
                 companies.length < 2
                     ? 'Add another company to create a link.'
                     : 'All other companies are already linked.',
-                style: TextStyle(fontSize: 12.5, color: semantic.textFaint));
+                style: TextStyle(fontSize: 13, color: semantic.textFaint));
           }
           return CompanyLinkBuilder(
             companies: companies,
@@ -1276,7 +1276,7 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
                 const SizedBox(height: 6),
                 Text('This seat is bound to ${seat.roleBinding}.',
                     style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 13,
                         color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
               ],
               const SizedBox(height: 12),

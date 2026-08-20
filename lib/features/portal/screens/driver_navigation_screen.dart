@@ -855,7 +855,7 @@ class _DriverNavigationScreenState
                 Expanded(
                   child: Text('You have arrived.',
                       style: TextStyle(
-                          fontSize: 14.5,
+                          fontSize: 15,
                           fontWeight: FontWeight.w800,
                           color: semantic.textStrong)),
                 ),
@@ -1093,7 +1093,7 @@ class _DriverNavigationScreenState
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 13.5,
+                      fontSize: 14,
                       fontWeight: FontWeight.w800,
                       color: semantic.textStrong),
                 ),
@@ -1101,7 +1101,7 @@ class _DriverNavigationScreenState
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: 12,
                         color: fallback ? colors.fg : semantic.textMuted)),
               ],
             ),
@@ -1195,7 +1195,7 @@ class _DriverNavigationScreenState
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      fontSize: 16.5,
+                      fontSize: 17,
                       fontWeight: FontWeight.w800,
                       height: 1.15,
                       color: MlTokens.inkOnFill)),
@@ -1205,7 +1205,7 @@ class _DriverNavigationScreenState
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style:
-                        const TextStyle(fontSize: 12.5, color: MlTokens.inkOnFill70)),
+                        const TextStyle(fontSize: 13, color: MlTokens.inkOnFill70)),
               ],
             ],
           ),

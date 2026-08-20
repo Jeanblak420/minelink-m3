@@ -269,7 +269,7 @@ class _OnRouteCard extends ConsumerWidget {
                         'its position or upload a proof of delivery until one is.',
                         style: TextStyle(
                           fontFamily: MlTokens.fontSans,
-                          fontSize: 12.5,
+                          fontSize: 13,
                           color: semantic.textStrong,
                         ),
                       ),

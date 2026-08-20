@@ -171,7 +171,7 @@ class TruckLocationsPanel extends StatelessWidget {
                       '${p.lat.toStringAsFixed(4)}, ${p.lng.toStringAsFixed(4)}',
                       style: TextStyle(
                         fontFamily: MlTokens.fontMono,
-                        fontSize: 11.5,
+                        fontSize: 12,
                         color: semantic.textMuted,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
@@ -183,7 +183,7 @@ class TruckLocationsPanel extends StatelessWidget {
                 DateFormat('dd MMM').format(MlTime.sast(p.recordedAt)),
                 style: TextStyle(
                   fontFamily: MlTokens.fontMono,
-                  fontSize: 11.5,
+                  fontSize: 12,
                   color: semantic.textFaint,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),

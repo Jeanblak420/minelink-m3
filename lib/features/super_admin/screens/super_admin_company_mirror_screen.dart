@@ -275,7 +275,7 @@ class _MirrorSearchBox extends ConsumerWidget {
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontFamily: MlTokens.fontSans,
-                                        fontSize: 11.5,
+                                        fontSize: 12,
                                         color: MlControlRoom.textMuted,
                                       ),
                                     ),
@@ -297,7 +297,7 @@ class _MirrorSearchBox extends ConsumerWidget {
                                 h.kind,
                                 style: TextStyle(
                                   fontFamily: MlTokens.fontSans,
-                                  fontSize: 10.5,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w700,
                                   color: MlControlRoom.textMuted,
                                 ),
@@ -548,7 +548,7 @@ class _HeroHeader extends StatelessWidget {
           'live operational data, recon records and positions.',
           style: TextStyle(
             fontFamily: MlTokens.fontSans,
-            fontSize: 12.5,
+            fontSize: 13,
             color: MlControlRoom.textMuted,
           ),
         ),
@@ -571,7 +571,7 @@ class _HeroHeader extends StatelessWidget {
             'Read-only mirror',
             style: TextStyle(
               fontFamily: MlTokens.fontSans,
-              fontSize: 12.5,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
               color: MlControlRoom.textMuted,
             ),
@@ -682,7 +682,7 @@ class _ReadOnlyBanner extends StatelessWidget {
                 'Permissions active',
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 11.5,
+                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: MlControlRoom.textMuted,
                 ),
@@ -975,7 +975,7 @@ class _DashboardBody extends StatelessWidget {
             trailing,
             style: TextStyle(
               fontFamily: MlTokens.fontSans,
-              fontSize: 11.5,
+              fontSize: 12,
               color: MlControlRoom.textMuted,
             ),
           ),
@@ -1058,7 +1058,7 @@ class _DashboardBody extends StatelessWidget {
           label,
           style: TextStyle(
             fontFamily: MlTokens.fontSans,
-            fontSize: 11.5,
+            fontSize: 12,
             fontWeight: FontWeight.w700,
             color: color,
           ),
@@ -1092,7 +1092,7 @@ class _DashboardBody extends StatelessWidget {
                       'This calendar month, from the company\'s live records',
                       style: TextStyle(
                         fontFamily: MlTokens.fontSans,
-                        fontSize: 11.5,
+                        fontSize: 12,
                         color: MlControlRoom.textMuted,
                       ),
                     ),
@@ -1233,7 +1233,7 @@ class _DashboardBody extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: MlTokens.fontSans,
-                fontSize: 10.5,
+                fontSize: 11,
                 color: MlControlRoom.textMuted,
               ),
             ),
@@ -1295,7 +1295,7 @@ class _DashboardBody extends StatelessWidget {
                       'Waybill completion',
                       style: TextStyle(
                         fontFamily: MlTokens.fontSans,
-                        fontSize: 11.5,
+                        fontSize: 12,
                         color: MlControlRoom.textMuted,
                       ),
                     ),
@@ -1397,7 +1397,7 @@ class _DashboardBody extends StatelessWidget {
                               d.tons == 0 ? '0' : _tons.format(d.tons),
                               style: TextStyle(
                                 fontFamily: MlTokens.fontMono,
-                                fontSize: 10.5,
+                                fontSize: 11,
                                 color: d.tons == 0
                                     ? MlControlRoom.textMuted.withValues(alpha: 0.6)
                                     : MlControlRoom.textMuted,
@@ -1550,7 +1550,7 @@ class _DashboardBody extends StatelessWidget {
                     '$stamp — $who$tons',
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: MlControlRoom.textStrong,
                     ),
@@ -1563,7 +1563,7 @@ class _DashboardBody extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontFamily: MlTokens.fontSans,
-                        fontSize: 11.5,
+                        fontSize: 12,
                         color: MlControlRoom.textMuted,
                       ),
                     ),
@@ -1592,7 +1592,7 @@ class _DashboardBody extends StatelessWidget {
               rowsLoading ? 'Loading records…' : 'No captured loads yet.',
               style: TextStyle(
                 fontFamily: MlTokens.fontSans,
-                fontSize: 12.5,
+                fontSize: 13,
                 color: MlControlRoom.textMuted,
               ),
             )
@@ -1746,7 +1746,7 @@ class _DashboardBody extends StatelessWidget {
               'Nothing to report yet.',
               style: TextStyle(
                 fontFamily: MlTokens.fontSans,
-                fontSize: 12.5,
+                fontSize: 13,
                 color: MlControlRoom.textMuted,
               ),
             )
@@ -1775,7 +1775,7 @@ class _DashboardBody extends StatelessWidget {
                             alerts[i].title,
                             style: TextStyle(
                               fontFamily: MlTokens.fontSans,
-                              fontSize: 12.5,
+                              fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: MlControlRoom.textStrong,
                             ),
@@ -1785,7 +1785,7 @@ class _DashboardBody extends StatelessWidget {
                             alerts[i].sub,
                             style: TextStyle(
                               fontFamily: MlTokens.fontSans,
-                              fontSize: 11.5,
+                              fontSize: 12,
                               color: MlControlRoom.textMuted,
                             ),
                           ),
@@ -1911,7 +1911,7 @@ class _MirrorLiveMapPreview extends ConsumerWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 11.5,
+                  fontSize: 12,
                   color: MlControlRoom.textMuted,
                 ),
               ),
@@ -2021,7 +2021,7 @@ class _MirrorLiveMapPreview extends ConsumerWidget {
                           : '$live of ${trips.length} live',
                       style: TextStyle(
                         fontFamily: MlTokens.fontSans,
-                        fontSize: 11.5,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: MlControlRoom.textStrong,
                       ),
@@ -2134,7 +2134,7 @@ class _KpiTileState extends State<_KpiTile> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: MlTokens.fontSans,
-                    fontSize: 11.5,
+                    fontSize: 12,
                     color: MlControlRoom.textMuted,
                   ),
                 ),

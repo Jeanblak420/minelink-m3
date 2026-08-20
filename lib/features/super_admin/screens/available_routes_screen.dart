@@ -215,7 +215,7 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: 13,
                 color: MlSemantic.of(context).textFaint,
               ),
             ),
@@ -224,7 +224,7 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
             child: Text(
               value,
               style: const TextStyle(
-                fontSize: 12.5,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -565,7 +565,7 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
                 'A trip counts as on time when it offloads within this many '
                 'hours of leaving the mine. Waiting to load is not counted — '
                 'that is the mine\'s queue, reported as turnaround.',
-                style: TextStyle(fontSize: 12.5),
+                style: TextStyle(fontSize: 13),
               ),
               const SizedBox(height: 14),
               TextField(
@@ -762,7 +762,7 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
                               Text(
                                 _dateFmt.format(MlTime.sast(r.createdAt)),
                                 style: TextStyle(
-                                  fontSize: 12.5,
+                                  fontSize: 13,
                                   color: semantic.textFaint,
                                 ),
                               ),
@@ -796,7 +796,7 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
                               if (r.paymentTerms != null) r.paymentTerms!,
                             ].join(' · '),
                             style: TextStyle(
-                              fontSize: 12.5,
+                              fontSize: 13,
                               color: semantic.textFaint,
                             ),
                           ),
@@ -805,7 +805,7 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
                             Text(
                               'Assigned to: ${r.assignedCompanies}',
                               style: TextStyle(
-                                fontSize: 12.5,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: semantic.textBody,
                               ),

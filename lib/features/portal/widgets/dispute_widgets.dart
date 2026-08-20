@@ -573,7 +573,7 @@ class _CommentThread extends ConsumerWidget {
                               (c.authorIsAdmin ? 'Platform admin' : 'User'),
                           style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 12.5,
+                              fontSize: 13,
                               color: semantic.textStrong),
                         ),
                         const SizedBox(width: 6),

@@ -197,7 +197,7 @@ class _TruckInfoCard extends StatelessWidget {
                             'Trip ${t.tripId.substring(0, 6)}…',
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 12.5,
+                              fontSize: 13,
                             ),
                           ),
                         const SizedBox(height: 3),
@@ -206,7 +206,7 @@ class _TruckInfoCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 11.5,
+                            fontSize: 12,
                             color: semantic.textMuted,
                           ),
                         ),
@@ -345,7 +345,7 @@ class _MotionRow extends StatelessWidget {
             child: Text(
               text,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: colors.fg,
               ),
@@ -395,7 +395,7 @@ class _DetailRow extends StatelessWidget {
             width: 74,
             child: Text(
               label,
-              style: TextStyle(fontSize: 11.5, color: semantic.textFaint),
+              style: TextStyle(fontSize: 12, color: semantic.textFaint),
             ),
           ),
           Expanded(

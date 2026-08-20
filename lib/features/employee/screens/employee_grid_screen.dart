@@ -144,7 +144,7 @@ class EmployeeGridScreen extends ConsumerWidget {
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
                       fontWeight: FontWeight.w800,
-                      fontSize: 15.5,
+                      fontSize: 16,
                       color: semantic.textStrong,
                     ),
                     maxLines: 1,
@@ -156,7 +156,7 @@ class EmployeeGridScreen extends ConsumerWidget {
                     style: TextStyle(
                       fontFamily: MlTokens.fontMono,
                       color: semantic.textMuted,
-                      fontSize: 12.5,
+                      fontSize: 13,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

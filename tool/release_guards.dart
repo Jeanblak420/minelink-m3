@@ -543,6 +543,28 @@ final guards = <Guard>[
     plantLine: 'final delta = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);',
   ),
   Guard(
+    id: 'no-half-point-font-size',
+    why: 'a half-point font size belongs to neither scale this app has — not '
+        'MlTokens.fs* (34/26/22/18/16/15/13/12/11) and not the M3 TextTheme '
+        '(45/36/32/28/24/22/16/14/12/11). It is somebody nudging a number '
+        'until one string fitted one box on one day. Measured 2026-08-20: '
+        '1,015 hand-written fontSize literals across THIRTY-SEVEN distinct '
+        'values, TEN of them half-points (7.5 8.5 9.5 10.5 11.5 12.5 13.5 '
+        '14.5 15.5 16.5) over ~380 sites. All rounded up — up rather than '
+        'nearest, because shrinking text is the direction that makes '
+        'something unreadable without making it look broken, while growing it '
+        'can only cause an overflow, which the sweeps catch. The token layer '
+        'is exempt: it is where the scale is defined.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    exemptPath: RegExp(r'lib/core/design/tokens/'),
+    pattern: RegExp(r'fontSize:\s*[0-9]+\.[0-9]'),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'planted.dart',
+    plantLine: 'style: TextStyle(fontSize: 12.5),',
+  ),
+  Guard(
     id: 'no-off-scale-corner-radius',
     why: 'a corner radius written as a number is a guess at the shape scale. '
         'Measured across lib/ on 2026-08-20: 320 sites carrying TWENTY-FOUR '

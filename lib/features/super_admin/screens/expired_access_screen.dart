@@ -78,7 +78,7 @@ class ExpiredAccessScreen extends ConsumerWidget {
                       child: Text(
                         access.explanation,
                         style: TextStyle(
-                          fontSize: 13.5,
+                          fontSize: 14,
                           height: 1.5,
                           color: semantic.textBody,
                         ),
@@ -89,7 +89,7 @@ class ExpiredAccessScreen extends ConsumerWidget {
                     const SizedBox(height: 12),
                     Text('Reason given: $reason',
                         style:
-                            TextStyle(fontSize: 12.5, color: semantic.textMuted)),
+                            TextStyle(fontSize: 13, color: semantic.textMuted)),
                   ],
                 ],
               ),

@@ -381,7 +381,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontFamily: MlTokens.fontSans,
-            fontSize: 11.5,
+            fontSize: 12,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.5,
             color: strong ? MlTone.transit.colors(Theme.of(context).brightness).fg : s.textFaint,
@@ -416,7 +416,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           const SizedBox(width: 7),
           Text('Live · Synced ${_ago(syncedAt)}',
               style: TextStyle(
-                  fontSize: 11.5, color: _green.withValues(alpha: 0.95))),
+                  fontSize: 12, color: _green.withValues(alpha: 0.95))),
         ]),
       ),
       const SizedBox(width: 10),
@@ -465,7 +465,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           child: Text(
             'Live profile · Auto-updates on any change · Synced ${_ago(syncedAt)}',
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 11.5, color: s.textFaint),
+            style: TextStyle(fontSize: 12, color: s.textFaint),
           ),
         ),
         const Spacer(),
@@ -477,7 +477,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
             foregroundColor: s.textBody,
             side: BorderSide(color: s.borderStrong),
             textStyle: const TextStyle(
-                fontSize: 12.5,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 fontFamily: MlTokens.fontSans),
             shape:
@@ -633,7 +633,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                       const SizedBox(width: 6),
                       Text(roleLabel.toUpperCase(),
                           style: TextStyle(
-                              fontSize: 10.5,
+                              fontSize: 11,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
                               color: tc.fg)),
@@ -656,9 +656,9 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                 ]),
                 const SizedBox(height: 10),
                 Text('${b.company.name} · $groupLabel',
-                    style: TextStyle(fontSize: 12.5, color: s.textMuted)),
+                    style: TextStyle(fontSize: 13, color: s.textMuted)),
                 Text(posting,
-                    style: TextStyle(fontSize: 12.5, color: s.textFaint)),
+                    style: TextStyle(fontSize: 13, color: s.textFaint)),
               ]),
             ),
           ]),
@@ -676,7 +676,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
               const SizedBox(width: 7),
               Text(widget.canManage ? 'Managed profile' : 'Read-only profile',
                   style: TextStyle(
-                      fontSize: 11.5,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: s.textMuted)),
             ]),
@@ -808,7 +808,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
     return _PCard(
       title: 'CONTACT & IDENTITY',
       right: Text('Tap to copy',
-          style: TextStyle(fontSize: 10.5, color: s.textFaint)),
+          style: TextStyle(fontSize: 11, color: s.textFaint)),
       child: Column(children: [
         for (final (icon, label, value, mono) in rows)
           InkWell(
@@ -893,7 +893,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                     ? '$expiring expiring'
                     : '',
             style: TextStyle(
-                fontSize: 10.5,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: allGreen ? _green : _amber),
           ),
@@ -902,7 +902,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text('No documents on file yet.',
-                    style: TextStyle(fontSize: 12.5, color: s.textMuted)),
+                    style: TextStyle(fontSize: 13, color: s.textMuted)),
               ),
             for (final d in docs) ...[
               _DocTile(doc: d, onOpen: () => _openDoc(d)),
@@ -925,7 +925,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                     const SizedBox(width: 7),
                     Text('Upload document',
                         style: TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: s.textMuted)),
                   ]),
@@ -997,13 +997,13 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
               const SizedBox(width: 5),
               const Text('LIVE',
                   style: TextStyle(
-                      fontSize: 10.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.w700,
                       color: _green)),
             ])
           : Text('OFF SHIFT',
               style: TextStyle(
-                  fontSize: 10.5,
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: s.textFaint)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1081,7 +1081,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
               Text(t,
                   style: TextStyle(
                       fontFamily: MlTokens.fontMono,
-                      fontSize: 10.5,
+                      fontSize: 11,
                       color: s.textFaint)),
           ],
         ),
@@ -1109,7 +1109,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
     return _PCard(
       title: "TODAY'S PRODUCTIVITY",
       right: Text('vs. weekly avg',
-          style: TextStyle(fontSize: 10.5, color: s.textFaint)),
+          style: TextStyle(fontSize: 11, color: s.textFaint)),
       child: metricsAsync.when(
         loading: () => const SizedBox(
             height: 120, child: Center(child: CircularProgressIndicator())),
@@ -1119,7 +1119,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           if (metrics.isEmpty) {
             return Text('No recorded productivity yet — live counters appear '
                 'as this person works in the app.',
-                style: TextStyle(fontSize: 12.5, color: s.textMuted));
+                style: TextStyle(fontSize: 13, color: s.textMuted));
           }
           return LayoutBuilder(builder: (context, c) {
             final narrow = c.maxWidth < 560;
@@ -1178,7 +1178,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
       title: 'LOCATION & ASSIGNMENT',
       right: Text(
           loc?.at != null ? 'Auto-detected · ${_ago(loc!.at)}' : 'Live',
-          style: TextStyle(fontSize: 10.5, color: s.textFaint)),
+          style: TextStyle(fontSize: 11, color: s.textFaint)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Container(
@@ -1297,7 +1297,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(isLeader ? 'REPORTS TO' : 'REPORTING SUPERVISOR',
                     style: TextStyle(
-                        fontSize: 9.5,
+                        fontSize: 10,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.1,
                         color: s.textFaint)),
@@ -1307,7 +1307,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                       ? 'Board / Directors'
                       : '${sup.name} · ${sup.roleLabel}',
                   style: TextStyle(
-                      fontSize: 13.5,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: s.textStrong),
                 ),
@@ -1356,7 +1356,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
               onTap: () => context.push('/portal/$org/notifications'),
               child: const Text('View full log →',
                   style: TextStyle(
-                      fontSize: 10.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: MlTokens.accent)),
             )
@@ -1369,7 +1369,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
         data: (items) {
           if (items.isEmpty) {
             return Text('No recorded activity in the last 24 hours.',
-                style: TextStyle(fontSize: 12.5, color: s.textMuted));
+                style: TextStyle(fontSize: 13, color: s.textMuted));
           }
           return Column(children: [
             for (var i = 0; i < items.length; i++)
@@ -1436,7 +1436,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(label,
                 style: TextStyle(
-                    fontSize: 9.5,
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.0,
                     color: s.textFaint)),
@@ -1445,14 +1445,14 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     fontFamily: MlTokens.fontMono,
-                    fontSize: 13.5,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: s.textStrong)),
             if (sub != null) ...[
               const SizedBox(height: 2),
               Text(sub,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 10.5, color: s.textFaint)),
+                  style: TextStyle(fontSize: 11, color: s.textFaint)),
             ],
           ]),
         );
@@ -1461,7 +1461,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
     return _PCard(
       title: 'ROLE SNAPSHOT',
       right: Text('updated by ${updatedBy.split(' ').first}',
-          style: TextStyle(fontSize: 10.5, color: s.textFaint)),
+          style: TextStyle(fontSize: 11, color: s.textFaint)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         // IntrinsicHeight: these rows stretch tiles to equal height, but the
         // parent Column gives them unbounded height — stretch alone would
@@ -1522,7 +1522,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
     return _PCard(
       title: 'NOTES & FLAGS',
       right: Text('${flags.length} open',
-          style: TextStyle(fontSize: 10.5, color: s.textFaint)),
+          style: TextStyle(fontSize: 11, color: s.textFaint)),
       child: Column(children: [
         if (flags.isEmpty)
           _FlagTile(
@@ -1566,7 +1566,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                 const SizedBox(width: 7),
                 Text('Add note or flag',
                     style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: s.textBody)),
               ]),
@@ -1614,7 +1614,7 @@ class _PCard extends StatelessWidget {
             Expanded(
               child: Text(title,
                   style: TextStyle(
-                      fontSize: 10.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.6,
                       color: s.textFaint)),
@@ -1731,7 +1731,7 @@ class _DocTile extends StatelessWidget {
                     color: s.textStrong)),
             const SizedBox(height: 3),
             Text(doc.subtitle,
-                style: TextStyle(fontSize: 10.5, color: s.textFaint)),
+                style: TextStyle(fontSize: 11, color: s.textFaint)),
             const SizedBox(height: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
@@ -1744,7 +1744,7 @@ class _DocTile extends StatelessWidget {
               ),
               child: Text(doc.statusLabel,
                   style: TextStyle(
-                      fontSize: 9.5,
+                      fontSize: 10,
                       fontWeight: FontWeight.w700,
                       color: statusColor)),
             ),
@@ -1793,7 +1793,7 @@ class _MetricTile extends StatelessWidget {
             Expanded(
               child: Text(m.label,
                   style: TextStyle(
-                      fontSize: 9.5,
+                      fontSize: 10,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.9,
                       height: 1.35,
@@ -1997,7 +1997,7 @@ class _ZonePainter extends CustomPainter {
           text: topLabel,
           style: TextStyle(
               fontFamily: MlTokens.fontMono,
-              fontSize: 9.5,
+              fontSize: 10,
               letterSpacing: 1.2,
               color: faint)),
       textDirection: TextDirection.ltr,
@@ -2074,14 +2074,14 @@ class _TimelineRow extends StatelessWidget {
                         TextSpan(text: item.rest),
                       ]),
                       style: TextStyle(
-                          fontSize: 12.5, height: 1.4, color: s.textBody),
+                          fontSize: 13, height: 1.4, color: s.textBody),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Text(timeLabel,
                       style: TextStyle(
                           fontFamily: MlTokens.fontMono,
-                          fontSize: 10.5,
+                          fontSize: 11,
                           color: s.textFaint)),
                 ]),
               ),
@@ -2131,7 +2131,7 @@ class _FlagTile extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(title,
                 style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: s.textStrong)),
             const SizedBox(height: 5),
@@ -2139,7 +2139,7 @@ class _FlagTile extends StatelessWidget {
                 style: TextStyle(
                     fontSize: 12, height: 1.5, color: s.textMuted)),
             const SizedBox(height: 8),
-            Text(meta, style: TextStyle(fontSize: 10.5, color: s.textFaint)),
+            Text(meta, style: TextStyle(fontSize: 11, color: s.textFaint)),
           ]),
         ),
       ]),

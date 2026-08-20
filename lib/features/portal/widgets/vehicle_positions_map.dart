@@ -90,7 +90,7 @@ class VehiclePositionsMap extends StatelessWidget {
                     style: const TextStyle(
                       color: MlTokens.inkOnFill,
                       fontWeight: FontWeight.w800,
-                      fontSize: 13.5,
+                      fontSize: 14,
                     ),
                   ),
                 ),

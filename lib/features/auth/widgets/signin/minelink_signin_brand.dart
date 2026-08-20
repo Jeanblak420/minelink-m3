@@ -298,7 +298,7 @@ class _MlBrandPanelState extends State<MlBrandPanel>
             widget.eyebrow.toUpperCase(),
             style: const TextStyle(
               fontFamily: MlAuth.sans,
-              fontSize: 10.5,
+              fontSize: 11,
               letterSpacing: 2.5,
               fontWeight: FontWeight.w700,
               color: MlAuth.accent2,
@@ -313,7 +313,7 @@ class _MlBrandPanelState extends State<MlBrandPanel>
               widget.blurb,
               style: const TextStyle(
                 fontFamily: MlAuth.sans,
-                fontSize: 13.5,
+                fontSize: 14,
                 height: 1.68,
                 color: MlAuth.inkMid,
               ),
@@ -401,7 +401,7 @@ class _MlBrandPanelState extends State<MlBrandPanel>
             s.label.toUpperCase(),
             style: const TextStyle(
               fontFamily: MlAuth.sans,
-              fontSize: 10.5,
+              fontSize: 11,
               letterSpacing: 1.05,
               fontWeight: FontWeight.w600,
               color: MlAuth.inkLo,

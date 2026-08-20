@@ -189,7 +189,7 @@ class _MultiFileDropPickerState extends State<MultiFileDropPicker> {
                     widget.hint,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 13,
                       height: 1.35,
                       color: scheme.onSurfaceVariant,
                     ),

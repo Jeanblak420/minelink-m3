@@ -388,7 +388,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
                             'Trip ${t.tripId.substring(0, 6)}…',
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 12.5,
+                              fontSize: 13,
                             ),
                           ),
                         const SizedBox(height: 3),
@@ -397,7 +397,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 11.5,
+                            fontSize: 12,
                             color: semantic.textMuted,
                           ),
                         ),
@@ -421,7 +421,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
                 _journeyLine(t),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 11.5, color: semantic.textMuted),
+                style: TextStyle(fontSize: 12, color: semantic.textMuted),
               ),
               const SizedBox(height: 2),
               Text(
@@ -457,7 +457,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
           value,
           style: TextStyle(
             fontFamily: MlTokens.fontMono,
-            fontSize: 13.5,
+            fontSize: 14,
             fontWeight: FontWeight.w800,
             color: color ?? semantic.textStrong,
             fontFeatures: const [FontFeature.tabularFigures()],
@@ -513,7 +513,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
               width: 92,
               child: Text(
                 label,
-                style: TextStyle(fontSize: 10.5, color: semantic.textMuted),
+                style: TextStyle(fontSize: 11, color: semantic.textMuted),
               ),
             ),
             Expanded(
@@ -561,7 +561,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: semantic.textStrong,
                       ),

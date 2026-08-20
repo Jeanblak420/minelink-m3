@@ -182,7 +182,7 @@ class _SuperAdminOrgInsightsScreenState
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
-                      fontSize: 12.5,
+                      fontSize: 13,
                       color: MlControlRoom.textMuted,
                     ),
                   ),
@@ -268,7 +268,7 @@ class _SuperAdminOrgInsightsScreenState
     overflow: TextOverflow.ellipsis,
     style: TextStyle(
       fontFamily: MlTokens.fontSans,
-      fontSize: 10.5,
+      fontSize: 11,
       fontWeight: FontWeight.w800,
       letterSpacing: 1.2,
       color: MlControlRoom.textMuted,
@@ -396,7 +396,7 @@ class _SuperAdminOrgInsightsScreenState
                         badge,
                         style: TextStyle(
                           fontFamily: MlTokens.fontSans,
-                          fontSize: 11.5,
+                          fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: MlControlRoom.cyan,
                         ),
@@ -491,7 +491,7 @@ class _SuperAdminOrgInsightsScreenState
                         : 'No tonnage recorded this month.',
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
-                      fontSize: 11.5,
+                      fontSize: 12,
                       color: MlControlRoom.textMuted,
                     ),
                   )
@@ -673,7 +673,7 @@ class _SuperAdminOrgInsightsScreenState
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: MlTokens.fontSans,
-                    fontSize: 10.5,
+                    fontSize: 11,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.2,
                     color: MlControlRoom.textMuted,
@@ -770,7 +770,7 @@ class _SuperAdminOrgInsightsScreenState
           text: TextSpan(
             style: TextStyle(
               fontFamily: MlTokens.fontSans,
-              fontSize: 12.5,
+              fontSize: 13,
               height: 1.35,
               color: MlControlRoom.textMuted,
             ),
@@ -1008,7 +1008,7 @@ class _SuperAdminOrgInsightsScreenState
                         text: unit,
                         style: TextStyle(
                           fontFamily: MlTokens.fontMono,
-                          fontSize: 10.5,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: MlControlRoom.textDim,
                         ),
@@ -1023,7 +1023,7 @@ class _SuperAdminOrgInsightsScreenState
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 9.5,
+                  fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.1,
                   color: MlControlRoom.textMuted,
@@ -1233,7 +1233,7 @@ class _SuperAdminOrgInsightsScreenState
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: MlTokens.fontSans,
-                    fontSize: 12.5,
+                    fontSize: 13,
                     fontWeight: idle ? FontWeight.w500 : FontWeight.w600,
                     color: idle ? MlControlRoom.textMuted : MlControlRoom.textStrong,
                   ),
@@ -1295,7 +1295,7 @@ class _SuperAdminOrgInsightsScreenState
                       'Signals from the last 24h',
                       style: TextStyle(
                         fontFamily: MlTokens.fontSans,
-                        fontSize: 11.5,
+                        fontSize: 12,
                         color: MlControlRoom.textMuted,
                       ),
                     ),
@@ -1400,7 +1400,7 @@ class _SuperAdminOrgInsightsScreenState
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: MlTokens.fontSans,
-                    fontSize: 11.5,
+                    fontSize: 12,
                     height: 1.35,
                     color: MlControlRoom.textMuted,
                   ),
@@ -1552,7 +1552,7 @@ class _SuperAdminOrgInsightsScreenState
                               '${counts[f]}',
                               style: TextStyle(
                                 fontFamily: MlTokens.fontMono,
-                                fontSize: 10.5,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 color: MlControlRoom.cyan,
                               ),
@@ -1603,7 +1603,7 @@ class _SuperAdminOrgInsightsScreenState
         label,
         style: TextStyle(
           fontFamily: MlTokens.fontSans,
-          fontSize: 10.5,
+          fontSize: 11,
           fontWeight: FontWeight.w800,
           color: color,
         ),
@@ -1732,7 +1732,7 @@ class _SuperAdminOrgInsightsScreenState
             textAlign: TextAlign.right,
             style: TextStyle(
               fontFamily: MlTokens.fontMono,
-              fontSize: 11.5,
+              fontSize: 12,
               fontWeight: FontWeight.w700,
               color: MlControlRoom.textStrong,
             ),
@@ -1794,7 +1794,7 @@ class _SuperAdminOrgInsightsScreenState
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontFamily: MlTokens.fontSans,
-                  fontSize: 11.5,
+                  fontSize: 12,
                   color: MlControlRoom.textMuted,
                 ),
               ),
@@ -1814,7 +1814,7 @@ class _SuperAdminOrgInsightsScreenState
                     '15-DAY TEMPO',
                     style: TextStyle(
                       fontFamily: MlTokens.fontSans,
-                      fontSize: 8.5,
+                      fontSize: 9,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.2,
                       color: MlControlRoom.textMuted,
@@ -2781,7 +2781,7 @@ class _MovementChartPainter extends CustomPainter {
             text: referenceCaption,
             style: TextStyle(
               fontFamily: MlTokens.fontMono,
-              fontSize: 9.5,
+              fontSize: 10,
               fontWeight: FontWeight.w600,
               letterSpacing: 1.8,
               color: MlControlRoom.cyanText.withValues(alpha: 0.85),

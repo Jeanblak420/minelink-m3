@@ -96,7 +96,7 @@ class _OrgGroupDialogState extends ConsumerState<_OrgGroupDialog> {
             Text(
               'Add up to two other companies — one mine, one buyer, one '
               'transporter at most. Your own company is always included.',
-              style: TextStyle(fontSize: 12.5, color: semantic.textMuted),
+              style: TextStyle(fontSize: 13, color: semantic.textMuted),
             ),
             const SizedBox(height: 10),
             Flexible(

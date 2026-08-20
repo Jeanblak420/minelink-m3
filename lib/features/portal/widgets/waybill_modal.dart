@@ -278,7 +278,7 @@ class _Message extends StatelessWidget {
             Text(
               text,
               textAlign: TextAlign.center,
-              style: TextStyle(color: semantic.textMuted, fontSize: 13.5),
+              style: TextStyle(color: semantic.textMuted, fontSize: 14),
             ),
           ],
         ),

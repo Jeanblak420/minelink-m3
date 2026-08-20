@@ -478,7 +478,7 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
             sw,
             const SizedBox(width: 7),
             Text(label,
-                style: TextStyle(fontSize: 10.5, color: t.inkMid)),
+                style: TextStyle(fontSize: 11, color: t.inkMid)),
           ],
         );
 
