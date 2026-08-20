@@ -308,3 +308,94 @@ Stated plainly so nothing here is mistaken for finished.
   not a change to make as a side effect of a shell rewrite.
 - **It has not been run on a physical phone or on iOS.** See the verification
   log for what has actually been executed.
+
+---
+
+## 7. Phase 2 — what looking at the screens actually found
+
+Phase 2 was supposed to be "hand-rebuild the ~20 screens Jean lives in". The
+screens were picked by measurement rather than opinion: every file in
+`lib/features` was scored on the three things that are genuinely drift — type
+re-specified instead of taken from the scale, corner radii written as numbers,
+and motion built from a bare `Duration` and `Curves` constant. 161 files score
+above zero; the top of that list is where the work started.
+
+**The first correction was to the ranking itself.** The initial score also
+counted hand-rolled `BoxDecoration`s, which put `chat_dock.dart` far in front —
+6,149 lines and 69 classes in one file, an entire chat application, mounted on
+every screen in the product by both shells. Reading it before touching it
+showed its 56 decorations are not drift at all: they read `ChatPalette`, which
+is **eighteen user-selectable chat themes**, deliberate, already reasoned
+about, and correctly filed in the token layer. Scoring colour as drift was
+wrong, and it was wrong about the single biggest file.
+
+### What the top of the list actually contained
+
+Not styling. On `/super-admin` — the platform admin's landing screen — four
+figures were **literals**:
+
+| what it said | what was true |
+|---|---|
+| `This month · Jul 2026` | written in July, still reading July in August, heading a section titled *"Live operations … this calendar month"* |
+| `… open · 2 aging > 24h` | `MlPendingRequest` carries no timestamp; nothing on the screen could ever have known it |
+| `Last 24h · +2 companies, +14 users` | a fake copy of a number the code already had — the view model reads `stats['newCompanies24h']` and puts it on the tiles as a delta |
+| `3 companies need approvals … oldest 5 days waiting` | the banner took **no data at all** and rendered unconditionally, so a platform with nothing expired saw a standing amber alert |
+
+The view model directly beside them is scrupulous — its own doc says a figure
+with no source is *"left blank rather than filled with a plausible number"*,
+and it does that, eight tiles' worth. **The discipline was applied to the data
+layer and skipped in the view.** That is the pattern worth remembering: the
+place a rule is written down is not the place it gets broken.
+
+A fifth turned up when a guard was written for the first four:
+`MlFlagshipTrend` defaulted `monthLabel` to `'Aug'`, and not one of its three
+call sites passes it — so the crosshair tooltip on the buyer, mine and
+transporter dashboards labelled every point `AUG NN` whatever the date. It
+reads correctly for one month a year, which is exactly why it survived: it was
+written in August and looked right.
+
+### The layout half: one fault, twenty-one times
+
+Every layout defect Phase 2 has found so far is the same one, and it is already
+written down in `CLAUDE.md` §10.4: **a `Row` hands a non-flex child unbounded
+width**, so that child's own `overflow: ellipsis` can never engage and the row
+simply overflows. It appeared as:
+
+- a four-column table asked to fit a phone (the console's org list)
+- chips inside a `Wrap`, which lays children out against unbounded width too —
+  so a chip wider than the `Wrap` does not wrap, it overflows, and `Flexible`
+  cannot help because there is no free space to flex against
+- `MlSectionHead` and `MlSectionTitle`, the two shared section headers, whose
+  trailing blocks are unflexed *on purpose* (a short right-aligned block given
+  `flex: 1` lands mid-row) and therefore cannot shrink when they must
+- fourteen screens wrapping `MlPageHeader` / `MlSectionTitle` in a `Row` to put
+  a button beside it, when both components already have a slot that drops the
+  action under the title
+- `MlRailIdentity` drawing its 280dp layout inside an 80dp rail
+
+The last one is the most interesting, because it was not a layout mistake at
+all. `MlAppShell` computes the rail's width from the caller's preference **and**
+the window class, but `railHeader` / `railFooter` are pre-built widgets whose
+own `expanded` came from the preference alone. Two sources of truth for one
+fact, and the widgets read the one that was wrong. `MlRailScope` publishes what
+the rail actually did.
+
+### Why none of this had been seen
+
+`super_admin_overflow_sweep_test.dart` renders nine console screens across six
+widths and six text scales and reports that each "survives every width x text
+scale". **Its narrowest width was 860.** So every console screen was unrendered
+on every phone and most tablets while the suite said otherwise. The portal's
+own sweep reached 360px but stopped at text scale 1.3, while the shells compose
+the in-app slider with the platform's and cap at 2.0 — leaving every size
+between them unrendered.
+
+Both sweeps also built their test app with `ThemeData(brightness: dark)` rather
+than `AppTheme`. That is stock Material's type scale in stock Material's font
+family: a measurement of text the app never draws. It was harmless while every
+component hard-coded its own `TextStyle`, and stopped being harmless the moment
+the components started taking type from the theme — which is the whole point of
+one design system.
+
+**A green sweep over the wrong widths, in the wrong font, is the same class of
+thing as a hardcoded figure: something that reports a fact it never checked.**

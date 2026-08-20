@@ -127,18 +127,51 @@ above.
 
 - **Nothing has been run on a physical Android phone.** The APK identity is set
   up so it installs alongside the real MineLink (`org.minelink.m3`, "MineLink
-  M3") and cannot replace it, but no APK has been built or installed.
+  M3") and cannot replace it. A **debug APK now builds** (180 MB,
+  `build/app/outputs/flutter-apk/app-debug.apk`, 2026-08-20) — but it has not
+  been installed on a handset and nothing has been driven on one.
 - **Nothing has been run on iOS.** No reachable Apple Developer account, same
   as the shipping app.
 - **The app has not been driven against the live database in a browser.** The
   web build compiles and the renders are real, but no screen has been opened
   as a signed-in user in this project. That needs credentials.
-- **No screen has been hand-rebuilt.** Every screen *changed*, because every
-  screen sits on the theme, the shell and the shared widgets — but Phase 2
-  (the ~20 screens that matter) and Phase 3 (the remaining ~80) have not
-  started.
-- **The layout sweeps have not been extended below 860px.** They are the
-  reason the desktop widths are trustworthy and the phone widths are not.
+- **Phase 2 is under way, not finished.** The console dashboard and fourteen
+  portal headers have been reworked and the layout sweeps widened; the rest of
+  the ~20, and all of Phase 3's ~80, have not been touched.
+- ~~**The layout sweeps have not been extended below 860px.**~~ ✅ **Done
+  2026-08-20.** The console sweep now runs 8 widths down to 360px, the portal
+  rail sweep down to 360, and the portal sweep up to text scale 2.0 (the
+  ceiling the shells actually install). See the commits for what that found.
+
+### 20 test files still render under a theme the app never ships
+
+`_host(...)` helpers that build a bare `MaterialApp` with no `theme:` measure
+**stock Material's type scale in stock Material's font family**. That was
+survivable while every component hard-coded its own `TextStyle`; now that the
+components take type from the theme — which is what makes one design system one
+system — a themeless host measures text the app will never draw.
+
+Two were fixed where they were directly implicated
+(`deactivate_account_card_test`, `portal_nav_rail_sweep_test`) and the console
+sweep was moved onto `AppTheme.darkTheme`. **Twenty remain:**
+
+```
+test/core/crash_reporter_test.dart              test/features/portal/place_search_test.dart
+test/core/utils/dialog_utils_test.dart          test/features/super_admin/company_link_builder_test.dart
+test/core/widgets/app_navigation_back_button…   test/widgets/dialog_pops_the_dialog_test.dart
+test/core/widgets/lazy_indexed_stack_test.dart  test/widgets/live_truck_marker_test.dart
+test/core/widgets/nav_history_recorder_test…    test/widgets/multi_file_drop_picker_test.dart
+test/features/account_deactivations_screen…     test/widgets/portal_phase_gate_test.dart
+test/features/auth/whatsapp_otp_screen_test…    test/widgets/portal_scaffold_semantics_test.dart
+test/features/crash_reports_screen_test.dart    test/widgets/recon_columns_and_cards_test.dart
+test/features/fleet/widgets/fleet_vehicle_…     test/widgets/super_admin_dashboard_v2_test.dart
+test/widget_test.dart                           test/widgets/targets_screen_test.dart
+```
+
+Converting them will surface real failures — that is the point of doing it, and
+why it deserves its own pass rather than being buried in an unrelated commit.
+Most assert on behaviour rather than geometry, so the risk they hide something
+is lower than it was for the sweeps; it is not zero.
 
 ---
 
@@ -150,5 +183,6 @@ flutter test
 dart tool/release_guards.dart
 flutter test test/renders --update-goldens     # rewrite docs/redesign/renders/
 flutter build web  --dart-define-from-file=config/supabase.live.json
-flutter build windows --debug
+flutter build apk --debug                      # 180 MB, verified 2026-08-20
+flutter build windows --debug                  # blocked — see above
 ```
