@@ -187,10 +187,29 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
                     child: Icon(_icon, size: 19, color: _accent),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    _title,
-                    style: context.mlText.editorialMedium.copyWith(
-                      color: MlSemantic.of(context).textStrong,
+                  // `Expanded`, and no `Spacer`.
+                  //
+                  // This was a bare `Text` — a NON-FLEX child of a `Row`, which
+                  // Flutter lays out against UNBOUNDED width (CLAUDE.md §10.4,
+                  // the first rule in the list). So the title took its natural
+                  // width whatever the window was, and "Mine/Supplier transport
+                  // requests" at the 20px editorial rung ran **157px** past a
+                  // 412px phone. Measured 2026-08-20, the first time any of the
+                  // four request inboxes was rendered.
+                  //
+                  // The `Spacer` that used to push the refresh button right is
+                  // gone with it: two flex children would split the free space
+                  // between them, which is the §10.4 sibling fault — the title
+                  // would stop at half the row and the button would land in the
+                  // middle. `Expanded` on the long child does both jobs.
+                  Expanded(
+                    child: Text(
+                      _title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.mlText.editorialMedium.copyWith(
+                        color: MlSemantic.of(context).textStrong,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -200,7 +219,6 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
                         .length,
                     color: _accent,
                   ),
-                  const Spacer(),
                   IconButton(
                     tooltip: 'Refresh',
                     onPressed: _refresh,

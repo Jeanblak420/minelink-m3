@@ -438,6 +438,184 @@ final List<TransportationRequest> kRequests = [
   _request(id: 'req-3', status: RequestStatus.sentBack, commodity: 'Manganese'),
 ];
 
+// ---------------------------------------------------------------------------
+// The super-admin's four request inboxes
+// ---------------------------------------------------------------------------
+
+RequestCompanyInfo _requester(String id, String name, String orgType) =>
+    RequestCompanyInfo(
+      id: id,
+      name: name,
+      orgType: orgType,
+      whatsappNumber: '+27000000000',
+      ceoFirstName: 'Fixture',
+      ceoLastName: 'Director',
+      supportEmail: 'ops@fixture.co.za',
+      status: 'active',
+      memberSince: DateTime.utc(2025, 4, 12),
+    );
+
+/// The transportation queue as an admin actually meets it.
+///
+/// **Every stage of `requested -> sent_back -> resubmitted -> approved ->
+/// linked` is here**, and that is the point: the inbox filters by status,
+/// colours by status and offers different actions per status, so a fixture
+/// sitting on one value photographs one fifth of the screen. The `requested`
+/// and `resubmitted` rows are what `adminPendingRequestCountProvider` counts —
+/// the number the console badge shows — and the closed ones are the history the
+/// list deliberately keeps.
+final List<TransportationRequest> kAdminTransportRequests = [
+  TransportationRequest(
+    id: 'areq-1',
+    requestingCompanyId: 'co-buyer',
+    buyerCompanyId: 'co-buyer',
+    requestType: 'transportation',
+    status: RequestStatus.requested,
+    loadingPoint: 'Iron Hills Mining',
+    offloadingPoint: 'Richards Bay',
+    commodity: 'Chrome',
+    paymentTerms: '30 days from invoice',
+    numSlots: '6',
+    isOngoing: true,
+    operatingHours24h: true,
+    sealRequired: true,
+    routeNotes: 'Weighbridge closes 18:00 on Saturdays.',
+    requesterOrgType: 'buyer',
+    requesterCompany: _requester('co-buyer', 'Atlas Buyer Group', 'buyer'),
+    startingDate: kCaptureNow.add(const Duration(days: 2)),
+    createdAt: _ago(const Duration(hours: 6)),
+    updatedAt: _ago(const Duration(hours: 6)),
+  ),
+  TransportationRequest(
+    id: 'areq-2',
+    requestingCompanyId: 'co-mine',
+    requestType: 'transportation',
+    status: RequestStatus.resubmitted,
+    loadingPoint: 'Iron Hills Mining',
+    offloadingPoint: 'Maputo',
+    commodity: 'Manganese',
+    paymentTerms: 'COD',
+    numSlots: '3',
+    isOngoing: false,
+    operatingStart: '06:00',
+    operatingEnd: '18:00',
+    adminNotes: 'Ending date was before the start date - please correct.',
+    requesterOrgType: 'mineSupplier',
+    requesterCompany:
+        _requester('co-mine', 'Iron Hills Mining', 'mineSupplier'),
+    startingDate: kCaptureNow.add(const Duration(days: 5)),
+    endingDate: kCaptureNow.add(const Duration(days: 40)),
+    createdAt: _ago(const Duration(days: 3)),
+    updatedAt: _ago(const Duration(hours: 2)),
+  ),
+  TransportationRequest(
+    id: 'areq-3',
+    requestingCompanyId: 'co-mine-2',
+    requestType: 'transportation',
+    status: RequestStatus.sentBack,
+    loadingPoint: 'Sable Ridge Chrome',
+    offloadingPoint: 'Richards Bay',
+    commodity: 'Chrome',
+    paymentTerms: '14 days',
+    numSlots: '2',
+    isOngoing: true,
+    adminNotes: 'No offloading contact on file. Add one and resubmit.',
+    requesterOrgType: 'mineSupplier',
+    requesterCompany:
+        _requester('co-mine-2', 'Sable Ridge Chrome', 'mineSupplier'),
+    startingDate: kCaptureNow.add(const Duration(days: 9)),
+    createdAt: _ago(const Duration(days: 6)),
+    updatedAt: _ago(const Duration(days: 1)),
+  ),
+  TransportationRequest(
+    id: 'areq-4',
+    requestingCompanyId: 'co-buyer',
+    buyerCompanyId: 'co-buyer',
+    requestType: 'transportation',
+    status: RequestStatus.linked,
+    supplierCompanyId: 'co-mine',
+    loadingPoint: 'Iron Hills Mining',
+    offloadingPoint: 'Richards Bay',
+    commodity: 'Chrome',
+    paymentTerms: '30 days from invoice',
+    numSlots: '4',
+    pricePerTon: 520,
+    isOngoing: true,
+    requesterOrgType: 'buyer',
+    requesterCompany: _requester('co-buyer', 'Atlas Buyer Group', 'buyer'),
+    startingDate: _ago(const Duration(days: 20)),
+    createdAt: _ago(const Duration(days: 26)),
+    updatedAt: _ago(const Duration(days: 26)),
+  ),
+];
+
+/// Buyers asking for product (CLAUDE.md 4, Request 2).
+final List<TransportationRequest> kAdminProductRequests = [
+  TransportationRequest(
+    id: 'preq-1',
+    requestingCompanyId: 'co-buyer',
+    buyerCompanyId: 'co-buyer',
+    requestType: 'product',
+    status: RequestStatus.requested,
+    commodity: 'Chrome',
+    productSpecifications: '38-42% Cr2O3, 0-6mm, moisture below 8%',
+    tonsAvailable: '4000',
+    paymentTerms: '30 days from invoice',
+    pricePerTon: 495,
+    isOngoing: false,
+    requesterOrgType: 'buyer',
+    requesterCompany: _requester('co-buyer', 'Atlas Buyer Group', 'buyer'),
+    createdAt: _ago(const Duration(hours: 20)),
+    updatedAt: _ago(const Duration(hours: 20)),
+  ),
+];
+
+/// Mines asking to be introduced to a buyer (CLAUDE.md 4, Request 3).
+///
+/// Carries two lab-result PDFs and an image, because the multi-file uploader is
+/// part of that form and an inbox that never shows an attachment chip cannot
+/// show whether the admin can open one.
+final List<TransportationRequest> kAdminBuyerRequests = [
+  TransportationRequest(
+    id: 'breq-1',
+    requestingCompanyId: 'co-mine',
+    requestType: 'buyer',
+    status: RequestStatus.requested,
+    commodity: 'Chrome',
+    tonsAvailable: '12000',
+    productSpecifications: '40% Cr2O3 lumpy, ex-stock',
+    paymentTerms: 'Letter of credit',
+    pricePerTon: 610,
+    transactionKind: 'FOT',
+    labResultPaths: const [
+      'co-mine/lab/sgs-2026-08-11.pdf',
+      'co-mine/lab/moisture-2026-08-12.pdf',
+    ],
+    productImagePath: 'co-mine/photos/stockpile.jpg',
+    isOngoing: false,
+    requesterOrgType: 'mineSupplier',
+    requesterCompany:
+        _requester('co-mine', 'Iron Hills Mining', 'mineSupplier'),
+    createdAt: _ago(const Duration(days: 2)),
+    updatedAt: _ago(const Duration(days: 2)),
+  ),
+];
+
+/// The companies the admin picks from when linking and dispatching.
+const List<({String id, String name})> kTransporterCompanies = [
+  (id: 'co-transporter', name: 'Roadhaul Logistics'),
+  (id: 'co-transporter-2', name: 'Northline Carriers'),
+  (id: 'co-transporter-3', name: 'Vaal Bulk Movers'),
+];
+const List<({String id, String name})> kMineCompanies = [
+  (id: 'co-mine', name: 'Iron Hills Mining'),
+  (id: 'co-mine-2', name: 'Sable Ridge Chrome'),
+];
+const List<({String id, String name})> kBuyerCompanies = [
+  (id: 'co-buyer', name: 'Atlas Buyer Group'),
+  (id: 'co-buyer-2', name: 'Northvale Alloys'),
+];
+
 final List<DispatchedRoute> kDispatches = [
   DispatchedRoute(
     dispatchId: 'dsp-1',
@@ -774,6 +952,24 @@ List<Override> portalCaptureOverrides() => [
           .overrideWith((ref, _) async => kProductionEntries),
       supplierRouteSpecsProvider.overrideWith((ref, _) async => kRouteSpecs),
       companyRequestsProvider.overrideWith((ref, _) async => kRequests),
+      // The four super-admin request inboxes, added 2026-08-20. Keyed by
+      // request type, so each queue gets its own list rather than all four
+      // rendering the same rows.
+      adminRequestQueueProvider
+          .overrideWith((ref, type) async => switch (type) {
+                'product' => kAdminProductRequests,
+                'buyer' => kAdminBuyerRequests,
+                _ => kAdminTransportRequests,
+              }),
+      transporterCompaniesProvider
+          .overrideWith((ref, _) async => kTransporterCompanies),
+      mineCompaniesProvider.overrideWith((ref, _) async => kMineCompanies),
+      buyerCompaniesProvider.overrideWith((ref, _) async => kBuyerCompanies),
+      // Only the linked request has a transporter on it. A fixture where every
+      // row is dispatched cannot show the panel's own empty state.
+      requestDispatchedTransportersProvider.overrideWith(
+          (ref, requestId) async =>
+              requestId == 'areq-4' ? {'co-transporter'} : <String>{}),
       transporterDispatchesProvider.overrideWith((ref, _) async => kDispatches),
       buyerTripValuesProvider.overrideWith((ref, _) async => kBuyerValues),
       tripEarningsProvider.overrideWith((ref, _) async => kTripEarnings),

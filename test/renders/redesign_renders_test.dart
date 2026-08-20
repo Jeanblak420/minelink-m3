@@ -48,6 +48,7 @@ import 'package:flutter_application_1/features/portal/screens/mine_reconciliatio
 import 'package:flutter_application_1/features/portal/screens/mine_supplier_portal_dashboard_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/transporter_reconciliations_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/recon_tables_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/request_review_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/margin_ledger_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/super_admin_org_insights_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/transporter_portal_dashboard_screen.dart';
@@ -173,12 +174,19 @@ void main() {
     );
   }
 
+  /// [act] runs after the tree has settled and before the picture is taken.
+  ///
+  /// Some screens only show their real content once something is SELECTED — the
+  /// request inboxes are a list until a row is opened, and the whole
+  /// due-diligence gate CLAUDE.md §4 describes lives in the panel underneath.
+  /// A render of the unselected state photographs the index, not the screen.
   Future<void> shoot(
     WidgetTester tester,
     Widget widget,
     Size size,
-    String name,
-  ) async {
+    String name, {
+    Future<void> Function(WidgetTester tester)? act,
+  }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -209,6 +217,11 @@ void main() {
     // lives in `test/test_helpers/render_pumps.dart` — shared with the test
     // that proves the schedule is long enough, so the two cannot drift.
     await pumpForCapture(tester);
+
+    if (act != null) {
+      await act(tester);
+      await pumpForCapture(tester);
+    }
 
     FlutterError.onError = previousOnError;
     tester.takeException();
@@ -1198,6 +1211,120 @@ void main() {
         ),
         const Size(1600, 2100),
         'screen-org-insights-desktop-dark',
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // THE REQUEST INBOXES — where every trip in this product begins.
+  //
+  // CLAUDE.md §4 is emphatic that these are four separate queues keyed by the
+  // requesting org's type, and that the admin sees "a clean, non-editable
+  // rendering of exactly what was submitted". None had ever been photographed,
+  // and the fixture they needed did not exist.
+  //
+  // `kAdminTransportRequests` carries FOUR STAGES of the request lifecycle —
+  // requested, resubmitted, sent-back and linked — because the inbox filters by
+  // status, colours by status and offers a different action per status. A
+  // fixture sitting on one value photographs one fifth of the screen. The
+  // sent-back and resubmitted rows also carry a real `adminNotes`, which is the
+  // revision loop's whole content and renders nowhere else.
+  group('requests — the four inboxes', () {
+    testWidgets('mine/supplier transport — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const RequestReviewScreen(
+              requestType: 'transportation', origin: 'mine'),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1700),
+        'screen-requests-mine-transport-desktop-dark',
+      );
+    });
+
+    testWidgets('buyer transport — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const RequestReviewScreen(
+              requestType: 'transportation', origin: 'buyer'),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1700),
+        'screen-requests-buyer-transport-desktop-dark',
+      );
+    });
+
+    testWidgets('requested product — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const RequestReviewScreen(requestType: 'product'),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1500),
+        'screen-requests-product-desktop-dark',
+      );
+    });
+
+    // The buyer-request inbox is the one with attachments on it — two lab PDFs
+    // and a stockpile photo — so it is the one that shows whether an admin can
+    // actually open what a mine sent.
+    testWidgets('requested buyers — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const RequestReviewScreen(requestType: 'buyer'),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1500),
+        'screen-requests-buyers-desktop-dark',
+      );
+    });
+
+    // A REQUEST OPEN, which is the screen rather than its index.
+    //
+    // Everything CLAUDE.md §4 describes about linking — the mine picker, the
+    // pricing where the admin enters a margin in Rand, the resulting
+    // transporter price, and the ordered due-diligence gate before a
+    // transporter may be chosen — lives in the panel that appears once a row is
+    // selected. The four renders above photograph the queue; this one
+    // photographs the work.
+    testWidgets('a request open — the linking panel, desktop dark',
+        (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const RequestReviewScreen(
+              requestType: 'transportation', origin: 'buyer'),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 2000),
+        'screen-request-detail-desktop-dark',
+        act: (tester) async {
+          // The `requested` row — the one an admin would actually pick up.
+          await tester.tap(find.textContaining('Iron Hills Mining').first);
+        },
+      );
+    });
+
+    testWidgets('mine/supplier transport — phone dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const RequestReviewScreen(
+              requestType: 'transportation', origin: 'mine'),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 1900),
+        'screen-requests-mine-transport-phone-dark',
       );
     });
   });
