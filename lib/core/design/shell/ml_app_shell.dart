@@ -227,6 +227,24 @@ class _MlAppShellState extends State<MlAppShell> {
       floatingActionButton: widget.floatingActionButton,
       body: windowClass.usesRail
           ? Row(
+              // STRETCH, not the default centre.
+              //
+              // `Expanded` expands along the MAIN axis — horizontally here.
+              // The cross axis is governed by `crossAxisAlignment`, which
+              // defaults to `center`, so the workspace was handed a LOOSE
+              // vertical constraint, shrink-wrapped to its content, and was
+              // then centred in the leftover space.
+              //
+              // Measured 2026-08-20 on a 1900px window: the Row was 1828 tall
+              // and the workspace inside it 1493, sitting at y=239 with 168px
+              // of nothing above it and the same below. Every dashboard floated
+              // in the middle of the page, and the taller the monitor the worse
+              // it got. Screens whose content already filled the height — the
+              // fleet register — looked correct, which is why it survived.
+              //
+              // The rail always filled, so nothing about the chrome gave it
+              // away.
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _maybeLock(
                   MlNavRail(
@@ -467,7 +485,13 @@ class _Workspace extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = constrain
-        ? Center(
+        // `Align(topCenter)`, not `Center`. The centring wanted here is
+        // HORIZONTAL — cap the content at a readable measure and put it in the
+        // middle of the workspace — and `Center` does both axes. See the
+        // `layoutBuilder` below, which had the same fault and was the one
+        // actually pushing the dashboards down the page.
+        ? Align(
+            alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints:
                   BoxConstraints(maxWidth: windowClass.contentMaxWidth),
@@ -491,6 +515,30 @@ class _Workspace extends StatelessWidget {
         // desktop app, and the reason M3 moved to a shared-axis fade.
         transitionBuilder: (child, animation) =>
             FadeTransition(opacity: animation, child: child),
+        // A TOP-ALIGNED stack. `AnimatedSwitcher`'s default `layoutBuilder` is
+        // `Stack(alignment: Alignment.center)`, and that centres the workspace
+        // VERTICALLY whenever a page is shorter than the window.
+        //
+        // Measured 2026-08-20: on a 1900px-tall render the three role
+        // dashboards and the console dashboard all began 233–265px below the
+        // top bar with a matching gap beneath them, while the fleet register —
+        // a page long enough to fill the viewport — started at 100 like
+        // everything else. Rendering the same dashboard at 1200px, where its
+        // content does fill the height, put it back at 100. The gap scaled with
+        // the window, which is what gives it away: a page does not float on a
+        // laptop and float further on a monitor unless something is centring
+        // it.
+        //
+        // It is worst on exactly the pages that are short — an empty state, a
+        // settings page, a small form — where it reads as a rendering fault
+        // rather than as a layout choice.
+        layoutBuilder: (currentChild, previousChildren) => Stack(
+          alignment: Alignment.topCenter,
+          children: <Widget>[
+            ...previousChildren,
+            if (currentChild != null) currentChild,
+          ],
+        ),
         child: KeyedSubtree(
           key: ValueKey(child.runtimeType.toString() + child.hashCode.toString()),
           child: content,
