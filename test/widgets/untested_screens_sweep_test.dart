@@ -30,7 +30,8 @@
 // resolves to a spinner cannot overflow — so it would pass every width and
 // every scale having laid out nothing. Measured: **8 of the 19 paint fewer
 // than three text runs, and four paint ZERO.** `fleet_management` renders
-// "Company information not available.", which is an error state.
+// "Company information not available.", which is an error state. Fixtures have
+// since promoted one of them; the rest are named there with their causes.
 //
 // `untested_screens_render_something_test.dart` is the check on that claim. It
 // measures what each screen actually painted, prints "PROVING SOMETHING: n / N"
@@ -57,7 +58,6 @@ import 'package:flutter_application_1/features/company/screens/employee_register
 import 'package:flutter_application_1/features/employee/screens/company_selection_screen.dart';
 import 'package:flutter_application_1/features/employee/screens/employee_profile_screen.dart';
 import 'package:flutter_application_1/features/fleet/screens/fleet_management_screen.dart';
-import 'package:flutter_application_1/features/home/screens/home_screen.dart';
 import 'package:flutter_application_1/features/notifications/screens/notification_screen.dart';
 import 'package:flutter_application_1/features/operations/screens/operations_hub_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/portal_tons_out_search_screen.dart';
@@ -67,6 +67,7 @@ import 'package:flutter_application_1/features/profile/screens/profile_screen.da
 import 'package:flutter_application_1/features/profile_setup/screens/profile_setup_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/transporter_leaderboard_screen.dart';
 
+import '../fixtures/screen_fixtures.dart';
 import '../test_helpers/real_fonts.dart';
 
 /// Down to 360 — the narrowest Android phone in common use, and the width
@@ -104,6 +105,7 @@ void main() {
     WidgetTester tester,
     Widget Function() child, {
     bool boldText = false,
+    List<Override> overrides = const [],
   }) async {
     for (final width in _widths) {
       for (final scale in _scales) {
@@ -116,6 +118,7 @@ void main() {
 
         await tester.pumpWidget(
           ProviderScope(
+            overrides: overrides,
             child: MaterialApp(
               theme: AppTheme.darkTheme,
               builder: (context, c) => MediaQuery(
@@ -199,8 +202,10 @@ void main() {
                 inPortal: false,
               ));
     });
-    testWidgets('company employees',
-        (t) => sweep(t, () => const CompanyEmployeesScreen()));
+    testWidgets(
+        'company employees',
+        (t) => sweep(t, () => const CompanyEmployeesScreen(),
+            overrides: [companyAccessOverride()]));
     testWidgets('employee register',
         (t) => sweep(t, () => const PortalEmployeeRegisterScreen()));
     testWidgets('company selection',
@@ -226,9 +231,11 @@ void main() {
         (t) => sweep(t, () => const NotificationScreen()));
   });
 
-  group('home & leaderboard', () {
-    testWidgets('home tab body',
-        (t) => sweep(t, () => const HomeTabBodyScreen()));
+  // HomeTabBodyScreen is deliberately absent: it is a container that renders
+  // `tabs[selected].screen` and adds no chrome, so sweeping it would sweep
+  // whichever tab body it was handed. Those are real screens with their own
+  // sweeps.
+  group('leaderboard', () {
     testWidgets('transporter leaderboard',
         (t) => sweep(t, () => const TransporterLeaderboardScreen()));
   });

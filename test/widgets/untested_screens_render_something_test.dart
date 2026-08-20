@@ -33,7 +33,6 @@ import 'package:flutter_application_1/features/company/screens/employee_register
 import 'package:flutter_application_1/features/employee/screens/company_selection_screen.dart';
 import 'package:flutter_application_1/features/employee/screens/employee_profile_screen.dart';
 import 'package:flutter_application_1/features/fleet/screens/fleet_management_screen.dart';
-import 'package:flutter_application_1/features/home/screens/home_screen.dart';
 import 'package:flutter_application_1/features/notifications/screens/notification_screen.dart';
 import 'package:flutter_application_1/features/operations/screens/operations_hub_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/portal_tons_out_search_screen.dart';
@@ -43,6 +42,7 @@ import 'package:flutter_application_1/features/profile/screens/profile_screen.da
 import 'package:flutter_application_1/features/profile_setup/screens/profile_setup_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/transporter_leaderboard_screen.dart';
 
+import '../fixtures/screen_fixtures.dart';
 import '../test_helpers/real_fonts.dart';
 
 /// A screen that paints fewer than this many text runs has not really
@@ -64,15 +64,17 @@ const int _minTextRuns = 3;
 /// Fixing each means supplying the state it short-circuits on, which is real
 /// per-screen work on the provider graph rather than one shared override. That
 /// is the follow-up; pretending in the meantime is not.
+/// **HomeTabBodyScreen is deliberately not in [_screens].** It is a container,
+/// not a screen: it renders `tabs[selected].screen` inside a LazyIndexedStack
+/// and adds no chrome of its own, so whatever it paints belongs to the tab body
+/// it was handed. Measuring it would measure the fixture. The tab bodies are
+/// real screens with their own sweeps, which is where that coverage lives.
 const Map<String, String> _unproven = {
   'account security':
       'its fields are built from the signed-in session; with no session it '
       'paints one line.',
   'profile setup':
       'gated on a profile-setup state that is null without a signed-in user.',
-  'company employees':
-      'returns a bare CircularProgressIndicator until companyProvider AND '
-      'companyAccessProvider both resolve a company.',
   'employee register': 'same company gate as company employees.',
   'fleet management':
       'short-circuits to "Company information not available." — an ERROR '
@@ -84,12 +86,21 @@ const Map<String, String> _unproven = {
   'communications hub':
       'chat rooms come from a realtime subscription that never opens against '
       'the dummy Supabase instance.',
-  'home tab body':
-      'returns SizedBox.shrink() until portalWorkspaceProvider reaches '
-      'PortalWorkspacePhase.ready with a non-empty tab list.',
 };
 
 typedef Screens = Map<String, Widget Function()>;
+
+/// Provider overrides a screen needs before it will lay anything out.
+/// See `test/fixtures/screen_fixtures.dart` for what each supplies and why.
+///
+/// `company employees` renders its **restricted** branch here — a real
+/// user-facing state, and the one reachable without faking `companyProvider`,
+/// whose notifier takes four services and opens two realtime channels. The
+/// managing branch is still uncovered; that is a fixture worth building, not a
+/// reason to leave the screen rendering a spinner.
+final Map<String, List<Override>> _fixtures = {
+  'company employees': [companyAccessOverride()],
+};
 
 final Screens _screens = {
   'login': () => const LoginScreen(),
@@ -113,7 +124,6 @@ final Screens _screens = {
   'messages': () => const MessagesScreen(),
   'communications hub': () => const CommunicationsHubScreen(),
   'notifications': () => const NotificationScreen(),
-  'home tab body': () => const HomeTabBodyScreen(),
   'transporter leaderboard': () => const TransporterLeaderboardScreen(),
 };
 
@@ -142,6 +152,7 @@ void main() {
       addTearDown(() => FlutterError.onError = prior);
 
       await tester.pumpWidget(ProviderScope(
+        overrides: _fixtures[entry.key] ?? const [],
         child: MaterialApp(
           theme: AppTheme.darkTheme,
           home: Builder(
