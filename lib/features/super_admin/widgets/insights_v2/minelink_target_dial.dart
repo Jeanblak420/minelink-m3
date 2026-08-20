@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 
 import 'minelink_screens_core.dart';
 import 'minelink_targets_core.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 
 class MlTargetDial extends StatefulWidget {
@@ -183,11 +184,9 @@ class _MlTargetDialState extends State<MlTargetDial> {
                 Expanded(
                   child: Text(
                     widget.errorText!,
-                    style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 10,
-                      height: 1.4,
+                    style: context.mlText.labelSmall.copyWith(
                       color: t.bad,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
@@ -209,13 +208,7 @@ class _MlTargetDialState extends State<MlTargetDial> {
               children: [
                 Text(
                   widget.label.toUpperCase(),
-                  style: TextStyle(
-                    fontFamily: MlGlass.sans,
-                    fontSize: 10,
-                    letterSpacing: 1.1,
-                    fontWeight: FontWeight.w700,
-                    color: t.inkHi,
-                  ),
+                  style: context.mlText.overline.copyWith(color: t.inkHi),
                 ),
                 if (widget.sublabel != null) ...[
                   const SizedBox(height: 3),
@@ -327,10 +320,11 @@ class _MlTargetDialState extends State<MlTargetDial> {
                     ),
                     if (widget.target > 0)
                       Text(' t',
-                          style: TextStyle(
-                              fontFamily: MlGlass.mono,
-                              fontSize: 10,
-                              color: t.inkLo)),
+                          style: context.mlText.code(
+                            color: t.inkLo,
+                            size: 10,
+                            weight: FontWeight.w400,
+                          )),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -338,20 +332,18 @@ class _MlTargetDialState extends State<MlTargetDial> {
                   pending
                       ? 'not reached yet'
                       : 'actual ${mlTons(widget.actual!)} t',
-                  style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 10,
-                      height: 1.4,
-                      color: t.inkLo),
+                  style: context.mlText.labelSmall.copyWith(
+                    color: t.inkLo,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
                 if (widget.note != null)
                   Text(
                     widget.note!,
-                    style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 10,
-                        height: 1.4,
-                        color: t.inkXlo),
+                    style: context.mlText.labelSmall.copyWith(
+                      color: t.inkXlo,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
               ],
             ),
@@ -413,20 +405,20 @@ class _MlTargetDialState extends State<MlTargetDial> {
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   onSubmitted: (_) => _commit(),
-                  style: TextStyle(
-                    fontFamily: MlGlass.mono,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                  style: context.mlText.code(
                     color: t.inkHi,
+                    size: 12,
+                    weight: FontWeight.w600,
                   ),
                   cursorColor: t.accent,
                   decoration: InputDecoration(
                     isDense: true,
                     hintText: 'Set target',
-                    hintStyle: TextStyle(
-                        fontFamily: MlGlass.mono,
-                        fontSize: 11,
-                        color: t.inkLo),
+                    hintStyle: context.mlText.code(
+                      color: t.inkLo,
+                      size: 11,
+                      weight: FontWeight.w400,
+                    ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 6),
                     filled: true,
                     fillColor: t.inkHi.withValues(alpha: 0.04),
@@ -460,8 +452,11 @@ class _MlTargetDialState extends State<MlTargetDial> {
         btn(Icons.add_rounded, () => _nudge(1), 'Increase'),
         const SizedBox(width: 6),
         Text('t',
-            style: TextStyle(
-                fontFamily: MlGlass.mono, fontSize: 10, color: t.inkLo)),
+            style: context.mlText.code(
+              color: t.inkLo,
+              size: 10,
+              weight: FontWeight.w400,
+            )),
       ],
     );
   }
@@ -490,12 +485,7 @@ class _MlTargetDialState extends State<MlTargetDial> {
                 widget.lockedNote,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: MlGlass.sans,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: t.inkLo,
-                ),
+                style: context.mlText.labelSmall.copyWith(color: t.inkLo),
               ),
             ),
           ],

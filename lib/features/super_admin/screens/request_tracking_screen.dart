@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/request_tracking.dart';
 import 'package:flutter_application_1/features/portal/providers/request_provider.dart';
 import 'package:flutter_application_1/features/portal/services/recon_exporter.dart';
@@ -285,10 +286,9 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
                         children: [
                           Text(
                             "Request's Tracking Logs",
-                            style: TextStyle(
-                              fontSize: MlTokens.fsTitle,
-                              fontWeight: FontWeight.w700,
+                            style: context.mlText.titleMedium.copyWith(
                               color: semantic.textStrong,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -297,8 +297,7 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
                             'completion.',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: MlTokens.fsLabel,
+                            style: context.mlText.bodySmall.copyWith(
                               color: semantic.textMuted,
                             ),
                           ),
@@ -551,9 +550,7 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
                     Text(
                       _dateFmt.format(MlTime.sast(r.updatedAt)),
                       maxLines: 1,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                      style: context.mlText.titleSmall.copyWith(
                         color: semantic.textBody,
                       ),
                     ),
@@ -561,9 +558,9 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
                     Text(
                       _relative(r.updatedAt),
                       maxLines: 1,
-                      style: TextStyle(
-                        fontSize: MlTokens.fsMicro,
+                      style: context.mlText.labelSmall.copyWith(
                         color: semantic.textFaint,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
@@ -602,8 +599,7 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
                   TextSpan(text: ' of $total'),
                 ],
               ),
-              style: TextStyle(
-                fontSize: MlTokens.fsLabel,
+              style: context.mlText.bodySmall.copyWith(
                 color: semantic.textMuted,
               ),
             ),
@@ -701,10 +697,9 @@ class _Header extends StatelessWidget {
                 ),
                 child: Text(
                   '$activeCount active',
-                  style: TextStyle(
-                    fontSize: MlTokens.fsLabel,
-                    fontWeight: FontWeight.w700,
+                  style: context.mlText.labelMedium.copyWith(
                     color: accentColors.fg,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -716,10 +711,7 @@ class _Header extends StatelessWidget {
           'Every request on the platform, from submission through to '
           'completion. A request completes when all of its trips are '
           'marked delivered.',
-          style: TextStyle(
-            fontSize: MlTokens.fsBodySm,
-            color: semantic.textMuted,
-          ),
+          style: context.mlText.bodyMedium.copyWith(color: semantic.textMuted),
         ),
       ],
     );
@@ -770,11 +762,9 @@ class _OpsStatCard extends StatelessWidget {
                   children: [
                     Text(
                       value,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSerif,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w600,
+                      style: context.mlText.figure(
                         color: semantic.textStrong,
+                        size: 28,
                         height: 1.1,
                       ),
                     ),
@@ -818,12 +808,11 @@ class _MicroLabel extends StatelessWidget {
     text,
     maxLines: 1,
     overflow: TextOverflow.ellipsis,
-    style: TextStyle(
-      fontFamily: MlTokens.fontMono,
-      fontSize: 10,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.8,
+    style: context.mlText.code(
       color: color,
+      size: 10,
+      weight: FontWeight.w600,
+      letterSpacing: 0.8,
     ),
   );
 }
@@ -892,20 +881,18 @@ class _FilterGroup extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: MlTokens.fsLabel,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.labelMedium.copyWith(
                   color: active ? semantic.textStrong : semantic.textMuted,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(width: 5),
               Text(
                 '$count',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: MlTokens.fsMicro,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.code(
                   color: active ? accentColors.fg : semantic.textFaint,
+                  size: 11,
+                  weight: FontWeight.w700,
                 ),
               ),
             ],
@@ -941,10 +928,9 @@ class _ExportButton extends StatelessWidget {
             children: [
               Text(
                 'Export',
-                style: TextStyle(
-                  fontSize: MlTokens.fsLabel,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.labelMedium.copyWith(
                   color: semantic.textStrong,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(width: 6),
@@ -996,14 +982,9 @@ class _PagerButton extends StatelessWidget {
           ),
           child: Text(
             label,
-            style: TextStyle(
-              fontSize: MlTokens.fsLabel,
+            style: context.mlText.labelMedium.copyWith(
+              color: active ? semantic.textStrong : enabled ? semantic.textMuted : semantic.textFaint.withValues(alpha: 0.55),
               fontWeight: FontWeight.w700,
-              color: active
-                  ? semantic.textStrong
-                  : enabled
-                  ? semantic.textMuted
-                  : semantic.textFaint.withValues(alpha: 0.55),
             ),
           ),
         ),
@@ -1106,7 +1087,7 @@ class _TypeCell extends StatelessWidget {
             row.typeLabel,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 13, color: semantic.textBody),
+            style: context.mlText.bodyMedium.copyWith(color: semantic.textBody),
           ),
         ),
       ],
@@ -1160,12 +1141,7 @@ class _StatusPill extends StatelessWidget {
               labelFor(row),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: MlTokens.fsLabel,
-                fontWeight: FontWeight.w600,
-                color: colors.fg,
-                height: 1.3,
-              ),
+              style: context.mlText.labelMedium.copyWith(color: colors.fg),
             ),
           ),
         ],
@@ -1188,7 +1164,7 @@ class _PartyChip extends StatelessWidget {
     if (n == null || n.isEmpty) {
       return Text(
         '—',
-        style: TextStyle(fontSize: 13, color: semantic.textFaint),
+        style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint),
       );
     }
     return Tooltip(
@@ -1203,7 +1179,9 @@ class _PartyChip extends StatelessWidget {
               n,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 13, color: semantic.textBody),
+              style: context.mlText.bodyMedium.copyWith(
+                color: semantic.textBody,
+              ),
             ),
           ),
         ],
@@ -1266,9 +1244,7 @@ class _RouteCell extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                style: context.mlText.labelMedium.copyWith(
                   color: semantic.textStrong,
                 ),
               ),
@@ -1293,7 +1269,7 @@ class _TripsCell extends StatelessWidget {
       return Text(
         '—',
         textAlign: TextAlign.right,
-        style: TextStyle(fontSize: 13, color: semantic.textFaint),
+        style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint),
       );
     }
     final fillColor = MlTone.transit.colors(Theme.of(context).brightness).fg;
@@ -1332,19 +1308,18 @@ class _TripsCell extends StatelessWidget {
               children: [
                 TextSpan(
                   text: '${row.tripsCompleted}',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
+                  style: context.mlText.code(
                     color: semantic.textStrong,
+                    size: 13,
+                    weight: FontWeight.w700,
                   ),
                 ),
                 TextSpan(
                   text: '/${row.tripsTotal}',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 13,
+                  style: context.mlText.code(
                     color: semantic.textFaint,
+                    size: 13,
+                    weight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -1369,7 +1344,7 @@ class _TonsCell extends StatelessWidget {
       return Text(
         '—',
         textAlign: TextAlign.right,
-        style: TextStyle(fontSize: 13, color: semantic.textFaint),
+        style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint),
       );
     }
     return Row(
@@ -1380,20 +1355,19 @@ class _TonsCell extends StatelessWidget {
         Text(
           tons.toStringAsFixed(2),
           maxLines: 1,
-          style: TextStyle(
-            fontFamily: MlTokens.fontMono,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
+          style: context.mlText.code(
             color: semantic.textStrong,
+            size: 13,
+            weight: FontWeight.w700,
           ),
         ),
         const SizedBox(width: 3),
         Text(
           't',
-          style: TextStyle(
-            fontFamily: MlTokens.fontMono,
-            fontSize: 11,
+          style: context.mlText.code(
             color: semantic.textFaint,
+            size: 11,
+            weight: FontWeight.w400,
           ),
         ),
       ],
@@ -1449,17 +1423,15 @@ class _RequestDetailsDialog extends StatelessWidget {
                         children: [
                           Text(
                             '${row.typeLabel} request',
-                            style: TextStyle(
-                              fontSize: MlTokens.fsTitle,
-                              fontWeight: FontWeight.w700,
+                            style: context.mlText.titleMedium.copyWith(
                               color: semantic.textStrong,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             'Updated ${_relative(row.updatedAt)}',
-                            style: TextStyle(
-                              fontSize: MlTokens.fsLabel,
+                            style: context.mlText.bodySmall.copyWith(
                               color: semantic.textMuted,
                             ),
                           ),
@@ -1531,10 +1503,10 @@ class _RequestDetailsDialog extends StatelessWidget {
                           const SizedBox(height: 4),
                           SelectableText(
                             row.requestId,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontMono,
-                              fontSize: MlTokens.fsLabel,
+                            style: context.mlText.code(
                               color: semantic.textBody,
+                              size: 12,
+                              weight: FontWeight.w400,
                             ),
                           ),
                         ],
@@ -1585,9 +1557,7 @@ class _RequestDetailsDialog extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+              style: context.mlText.labelMedium.copyWith(
                 color: semantic.textStrong,
               ),
             ),
@@ -1617,11 +1587,8 @@ class _RequestDetailsDialog extends StatelessWidget {
           Expanded(
             child: Text(
               (value == null || value.isEmpty) ? '—' : value,
-              style: TextStyle(
-                fontSize: MlTokens.fsBodySm,
-                color: (value == null || value.isEmpty)
-                    ? semantic.textFaint
-                    : semantic.textBody,
+              style: context.mlText.bodyMedium.copyWith(
+                color: (value == null || value.isEmpty) ? semantic.textFaint : semantic.textBody,
               ),
             ),
           ),

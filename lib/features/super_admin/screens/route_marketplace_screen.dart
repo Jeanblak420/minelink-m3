@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/config/supabase_config.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
@@ -111,9 +112,7 @@ class RouteMarketplaceScreen extends ConsumerWidget {
               'Visible to you only for now. This marketplace will become '
               'public in a later release — requesters will then browse the '
               'routes each transporter offers and has successfully completed.',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+              style: context.mlText.titleSmall.copyWith(
                 color: MlTone.atMine.colors(Theme.of(context).brightness).fg,
               ),
             ),
@@ -200,11 +199,9 @@ class RouteMarketplaceScreen extends ConsumerWidget {
       text,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        fontFamily: MlTokens.fontSans,
-        fontSize: 13,
-        fontWeight: strong ? FontWeight.w700 : FontWeight.w400,
+      style: context.mlText.titleSmall.copyWith(
         color: strong ? semantic.textStrong : semantic.textBody,
+        fontWeight: strong ? FontWeight.w700 : FontWeight.w400,
       ),
     );
   }
@@ -214,11 +211,10 @@ class RouteMarketplaceScreen extends ConsumerWidget {
       text,
       textAlign: TextAlign.right,
       maxLines: 1,
-      style: TextStyle(
-        fontFamily: MlTokens.fontMono,
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
+      style: context.mlText.code(
         color: MlSemantic.of(context).textStrong,
+        size: 13,
+        weight: FontWeight.w600,
       ),
     );
   }

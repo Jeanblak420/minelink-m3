@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/raw_recon_row.dart';
 import 'package:flutter_application_1/features/portal/services/reconciliation_service.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/company_monthly_ops_stats.dart';
@@ -180,9 +181,7 @@ class _SuperAdminOrgInsightsScreenState
                   child: Text(
                     'No companies match this filter.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 13,
+                    style: context.mlText.bodyMedium.copyWith(
                       color: MlControlRoom.textMuted,
                     ),
                   ),
@@ -266,13 +265,7 @@ class _SuperAdminOrgInsightsScreenState
     text.toUpperCase(),
     maxLines: 1,
     overflow: TextOverflow.ellipsis,
-    style: TextStyle(
-      fontFamily: MlTokens.fontSans,
-      fontSize: 11,
-      fontWeight: FontWeight.w800,
-      letterSpacing: 1.2,
-      color: MlControlRoom.textMuted,
-    ),
+    style: context.mlText.overline.copyWith(color: MlControlRoom.textMuted),
   );
 
   // ---- fleet distribution donut ----
@@ -394,11 +387,9 @@ class _SuperAdminOrgInsightsScreenState
                       ),
                       child: Text(
                         badge,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
+                        style: context.mlText.labelMedium.copyWith(
                           color: MlControlRoom.cyan,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
@@ -443,8 +434,7 @@ class _SuperAdminOrgInsightsScreenState
                                   if (centerUnit.isNotEmpty)
                                     TextSpan(
                                       text: centerUnit,
-                                      style: TextStyle(
-                                        fontSize: 16,
+                                      style: context.mlText.bodyLarge.copyWith(
                                         color: MlControlRoom.textBody,
                                       ),
                                     ),
@@ -454,12 +444,9 @@ class _SuperAdminOrgInsightsScreenState
                             const SizedBox(height: 2),
                             Text(
                               centerSmall,
-                              style: TextStyle(
-                                fontFamily: MlTokens.fontSans,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 2.6,
+                              style: context.mlText.labelSmall.copyWith(
                                 color: MlControlRoom.textMuted,
+                                letterSpacing: 2.6,
                               ),
                             ),
                           ],
@@ -489,9 +476,7 @@ class _SuperAdminOrgInsightsScreenState
                     _hasFleet
                         ? 'No fleet registered yet.'
                         : 'No tonnage recorded this month.',
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 12,
+                    style: context.mlText.bodySmall.copyWith(
                       color: MlControlRoom.textMuted,
                     ),
                   )
@@ -520,11 +505,9 @@ class _SuperAdminOrgInsightsScreenState
                                   slices[i].name,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: MlTokens.fontSans,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
+                                  style: context.mlText.bodyMedium.copyWith(
                                     color: MlControlRoom.textBody,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
@@ -533,11 +516,10 @@ class _SuperAdminOrgInsightsScreenState
                                 _hasFleet
                                     ? _int.format(slices[i].value.round())
                                     : _tonsInt.format(slices[i].value),
-                                style: TextStyle(
-                                  fontFamily: MlTokens.fontMono,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
+                                style: context.mlText.code(
                                   color: MlControlRoom.textStrong,
+                                  size: 13,
+                                  weight: FontWeight.w600,
                                 ),
                               ),
                             ],
@@ -613,21 +595,19 @@ class _SuperAdminOrgInsightsScreenState
               children: [
                 TextSpan(
                   text: value,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
+                  style: context.mlText.code(
                     color: valueColor ?? MlControlRoom.textStrong,
+                    size: 18,
+                    weight: FontWeight.w500,
                   ),
                 ),
                 if (unit != null)
                   TextSpan(
                     text: unit,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontMono,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
+                    style: context.mlText.code(
                       color: MlControlRoom.textDim,
+                      size: 11,
+                      weight: FontWeight.w500,
                     ),
                   ),
               ],
@@ -671,11 +651,7 @@ class _SuperAdminOrgInsightsScreenState
                   label.toUpperCase(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
+                  style: context.mlText.overline.copyWith(
                     color: MlControlRoom.textMuted,
                   ),
                 ),
@@ -687,30 +663,28 @@ class _SuperAdminOrgInsightsScreenState
                     children: [
                       TextSpan(
                         text: value,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontMono,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
+                        style: context.mlText.code(
                           color: MlControlRoom.textStrong,
+                          size: 17,
+                          weight: FontWeight.w600,
                         ),
                       ),
                       if (unit != null)
                         TextSpan(
                           text: unit,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontMono,
-                            fontSize: 11,
+                          style: context.mlText.code(
                             color: MlControlRoom.textDim,
+                            size: 11,
+                            weight: FontWeight.w400,
                           ),
                         ),
                       if (tail != null)
                         TextSpan(
                           text: tail,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontMono,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                          style: context.mlText.code(
                             color: tailColor ?? MlControlRoom.textMuted,
+                            size: 12,
+                            weight: FontWeight.w600,
                           ),
                         ),
                     ],
@@ -744,17 +718,14 @@ class _SuperAdminOrgInsightsScreenState
               ),
               TextSpan(
                 text: '.$frac',
-                style: TextStyle(
-                  fontSize: 22,
+                style: context.mlText.titleLarge.copyWith(
                   color: MlControlRoom.textStrong.withValues(alpha: 0.75),
+                  fontWeight: FontWeight.w400,
                 ),
               ),
               TextSpan(
                 text: 't',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+                style: context.mlText.titleMedium.copyWith(
                   color: MlControlRoom.textMuted,
                 ),
               ),
@@ -768,10 +739,7 @@ class _SuperAdminOrgInsightsScreenState
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           text: TextSpan(
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 13,
-              height: 1.35,
+            style: context.mlText.bodyMedium.copyWith(
               color: MlControlRoom.textMuted,
             ),
             children: [
@@ -840,11 +808,9 @@ class _SuperAdminOrgInsightsScreenState
                       child: Text(
                         '${delta >= 0 ? '▲' : '▼'} '
                         '${delta.abs().toStringAsFixed(1)}%',
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
+                        style: context.mlText.labelSmall.copyWith(
                           color: delta >= 0 ? MlControlRoom.green : MlControlRoom.red,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -996,21 +962,19 @@ class _SuperAdminOrgInsightsScreenState
                   children: [
                     TextSpan(
                       text: value,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontMono,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
+                      style: context.mlText.code(
                         color: color ?? MlControlRoom.textStrong,
+                        size: 17,
+                        weight: FontWeight.w700,
                       ),
                     ),
                     if (unit != null)
                       TextSpan(
                         text: unit,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontMono,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                        style: context.mlText.code(
                           color: MlControlRoom.textDim,
+                          size: 11,
+                          weight: FontWeight.w600,
                         ),
                       ),
                   ],
@@ -1021,11 +985,7 @@ class _SuperAdminOrgInsightsScreenState
                 label.toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.1,
+                style: context.mlText.overline.copyWith(
                   color: MlControlRoom.textMuted,
                 ),
               ),
@@ -1045,12 +1005,9 @@ class _SuperAdminOrgInsightsScreenState
             pct == null
                 ? '—'
                 : '${pct >= 0 ? '+' : '−'}${pct.abs().toStringAsFixed(0)}%',
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 32,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.64,
+            style: context.mlText.headlineLarge.copyWith(
               color: MlControlRoom.textStrong,
+              letterSpacing: -0.64,
             ),
           ),
           const SizedBox(height: 4),
@@ -1060,12 +1017,9 @@ class _SuperAdminOrgInsightsScreenState
                 : pct >= 0
                 ? '▲ Healthy growth this month'
                 : '▼ Down on last month',
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 11,
-              color: pct == null
-                  ? MlControlRoom.textMuted
-                  : (pct >= 0 ? MlControlRoom.green : MlControlRoom.red),
+            style: context.mlText.labelSmall.copyWith(
+              color: pct == null ? MlControlRoom.textMuted : (pct >= 0 ? MlControlRoom.green : MlControlRoom.red),
+              fontWeight: FontWeight.w400,
             ),
           ),
           const SizedBox(height: 12),
@@ -1159,10 +1113,9 @@ class _SuperAdminOrgInsightsScreenState
         const SizedBox(height: 2),
         Text(
           'Network share this month',
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: 11,
+          style: context.mlText.labelSmall.copyWith(
             color: MlControlRoom.textMuted,
+            fontWeight: FontWeight.w400,
           ),
         ),
         const SizedBox(height: 12),
@@ -1173,9 +1126,7 @@ class _SuperAdminOrgInsightsScreenState
         if (rows.isEmpty)
           Text(
             'No tonnage recorded yet.',
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 12,
+            style: context.mlText.bodySmall.copyWith(
               color: MlControlRoom.textMuted,
             ),
           ),
@@ -1219,10 +1170,10 @@ class _SuperAdminOrgInsightsScreenState
             children: [
               Text(
                 (i + 1).toString().padLeft(2, '0'),
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: 10,
+                style: context.mlText.code(
                   color: MlControlRoom.textDim,
+                  size: 10,
+                  weight: FontWeight.w400,
                 ),
               ),
               const SizedBox(width: 10),
@@ -1231,24 +1182,19 @@ class _SuperAdminOrgInsightsScreenState
                   c.companyName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 13,
-                    fontWeight: idle ? FontWeight.w500 : FontWeight.w600,
+                  style: context.mlText.titleSmall.copyWith(
                     color: idle ? MlControlRoom.textMuted : MlControlRoom.textStrong,
+                    fontWeight: idle ? FontWeight.w500 : FontWeight.w600,
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               Text(
                 '${_tons.format(c.tonsMoved)} t',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: 12,
-                  fontWeight: idle ? FontWeight.w500 : FontWeight.w400,
-                  color: idle
-                      ? MlControlRoom.textMuted
-                      : (lead ? MlControlRoom.cyanText : MlControlRoom.textStrong),
+                style: context.mlText.code(
+                  color: idle ? MlControlRoom.textMuted : (lead ? MlControlRoom.cyanText : MlControlRoom.textStrong),
+                  size: 12,
+                  weight: idle ? FontWeight.w500 : FontWeight.w400,
                 ),
               ),
             ],
@@ -1282,20 +1228,15 @@ class _SuperAdminOrgInsightsScreenState
                   children: [
                     Text(
                       'Recent alerts',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSerif,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.15,
+                      style: context.mlText.editorialSmall.copyWith(
                         color: MlControlRoom.textStrong,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Signals from the last 24h',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 12,
+                      style: context.mlText.bodySmall.copyWith(
                         color: MlControlRoom.textMuted,
                       ),
                     ),
@@ -1318,10 +1259,7 @@ class _SuperAdminOrgInsightsScreenState
                     ),
                     child: Text(
                       'View all',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                      style: context.mlText.labelSmall.copyWith(
                         color: MlControlRoom.textBody,
                       ),
                     ),
@@ -1337,9 +1275,7 @@ class _SuperAdminOrgInsightsScreenState
               alignment: Alignment.center,
               child: Text(
                 'Nothing needs attention right now.',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 12,
+                style: context.mlText.bodySmall.copyWith(
                   color: MlControlRoom.textMuted,
                 ),
               ),
@@ -1386,11 +1322,9 @@ class _SuperAdminOrgInsightsScreenState
                   a.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
+                  style: context.mlText.titleSmall.copyWith(
                     color: MlControlRoom.textStrong,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -1398,10 +1332,7 @@ class _SuperAdminOrgInsightsScreenState
                   a.message,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 12,
-                    height: 1.35,
+                  style: context.mlText.bodySmall.copyWith(
                     color: MlControlRoom.textMuted,
                   ),
                 ),
@@ -1412,10 +1343,10 @@ class _SuperAdminOrgInsightsScreenState
             const SizedBox(width: 8),
             Text(
               stamp,
-              style: TextStyle(
-                fontFamily: MlTokens.fontMono,
-                fontSize: 10,
+              style: context.mlText.code(
                 color: MlControlRoom.textDim,
+                size: 10,
+                weight: FontWeight.w400,
               ),
             ),
           ],
@@ -1487,9 +1418,7 @@ class _SuperAdminOrgInsightsScreenState
             Text(
               'Ranked by tons moved · '
               '${_dataAt == null ? 'live monthly rollup' : 'updated ${_agoShort(_dataAt!)}'}',
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 12,
+              style: context.mlText.bodySmall.copyWith(
                 color: MlControlRoom.textMuted,
               ),
             ),
@@ -1530,10 +1459,7 @@ class _SuperAdminOrgInsightsScreenState
                       children: [
                         Text(
                           labels[f]!,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                          style: context.mlText.labelMedium.copyWith(
                             color: _filter == f ? MlControlRoom.cyanText : MlControlRoom.textMuted,
                           ),
                         ),
@@ -1550,11 +1476,10 @@ class _SuperAdminOrgInsightsScreenState
                             ),
                             child: Text(
                               '${counts[f]}',
-                              style: TextStyle(
-                                fontFamily: MlTokens.fontMono,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
+                              style: context.mlText.code(
                                 color: MlControlRoom.cyan,
+                                size: 11,
+                                weight: FontWeight.w700,
                               ),
                             ),
                           ),
@@ -1601,11 +1526,9 @@ class _SuperAdminOrgInsightsScreenState
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontFamily: MlTokens.fontSans,
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
+        style: context.mlText.labelSmall.copyWith(
           color: color,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );
@@ -1646,11 +1569,7 @@ class _SuperAdminOrgInsightsScreenState
           label.toUpperCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.1,
+          style: context.mlText.overline.copyWith(
             color: MlControlRoom.textMuted,
           ),
         ),
@@ -1663,20 +1582,19 @@ class _SuperAdminOrgInsightsScreenState
             children: [
               TextSpan(
                 text: value,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+                style: context.mlText.code(
                   color: valueColor ?? MlControlRoom.textStrong,
+                  size: 15,
+                  weight: FontWeight.w600,
                 ),
               ),
               if (unit != null)
                 TextSpan(
                   text: unit,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 10,
+                  style: context.mlText.code(
                     color: MlControlRoom.textDim,
+                    size: 10,
+                    weight: FontWeight.w400,
                   ),
                 ),
             ],
@@ -1691,10 +1609,9 @@ class _SuperAdminOrgInsightsScreenState
           width: 78,
           child: Text(
             label,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 11,
+            style: context.mlText.labelSmall.copyWith(
               color: MlControlRoom.textMuted,
+              fontWeight: FontWeight.w400,
             ),
           ),
         ),
@@ -1730,11 +1647,10 @@ class _SuperAdminOrgInsightsScreenState
           child: Text(
             pct == null ? '—' : '$pct%',
             textAlign: TextAlign.right,
-            style: TextStyle(
-              fontFamily: MlTokens.fontMono,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+            style: context.mlText.code(
               color: MlControlRoom.textStrong,
+              size: 12,
+              weight: FontWeight.w700,
             ),
           ),
         ),
@@ -1757,11 +1673,9 @@ class _SuperAdminOrgInsightsScreenState
           ),
           child: Text(
             initials.isEmpty ? '—' : initials,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
+            style: context.mlText.titleSmall.copyWith(
               color: MlControlRoom.cyanText,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
@@ -1777,11 +1691,9 @@ class _SuperAdminOrgInsightsScreenState
                 children: [
                   Text(
                     s.companyName,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
+                    style: context.mlText.titleMedium.copyWith(
                       color: MlControlRoom.textStrong,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   ...badges,
@@ -1792,9 +1704,7 @@ class _SuperAdminOrgInsightsScreenState
                 metaParts.join(' · '),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 12,
+                style: context.mlText.bodySmall.copyWith(
                   color: MlControlRoom.textMuted,
                 ),
               ),
@@ -1880,11 +1790,9 @@ class _SuperAdminOrgInsightsScreenState
                       'Open workspace',
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
+                      style: context.mlText.labelMedium.copyWith(
                         color: MlControlRoom.cyan,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
@@ -2464,10 +2372,9 @@ class _MovementChart extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 10,
+            style: context.mlText.labelSmall.copyWith(
               color: MlControlRoom.textMuted,
+              fontWeight: FontWeight.w400,
             ),
           ),
         ),
@@ -2532,12 +2439,11 @@ class _MovementChart extends StatelessWidget {
                     ),
                     child: Text(
                       '${_pill.format(lastValue)} t',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontMono,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.72,
+                      style: context.mlText.code(
                         color: MlControlRoom.textStrong,
+                        size: 13,
+                        weight: FontWeight.w600,
+                        letterSpacing: 0.72,
                       ),
                     ),
                   ),
@@ -2556,11 +2462,11 @@ class _MovementChart extends StatelessWidget {
                   alignment: alignAtFraction(n > 1 ? t / (n - 1) : 0),
                   child: Text(
                     (t + 1).toString().padLeft(2, '0'),
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontMono,
-                      fontSize: 9,
-                      letterSpacing: 1.26,
+                    style: context.mlText.code(
                       color: MlControlRoom.textDim,
+                      size: 9,
+                      weight: FontWeight.w400,
+                      letterSpacing: 1.26,
                     ),
                   ),
                 ),
@@ -2568,11 +2474,11 @@ class _MovementChart extends StatelessWidget {
                 alignment: Alignment.topRight,
                 child: Text(
                   'Today',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 9,
-                    letterSpacing: 1.26,
+                  style: context.mlText.code(
                     color: MlControlRoom.textMuted,
+                    size: 9,
+                    weight: FontWeight.w400,
+                    letterSpacing: 1.26,
                   ),
                 ),
               ),
@@ -2626,11 +2532,11 @@ class _MovementChart extends StatelessWidget {
               ),
               Text(
                 'DAILY · TONS',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: 9,
-                  letterSpacing: 1.62,
+                style: context.mlText.code(
                   color: MlControlRoom.textFaint,
+                  size: 9,
+                  weight: FontWeight.w400,
+                  letterSpacing: 1.62,
                 ),
               ),
             ],
@@ -2779,12 +2685,12 @@ class _MovementChartPainter extends CustomPainter {
         final tp = TextPainter(
           text: TextSpan(
             text: referenceCaption,
-            style: TextStyle(
-              fontFamily: MlTokens.fontMono,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.8,
+            // MlType, not context.mlText: a CustomPainter has no BuildContext.
+            style: MlType.code(
               color: MlControlRoom.cyanText.withValues(alpha: 0.85),
+              size: 10,
+              weight: FontWeight.w600,
+              letterSpacing: 1.8,
             ),
           ),
           textDirection: ui.TextDirection.ltr,

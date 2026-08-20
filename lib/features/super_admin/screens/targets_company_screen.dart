@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/target_scope.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/features/super_admin/providers/targets_provider.dart';
@@ -63,28 +64,24 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
 
     return Container(
       color: t.bg0,
-      child: Column(
-        children: [
-          TargetsBand(
-            title: name == null ? 'Company targets' : '$name targets',
-            subtitle: name == null
-                ? 'Pick a company to set its monthly targets and its 12-month '
-                    'cycle. Each company carries its own commitment, separate '
-                    'from its org type and from the platform.'
-                : 'Every load this company was a party to — as the mine, the '
-                    'buyer or the transporter. Its own commitment, independent '
-                    'of the org-type and platform targets.',
-            icon: Icons.apartment_rounded,
-            scopeLabel: 'BY COMPANY',
-            headline: data == null ? null : TargetsHeadline.of(data),
-            selector: _picker(t, companies, orgs.isLoading),
-          ),
-          Expanded(
-            child: scope == null
-                ? _empty(t, orgs.isLoading)
-                : TargetsWorkspace(key: ValueKey(scope), scope: scope),
-          ),
-        ],
+      child: TargetsPage(
+        band: TargetsBand(
+          title: name == null ? 'Company targets' : '$name targets',
+          subtitle: name == null
+              ? 'Pick a company to set its monthly targets and its 12-month '
+                  'cycle. Each company carries its own commitment, separate '
+                  'from its org type and from the platform.'
+              : 'Every load this company was a party to — as the mine, the '
+                  'buyer or the transporter. Its own commitment, independent '
+                  'of the org-type and platform targets.',
+          icon: Icons.apartment_rounded,
+          scopeLabel: 'BY COMPANY',
+          headline: data == null ? null : TargetsHeadline.of(data),
+          selector: _picker(t, companies, orgs.isLoading),
+        ),
+        body: scope == null
+            ? _empty(t, orgs.isLoading)
+            : TargetsWorkspace(key: ValueKey(scope), scope: scope),
       ),
     );
   }
@@ -128,22 +125,14 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
                 child: TextField(
                   controller: _search,
                   onChanged: (v) => setState(() => _query = v),
-                  style: TextStyle(
-                    fontFamily: MlGlass.sans,
-                    fontSize: 12,
-                    color: t.inkHi,
-                  ),
+                  style: context.mlText.bodySmall.copyWith(color: t.inkHi),
                   cursorColor: t.accent,
                   decoration: InputDecoration(
                     isDense: true,
                     hintText: loading
                         ? 'Loading organizations…'
                         : 'Search ${companies.length} organizations',
-                    hintStyle: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 12,
-                      color: t.inkLo,
-                    ),
+                    hintStyle: context.mlText.bodySmall.copyWith(color: t.inkLo),
                     prefixIcon:
                         Icon(Icons.search_rounded, size: 15, color: t.inkLo),
                     prefixIconConstraints:
@@ -195,10 +184,9 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
           const SizedBox(height: 9),
           Text(
             '$hidden more — narrow the search to see them',
-            style: TextStyle(
-              fontFamily: MlGlass.sans,
-              fontSize: 10,
+            style: context.mlText.labelSmall.copyWith(
               color: t.inkXlo,
+              fontWeight: FontWeight.w400,
             ),
           ),
         ],
@@ -206,11 +194,7 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
           const SizedBox(height: 12),
           Text(
             'No organization matches "$_query".',
-            style: TextStyle(
-              fontFamily: MlGlass.sans,
-              fontSize: 12,
-              color: t.inkMid,
-            ),
+            style: context.mlText.bodySmall.copyWith(color: t.inkMid),
           ),
         ],
       ],
@@ -232,11 +216,9 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
             const SizedBox(height: 14),
             Text(
               loading ? 'Loading organizations…' : 'Choose a company',
-              style: TextStyle(
-                fontFamily: MlGlass.sans,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
+              style: context.mlText.titleSmall.copyWith(
                 color: t.inkMid,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 6),
@@ -244,11 +226,9 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
               'Targets are set per company. Nothing is created until one is '
               'picked, so browsing here changes nothing.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: MlGlass.sans,
-                fontSize: 12,
-                height: 1.55,
+              style: context.mlText.bodySmall.copyWith(
                 color: t.inkXlo,
+                height: 1.55,
               ),
             ),
           ],

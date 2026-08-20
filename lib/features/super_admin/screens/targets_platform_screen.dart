@@ -24,20 +24,18 @@ class TargetsPlatformScreen extends ConsumerWidget {
 
     return Container(
       color: t.bg0,
-      child: Column(
-        children: [
-          TargetsBand(
-            title: 'Platform targets',
-            subtitle: 'Every organisation combined. Tonnage is weighbridge net '
-                'mass — gross less tare, the figure recon and billing already '
-                'run on — so a target here is measured against the same number '
-                'the waybills carry.',
-            icon: Icons.public_rounded,
-            scopeLabel: 'PLATFORM-WIDE',
-            headline: data == null ? null : TargetsHeadline.of(data),
-          ),
-          const Expanded(child: TargetsWorkspace(scope: scope)),
-        ],
+      child: TargetsPage(
+        band: TargetsBand(
+          title: 'Platform targets',
+          subtitle: 'Every organisation combined. Tonnage is weighbridge net '
+              'mass — gross less tare, the figure recon and billing already '
+              'run on — so a target here is measured against the same number '
+              'the waybills carry.',
+          icon: Icons.public_rounded,
+          scopeLabel: 'PLATFORM-WIDE',
+          headline: data == null ? null : TargetsHeadline.of(data),
+        ),
+        body: const TargetsWorkspace(scope: scope),
       ),
     );
   }

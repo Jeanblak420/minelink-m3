@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/logger.dart';
 import 'package:flutter_application_1/core/widgets/app_navigation_back_button.dart';
 import 'package:flutter_application_1/core/widgets/osm_tile_layer.dart';
@@ -185,18 +186,14 @@ class _MirrorSearchBox extends ConsumerWidget {
         fieldViewBuilder: (context, controller, focus, onSubmit) => TextField(
           controller: controller,
           focusNode: focus,
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: 13,
+          style: context.mlText.bodyMedium.copyWith(
             color: MlControlRoom.textStrong,
           ),
           cursorColor: MlControlRoom.blue,
           decoration: InputDecoration(
             isDense: true,
             hintText: 'Search assets, routes, users',
-            hintStyle: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 13,
+            hintStyle: context.mlText.bodyMedium.copyWith(
               color: MlControlRoom.textMuted,
             ),
             prefixIcon: Icon(Icons.search, size: 18, color: MlControlRoom.textMuted),
@@ -261,11 +258,9 @@ class _MirrorSearchBox extends ConsumerWidget {
                                     h.title,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontFamily: MlTokens.fontSans,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
+                                    style: context.mlText.titleSmall.copyWith(
                                       color: MlControlRoom.textStrong,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                   if (h.sub.isNotEmpty)
@@ -273,9 +268,7 @@ class _MirrorSearchBox extends ConsumerWidget {
                                       h.sub,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontFamily: MlTokens.fontSans,
-                                        fontSize: 12,
+                                      style: context.mlText.bodySmall.copyWith(
                                         color: MlControlRoom.textMuted,
                                       ),
                                     ),
@@ -295,11 +288,9 @@ class _MirrorSearchBox extends ConsumerWidget {
                               ),
                               child: Text(
                                 h.kind,
-                                style: TextStyle(
-                                  fontFamily: MlTokens.fontSans,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
+                                style: context.mlText.labelSmall.copyWith(
                                   color: MlControlRoom.textMuted,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
@@ -498,11 +489,7 @@ class _HeroHeader extends StatelessWidget {
       children: [
         Text(
           'ORGANIZATION INSIGHTS',
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.6,
+          style: context.mlText.overline.copyWith(
             color: MlControlRoom.textMuted,
           ),
         ),
@@ -532,11 +519,9 @@ class _HeroHeader extends StatelessWidget {
               ),
               child: Text(
                 company.orgType.label,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.labelMedium.copyWith(
                   color: chip,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -546,9 +531,7 @@ class _HeroHeader extends StatelessWidget {
         Text(
           'Full-screen read-only mirror of this organization\'s workspace — '
           'live operational data, recon records and positions.',
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: 13,
+          style: context.mlText.bodyMedium.copyWith(
             color: MlControlRoom.textMuted,
           ),
         ),
@@ -569,10 +552,7 @@ class _HeroHeader extends StatelessWidget {
           ),
           child: Text(
             'Read-only mirror',
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+            style: context.mlText.titleSmall.copyWith(
               color: MlControlRoom.textMuted,
             ),
           ),
@@ -648,9 +628,7 @@ class _ReadOnlyBanner extends StatelessWidget {
             Expanded(
               child: Text.rich(
                 TextSpan(
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 13,
+                  style: context.mlText.bodyMedium.copyWith(
                     color: MlControlRoom.textMuted,
                   ),
                   children: [
@@ -680,11 +658,9 @@ class _ReadOnlyBanner extends StatelessWidget {
               ),
               child: Text(
                 'Permissions active',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.labelMedium.copyWith(
                   color: MlControlRoom.textMuted,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -962,20 +938,16 @@ class _DashboardBody extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
+            style: context.mlText.titleMedium.copyWith(
               color: MlControlRoom.textStrong,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
         if (trailing != null)
           Text(
             trailing,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 12,
+            style: context.mlText.bodySmall.copyWith(
               color: MlControlRoom.textMuted,
             ),
           ),
@@ -1056,11 +1028,9 @@ class _DashboardBody extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+          style: context.mlText.labelMedium.copyWith(
             color: color,
+            fontWeight: FontWeight.w700,
           ),
         ),
       );
@@ -1080,19 +1050,15 @@ class _DashboardBody extends StatelessWidget {
                   children: [
                     Text(
                       'Operational snapshot',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
+                      style: context.mlText.titleMedium.copyWith(
                         color: MlControlRoom.textStrong,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       'This calendar month, from the company\'s live records',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 12,
+                      style: context.mlText.bodySmall.copyWith(
                         color: MlControlRoom.textMuted,
                       ),
                     ),
@@ -1219,11 +1185,9 @@ class _DashboardBody extends StatelessWidget {
           children: [
             Text(
               value,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
+              style: context.mlText.titleLarge.copyWith(
                 color: MlControlRoom.textStrong,
+                fontWeight: FontWeight.w800,
               ),
             ),
             const SizedBox(height: 2),
@@ -1231,10 +1195,9 @@ class _DashboardBody extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 11,
+              style: context.mlText.labelSmall.copyWith(
                 color: MlControlRoom.textMuted,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ],
@@ -1276,11 +1239,9 @@ class _DashboardBody extends StatelessWidget {
                   child: Center(
                     child: Text(
                       pct == null ? '—' : '$pct%',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
+                      style: context.mlText.titleMedium.copyWith(
                         color: MlControlRoom.textStrong,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
@@ -1293,29 +1254,24 @@ class _DashboardBody extends StatelessWidget {
                   children: [
                     Text(
                       'Waybill completion',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 12,
+                      style: context.mlText.bodySmall.copyWith(
                         color: MlControlRoom.textMuted,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       pace,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
+                      style: context.mlText.titleMedium.copyWith(
                         color: MlControlRoom.textStrong,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       'This month\'s done vs open',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 11,
+                      style: context.mlText.labelSmall.copyWith(
                         color: MlControlRoom.textMuted,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
@@ -1395,12 +1351,10 @@ class _DashboardBody extends StatelessWidget {
                           children: [
                             Text(
                               d.tons == 0 ? '0' : _tons.format(d.tons),
-                              style: TextStyle(
-                                fontFamily: MlTokens.fontMono,
-                                fontSize: 11,
-                                color: d.tons == 0
-                                    ? MlControlRoom.textMuted.withValues(alpha: 0.6)
-                                    : MlControlRoom.textMuted,
+                              style: context.mlText.code(
+                                color: d.tons == 0 ? MlControlRoom.textMuted.withValues(alpha: 0.6) : MlControlRoom.textMuted,
+                                size: 11,
+                                weight: FontWeight.w400,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -1420,10 +1374,9 @@ class _DashboardBody extends StatelessWidget {
                             const SizedBox(height: 8),
                             Text(
                               DateFormat('EE').format(d.day).substring(0, 2),
-                              style: TextStyle(
-                                fontFamily: MlTokens.fontSans,
-                                fontSize: 11,
+                              style: context.mlText.labelSmall.copyWith(
                                 color: MlControlRoom.textMuted,
+                                fontWeight: FontWeight.w400,
                               ),
                             ),
                           ],
@@ -1457,20 +1410,16 @@ class _DashboardBody extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 13,
+                style: context.mlText.bodyMedium.copyWith(
                   color: MlControlRoom.textMuted,
                 ),
               ),
             ),
             Text(
               value,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
+              style: context.mlText.titleMedium.copyWith(
                 color: MlControlRoom.textStrong,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ],
@@ -1548,11 +1497,9 @@ class _DashboardBody extends StatelessWidget {
                 children: [
                   Text(
                     '$stamp — $who$tons',
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+                    style: context.mlText.titleSmall.copyWith(
                       color: MlControlRoom.textStrong,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   if (route.isNotEmpty) ...[
@@ -1561,9 +1508,7 @@ class _DashboardBody extends StatelessWidget {
                       route,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 12,
+                      style: context.mlText.bodySmall.copyWith(
                         color: MlControlRoom.textMuted,
                       ),
                     ),
@@ -1590,9 +1535,7 @@ class _DashboardBody extends StatelessWidget {
           if (recent.isEmpty)
             Text(
               rowsLoading ? 'Loading records…' : 'No captured loads yet.',
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 13,
+              style: context.mlText.bodyMedium.copyWith(
                 color: MlControlRoom.textMuted,
               ),
             )
@@ -1632,20 +1575,16 @@ class _DashboardBody extends StatelessWidget {
                   children: [
                     Text(
                       'Fleet activity map',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
+                      style: context.mlText.titleMedium.copyWith(
                         color: MlControlRoom.textStrong,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       'Live GPS positions for every vehicle on this '
                       'organization\'s active trips.',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 12,
+                      style: context.mlText.bodySmall.copyWith(
                         color: MlControlRoom.textMuted,
                       ),
                     ),
@@ -1744,9 +1683,7 @@ class _DashboardBody extends StatelessWidget {
           if (alerts.isEmpty)
             Text(
               'Nothing to report yet.',
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 13,
+              style: context.mlText.bodyMedium.copyWith(
                 color: MlControlRoom.textMuted,
               ),
             )
@@ -1773,19 +1710,15 @@ class _DashboardBody extends StatelessWidget {
                         children: [
                           Text(
                             alerts[i].title,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontSans,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
+                            style: context.mlText.titleSmall.copyWith(
                               color: MlControlRoom.textStrong,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 1),
                           Text(
                             alerts[i].sub,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontSans,
-                              fontSize: 12,
+                            style: context.mlText.bodySmall.copyWith(
                               color: MlControlRoom.textMuted,
                             ),
                           ),
@@ -1838,6 +1771,7 @@ class _MirrorLiveMapPreview extends ConsumerWidget {
           ),
         ),
         error: (_, _) => _placeholder(
+          context,
           icon: Icons.wifi_off_rounded,
           title: 'Live map unavailable',
           message: 'Vehicle positions could not be loaded right now.',
@@ -1846,6 +1780,7 @@ class _MirrorLiveMapPreview extends ConsumerWidget {
           final withFix = trips.where((t) => t.hasFix).toList();
           if (trips.isEmpty) {
             return _placeholder(
+              context,
               icon: Icons.local_shipping_outlined,
               title: 'No active trips right now',
               message: 'Trucks appear here the moment a trip is scheduled; '
@@ -1854,6 +1789,7 @@ class _MirrorLiveMapPreview extends ConsumerWidget {
           }
           if (withFix.isEmpty) {
             return _placeholder(
+              context,
               icon: Icons.gps_off_outlined,
               title:
                   '${trips.length} active trip${trips.length == 1 ? '' : 's'} — '
@@ -1881,7 +1817,7 @@ class _MirrorLiveMapPreview extends ConsumerWidget {
     );
   }
 
-  Widget _placeholder({
+  Widget _placeholder(BuildContext context, {
     required IconData icon,
     required String title,
     required String message,
@@ -1898,20 +1834,16 @@ class _MirrorLiveMapPreview extends ConsumerWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.titleSmall.copyWith(
                   color: MlControlRoom.textStrong,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 12,
+                style: context.mlText.bodySmall.copyWith(
                   color: MlControlRoom.textMuted,
                 ),
               ),
@@ -2019,11 +1951,9 @@ class _MirrorLiveMapPreview extends ConsumerWidget {
                       live == trips.length
                           ? '$live live'
                           : '$live of ${trips.length} live',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                      style: context.mlText.labelMedium.copyWith(
                         color: MlControlRoom.textStrong,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
@@ -2097,9 +2027,7 @@ class _KpiTileState extends State<_KpiTile> {
                         widget.label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 12,
+                        style: context.mlText.bodySmall.copyWith(
                           color: MlControlRoom.textMuted,
                         ),
                       ),
@@ -2132,9 +2060,7 @@ class _KpiTileState extends State<_KpiTile> {
                   widget.sub,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 12,
+                  style: context.mlText.bodySmall.copyWith(
                     color: MlControlRoom.textMuted,
                   ),
                 ),

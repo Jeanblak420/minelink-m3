@@ -39,7 +39,9 @@ class _UserDetailLine extends StatelessWidget {
         children: [
           SizedBox(
             width: 118,
-            child: Text(label, style: TextStyle(fontSize: 13, color: v)),
+            child: Text(label, style: context.mlText.bodyMedium.copyWith(
+              color: v,
+            )),
           ),
           Expanded(
             child: Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
@@ -159,11 +161,9 @@ class _OrganizationDetailScreenState extends ConsumerState<OrganizationDetailScr
                 Expanded(
                   child: Text(
                     title,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 18,
+                    style: context.mlText.titleMedium.copyWith(
                       color: MlSemantic.of(context).textStrong,
+                      fontWeight: FontWeight.w800,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -414,11 +414,8 @@ class _OverviewTab extends ConsumerWidget {
                           status.isActive
                               ? 'No token expiry on file'
                               : 'See access token section below',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                          style: context.mlText.bodyMedium.copyWith(
+                            color: Theme.of(context) .colorScheme .onSurfaceVariant,
                           ),
                         ),
                     ),
@@ -427,11 +424,9 @@ class _OverviewTab extends ConsumerWidget {
               const SizedBox(height: 20),
               Text(
                 'Company',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: MlTokens.fsTitle,
-                  fontWeight: FontWeight.w800,
+                style: context.mlText.titleMedium.copyWith(
                   color: MlSemantic.of(context).textStrong,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 8),
@@ -455,11 +450,9 @@ class _OverviewTab extends ConsumerWidget {
               const Divider(height: 32),
               Text(
                 'Account owner (login)',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: MlTokens.fsTitle,
-                  fontWeight: FontWeight.w800,
+                style: context.mlText.titleMedium.copyWith(
                   color: MlSemantic.of(context).textStrong,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 8),
@@ -469,11 +462,9 @@ class _OverviewTab extends ConsumerWidget {
               const Divider(height: 32),
               Text(
                 'Seats',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: MlTokens.fsTitle,
-                  fontWeight: FontWeight.w800,
+                style: context.mlText.titleMedium.copyWith(
                   color: MlSemantic.of(context).textStrong,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 8),
@@ -536,20 +527,20 @@ class _ChatConnectionsSection extends ConsumerWidget {
       children: [
         Text(
           'Chat connections',
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: MlTokens.fsTitle,
-            fontWeight: FontWeight.w800,
+          style: context.mlText.titleMedium.copyWith(
             color: semantic.textStrong,
+            fontWeight: FontWeight.w800,
           ),
         ),
         const SizedBox(height: 4),
         Text('Companies this organization can message in MineLink Messenger.',
-            style: TextStyle(fontSize: 13, color: semantic.textFaint)),
+            style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint)),
         const SizedBox(height: 12),
         if (mine.isEmpty)
           Text('No chat links yet.',
-              style: TextStyle(fontSize: 13, color: semantic.textFaint))
+              style: context.mlText.bodyMedium.copyWith(
+                color: semantic.textFaint,
+              ))
         else
           for (final c in mine)
             Builder(builder: (context) {
@@ -567,8 +558,9 @@ class _ChatConnectionsSection extends ConsumerWidget {
                                   companyId: otherId, name: nameOf(otherId))),
                           const SizedBox(width: 8),
                           Text('· ${companyOrgTypeLabel(typeOf(otherId))}',
-                              style: TextStyle(
-                                  fontSize: 12, color: semantic.textFaint)),
+                              style: context.mlText.bodySmall.copyWith(
+                                color: semantic.textFaint,
+                              )),
                         ],
                       ),
                     ),
@@ -589,10 +581,10 @@ class _ChatConnectionsSection extends ConsumerWidget {
             }),
         const SizedBox(height: 16),
         Text('Link a company for chat',
-            style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: semantic.textStrong)),
+            style: context.mlText.titleSmall.copyWith(
+              color: semantic.textStrong,
+              fontWeight: FontWeight.w700,
+            )),
         const SizedBox(height: 8),
         Builder(builder: (context) {
           final linkedIds = {
@@ -606,7 +598,9 @@ class _ChatConnectionsSection extends ConsumerWidget {
                 companies.length < 2
                     ? 'Add another company to create a link.'
                     : 'All other companies are already linked.',
-                style: TextStyle(fontSize: 13, color: semantic.textFaint));
+                style: context.mlText.bodyMedium.copyWith(
+                  color: semantic.textFaint,
+                ));
           }
           return CompanyLinkBuilder(
             companies: companies,
@@ -761,14 +755,15 @@ class _UsersTab extends ConsumerWidget {
                                     const SizedBox(height: 4),
                                     Text(
                                       'Role: ${u['role'] as String? ?? 'unassigned'}',
-                                      style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                      style: context.mlText.bodyMedium.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      ),
                                     ),
                                     if (_UsersTab._profileEmail(u) case final em?) ...[
                                       const SizedBox(height: 4),
                                       Text(
                                         em,
-                                        style: TextStyle(
-                                          fontSize: 13,
+                                        style: context.mlText.bodyMedium.copyWith(
                                           color: Theme.of(context).colorScheme.primary,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -1120,12 +1115,8 @@ class _TokensTabState extends ConsumerState<_TokensTab> {
                                     DataCell(
                                       Text(
                                         formatTokenExpiresRemaining(t.expiresAt, compact: true),
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: t.expiresAt.isBefore(DateTime.now())
-                                              ? Theme.of(context).colorScheme.error
-                                              : Theme.of(context).colorScheme.primary,
-                                          fontWeight: FontWeight.w600,
+                                        style: context.mlText.labelMedium.copyWith(
+                                          color: t.expiresAt.isBefore(DateTime.now()) ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary,
                                         ),
                                       ),
                                     ),
@@ -1266,19 +1257,16 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
                     : 'This company has used all ${allowance['limit'] ?? 2} '
                         'reassignments for the current '
                         '${allowance['period_days'] ?? 30}-day window.',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: remaining > 0
-                      ? Theme.of(ctx).colorScheme.onSurfaceVariant
-                      : Theme.of(ctx).colorScheme.error,
+                style: context.mlText.bodyMedium.copyWith(
+                  color: remaining > 0 ? Theme.of(ctx).colorScheme.onSurfaceVariant : Theme.of(ctx).colorScheme.error,
                 ),
               ),
               if (seat.roleBinding != null) ...[
                 const SizedBox(height: 6),
                 Text('This seat is bound to ${seat.roleBinding}.',
-                    style: TextStyle(
-                        fontSize: 13,
-                        color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                    )),
               ],
               const SizedBox(height: 12),
               Flexible(
@@ -1460,12 +1448,16 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
                                     : s.roleBinding != null
                                         ? 'No assignee · bound to ${s.roleBinding}'
                                         : 'No assignee',
-                                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                style: context.mlText.bodyMedium.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
                               ),
                             ),
                             trailing: Text(
                               s.status,
-                              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                              style: context.mlText.bodySmall.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
                             ),
                             children: [
                               if (s.isOccupied)
@@ -1564,17 +1556,17 @@ class _FilterStatCard extends StatelessWidget {
                 children: [
                   Text(
                     value,
-                    style: TextStyle(fontFamily: MlTokens.fontMono, fontSize: 24, fontWeight: FontWeight.w700, color: color),
+                    style: context.mlText.code(
+                      color: color,
+                      size: 24,
+                      weight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     label,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                    style: context.mlText.labelSmall.copyWith(
                       color: semantic.textMuted,
-                      letterSpacing: 0.4,
                     ),
                   ),
                 ],

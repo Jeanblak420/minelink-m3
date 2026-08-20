@@ -1,5 +1,6 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/design/charts/ml_sparkline.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_console_palettes.dart';
@@ -42,11 +43,9 @@ class SaHeaderLink extends StatelessWidget {
       onTap: onTap,
       child: Text(
         '$label →',
-        style: TextStyle(
-          fontFamily: kConsoleSans,
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
+        style: context.mlText.titleSmall.copyWith(
           color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -79,13 +78,7 @@ class SaSectionHeader extends StatelessWidget {
       title,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        fontFamily: kEditorialSerif,
-        fontSize: 19,
-        fontWeight: FontWeight.w500,
-        letterSpacing: -0.19,
-        color: s.textStrong,
-      ),
+      style: context.mlText.editorialMedium.copyWith(color: s.textStrong),
     );
 
     final metaText = meta == null
@@ -94,11 +87,7 @@ class SaSectionHeader extends StatelessWidget {
             meta!,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: kConsoleSans,
-              fontSize: 12,
-              color: s.textFaint,
-            ),
+            style: context.mlText.bodySmall.copyWith(color: s.textFaint),
           );
 
     // The head tools were three non-flex children after a `Spacer`, which is
@@ -157,11 +146,7 @@ class SaSectionHeader extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: TextStyle(
-                fontFamily: kConsoleSans,
-                color: s.textMuted,
-                fontSize: 13,
-              ),
+              style: context.mlText.bodyMedium.copyWith(color: s.textMuted),
             ),
           ],
         );
@@ -193,12 +178,10 @@ class SaNewPill extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             'NEW',
-            style: TextStyle(
-              fontFamily: kConsoleSans,
-              fontSize: 11,
+            style: context.mlText.labelSmall.copyWith(
+              color: fg,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.66,
-              color: fg,
             ),
           ),
         ],
@@ -302,11 +285,7 @@ class SaOrgTypeCard extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: TextStyle(
-                            fontFamily: kEditorialSerif,
-                            fontSize: 19,
-                            fontWeight: FontWeight.w500,
-                            height: 1.25,
+                          style: context.mlText.editorialMedium.copyWith(
                             color: s.textStrong,
                           ),
                         ),
@@ -369,11 +348,10 @@ class SaOrgTypeCard extends StatelessWidget {
                                 m.$2,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontFamily: MlTokens.fontMono,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                                style: context.mlText.code(
                                   color: s.textStrong,
+                                  size: 14,
+                                  weight: FontWeight.w600,
                                 ),
                               ),
                             ],
@@ -495,12 +473,10 @@ class SaStatTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           text: TextSpan(
-                            style: TextStyle(
-                              fontFamily: kEditorialSerif,
-                              fontSize: 32,
-                              fontWeight: FontWeight.w600,
-                              height: 1.0,
+                            style: context.mlText.figure(
                               color: s.textStrong,
+                              size: 32,
+                              height: 1.0,
                             ),
                             children: [
                               TextSpan(text: value),
@@ -513,11 +489,9 @@ class SaStatTile extends StatelessWidget {
                                     padding: const EdgeInsets.only(left: 2),
                                     child: Text(
                                       unit!,
-                                      style: TextStyle(
-                                        fontFamily: kEditorialSerif,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                                      style: context.mlText.editorialSmall.copyWith(
                                         color: s.textFaint,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ),
@@ -530,11 +504,9 @@ class SaStatTile extends StatelessWidget {
                           label,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: kConsoleSans,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
+                          style: context.mlText.titleSmall.copyWith(
                             color: s.textStrong,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -542,10 +514,10 @@ class SaStatTile extends StatelessWidget {
                           sublabel,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontMono,
-                            fontSize: 12,
+                          style: context.mlText.code(
                             color: s.textFaint,
+                            size: 12,
+                            weight: FontWeight.w400,
                           ),
                         ),
                       ],
@@ -622,11 +594,10 @@ class _Delta extends StatelessWidget {
         ],
         Text(
           suffix ? '$delta · 24h' : delta,
-          style: TextStyle(
-            fontFamily: MlTokens.fontMono,
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
+          style: context.mlText.code(
             color: c,
+            size: 11,
+            weight: FontWeight.w700,
           ),
         ),
       ],

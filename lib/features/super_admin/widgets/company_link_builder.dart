@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/chat/providers/messaging_providers.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -118,10 +119,10 @@ class _CompanyLinkBuilderState extends ConsumerState<CompanyLinkBuilder> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(title,
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: semantic.textFaint)),
+                style: context.mlText.titleSmall.copyWith(
+                  color: semantic.textFaint,
+                  fontWeight: FontWeight.w700,
+                )),
             const SizedBox(height: 8),
             _GroupedCompanyList(
               companies: widget.companies,
@@ -181,7 +182,9 @@ class _CompanyLinkBuilderState extends ConsumerState<CompanyLinkBuilder> {
         const SizedBox(height: 14),
         RichText(
           text: TextSpan(
-            style: TextStyle(fontSize: 14, color: semantic.textStrong),
+            style: context.mlText.bodyMedium.copyWith(
+              color: semantic.textStrong,
+            ),
             children: [
               const TextSpan(text: 'Connect '),
               TextSpan(
@@ -246,11 +249,10 @@ class _GroupedCompanyList extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
               child: Text(
                 companyOrgTypeLabel(t == 'other' ? null : t).toUpperCase(),
-                style: TextStyle(
-                    fontSize: 11,
-                    letterSpacing: 0.6,
-                    fontWeight: FontWeight.w800,
-                    color: semantic.textFaint),
+                style: context.mlText.labelSmall.copyWith(
+                  color: semantic.textFaint,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
             for (final c in groups[t]!)
@@ -310,11 +312,9 @@ class _CompanyRow extends StatelessWidget {
               Expanded(
                 child: Text(name,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight:
-                          selected ? FontWeight.w700 : FontWeight.w500,
+                    style: context.mlText.titleSmall.copyWith(
                       color: semantic.textStrong,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                     )),
               ),
             ],

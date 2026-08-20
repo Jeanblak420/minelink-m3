@@ -1,11 +1,56 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screens_core.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_targets_charts.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_targets_core.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/targets/targets_workspace.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
+
+/// The page shape all three targets screens share: a band, then a workspace
+/// filling what is left.
+///
+/// The **cap** is the reason this is a widget rather than three copies of
+/// `Column(children: [band, Expanded(body)])`.
+///
+/// An unflexed child of a `Column` does not shrink — it takes its natural
+/// height and, if that is more than the Column has, it overflows. At text scale
+/// 2.0 on a 700px console the org-type band is taller than the viewport on its
+/// own: a paragraph of subtitle, a three-pill selector and a four-figure stats
+/// row. Measured overflow, 60px, and the workspace below it pushed off the
+/// screen entirely.
+///
+/// Half the viewport, scrolled internally. Every ordinary text size is
+/// unaffected — the band is nowhere near half a screen at 1.0 — and the extreme
+/// one degrades into a scroll rather than into content clipped below a fold
+/// with nothing to say it is there.
+///
+/// The platform and company screens do not overflow today (neither carries the
+/// org-type selector) and use this anyway: the shape is the fault, not the one
+/// screen that happened to cross the line first.
+class TargetsPage extends StatelessWidget {
+  const TargetsPage({super.key, required this.band, required this.body});
+
+  final Widget band;
+  final Widget body;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, box) => Column(
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight:
+                    box.hasBoundedHeight ? box.maxHeight / 2 : double.infinity,
+              ),
+              child: SingleChildScrollView(child: band),
+            ),
+            Expanded(child: body),
+          ],
+        ),
+      );
+}
 
 /// The band above each targets screen: what you are looking at on the left,
 /// how it is going on the right.
@@ -53,8 +98,8 @@ class TargetsBand extends StatelessWidget {
           children: [
             LayoutBuilder(
               builder: (context, box) {
-                final identity = _identity(t);
-                final stats = _stats(t);
+                final identity = _identity(context, t);
+                final stats = _stats(context, t);
                 if (box.maxWidth < 720) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +133,7 @@ class TargetsBand extends StatelessWidget {
     );
   }
 
-  Widget _identity(MlGlass t) => Row(
+  Widget _identity(BuildContext context, MlGlass t) => Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           MlWell(icon: icon, color: t.accent2, size: 38, iconSize: 18, radius: 10),
@@ -104,9 +149,7 @@ class TargetsBand extends StatelessWidget {
                       child: Text(
                         title,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: MlGlass.display,
-                          fontSize: 21,
+                        style: context.mlText.editorialMedium.copyWith(
                           color: t.inkHi,
                         ),
                       ),
@@ -122,11 +165,9 @@ class TargetsBand extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    fontFamily: MlGlass.sans,
-                    fontSize: 12,
-                    height: 1.5,
+                  style: context.mlText.bodySmall.copyWith(
                     color: t.inkMid,
+                    height: 1.5,
                   ),
                 ),
               ],
@@ -135,7 +176,7 @@ class TargetsBand extends StatelessWidget {
         ],
       );
 
-  Widget _stats(MlGlass t) {
+  Widget _stats(BuildContext context, MlGlass t) {
     final h = headline;
     if (h == null) {
       return SizedBox(
@@ -143,10 +184,9 @@ class TargetsBand extends StatelessWidget {
         child: Center(
           child: Text(
             'reading…',
-            style: TextStyle(
-              fontFamily: MlGlass.sans,
-              fontSize: 11,
+            style: context.mlText.labelSmall.copyWith(
               color: t.inkLo,
+              fontWeight: FontWeight.w400,
             ),
           ),
         ),
@@ -158,9 +198,10 @@ class TargetsBand extends StatelessWidget {
       spacing: 22,
       runSpacing: 12,
       children: [
-        _stat(t, h.periodLabel.toUpperCase(), '${mlTons(h.actual)} t',
+        _stat(context, t, h.periodLabel.toUpperCase(), '${mlTons(h.actual)} t',
             'moved so far', t.inkHi),
         _stat(
+          context,
           t,
           'TARGET',
           h.target > 0 ? '${mlTons(h.target, decimals: 0)} t' : 'not set',
@@ -168,18 +209,21 @@ class TargetsBand extends StatelessWidget {
           h.target > 0 ? t.inkHi : t.inkLo,
         ),
         _stat(
+          context,
           t,
           'ATTAINMENT',
           h.target > 0 ? '${(h.attainment * 100).round()}%' : '—',
           h.outcome.label.toLowerCase(),
           band,
         ),
-        _stat(t, 'CYCLE', '${h.elapsedDays}/365', h.cycleLabel, t.accent2),
+        _stat(context, t, 'CYCLE', '${h.elapsedDays}/365', h.cycleLabel,
+            t.accent2),
       ],
     );
   }
 
   Widget _stat(
+    BuildContext context,
     MlGlass t,
     String label,
     String value,
@@ -214,10 +258,9 @@ class TargetsBand extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             sub,
-            style: TextStyle(
-              fontFamily: MlGlass.sans,
-              fontSize: 10,
+            style: context.mlText.labelSmall.copyWith(
               color: t.inkXlo,
+              fontWeight: FontWeight.w400,
             ),
           ),
         ],
@@ -293,10 +336,7 @@ class TargetsScopePill extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    fontFamily: MlGlass.sans,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                  style: context.mlText.labelMedium.copyWith(
                     color: selected ? t.accent2 : t.inkMid,
                   ),
                 ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/recon_dispute.dart';
 import 'package:flutter_application_1/features/portal/services/dispute_service.dart';
 import 'package:flutter_application_1/features/portal/widgets/dispute_widgets.dart';
@@ -173,7 +174,9 @@ class _DisputeRowCard extends StatelessWidget {
                     const SizedBox(width: 3),
                     Text(
                       '${d.commentCount}',
-                      style: TextStyle(fontSize: 12, color: semantic.textFaint),
+                      style: context.mlText.bodySmall.copyWith(
+                        color: semantic.textFaint,
+                      ),
                     ),
                   ],
                 ),
@@ -183,16 +186,16 @@ class _DisputeRowCard extends StatelessWidget {
           Text(
             '${d.sourceName ?? '—'} → ${d.customerName ?? '—'}'
             '${d.transporterName != null ? ' · ${d.transporterName}' : ''}',
-            style: TextStyle(fontSize: 13, color: semantic.textBody),
+            style: context.mlText.bodyMedium.copyWith(color: semantic.textBody),
           ),
           const SizedBox(height: 4),
           Text(
             'Variance ${_t(d.variance)}'
             '${d.claimedTons != null ? ' · claimed ${_t(d.claimedTons)}' : ''}',
-            style: TextStyle(
-              fontFamily: MlTokens.fontMono,
-              fontSize: 13,
+            style: context.mlText.code(
               color: semantic.textMuted,
+              size: 13,
+              weight: FontWeight.w400,
             ),
           ),
           const SizedBox(height: 6),
@@ -210,7 +213,9 @@ class _DisputeRowCard extends StatelessWidget {
                   'by ${d.raisedByName ?? '—'}'
                   '${d.raisedByCompanyName != null ? ' · ${d.raisedByCompanyName}' : ''}'
                   ' · ${dateFmt.format(MlTime.sast(d.createdAt))}',
-                  style: TextStyle(fontSize: 12, color: semantic.textFaint),
+                  style: context.mlText.bodySmall.copyWith(
+                    color: semantic.textFaint,
+                  ),
                 ),
               ),
               MlButton.outline(

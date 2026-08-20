@@ -15,6 +15,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'minelink_targets_core.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 
 Color mlOutcomeColor(MlGlass t, MlTargetOutcome o) {
@@ -86,7 +88,7 @@ class MlShortTermChart extends StatelessWidget {
         const SizedBox(height: 8),
         _axis(t),
         const SizedBox(height: 10),
-        _legend(t),
+        _legend(context, t),
       ],
     );
   }
@@ -107,11 +109,11 @@ class MlShortTermChart extends StatelessWidget {
                       child: Text(
                         data.months[i].shortLabel,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: MlGlass.mono,
-                          fontSize: 8,
-                          letterSpacing: 0.8,
+                        style: context.mlText.code(
                           color: data.isPlanned(i) ? t.accent2 : t.inkLo,
+                          size: 8,
+                          weight: FontWeight.w400,
+                          letterSpacing: 0.8,
                         ),
                       ),
                     ),
@@ -121,15 +123,17 @@ class MlShortTermChart extends StatelessWidget {
         ),
       );
 
-  Widget _legend(MlGlass t) {
+  Widget _legend(BuildContext context, MlGlass t) {
     Widget item(Widget swatch, String label) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             swatch,
             const SizedBox(width: 7),
             Text(label,
-                style: TextStyle(
-                    fontFamily: MlGlass.sans, fontSize: 11, color: t.inkMid)),
+                style: context.mlText.labelSmall.copyWith(
+                  color: t.inkMid,
+                  fontWeight: FontWeight.w400,
+                )),
           ],
         );
 
@@ -301,13 +305,8 @@ class MlHorizonChart extends StatelessWidget {
                       child: Text(
                         kMlHorizons[i].name,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: MlGlass.sans,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: data.horizonReached(kMlHorizons[i])
-                              ? t.ink
-                              : t.inkLo,
+                        style: context.mlText.labelSmall.copyWith(
+                          color: data.horizonReached(kMlHorizons[i]) ? t.ink : t.inkLo,
                         ),
                       ),
                     ),
@@ -398,11 +397,11 @@ class _HorizonPainter extends CustomPainter {
       final tp = TextPainter(
         text: TextSpan(
           text: '${(a * 100).round()}%',
-          style: TextStyle(
-            fontFamily: MlGlass.mono,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+          // MlType, not context.mlText: a CustomPainter has no BuildContext.
+          style: MlType.code(
             color: color,
+            size: 12,
+            weight: FontWeight.w600,
           ),
         ),
         textDirection: TextDirection.ltr,
@@ -459,11 +458,11 @@ class MlCycleChart extends StatelessWidget {
                     child: Text(
                       z.name.toUpperCase(),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: MlGlass.mono,
-                        fontSize: 8,
-                        letterSpacing: 0.8,
+                      style: context.mlText.code(
                         color: t.inkLo,
+                        size: 8,
+                        weight: FontWeight.w400,
+                        letterSpacing: 0.8,
                       ),
                     ),
                   ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/organization_status.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/features/super_admin/utils/organization_search.dart';
@@ -214,11 +215,13 @@ class _OrganizationManagementScreenState
                     _query = v.trim().toLowerCase();
                     _page = 1;
                   }),
-                  style: TextStyle(fontSize: 14, color: s.textBody),
+                  style: context.mlText.bodyMedium.copyWith(color: s.textBody),
                   decoration: InputDecoration(
                     isDense: true,
                     hintText: 'Search name, owner, email, serial…',
-                    hintStyle: TextStyle(fontSize: 14, color: s.textFaint),
+                    hintStyle: context.mlText.bodyMedium.copyWith(
+                      color: s.textFaint,
+                    ),
                     prefixIcon: Icon(
                       Icons.search,
                       size: 18,
@@ -314,7 +317,7 @@ class _OrganizationManagementScreenState
             child: Center(
               child: Text(
                 'No organizations match these filters.',
-                style: TextStyle(color: s.textFaint, fontSize: 14),
+                style: context.mlText.bodyMedium.copyWith(color: s.textFaint),
               ),
             ),
           )
@@ -343,7 +346,7 @@ class _OrganizationManagementScreenState
                 total == 0
                     ? '0'
                     : '${start + 1}–${(start + _perPage).clamp(0, total)} of $total',
-                style: TextStyle(fontSize: 13, color: s.textMuted),
+                style: context.mlText.bodyMedium.copyWith(color: s.textMuted),
               ),
               _dropdown<int>(
                 context: context,
@@ -390,12 +393,10 @@ class _OrganizationManagementScreenState
 
   // ───────────────────────── table ─────────────────────────
   Widget _headerRow(MlSemantic s) {
-    final st = TextStyle(
-      fontFamily: MlTokens.fontSans,
-      fontSize: 11,
+    final st = context.mlText.labelSmall.copyWith(
+      color: s.textFaint,
       fontWeight: FontWeight.w700,
       letterSpacing: 0.7,
-      color: s.textFaint,
     );
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -467,11 +468,9 @@ class _OrganizationManagementScreenState
                           name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                          style: context.mlText.titleSmall.copyWith(
                             color: s.textStrong,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         if (subline.isNotEmpty)
@@ -479,10 +478,10 @@ class _OrganizationManagementScreenState
                             subline,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontMono,
-                              fontSize: 12,
+                            style: context.mlText.code(
                               color: s.textFaint,
+                              size: 12,
+                              weight: FontWeight.w400,
                             ),
                           ),
                       ],
@@ -529,12 +528,9 @@ class _OrganizationManagementScreenState
                           _typeLabel(type).toUpperCase(),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
+                          style: context.mlText.labelSmall.copyWith(
                             color: tc,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -549,11 +545,10 @@ class _OrganizationManagementScreenState
               child: Text(
                 '$seatsUsed/$seatLimit',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.code(
                   color: over ? MlTokens.orange600 : s.textBody,
+                  size: 13,
+                  weight: FontWeight.w700,
                 ),
               ),
             ),
@@ -576,11 +571,10 @@ class _OrganizationManagementScreenState
                       exp.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontMono,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                      style: context.mlText.code(
                         color: exp.expired ? MlTokens.red600 : s.textBody,
+                        size: 13,
+                        weight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -597,7 +591,9 @@ class _OrganizationManagementScreenState
                         exp.date!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 12, color: s.textFaint),
+                        style: context.mlText.bodySmall.copyWith(
+                          color: s.textFaint,
+                        ),
                       ),
                     ),
                   ],
@@ -725,11 +721,9 @@ class _OrganizationManagementScreenState
           ),
           child: Text(
             '$p',
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
+            style: context.mlText.titleSmall.copyWith(
               color: selected ? MlTokens.inkOnFill : s.textBody,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),

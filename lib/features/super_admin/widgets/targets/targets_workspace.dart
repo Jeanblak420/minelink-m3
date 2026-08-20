@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/target_scope.dart';
 import 'package:flutter_application_1/features/super_admin/data/repositories/targets_controller.dart';
 import 'package:flutter_application_1/features/super_admin/providers/targets_provider.dart';
@@ -99,11 +100,7 @@ class _TargetsWorkspaceState extends ConsumerState<TargetsWorkspace> {
               Expanded(
                 child: Text(
                   message,
-                  style: TextStyle(
-                    fontFamily: MlGlass.sans,
-                    fontSize: 13,
-                    color: t.inkHi,
-                  ),
+                  style: context.mlText.bodyMedium.copyWith(color: t.inkHi),
                 ),
               ),
             ],
@@ -168,22 +165,16 @@ class TargetsError extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             title,
-            style: TextStyle(
-              fontFamily: MlGlass.sans,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+            style: context.mlText.titleMedium.copyWith(
               color: t.inkHi,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: MlGlass.sans,
-              fontSize: 12,
-              color: t.inkMid,
-            ),
+            style: context.mlText.bodySmall.copyWith(color: t.inkMid),
           ),
           const SizedBox(height: 16),
           FilledButton(onPressed: onRetry, child: const Text('Retry')),

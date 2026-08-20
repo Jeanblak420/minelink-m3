@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/services/recon_exporter.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
@@ -300,20 +301,18 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
               const SizedBox(width: 9),
               Text(
                 'All mines',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 13,
-                  fontWeight: focused ? FontWeight.w600 : FontWeight.w800,
+                style: context.mlText.titleSmall.copyWith(
                   color: focused ? semantic.textStrong : accent,
+                  fontWeight: focused ? FontWeight.w600 : FontWeight.w800,
                 ),
               ),
               const Spacer(),
               Text(
                 '${entries.length}',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: 11,
+                style: context.mlText.code(
                   color: semantic.textFaint,
+                  size: 11,
+                  weight: FontWeight.w400,
                 ),
               ),
             ],
@@ -339,23 +338,19 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
                     name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 13,
-                      fontWeight: name == _mineFilter
-                          ? FontWeight.w800
-                          : FontWeight.w600,
+                    style: context.mlText.titleSmall.copyWith(
                       color: name == _mineFilter ? accent : semantic.textStrong,
+                      fontWeight: name == _mineFilter ? FontWeight.w800 : FontWeight.w600,
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   '${mines[name]}',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 11,
+                  style: context.mlText.code(
                     color: semantic.textFaint,
+                    size: 11,
+                    weight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -390,11 +385,9 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
                 _mineFilter ?? 'All mines',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.titleSmall.copyWith(
                   color: semantic.textStrong,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -520,11 +513,9 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
       text,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        fontFamily: MlTokens.fontSans,
-        fontSize: 14,
-        fontWeight: strong ? FontWeight.w700 : FontWeight.w400,
+      style: context.mlText.titleSmall.copyWith(
         color: strong ? semantic.textStrong : semantic.textBody,
+        fontWeight: strong ? FontWeight.w700 : FontWeight.w400,
       ),
     );
   }
@@ -545,11 +536,9 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
           top,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: 14,
-            fontWeight: strong ? FontWeight.w700 : FontWeight.w400,
+          style: context.mlText.titleSmall.copyWith(
             color: strong ? semantic.textStrong : semantic.textBody,
+            fontWeight: strong ? FontWeight.w700 : FontWeight.w400,
           ),
         ),
         if (sub != null) ...[
@@ -558,10 +547,9 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
             sub,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 11,
+            style: context.mlText.labelSmall.copyWith(
               color: semantic.textFaint,
+              fontWeight: FontWeight.w400,
             ),
           ),
         ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -154,11 +155,9 @@ class _CrashReportsBody extends StatelessWidget {
               Flexible(
                 child: Text(
                   'Crash reports',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: MlTokens.fsH3,
-                    fontWeight: FontWeight.w800,
+                  style: context.mlText.titleMedium.copyWith(
                     color: semantic.textStrong,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -282,10 +281,7 @@ class _CrashReportCard extends StatelessWidget {
                             report.errorFirstLine,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontSans,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                            style: context.mlText.titleSmall.copyWith(
                               color: semantic.textStrong,
                             ),
                           ),
@@ -307,10 +303,10 @@ class _CrashReportCard extends StatelessWidget {
                           child: Text(
                             df.format(MlTime.sast(report.at)),
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontMono,
-                              fontSize: 12,
+                            style: context.mlText.code(
                               color: semantic.textFaint,
+                              size: 12,
+                              weight: FontWeight.w400,
                             ),
                           ),
                         ),
@@ -326,9 +322,7 @@ class _CrashReportCard extends StatelessWidget {
                           child: Text(
                             _contextLabel(),
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontSans,
-                              fontSize: 12,
+                            style: context.mlText.bodySmall.copyWith(
                               color: semantic.textMuted,
                             ),
                           ),
@@ -373,9 +367,7 @@ class _CrashReportCard extends StatelessWidget {
             else
               Text(
                 'No stack trace recorded.',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 13,
+                style: context.mlText.bodyMedium.copyWith(
                   color: semantic.textFaint,
                 ),
               ),

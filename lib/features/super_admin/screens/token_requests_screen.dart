@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/models.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
@@ -138,22 +139,26 @@ class _TokenRequestsScreenState extends ConsumerState<TokenRequestsScreen> {
                           children: [
                             Text(
                               r.organizationName,
-                              style: TextStyle(
-                                fontFamily: MlTokens.fontSans,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
+                              style: context.mlText.titleMedium.copyWith(
                                 color: semantic.textStrong,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                             const SizedBox(height: 3),
                             Text(
                               '${r.requestKindLabel} · ${r.organizationType}',
-                              style: TextStyle(fontFamily: MlTokens.fontSans, fontSize: 13, color: semantic.textMuted),
+                              style: context.mlText.bodyMedium.copyWith(
+                                color: semantic.textMuted,
+                              ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Created: ${df.format(MlTime.sast(r.createdAt))}',
-                              style: TextStyle(fontFamily: MlTokens.fontMono, fontSize: 12, color: semantic.textFaint),
+                              style: context.mlText.code(
+                                color: semantic.textFaint,
+                                size: 12,
+                                weight: FontWeight.w400,
+                              ),
                             ),
                             if (r.isInProgress && r.handlingDisplayName != null)
                               Padding(
@@ -369,11 +374,9 @@ class _RequestDetailPanelState extends ConsumerState<_RequestDetailPanel> {
         children: [
           Text(
             r.organizationName,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: MlTokens.fsH3,
-              fontWeight: FontWeight.w800,
+            style: context.mlText.titleMedium.copyWith(
               color: MlSemantic.of(context).textStrong,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 8),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/fleet/models/vehicle_driver.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -201,7 +202,7 @@ class _RequestCard extends StatelessWidget {
           ),
           Text(
             'by ${r.requestedByName ?? '—'} · ${dateFmt.format(MlTime.sast(r.createdAt))}',
-            style: TextStyle(fontSize: 13, color: semantic.textFaint),
+            style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint),
           ),
           if (r.isPending) ...[
             MlButton.go(

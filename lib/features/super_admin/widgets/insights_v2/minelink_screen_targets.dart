@@ -20,6 +20,7 @@ import 'minelink_screens_core.dart';
 import 'minelink_targets_core.dart';
 import 'minelink_targets_charts.dart';
 import 'minelink_target_dial.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
@@ -141,23 +142,34 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
             children: [
               Icon(icon, size: 14, color: on ? t.accent2 : t.inkMid),
               const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: MlGlass.sans,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: on ? t.accent2 : t.inkMid,
+              // Flexible and WRAPPING, not ellipsising. The note below this
+              // builder is explicit that nothing here can ellipsize without
+              // destroying the meaning — "Long term targets & goals" truncated
+              // to "Long term targets…" is a different tab. So the label takes
+              // a second line instead, which is what a tab with a long label
+              // should do at an accessibility text size.
+              //
+              // It began overflowing by 131px when the label moved from 13 onto
+              // titleSmall's 14. The Wrap around the tabs already stacks them
+              // vertically; what it could not do is make ONE tab narrower than
+              // its own contents.
+              Flexible(
+                child: Text(
+                  label,
+                  softWrap: true,
+                  style: context.mlText.titleSmall.copyWith(
+                    color: on ? t.accent2 : t.inkMid,
+                  ),
                 ),
               ),
               if (badge > 0) ...[
                 const SizedBox(width: 8),
                 Text(
                   '$badge',
-                  style: TextStyle(
-                    fontFamily: MlGlass.mono,
-                    fontSize: 10,
+                  style: context.mlText.code(
                     color: (on ? t.accent : t.inkLo),
+                    size: 10,
+                    weight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -201,11 +213,7 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
                   'closed months are a record and stay locked.'
               : 'Six horizon goals committed as one 12-month cycle. Once locked, '
                   'nothing changes until the cycle has run its full 365 days.',
-          style: TextStyle(
-              fontFamily: MlGlass.sans,
-              fontSize: 12,
-              height: 1.5,
-              color: t.inkMid),
+          style: context.mlText.bodySmall.copyWith(color: t.inkMid, height: 1.5),
         ),
       ],
     );
@@ -493,19 +501,13 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
         ),
         title: Text(
           title,
-          style: TextStyle(
-            fontFamily: MlGlass.display,
-            fontSize: 19,
-            color: t.inkHi,
-          ),
+          style: context.mlText.editorialMedium.copyWith(color: t.inkHi),
         ),
         content: Text(
           body,
-          style: TextStyle(
-            fontFamily: MlGlass.sans,
-            fontSize: 13,
-            height: 1.55,
+          style: context.mlText.bodyMedium.copyWith(
             color: t.inkMid,
+            height: 1.55,
           ),
         ),
         actions: [
@@ -572,22 +574,19 @@ class _CycleCompleteBanner extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text('Your 12-month cycle has closed',
-                    style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                    style: context.mlText.titleSmall.copyWith(
                       color: t.inkHi,
+                      fontWeight: FontWeight.w700,
                     )),
                 const SizedBox(height: 4),
                 Text(
                   '${cycle.label} has run its full 365 days. You can now review '
                   'how the six horizon goals landed and set new long-term '
                   'targets for the next cycle.',
-                  style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 12,
-                      height: 1.5,
-                      color: t.inkMid),
+                  style: context.mlText.bodySmall.copyWith(
+                    color: t.inkMid,
+                    height: 1.5,
+                  ),
                 ),
               ],
             ),
@@ -691,11 +690,7 @@ class _CycleCard extends StatelessWidget {
               badge,
               const SizedBox(height: 10),
               Text(c.label,
-                  style: TextStyle(
-                    fontFamily: MlGlass.display,
-                    fontSize: 20,
-                    color: t.inkHi,
-                  )),
+                  style: context.mlText.editorialMedium.copyWith(color: t.inkHi)),
               const SizedBox(height: 4),
               Text(
                 c.isDraft
@@ -706,11 +701,10 @@ class _CycleCard extends StatelessWidget {
                             'set the next one.'
                         : 'Targets reopen in ${data.daysUntilCycleReopens} days, '
                             'once the full 12-month cycle has run.',
-                style: TextStyle(
-                    fontFamily: MlGlass.sans,
-                    fontSize: 12,
-                    height: 1.5,
-                    color: t.inkMid),
+                style: context.mlText.bodySmall.copyWith(
+                  color: t.inkMid,
+                  height: 1.5,
+                ),
               ),
             ],
           );
@@ -735,10 +729,10 @@ class _CycleCard extends StatelessWidget {
                               size: 12, color: t.inkXlo),
                           const SizedBox(width: 7),
                           Text('Locked',
-                              style: TextStyle(
-                                  fontFamily: MlGlass.sans,
-                                  fontSize: 11,
-                                  color: t.inkLo)),
+                              style: context.mlText.labelSmall.copyWith(
+                                color: t.inkLo,
+                                fontWeight: FontWeight.w400,
+                              )),
                         ],
                       ),
                     );
@@ -859,11 +853,9 @@ class _LockWarning extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text('Locking is permanent for 12 months',
-                    style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+                    style: context.mlText.titleSmall.copyWith(
                       color: t.inkHi,
+                      fontWeight: FontWeight.w700,
                     )),
                 const SizedBox(height: 4),
                 Text(
@@ -873,11 +865,10 @@ class _LockWarning extends StatelessWidget {
                   'fall behind measures nothing. You will be notified when the '
                   'cycle closes and the next one can be set.'
                   '${unset > 0 ? '\n\n$unset horizon${unset == 1 ? '' : 's'} still without a target.' : ''}',
-                  style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 12,
-                      height: 1.5,
-                      color: t.inkMid),
+                  style: context.mlText.bodySmall.copyWith(
+                    color: t.inkMid,
+                    height: 1.5,
+                  ),
                 ),
               ],
             ),
@@ -940,7 +931,7 @@ class _MonthTable extends StatelessWidget {
           Container(height: 1, color: t.line2),
           for (var i = 0; i < data.months.length; i++) ...[
             if (i == data.currentIndex + 1) _plannedDivider(t),
-            _row(t, i),
+            _row(context, t, i),
           ],
         ],
       ),
@@ -978,7 +969,7 @@ class _MonthTable extends StatelessWidget {
         ),
       );
 
-  Widget _row(MlGlass t, int i) {
+  Widget _row(BuildContext context, MlGlass t, int i) {
     final m = data.months[i];
     final locked = data.isPast(i);
     final outcome = m.outcome;
@@ -1012,13 +1003,9 @@ class _MonthTable extends StatelessWidget {
                   child: Text(m.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 12,
-                        fontWeight: i == data.currentIndex
-                            ? FontWeight.w700
-                            : FontWeight.w500,
+                      style: context.mlText.labelMedium.copyWith(
                         color: locked ? t.inkMid : t.inkHi,
+                        fontWeight: i == data.currentIndex ? FontWeight.w700 : FontWeight.w500,
                       )),
                 ),
                 if (locked) ...[
@@ -1045,14 +1032,13 @@ class _MonthTable extends StatelessWidget {
           Expanded(
             flex: 20,
             child: locked
-                ? _readOnlyField(t, m.target)
+                ? _readOnlyField(context, t, m.target)
                 : Text(
                     m.target > 0 ? '${mlTons(m.target, decimals: 0)} t' : '—',
-                    style: TextStyle(
-                      fontFamily: MlGlass.mono,
-                      fontSize: 12,
+                    style: context.mlText.code(
                       color: m.target > 0 ? t.ink : t.inkLo,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                      size: 12,
+                      weight: FontWeight.w400,
                     ),
                   ),
           ),
@@ -1060,12 +1046,10 @@ class _MonthTable extends StatelessWidget {
             flex: 20,
             child: Text(
               m.hasActuals ? '${mlTons(m.total)} t' : '—',
-              style: TextStyle(
-                fontFamily: MlGlass.mono,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+              style: context.mlText.code(
                 color: m.hasActuals ? t.inkHi : t.inkXlo,
-                fontFeatures: const [FontFeature.tabularFigures()],
+                size: 12,
+                weight: FontWeight.w600,
               ),
             ),
           ),
@@ -1081,11 +1065,10 @@ class _MonthTable extends StatelessWidget {
                         child: Text(
                           m.target > 0 ? '${(att * 100).round()}%' : '—',
                           textAlign: TextAlign.right,
-                          style: TextStyle(
-                            fontFamily: MlGlass.mono,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                          style: context.mlText.code(
                             color: m.target > 0 ? color : t.inkLo,
+                            size: 11,
+                            weight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -1096,17 +1079,17 @@ class _MonthTable extends StatelessWidget {
                     ],
                   )
                 : Text('awaiting actuals',
-                    style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 11,
-                        color: t.inkXlo)),
+                    style: context.mlText.labelSmall.copyWith(
+                      color: t.inkXlo,
+                      fontWeight: FontWeight.w400,
+                    )),
           ),
         ],
       ),
     );
   }
 
-  Widget _readOnlyField(MlGlass t, double target) => Container(
+  Widget _readOnlyField(BuildContext context, MlGlass t, double target) => Container(
         height: 28,
         padding: const EdgeInsets.symmetric(horizontal: 9),
         alignment: Alignment.centerLeft,
@@ -1122,8 +1105,11 @@ class _MonthTable extends StatelessWidget {
             const SizedBox(width: 7),
             Text(
               target > 0 ? '${mlTons(target, decimals: 0)} t' : 'no target',
-              style: TextStyle(
-                  fontFamily: MlGlass.mono, fontSize: 12, color: t.inkMid),
+              style: context.mlText.code(
+                color: t.inkMid,
+                size: 12,
+                weight: FontWeight.w400,
+              ),
             ),
           ],
         ),
@@ -1159,7 +1145,7 @@ class _HorizonLadder extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           for (final z in kMlHorizons) ...[
-            _row(t, z),
+            _row(context, t, z),
             const SizedBox(height: 10),
           ],
         ],
@@ -1167,7 +1153,7 @@ class _HorizonLadder extends StatelessWidget {
     );
   }
 
-  Widget _row(MlGlass t, MlHorizon z) {
+  Widget _row(BuildContext context, MlGlass t, MlHorizon z) {
     final outcome = data.horizonOutcome(z);
     final target = data.cycle.targets[z.key] ?? 0;
     final actual = data.horizonActual(z);
@@ -1191,11 +1177,9 @@ class _HorizonLadder extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(z.name,
-                    style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+                    style: context.mlText.titleSmall.copyWith(
                       color: t.inkHi,
+                      fontWeight: FontWeight.w700,
                     )),
                 const SizedBox(height: 3),
                 Text(z.description,
@@ -1212,11 +1196,10 @@ class _HorizonLadder extends StatelessWidget {
             width: 92,
             child: Text(
               target > 0 ? '${mlTons(target, decimals: 0)} t' : '—',
-              style: TextStyle(
-                fontFamily: MlGlass.mono,
-                fontSize: 12,
+              style: context.mlText.code(
                 color: t.inkMid,
-                fontFeatures: const [FontFeature.tabularFigures()],
+                size: 12,
+                weight: FontWeight.w400,
               ),
             ),
           ),
@@ -1244,11 +1227,10 @@ class _HorizonLadder extends StatelessWidget {
                   child: Text(
                     pending ? '—' : '${(att * 100).round()}%',
                     textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontFamily: MlGlass.mono,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                    style: context.mlText.code(
                       color: color,
+                      size: 11,
+                      weight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -1338,7 +1320,7 @@ class _TargetHistory extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          for (final e in shown) _row(t, e.value),
+          for (final e in shown) _row(context, t, e.value),
         ],
       ),
     );
@@ -1384,12 +1366,9 @@ class _TargetHistory extends StatelessWidget {
                     )),
                 const SizedBox(height: 3),
                 Text(label,
-                    style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 10,
-                      letterSpacing: 0.8,
-                      fontWeight: FontWeight.w600,
+                    style: context.mlText.labelSmall.copyWith(
                       color: t.inkMid,
+                      letterSpacing: 0.8,
                     )),
               ],
             ),
@@ -1399,7 +1378,7 @@ class _TargetHistory extends StatelessWidget {
     );
   }
 
-  Widget _row(MlGlass t, MlMonthTarget m) {
+  Widget _row(BuildContext context, MlGlass t, MlMonthTarget m) {
     final outcome = m.outcome;
     final color = mlOutcomeColor(t, outcome);
     final variance = m.target > 0 ? m.total - m.target : 0.0;
@@ -1424,11 +1403,7 @@ class _TargetHistory extends StatelessWidget {
                   child: Text(m.label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontFamily: MlGlass.sans,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: t.ink)),
+                      style: context.mlText.labelMedium.copyWith(color: t.ink)),
                 ),
               ],
             ),
@@ -1437,18 +1412,20 @@ class _TargetHistory extends StatelessWidget {
             flex: 15,
             child: Text(
               m.target > 0 ? '${mlTons(m.target, decimals: 0)} t' : '—',
-              style: TextStyle(
-                  fontFamily: MlGlass.mono, fontSize: 12, color: t.inkMid),
+              style: context.mlText.code(
+                color: t.inkMid,
+                size: 12,
+                weight: FontWeight.w400,
+              ),
             ),
           ),
           Expanded(
             flex: 15,
             child: Text('${mlTons(m.total)} t',
-                style: TextStyle(
-                  fontFamily: MlGlass.mono,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                style: context.mlText.code(
                   color: t.inkHi,
+                  size: 12,
+                  weight: FontWeight.w600,
                 )),
           ),
           Expanded(
@@ -1457,11 +1434,10 @@ class _TargetHistory extends StatelessWidget {
               m.target > 0
                   ? '${variance >= 0 ? '+' : '−'}${mlTons(variance.abs())} t'
                   : '—',
-              style: TextStyle(
-                fontFamily: MlGlass.mono,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+              style: context.mlText.code(
                 color: variance >= 0 ? t.good : t.bad,
+                size: 12,
+                weight: FontWeight.w600,
               ),
             ),
           ),
@@ -1480,11 +1456,10 @@ class _TargetHistory extends StatelessWidget {
                   child: Text(
                     m.target > 0 ? '${(m.attainment * 100).round()}%' : '—',
                     textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontFamily: MlGlass.mono,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                    style: context.mlText.code(
                       color: color,
+                      size: 11,
+                      weight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -1539,12 +1514,11 @@ class _CycleArchive extends StatelessWidget {
                 'No closed cycles yet. The first will appear here once this '
                 'one completes.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontFamily: MlGlass.sans, fontSize: 12, color: t.inkMid),
+                style: context.mlText.bodySmall.copyWith(color: t.inkMid),
               ),
             ),
           for (final c in cycles) ...[
-            _cycle(t, c),
+            _cycle(context, t, c),
             const SizedBox(height: 12),
           ],
         ],
@@ -1552,7 +1526,7 @@ class _CycleArchive extends StatelessWidget {
     );
   }
 
-  Widget _cycle(MlGlass t, MlArchivedCycle c) {
+  Widget _cycle(BuildContext context, MlGlass t, MlArchivedCycle c) {
     final hit = c.surpassedCount;
     final band = hit >= 4
         ? MlTargetOutcome.surpassed
@@ -1594,11 +1568,10 @@ class _CycleArchive extends StatelessWidget {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(c.label,
-                        style: TextStyle(
-                            fontFamily: MlGlass.sans,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: t.inkHi)),
+                        style: context.mlText.titleSmall.copyWith(
+                          color: t.inkHi,
+                          fontWeight: FontWeight.w700,
+                        )),
                     _OutcomeBadge(
                         tokens: t,
                         outcome: band,
@@ -1606,10 +1579,10 @@ class _CycleArchive extends StatelessWidget {
                   ],
                 ),
                 Text('closed cycle · read-only',
-                    style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 11,
-                        color: t.inkLo)),
+                    style: context.mlText.labelSmall.copyWith(
+                      color: t.inkLo,
+                      fontWeight: FontWeight.w400,
+                    )),
               ],
             ),
           ),
@@ -1644,19 +1617,19 @@ class _CycleArchive extends StatelessWidget {
                         )),
                     const SizedBox(height: 4),
                     Text('${(a * 100).round()}%',
-                        style: TextStyle(
-                          fontFamily: MlGlass.mono,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                        style: context.mlText.code(
                           color: color,
+                          size: 12,
+                          weight: FontWeight.w600,
                         )),
                     const SizedBox(height: 2),
                     Text(
                       '${mlTons(act, decimals: 0)} / ${mlTons(tgt, decimals: 0)}',
-                      style: TextStyle(
-                          fontFamily: MlGlass.mono,
-                          fontSize: 10,
-                          color: t.inkLo),
+                      style: context.mlText.code(
+                        color: t.inkLo,
+                        size: 10,
+                        weight: FontWeight.w400,
+                      ),
                     ),
                     const SizedBox(height: 7),
                     ClipRRect(
@@ -1848,12 +1821,10 @@ class _StatusBadge extends StatelessWidget {
             Icon(icon, size: 12, color: color),
             const SizedBox(width: 6),
             Text(label,
-                style: TextStyle(
-                  fontFamily: MlGlass.sans,
-                  fontSize: 10,
+                style: context.mlText.labelSmall.copyWith(
+                  color: color,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.7,
-                  color: color,
                 )),
           ],
         ),
@@ -1892,11 +1863,9 @@ class _FilledButton extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
-            fontFamily: MlGlass.sans,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+          style: context.mlText.labelMedium.copyWith(
             color: enabled ? (t.isDark ? t.bg0 : MlTokens.inkOnFill) : t.inkXlo,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),

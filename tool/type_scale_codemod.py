@@ -145,11 +145,16 @@ SIZE_ALIASES = {
 # bare string literals rather than as aliases of `MlTokens` — so "one name per
 # typeface" was true of the token file and not of the product.
 #
-# `kConsoleSans` is the exception, and it is a face CHANGE rather than a rename:
-# it is `'Sora'`, a fourth typeface, alive at seven sites in the console's own
-# dashboard widgets. `mlConsoleSans` (the rail's copy of it) is now dead, so the
-# rail those seven widgets sit beside is Plus Jakarta Sans and they are not.
-# Reported as `FACE` so it is never a silent change.
+# `kConsoleSans` WAS the exception. It was `'Sora'` — a fourth typeface, alive at
+# seven sites in the console's own dashboard widgets while the rail beside them
+# ran Plus Jakarta Sans — and this table carried it as a face CHANGE so the
+# report could never make it a silent one. Sora was retired on 2026-08-20 and
+# the constant is now an alias of `MlTokens.fontSans`, so it is an ordinary
+# rename again.
+#
+# The `True` flag stays in the table rather than being deleted with it: the next
+# name that means a different face wants exactly this treatment, and a mechanism
+# with no live example is one nobody remembers is there.
 FAMILY_ALIASES = {
     'MlTokens.fontSans': ('sans', False),
     'MlTokens.fontMono': ('mono', False),
@@ -164,8 +169,8 @@ FAMILY_ALIASES = {
     "'PlusJakartaSans'": ('sans', False),
     "'JetBrainsMono'": ('mono', False),
     "'Fraunces'": ('serif', False),
-    'kConsoleSans': ('sans', True),
-    "'Sora'": ('sans', True),
+    'kConsoleSans': ('sans', False),  # an alias since Sora was retired
+    "'Sora'": ('sans', True),  # the flag's live example, if one ever returns
 }
 
 TABULAR = ('[FontFeature.tabularFigures()]',

@@ -10,6 +10,7 @@
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_console_palettes.dart';
 
@@ -358,14 +359,18 @@ class MlPill extends StatelessWidget {
             Border.all(color: neutral ? t.lineStrong : fg.withValues(alpha: 0.3)),
         borderRadius: MlShape.pill,
       ),
+      // A pill given a bounded width had nothing to do but overflow: no
+      // maxLines, no overflow behaviour. That is fine while every caller keeps
+      // it unflexed and lets it size itself, and it is exactly what stops a
+      // caller from putting it in a `Flexible` when the row runs out of room —
+      // which is the one thing that would let a long org type ("MINESUPPLIER")
+      // yield space instead of pushing the seat count off a 360px phone.
       child: Text(
         text,
-        style: TextStyle(
-          fontFamily: MlGlass.sans,
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: fg,
-        ),
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
+        style: context.mlText.labelSmall.copyWith(color: fg),
       ),
     );
   }
@@ -407,12 +412,9 @@ class MlStat extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: TextStyle(
-            fontFamily: MlGlass.sans,
-            fontSize: 10,
-            letterSpacing: 1.15,
-            fontWeight: FontWeight.w600,
+          style: context.mlText.labelSmall.copyWith(
             color: t.inkMid,
+            letterSpacing: 1.15,
           ),
         ),
         const SizedBox(height: 6),
@@ -437,10 +439,11 @@ class MlStat extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 2),
                 child: Text(unit!,
-                    style: TextStyle(
-                        fontFamily: MlGlass.mono,
-                        fontSize: 10,
-                        color: t.inkLo)),
+                    style: context.mlText.code(
+                      color: t.inkLo,
+                      size: 10,
+                      weight: FontWeight.w400,
+                    )),
               ),
             if (leadingDot != null) ...[
               const SizedBox(width: 7),
@@ -455,10 +458,10 @@ class MlStat extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 6),
                 child: Text(suffix!,
-                    style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 11,
-                        color: suffixColor ?? t.inkLo)),
+                    style: context.mlText.labelSmall.copyWith(
+                      color: suffixColor ?? t.inkLo,
+                      fontWeight: FontWeight.w400,
+                    )),
               ),
           ],
         ),
@@ -566,11 +569,7 @@ class MlSectionHead extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   subtitle!,
-                  style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 12,
-                      height: 1.4,
-                      color: t.inkMid),
+                  style: context.mlText.bodySmall.copyWith(color: t.inkMid),
                 ),
               ],
             ],
@@ -583,10 +582,10 @@ class MlSectionHead extends StatelessWidget {
             children: [
               if (meta != null)
                 Text(meta!,
-                    style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 11,
-                        color: t.inkLo)),
+                    style: context.mlText.labelSmall.copyWith(
+                      color: t.inkLo,
+                      fontWeight: FontWeight.w400,
+                    )),
               if (link != null) ...[
                 if (meta != null) const SizedBox(height: 3),
                 MouseRegion(
@@ -594,10 +593,7 @@ class MlSectionHead extends StatelessWidget {
                   child: GestureDetector(
                     onTap: onLink,
                     child: Text('$link →',
-                        style: TextStyle(
-                          fontFamily: MlGlass.sans,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                        style: context.mlText.labelMedium.copyWith(
                           color: t.accent2,
                         )),
                   ),

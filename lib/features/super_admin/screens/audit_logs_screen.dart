@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/models.dart';
 import 'package:flutter_application_1/features/super_admin/utils/audit_log_csv_exporter.dart';
@@ -59,11 +60,9 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
                 Expanded(
                   child: Text(
                     'Audit Logs',
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: MlTokens.fsH3,
-                      fontWeight: FontWeight.w800,
+                    style: context.mlText.titleMedium.copyWith(
                       color: MlSemantic.of(context).textStrong,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
@@ -197,13 +196,19 @@ class _AuditLogCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           log.actorEmail,
-                          style: TextStyle(fontFamily: MlTokens.fontSans, fontSize: 12, color: semantic.textMuted),
+                          style: context.mlText.bodySmall.copyWith(
+                            color: semantic.textMuted,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Text(
                         _timeAgo(log.createdAt),
-                        style: TextStyle(fontFamily: MlTokens.fontMono, fontSize: 11, color: semantic.textFaint),
+                        style: context.mlText.code(
+                          color: semantic.textFaint,
+                          size: 11,
+                          weight: FontWeight.w400,
+                        ),
                       ),
                     ],
                   ),
@@ -215,7 +220,9 @@ class _AuditLogCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           log.organizationName!,
-                          style: TextStyle(fontFamily: MlTokens.fontSans, fontSize: 12, color: semantic.textMuted),
+                          style: context.mlText.bodySmall.copyWith(
+                            color: semantic.textMuted,
+                          ),
                         ),
                       ],
                     ),

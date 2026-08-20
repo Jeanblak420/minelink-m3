@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/chat/models/messaging_models.dart';
 import 'package:flutter_application_1/features/chat/providers/messaging_providers.dart';
@@ -135,7 +136,7 @@ class _ChatConnectionsScreenState extends ConsumerState<ChatConnectionsScreen> {
           Text(
             'Companies tied together by an accepted request or transaction. They are '
             'NOT linked automatically — review and connect the ones you want.',
-            style: TextStyle(fontSize: 13, color: semantic.textFaint),
+            style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint),
           ),
           const SizedBox(height: 10),
           _recommendations(
@@ -192,10 +193,9 @@ class _ChatConnectionsScreenState extends ConsumerState<ChatConnectionsScreen> {
 
   Widget _sectionTitle(MlSemantic semantic, String text) => Text(
     text,
-    style: TextStyle(
-      fontSize: 15,
-      fontWeight: FontWeight.w700,
+    style: context.mlText.titleMedium.copyWith(
       color: semantic.textStrong,
+      fontWeight: FontWeight.w700,
     ),
   );
 
@@ -209,7 +209,7 @@ class _ChatConnectionsScreenState extends ConsumerState<ChatConnectionsScreen> {
     ),
     child: Text(
       message,
-      style: TextStyle(fontSize: 13, color: semantic.textFaint),
+      style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint),
     ),
   );
 
@@ -405,17 +405,19 @@ class _RecommendationCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             '$aType  ·  $bType',
-            style: TextStyle(fontSize: 13, color: semantic.textFaint),
+            style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint),
           ),
           const SizedBox(height: 6),
           Text(
             pair.reason,
-            style: TextStyle(fontSize: 13, color: semantic.textStrong),
+            style: context.mlText.bodyMedium.copyWith(
+              color: semantic.textStrong,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             'Tied together ${dateFmt.format(MlTime.sast(pair.date))}',
-            style: TextStyle(fontSize: 12, color: semantic.textFaint),
+            style: context.mlText.bodySmall.copyWith(color: semantic.textFaint),
           ),
           const SizedBox(height: 12),
           Align(
@@ -498,7 +500,9 @@ class _ConnectionCard extends StatelessWidget {
                   '${when != null ? '  ·  ${revoked ? 'Revoked' : 'Linked'} ${dateFmt.format(MlTime.sast(when))}' : ''}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 13, color: semantic.textFaint),
+                  style: context.mlText.bodyMedium.copyWith(
+                    color: semantic.textFaint,
+                  ),
                 ),
               ],
             ),

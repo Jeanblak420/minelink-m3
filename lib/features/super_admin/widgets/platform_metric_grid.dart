@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/layout/app_breakpoints.dart';
 
 /// One KPI tile for super-admin dashboards (registry stats, org insights, etc.).
@@ -138,9 +139,7 @@ class PlatformMetricCard extends StatelessWidget {
                   item.label,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    height: 1.25,
+                  style: context.mlText.bodySmall.copyWith(
                     color: cs.onSurfaceVariant,
                   ),
                 ),

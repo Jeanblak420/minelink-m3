@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/providers/request_provider.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -149,8 +150,7 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
                 'Go through every line below once more and make sure it is '
                 'correct. Once assigned, this org uses it to pre-fill a real '
                 'transportation request.',
-                style: TextStyle(
-                  fontSize: 13,
+                style: context.mlText.bodyMedium.copyWith(
                   color: Theme.of(ctx).colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -214,8 +214,7 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
             width: 120,
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 13,
+              style: context.mlText.bodyMedium.copyWith(
                 color: MlSemantic.of(context).textFaint,
               ),
             ),
@@ -345,8 +344,7 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
               Text(
                 'The org stops seeing this under "Available routes". Requests '
                 'it has already submitted are not affected.',
-                style: TextStyle(
-                  fontSize: 13,
+                style: context.mlText.bodyMedium.copyWith(
                   color: Theme.of(ctx).colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -429,8 +427,7 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
                   '${route.routeLabel} · ${route.commodity ?? '—'}\n'
                   'The org will see this under "Available routes" and can use '
                   'it to pre-fill a transportation request.',
-                  style: TextStyle(
-                    fontSize: 13,
+                  style: context.mlText.bodyMedium.copyWith(
                     color: Theme.of(ctx).colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -754,15 +751,13 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
                               if (r.commodity != null)
                                 Text(
                                   r.commodity!,
-                                  style: TextStyle(
-                                    fontSize: 13,
+                                  style: context.mlText.bodyMedium.copyWith(
                                     color: semantic.textFaint,
                                   ),
                                 ),
                               Text(
                                 _dateFmt.format(MlTime.sast(r.createdAt)),
-                                style: TextStyle(
-                                  fontSize: 13,
+                                style: context.mlText.bodyMedium.copyWith(
                                   color: semantic.textFaint,
                                 ),
                               ),
@@ -795,8 +790,7 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
                               if (r.tons != null) '${r.tons} tons',
                               if (r.paymentTerms != null) r.paymentTerms!,
                             ].join(' · '),
-                            style: TextStyle(
-                              fontSize: 13,
+                            style: context.mlText.bodyMedium.copyWith(
                               color: semantic.textFaint,
                             ),
                           ),
@@ -804,9 +798,7 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
                             const SizedBox(height: 6),
                             Text(
                               'Assigned to: ${r.assignedCompanies}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                              style: context.mlText.titleSmall.copyWith(
                                 color: semantic.textBody,
                               ),
                             ),

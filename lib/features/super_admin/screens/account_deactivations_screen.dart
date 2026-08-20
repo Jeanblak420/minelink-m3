@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
@@ -279,11 +280,9 @@ class _Body extends StatelessWidget {
               Flexible(
                 child: Text(
                   'Account deactivations',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: MlTokens.fsH3,
-                    fontWeight: FontWeight.w800,
+                  style: context.mlText.titleMedium.copyWith(
                     color: semantic.textStrong,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -460,11 +459,9 @@ class _RequestCard extends StatelessWidget {
                         Flexible(
                           child: Text(
                             row.displayName,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontSans,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
+                            style: context.mlText.titleMedium.copyWith(
                               color: semantic.textStrong,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
@@ -483,9 +480,7 @@ class _RequestCard extends StatelessWidget {
                             '${row.companyName ?? 'No company'} · '
                             '${row.role ?? 'Unknown role'}',
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontSans,
-                              fontSize: 13,
+                            style: context.mlText.bodyMedium.copyWith(
                               color: semantic.textMuted,
                             ),
                           ),
@@ -499,10 +494,10 @@ class _RequestCard extends StatelessWidget {
                           child: Text(
                             'Requested ${df.format(MlTime.sast(row.requestedAt))}',
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontMono,
-                              fontSize: 12,
+                            style: context.mlText.code(
                               color: semantic.textFaint,
+                              size: 12,
+                              weight: FontWeight.w400,
                             ),
                           ),
                         ),
@@ -516,10 +511,7 @@ class _RequestCard extends StatelessWidget {
                             child: Text(
                               _autoAppliesLabel(row.autoApplyAt),
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontFamily: MlTokens.fontSans,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                              style: context.mlText.labelMedium.copyWith(
                                 color: MlTone.warn.colors(brightness).fg,
                               ),
                             ),
@@ -533,9 +525,7 @@ class _RequestCard extends StatelessWidget {
                         row.reason!.trim(),
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 13,
+                        style: context.mlText.bodyMedium.copyWith(
                           color: semantic.textBody,
                         ),
                       ),
@@ -547,11 +537,9 @@ class _RequestCard extends StatelessWidget {
                         'Note: ${row.reviewNote!.trim()}',
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 12,
-                          fontStyle: FontStyle.italic,
+                        style: context.mlText.bodySmall.copyWith(
                           color: semantic.textFaint,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                     ],
@@ -607,12 +595,7 @@ class _InfoChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontFamily: MlTokens.fontSans,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: colors.fg,
-        ),
+        style: context.mlText.labelMedium.copyWith(color: colors.fg),
       ),
     );
   }

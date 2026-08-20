@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ui_prefs.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/super_admin_dashboard_widgets.dart';
@@ -86,7 +87,9 @@ class UserPreferencesScreen extends ConsumerWidget {
                     const SizedBox(height: 6),
                     Text(
                       prefs.accent.label,
-                      style: TextStyle(fontSize: 12, color: s.textMuted),
+                      style: context.mlText.bodySmall.copyWith(
+                        color: s.textMuted,
+                      ),
                     ),
                     const SizedBox(height: 18),
                     _SwitchRow(
@@ -112,11 +115,10 @@ class UserPreferencesScreen extends ConsumerWidget {
                         const Expanded(child: _GroupLabel('Text size')),
                         Text(
                           '${(prefs.textScale * 100).round()}%',
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontMono,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
+                          style: context.mlText.code(
                             color: s.textStrong,
+                            size: 13,
+                            weight: FontWeight.w700,
                           ),
                         ),
                       ],
@@ -159,7 +161,9 @@ class UserPreferencesScreen extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         'Saved to your account only',
-                        style: TextStyle(fontSize: 12, color: s.textMuted),
+                        style: context.mlText.bodySmall.copyWith(
+                          color: s.textMuted,
+                        ),
                       ),
                     ),
                   ],
@@ -208,12 +212,10 @@ class _GroupLabel extends StatelessWidget {
     final s = MlSemantic.of(context);
     return Text(
       text.toUpperCase(),
-      style: TextStyle(
-        fontFamily: MlTokens.fontSans,
-        fontSize: 11,
+      style: context.mlText.labelSmall.copyWith(
+        color: s.textFaint,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.66,
-        color: s.textFaint,
       ),
     );
   }
@@ -256,10 +258,9 @@ class _ModeButton extends StatelessWidget {
               const SizedBox(width: 7),
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.titleSmall.copyWith(
                   color: selected ? MlTokens.inkOnFill : s.textBody,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
@@ -334,16 +335,15 @@ class _SwitchRow extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.titleMedium.copyWith(
                   color: s.textStrong,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 description,
-                style: TextStyle(fontSize: 13, color: s.textMuted),
+                style: context.mlText.bodyMedium.copyWith(color: s.textMuted),
               ),
             ],
           ),

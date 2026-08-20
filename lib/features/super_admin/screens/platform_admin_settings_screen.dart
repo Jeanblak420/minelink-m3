@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
@@ -32,11 +33,9 @@ class PlatformAdminSettingsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     'Platform settings',
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: MlTokens.fsH2,
-                      fontWeight: FontWeight.w800,
+                    style: context.mlText.titleLarge.copyWith(
                       color: MlSemantic.of(context).textStrong,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 8),

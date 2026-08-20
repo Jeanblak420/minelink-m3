@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/models.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -134,18 +135,14 @@ class _OrgTypeAuditTab extends ConsumerWidget {
                       ),
                       title: Text(
                         title,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
+                        style: context.mlText.titleMedium.copyWith(
                           color: semantic.textStrong,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       subtitle: Text(
                         '${entries.length} events · org $oid',
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 13,
+                        style: context.mlText.bodyMedium.copyWith(
                           color: semantic.textMuted,
                         ),
                       ),
@@ -170,10 +167,10 @@ class _OrgTypeAuditTab extends ConsumerWidget {
                             ),
                             trailing: Text(
                               DateFormat('yyyy-MM-dd HH:mm:ss').format(MlTime.sast(log.createdAt)),
-                              style: TextStyle(
-                                fontFamily: MlTokens.fontMono,
-                                fontSize: 12,
+                              style: context.mlText.code(
                                 color: semantic.textFaint,
+                                size: 12,
+                                weight: FontWeight.w400,
                               ),
                             ),
                           ),

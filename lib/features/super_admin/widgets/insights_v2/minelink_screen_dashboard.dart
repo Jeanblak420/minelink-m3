@@ -25,6 +25,7 @@ import 'package:intl/intl.dart';
 
 import 'minelink_screens_core.dart';
 import 'minelink_charts.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/charts/ml_sparkline.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_console_palettes.dart';
@@ -282,19 +283,17 @@ class _OrgCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(agg.title,
-                          style: TextStyle(
-                            fontFamily: MlGlass.sans,
-                            fontSize: 15,
+                          style: context.mlText.titleMedium.copyWith(
+                            color: t.inkHi,
                             fontWeight: FontWeight.w700,
                             letterSpacing: -0.15,
-                            color: t.inkHi,
                           )),
                       const SizedBox(height: 3),
                       Text(agg.subtitle,
-                          style: TextStyle(
-                              fontFamily: MlGlass.sans,
-                              fontSize: 11,
-                              color: t.inkMid)),
+                          style: context.mlText.labelSmall.copyWith(
+                            color: t.inkMid,
+                            fontWeight: FontWeight.w400,
+                          )),
                     ],
                   ),
                 ),
@@ -408,26 +407,19 @@ class _PendingCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(req.label,
-                      style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                      style: context.mlText.titleSmall.copyWith(
                         color: t.inkHi,
+                        fontWeight: FontWeight.w700,
                       )),
                   const SizedBox(height: 4),
                   Text(req.sub,
-                      style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 11,
-                        height: 1.45,
+                      style: context.mlText.labelSmall.copyWith(
                         color: t.inkMid,
+                        fontWeight: FontWeight.w400,
                       )),
                   const SizedBox(height: 8),
                   Text('${req.count} new · Review →',
-                      style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                      style: context.mlText.labelSmall.copyWith(
                         color: t.accent2,
                       )),
                 ],
@@ -465,12 +457,9 @@ class _NewBadge extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text('NEW',
-              style: TextStyle(
-                fontFamily: MlGlass.sans,
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.6,
+              style: context.mlText.labelSmall.copyWith(
                 color: t.good,
+                fontWeight: FontWeight.w800,
               )),
         ],
       ),
@@ -548,27 +537,25 @@ class _RegistryTile extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(left: 3),
                     child: Text(stat.unit!,
-                        style: TextStyle(
-                            fontFamily: MlGlass.sans,
-                            fontSize: 14,
-                            color: t.inkMid)),
+                        style: context.mlText.bodyMedium.copyWith(
+                          color: t.inkMid,
+                        )),
                   ),
               ],
             ),
             const SizedBox(height: 9),
             Text(stat.label,
-                style: TextStyle(
-                  fontFamily: MlGlass.sans,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.titleSmall.copyWith(
                   color: t.inkHi,
+                  fontWeight: FontWeight.w700,
                 )),
             const SizedBox(height: 3),
             Text(stat.sub,
-                style: TextStyle(
-                    fontFamily: MlGlass.mono,
-                    fontSize: 11,
-                    color: t.inkLo)),
+                style: context.mlText.code(
+                  color: t.inkLo,
+                  size: 11,
+                  weight: FontWeight.w400,
+                )),
           ],
         ),
       ),
@@ -680,11 +667,10 @@ class _Delta extends StatelessWidget {
         ],
         Text(
           suffix ? '$label · 24h' : label!,
-          style: TextStyle(
-            fontFamily: MlGlass.mono,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
+          style: context.mlText.code(
             color: c,
+            size: 11,
+            weight: FontWeight.w600,
           ),
         ),
       ],
@@ -748,11 +734,9 @@ class _ExpiredBanner extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text('Expired token requests',
-                      style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                      style: context.mlText.titleSmall.copyWith(
                         color: t.inkHi,
+                        fontWeight: FontWeight.w700,
                       )),
                   const SizedBox(height: 3),
                   Text(
@@ -762,12 +746,7 @@ class _ExpiredBanner extends StatelessWidget {
                     // alongside the number.
                     '$count ${count == 1 ? 'company needs' : 'companies need'} '
                     'approvals or action from the Admin panel.',
-                    style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 12,
-                      height: 1.45,
-                      color: t.inkMid,
-                    ),
+                    style: context.mlText.bodySmall.copyWith(color: t.inkMid),
                   ),
                 ],
               ),
@@ -788,11 +767,9 @@ class _ExpiredBanner extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text('Review',
-                      style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                      style: context.mlText.labelMedium.copyWith(
                         color: t.warn,
+                        fontWeight: FontWeight.w700,
                       )),
                   const SizedBox(width: 5),
                   Icon(Icons.chevron_right_rounded, size: 15, color: t.warn),
@@ -896,12 +873,9 @@ class _ActionButtonState extends State<_ActionButton> {
               const SizedBox(width: 9),
               Text(
                 widget.label,
-                style: TextStyle(
-                  fontFamily: MlGlass.sans,
-                  fontSize: 12,
-                  fontWeight:
-                      widget.primary ? FontWeight.w700 : FontWeight.w500,
+                style: context.mlText.labelMedium.copyWith(
                   color: widget.primary ? t.accent2 : t.inkHi,
+                  fontWeight: widget.primary ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
             ],
@@ -999,21 +973,15 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text('Recently active organizations',
-                        style: TextStyle(
-                          fontFamily: MlGlass.display,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: -0.2,
+                        style: context.mlText.editorialMedium.copyWith(
                           color: t.inkHi,
+                          fontWeight: FontWeight.w400,
                         )),
                     const SizedBox(height: 3),
                     Text(
                       'Live token expiry — companies under 7 days are '
                       'flagged for upgrade.',
-                      style: TextStyle(
-                          fontFamily: MlGlass.sans,
-                          fontSize: 12,
-                          color: t.inkMid),
+                      style: context.mlText.bodySmall.copyWith(color: t.inkMid),
                     ),
                   ],
                 ),
@@ -1072,18 +1040,17 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                                     child: Text(tab[1],
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            fontFamily: MlGlass.sans,
-                                            fontSize: 12,
-                                            color:
-                                                sel ? t.accent2 : t.inkMid)),
+                                        style: context.mlText.bodySmall.copyWith(
+                                          color: sel ? t.accent2 : t.inkMid,
+                                        )),
                                   ),
                                   const SizedBox(width: 6),
                                   Text('${_count(key)}',
-                                      style: TextStyle(
-                                          fontFamily: MlGlass.mono,
-                                          fontSize: 10,
-                                          color: sel ? t.accent : t.inkLo)),
+                                      style: context.mlText.code(
+                                        color: sel ? t.accent : t.inkLo,
+                                        size: 10,
+                                        weight: FontWeight.w400,
+                                      )),
                                 ],
                               ),
                             ),
@@ -1098,17 +1065,13 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                 TextSpan(children: [
                   TextSpan(
                       text: 'Sort by ',
-                      style: TextStyle(
-                          fontFamily: MlGlass.sans,
-                          fontSize: 11,
-                          color: t.inkLo)),
+                      style: context.mlText.labelSmall.copyWith(
+                        color: t.inkLo,
+                        fontWeight: FontWeight.w400,
+                      )),
                   TextSpan(
                       text: 'last active ↓',
-                      style: TextStyle(
-                          fontFamily: MlGlass.sans,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: t.inkMid)),
+                      style: context.mlText.labelSmall.copyWith(color: t.inkMid)),
                 ]),
               ),
             ],
@@ -1132,10 +1095,9 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                       child: Text(
                         'No organizations of this type in the current window.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontFamily: MlGlass.sans,
-                            fontSize: 13,
-                            color: t.inkMid),
+                        style: context.mlText.bodyMedium.copyWith(
+                          color: t.inkMid,
+                        ),
                       ),
                     ),
                   ...rows.map((r) => asTable ? _row(t, r) : _card(t, r)),
@@ -1224,11 +1186,9 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                     children: [
                       Text(r.name,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: MlGlass.sans,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
+                          style: context.mlText.titleSmall.copyWith(
                             color: t.inkHi,
+                            fontWeight: FontWeight.w700,
                           )),
                       const SizedBox(height: 3),
                       Row(
@@ -1244,10 +1204,10 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                             child: Text(
                               '${r.status} - ${r.location} - ${r.users} users',
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontFamily: MlGlass.sans,
-                                  fontSize: 11,
-                                  color: t.inkMid),
+                              style: context.mlText.labelSmall.copyWith(
+                                color: t.inkMid,
+                                fontWeight: FontWeight.w400,
+                              ),
                             ),
                           ),
                         ],
@@ -1263,8 +1223,14 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
             // ---- org type + seats ----
             Row(
               children: [
-                MlPill(r.type.toUpperCase(),
-                    tokens: t, kind: _pillKind(r.type)),
+                // Flexible: at 360px and text scale 2.0 a "MINESUPPLIER" pill
+                // claims so much of this row that the seat count beside it
+                // overflowed by 3.4px. The pill is the part that can afford to
+                // give — it ellipsises, and the count cannot.
+                Flexible(
+                  child: MlPill(r.type.toUpperCase(),
+                      tokens: t, kind: _pillKind(r.type)),
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -1317,23 +1283,20 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                 Flexible(
                   child: Text(r.expiry,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: MlGlass.mono,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color:
-                            r.expiryState == MlExpiry.expired ? t.bad : t.inkHi,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+                      style: context.mlText.code(
+                        color: r.expiryState == MlExpiry.expired ? t.bad : t.inkHi,
+                        size: 12,
+                        weight: FontWeight.w600,
                       )),
                 ),
                 const SizedBox(width: 9),
                 Flexible(
                   child: Text(r.date,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontFamily: MlGlass.sans,
-                          fontSize: 11,
-                          color: t.inkLo)),
+                      style: context.mlText.labelSmall.copyWith(
+                        color: t.inkLo,
+                        fontWeight: FontWeight.w400,
+                      )),
                 ),
               ],
             ),
@@ -1417,11 +1380,9 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                       children: [
                         Text(r.name,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: MlGlass.sans,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
+                            style: context.mlText.titleSmall.copyWith(
                               color: t.inkHi,
+                              fontWeight: FontWeight.w700,
                             )),
                         const SizedBox(height: 3),
                         Row(
@@ -1437,10 +1398,10 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                               child: Text(
                                 '${r.status} · ${r.location} · ${r.users} users',
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    fontFamily: MlGlass.sans,
-                                    fontSize: 11,
-                                    color: t.inkMid),
+                                style: context.mlText.labelSmall.copyWith(
+                                  color: t.inkMid,
+                                  fontWeight: FontWeight.w400,
+                                ),
                               ),
                             ),
                           ],
@@ -1475,11 +1436,10 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                   ),
                   const SizedBox(width: 9),
                   Text('${r.seatsUsed}/${r.seats}',
-                      style: TextStyle(
-                        fontFamily: MlGlass.mono,
-                        fontSize: 11,
+                      style: context.mlText.code(
                         color: t.inkMid,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+                        size: 11,
+                        weight: FontWeight.w400,
                       )),
                 ],
               ),
@@ -1498,14 +1458,10 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                   Flexible(
                     child: Text(r.expiry,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: MlGlass.mono,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: r.expiryState == MlExpiry.expired
-                              ? t.bad
-                              : t.inkHi,
-                          fontFeatures: const [FontFeature.tabularFigures()],
+                        style: context.mlText.code(
+                          color: r.expiryState == MlExpiry.expired ? t.bad : t.inkHi,
+                          size: 12,
+                          weight: FontWeight.w600,
                         )),
                   ),
                   const SizedBox(width: 9),
@@ -1516,10 +1472,10 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                   Flexible(
                     child: Text(r.date,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontFamily: MlGlass.sans,
-                            fontSize: 11,
-                            color: t.inkLo)),
+                        style: context.mlText.labelSmall.copyWith(
+                          color: t.inkLo,
+                          fontWeight: FontWeight.w400,
+                        )),
                   ),
                 ],
               ),
@@ -1581,12 +1537,7 @@ class _ManageAllState extends State<_ManageAll> {
               Icon(Icons.open_in_new_rounded, size: 15, color: t.accent2),
               const SizedBox(width: 8),
               Text('Manage all',
-                  style: TextStyle(
-                    fontFamily: MlGlass.sans,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: t.accent2,
-                  )),
+                  style: context.mlText.labelMedium.copyWith(color: t.accent2)),
             ],
           ),
         ),

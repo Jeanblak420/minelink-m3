@@ -68,59 +68,55 @@ class TargetsOrgTypeScreen extends ConsumerWidget {
 
     return Container(
       color: t.bg0,
-      child: Column(
-        children: [
-          TargetsBand(
-            title: '${orgType.label} targets',
-            subtitle: 'Every load ${orgType.loadClause} — the tonnage on trips '
-                'with a '
-                '${orgType == TargetOrgType.mineSupplier ? "mine" : orgType == TargetOrgType.buyer ? "buyer" : "transporter"} '
-                'on them. A load counts once for each side of the transaction, '
-                'so these three do not add up to the platform figure; each is '
-                'the same movement seen from one side.',
-            icon: orgType.icon,
-            scopeLabel: 'BY ORG TYPE',
-            headline: data == null ? null : TargetsHeadline.of(data),
-            selector: Row(
-              children: [
-                Text(
-                  'ORG TYPE',
-                  style: TextStyle(
-                    fontFamily: MlGlass.sans,
-                    fontSize: 9,
-                    letterSpacing: 1.1,
-                    fontWeight: FontWeight.w700,
-                    color: t.inkLo,
-                  ),
+      child: TargetsPage(
+        band: TargetsBand(
+          title: '${orgType.label} targets',
+          subtitle: 'Every load ${orgType.loadClause} — the tonnage on trips '
+              'with a '
+              '${orgType == TargetOrgType.mineSupplier ? "mine" : orgType == TargetOrgType.buyer ? "buyer" : "transporter"} '
+              'on them. A load counts once for each side of the transaction, '
+              'so these three do not add up to the platform figure; each is '
+              'the same movement seen from one side.',
+          icon: orgType.icon,
+          scopeLabel: 'BY ORG TYPE',
+          headline: data == null ? null : TargetsHeadline.of(data),
+          selector: Row(
+            children: [
+              Text(
+                'ORG TYPE',
+                style: TextStyle(
+                  fontFamily: MlGlass.sans,
+                  fontSize: 9,
+                  letterSpacing: 1.1,
+                  fontWeight: FontWeight.w700,
+                  color: t.inkLo,
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final o in TargetOrgType.values)
-                        TargetsScopePill(
-                          label: o.label,
-                          sublabel: o.lens.toUpperCase(),
-                          icon: o.icon,
-                          selected: o == orgType,
-                          // A path segment rather than screen state: an admin
-                          // comparing the three wants to link somebody to one.
-                          onTap: () => context.go('$basePath/${o.wire}'),
-                        ),
-                    ],
-                  ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final o in TargetOrgType.values)
+                      TargetsScopePill(
+                        label: o.label,
+                        sublabel: o.lens.toUpperCase(),
+                        icon: o.icon,
+                        selected: o == orgType,
+                        // A path segment rather than screen state: an admin
+                        // comparing the three wants to link somebody to one.
+                        onTap: () => context.go('$basePath/${o.wire}'),
+                      ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Expanded(
-            // Keyed so switching type tears the workspace down rather than
-            // letting the previous type's dials linger over new data.
-            child: TargetsWorkspace(key: ValueKey(orgType), scope: scope),
-          ),
-        ],
+        ),
+        // Keyed so switching type tears the workspace down rather than
+        // letting the previous type's dials linger over new data.
+        body: TargetsWorkspace(key: ValueKey(orgType), scope: scope),
       ),
     );
   }

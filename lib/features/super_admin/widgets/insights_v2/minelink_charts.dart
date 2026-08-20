@@ -16,9 +16,10 @@
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'dart:math' as math;
-import 'dart:ui' show FontFeature, PathMetric;
+import 'dart:ui' show PathMetric;
 import 'package:flutter/material.dart';
 
 import 'minelink_screens_core.dart';
@@ -317,12 +318,11 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
                             (widget.targetLabel ??
                                     'Target ${mlThousands(widget.target!.round())} t')
                                 .toUpperCase(),
-                            style: TextStyle(
-                              fontFamily: MlGlass.mono,
-                              fontSize: 9,
-                              letterSpacing: 2,
-                              fontWeight: FontWeight.w500,
+                            style: context.mlText.code(
                               color: t.accent2.withValues(alpha: 0.8),
+                              size: 9,
+                              weight: FontWeight.w500,
+                              letterSpacing: 2,
                             ),
                           ),
                         ),
@@ -396,33 +396,30 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
               Text(
                 '$_monthLabel ${(i + 1).toString().padLeft(2, '0')}'
                     .toUpperCase(),
-                style: TextStyle(
-                  fontFamily: MlGlass.mono,
-                  fontSize: 9,
-                  letterSpacing: 1.6,
+                style: context.mlText.code(
                   color: t.inkLo,
+                  size: 9,
+                  weight: FontWeight.w400,
+                  letterSpacing: 1.6,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 '${_fmt(cur)} t',
-                style: TextStyle(
-                  fontFamily: MlGlass.mono,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                style: context.mlText.code(
                   color: t.inkHi,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+                  size: 14,
+                  weight: FontWeight.w600,
                 ),
               ),
               if (prev != null) ...[
                 const SizedBox(height: 3),
                 Text(
                   '${_priorLabel.split(' ').first} · ${_fmt(prev)} t',
-                  style: TextStyle(
-                    fontFamily: MlGlass.mono,
-                    fontSize: 10,
+                  style: context.mlText.code(
                     color: t.inkMid,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                    size: 10,
+                    weight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -434,11 +431,11 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
   }
 
   Widget _xAxis(MlGlass t, int n) {
-    final style = TextStyle(
-      fontFamily: MlGlass.mono,
-      fontSize: 9,
-      letterSpacing: 1.4,
+    final style = context.mlText.code(
       color: t.inkLo,
+      size: 9,
+      weight: FontWeight.w400,
+      letterSpacing: 1.4,
     );
     return SizedBox(
       height: 14,
@@ -478,7 +475,10 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
             sw,
             const SizedBox(width: 7),
             Text(label,
-                style: TextStyle(fontSize: 11, color: t.inkMid)),
+                style: context.mlText.labelSmall.copyWith(
+                  color: t.inkMid,
+                  fontWeight: FontWeight.w400,
+                )),
           ],
         );
 
@@ -498,11 +498,11 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
         ),
         Text(
           widget.unitCaption.toUpperCase(),
-          style: TextStyle(
-            fontFamily: MlGlass.mono,
-            fontSize: 9,
-            letterSpacing: 1.8,
+          style: context.mlText.code(
             color: t.inkXlo,
+            size: 9,
+            weight: FontWeight.w400,
+            letterSpacing: 1.8,
           ),
         ),
       ],
@@ -550,13 +550,11 @@ class _LatestPill extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontFamily: MlGlass.mono,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.6,
+        style: context.mlText.code(
           color: t.inkHi,
-          fontFeatures: const [FontFeature.tabularFigures()],
+          size: 12,
+          weight: FontWeight.w600,
+          letterSpacing: 0.6,
         ),
       ),
     );

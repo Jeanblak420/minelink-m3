@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -45,21 +46,17 @@ class _PlatformUsersScreenState extends ConsumerState<PlatformUsersScreen> {
                     children: [
                       Text(
                         'Platform users',
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: MlTokens.fsH3,
-                          fontWeight: FontWeight.w800,
+                        style: context.mlText.titleMedium.copyWith(
                           color: MlSemantic.of(context).textStrong,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Every employee on the platform, grouped by company. '
                         'Tap a user or company to drill into the organization.',
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
+                        style: context.mlText.bodyMedium.copyWith(
                           color: cs.onSurfaceVariant,
-                          fontSize: 13,
                         ),
                       ),
                     ],
@@ -241,19 +238,15 @@ class _CompanyUsersSection extends StatelessWidget {
                       children: [
                         Text(
                           bucket.companyName,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
+                          style: context.mlText.titleMedium.copyWith(
                             color: semantic.textStrong,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           subtitle,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontSize: 12,
+                          style: context.mlText.bodySmall.copyWith(
                             color: semantic.textMuted,
                           ),
                         ),
@@ -364,10 +357,7 @@ class _UserRow extends StatelessWidget {
                       Flexible(
                         child: Text(
                           displayName,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                          style: context.mlText.titleSmall.copyWith(
                             color: semantic.textStrong,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -381,9 +371,7 @@ class _UserRow extends StatelessWidget {
                       if (roleLabel != null) roleLabel,
                       if (email != null) email,
                     ].join(' · '),
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 12,
+                    style: context.mlText.bodySmall.copyWith(
                       color: semantic.textMuted,
                     ),
                     overflow: TextOverflow.ellipsis,

@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/transportation_request.dart';
 import 'package:flutter_application_1/features/portal/providers/request_provider.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -188,11 +189,7 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
                   const SizedBox(width: 12),
                   Text(
                     _title,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSerif,
-                      fontSize: 19,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: -0.19,
+                    style: context.mlText.editorialMedium.copyWith(
                       color: MlSemantic.of(context).textStrong,
                     ),
                   ),
@@ -214,9 +211,7 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
               const SizedBox(height: 4),
               Text(
                 _subtitle,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 13,
+                style: context.mlText.bodyMedium.copyWith(
                   color: MlSemantic.of(context).textFaint,
                 ),
               ),
@@ -410,19 +405,15 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
                       },
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                      style: context.mlText.titleMedium.copyWith(
                         color: s.textStrong,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       summary.isEmpty ? 'No details' : summary,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 13,
+                      style: context.mlText.bodyMedium.copyWith(
                         color: s.textMuted,
                       ),
                     ),
@@ -606,8 +597,7 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
               const SizedBox(height: 10),
               Text(
                 'The transporter never sees your margin — only this price.',
-                style: TextStyle(
-                  fontSize: 12,
+                style: context.mlText.bodySmall.copyWith(
                   color: MlSemantic.of(context).textMuted,
                 ),
               ),
@@ -757,12 +747,9 @@ class _NewBadge extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             '$count new',
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.4,
+            style: context.mlText.labelSmall.copyWith(
               color: color,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],
@@ -806,11 +793,9 @@ class _FilterTab extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.titleSmall.copyWith(
                   color: selected ? MlTokens.inkOnFill : s.textBody,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(width: 8),
@@ -824,10 +809,10 @@ class _FilterTab extends StatelessWidget {
                 ),
                 child: Text(
                   '$count',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 12,
+                  style: context.mlText.code(
                     color: selected ? MlTokens.inkOnFill : s.textMuted,
+                    size: 12,
+                    weight: FontWeight.w400,
                   ),
                 ),
               ),
@@ -1083,7 +1068,9 @@ class _DetailPanel extends ConsumerWidget {
             children: [
               Text(
                 k,
-                style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                style: context.mlText.bodySmall.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
@@ -1244,7 +1231,9 @@ class _OrderTermsStepState extends ConsumerState<_OrderTermsStep> {
         ),
         if (_error != null) ...[
           const SizedBox(height: 8),
-          Text(_error!, style: TextStyle(color: cs.error, fontSize: 12)),
+          Text(_error!, style: context.mlText.bodySmall.copyWith(
+            color: cs.error,
+          )),
         ],
         const SizedBox(height: 10),
         MlButton.primary(
@@ -1292,7 +1281,9 @@ class _ProductLocation extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Product location',
-              style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
+              style: context.mlText.bodySmall.copyWith(
+                color: cs.onSurfaceVariant,
+              )),
           const SizedBox(height: 2),
           if (v == null || v.isEmpty)
             const Text('—', style: TextStyle(fontWeight: FontWeight.w600))
@@ -1343,7 +1334,7 @@ class _RequesterLine extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           'Requested by ',
-          style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+          style: context.mlText.bodyMedium.copyWith(color: cs.onSurfaceVariant),
         ),
         InkWell(
           onTap: () => showDialog<void>(
@@ -1352,10 +1343,9 @@ class _RequesterLine extends StatelessWidget {
           ),
           child: Text(
             company.name,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
+            style: context.mlText.titleSmall.copyWith(
               color: cs.primary,
+              fontWeight: FontWeight.w700,
               decoration: TextDecoration.underline,
               decorationColor: cs.primary,
             ),
@@ -1363,7 +1353,7 @@ class _RequesterLine extends StatelessWidget {
         ),
         Text(
           ' · ${company.orgTypeLabel}',
-          style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+          style: context.mlText.bodyMedium.copyWith(color: cs.onSurfaceVariant),
         ),
       ],
     );
@@ -1389,7 +1379,9 @@ class _CompanyProfileDialog extends StatelessWidget {
             width: 130,
             child: Text(
               k,
-              style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+              style: context.mlText.bodyMedium.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ),
           Expanded(
@@ -1731,7 +1723,9 @@ class _SelectedPartiesSummary extends StatelessWidget {
             width: 130,
             child: Text(
               '$label:',
-              style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+              style: context.mlText.bodySmall.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ),
           Expanded(
@@ -1876,10 +1870,8 @@ class _PricingFieldsState extends State<_PricingFields> {
           const SizedBox(height: 6),
           Text(
             'Your margin cannot exceed the agreed price.',
-            style: TextStyle(
+            style: context.mlText.labelMedium.copyWith(
               color: MlTone.error.colors(Theme.of(context).brightness).fg,
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
             ),
           ),
         ],
@@ -1897,7 +1889,9 @@ class _PricingFieldsState extends State<_PricingFields> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 12, color: semantic.textMuted)),
+        Text(label, style: context.mlText.bodySmall.copyWith(
+          color: semantic.textMuted,
+        )),
         const SizedBox(height: 2),
         Text(
           value,

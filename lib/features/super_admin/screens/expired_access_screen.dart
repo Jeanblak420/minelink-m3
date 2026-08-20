@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/auth/services/logout_service.dart';
 import 'package:flutter_application_1/features/portal/providers/company_access_provider.dart';
-import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// The full explanation behind the notice bar: what has lapsed, what still
@@ -77,9 +77,7 @@ class ExpiredAccessScreen extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         access.explanation,
-                        style: TextStyle(
-                          fontSize: 14,
-                          height: 1.5,
+                        style: context.mlText.bodyMedium.copyWith(
                           color: semantic.textBody,
                         ),
                       ),
@@ -89,7 +87,9 @@ class ExpiredAccessScreen extends ConsumerWidget {
                     const SizedBox(height: 12),
                     Text('Reason given: $reason',
                         style:
-                            TextStyle(fontSize: 13, color: semantic.textMuted)),
+                            context.mlText.bodyMedium.copyWith(
+                              color: semantic.textMuted,
+                            )),
                   ],
                 ],
               ),
@@ -181,9 +181,7 @@ class _Section extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
-              fontFamily: MlGlass.display,
-              fontSize: 16,
+            style: context.mlText.editorialSmall.copyWith(
               color: semantic.textStrong,
             ),
           ),
@@ -208,9 +206,7 @@ class _Section extends StatelessWidget {
                   Expanded(
                     child: Text(
                       item,
-                      style: TextStyle(
-                        fontSize: 13,
-                        height: 1.45,
+                      style: context.mlText.bodyMedium.copyWith(
                         color: semantic.textBody,
                       ),
                     ),
