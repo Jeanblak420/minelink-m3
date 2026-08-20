@@ -60,7 +60,7 @@ Future<void> _loadRealFonts() async {
 const _widths = <double>[1440, 1040, 820, 380];
 
 /// 1.0 plus both ends of the console's text-size range.
-const _scales = <double>[0.85, 1.0, 1.3];
+const _scales = <double>[0.85, 1.0, 1.3, 1.6, 2.0];
 
 void main() {
   setUpAll(_loadRealFonts);

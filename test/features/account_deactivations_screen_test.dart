@@ -148,7 +148,7 @@ void main() {
   setUpAll(loadRealFonts);
 
   for (final width in <double>[360, 800, 1440]) {
-    for (final scale in <double>[0.85, 1.0, 1.3]) {
+    for (final scale in <double>[0.85, 1.0, 1.3, 1.6, 2.0]) {
       testWidgets('renders an empty queue without overflow at ${width}px / '
           'scale $scale', (tester) async {
         await _pumpAt(tester, width: width, scale: scale, rows: const []);
@@ -164,7 +164,7 @@ void main() {
   // screen). This sweep pumps a hostile, populated, MIXED-status fixture
   // through the same width x scale matrix and asserts real content rendered.
   for (final width in <double>[360, 800, 1440]) {
-    for (final scale in <double>[0.85, 1.0, 1.3]) {
+    for (final scale in <double>[0.85, 1.0, 1.3, 1.6, 2.0]) {
       testWidgets('renders a populated mixed-status queue without overflow at '
           '${width}px / scale $scale', (tester) async {
         await _pumpAt(tester, width: width, scale: scale, rows: _populatedRows);

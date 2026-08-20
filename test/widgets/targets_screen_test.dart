@@ -13,6 +13,7 @@
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,7 +32,7 @@ const double _contentWidth = 1612;
 const _widths = <double>[1612, 1440, 1280, 1024, 860, 720];
 
 /// 1.0 plus both ends of the UiPrefs text-size slider.
-const _scales = <double>[0.85, 1.0, 1.15, 1.3];
+const _scales = <double>[0.85, 1.0, 1.15, 1.3, 1.6, 2.0];
 
 Future<void> _loadFont(String family, List<String> files) async {
   final loader = FontLoader(family);
@@ -301,6 +302,18 @@ void main() {
           tester.view.physicalSize = Size(width + 80, 1400);
           tester.view.devicePixelRatio = 1.0;
 
+          // Capture the full FlutterErrorDetails, not just the exception.
+          // `takeException()` drops the "relevant error-causing widget" line,
+          // which is the only part that says WHERE to fix it.
+          final captured = <String>[];
+          final prior = FlutterError.onError;
+          FlutterError.onError = (d) {
+            captured.add(d
+                .toDiagnosticsNode(style: DiagnosticsTreeStyle.error)
+                .toStringDeep());
+            prior?.call(d);
+          };
+
           await tester.pumpWidget(
             _host(
               MineLinkTargetsScreen(data: sample(), initialTab: tab),
@@ -309,12 +322,13 @@ void main() {
             ),
           );
           await tester.pump();
+          FlutterError.onError = prior;
 
           final failure = tester.takeException();
           if (failure != null) {
             fail(
               'Layout error at width=$width textScale=$scale '
-              'tab=${tab.name}: $failure',
+              'tab=${tab.name}: $failure\n${captured.join('\n')}',
             );
           }
         }

@@ -1278,17 +1278,29 @@ class _RoleSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Flexible, because a Row hands a non-flex child UNBOUNDED width
+            // (CLAUDE.md 10.4) and its own ellipsis then never engages. Only
+            // visible above text scale 1.3, which is where these sweeps used to
+            // stop -- the shells compose the in-app slider with the platform's
+            // and cap at kMaxEffectiveTextScale = 2.0, so everything between the
+            // two was a size a real user could reach and nothing had rendered.
+            // The LABEL flexes and the FIGURE never does: "PODS UPLOAD… 94%"
+            // is still readable, "PODS UPLOADED 9…" is a different number.
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  k.label,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 10,
-                    letterSpacing: 1.1,
-                    fontWeight: FontWeight.w800,
-                    color: pal.textMuted,
+                Flexible(
+                  child: Text(
+                    k.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: MlTokens.fontSans,
+                      fontSize: 10,
+                      letterSpacing: 1.1,
+                      fontWeight: FontWeight.w800,
+                      color: pal.textMuted,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),

@@ -73,7 +73,7 @@ void main() {
     // 412 is the render harness's phone width; 360 is the narrowest Android
     // phone in common use and the width CLAUDE.md §10.4 keeps naming.
     for (final width in <double>[360, 412, 600, 760]) {
-      for (final scale in <double>[1.0, 1.3]) {
+      for (final scale in <double>[1.0, 1.3, 1.6, 2.0]) {
         testWidgets('no layout faults at ${width.toInt()}px / scale $scale',
             (tester) async {
           final faults = await faultsAt(tester, width, scale: scale);

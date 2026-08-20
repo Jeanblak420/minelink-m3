@@ -248,7 +248,7 @@ void main() {
   });
 
   for (final width in <double>[360, 800]) {
-    for (final scale in <double>[0.85, 1.0, 1.3]) {
+    for (final scale in <double>[0.85, 1.0, 1.3, 1.6, 2.0]) {
       testWidgets('no overflow at ${width}px / scale $scale', (tester) async {
         tester.view.physicalSize = Size(width, 1200);
         tester.view.devicePixelRatio = 1.0;
@@ -277,7 +277,7 @@ void main() {
 
   group('populated states, real content, no overflow', () {
     for (final width in <double>[360, 800]) {
-      for (final scale in <double>[0.85, 1.0, 1.3]) {
+      for (final scale in <double>[0.85, 1.0, 1.3, 1.6, 2.0]) {
         testWidgets('pending at ${width}px / scale $scale', (tester) async {
           tester.view.physicalSize = Size(width, 1200);
           tester.view.devicePixelRatio = 1.0;
@@ -330,7 +330,7 @@ void main() {
 
   group('hostile MLD01 / MLD02 server messages, no overflow', () {
     for (final width in <double>[360, 800]) {
-      for (final scale in <double>[0.85, 1.0, 1.3]) {
+      for (final scale in <double>[0.85, 1.0, 1.3, 1.6, 2.0]) {
         testWidgets(
             'MLD01 with an unbroken long company-bearing message at ${width}px / scale $scale',
             (tester) async {

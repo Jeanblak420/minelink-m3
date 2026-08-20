@@ -171,6 +171,11 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        // A Wrap, not a Row. Two tabs reading "Short term targets" and "Long
+        // term targets & goals" side by side are wider than a narrow console
+        // at an accessibility text size, and a Row would simply overflow —
+        // there is nothing here that can ellipsize without destroying the
+        // label. The second tab drops to its own line instead.
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
@@ -178,8 +183,9 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
             border: Border.all(color: t.line),
             borderRadius: MlShape.radiusMedium,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+          child: Wrap(
+            spacing: 4,
+            runSpacing: 4,
             children: [
               tab(MlTargetsTab.shortTerm, Icons.calendar_month_outlined,
                   'Short term targets', unset),
@@ -991,30 +997,47 @@ class _MonthTable extends StatelessWidget {
         children: [
           Expanded(
             flex: 24,
+            // Three unflexed children in one cell — the month, a lock and a
+            // CURRENT badge — so each took its natural width from an unbounded
+            // constraint (CLAUDE.md 10.4). At 860px and text scale 2.0 that is
+            // 15px more than the cell has. Only visible above 1.3, which is
+            // where this sweep used to stop.
+            //
+            // The MONTH flexes first and the badge second: a row reading
+            // "August 20…  CURRENT" still tells you which month is current,
+            // and one reading "August 2026  CURR…" tells you less.
             child: Row(
               children: [
-                Text(m.label,
-                    style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 12,
-                      fontWeight: i == data.currentIndex
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                      color: locked ? t.inkMid : t.inkHi,
-                    )),
+                Flexible(
+                  child: Text(m.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: MlGlass.sans,
+                        fontSize: 12,
+                        fontWeight: i == data.currentIndex
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        color: locked ? t.inkMid : t.inkHi,
+                      )),
+                ),
                 if (locked) ...[
                   const SizedBox(width: 7),
                   Icon(Icons.lock_outline_rounded, size: 12, color: t.inkXlo),
                 ],
                 if (i == data.currentIndex) ...[
                   const SizedBox(width: 8),
-                  Text('CURRENT',
-                      style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 8,
-                        letterSpacing: 1,
-                        color: t.accent2,
-                      )),
+                  Flexible(
+                    child: Text('CURRENT',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: MlGlass.sans,
+                          fontSize: 8,
+                          letterSpacing: 1,
+                          color: t.accent2,
+                        )),
+                  ),
                 ],
               ],
             ),
@@ -1390,16 +1413,23 @@ class _TargetHistory extends StatelessWidget {
         children: [
           Expanded(
             flex: 18,
+            // Flexible: a Row hands a non-flex child unbounded width
+            // (CLAUDE.md 10.4), so this month label could not ellipsize inside
+            // its own column and pushed the row over at large text sizes.
             child: Row(
               children: [
                 Icon(Icons.lock_outline_rounded, size: 11, color: t.inkXlo),
                 const SizedBox(width: 8),
-                Text(m.label,
-                    style: TextStyle(
-                        fontFamily: MlGlass.sans,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: t.ink)),
+                Flexible(
+                  child: Text(m.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontFamily: MlGlass.sans,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: t.ink)),
+                ),
               ],
             ),
           ),
@@ -1541,24 +1571,47 @@ class _CycleArchive extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Text(c.label,
-                  style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: t.inkHi)),
-              const SizedBox(width: 10),
-              _OutcomeBadge(
-                  tokens: t, outcome: band, overrideLabel: '$hit OF 6 SURPASSED'),
-              const Spacer(),
-              Text('closed cycle · read-only',
-                  style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 11,
-                      color: t.inkLo)),
-            ],
+          // A Wrap, not a Row with a Spacer. A Spacer collapses to zero when
+          // the row is full and the children then overflow, which is what
+          // happened here at text scale 2.0 — the label, the badge and the
+          // read-only note together are wider than a narrow console.
+          //
+          // `width: double.infinity` is load-bearing: a Wrap sizes to its
+          // content, so without it `spaceBetween` has no free space to
+          // distribute and the note renders glued to the badge instead of at
+          // the right edge (CLAUDE.md 10.4).
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 10,
+              runSpacing: 8,
+              children: [
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(c.label,
+                        style: TextStyle(
+                            fontFamily: MlGlass.sans,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: t.inkHi)),
+                    _OutcomeBadge(
+                        tokens: t,
+                        outcome: band,
+                        overrideLabel: '$hit OF 6 SURPASSED'),
+                  ],
+                ),
+                Text('closed cycle · read-only',
+                    style: TextStyle(
+                        fontFamily: MlGlass.sans,
+                        fontSize: 11,
+                        color: t.inkLo)),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
           MlGrid(
@@ -1735,19 +1788,29 @@ class _OutcomeBadge extends StatelessWidget {
         ),
         borderRadius: MlShape.radiusSmall,
       ),
+      // Flexible, because a Row hands a non-flex child UNBOUNDED width
+      // (CLAUDE.md 10.4) and its own ellipsis then never engages. Only
+      // visible above text scale 1.3, which is where these sweeps used to
+      // stop -- the shells compose the in-app slider with the platform's
+      // and cap at kMaxEffectiveTextScale = 2.0, so everything between the
+      // two was a size a real user could reach and nothing had rendered.
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(_icon, size: 11, color: color),
           const SizedBox(width: 5),
-          Text(
-            overrideLabel ?? outcome.label,
-            style: TextStyle(
-              fontFamily: MlGlass.sans,
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.6,
-              color: color,
+          Flexible(
+            child: Text(
+              overrideLabel ?? outcome.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: MlGlass.sans,
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.6,
+                color: color,
+              ),
             ),
           ),
         ],

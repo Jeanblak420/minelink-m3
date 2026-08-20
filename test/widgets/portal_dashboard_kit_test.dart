@@ -36,7 +36,7 @@ Future<void> _loadFont(String family, List<String> files) async {
 }
 
 const _widths = <double>[1600, 1280, 1024, 430];
-const _scales = <double>[0.85, 1.0, 1.15, 1.3];
+const _scales = <double>[0.85, 1.0, 1.15, 1.3, 1.6, 2.0];
 
 /// Deliberately awkward: a long label, a long unit, a big delta, a null value
 /// and a real zero all in one row.

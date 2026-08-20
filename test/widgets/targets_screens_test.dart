@@ -6,6 +6,7 @@
 // the width x text-scale corners the console actually allows.
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,7 +24,7 @@ import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/m
 import '../fixtures/ml_targets_sample.dart';
 
 const _widths = <double>[1612, 1280, 1024, 860, 700];
-const _scales = <double>[0.85, 1.0, 1.3];
+const _scales = <double>[0.85, 1.0, 1.3, 1.6, 2.0];
 
 Future<void> _loadFont(String family, List<String> files) async {
   final loader = FontLoader(family);
@@ -260,13 +261,27 @@ void main() {
       for (final width in _widths) {
         for (final scale in _scales) {
           sized(tester, width);
+          final captured = <String>[];
+          final prior = FlutterError.onError;
+          FlutterError.onError = (d) {
+            captured.add(d
+                .toDiagnosticsNode(style: DiagnosticsTreeStyle.error)
+                .toStringDeep());
+            prior?.call(d);
+          };
           await tester.pumpWidget(_host(build(),
               overrides: overrides, width: width, scale: scale));
           await tester.pumpAndSettle();
+          FlutterError.onError = prior;
 
+          // Capture the full FlutterErrorDetails, not just the exception.
+          // `takeException()` drops the "relevant error-causing widget" line,
+          // which is the only part that says WHERE to fix it — the console
+          // sweep learned this and this one had not.
           final failure = tester.takeException();
           if (failure != null) {
-            fail('Layout error at width=$width textScale=$scale: $failure');
+            fail('Layout error at width=$width textScale=$scale: $failure\n'
+                '${captured.join('\n')}');
           }
         }
       }

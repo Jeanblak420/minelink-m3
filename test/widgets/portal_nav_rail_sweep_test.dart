@@ -40,7 +40,7 @@ Future<void> _loadFont(String family, List<String> files) async {
 const _widths = <double>[1600, 1280, 1024, 430, 360];
 
 /// 1.0 plus the two ends of the user-settable scale range.
-const _scales = <double>[0.85, 1.0, 1.15, 1.3];
+const _scales = <double>[0.85, 1.0, 1.15, 1.3, 1.6, 2.0];
 
 /// Every (org type, role) the portal can produce, plus the company accounts.
 const _cases = <({OrgType orgType, UserRole? role})>[

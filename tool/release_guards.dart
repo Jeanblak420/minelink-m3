@@ -565,6 +565,27 @@ final guards = <Guard>[
     plantLine: 'style: TextStyle(fontSize: 12.5),',
   ),
   Guard(
+    id: 'text-scale-sweep-reaches-the-ceiling',
+    why: 'a sweep that stops below the scale the shells actually install '
+        'leaves real sizes unrendered while reporting that a screen "survives '
+        'every width x text scale". Since 2026-08-17 the shells COMPOSE the '
+        "in-app slider with the platform's own scaler and cap the product at "
+        'kMaxEffectiveTextScale = 2.0, so everything between 1.3 and 2.0 is a '
+        'size a real user can be sitting at. FOURTEEN sweep sites across '
+        'ELEVEN files stopped at 1.3. Raising them all found seven real '
+        'overflows — an employee-register KPI chip, three targets rows, a '
+        'targets tab bar, a closed-cycle header and the target dial, none of '
+        'which reproduced at or below 1.3. Include 2.0, or the claim in the '
+        "test's own name is false.",
+    mode: Mode.block,
+    roots: ['test'],
+    extension: '.dart',
+    pattern: RegExp(r'(?:final scale in|_scales\s*=)\s*<double>\[(?![^\]]*2\.0)'),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'some_sweep_test.dart',
+    plantLine: 'const _scales = <double>[0.85, 1.0, 1.3];',
+  ),
+  Guard(
     id: 'no-off-scale-corner-radius',
     why: 'a corner radius written as a number is a guess at the shape scale. '
         'Measured across lib/ on 2026-08-20: 320 sites carrying TWENTY-FOUR '

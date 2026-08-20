@@ -237,11 +237,27 @@ class _MlTargetDialState extends State<MlTargetDial> {
         ],
       );
 
-  Widget _body(MlGlass t, Color ringColor, double att, bool pending) => Row(
+  Widget _body(MlGlass t, Color ringColor, double att, bool pending) {
+    // The ring grows with the text inside it.
+    //
+    // It was a fixed 70x70 holding a percentage and a caption, so at an
+    // accessibility text size the two together were taller than the circle and
+    // the column overflowed. Clipping a dial's own reading is the wrong trade:
+    // the figure IS the control, and 70px was a proportion of that figure
+    // rather than a hard constraint.
+    //
+    // Capped at 1.5x because the dial sits beside a label column in a
+    // fixed-width card; past that the ring starts crowding the words it
+    // explains, and the caption is what should give instead.
+    final textScale =
+        (MediaQuery.textScalerOf(context).scale(14) / 14).clamp(1.0, 1.5);
+    final ring = 70.0 * textScale;
+
+    return Row(
         children: [
           SizedBox(
-            width: 70,
-            height: 70,
+            width: ring,
+            height: ring,
             child: CustomPaint(
               painter: _DialRingPainter(
                 value: (widget.target > 0 && !pending)
@@ -342,6 +358,7 @@ class _MlTargetDialState extends State<MlTargetDial> {
           ),
         ],
       );
+  }
 
   Widget _controls(MlGlass t) {
     Widget btn(IconData icon, VoidCallback onTap, String tip) => Tooltip(
@@ -456,18 +473,29 @@ class _MlTargetDialState extends State<MlTargetDial> {
           border: Border.all(color: t.line),
           borderRadius: MlShape.radiusSmall,
         ),
+        // Flexible, because a Row hands a non-flex child UNBOUNDED width
+        // (CLAUDE.md 10.4) and its own ellipsis then never engages. Only
+        // visible above text scale 1.3, which is where these sweeps used to
+        // stop -- the shells compose the in-app slider with the platform's
+        // and cap at kMaxEffectiveTextScale = 2.0, so everything between the
+        // two was a size a real user could reach and nothing had rendered.
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.lock_outline_rounded, size: 11, color: t.inkXlo),
             const SizedBox(width: 6),
-            Text(
-              widget.lockedNote,
-              style: TextStyle(
-                fontFamily: MlGlass.sans,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: t.inkLo,
+            Flexible(
+              child: Text(
+                widget.lockedNote,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: MlGlass.sans,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: t.inkLo,
+                ),
               ),
             ),
           ],

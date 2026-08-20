@@ -265,7 +265,7 @@ void main() {
     // The console lets each admin set a text scale of 0.85–1.3 and bold text.
     // A card that fits at 1.0 and not at 1.3 is broken for whoever moved the
     // slider — which is the only reason the slider's own screen exists.
-    for (final scale in <double>[0.85, 1.0, 1.15, 1.3]) {
+    for (final scale in <double>[0.85, 1.0, 1.15, 1.3, 1.6, 2.0]) {
       testWidgets('survives text scale $scale, bold, reduce-motion',
           (tester) async {
         await _pump(
