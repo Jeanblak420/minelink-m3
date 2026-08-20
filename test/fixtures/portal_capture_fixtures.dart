@@ -48,7 +48,9 @@ import 'package:flutter_application_1/features/portal/models/load_quality.dart';
 import 'package:flutter_application_1/features/portal/models/logistics_models.dart';
 import 'package:flutter_application_1/features/portal/models/mine_trip.dart';
 import 'package:flutter_application_1/features/portal/models/production_entry.dart';
+import 'package:flutter_application_1/features/portal/models/raw_recon_row.dart';
 import 'package:flutter_application_1/features/portal/models/recon_dispute.dart';
+import 'package:flutter_application_1/features/portal/models/trip_reconciliation.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_entry.dart';
 import 'package:flutter_application_1/features/portal/models/transportation_request.dart';
 import 'package:flutter_application_1/features/portal/models/trip_status.dart';
@@ -65,6 +67,7 @@ import 'package:flutter_application_1/features/portal/services/dispute_service.d
 import 'package:flutter_application_1/features/portal/services/earnings_service.dart';
 import 'package:flutter_application_1/features/portal/services/production_service.dart';
 import 'package:flutter_application_1/features/portal/services/quality_service.dart';
+import 'package:flutter_application_1/features/portal/services/reconciliation_service.dart';
 import 'package:flutter_application_1/features/portal/services/logistics_service.dart';
 
 /// A fixed instant, so a capture re-run produces the same pixels. `DateTime.now()`
@@ -211,6 +214,193 @@ final List<SecurityConfirmation> kPendingConfirmations = [
     confirmationType: SecurityConfirmationType.arrival,
     driverConfirmed: true,
     driverConfirmedAt: _ago(const Duration(minutes: 6)),
+  ),
+];
+
+// ---------------------------------------------------------------------------
+// Reconciliation — Side A raw rows, Side B variances, quality certificates
+// ---------------------------------------------------------------------------
+
+/// Side A: the recon table exactly as captured, in the column order CLAUDE.md
+/// §4 fixes — DATE · TIME-IN · WAYBILL · TRANSPORTER · REG · DESTINATION ·
+/// PRODUCT · SOURCE · CUSTOMER · NET MASS · TIME-OUT.
+///
+/// **Two dates and two transporters, on purpose.** The table blanks `DATE` on
+/// every row after the first of a group, so a fixture on one day cannot show
+/// that behaviour at all — and the Transporter filter has nothing to filter.
+///
+/// Row 3 has a **null delivered weight and therefore a null variance**, which is
+/// the state the model's own comment insists is not a measured zero: the truck
+/// is loaded and gone but no POD has landed. A fixture where every load is
+/// closed hides exactly the row a reconciler is looking for.
+final List<RawReconRow> kRawReconRows = [
+  RawReconRow(
+    tripId: 't-1',
+    tripDate: DateTime.utc(2026, 8, 15, 6, 12),
+    timeIn: DateTime.utc(2026, 8, 15, 6, 12),
+    waybillNumber: 'TRP-000123',
+    transporterName: 'Roadhaul Logistics',
+    truckReg: 'CK 84 RT GP',
+    destination: 'Richards Bay',
+    product: 'Chrome',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Atlas Buyer Group',
+    netMass: 36.22,
+    deliveredTons: 35.80,
+    varianceTons: 0.42,
+    timeOut: DateTime.utc(2026, 8, 15, 7, 4),
+    tripStatus: 'completed',
+    podPhotoPath: 'FIXTURE-company/pod/t-1.jpg',
+  ),
+  RawReconRow(
+    tripId: 't-2',
+    tripDate: DateTime.utc(2026, 8, 15, 9, 30),
+    timeIn: DateTime.utc(2026, 8, 15, 9, 30),
+    waybillNumber: 'TRP-000124',
+    transporterName: 'Roadhaul Logistics',
+    truckReg: 'JD 22 PL MP',
+    destination: 'Richards Bay',
+    product: 'Chrome',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Atlas Buyer Group',
+    netMass: 34.90,
+    deliveredTons: 34.90,
+    varianceTons: 0,
+    timeOut: DateTime.utc(2026, 8, 15, 10, 11),
+    tripStatus: 'completed',
+  ),
+  RawReconRow(
+    tripId: 't-3',
+    tripDate: DateTime.utc(2026, 8, 14, 14, 48),
+    timeIn: DateTime.utc(2026, 8, 14, 14, 48),
+    waybillNumber: 'TRP-000119',
+    transporterName: 'Northline Carriers',
+    truckReg: 'BX 09 LM NW',
+    destination: 'Maputo',
+    product: 'Manganese',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Northvale Alloys',
+    netMass: 32.10,
+    timeOut: DateTime.utc(2026, 8, 14, 15, 22),
+    tripStatus: 'en_route_to_offload',
+  ),
+];
+
+/// Side B: the same three loads as the system's own cross-check.
+///
+/// One clean, one with mass that left the mine and did not arrive, one still
+/// open. `variance` is positive-means-missing, per the model's contract.
+final List<TripReconciliation> kTripReconciliations = [
+  TripReconciliation(
+    tripId: 't-1',
+    updatedAt: _ago(const Duration(hours: 5)),
+    reference: 'TRP-000123',
+    truckReg: 'CK 84 RT GP',
+    commodity: 'Chrome',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Atlas Buyer Group',
+    transporterName: 'Roadhaul Logistics',
+    mineNetTons: 36.22,
+    deliveredTons: 35.80,
+    variance: 0.42,
+    tripStatus: 'completed',
+    podPhotoPath: 'FIXTURE-company/pod/t-1.jpg',
+  ),
+  TripReconciliation(
+    tripId: 't-2',
+    updatedAt: _ago(const Duration(hours: 2)),
+    reference: 'TRP-000124',
+    truckReg: 'JD 22 PL MP',
+    commodity: 'Chrome',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Atlas Buyer Group',
+    transporterName: 'Roadhaul Logistics',
+    mineNetTons: 34.90,
+    deliveredTons: 34.90,
+    variance: 0,
+    tripStatus: 'completed',
+  ),
+  TripReconciliation(
+    tripId: 't-3',
+    updatedAt: _ago(const Duration(hours: 20)),
+    reference: 'TRP-000119',
+    truckReg: 'BX 09 LM NW',
+    commodity: 'Manganese',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Northvale Alloys',
+    transporterName: 'Northline Carriers',
+    mineNetTons: 32.10,
+    tripStatus: 'en_route_to_offload',
+  ),
+];
+
+/// Quality certificates, and the absence of one.
+///
+/// `t-1` carries the worked example from CLAUDE.md §4 — 38% Cr₂O₃ against a 42%
+/// spec and 10% moisture against an 8% maximum, giving 34.10 payable tons and a
+/// 0.9048 grade factor. `t-3` has **no certificate at all**, which is what most
+/// rows look like until the mine attaches one, and is the state the table has to
+/// render as "not set" rather than as a zero.
+final List<LoadQualityRow> kLoadQuality = [
+  LoadQualityRow(
+    tripId: 't-1',
+    updatedAt: _ago(const Duration(hours: 5)),
+    reference: 'TRP-000123',
+    truckReg: 'CK 84 RT GP',
+    commodity: 'Chrome',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Atlas Buyer Group',
+    netTons: 36.22,
+    deliveredTons: 35.80,
+    cr2o3Pct: 38,
+    moisturePct: 10,
+    sizing: '0-6mm',
+    certFileName: 'lab-TRP-000123.pdf',
+    certPath: 'FIXTURE-company/quality/t-1.pdf',
+    issuedAt: _ago(const Duration(days: 1)),
+    specCr2o3Pct: 42,
+    specMoistureMaxPct: 8,
+    specSizing: '0-6mm',
+    payableTons: 34.10,
+    gradeFactor: 0.9048,
+    tripStatus: 'completed',
+    routeId: 'rt-1',
+  ),
+  LoadQualityRow(
+    tripId: 't-3',
+    updatedAt: _ago(const Duration(hours: 20)),
+    reference: 'TRP-000119',
+    truckReg: 'BX 09 LM NW',
+    commodity: 'Manganese',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Northvale Alloys',
+    netTons: 32.10,
+    tripStatus: 'en_route_to_offload',
+    routeId: 'rt-2',
+  ),
+];
+
+/// The two retained versions of an exported-then-edited reconciliation.
+///
+/// One pair has an edited upload and one does not, because "Original only" and
+/// "Original + Edited — uploaded {date}" are two different rows to draw and the
+/// second is the whole point of the round-trip rule.
+final List<ReconUploadPair> kReconUploadPairs = [
+  ReconUploadPair(
+    id: 'rup-1',
+    companyId: 'FIXTURE-company',
+    side: 'A',
+    originalPath: 'FIXTURE-company/recon/A-original.xlsx',
+    originalCreatedAt: _ago(const Duration(days: 3)),
+    editedPath: 'FIXTURE-company/recon/A-edited.xlsx',
+    editedUploadedAt: _ago(const Duration(days: 1)),
+  ),
+  ReconUploadPair(
+    id: 'rup-2',
+    companyId: 'FIXTURE-company',
+    side: 'B',
+    originalPath: 'FIXTURE-company/recon/B-original.xlsx',
+    originalCreatedAt: _ago(const Duration(days: 2)),
   ),
 ];
 
@@ -591,6 +781,16 @@ List<Override> portalCaptureOverrides() => [
       productionReportProvider
           .overrideWith((ref, _) async => kProductionReport),
       logisticsSnapshotProvider.overrideWith((ref, _) async => kLogistics),
+      // The reconciliation layer, added 2026-08-20 when the recon screens were
+      // photographed for the first time. Without these the whole
+      // Reconciliations tab — Side A, Side B, the quality table and the
+      // two-version upload pairs — rendered four error cards.
+      rawReconRowsProvider.overrideWith((ref, _) async => kRawReconRows),
+      tripReconciliationsProvider
+          .overrideWith((ref, _) async => kTripReconciliations),
+      loadQualityProvider.overrideWith((ref, _) async => kLoadQuality),
+      reconUploadPairsProvider
+          .overrideWith((ref, _) async => kReconUploadPairs),
       // Added 2026-08-20, when the three role dashboards were photographed for
       // the first time. `kFleetStatus` had existed in this file all along and
       // was never registered, so the transporter dashboard rendered with FOUR

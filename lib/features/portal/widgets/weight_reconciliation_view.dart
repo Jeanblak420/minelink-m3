@@ -217,7 +217,7 @@ class WeightReconciliationView extends ConsumerWidget {
                   const SizedBox(height: 16),
                   MlDataTable(
                     columns: const [
-                      MlColumn('Truck', flex: 3),
+                      MlColumn('Truck', flex: 3, minWidth: kPlateColumnMinWidth),
                       MlColumn('Source', flex: 3),
                       MlColumn('Customer', flex: 3),
                       MlColumn('Mine net', flex: 2, align: TextAlign.right),
@@ -303,7 +303,25 @@ class WeightReconciliationView extends ConsumerWidget {
     final tone = _varianceTone(r.variance, r.mineNetTons)
         .colors(Theme.of(context).brightness);
     final v = r.variance ?? 0;
-    final sign = v > 0 ? '−' : (v < 0 ? '+' : '');
+    // THE SIGN IS THE STORED ONE. It used to be inverted here — `v > 0 ? '−'`
+    // — and nothing said why.
+    //
+    // `trips.variance_tons` is a generated Postgres column and its convention is
+    // written down in `TripReconciliation` and `RawReconRow` alike: **positive
+    // means mass that left the mine and did not arrive**. The CSV/Excel/PDF
+    // exports carry that sign, the raw Side A table three cards further down the
+    // same screen prints that sign, and the "Net variance" stat card at the top
+    // of THIS card prints that sign.
+    //
+    // So until 2026-08-20 one load rendered as `0.42 t` on the stat card and
+    // `−0.42 t` in the row underneath it — the same figure, the same load, on
+    // the same card, with opposite signs. On the screen whose entire job is to
+    // say whether mass went missing. Photographed on
+    // `screen-mine-reconciliations-desktop-dark`.
+    //
+    // The tone still carries "is this bad" (`variance_severity.dart` scores it
+    // as a percentage of the load), which is what the colour is for. The number
+    // says how much, in the direction the database and every export mean it.
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
@@ -313,7 +331,7 @@ class WeightReconciliationView extends ConsumerWidget {
           borderRadius: BorderRadius.circular(MlTokens.rSm),
         ),
         child: Text(
-          '$sign${v.abs().toStringAsFixed(2)} t',
+          '${v.toStringAsFixed(2)} t',
           style: context.mlText.code(
             color: tone.fg,
             size: 13,

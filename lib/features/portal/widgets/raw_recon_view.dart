@@ -304,40 +304,45 @@ class _RawReconViewState extends ConsumerState<RawReconView> {
                   ),
                   if (_visibleStats.isNotEmpty) ...[
                     const SizedBox(height: 10),
-                    LayoutBuilder(
-                      builder: (context, c) {
-                        final visible = [
-                          for (final s in _statOrder)
-                            if (_visibleStats.contains(s)) s,
-                        ];
-                        final cols = c.maxWidth > 700
-                            ? visible.length
-                            : (visible.length / 2).ceil().clamp(1, 3);
-                        const gap = 10.0;
-                        final w = (c.maxWidth - gap * (cols - 1)) / cols;
-                        return Wrap(
-                          spacing: gap,
-                          runSpacing: gap,
-                          children: [
-                            for (final s in visible)
-                              SizedBox(
-                                width: w,
-                                child: MlStatCard(
-                                  label: s,
-                                  value:
-                                      '${(stats[s] ?? 0).toStringAsFixed(2)} t',
-                                  caption: _statCaption[s],
-                                  icon: s == 'Total'
-                                      ? Icons.functions_rounded
-                                      : Icons.scale_outlined,
-                                  tone: s == 'Total'
-                                      ? MlTone.accent
-                                      : MlTone.done,
-                                ),
-                              ),
-                          ],
-                        );
-                      },
+                    // `MlTileGrid`, not a hand-rolled breakpoint.
+                    //
+                    // This was `cols = maxWidth > 700 ? visible.length :
+                    // (visible.length / 2).ceil().clamp(1, 3)` — the seventeenth
+                    // copy of the shape MlTileGrid was extracted to end, and the
+                    // one that survived the sweep. On a 380px phone with all
+                    // five periods showing it chose THREE columns of 120px, and
+                    // an `MlStatCard` is 92px of tone bar, icon well and padding
+                    // before a single character of text. Photographed 2026-08-20
+                    // on `screen-recon-tables-phone-dark`: five cards showing an
+                    // icon and the letters D, W, M, Y, T — the tonnage figure
+                    // ellipsised away to nothing, on the screen whose entire
+                    // purpose is that figure.
+                    //
+                    // `minTileWidth` rather than a ladder: it "cannot produce a
+                    // tile narrower than its content", which is the property
+                    // this needed and the reason MlTileGrid's own doc calls it
+                    // the one to reach for. 220 is measured, not chosen — it
+                    // leaves 128px for the text column, and `Total` is
+                    // `103.22 t` in the display face. It reproduces the existing
+                    // five-across desktop row exactly and gives one column on a
+                    // phone, which is what every other stat grid in the portal
+                    // already does.
+                    MlTileGrid(
+                      minTileWidth: 220,
+                      gap: 10,
+                      children: [
+                        for (final s in _statOrder)
+                          if (_visibleStats.contains(s))
+                            MlStatCard(
+                              label: s,
+                              value: '${(stats[s] ?? 0).toStringAsFixed(2)} t',
+                              caption: _statCaption[s],
+                              icon: s == 'Total'
+                                  ? Icons.functions_rounded
+                                  : Icons.scale_outlined,
+                              tone: s == 'Total' ? MlTone.accent : MlTone.done,
+                            ),
+                      ],
                     ),
                   ],
                   const SizedBox(height: 12),
@@ -591,20 +596,31 @@ class _ExcelReconTable extends StatelessWidget {
       ],
     );
 
-    return LayoutBuilder(
-      builder: (context, c) {
-        const minTableWidth = 1120.0;
-        if (c.maxWidth >= minTableWidth) return table;
-        return Scrollbar(
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(bottom: 8),
-            child: SizedBox(width: minTableWidth, child: table),
-          ),
-        );
-      },
-    );
+    // `MlWideTable`, which was extracted FROM this widget's own scroll view and
+    // then never came back to it. One implementation, so a fix to the thumb's
+    // contrast or its bottom padding reaches this table too.
+    //
+    // 1320, not the 1120 this carried. At 1120 the fourteen columns are squeezed
+    // to the point where Flutter breaks INSIDE words rather than between them:
+    // photographed 2026-08-20 on a 1600px desktop, the header read
+    // "DELIVER / ED", "VARIAN / CE" and "PO / D", and the Manganese row read
+    // "Manganes / e". Nothing overflowed — a wrapped cell is a cell that fits —
+    // so no sweep and no overflow capture ever saw it.
+    //
+    // 1480 is MEASURED, and the first two guesses were both wrong. "DELIVERED"
+    // is the widest single word in the header and sits in a flex-16 column of a
+    // 260-flex table; arithmetic said 1284, and at 1284 it still broke, because
+    // the estimate ignored the overline's letter-spacing and the cell padding.
+    // `recon_table_legibility_test.dart` renders the table AT its own minimum —
+    // a narrow viewport, where the scroll view sizes it to exactly `minWidth` —
+    // so the boundary itself is what gets checked rather than some width that
+    // happens to be wider than it.
+    //
+    // The consequence is that this table now scrolls on a 1600px window as well
+    // as on a phone, and that is the right trade: `MlWideTable`'s own doc says a
+    // wide register "cannot be made to fit a laptop and should not be truncated
+    // to try", and a scrollbar that says so beats a header nobody can read.
+    return MlWideTable(minWidth: 1480, child: table);
   }
 
   TableRow _row(

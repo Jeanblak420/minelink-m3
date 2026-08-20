@@ -236,61 +236,102 @@ class _ReconUploadsPanelState extends ConsumerState<ReconUploadsPanel> {
     ReconUploadPair? pair,
   ) {
     final semantic = MlSemantic.of(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 150,
-          child: Text(
-            label,
-            style: context.mlText.titleSmall.copyWith(
-              color: semantic.textStrong,
-              fontWeight: FontWeight.w700,
+
+    final title = Text(
+      label,
+      style: context.mlText.titleSmall.copyWith(
+        color: semantic.textStrong,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+
+    final versions = pair == null
+        ? Text(
+            'No edited copy uploaded yet.',
+            style: context.mlText.bodyMedium.copyWith(
+              color: semantic.textFaint,
             ),
-          ),
-        ),
-        Expanded(
-          child: pair == null
-              ? Text(
-                  'No edited copy uploaded yet.',
-                  style: context.mlText.bodyMedium.copyWith(
-                    color: semantic.textFaint,
-                  ),
-                )
-              : Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ActionChip(
-                      avatar: const Icon(Icons.lock_outline, size: 15),
-                      label: Text(
-                        'Original — ${_dateFmt.format(MlTime.sast(pair.originalCreatedAt))}',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      onPressed: () => _openPath(pair.originalPath),
-                    ),
-                    if (pair.editedPath != null)
-                      ActionChip(
-                        avatar: const Icon(Icons.edit_outlined, size: 15),
-                        label: Text(
-                          'Edited — uploaded ${pair.editedUploadedAt == null ? '—' : _dateFmt.format(MlTime.sast(pair.editedUploadedAt!))}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        onPressed: () => _openPath(pair.editedPath!),
-                      ),
-                  ],
+          )
+        : Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ActionChip(
+                avatar: const Icon(Icons.lock_outline, size: 15),
+                label: Text(
+                  'Original — ${_dateFmt.format(MlTime.sast(pair.originalCreatedAt))}',
+                  style: const TextStyle(fontSize: 12),
                 ),
-        ),
-        if (widget.canEdit) ...[
-          const SizedBox(width: 10),
-          MlButton.outline(
+                onPressed: () => _openPath(pair.originalPath),
+              ),
+              if (pair.editedPath != null)
+                ActionChip(
+                  avatar: const Icon(Icons.edit_outlined, size: 15),
+                  label: Text(
+                    'Edited — uploaded ${pair.editedUploadedAt == null ? '—' : _dateFmt.format(MlTime.sast(pair.editedUploadedAt!))}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  onPressed: () => _openPath(pair.editedPath!),
+                ),
+            ],
+          );
+
+    final action = widget.canEdit
+        ? MlButton.outline(
             label: 'Upload edited',
             icon: Icons.upload_outlined,
             compact: true,
             onPressed: _busy ? null : () => _uploadEdited(side),
-          ),
-        ],
-      ],
+          )
+        : null;
+
+    // ── Below this it stacks. ─────────────────────────────────────────────
+    //
+    // This was one `Row`: a `SizedBox(width: 150)` label, an `Expanded` middle,
+    // and an UNFLEXED "Upload edited" button. A non-flex child of a Row is laid
+    // out against unbounded width (CLAUDE.md §10.4), so 150 + 10 + ~150 of
+    // button leaves the Expanded nothing on a phone and the row simply runs
+    // over — measured 2026-08-20 at 360px: 22px at text scale 1.0 and 50px at
+    // 1.3, on the mine's, the buyer's and the transporter's Reconciliations
+    // screens at once.
+    //
+    // No sweep had seen it because `reconUploadPairsProvider` had no fixture:
+    // with no version pairs the panel renders one short sentence, which cannot
+    // overflow. The row only exists once there is something to reconcile.
+    //
+    // The threshold scales with the type, the same way `MlSectionTitle`'s does.
+    // A fixed breakpoint under a user-controlled text size is only right at one
+    // setting — see the bottom navigation bar for the same fault at a larger
+    // scale.
+    return LayoutBuilder(
+      builder: (context, c) {
+        final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+        if (c.maxWidth < 520 * scale) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              title,
+              const SizedBox(height: 8),
+              versions,
+              if (action != null) ...[
+                const SizedBox(height: 10),
+                Align(alignment: Alignment.centerLeft, child: action),
+              ],
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(width: 150, child: title),
+            Expanded(child: versions),
+            if (action != null) ...[
+              const SizedBox(width: 10),
+              action,
+            ],
+          ],
+        );
+      },
     );
   }
 }

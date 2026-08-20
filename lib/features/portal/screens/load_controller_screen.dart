@@ -223,7 +223,7 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
                     else
                       MlDataTable(
                         columns: const [
-                          MlColumn('Truck Reg', flex: 3),
+                          MlColumn('Truck Reg', flex: 3, minWidth: kPlateColumnMinWidth),
                           MlColumn('Client', flex: 3),
                           MlColumn('Material', flex: 3),
                           MlColumn('Tons', flex: 2, align: TextAlign.right),
@@ -353,11 +353,26 @@ class _ReadyTruckRow extends StatelessWidget {
             field('Material', trip.materialLabel),
           ],
         );
-        final actions = Row(
-          mainAxisSize: MainAxisSize.min,
+        // A `Wrap`, not a `Row`.
+        //
+        // The status badge and the Record Load button together want 281px, and
+        // the narrow branch below hands them 252 on a 360px phone — measured
+        // 2026-08-20, a 29px overflow that no sweep had seen because the sweep
+        // ran with no trips and therefore no row to put them in. A Row cannot
+        // give way; a Wrap puts the button under the badge.
+        //
+        // Safe in the wide branch too: a non-flex child of a `Row` is laid out
+        // against unbounded width (CLAUDE.md §10.4), so this Wrap takes its
+        // natural one-line width there exactly as the Row did, and the
+        // `Expanded(child: fields)` beside it absorbs what is left. The rule
+        // §10.4 warns about — an unflexed Wrap pushing a Row over — bites when
+        // the Wrap is the LONG child; here it is the short trailing one.
+        final actions = Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             MlStatusBadge.forStatus(trip.status.label),
-            const SizedBox(width: 12),
             MlButton.primary(
               label: 'Record Load',
               icon: Icons.inventory_2_outlined,

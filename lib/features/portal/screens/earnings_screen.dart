@@ -274,7 +274,7 @@ class _EarningsBody extends StatelessWidget {
           meta: mlCount(vehicleRows.length, 'vehicle'),
           child: MlDataTable(
             columns: const [
-              MlColumn('Vehicle', flex: 3),
+              MlColumn('Vehicle', flex: 3, minWidth: kPlateColumnMinWidth),
               MlColumn('Trips', flex: 1, align: TextAlign.right),
               MlColumn('Tons', flex: 2, align: TextAlign.right),
               MlColumn('Revenue', flex: 2, align: TextAlign.right),
@@ -387,7 +387,7 @@ class _EarningsBody extends StatelessWidget {
               const SizedBox(height: 12),
               MlDataTable(
                 columns: const [
-                  MlColumn('Truck', flex: 2),
+                  MlColumn('Truck', flex: 2, minWidth: kPlateColumnMinWidth),
                   MlColumn('Customer', flex: 3),
                   MlColumn('Tons', flex: 2, align: TextAlign.right),
                   MlColumn('Revenue', flex: 2, align: TextAlign.right),

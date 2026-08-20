@@ -209,7 +209,7 @@ class _EconomyCard extends StatelessWidget {
           else
             MlDataTable(
               columns: const [
-                MlColumn('Vehicle', flex: 3),
+                MlColumn('Vehicle', flex: 3, minWidth: kPlateColumnMinWidth),
                 MlColumn('Litres', flex: 2, align: TextAlign.right),
                 MlColumn('l/100km', flex: 2, align: TextAlign.right),
                 MlColumn('Cost/km', flex: 2, align: TextAlign.right),

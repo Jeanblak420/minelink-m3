@@ -469,31 +469,55 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
           ),
         );
 
+    // `Flexible` on the label, and a bound on the whole key below.
+    //
+    // A `Wrap` lays its children out against UNBOUNDED main-axis constraints —
+    // that is how it discovers their natural widths — so a legend wider than
+    // the Wrap's own line does not shrink, it overflows. Measured 2026-08-20 on
+    // the buyer dashboard at 360px and text scale 1.3: the "vs previous period"
+    // key wanted 192px of a 180px line and ran 12px over. Same family as
+    // CLAUDE.md §10.4's Row rule, one container along.
+    //
+    // `Flexible` alone does nothing here for the same reason; it needs the
+    // `ConstrainedBox` below to have something to be flexible within.
     Widget legend(String label, Widget sw) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             sw,
             const SizedBox(width: 7),
-            Text(label,
-                style: context.mlText.labelSmall.copyWith(
-                  color: t.inkMid,
-                  fontWeight: FontWeight.w400,
-                )),
+            Flexible(
+              child: Text(label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.mlText.labelSmall.copyWith(
+                    color: t.inkMid,
+                    fontWeight: FontWeight.w400,
+                  )),
+            ),
           ],
         );
 
     return Row(
       children: [
         Expanded(
-          child: Wrap(
-            spacing: 16,
-            runSpacing: 6,
-            children: [
-              legend('This period', swatch(t.accent)),
-              legend(_priorLabel,
-                  swatch(t.inkMid.withValues(alpha: 0.7), dashed: true)),
-              legend('Target', swatch(t.accent2.withValues(alpha: 0.6), dashed: true)),
-            ],
+          child: LayoutBuilder(
+            builder: (context, c) {
+              Widget bounded(Widget child) => ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: c.maxWidth),
+                    child: child,
+                  );
+              return Wrap(
+                spacing: 16,
+                runSpacing: 6,
+                children: [
+                  bounded(legend('This period', swatch(t.accent))),
+                  bounded(legend(_priorLabel,
+                      swatch(t.inkMid.withValues(alpha: 0.7), dashed: true))),
+                  bounded(legend('Target',
+                      swatch(t.accent2.withValues(alpha: 0.6), dashed: true))),
+                ],
+              );
+            },
           ),
         ),
         Text(

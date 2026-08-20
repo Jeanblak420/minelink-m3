@@ -41,7 +41,11 @@ import 'package:flutter_application_1/features/portal/screens/buyer_portal_dashb
 import 'package:flutter_application_1/features/portal/screens/driver_routes_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/load_controller_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/security_checkin_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_reconciliations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_reconciliations_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/mine_supplier_portal_dashboard_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_reconciliations_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/recon_tables_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/transporter_portal_dashboard_screen.dart';
 import 'package:flutter_application_1/features/portal/nav/portal_nav.dart';
 import 'package:flutter_application_1/features/profile_setup/screens/profile_setup_screen.dart';
@@ -74,12 +78,20 @@ void main() {
     );
   });
 
-  /// The console dashboard inside the real shell.
+  /// The console inside the real shell.
+  ///
+  /// [body] defaults to the platform dashboard. Pass another console screen to
+  /// photograph it with the real rail, top bar and canvas around it — which is
+  /// the whole point, since Jean's brief is about "the placement of everything"
+  /// and a console screen out of its chrome is not that.
   Widget console({
     required Brightness brightness,
     bool railExpanded = true,
+    Widget? body,
+    List<Override> extraOverrides = const [],
   }) {
     return ProviderScope(
+      overrides: [...companyScopeOverrides(), ...extraOverrides],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: AppTheme.build(brightness),
@@ -125,12 +137,13 @@ void main() {
           // which is how fabricated platform totals could reach a real admin
           // (P9-03). A render test is a legitimate caller of sample data — so
           // it says so, out loud, at the call site.
-          child: MineLinkDashboardScreen(
-            orgAggregates: MlSampleData.orgAggregates,
-            pendingRequests: MlSampleData.pendingRequests,
-            registry: MlSampleData.registry,
-            recentOrgs: MlSampleData.recentOrgs,
-          ),
+          child: body ??
+              MineLinkDashboardScreen(
+                orgAggregates: MlSampleData.orgAggregates,
+                pendingRequests: MlSampleData.pendingRequests,
+                registry: MlSampleData.registry,
+                recentOrgs: MlSampleData.recentOrgs,
+              ),
         ),
       ),
     );
@@ -627,6 +640,104 @@ void main() {
         ),
         const Size(412, 1700),
         'screen-load-controller-phone-dark',
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // RECONCILIATION — the widest tables in the product.
+  //
+  // The recon table's eleven columns are fixed by CLAUDE.md §4 and cannot be
+  // made to fit a phone, which makes these the screens `MlWideTable` exists
+  // for. None had ever been photographed, and the fixtures they need did not
+  // exist: `rawReconRowsProvider`, `tripReconciliationsProvider`,
+  // `loadQualityProvider` and `reconUploadPairsProvider` all rejected, so the
+  // whole tab was four error cards.
+  //
+  // The fixture rows are deliberately awkward — two dates (so the DATE-blanking
+  // on repeat rows is visible at all), two transporters (so the filter has
+  // something to filter), one load with no delivered weight and therefore a
+  // null variance, and one with no quality certificate.
+  group('reconciliation', () {
+    testWidgets('recon tables — console, desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const ReconTablesScreen(),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1700),
+        'screen-recon-tables-desktop-dark',
+      );
+    });
+
+    testWidgets('recon tables — console, phone dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const ReconTablesScreen(),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 1700),
+        'screen-recon-tables-phone-dark',
+      );
+    });
+
+    testWidgets('mine reconciliations — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const MineReconciliationsScreen(),
+          title: 'Fixture Chrome Mine',
+          subtitle: 'Reconciliations',
+          orgType: OrgType.mineSupplier,
+          role: UserRole.admin,
+          selectedRoute: '/portal/mine/reconciliations',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1700),
+        'screen-mine-reconciliations-desktop-dark',
+      );
+    });
+
+    // Light, because the recon tables are where the light theme is most likely
+    // to be used in an office and least likely to have been looked at.
+    testWidgets('transporter reconciliations — desktop light', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.light,
+          child: const TransporterReconciliationsScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Reconciliations',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter/reconciliations',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1500),
+        'screen-transporter-reconciliations-desktop-light',
+      );
+    });
+
+    testWidgets('buyer reconciliations — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const BuyerReconciliationsScreen(),
+          title: 'Fixture Metals',
+          subtitle: 'Reconciliations',
+          orgType: OrgType.buyer,
+          role: UserRole.admin,
+          selectedRoute: '/portal/buyer/reconciliations',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 1700),
+        'screen-buyer-reconciliations-phone-dark',
       );
     });
   });

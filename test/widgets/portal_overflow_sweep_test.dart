@@ -26,6 +26,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:flutter_application_1/core/theme/app_theme.dart';
+// The capture fixtures, so the second pass below sweeps screens with real
+// rows in their tables rather than their empty states.
+
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/features/portal/providers/mirror_company_context_provider.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_loads_value_screen.dart';
@@ -73,6 +76,9 @@ import 'package:flutter_application_1/features/portal/screens/tons_out_detail_sc
 
 /// Narrow phone, small tablet, desktop rail width. The 360 is the one that
 /// matters most: drivers and security run this on a phone.
+import '../fixtures/portal_capture_fixtures.dart';
+import '../fixtures/screen_fixtures.dart';
+
 const _widths = <double>[360, 800, 1280];
 const _scales = <double>[0.85, 1.0, 1.3, 1.6, 2.0];
 
@@ -124,9 +130,11 @@ void main() {
     WidgetTester tester,
     Widget Function() child, {
     bool boldText = false,
+    List<Override> overrides = const [],
+    List<double> scales = _scales,
   }) async {
     for (final width in _widths) {
-      for (final scale in _scales) {
+      for (final scale in scales) {
         tester.view.physicalSize = Size(width, 1400);
         tester.view.devicePixelRatio = 1.0;
 
@@ -143,6 +151,7 @@ void main() {
               // laid out nothing. This is the difference between a real sweep
               // and a green tick.
               mirrorCompanyIdProvider.overrideWith((ref) => 'sweep-company'),
+              ...overrides,
             ],
             child: MaterialApp(
                           // The REAL app theme: a bare ThemeData leaves buttons on
@@ -261,6 +270,65 @@ void main() {
       testWidgets('${entry.key} survives every width x text scale',
           (tester) async {
         await sweep(tester, entry.value);
+      });
+    }
+  });
+
+  // ---------------------------------------------------------------------
+  // THE SAME SCREENS, WITH ROWS IN THEM.
+  //
+  // Everything above renders with no data behind it. That is deliberate and it
+  // is documented — an error state carries more text than the figure it
+  // replaced, so it is a real corner — but it is only half the job, and the
+  // half it misses is the half with tables in it. CLAUDE.md §10.5: a green test
+  // over an empty fixture proves nothing.
+  //
+  // Measured 2026-08-20: three tables overflowed at 412px with rows in them —
+  // 24px on the super-admin recon screen's quality table, 35px and 4.6px on the
+  // buyer's reconciliations — and every one of the 27 corners above passed,
+  // because with no rows there is no plate pill to overflow. A plate is 114px
+  // of fixed content in a flex column, which is exactly the case an empty table
+  // cannot show.
+  //
+  // Two text scales rather than five. The data pass is roughly 3x the work per
+  // screen (real rows, real tables, real exports) and 1.0/1.3 are the ends of
+  // the range `ConsolePrefs` actually offers; 1.6 and 2.0 stay on the empty
+  // pass, where they are cheap. Widening this later is a runtime decision, not
+  // a correctness one.
+  group('portal screens, with data', () {
+    // Only the screens the capture fixtures genuinely populate. A screen listed
+    // here that the fixtures do not reach would sweep its error state twice and
+    // report it as coverage.
+    const withData = [
+      'mine dashboard',
+      'buyer dashboard',
+      'transporter dashboard',
+      'mine reconciliations',
+      'buyer reconciliations',
+      'transporter reconciliations',
+      'tons out',
+      'load controller',
+      'security check-in',
+      'buyer loads & value',
+      'buyer waybills',
+      'earnings',
+      'fuel costs',
+      'mine quality',
+      'mine production',
+      'driver routes',
+    ];
+    for (final key in withData) {
+      testWidgets('$key survives every width x text scale, WITH ROWS',
+          (tester) async {
+        await sweep(
+          tester,
+          screens[key]!,
+          overrides: [
+            ...companyScopeOverrides(),
+            ...portalCaptureOverrides(),
+          ],
+          scales: const [1.0, 1.3],
+        );
       });
     }
   });

@@ -85,7 +85,7 @@ class BuyerWaybillsScreen extends ConsumerWidget {
                         // reference; calling the column "Waybill #" on an
                         // editable row invited the reader to think they were
                         // editing a waybill (P8-20).
-                        MlColumn('Transaction ref', flex: 2),
+                        MlColumn('Transaction ref', flex: 2, minWidth: kPlateColumnMinWidth),
                         MlColumn('Product', flex: 2),
                         MlColumn('Order', flex: 2),
                         MlColumn('Status', flex: 2, align: TextAlign.right),

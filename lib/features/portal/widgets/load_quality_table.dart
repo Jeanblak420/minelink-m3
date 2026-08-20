@@ -173,7 +173,7 @@ class LoadQualityTable extends ConsumerWidget {
                   const SizedBox(height: 10),
                   MlDataTable(
                     columns: [
-                      const MlColumn('Truck', flex: 3),
+                      const MlColumn('Truck', flex: 3, minWidth: kPlateColumnMinWidth),
                       const MlColumn('Product', flex: 2),
                       const MlColumn('Net', flex: 2, align: TextAlign.right),
                       const MlColumn('Cr₂O₃', flex: 2, align: TextAlign.right),

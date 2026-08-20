@@ -271,7 +271,7 @@ class _Body extends ConsumerWidget {
               const SizedBox(height: 14),
               MlDataTable(
                 columns: const [
-                  MlColumn('Truck', flex: 3),
+                  MlColumn('Truck', flex: 3, minWidth: kPlateColumnMinWidth),
                   MlColumn('Source', flex: 2),
                   MlColumn('Delivered', flex: 2, align: TextAlign.right),
                   MlColumn('Rate', flex: 2, align: TextAlign.right),
