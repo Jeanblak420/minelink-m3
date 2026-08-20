@@ -24,6 +24,8 @@ import 'package:flutter_application_1/features/portal/models/trip_status.dart';
 import 'package:flutter_application_1/features/portal/models/trip_waypoint.dart';
 import 'package:flutter_application_1/features/portal/providers/company_location_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/hazard_provider.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/features/portal/providers/routing_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/lifecycle_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/live_tracking_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/logistics_provider.dart';
@@ -108,6 +110,13 @@ class _DriverNavigationScreenState
   bool _rerouting = false;
   bool _arrived = false;
   bool _followCamera = true;
+
+  /// True once `FlutterMap` has been laid out at least once.
+  ///
+  /// `MapController` throws if it is used before that, and the follow camera is
+  /// driven from an animation tick that can start before the first frame — see
+  /// `MapOptions.onMapReady`.
+  bool _mapReady = false;
   bool _muted = false;
 
   // Phase-5 T7 hazard layer: active hazards near the driver, overlaid on the
@@ -152,7 +161,9 @@ class _DriverNavigationScreenState
     // Shortest-arc heading interpolation so 350°→10° doesn't spin the long way.
     var dh = (_headingTo - _headingFrom + 540) % 360 - 180;
     _smoothHeading = (_headingFrom + dh * t + 360) % 360;
-    if (_followCamera && _smoothPos != null) {
+    // `_mapReady` — see `MapOptions.onMapReady` below for why this guard is
+    // load-bearing rather than defensive.
+    if (_mapReady && _followCamera && _smoothPos != null) {
       _mapController.moveAndRotate(
           _smoothPos!, _zoomForSpeed(_speedKmh), -_smoothHeading);
     }
@@ -411,7 +422,15 @@ class _DriverNavigationScreenState
     final remainM = remainingMeters(r.distanceM, _traveledM);
     final remainS = r.durationS * (remainM / r.distanceM);
     return (
-      eta: DateTime.now().add(Duration(seconds: remainS.round())),
+      // `MlTime.now()`, not `DateTime.now()`. This ETA is READ — it is the
+      // clock time in the driver's HUD — and CLAUDE.md §7.1 makes every time a
+      // user reads a South African one. A laptop or a handset left on another
+      // zone printed an arrival hour that was simply not the hour.
+      //
+      // It is a WALL CLOCK, so it must be converted back at the wire:
+      // `publishNavState` does `eta.toUtc()`, and a wall clock pushed through
+      // that lands hours out. Both publish sites wrap it in `MlTime.toServer`.
+      eta: MlTime.now().add(Duration(seconds: remainS.round())),
       timeLeftS: remainS.round(),
       distLeftM: remainM.round(),
     );
@@ -439,7 +458,7 @@ class _DriverNavigationScreenState
     ref.read(liveTrackingServiceProvider).publishNavState(
           instruction:
               _arrived ? 'Arrived at destination' : _currentInstructionText(),
-          eta: est.eta,
+          eta: MlTime.toServer(est.eta),
           timeLeftS: est.timeLeftS,
           distanceLeftM: est.distLeftM,
           speedKmh: _speedKmh,
@@ -460,7 +479,7 @@ class _DriverNavigationScreenState
     _lastTelemetryAt = DateTime.now();
     ref.read(liveTrackingServiceProvider).publishNavState(
           instruction: _currentInstructionText(),
-          eta: est?.eta,
+          eta: est == null ? null : MlTime.toServer(est.eta),
           timeLeftS: est?.timeLeftS,
           distanceLeftM: est?.distLeftM,
           speedKmh: _speedKmh,
@@ -616,8 +635,9 @@ class _DriverNavigationScreenState
       _routeFailed = false;
     });
     final zones = await _avoidZones(from, to);
-    final route =
-        await RoutingService().fetchRoute(from, to, avoidLocations: zones);
+    final route = await ref
+        .read(routingServiceProvider)
+        .fetchRoute(from, to, avoidLocations: zones);
     if (!mounted) return;
     setState(() {
       _fetchingRoute = false;
@@ -626,8 +646,23 @@ class _DriverNavigationScreenState
       } else {
         _route = route;
         _stepStartM = stepStartOffsets(route.points, route.steps);
-        _stepIx = 0;
         _voice.reset();
+        // Seed the progress from where the truck IS, rather than parking on
+        // step 0 until the next fix arrives.
+        //
+        // `_stepIx = 0` meant the banner read the DEPARTURE step with its
+        // distance-to-manoeuvre measured to the start of the route — so between
+        // the route landing and the next GPS fix it said **"In 0 m — Head out
+        // onto Dwarsrivier Road"**. Photographed 2026-08-20, and it is not only
+        // a render artefact: the position stream has a 3 m distance filter, so
+        // a truck stationary at a boom gate genuinely sits in that state, and
+        // the voice announces from the same figure.
+        //
+        // `_updateProgress` is what every later fix calls; calling it here
+        // means the first frame after a route is the same shape as every frame
+        // after it. Safe inside `setState` — it assigns fields and hands the
+        // instruction to the voice engine, and does not call `setState` itself.
+        _updateProgress(from, to);
       }
     });
     if (route != null && route.points.length >= 2) _publishRoute(route);
@@ -946,6 +981,33 @@ class _DriverNavigationScreenState
       options: MapOptions(
         initialCenter: _pos ?? destPoint,
         initialZoom: 15,
+        // The camera cannot be driven before this fires.
+        //
+        // `MapController.moveAndRotate` throws "You need to have the FlutterMap
+        // widget rendered at least once before using the MapController", and
+        // the follow camera in `_onMotionTick` called it on every animation
+        // tick with no guard. That is a RACE, not a theoretical one: the
+        // position stream is subscribed at the end of `_bootstrap`, BEFORE the
+        // `setState` that flips `_loading` false — so on a phone with a warm
+        // GPS fix the first position can arrive, start the glide animation and
+        // tick it, all before the frame that first builds this map. The
+        // exception then escapes an AnimationController listener, on the
+        // driver's navigation screen, at the moment navigation starts.
+        //
+        // Found 2026-08-20 by rendering the screen for the first time — the
+        // render harness delivers its first fix immediately, which is the same
+        // shape as a warm fix and is why it reproduced every time.
+        onMapReady: () {
+          _mapReady = true;
+          // Catch up: the fixes that arrived before the map existed left the
+          // camera behind, and without this the puck sits still until the next
+          // one — which on a truck stopped at a boom gate can be a long time.
+          final p = _smoothPos ?? _pos;
+          if (p != null && _followCamera) {
+            _mapController.moveAndRotate(
+                p, _zoomForSpeed(_speedKmh), -_smoothHeading);
+          }
+        },
         onPositionChanged: (camera, hasGesture) {
           if (hasGesture && _followCamera) {
             setState(() => _followCamera = false);
@@ -1089,21 +1151,45 @@ class _DriverNavigationScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // The leg on its own line, as a label.
+                //
+                // It used to be a prefix — "Offloading at  {place}" on ONE
+                // line with an ellipsis — so thirteen characters of preamble
+                // ate the front of the only field on this screen that says
+                // where the truck is going. Photographed 2026-08-20 at 412px:
+                // "Offloading at  Iron Hills Mining — collection po…".
+                //
+                // As a label it costs no horizontal room at all, and the place
+                // gets the whole width and two lines.
                 Text(
-                  '${_offloadLeg ? 'Offloading at' : 'Loading at'}  $headline',
+                  (_offloadLeg ? 'Offloading at' : 'Loading at').toUpperCase(),
                   maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.mlText.overline.copyWith(
+                    color: semantic.textFaint,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  headline,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.mlText.titleSmall.copyWith(
                     color: semantic.textStrong,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                Text(detail,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.mlText.bodySmall.copyWith(
-                      color: fallback ? colors.fg : semantic.textMuted,
-                    )),
+                // …and nothing underneath when the detail line would only
+                // repeat it. `detail` falls back to `d.label`, which for a
+                // booked pin IS the headline, so the bar printed the same
+                // place twice — the first copy truncated.
+                if (detail.trim().isNotEmpty && detail.trim() != headline.trim())
+                  Text(detail,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.mlText.bodySmall.copyWith(
+                        color: fallback ? colors.fg : semantic.textMuted,
+                      )),
               ],
             ),
           ),
@@ -1202,8 +1288,15 @@ class _DriverNavigationScreenState
                       color: MlTokens.inkOnFill)),
               if (secondary != null) ...[
                 const SizedBox(height: 2),
+                // Two lines, like the primary above it.
+                //
+                // At one line the degraded banner read "Turn-by-turn is
+                // unavailable righ…" on a 412px phone — the sentence that
+                // explains why there is no route line, cut before it says
+                // anything. It shares the row with two icon buttons in that
+                // state, which is exactly when there is least width for it.
                 Text(secondary,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style:
                         const TextStyle(fontSize: 13, color: MlTokens.inkOnFill70)),
@@ -1233,17 +1326,23 @@ class _DriverNavigationScreenState
 
   Widget _bottomBar() {
     final semantic = MlSemantic.of(context);
-    final r = _route;
+    // ONE estimate, shared with the telemetry.
+    //
+    // This block used to recompute `remainM`, `remainS` and the ETA itself,
+    // duplicating `_liveEstimates()` line for line — so the number in the
+    // driver's HUD and the number published to every watcher could drift apart
+    // the moment either was touched. And it was the copy that still said
+    // `DateTime.now()`, so the HUD printed the DEVICE's clock while everything
+    // else in the product had moved to South African time (CLAUDE.md §7.1).
+    final est = _liveEstimates();
     String eta = '—', mins = '—', dist = '—';
     String plan = '—';
     Color? planColor;
-    if (r != null && r.distanceM > 0) {
-      final remainM = remainingMeters(r.distanceM, _traveledM);
-      final remainS = r.durationS * (remainM / r.distanceM);
-      final etaAt = DateTime.now().add(Duration(seconds: remainS.round()));
+    if (est != null) {
+      final etaAt = est.eta;
       eta = DateFormat.Hm().format(etaAt);
-      mins = '${(remainS / 60).ceil()} min';
-      dist = _fmtDistance(remainM);
+      mins = '${(est.timeLeftS / 60).ceil()} min';
+      dist = _fmtDistance(est.distLeftM.toDouble());
       // Late vs the session's original ETA (kept across reroutes).
       final base = _originalEta;
       if (base != null) {
@@ -1265,12 +1364,25 @@ class _DriverNavigationScreenState
     Widget cell(String value, String label, {Color? color}) => Expanded(
           child: Column(children: [
             Text(value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: context.mlText.code(
                   color: color ?? semantic.textStrong,
                   size: 16,
                   weight: FontWeight.w800,
                 )),
+            // The LABEL may take two lines, the value may not.
+            //
+            // "Time left" does not fit a 72px readout at text scale 1.3, and
+            // wrapping it at its space keeps both words. A VALUE has no space
+            // to wrap at — "6.1 km" broken across lines is unreadable at a
+            // glance — so that one stays on one line and ellipsises as a last
+            // resort.
             Text(label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: context.mlText.labelSmall.copyWith(
                   color: semantic.textMuted,
                   fontWeight: FontWeight.w400,
@@ -1278,40 +1390,93 @@ class _DriverNavigationScreenState
           ]),
         );
 
+    final readouts = <Widget>[
+      cell(eta, 'ETA'),
+      cell(mins, 'Time left'),
+      cell(dist, 'Distance'),
+      cell(plan, 'vs plan', color: planColor),
+      cell('${_speedKmh.round()}', 'km/h'),
+    ];
+
+    final actions = <Widget>[
+      IconButton(
+        tooltip: 'Report a hazard',
+        onPressed: _reportHazard,
+        icon: const Icon(Icons.warning_amber_rounded),
+      ),
+      IconButton(
+        tooltip:
+            _offloadLeg ? 'Confirm at gate — exit' : 'Confirm at gate — arrival',
+        onPressed: _confirmAtGate,
+        icon: const Icon(Icons.shield_outlined),
+      ),
+      IconButton(
+        tooltip: _muted ? 'Unmute voice' : 'Mute voice',
+        onPressed: () => setState(() {
+          _muted = !_muted;
+          _voice.muted = _muted;
+        }),
+        icon:
+            Icon(_muted ? Icons.volume_off_rounded : Icons.volume_up_rounded),
+      ),
+      MlButton.danger(
+          label: 'End', compact: true, onPressed: () => context.pop()),
+    ];
+
+    // ── The readouts get their own row on a phone. ────────────────────────
+    //
+    // This was one `Row`: five `Expanded` readouts, three 48px icon buttons and
+    // an End button. On a 412px phone the buttons take ~215px of it, leaving
+    // roughly 30px per readout — so the HUD a driver GLANCES AT rendered
+    // "Dista / nce", "on / tim / e" and "22: / 26", every label and half the
+    // values broken across lines. Photographed 2026-08-20, the first time this
+    // screen had ever been rendered anywhere.
+    //
+    // Five readouts across 412px is ~78px each, which fits every string at its
+    // natural size, so the split costs one row of height and nothing else. The
+    // threshold scales with the type, like `MlSectionTitle`'s: a fixed
+    // breakpoint under a user-controlled text size is right at one setting only.
+    //
+    // `maxLines: 1` above is the backstop, not the fix — a HUD that ellipsises
+    // "+120 min" is bad, and one that stacks it into three lines mid-word is
+    // worse.
     return MlCard(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(children: [
-        cell(eta, 'ETA'),
-        cell(mins, 'Time left'),
-        cell(dist, 'Distance'),
-        cell(plan, 'vs plan', color: planColor),
-        cell('${_speedKmh.round()}', 'km/h'),
-        IconButton(
-          tooltip: 'Report a hazard',
-          onPressed: _reportHazard,
-          icon: const Icon(Icons.warning_amber_rounded),
-        ),
-        IconButton(
-          tooltip: _offloadLeg
-              ? 'Confirm at gate — exit'
-              : 'Confirm at gate — arrival',
-          onPressed: _confirmAtGate,
-          icon: const Icon(Icons.shield_outlined),
-        ),
-        IconButton(
-          tooltip: _muted ? 'Unmute voice' : 'Mute voice',
-          onPressed: () => setState(() {
-            _muted = !_muted;
-            _voice.muted = _muted;
-          }),
-          icon: Icon(
-              _muted ? Icons.volume_off_rounded : Icons.volume_up_rounded),
-        ),
-        MlButton.danger(
-            label: 'End',
-            compact: true,
-            onPressed: () => context.pop()),
-      ]),
+      child: LayoutBuilder(builder: (context, c) {
+        final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+
+        // How much room one readout gets if all five share the row. 66 is what
+        // the widest label — "Distance" — needs at scale 1; MEASURED, after a
+        // first attempt guessed a whole-bar threshold and still wrapped
+        // "Dista / nce" at 360px × 1.3, where five readouts get 62.4px each.
+        final perCell = (c.maxWidth - 24) / 5;
+        final readoutsFit = perCell >= 66 * scale;
+
+        if (c.maxWidth >= 620 * scale && readoutsFit) {
+          return Row(children: [...readouts, ...actions]);
+        }
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (readoutsFit)
+              Row(children: readouts)
+            else ...[
+              // Three and two. Uneven, and right: the three a driver reads
+              // most while moving go on top, at 104px each, where every label
+              // fits whole at any scale this console offers.
+              Row(children: readouts.sublist(0, 3)),
+              const SizedBox(height: 6),
+              Row(children: readouts.sublist(3)),
+            ],
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: actions,
+            ),
+          ],
+        );
+      }),
     );
   }
 }

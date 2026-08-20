@@ -23,6 +23,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/features/super_admin/screens/super_admin_org_insights_screen.dart';
 
 import '../../fixtures/console_capture_fixtures.dart';
@@ -50,8 +51,13 @@ void main() {
         ...consoleCaptureOverrides(),
         ...portalCaptureOverrides(),
       ],
-      child: const MaterialApp(
-        home: Scaffold(
+      // The APP's theme, not a bare MaterialApp. A bare one renders in stock
+      // Material's type scale and font family — a measurement of text this app
+      // never draws — and `test-renders-under-the-app-theme` caught exactly
+      // that here.
+      child: MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: const Scaffold(
           body: SuperAdminOrgInsightsScreen(orgType: 'transporter'),
         ),
       ),

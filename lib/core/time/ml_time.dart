@@ -35,6 +35,8 @@
 /// instant.
 library;
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
+
 /// South Africa's offset from UTC. Fixed, and no daylight saving.
 const Duration kSastOffset = Duration(hours: 2);
 
@@ -62,8 +64,24 @@ abstract final class MlTime {
   static DateTime? sastOrNull(DateTime? instant) =>
       instant == null ? null : sast(instant);
 
+  /// The instant [now] is measured from. `null` means the real one.
+  ///
+  /// Set it in a test and the WHOLE PRODUCT's clock freezes, because every
+  /// "today", every window edge and every displayed time in this app already
+  /// comes through here — that is the point of §7.1, and this is the dividend.
+  ///
+  /// Written for the render harness. A golden of the driver's navigation screen
+  /// prints an ETA — a real clock time — so the image changed every minute and
+  /// the comparison could never pass twice. Any screen with a relative date,
+  /// a rolling window or a countdown has the same problem; one hook settles all
+  /// of them rather than each one growing its own injectable clock.
+  ///
+  /// **Never set outside a test.** Nothing in `lib/` writes it.
+  @visibleForTesting
+  static DateTime Function()? debugClock;
+
   /// Now, on the South African wall clock.
-  static DateTime now() => sast(DateTime.now());
+  static DateTime now() => sast(debugClock?.call() ?? DateTime.now());
 
   /// Midnight today, South African. The start of every "today" in the product.
   static DateTime today() => startOfDay(now());

@@ -29,6 +29,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide UserIdentity;
 import 'package:flutter_application_1/core/design/shell/ml_app_shell.dart';
 import 'package:flutter_application_1/core/design/shell/ml_rail_blocks.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/core/widgets/user_identity_flyout.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/auth/screens/login_screen.dart';
@@ -38,6 +39,7 @@ import 'package:flutter_application_1/features/fleet/screens/fleet_management_sc
 import 'package:flutter_application_1/features/operations/screens/operations_hub_screen.dart';
 import 'package:flutter_application_1/features/chat/screens/communications_hub_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_portal_dashboard_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/driver_navigation_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/driver_routes_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/load_controller_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/security_checkin_screen.dart';
@@ -56,8 +58,11 @@ import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/m
 
 import '../fixtures/console_capture_fixtures.dart';
 import '../fixtures/ml_sample_data.dart';
+import '../fixtures/nav_fixtures.dart';
 import '../fixtures/portal_capture_fixtures.dart';
 import '../fixtures/screen_fixtures.dart';
+import '../test_helpers/fake_geolocator.dart';
+import '../test_helpers/fake_path_provider.dart';
 import '../test_helpers/real_fonts.dart';
 import '../test_helpers/render_pumps.dart';
 
@@ -75,6 +80,22 @@ void main() {
           'these renders will be an empty box.');
     }
     SharedPreferences.setMockInitialValues({});
+    // `flutter_map`'s tile cache asks path_provider for a directory before it
+    // will even conclude a tile is unavailable, and the MissingPluginException
+    // that follows fails the TEST from an async gap rather than the widget.
+    installFakePathProvider();
+    // FREEZE THE CLOCK.
+    //
+    // The driver's navigation HUD prints an ETA, which is a real clock time, so
+    // its golden changed every minute and could never match twice. Every time
+    // in this product comes through `MlTime` (CLAUDE.md §7.1), so one hook
+    // settles it for every screen that shows a relative date, a rolling window
+    // or a countdown — not just this one.
+    //
+    // `kCaptureNow` is the same instant the portal fixtures are stamped from,
+    // so "5 days ago" in a render means five days from the data beside it.
+    MlTime.debugClock = () => kCaptureNow;
+    addTearDown(() => MlTime.debugClock = null);
     await Supabase.initialize(
       url: 'http://localhost:54321',
       anonKey: 'render-test-key',
@@ -841,6 +862,82 @@ void main() {
         ),
         const Size(412, 1400),
         'dash-driver-trip-phone-dark',
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // DRIVER NAVIGATION — the only screen in this product used while moving.
+  //
+  // It had no picture of any kind, and three things stood between it and one:
+  // GPS, the destination RPC and the routing service. All three are seams now
+  // (`test/fixtures/nav_fixtures.dart` explains each), and the third —
+  // `routingServiceProvider` — is a change in `lib/`, because `RoutingService()`
+  // was constructed at the call site and there was no way to hand this screen a
+  // route at all.
+  //
+  // NOT inside `MlAppShell`: navigation is full-bleed by design. A driver
+  // holding a phone at a boom gate gets the map and the instruction banner and
+  // nothing else, and putting a rail around it here would photograph a screen
+  // that does not exist.
+  //
+  // ⚠️ THE MAP TILES ARE BLANK, and that is not a fault in the design. Tiles
+  // come from OpenStreetMap over HTTP, and `flutter_test` answers every request
+  // with a 400 — so the canvas under the route is the empty-tile colour. What
+  // IS real here is everything drawn on top of it: the route line, the truck
+  // puck, the instruction banner, the destination bar and the HUD. The tiles
+  // are the one part of this screen that still needs a device.
+  group('driver navigation', () {
+    testWidgets('navigating — phone dark', (tester) async {
+      FakeGeolocatorPlatform.install(
+        latitude: kNavTruck.latitude,
+        longitude: kNavTruck.longitude,
+      );
+      await shoot(
+        tester,
+        ProviderScope(
+          overrides: [
+            ...companyScopeOverrides(role: UserRole.driver),
+            ...portalCaptureOverrides(),
+            ...navigationOverrides(),
+          ],
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.build(Brightness.dark),
+            home: const DriverNavigationScreen(tripId: 't-3'),
+          ),
+        ),
+        const Size(412, 915),
+        'screen-driver-navigation-phone-dark',
+      );
+    });
+
+    // The degraded state, which CLAUDE.md lists as built behaviour and which
+    // nobody had looked at either: Valhalla and OSRM both unreachable, so the
+    // screen falls back to bearing-and-distance with no turn list. A driver in
+    // a bad-signal valley gets this one, and it is the picture that says
+    // whether "graceful degradation" is graceful.
+    testWidgets('no route available — phone dark', (tester) async {
+      FakeGeolocatorPlatform.install(
+        latitude: kNavTruck.latitude,
+        longitude: kNavTruck.longitude,
+      );
+      await shoot(
+        tester,
+        ProviderScope(
+          overrides: [
+            ...companyScopeOverrides(role: UserRole.driver),
+            ...portalCaptureOverrides(),
+            ...navigationOverrides(route: null),
+          ],
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.build(Brightness.dark),
+            home: const DriverNavigationScreen(tripId: 't-3'),
+          ),
+        ),
+        const Size(412, 915),
+        'screen-driver-navigation-no-route-phone-dark',
       );
     });
   });

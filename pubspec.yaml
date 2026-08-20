@@ -73,6 +73,12 @@ dev_dependencies:
   # guard is anchored to the `dependencies:` block itself, not to indent, so
   # this plain entry here does not trip it.
   mockito: ^5.4.4
+  # Test-only, and NOT a second copy of geolocator: this is the federated
+  # platform interface `geolocator` already depends on, named explicitly so
+  # `test/test_helpers/fake_geolocator.dart` may import it. Substituting
+  # `GeolocatorPlatform.instance` is the plugin's own designed seam, and it is
+  # what makes the driver's navigation screen photographable without a handset.
+  geolocator_platform_interface: ^4.2.4
 
 flutter:
   uses-material-design: true

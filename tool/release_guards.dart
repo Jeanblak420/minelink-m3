@@ -543,6 +543,37 @@ final guards = <Guard>[
     plantLine: 'final delta = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);',
   ),
   Guard(
+    id: 'driver-eta-is-not-the-device-clock',
+    why: 'the arrival time in the driver\'s HUD came from `DateTime.now()`, '
+        'which is the DEVICE\'s opinion of the hour. CLAUDE.md §7.1 makes '
+        'every time a user reads a South African one — the rule exists '
+        'because a printed waybill once said 2026-08-16 · 23:29 for a '
+        'hand-off at 01:29 on the 17th — and an ETA is exactly that: a clock '
+        'time, read, acted on, and compared against a delivery window. A '
+        'handset on the wrong zone printed an arrival hour that was simply '
+        'not the hour.\n'
+        '\n'
+        'A UNIT TEST CANNOT CATCH THIS, which is why it is a source guard: on '
+        'a machine already running SAST the two expressions are identical, so '
+        'a test asserting the rendered ETA passes under both implementations '
+        'and fails for everyone in another zone. The guard sees the source '
+        'instead.\n'
+        '\n'
+        'Narrow on purpose. `DateTime.now()` on its own is fine in this file '
+        'and is used correctly nine times — reroute throttles, hazard-refresh '
+        'windows, off-route timers. Those measure ELAPSED time, which §7.1 '
+        'exempts by name. It is `.add(` after it that turns an instant into a '
+        'clock reading somebody looks at.',
+    mode: Mode.block,
+    roots: ['lib/features/portal/screens/driver_navigation_screen.dart'],
+    extension: '.dart',
+    pattern: RegExp(r'DateTime\.now\(\)\.add\('),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'driver_navigation_screen.dart',
+    plantLine:
+        '      eta: DateTime.now().add(Duration(seconds: remainS.round())),',
+  ),
+  Guard(
     id: 'no-half-point-font-size',
     why: 'a half-point font size belongs to neither scale this app has — not '
         'MlTokens.fs* (34/26/22/18/16/15/13/12/11) and not the M3 TextTheme '
