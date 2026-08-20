@@ -209,16 +209,49 @@ abstract final class MlTokens {
   static const fontMono = 'JetBrainsMono';
   static const fontSerif = 'Fraunces';
 
-  // Type scale (px)
-  static const fsDisplay = 34.0;
-  static const fsH1 = 26.0;
-  static const fsH2 = 22.0;
-  static const fsH3 = 18.0;
-  static const fsTitle = 16.0;
-  static const fsBody = 15.0;
-  static const fsBodySm = 13.0;
-  static const fsLabel = 12.0;
-  static const fsMicro = 11.0;
+  // ---- Type scale (px) ----
+  //
+  // **These are the M3 slot sizes, under the app's older names.**
+  //
+  // There were TWO type scales, neither derived from the other — this one,
+  // and the `TextTheme` in `MlTypeScale`, which is what every Material widget
+  // actually resolves. That is the same fault Phase 1 fixed for colour, where
+  // `Theme.of(context).colorScheme.primary` and `MlTokens.accent` were simply
+  // different colours that both meant "the accent". Here it was
+  // `MlTokens.fsBodySm` (13) and `textTheme.bodyMedium` (14) both meaning
+  // "small body text", 1px apart, on adjacent lines of the same screen.
+  //
+  // The theme won, on two grounds: it is what Material widgets read without
+  // being told, and it was already the more used of the two (158 sites
+  // against 96). So these nine constants are now aliases of their slots, and
+  // MineLink has one type scale.
+  //
+  // Five were already equal. The four that moved, and the direction chosen:
+  //
+  //   fsDisplay  34 -> 32   headlineLarge. Down: a hero numeral loses nothing
+  //                         at 32 and the tile it sits in gets 2px back.
+  //   fsH1       26 -> 24   headlineSmall. 26 sits exactly between two slots;
+  //                         down, for the same reason.
+  //   fsH3       18 -> 16   titleMedium. M3 has no step between 16 and 22, and
+  //                         growing a sub-heading by 4px would have been the
+  //                         larger change of the two.
+  //   fsBody     15 -> 16   bodyLarge. UP, because this one is read rather
+  //                         than scanned, and shrinking running text is the
+  //                         direction that harms without looking broken.
+  //   fsBodySm   13 -> 14   bodyMedium. Up, same reason.
+  //
+  // Kept as names rather than deleted: 96 call sites read better saying
+  // `fsBodySm` than `14.0`, and a name is what makes the next change one edit
+  // instead of ninety-six.
+  static const fsDisplay = 32.0; // headlineLarge / displaySmall
+  static const fsH1 = 24.0; // headlineSmall
+  static const fsH2 = 22.0; // titleLarge
+  static const fsH3 = 16.0; // titleMedium
+  static const fsTitle = 16.0; // titleMedium
+  static const fsBody = 16.0; // bodyLarge
+  static const fsBodySm = 14.0; // bodyMedium
+  static const fsLabel = 12.0; // bodySmall / labelMedium
+  static const fsMicro = 11.0; // labelSmall
 
   // ---- Radii ----
   static const rXs = 6.0;
