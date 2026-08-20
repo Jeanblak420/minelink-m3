@@ -24,19 +24,21 @@
 // shells actually install — because the point is to hold these screens to the
 // standard the rest are already held to, not to invent a gentler one for them.
 //
-// 🚨 THIS FILE DOES NOT PROVE WHAT ITS GREEN TICKS SUGGEST, ON ITS OWN.
+// 🚨 A GREEN TICK HERE IS ONLY WORTH WHAT THE SCREEN ACTUALLY PAINTED.
 //
-// These screens render with no Supabase data behind them, and a screen that
-// resolves to a spinner cannot overflow — so it would pass every width and
-// every scale having laid out nothing. Measured: **8 of the 19 paint fewer
-// than three text runs, and four paint ZERO.** `fleet_management` renders
-// "Company information not available.", which is an error state. Fixtures have
-// since promoted one of them; the rest are named there with their causes.
+// A screen that resolves to a spinner cannot overflow, so it would pass every
+// width and every scale having laid out nothing. When this file was written
+// that was true of EIGHT of its nineteen screens — four painted nothing at all,
+// and `fleet_management` painted "Company information not available.", an error
+// state.
 //
-// `untested_screens_render_something_test.dart` is the check on that claim. It
-// measures what each screen actually painted, prints "PROVING SOMETHING: n / N"
-// every run, and holds the eight in a baseline that can only shrink. Read the
-// two files together; this one alone is a coverage number, not coverage.
+// `test/fixtures/screen_fixtures.dart` now supplies the state each one gates
+// on, and every screen here is swept with the same overrides its
+// render-something check uses. `untested_screens_render_something_test.dart`
+// measures what each paints and prints "PROVING SOMETHING: n / N" every run;
+// it currently reads 18 / 18, and its baseline of excuses is EMPTY. Keep the
+// two in step: a screen added here without a fixture will pass this sweep and
+// fail that check, which is the right way round.
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -177,46 +179,60 @@ void main() {
 
   group('profile', () {
     testWidgets('profile', (t) => sweep(t, () => const ProfileScreen()));
-    testWidgets('account security',
-        (t) => sweep(t, () => const AccountSecurityScreen()));
-    testWidgets('profile setup',
-        (t) => sweep(t, () => const ProfileSetupScreen()));
+    testWidgets(
+        'account security',
+        (t) => sweep(t, () => const AccountSecurityScreen(),
+            overrides: [accountEmailOverride()]));
+    testWidgets(
+        'profile setup',
+        (t) => sweep(t, () => const ProfileSetupScreen(),
+            overrides: [profileSetupOverride()]));
   });
 
   group('employee & company', () {
     testWidgets('employee profile — managed', (t) {
       return sweep(
-          t,
-          () => const EmployeeProfileScreen(
-                employeeId: 'sweep-employee',
-                canManage: true,
-                inPortal: true,
-              ));
+        t,
+        () => const EmployeeProfileScreen(
+          employeeId: 'sweep-employee',
+          canManage: true,
+          inPortal: true,
+        ),
+        overrides: companyScopeOverrides(),
+      );
     });
     testWidgets('employee profile — read-only mirror', (t) {
       return sweep(
-          t,
-          () => const EmployeeProfileScreen(
-                employeeId: 'sweep-employee',
-                canManage: false,
-                inPortal: false,
-              ));
+        t,
+        () => const EmployeeProfileScreen(
+          employeeId: 'sweep-employee',
+          canManage: false,
+          inPortal: false,
+        ),
+        overrides: companyScopeOverrides(canManageEmployees: false),
+      );
     });
     testWidgets(
         'company employees',
         (t) => sweep(t, () => const CompanyEmployeesScreen(),
-            overrides: [companyAccessOverride()]));
-    testWidgets('employee register',
-        (t) => sweep(t, () => const PortalEmployeeRegisterScreen()));
+            overrides: companyScopeOverrides()));
+    testWidgets(
+        'employee register',
+        (t) => sweep(t, () => const PortalEmployeeRegisterScreen(),
+            overrides: companyScopeOverrides()));
     testWidgets('company selection',
         (t) => sweep(t, () => const CompanySelectionScreen()));
   });
 
   group('fleet & operations', () {
-    testWidgets('fleet management',
-        (t) => sweep(t, () => const FleetManagementScreen()));
-    testWidgets('operations hub',
-        (t) => sweep(t, () => const OperationsHubScreen()));
+    testWidgets(
+        'fleet management',
+        (t) => sweep(t, () => const FleetManagementScreen(),
+            overrides: companyScopeOverrides()));
+    testWidgets(
+        'operations hub',
+        (t) => sweep(t, () => const OperationsHubScreen(),
+            overrides: companyScopeOverrides()));
     testWidgets('transporter drivers',
         (t) => sweep(t, () => const TransporterDriversScreen()));
     testWidgets('tons-out search',
@@ -225,8 +241,10 @@ void main() {
 
   group('chat & notifications', () {
     testWidgets('messages', (t) => sweep(t, () => const MessagesScreen()));
-    testWidgets('communications hub',
-        (t) => sweep(t, () => const CommunicationsHubScreen()));
+    testWidgets(
+        'communications hub',
+        (t) => sweep(t, () => const CommunicationsHubScreen(),
+            overrides: companyScopeOverrides()));
     testWidgets('notifications',
         (t) => sweep(t, () => const NotificationScreen()));
   });

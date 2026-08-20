@@ -100,29 +100,38 @@ class CommunicationsHubScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: [
-                        _CommunicationChip(
-                          label: 'Contacts',
-                          value: state.contacts.length.toString(),
-                          icon: Icons.people_outline,
-                          tone: MlTone.accent,
-                        ),
-                        _CommunicationChip(
-                          label: 'Announcements',
-                          value: state.announcements.length.toString(),
-                          icon: Icons.campaign_outlined,
-                          tone: MlTone.warn,
-                        ),
-                        _CommunicationChip(
-                          label: 'Chat rooms',
-                          value: state.chatRooms.length.toString(),
-                          icon: Icons.forum_outlined,
-                          tone: MlTone.transit,
-                        ),
-                      ],
+                    // A Wrap lays every child out against UNBOUNDED width, so
+                    // a chip wider than the Wrap does not wrap — it overflows.
+                    // `maxWidth` hands each chip the row's real width to
+                    // ellipsize its label inside.
+                    LayoutBuilder(
+                      builder: (context, c) => Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          _CommunicationChip(
+                            label: 'Contacts',
+                            value: state.contacts.length.toString(),
+                            icon: Icons.people_outline,
+                            tone: MlTone.accent,
+                            maxWidth: c.maxWidth,
+                          ),
+                          _CommunicationChip(
+                            label: 'Announcements',
+                            value: state.announcements.length.toString(),
+                            icon: Icons.campaign_outlined,
+                            tone: MlTone.warn,
+                            maxWidth: c.maxWidth,
+                          ),
+                          _CommunicationChip(
+                            label: 'Chat rooms',
+                            value: state.chatRooms.length.toString(),
+                            icon: Icons.forum_outlined,
+                            tone: MlTone.transit,
+                            maxWidth: c.maxWidth,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -285,10 +294,17 @@ class _CommunicationChip extends StatelessWidget {
   final IconData icon;
   final MlTone tone;
 
+  /// The width the chip must fit inside — the enclosing Wrap's own width.
+  /// Required rather than optional: a Wrap gives its children unbounded width,
+  /// so a chip built without this cannot know when to ellipsize and will
+  /// silently overflow instead.
+  final double maxWidth;
+
   const _CommunicationChip({
     required this.label,
     required this.value,
     required this.icon,
+    required this.maxWidth,
     this.tone = MlTone.accent,
   });
 
@@ -296,6 +312,7 @@ class _CommunicationChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final semantic = MlSemantic.of(context);
     return Container(
+      constraints: BoxConstraints(maxWidth: maxWidth),
       padding: const EdgeInsets.fromLTRB(10, 8, 14, 8),
       decoration: BoxDecoration(
         color: semantic.surfaceCard,
@@ -316,13 +333,24 @@ class _CommunicationChip extends StatelessWidget {
               color: semantic.textStrong,
             ),
           ),
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: MlTokens.fsBodySm,
-              fontWeight: FontWeight.w600,
-              color: semantic.textMuted,
+          // The COUNT above is never allowed to shrink; the word after it is.
+          // A chip reading "12 Announcem…" is still usable, one reading
+          // "1 Announcements" is wrong. These sit in a Wrap, which lays every
+          // child out against UNBOUNDED width — so a chip wider than the Wrap
+          // does not wrap, it overflows, and at 360px with text scale 2.0
+          // "Announcements" did exactly that by 37px. The cap comes from the
+          // Wrap's own width (see the LayoutBuilder at the call site).
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: MlTokens.fontSans,
+                fontSize: MlTokens.fsBodySm,
+                fontWeight: FontWeight.w600,
+                color: semantic.textMuted,
+              ),
             ),
           ),
         ],

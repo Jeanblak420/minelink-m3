@@ -69,24 +69,8 @@ const int _minTextRuns = 3;
 /// and adds no chrome of its own, so whatever it paints belongs to the tab body
 /// it was handed. Measuring it would measure the fixture. The tab bodies are
 /// real screens with their own sweeps, which is where that coverage lives.
-const Map<String, String> _unproven = {
-  'account security':
-      'its fields are built from the signed-in session; with no session it '
-      'paints one line.',
-  'profile setup':
-      'gated on a profile-setup state that is null without a signed-in user.',
-  'employee register': 'same company gate as company employees.',
-  'fleet management':
-      'short-circuits to "Company information not available." — an ERROR '
-      'state, which is exactly what CLAUDE.md §10.5 warns a green sweep over '
-      'proves nothing about.',
-  'operations hub':
-      'needs an OperationsAccessPolicy resolved from a role; paints nothing '
-      'without one.',
-  'communications hub':
-      'chat rooms come from a realtime subscription that never opens against '
-      'the dummy Supabase instance.',
-};
+const Map<String, String> _unproven = <String, String>{};
+
 
 typedef Screens = Map<String, Widget Function()>;
 
@@ -99,7 +83,14 @@ typedef Screens = Map<String, Widget Function()>;
 /// managing branch is still uncovered; that is a fixture worth building, not a
 /// reason to leave the screen rendering a spinner.
 final Map<String, List<Override>> _fixtures = {
-  'company employees': [companyAccessOverride()],
+  'account security': [accountEmailOverride()],
+  'profile setup': [profileSetupOverride()],
+  'company employees': companyScopeOverrides(),
+  'employee register': companyScopeOverrides(),
+  'fleet management': companyScopeOverrides(),
+  'operations hub': companyScopeOverrides(),
+  'communications hub': companyScopeOverrides(),
+  'employee profile': companyScopeOverrides(),
 };
 
 final Screens _screens = {
