@@ -31,6 +31,45 @@ Future<void> loadFont(String family, List<String> files) async {
   if (loaded) await loader.load();
 }
 
+/// Registers Flutter's Material icon font.
+///
+/// `flutter test` does not load it, so every `Icon` renders as an empty box —
+/// harmless for a layout assertion (the glyph is square either way) but ruinous
+/// for a golden you intend to *look at*, which comes out as a grid of hollow
+/// squares where the interface's icons should be.
+///
+/// It is not in the app's assets; it ships in the SDK's artifact cache, whose
+/// location differs per install, so this resolves it from the running Dart
+/// executable rather than a hardcoded path. Returns false when it cannot be
+/// found — callers that only assert layout do not care.
+Future<bool> loadMaterialIcons() async {
+  // Walk up from the test executable looking for `artifacts/material_fonts`.
+  //
+  // Deliberately a search rather than a fixed number of `.parent` hops: the
+  // executable is `.../cache/dart-sdk/bin/dart` on one run and
+  // `.../cache/artifacts/engine/<platform>/flutter_tester` on another, so any
+  // fixed depth is right for one and silently wrong for the other. It was
+  // wrong the first time for exactly that reason.
+  var dir = File(Platform.resolvedExecutable).parent;
+  for (var i = 0; i < 8; i++) {
+    for (final name in const [
+      'materialicons-regular.otf',
+      'MaterialIcons-Regular.otf',
+    ]) {
+      final f = File('${dir.path}/artifacts/material_fonts/$name');
+      if (!f.existsSync()) continue;
+      final loader = FontLoader('MaterialIcons')
+        ..addFont(f.readAsBytes().then((b) => ByteData.sublistView(b)));
+      await loader.load();
+      return true;
+    }
+    final parent = dir.parent;
+    if (parent.path == dir.path) break;
+    dir = parent;
+  }
+  return false;
+}
+
 /// Every family the app registers in `pubspec.yaml`.
 Future<void> loadRealFonts() async {
   await loadFont('PlusJakartaSans', [

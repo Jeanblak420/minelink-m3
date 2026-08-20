@@ -59,7 +59,7 @@ class MlAppShell extends StatefulWidget {
     this.floatingActionButton,
     this.overlay,
     this.showCanvasTexture = true,
-    this.constrainContent = true,
+    this.constrainContent = false,
     this.navEnabled = true,
     this.bottomNavOverride,
   });
@@ -106,8 +106,16 @@ class MlAppShell extends StatefulWidget {
 
   final bool showCanvasTexture;
 
-  /// Whether to cap and pad the content. False for a page that manages its own
-  /// full-bleed layout (a map).
+  /// Whether the SHELL caps and pads the content. **Off by default.**
+  ///
+  /// `MlPageBody` already does this — a responsive gutter (28 at tablet and
+  /// above, 16 below, because 28 on a 360px phone spends 16% of the viewport on
+  /// margin) and a 1280 cap — and 46 screens use it. Having the shell do it too
+  /// gave every one of those pages a 56dp gutter and capped it twice.
+  ///
+  /// So the page owns its gutter and the shell owns the canvas. Set this true
+  /// only for a page that does not use `MlPageBody` and wants the treatment
+  /// anyway.
   final bool constrainContent;
 
   /// Navigation is inert and visibly dimmed when false.
@@ -159,26 +167,24 @@ class _MlAppShellState extends State<MlAppShell> {
   /// top-level destinations and always appends **More**, which opens the full
   /// tree in the drawer. Nothing becomes unreachable — the drawer holds
   /// everything, exactly as the rail does.
-  List<MlNavNode> get _bottomDestinations {
-    final flat = <MlNavNode>[];
-    for (final node in widget.tree) {
-      // A group contributes its first leaf: the group itself has no route, and
-      // a bottom-bar destination that cannot navigate is a dead target.
-      flat.add(node.isGroup ? node.leaves.first : node);
-      if (flat.length == 4) break;
-    }
-    return flat;
-  }
+  /// The top-level nodes the bottom bar stands for.
+  ///
+  /// **The node, not its first leaf.** A group keeps its own short label and
+  /// icon — "Requests" — and navigates to its first child. Lifting the child
+  /// out instead put its full label in the bar, and "Mine/Supplier transport"
+  /// wrapped to three lines at 412px, overlapping both neighbours and clipping
+  /// at the bottom of the bar. `NavigationBar` does not ellipsize.
+  List<MlNavNode> get _bottomDestinations =>
+      widget.tree.take(4).toList(growable: false);
 
-  bool _bottomSelected(MlNavNode node, int index) {
-    final selected = widget.selectedRoute;
-    if (selected == null) return false;
-    if (node.route == selected) return true;
-    // A leaf lifted out of a group stands for the whole group, so it should
-    // stay lit while the user is anywhere inside it.
-    final source = widget.tree.length > index ? widget.tree[index] : null;
-    return source != null && source.isGroup && source.contains(selected);
-  }
+  /// Where a bottom destination goes: itself, or its first child.
+  String? _bottomRoute(MlNavNode node) =>
+      node.isGroup ? node.leaves.first.route : node.route;
+
+  /// A group stays lit while the user is anywhere inside it.
+  bool _bottomSelected(MlNavNode node) => node.contains(
+        widget.tree.resolveSelected(widget.selectedRoute),
+      );
 
   String get _resolvedTitle =>
       widget.title ?? widget.tree.leafFor(widget.selectedRoute)?.label ?? '';
@@ -378,7 +384,7 @@ class _MlAppShellState extends State<MlAppShell> {
     final destinations = _bottomDestinations;
     final selectedIndex = () {
       for (var i = 0; i < destinations.length; i++) {
-        if (_bottomSelected(destinations[i], i)) return i;
+        if (_bottomSelected(destinations[i])) return i;
       }
       // Nothing in the bar matches — the user is somewhere reached through
       // "More". Selecting index 0 would lie about where they are, so the
@@ -393,14 +399,17 @@ class _MlAppShellState extends State<MlAppShell> {
           _scaffoldKey.currentState?.openDrawer();
           return;
         }
-        widget.onNavigate(destinations[i].route!);
+        final route = _bottomRoute(destinations[i]);
+        if (route != null) widget.onNavigate(route);
       },
       destinations: [
         for (final node in destinations)
           NavigationDestination(
             icon: _maybeBadge(node, Icon(node.icon)),
             selectedIcon: Icon(node.selectedIcon ?? node.icon),
-            label: node.label,
+            label: node.compactLabel,
+            // The full label stays available on long-press, so shortening for
+            // the bar never costs the destination its name.
             tooltip: node.label,
           ),
         NavigationDestination(
@@ -421,10 +430,18 @@ class _MlAppShellState extends State<MlAppShell> {
   /// The More tab carries the badge for everything the bar cannot show, so a
   /// queue hidden behind it is still visible from the phone's home screen.
   Widget _maybeBadgeTotal(Widget icon) {
-    final shown = _bottomDestinations.map((n) => n.route).toSet();
+    // Everything the bar does not stand for. A bottom destination stands for
+    // its whole group, so subtract by group rather than by route — counting
+    // routes would re-count every sibling of a shown group's first child as
+    // "hidden" and inflate the More badge.
+    final shownRoutes = <String>{
+      for (final node in _bottomDestinations)
+        for (final leaf in node.leaves)
+          if (leaf.route != null) leaf.route!,
+    };
     var hidden = 0;
     for (final leaf in widget.tree.allLeaves) {
-      if (shown.contains(leaf.route)) continue;
+      if (shownRoutes.contains(leaf.route)) continue;
       hidden += _countFor(leaf);
     }
     return hidden > 0 ? Badge.count(count: hidden, child: icon) : icon;

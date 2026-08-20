@@ -137,6 +137,7 @@ List<MlNavNode> consoleNavTree() => <MlNavNode>[
       // ---- Organisations, access and the audit trail ----
       const MlNavNode.group(
         label: 'Tokens & Seats',
+        shortLabel: 'Access',
         icon: Icons.vpn_key_outlined,
         selectedIcon: Icons.vpn_key_rounded,
         children: [
@@ -188,6 +189,7 @@ List<MlNavNode> consoleNavTree() => <MlNavNode>[
       ),
       const MlNavNode.leaf(
         label: 'Margin ledger History',
+        shortLabel: 'Margins',
         icon: Icons.receipt_long_outlined,
         selectedIcon: Icons.receipt_long_rounded,
         route: '/super-admin/margin-ledger',

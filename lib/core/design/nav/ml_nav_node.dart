@@ -85,6 +85,7 @@ class MlNavNode {
     required String this.route,
     this.badge,
     this.selectedIcon,
+    this.shortLabel,
   }) : children = const <MlNavNode>[];
 
   /// A section header with children. Carries no route and no badge of its own —
@@ -94,10 +95,28 @@ class MlNavNode {
     required this.icon,
     required this.children,
     this.selectedIcon,
+    this.shortLabel,
   })  : route = null,
         badge = null;
 
   final String label;
+
+  /// The label for surfaces with no room for [label] — chiefly the phone's
+  /// bottom navigation bar.
+  ///
+  /// `NavigationBar` does not ellipsize; a long label wraps, and three wrapped
+  /// lines in a 72dp bar collide with their neighbours and clip at the bottom.
+  /// Measured at 412px: "Mine/Supplier transport" wrapped to three lines and
+  /// overlapped both adjacent destinations.
+  ///
+  /// A separate field rather than truncating [label] automatically, because the
+  /// short form is an editorial decision — "Requests", not "Mine/Suppl…".
+  /// Defaults to [label] via [compactLabel].
+  final String? shortLabel;
+
+  /// [shortLabel] when set, otherwise [label].
+  String get compactLabel => shortLabel ?? label;
+
   final IconData icon;
 
   /// The filled counterpart drawn when this destination is selected.
@@ -160,6 +179,7 @@ class MlNavNode {
       label: label,
       icon: icon,
       selectedIcon: selectedIcon,
+      shortLabel: shortLabel,
       children: kept,
     );
   }
