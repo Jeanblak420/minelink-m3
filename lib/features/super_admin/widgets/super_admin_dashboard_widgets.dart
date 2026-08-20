@@ -9,9 +9,22 @@ import 'package:flutter_application_1/core/design/tokens/ml_rail_tokens.dart';
 /// section titles (matches the design system's Fraunces headings).
 const String kEditorialSerif = MlTokens.fontSerif; // 'Fraunces'
 
-/// Console UI sans — the design drop overrides the design-system sans with
-/// Sora for the whole Super-Admin console (`--font-sans: 'Sora'`).
-const String kConsoleSans = 'Sora';
+/// Console UI sans.
+///
+/// The design drop overrode the design-system sans with Sora for the whole
+/// console (`--font-sans: 'Sora'`), and this constant carried that. It no
+/// longer does, as of 2026-08-20.
+///
+/// The override was never applied to the console. `mlConsoleSans`, the rail's
+/// copy of the same string, had already stopped being read by anything, so the
+/// chrome around these cards ran Plus Jakarta Sans while the seven tiles inside
+/// it ran Sora — one screen, two sans faces, and a fourth typeface in a system
+/// that has three (`docs/design-reference.md` §3). Sora was not chosen over
+/// Plus Jakarta Sans here; it was simply the half of the drop that survived.
+///
+/// Kept as a name rather than deleted, because "the console's UI sans" is a
+/// real role and seven sites read better saying so than repeating the family.
+const String kConsoleSans = MlTokens.fontSans;
 
 /// Muted hairline-caption ink the design hardcodes on card subtitles
 /// (`#657795`) — same literal in both themes.

@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/organization_status.dart';
@@ -1098,7 +1099,7 @@ class _TokensTabState extends ConsumerState<_TokensTab> {
                                     DataCell(
                                       SelectableText(
                                         t.tokenPreview,
-                                        style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+                                        style: context.mlText.code(size: 14),
                                       ),
                                     ),
                                     DataCell(Text('${t.seatLimit}')),

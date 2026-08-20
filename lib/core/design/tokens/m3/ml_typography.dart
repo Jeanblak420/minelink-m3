@@ -198,4 +198,177 @@ abstract final class MlTypeScale {
         letterSpacing: 1.1,
         color: color,
       );
+
+  /// The **editorial** rungs — Fraunces at title size, not at hero size.
+  ///
+  /// `docs/design-reference.md` §3 gives the serif two jobs: *"section titles,
+  /// **and** every large numeral"*. Only the second was on the scale. The
+  /// `display` slots are 45 / 36 / 32, which is the numeral; a Fraunces
+  /// *section title* is 16–26 across 20 sites in this tree and had no rung at
+  /// all, so every one of them was hand-written and picked up `bodyMedium`'s
+  /// line box on the way past.
+  ///
+  /// Three steps, at **24 / 20 / 16**, chosen so that the sizes actually in use
+  /// (16, 18, 19, 20, 21, 22, 24, 26) each move by at most 2px.
+  ///
+  /// **Each rung shares the line box of the sans title slot at its own size**,
+  /// so a serif title and a sans title on the same row sit on the same
+  /// baseline: `editorialLarge` takes `headlineSmall`'s 32/24, `editorialSmall`
+  /// takes `titleMedium`'s 24/16, and `editorialMedium` — which has no sans
+  /// twin at 20 — interpolates.
+  ///
+  /// Weight is w500, the same as the display slots, because Fraunces Medium is
+  /// the face's own regular here. A title wanting more says so:
+  /// `context.mlText.editorialLarge.copyWith(fontWeight: FontWeight.w600)`.
+  /// Only 500, 500-italic and 600 are registered (`pubspec.yaml`) — asking for
+  /// w400 or w700 silently renders one of those three.
+  ///
+  /// Deliberately **not** tabular. `MlType.figure` is tabular because a numeral
+  /// that re-measures every frame visibly jitters; a title is words, and
+  /// tabular spacing in running words looks typed rather than set.
+  static TextStyle editorial(double size, double height, double tracking,
+          Color color) =>
+      TextStyle(
+        fontFamily: MlTokens.fontSerif,
+        fontSize: size,
+        height: height,
+        fontWeight: FontWeight.w500,
+        letterSpacing: tracking,
+        color: color,
+      );
+}
+
+/// The type scale as a screen reaches for it: `context.mlText.titleSmall`.
+///
+/// ## Why this exists rather than `TextStyle(fontFamily: …, fontSize: …)`
+///
+/// A `TextStyle` built from scratch carries **only** what is written into it.
+/// Everything else — `height`, `letterSpacing` — is inherited from whatever
+/// `DefaultTextStyle` happens to be in scope, and inside a `Scaffold` that is
+/// `bodyMedium`. So a hand-written 15px w800 conversation title was drawn with
+/// **body** metrics: line height 1.43 where a title wants 1.27, and
+/// letterSpacing +0.25 where a bold title wants −0.1. It looked *nearly* right,
+/// which is why ~500 sites accumulated across the product and why line spacing
+/// visibly differs between two cards on the same screen.
+///
+/// Reaching a slot fixes both, because the slot states them.
+///
+/// ## Why the slots are non-null here
+///
+/// `TextTheme`'s fields are `TextStyle?`. In this app they are never null —
+/// `MlTypeScale.textTheme` fills all fifteen — but the type system does not know
+/// that, so every call site would end in `!`. Five hundred `!`s is five hundred
+/// places a reader has to decide whether the bang is safe. It is decided once,
+/// here.
+///
+/// ## Choosing a slot
+///
+/// | you are drawing | slot |
+/// |---|---|
+/// | a tonnage, a headline figure | [figure] (Fraunces, tabular) |
+/// | a plate, a waybill number, a reference | [code] (JetBrains Mono) |
+/// | a section title **in the serif** | `editorialLarge` / `Medium` / `Small` |
+/// | a page title | `headlineSmall` / `headlineMedium` |
+/// | a card or dialog title | `titleMedium` (16) / `titleSmall` (14) |
+/// | a list-row title | `titleSmall` |
+/// | prose, a table cell, a field value | `bodyMedium` (14) / `bodySmall` (12) |
+/// | a button, chip, tab or nav label | `labelLarge` (14) / `labelMedium` (12) |
+/// | a tracked uppercase caption above a group | [overline] |
+///
+/// Weight and colour are the two things a site legitimately varies, and both
+/// go through `copyWith` so the slot's metrics survive:
+///
+/// ```dart
+/// style: context.mlText.titleSmall.copyWith(
+///   color: pal.headerText,
+///   fontWeight: FontWeight.w700,
+/// ),
+/// ```
+final class MlText {
+  const MlText._(this._t);
+
+  /// The active scale above [context].
+  factory MlText.of(BuildContext context) =>
+      MlText._(Theme.of(context).textTheme);
+
+  /// The scale of a [TextTheme] held directly.
+  ///
+  /// Prefer [of] wherever there is a `BuildContext`. This exists for the same
+  /// reason `MlSemantic.from(Brightness)` does — the handful of places with no
+  /// context at all: a document rendered off-screen, and the tests that assert
+  /// on the styles themselves rather than on what they measure.
+  const MlText.forTheme(TextTheme theme) : _t = theme;
+
+  final TextTheme _t;
+
+  // ---- display: Fraunces, tabular ----
+  TextStyle get displayLarge => _t.displayLarge!;
+  TextStyle get displayMedium => _t.displayMedium!;
+  TextStyle get displaySmall => _t.displaySmall!;
+
+  // ---- headline: Plus Jakarta Sans, bold ----
+  TextStyle get headlineLarge => _t.headlineLarge!;
+  TextStyle get headlineMedium => _t.headlineMedium!;
+  TextStyle get headlineSmall => _t.headlineSmall!;
+
+  // ---- title: semibold ----
+  TextStyle get titleLarge => _t.titleLarge!;
+  TextStyle get titleMedium => _t.titleMedium!;
+  TextStyle get titleSmall => _t.titleSmall!;
+
+  // ---- body: regular ----
+  TextStyle get bodyLarge => _t.bodyLarge!;
+  TextStyle get bodyMedium => _t.bodyMedium!;
+  TextStyle get bodySmall => _t.bodySmall!;
+
+  // ---- label: semibold, tracked ----
+  TextStyle get labelLarge => _t.labelLarge!;
+  TextStyle get labelMedium => _t.labelMedium!;
+  TextStyle get labelSmall => _t.labelSmall!;
+
+  // ---- editorial: Fraunces at title size. See [MlTypeScale.editorial]. ----
+  TextStyle get editorialLarge =>
+      MlTypeScale.editorial(24, 32 / 24, -0.2, _ink);
+  TextStyle get editorialMedium =>
+      MlTypeScale.editorial(20, 26 / 20, -0.15, _ink);
+  TextStyle get editorialSmall =>
+      MlTypeScale.editorial(16, 24 / 16, -0.1, _ink);
+
+  /// The tracked uppercase caption. See [MlTypeScale.overline].
+  ///
+  /// A getter rather than a method so it reads like every other slot; colour
+  /// goes through `copyWith` as it does everywhere else.
+  TextStyle get overline => MlTypeScale.overline(_ink);
+
+  /// The theme's own ink, for the slots this class synthesises rather than
+  /// reads. `onSurface` is what `MlTypeScale.textTheme` was built with.
+  Color get _ink => _t.bodyMedium?.color ?? const Color(0xFF0F172A);
+
+  /// A **display numeral** — see [MlType.figure].
+  TextStyle figure({Color? color, double? size, double? height}) =>
+      MlType.figure(
+        color: color ?? _ink,
+        size: size ?? MlTokens.fsH2,
+        height: height,
+      );
+
+  /// A **machine identifier** — see [MlType.code].
+  TextStyle code({
+    Color? color,
+    double size = MlTokens.fsBody,
+    FontWeight weight = FontWeight.w600,
+    double? letterSpacing,
+  }) =>
+      MlType.code(
+        color: color ?? _ink,
+        size: size,
+        weight: weight,
+        letterSpacing: letterSpacing,
+      );
+}
+
+/// `context.mlText` — the type scale, without writing `Theme.of(context)`.
+extension MlTextOnContext on BuildContext {
+  /// The active [MlText] scale. See that class for how to choose a slot.
+  MlText get mlText => MlText.of(this);
 }

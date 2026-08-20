@@ -154,15 +154,14 @@ flutter:
           style: italic
         - asset: assets/fonts/Fraunces-SemiBold.ttf
           weight: 600
-    - family: Sora
-      fonts:
-        - asset: assets/fonts/Sora-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Sora-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Sora-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Sora-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/Sora-ExtraBold.ttf
-          weight: 800
+    # Sora was a fifth entry here — five weights, 292 KB, bundled into every web
+    # build and every APK. Nothing in lib/ renders in it as of 2026-08-20: the
+    # design drop set `--font-sans: 'Sora'` for the console, but only half of
+    # that override ever landed, so the console's rail ran Plus Jakarta Sans
+    # while seven cards inside it ran Sora. Three faces, three jobs
+    # (docs/design-reference.md §3) — and `one_type_scale_test.dart` fails if a
+    # fourth reappears.
+    #
+    # The .ttf files stay in assets/fonts/. `reference_capture_test.dart`
+    # reproduces the drop and loads them straight off disk with a `FontLoader`,
+    # which does not consult this file. Restoring the family is this block.

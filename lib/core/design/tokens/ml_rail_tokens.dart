@@ -67,9 +67,17 @@ const mlCanvasDot = Color(0x0B0F172A);
 /// shadow reads as a halo on the dark one.
 const mlRailFlyoutShadow = Color(0x8A000000);
 
-/// Console UI sans — the design drop sets `--font-sans: 'Sora'` for the whole
-/// Super-Admin console (chrome + screens).
-const mlConsoleSans = 'Sora';
+// `mlConsoleSans = 'Sora'` stood here until 2026-08-20. The design drop set
+// `--font-sans: 'Sora'` for the console, but nothing in this tree had read this
+// constant for some time — the rail it named runs Plus Jakarta Sans like the
+// rest of the product, and the only surviving Sora was `kConsoleSans` in
+// `super_admin_dashboard_widgets.dart`, seven tiles inside that same rail.
+//
+// So the console's own chrome and the cards sitting in it disagreed about what
+// the console's typeface was, and the dead constant here is what made that look
+// intentional. Three faces, three jobs (`docs/design-reference.md` §3); Sora is
+// not one of them, and `one_type_scale_test.dart` now fails if a fourth
+// reappears.
 
 /// Sidebar theme tokens — the nav rail flips with the console theme (design
 /// `--sb-*` variables): light = white rail, slate ink, blue accent; dark = the

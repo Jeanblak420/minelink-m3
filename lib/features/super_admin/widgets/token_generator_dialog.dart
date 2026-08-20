@@ -3,6 +3,7 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/dialog_utils.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/features/super_admin/utils/edge_function_errors.dart';
@@ -222,7 +223,8 @@ class _TokenGeneratorDialogState extends ConsumerState<TokenGeneratorDialog> {
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: MlShape.radiusSmall,
               ),
-              child: SelectableText(_generatedToken!, style: const TextStyle(fontFamily: 'monospace', fontSize: 16)),
+              child: SelectableText(_generatedToken!,
+                  style: context.mlText.code(size: 16)),
             ),
             const SizedBox(height: 12),
             SizedBox(

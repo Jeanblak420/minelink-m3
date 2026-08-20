@@ -71,6 +71,12 @@ Future<bool> loadMaterialIcons() async {
 }
 
 /// Every family the app registers in `pubspec.yaml`.
+///
+/// Sora used to be a fourth entry here. It is not a product face — see
+/// `ml_rail_tokens.dart` — and loading it made every layout sweep in the suite
+/// pay for a family nothing renders in. `reference_capture_test.dart` still
+/// loads it from its own list, because reproducing the design drop is exactly
+/// the job that needs it.
 Future<void> loadRealFonts() async {
   await loadFont('PlusJakartaSans', [
     'PlusJakartaSans-Regular.ttf',
@@ -87,11 +93,5 @@ Future<void> loadRealFonts() async {
   await loadFont('Fraunces', [
     'Fraunces-Medium.ttf',
     'Fraunces-SemiBold.ttf',
-  ]);
-  await loadFont('Sora', [
-    'Sora-Regular.ttf',
-    'Sora-Medium.ttf',
-    'Sora-SemiBold.ttf',
-    'Sora-Bold.ttf',
   ]);
 }

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_model.dart';
@@ -755,10 +756,10 @@ class _RecentTripsCard extends ConsumerWidget {
                           .bodySmall
                           ?.copyWith(color: semantic.textMuted)),
                 Text('$date · $time',
-                    style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                        color: semantic.textMuted)),
+                    style: context.mlText.code(
+                        color: semantic.textMuted,
+                        size: 12,
+                        weight: FontWeight.w400)),
               ],
             ),
           ),

@@ -127,6 +127,12 @@ class MlAuth {
   // These three are already registered in pubspec for the console. Do not add
   // Inter or Instrument Serif — Flutter falls back silently and the screen
   // quietly loses its character with nothing to catch it.
+  // Spelled out rather than aliased, because this file imports nothing but
+  // Flutter (see the class doc). `one_type_scale_test.dart` pins all three
+  // against `MlTokens` — the same arrangement `MlAuth.accent` has with
+  // `auth_token_alignment_test.dart`, and for the same reason: a `fontFamily`
+  // that does not resolve falls back silently, so a rename that fixed one half
+  // of the product would change the typeface of the other with nothing red.
   static const String sans = 'PlusJakartaSans';
   static const String mono = 'JetBrainsMono';
   static const String serif = 'Fraunces';
