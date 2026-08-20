@@ -216,10 +216,11 @@ flutter build windows --debug                  # blocked — see above
 | | |
 |---|---|
 | `flutter analyze` | no issues |
-| `flutter test` | **1,573 passed**, 1 skipped (a tag-gated capture task) |
+| `flutter test` | **1,580 passed**, 1 skipped (a tag-gated capture task) |
 | `dart tool/release_guards.dart` | **27/27**, every one selftest-proven to bite |
 | `type_scale_codemod.py --selftest` | OK — slot table, editorial rungs, five rewrites, three refusals |
-| Renders | 18 files, zero layout faults at any size |
+| `glyph_coverage_check.py` | passes — every character a UI string uses is in a shipped face |
+| Renders | **25 files**, zero layout faults at any size |
 | Screens proving something | **18 / 18** in the untested-screens check; its baseline of excuses is empty |
 | Web (dart2js release) | builds |
 | Android debug APK | builds |
@@ -264,6 +265,38 @@ the *name* now — `fontSize`, `fs`, `textSize`, `size`.
   a compliance chip, a `DropdownButton`, a dashboard pill, the targets tabs, and
   a targets band 60px taller than the viewport. The last was fixed as a *shape*
   (`TargetsPage`) rather than as an instance.
+- **Seven screens that had no picture now have one** — and it was never a
+  Supabase transport fake. Three notifiers (`FleetNotifier`,
+  `OperationsNotifier`, `CommunicationsNotifier`) loaded and opened realtime
+  channels **from their constructors**, so none of them could be *constructed*
+  without a network. `start()` is the seam; the providers call it immediately,
+  so the running app is unchanged. It is not only a test problem: a notifier
+  that dials out from its constructor cannot be used by anything wanting a
+  snapshot without a subscription.
+
+  The dashboards needed no seam at all — `test/fixtures/portal_capture_
+  fixtures.dart` already overrode every portal data provider and was only ever
+  wired into the design-*reference* capture. Pointing the redesign renders at
+  the same fixtures was the whole change.
+- **Four fixture gaps, each invisible until something was photographed.**
+  `kFleetStatus` had existed all along and was never registered, so the
+  transporter dashboard rendered with four panels of apology.
+  `fleetMaintenanceProvider` had no fixture, so the third fleet state (in
+  maintenance) had never been drawn. `vehicleDriversProvider` had none, so the
+  driver's hero screen photographed as *"Couldn't load your trip"*. And the two
+  fixture files described **two different fleets** — `FIXTURE-vehicle-1` was a
+  Scania on `CK 84 RT GP` in one while `veh-1` was a Freightliner on the same
+  plate in the other — so a screen reading the fleet from one and its trips from
+  the other resolved nothing. One namespace now.
+- **A character no shipped font can draw.** Two driver lifecycle buttons read
+  *"Arrived at loading ✓"* and a chat receipt read *"09:20 ✓✓"*. U+2713 is in
+  none of the three faces; on a handset the platform's fallback chain supplies
+  it, so it was right wherever anyone had looked and came out as tofu the first
+  time it was rendered elsewhere. Both are icons now, and
+  `tool/glyph_coverage_check.py` reads the `cmap` out of each TTF and holds the
+  line. Emoji are exempt by the Emoji_Presentation property — deliberately not
+  "the Dingbats block", because ✓ lives in Dingbats and is the character this
+  exists for.
 
 ### Still open, stated plainly
 
@@ -277,14 +310,12 @@ the *name* now — `fontSize`, `fs`, `textSize`, `size`.
   components, shape scale, type scale — and the layout defects found along the
   way are fixed, but the ~20 screens of Phase 2 and the ~80 of Phase 3 have not
   been individually redesigned against the console reference.
-- **Seven screens have never been photographed**, not three. The handoff names
-  fleet management, the operations hub and the communications hub, which cannot
-  be goldened because a realtime channel opened in a constructor leaves a
-  pending timer that a golden's `expectLater` outlives. But the four `portal-*`
-  renders are **shell only** — the workspace body is a placeholder that says so
-  in the picture: *"The dashboards need a live session; a picture of their
-  loading state would not be a picture of the design."* So the three portal
-  dashboards, the screens that carry the product, have no picture either.
+- ~~**Seven screens have never been photographed**~~ — **closed.** All seven
+  have pictures now: fleet management, the operations hub, the communications
+  hub, the three role dashboards and the driver's Trip screen. See "What Phase 3
+  closed", below. The four `portal-*` shell renders keep their placeholder on
+  purpose: that group is about the rail and the reflow per role, and the
+  workspace now has a group of its own.
 - **Nothing has run on a physical handset**, and nothing has been driven against
   the live database in a browser as a signed-in user.
 - **Thirteen `DropdownButton`s have no `isExpanded`.** They pass the sweeps

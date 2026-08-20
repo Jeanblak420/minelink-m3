@@ -4558,12 +4558,27 @@ class _BubblePreview extends StatelessWidget {
                         color: pal.outgoingText,
                       )),
                   const SizedBox(height: 3),
-                  Text('09:20 ✓✓',
-                      style: context.mlText.code(
-                        color: pal.outgoingText.withValues(alpha: 0.7),
-                        size: 11,
-                        weight: FontWeight.w400,
-                      )),
+                  // The read receipt is an ICON, not a `✓✓` in the string.
+                  // U+2713 is in none of the three shipped faces — on a handset
+                  // the platform's fallback chain supplies it, so it looked
+                  // right wherever anyone had looked, and it came out as two
+                  // tofu boxes the first time this was rendered anywhere else.
+                  // `tool/glyph_coverage_check.py` holds the line.
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('09:20',
+                          style: context.mlText.code(
+                            color: pal.outgoingText.withValues(alpha: 0.7),
+                            size: 11,
+                            weight: FontWeight.w400,
+                          )),
+                      const SizedBox(width: 4),
+                      Icon(Icons.done_all_rounded,
+                          size: 13,
+                          color: pal.outgoingText.withValues(alpha: 0.7)),
+                    ],
+                  ),
                 ],
               ),
             ),

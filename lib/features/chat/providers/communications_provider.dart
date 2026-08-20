@@ -77,7 +77,20 @@ class CommunicationsNotifier extends StateNotifier<CommunicationsState> {
   final List<RealtimeChannel> _channels = [];
 
   CommunicationsNotifier(this._service, this.scope)
-    : super(const CommunicationsState()) {
+    : super(const CommunicationsState());
+
+  /// Begins the first read and subscribes to changes.
+  ///
+  /// **Deliberately not the constructor** — the third notifier in this tree
+  /// with the same seam, after `FleetNotifier` and `OperationsNotifier`, and
+  /// for the same reason: a constructor that dials out cannot be run without a
+  /// network, so the communications hub could not be photographed. `refresh()`
+  /// issues a query and `_setupRealtime()` opens channels; against an
+  /// unreachable host both leave a connect timer that outlives the widget tree.
+  ///
+  /// [communicationsProvider] calls this immediately, so the running app is
+  /// unchanged.
+  void start() {
     _initialize();
   }
 
@@ -248,8 +261,10 @@ final communicationsProvider = StateNotifierProvider.autoDispose
       ref,
       scope,
     ) {
+      // `..start()` rather than the constructor doing it — see
+      // CommunicationsNotifier. The running app is unchanged.
       return CommunicationsNotifier(
         ref.watch(communicationsServiceProvider),
         scope,
-      );
+      )..start();
     });

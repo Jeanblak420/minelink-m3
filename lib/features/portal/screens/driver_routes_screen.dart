@@ -554,10 +554,20 @@ class _CurrentTripCard extends StatelessWidget {
                 onPressed: onDirections),
             const SizedBox(height: 10),
           ],
+          // The ICON carries the done state, not a `✓` appended to the label.
+          //
+          // These read "Arrived at loading ✓" until 2026-08-20, and U+2713 is
+          // not in Plus Jakarta Sans. On a handset the platform's fallback
+          // chain supplies it, so it looked fine wherever anyone had looked —
+          // and it came out as a tofu box the first time the driver's Trip
+          // screen was rendered anywhere else. A brand font cannot be assumed
+          // to carry a symbol, and a filled-vs-outline check is how M3 says
+          // "this step is done" anyway.
           MlButton.outline(
-            label:
-                arrivedLoadingDone ? 'Arrived at loading ✓' : 'Arrived at loading',
-            icon: Icons.check_circle_outline,
+            label: 'Arrived at loading',
+            icon: arrivedLoadingDone
+                ? Icons.check_circle_rounded
+                : Icons.check_circle_outline,
             expand: true,
             onPressed: (!arrivedLoadingDone &&
                     status.isActive &&
@@ -567,10 +577,10 @@ class _CurrentTripCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           MlButton.outline(
-            label: arrivedOffloadingDone
-                ? 'Arrived at offloading ✓'
-                : 'Arrived at offloading',
-            icon: Icons.check_circle_outline,
+            label: 'Arrived at offloading',
+            icon: arrivedOffloadingDone
+                ? Icons.check_circle_rounded
+                : Icons.check_circle_outline,
             expand: true,
             onPressed:
                 (!arrivedOffloadingDone && status.step >= TripStatus.loaded.step)

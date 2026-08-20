@@ -38,6 +38,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_status.dart';
+import 'package:flutter_application_1/features/fleet/models/maintenance_record.dart';
+import 'package:flutter_application_1/features/fleet/models/service_schedule.dart';
+import 'package:flutter_application_1/features/fleet/models/vehicle_driver.dart';
+import 'package:flutter_application_1/features/fleet/providers/fleet_provider.dart';
+import 'package:flutter_application_1/features/fleet/providers/maintenance_providers.dart';
 import 'package:flutter_application_1/features/portal/models/buyer_load_value.dart';
 import 'package:flutter_application_1/features/portal/models/load_quality.dart';
 import 'package:flutter_application_1/features/portal/models/logistics_models.dart';
@@ -368,7 +373,94 @@ final List<FleetVehicleStatus> kFleetStatus = const [
     onRoute: false,
     make: 'Volvo',
   ),
+  // IN MAINTENANCE — the third fleet state, and the one that had no fixture at
+  // all until 2026-08-20. `CLAUDE.md` §4 makes it a derived state: a truck is
+  // in maintenance while an open record takes it out of service, and that is
+  // what keeps `accept_request_dispatch` from booking it. A fixture that showed
+  // two of the three positions proves the design handles two of them.
+  FleetVehicleStatus(
+    vehicleId: 'veh-4',
+    registration: 'MN 07 PL GP',
+    isActive: true,
+    onRoute: false,
+    make: 'MAN',
+    inMaintenance: true,
+    maintenanceTitle: 'Gearbox rebuild',
+  ),
 ];
+
+/// Who is on which truck.
+///
+/// `FIXTURE-employee` is on `veh-2`, which is the truck carrying trip `t-2`
+/// (en route to offload) — so the driver's Trip screen resolves a truck AND a
+/// live trip, and its hero card has something in it. A fixture that resolved
+/// the truck but no trip would photograph the empty state and prove only that
+/// the empty state exists.
+final List<VehicleDriver> kVehicleDrivers = [
+  VehicleDriver(
+    assignmentId: 'va-1',
+    vehicleId: 'veh-2',
+    registration: 'JD 22 PL MP',
+    driverEmployeeId: 'FIXTURE-employee',
+    driverName: 'Fixture Operator',
+    onRoute: true,
+    assignedAt: _ago(const Duration(days: 12)),
+  ),
+  VehicleDriver(
+    assignmentId: 'va-2',
+    vehicleId: 'veh-1',
+    registration: 'CK 84 RT GP',
+    driverEmployeeId: 'emp-1',
+    driverName: 'Sipho Ndlovu',
+    onRoute: false,
+    assignedAt: _ago(const Duration(days: 40)),
+  ),
+];
+
+// ---------------------------------------------------------------------------
+// Maintenance
+// ---------------------------------------------------------------------------
+
+/// One open repair and one service falling due.
+///
+/// The repair is the record that puts `veh-4` above into maintenance — the two
+/// fixtures have to agree, because the dashboard reads the fleet status for its
+/// counts and the maintenance feed for its queue, and a screen where those two
+/// disagree is a screen nobody can read.
+final ({List<MaintenanceRecord> records, List<ServiceSchedule> schedules})
+    kMaintenance = (
+  records: [
+    MaintenanceRecord(
+      id: 'mr-1',
+      vehicleId: 'veh-4',
+      registration: 'MN 07 PL GP',
+      kind: MaintenanceKind.repair,
+      title: 'Gearbox rebuild',
+      status: MaintenanceStatus.open,
+      takesOutOfService: true,
+      startedAt: _ago(const Duration(days: 4)),
+      expectedBackAt: kCaptureNow.add(const Duration(days: 3)),
+      costZar: 48500,
+      odometerKm: 91500,
+    ),
+  ],
+  schedules: [
+    ServiceSchedule(
+      id: 'ss-1',
+      vehicleId: 'veh-1',
+      registration: 'CK 84 RT GP',
+      name: 'Major service',
+      notifyDaysBefore: 14,
+      active: true,
+      vehicleOdometerKm: 412300,
+      // Inside the reminder window, so the "services due" queue has something
+      // in it. A queue rendered empty says nothing about how a full one looks.
+      dueDate: kCaptureNow.add(const Duration(days: 9)),
+      repeatMonths: 6,
+      lastDoneAt: _ago(const Duration(days: 170)),
+    ),
+  ],
+);
 
 // ---------------------------------------------------------------------------
 // Disputes
@@ -442,9 +534,15 @@ final LogisticsSnapshot kLogistics = LogisticsSnapshot(
       truckReg: 'CK 84 RT GP',
       updatedAt: _ago(const Duration(hours: 5)),
     ),
+    // `dispatchId` matters here and nowhere else in this list: the driver's
+    // Trip screen looks its route up BY DISPATCH to draw the From -> To
+    // timeline and name the commodity. Without it the hero card renders with a
+    // plate and a status pill and no route at all, which reads as a design
+    // that forgot to say where the truck is going.
     TripRecord(
       id: 't-2',
       transactionId: 'txn-2',
+      dispatchId: 'dsp-1',
       vehicleId: 'veh-2',
       routeId: 'rt-1',
       status: 'en_route_to_offload',
@@ -493,6 +591,21 @@ List<Override> portalCaptureOverrides() => [
       productionReportProvider
           .overrideWith((ref, _) async => kProductionReport),
       logisticsSnapshotProvider.overrideWith((ref, _) async => kLogistics),
+      // Added 2026-08-20, when the three role dashboards were photographed for
+      // the first time. `kFleetStatus` had existed in this file all along and
+      // was never registered, so the transporter dashboard rendered with FOUR
+      // panels reading "fleet status unavailable", "Could not read this queue"
+      // and "The fleet status could not be read" — honest error states, and
+      // half a screen of apology in what was supposed to be a picture of the
+      // design. Nothing looked at it, so nothing noticed.
+      fleetStatusProvider.overrideWith((ref, _) async => kFleetStatus),
+      fleetMaintenanceProvider.overrideWith((ref, _) async => kMaintenance),
+      // The driver's Trip screen rejects the whole screen when this one errors
+      // — `DriverResolutionError`, deliberately, so an RLS or network failure
+      // can never read as "no truck assigned". Un-overridden it errored, and
+      // the hero screen of the mobile app photographed as
+      // "Couldn't load your trip".
+      vehicleDriversProvider.overrideWith((ref, _) async => kVehicleDrivers),
       // A StreamProvider over Supabase realtime. Left un-overridden it does
       // not merely render an error — it throws from `runOnDispose` when the
       // container tears down, AFTER the harness has restored

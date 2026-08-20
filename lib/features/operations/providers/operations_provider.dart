@@ -102,7 +102,20 @@ class OperationsNotifier extends StateNotifier<OperationsState> {
   Timer? _refreshDebounce;
 
   OperationsNotifier(this._service, this.scope)
-    : super(const OperationsState()) {
+    : super(const OperationsState());
+
+  /// Begins the first read and subscribes to changes.
+  ///
+  /// **Deliberately not the constructor** — the same seam `FleetNotifier` has,
+  /// for the same reason. `refresh()` issues a query and `_setupRealtime()`
+  /// opens channels; against an unreachable host both are socket attempts whose
+  /// connect timer outlives the widget tree. A layout sweep survives that (it
+  /// pumps and ends) but a golden does not, so the operations hub could never
+  /// be photographed.
+  ///
+  /// [operationsProvider] calls this immediately, so the running app is
+  /// unchanged.
+  void start() {
     _initialize();
   }
 
@@ -510,5 +523,8 @@ final operationsServiceProvider = Provider<OperationsService>((ref) {
 
 final operationsProvider = StateNotifierProvider.autoDispose
     .family<OperationsNotifier, OperationsState, OperationsScope>((ref, scope) {
-      return OperationsNotifier(ref.watch(operationsServiceProvider), scope);
+      // `..start()` rather than the constructor doing it — see
+      // OperationsNotifier. The running app is unchanged.
+      return OperationsNotifier(ref.watch(operationsServiceProvider), scope)
+        ..start();
     });

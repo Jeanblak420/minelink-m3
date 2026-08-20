@@ -88,7 +88,30 @@ class FleetNotifier extends StateNotifier<FleetState> {
   RealtimeChannel? _fleetChannel;
 
   FleetNotifier(this._fleetService, this._ref, this.companyId)
-      : super(FleetState()) {
+      : super(FleetState());
+
+  /// Begins the first read and subscribes to changes.
+  ///
+  /// **Deliberately not the constructor.** Both of these were in it until
+  /// 2026-08-20, which meant a `FleetNotifier` could not be *constructed*
+  /// without a network: `_setupRealtime` opens a `RealtimeChannel`, and against
+  /// an unreachable host that is a socket attempt whose reconnect timer
+  /// reschedules itself for as long as the object exists.
+  ///
+  /// The visible cost was that fleet management could never be photographed. A
+  /// layout sweep survives a pending timer — it pumps and ends — but a golden
+  /// does not, because `expectLater` keeps the test body alive long enough for
+  /// the framework's pending-timer check to fire. Pumping past the retry does
+  /// not help; the retry is what schedules the next one.
+  ///
+  /// It is not only a test problem, which is why the seam is here rather than a
+  /// flag a test sets. A notifier that dials out from its constructor cannot be
+  /// used by anything that wants a snapshot without a subscription — a preview,
+  /// a print view, a screen rendering somebody else's company for reference.
+  ///
+  /// [fleetProvider] calls this immediately, so nothing about the running app
+  /// changes.
+  void start() {
     loadFleetVehicles();
     _setupRealtime();
   }
@@ -467,7 +490,10 @@ final fleetProvider =
       companyId,
     ) {
       final fleetService = ref.watch(fleetServiceProvider);
-      return FleetNotifier(fleetService, ref, companyId);
+      // `..start()` rather than the constructor doing it — see FleetNotifier.
+      // The running app is unchanged; what moves is that a notifier can now be
+      // built without dialling out.
+      return FleetNotifier(fleetService, ref, companyId)..start();
     });
 
 final currentUserFleetProvider =

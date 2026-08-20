@@ -30,6 +30,9 @@ import 'package:flutter_application_1/features/employee/services/employee_servic
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_model.dart';
 import 'package:flutter_application_1/features/fleet/providers/fleet_provider.dart';
 import 'package:flutter_application_1/features/notifications/services/notification_service.dart';
+import 'package:flutter_application_1/features/chat/providers/communications_provider.dart';
+import 'package:flutter_application_1/features/operations/models/operations_models.dart';
+import 'package:flutter_application_1/features/operations/providers/operations_provider.dart';
 import 'package:flutter_application_1/features/portal/portal_navigation.dart';
 import 'package:flutter_application_1/features/portal/providers/portal_workspace_provider.dart';
 import 'package:flutter_application_1/features/profile/providers/account_email_provider.dart';
@@ -395,42 +398,70 @@ List<Override> companyScopeOverrides({
 // Fleet
 // ---------------------------------------------------------------------------
 
-/// Three trucks, so a fleet screen lays out a real list.
+/// The fixture fleet — four trucks, ONE namespace.
+///
+/// The ids and registrations here match `kFleetStatus` and the trips in
+/// `portal_capture_fixtures.dart` exactly, and that is the point. The two
+/// fixture files used to describe two different fleets — `FIXTURE-vehicle-1`
+/// was a Scania on `CK 84 RT GP` in one and `veh-1` was a Freightliner on the
+/// same plate in the other — so a screen that read the fleet from one and its
+/// trips from the other resolved nothing. The driver's Trip screen is exactly
+/// that screen: it finds the driver's truck in the fleet and then filters trips
+/// by that truck's **id**. It rendered "Couldn't load your trip".
+///
+/// `veh-2` is the one with a live trip (`t-2`, en route to offload) and the one
+/// [vehicleDriversOverride] assigns the fixture driver to, so the driver hero
+/// has something in it. `veh-4` is the truck in maintenance.
 List<FleetVehicle> fixtureFleet() => [
       FleetVehicle(
-        id: 'FIXTURE-vehicle-1',
+        id: 'veh-1',
         companyId: 'FIXTURE-company',
         createdAt: _fixtureDate,
         vehicleRegistrationNumber: 'CK 84 RT GP',
-        vehicleMake: 'Scania',
+        vehicleMake: 'Freightliner',
         vehicleType: 'Interlink',
         vehicleYearModel: 2021,
         vehicleOdometerKm: 412300,
         firstTrailerRegs: 'CK 85 RT GP',
         secondTrailerRegs: 'CK 86 RT GP',
-        driverFirstName: 'Second',
-        driverLastName: 'Driver',
+        driverFirstName: 'Sipho',
+        driverLastName: 'Ndlovu',
       ),
       FleetVehicle(
-        id: 'FIXTURE-vehicle-2',
+        id: 'veh-2',
         companyId: 'FIXTURE-company',
         createdAt: _fixtureDate,
-        vehicleRegistrationNumber: 'DR 12 KM GP',
-        vehicleMake: 'Volvo',
+        vehicleRegistrationNumber: 'JD 22 PL MP',
+        vehicleMake: 'Scania',
         vehicleType: 'Side tipper',
         vehicleYearModel: 2019,
         vehicleOdometerKm: 688140,
-        firstTrailerRegs: 'DR 13 KM GP',
+        firstTrailerRegs: 'JD 23 PL MP',
+        driverFirstName: 'Thandi',
+        driverLastName: 'Mokoena',
       ),
       FleetVehicle(
-        id: 'FIXTURE-vehicle-3',
+        id: 'veh-3',
+        companyId: 'FIXTURE-company',
+        createdAt: _fixtureDate,
+        vehicleRegistrationNumber: 'BX 09 LM NW',
+        vehicleMake: 'Volvo',
+        vehicleType: 'Flat deck',
+        vehicleYearModel: 2023,
+        vehicleOdometerKm: 91500,
+      ),
+      // In maintenance — the third fleet state (CLAUDE.md §4), derived from an
+      // open out-of-service record rather than a flag. `kMaintenance` carries
+      // the record that puts it there.
+      FleetVehicle(
+        id: 'veh-4',
         companyId: 'FIXTURE-company',
         createdAt: _fixtureDate,
         vehicleRegistrationNumber: 'MN 07 PL GP',
         vehicleMake: 'MAN',
-        vehicleType: 'Flat deck',
-        vehicleYearModel: 2023,
-        vehicleOdometerKm: 91500,
+        vehicleType: 'Tautliner',
+        vehicleYearModel: 2020,
+        vehicleOdometerKm: 254880,
       ),
     ];
 
@@ -441,6 +472,14 @@ List<FleetVehicle> fixtureFleet() => [
 /// NON-DETERMINISTIC one: the spinner's arc lands at a slightly different angle
 /// depending on microtask ordering, so a golden of it fails against itself. A
 /// render that cannot reproduce is not evidence.
+///
+/// It simply **does not call `start()`**, which is what keeps it off the
+/// network. Until 2026-08-20 `FleetNotifier` loaded and subscribed from its
+/// constructor, so this subclass inherited both no matter what it did
+/// afterwards: `super(...)` runs first. The realtime channel's reconnect timer
+/// then outlived every golden of this screen — a sweep pumps and ends, but
+/// `expectLater` keeps a golden's body alive long enough for the framework's
+/// pending-timer check to fire. That is why fleet management had no picture.
 class FixtureFleetNotifier extends FleetNotifier {
   FixtureFleetNotifier(
     super.fleetService,
@@ -459,6 +498,15 @@ class FixtureFleetNotifier extends FleetNotifier {
     if (_pinned) return;
     super.state = value;
   }
+
+  /// Refuses to start, so nothing here reaches the network.
+  ///
+  /// Overridden rather than merely left uncalled: `fleetOverride` is not the
+  /// only thing that can build one of these, and a fixture that quietly began
+  /// dialling out because some other code path called `start()` would put the
+  /// pending timer back with nothing to say where it came from.
+  @override
+  void start() {}
 }
 
 /// The fleet for the fixture company.
@@ -469,4 +517,150 @@ Override fleetOverride() {
         companyId,
         fixture: FleetState(vehicles: fixtureFleet()),
       ));
+}
+
+// ---------------------------------------------------------------------------
+// Operations
+// ---------------------------------------------------------------------------
+
+/// An [OperationsNotifier] that never dials out and holds a fixed state.
+///
+/// Same arrangement as [FixtureFleetNotifier], and it became possible for the
+/// same reason: `OperationsNotifier` used to `refresh()` and open its realtime
+/// channels from its constructor, so the operations hub could not be
+/// constructed without a network and therefore could not be photographed. The
+/// seam is `start()`, which this refuses.
+class FixtureOperationsNotifier extends OperationsNotifier {
+  FixtureOperationsNotifier(
+    super.service,
+    super.scope, {
+    required OperationsState fixture,
+  }) {
+    state = fixture;
+    _pinned = true;
+  }
+
+  bool _pinned = false;
+
+  @override
+  set state(OperationsState value) {
+    if (_pinned) return;
+    super.state = value;
+  }
+
+  @override
+  void start() {}
+}
+
+/// The operations hub's state for the fixture company.
+///
+/// The fleet and the roster are populated and the ledgers are not, on purpose.
+/// A fixture where every tab is full hides the empty states, and an empty state
+/// is a design that has to be looked at like any other — this project has
+/// already shipped one screen whose empty state nobody had seen.
+Override operationsOverride() {
+  return operationsProvider.overrideWith(
+    (ref, scope) => FixtureOperationsNotifier(
+      ref.watch(operationsServiceProvider),
+      scope,
+      fixture: OperationsState(
+        employees: [
+          fixtureEmployee(),
+          fixtureEmployee(
+            id: 'FIXTURE-employee-2',
+            firstName: 'Second',
+            lastName: 'Driver',
+            role: UserRole.driver,
+          ),
+        ],
+        vehicles: fixtureFleet(),
+        isLoading: false,
+      ),
+    ),
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Communications
+// ---------------------------------------------------------------------------
+
+/// A [CommunicationsNotifier] that never dials out and holds a fixed state.
+///
+/// The third of these, after [FixtureFleetNotifier] and
+/// [FixtureOperationsNotifier], and the third notifier whose constructor used
+/// to reach the network. Refuses `start()`.
+class FixtureCommunicationsNotifier extends CommunicationsNotifier {
+  FixtureCommunicationsNotifier(
+    super.service,
+    super.scope, {
+    required CommunicationsState fixture,
+  }) {
+    state = fixture;
+    _pinned = true;
+  }
+
+  bool _pinned = false;
+
+  @override
+  set state(CommunicationsState value) {
+    if (_pinned) return;
+    super.state = value;
+  }
+
+  @override
+  void start() {}
+}
+
+/// The communications hub's state for the fixture company.
+///
+/// Two announcements at DIFFERENT importances, because the card is toned and
+/// badged by that field — a fixture where both were `normal` would render one
+/// treatment twice and show nothing about the other two. The chat side is left
+/// empty on purpose so its empty state is in the picture as well.
+Override communicationsOverride() {
+  return communicationsProvider.overrideWith(
+    (ref, scope) => FixtureCommunicationsNotifier(
+      ref.watch(communicationsServiceProvider),
+      scope,
+      fixture: CommunicationsState(
+        company: fixtureCompany(),
+        employees: [
+          fixtureEmployee(),
+          fixtureEmployee(
+            id: 'FIXTURE-employee-2',
+            firstName: 'Second',
+            lastName: 'Driver',
+            role: UserRole.driver,
+          ),
+        ],
+        announcements: [
+          BroadcastUpdate(
+            id: 'FIXTURE-broadcast-1',
+            event: 'company_broadcast',
+            createdBy: 'FIXTURE-user',
+            timestamp: _fixtureDate,
+            payload: const {
+              'title': 'Weighbridge offline 06:00–08:00 Saturday',
+              'message': 'Calibration. Hold loads at the gate; Security will '
+                  'check trucks in as normal and the queue will clear from 08:00.',
+              'importance': 'high',
+            },
+          ),
+          BroadcastUpdate(
+            id: 'FIXTURE-broadcast-2',
+            event: 'company_broadcast',
+            createdBy: 'FIXTURE-user',
+            timestamp: _fixtureDate,
+            payload: const {
+              'title': 'New seal supplier from Monday',
+              'message': 'Same serial format. Report any seal that will not '
+                  'close to the Load Controller before the truck is loaded.',
+              'importance': 'normal',
+            },
+          ),
+        ],
+        isLoading: false,
+      ),
+    ),
+  );
 }

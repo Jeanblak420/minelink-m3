@@ -34,12 +34,20 @@ import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/auth/screens/login_screen.dart';
 import 'package:flutter_application_1/features/company/screens/company_employees_screen.dart';
 import 'package:flutter_application_1/features/employee/screens/employee_profile_screen.dart';
+import 'package:flutter_application_1/features/fleet/screens/fleet_management_screen.dart';
+import 'package:flutter_application_1/features/operations/screens/operations_hub_screen.dart';
+import 'package:flutter_application_1/features/chat/screens/communications_hub_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_portal_dashboard_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/driver_routes_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_supplier_portal_dashboard_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_portal_dashboard_screen.dart';
 import 'package:flutter_application_1/features/portal/nav/portal_nav.dart';
 import 'package:flutter_application_1/features/profile_setup/screens/profile_setup_screen.dart';
 import 'package:flutter_application_1/features/super_admin/nav/console_nav.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screen_dashboard.dart';
 
 import '../fixtures/ml_sample_data.dart';
+import '../fixtures/portal_capture_fixtures.dart';
 import '../fixtures/screen_fixtures.dart';
 import '../test_helpers/real_fonts.dart';
 
@@ -404,6 +412,59 @@ void main() {
       );
     });
 
+    testWidgets('fleet management — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const FleetManagementScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Fleet',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+        ),
+        const Size(1600, 1400),
+        'screen-fleet-desktop-dark',
+      );
+    });
+
+    testWidgets('operations hub — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const OperationsHubScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Operations',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+          extraOverrides: [operationsOverride()],
+        ),
+        const Size(1600, 1200),
+        'screen-operations-hub-desktop-dark',
+      );
+    });
+
+    testWidgets('communications hub — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const CommunicationsHubScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Communications',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+          extraOverrides: [communicationsOverride()],
+        ),
+        const Size(1600, 1200),
+        'screen-communications-hub-desktop-dark',
+      );
+    });
+
     testWidgets('employee profile — desktop dark', (tester) async {
       await shoot(
         tester,
@@ -458,6 +519,106 @@ void main() {
         ),
         const Size(412, 1100),
         'screen-profile-setup-phone-dark',
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // The three role dashboards, WITH DATA.
+  //
+  // These are the screens the product is actually used through, and until now
+  // none of them had a picture. The `portal — one shell, four roles` group
+  // above renders the shell around a labelled placeholder, and the placeholder
+  // says so on the image: "The dashboards need a live session; a picture of
+  // their loading state would not be a picture of the design." That was true
+  // and it was also the whole workspace missing from the record.
+  //
+  // What changed is not a Supabase fake. `test/fixtures/portal_capture_
+  // fixtures.dart` already overrode every portal data provider — the seam is
+  // the provider, not the transport — and it was only ever wired into the
+  // design-REFERENCE capture. Pointing the redesign renders at the same
+  // fixtures is all it took.
+  //
+  // Deliberately not uniform, per that file's own note: one stockpile is over
+  // its collect threshold and one is not, one truck is on route and one is
+  // available, one load carries a quality penalty, one dispute is open. A
+  // fixture where every row looks the same hides exactly the states a design
+  // has to handle.
+  group('portal dashboards — the workspace, with data', () {
+    testWidgets('transporter dashboard — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const TransporterPortalDashboardScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Transporter workspace',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1900),
+        'dash-transporter-desktop-dark',
+      );
+    });
+
+    testWidgets('mine dashboard — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const MineSupplierPortalDashboardScreen(),
+          title: 'Iron Hills Mining',
+          subtitle: 'Mine workspace',
+          orgType: OrgType.mineSupplier,
+          role: UserRole.admin,
+          selectedRoute: '/portal/mine',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1900),
+        'dash-mine-desktop-dark',
+      );
+    });
+
+    // Light, because the buyer portal is the one place the light theme gets
+    // looked at on a data-dense screen, and a theme nobody photographs is a
+    // theme nobody checks.
+    testWidgets('buyer dashboard — desktop light', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.light,
+          child: const BuyerPortalDashboardScreen(),
+          title: 'Fixture Metals',
+          subtitle: 'Buyer workspace',
+          orgType: OrgType.buyer,
+          role: UserRole.admin,
+          selectedRoute: '/portal/buyer',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1900),
+        'dash-buyer-desktop-light',
+      );
+    });
+
+    // The driver's Trip screen on a phone — the only screen in this product
+    // that is used one-handed, standing next to a truck.
+    testWidgets('driver trip — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const DriverRoutesScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Trip',
+          orgType: OrgType.transporter,
+          role: UserRole.driver,
+          selectedRoute: '/portal/driver',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 1400),
+        'dash-driver-trip-phone-dark',
       );
     });
   });
