@@ -183,10 +183,30 @@ class _OrganizationManagementScreenState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ── Filter bar ──
-        Row(
-          children: [
-            Expanded(
-              child: SizedBox(
+        //
+        // A Row until it genuinely does not fit, then stacked.
+        //
+        // It was an unconditional Row whose two dropdowns were UNFLEXED, so
+        // they took their widest item's natural width from an unbounded
+        // constraint (CLAUDE.md §10.4) while the search field held an
+        // Expanded. At text scale 2.0 on a 600px window that is 16px more
+        // than exists, and the bar overflowed. The console's own text-scale
+        // slider reaches 1.3, and the shells compose it with the platform's
+        // up to kMaxEffectiveTextScale, so 2.0 is a size a real admin can be
+        // sitting at -- not a hypothetical.
+        LayoutBuilder(
+          builder: (context, c) {
+            // The dropdowns size to their widest label ("All org types",
+            // "All statuses") at 13.5px semibold; ~170dp covers both with the
+            // chevron and padding, and scales with the text. This is an
+            // estimate, and it is checked rather than trusted: the console
+            // sweep renders this screen at 8 widths x 6 text scales.
+            final scale = MediaQuery.textScalerOf(context).scale(13.5) / 13.5;
+            final filtersNeed = 2 * 170 * scale + 20;
+            // Below this the search box stops being a search box.
+            final stacked = c.maxWidth - filtersNeed < 220;
+
+            final search = SizedBox(
                 height: 40,
                 child: TextField(
                   onChanged: (v) => setState(() {
@@ -216,10 +236,9 @@ class _OrganizationManagementScreenState
                     ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            _dropdown<String>(
+              );
+
+            final typeFilter = _dropdown<String>(
               context: context,
               value: _type,
               onChanged: (v) => setState(() {
@@ -235,9 +254,9 @@ class _OrganizationManagementScreenState
                   child: Text('Transporter'),
                 ),
               ],
-            ),
-            const SizedBox(width: 10),
-            _dropdown<OrganizationStatus?>(
+            );
+
+            final statusFilter = _dropdown<OrganizationStatus?>(
               context: context,
               value: _status,
               onChanged: (v) => setState(() {
@@ -257,8 +276,34 @@ class _OrganizationManagementScreenState
                 ])
                   DropdownMenuItem(value: st, child: Text(st.displayName)),
               ],
-            ),
-          ],
+            );
+
+            if (!stacked) {
+              return Row(
+                children: [
+                  Expanded(child: search),
+                  const SizedBox(width: 10),
+                  typeFilter,
+                  const SizedBox(width: 10),
+                  statusFilter,
+                ],
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                search,
+                const SizedBox(height: 10),
+                // Wrap, so the two filters sit side by side when they fit and
+                // stack when they do not -- one more step down, without
+                // another threshold to get wrong.
+                Wrap(spacing: 10, runSpacing: 10, children: [
+                  typeFilter,
+                  statusFilter,
+                ]),
+              ],
+            );
+          },
         ),
         const SizedBox(height: 16),
         // ── Table ──
@@ -283,7 +328,15 @@ class _OrganizationManagementScreenState
           decoration: BoxDecoration(
             border: Border(top: BorderSide(color: s.divider)),
           ),
-          child: Row(
+          // Wrap, not Row. Every child here is unflexed -- a range label, a
+          // rows-per-page dropdown and the pager buttons -- so on a phone, or
+          // at a large text scale, their combined natural width exceeds the
+          // footer and it overflowed. Wrapping needs no threshold and keeps
+          // every control reachable rather than clipping the pager.
+          child: Wrap(
+            spacing: 14,
+            runSpacing: 10,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
                 total == 0
@@ -291,7 +344,6 @@ class _OrganizationManagementScreenState
                     : '${start + 1}–${(start + _perPage).clamp(0, total)} of $total',
                 style: TextStyle(fontSize: 13, color: s.textMuted),
               ),
-              const SizedBox(width: 14),
               _dropdown<int>(
                 context: context,
                 value: _perPage,
@@ -578,7 +630,18 @@ class _OrganizationManagementScreenState
   }) {
     final s = MlSemantic.of(context);
     return Container(
-      height: 40,
+      // minHeight, not height. A fixed height counts Border.all as padding ON
+      // TOP of `padding` (CLAUDE.md §10.4), and at text scale 2.0 a 13.5px
+      // label is 27px inside a 40px box -- it fits by less than the border.
+      //
+      // maxWidth, because `DropdownButton` lays its SELECTED item out at that
+      // item's natural width unless told otherwise -- the same trap §10.4
+      // records for DropdownButtonFormField. Both call sites now sit in a
+      // Wrap, which hands children unbounded width, so at text scale 2.0
+      // "All statuses" was simply wider than the phone. 260 is comfortable at
+      // every scale the console offers and narrower than a 360px viewport's
+      // content box, so the chip can always be laid out somewhere.
+      constraints: const BoxConstraints(minHeight: 40, maxWidth: 260),
       padding: EdgeInsets.symmetric(horizontal: dense ? 10 : 12),
       decoration: BoxDecoration(
         color: s.surfaceCard,
@@ -591,6 +654,9 @@ class _OrganizationManagementScreenState
           items: items,
           onChanged: onChanged,
           isDense: true,
+          // With the cap above, this is what makes the label ellipsize inside
+          // the box instead of pushing past it.
+          isExpanded: true,
           borderRadius: BorderRadius.circular(12),
           icon: Icon(Icons.expand_more, size: 18, color: s.textMuted),
           style: TextStyle(

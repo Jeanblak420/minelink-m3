@@ -1026,48 +1026,71 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
           Row(
             children: [
               Expanded(
-                child: Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: _tabs.map((tab) {
-                    final key = tab[0];
-                    final sel = _tab == key;
-                    return MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () => setState(() => _tab = key),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 11, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: sel
-                                ? t.accent.withValues(alpha: 0.12)
-                                : t.inkHi.withValues(alpha: 0.03),
-                            border: Border.all(
-                                color:
-                                    sel ? t.accent.withValues(alpha: 0.35) : t.line),
-                            borderRadius: BorderRadius.circular(7),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(tab[1],
-                                  style: TextStyle(
-                                      fontFamily: MlGlass.sans,
-                                      fontSize: 11.5,
-                                      color: sel ? t.accent2 : t.inkMid)),
-                              const SizedBox(width: 6),
-                              Text('${_count(key)}',
-                                  style: TextStyle(
-                                      fontFamily: MlGlass.mono,
-                                      fontSize: 10,
-                                      color: sel ? t.accent : t.inkLo)),
-                            ],
+                // A Wrap lays every child out against UNBOUNDED width, so a
+                // chip wider than the Wrap itself does not wrap -- it
+                // overflows. At text scale 1.6 with bold text on a 412px
+                // phone, the "Transporters" chip is exactly that, and it
+                // overflowed by 6.1px. Flexible cannot help inside a Wrap
+                // (there is no free space to flex against); the chip needs a
+                // real maximum, which is what this LayoutBuilder supplies.
+                child: LayoutBuilder(
+                  builder: (context, c) => Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: _tabs.map((tab) {
+                      final key = tab[0];
+                      final sel = _tab == key;
+                      return MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _tab = key),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: c.maxWidth),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 11, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: sel
+                                    ? t.accent.withValues(alpha: 0.12)
+                                    : t.inkHi.withValues(alpha: 0.03),
+                                border: Border.all(
+                                    color: sel
+                                        ? t.accent.withValues(alpha: 0.35)
+                                        : t.line),
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // The count must never be the thing that
+                                  // gets clipped -- a tab reading "Transp… 12"
+                                  // is still usable, one reading
+                                  // "Transporters 1" is a lie. So the label
+                                  // flexes and the count does not.
+                                  Flexible(
+                                    child: Text(tab[1],
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                            fontFamily: MlGlass.sans,
+                                            fontSize: 11.5,
+                                            color:
+                                                sel ? t.accent2 : t.inkMid)),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text('${_count(key)}',
+                                      style: TextStyle(
+                                          fontFamily: MlGlass.mono,
+                                          fontSize: 10,
+                                          color: sel ? t.accent : t.inkLo)),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
               Text.rich(

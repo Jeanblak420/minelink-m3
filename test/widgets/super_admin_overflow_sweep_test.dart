@@ -63,13 +63,30 @@ import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/m
 import 'package:flutter_application_1/features/super_admin/widgets/transporters_overview/overview_models.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/transporters_overview/transporters_overview_body.dart';
 import 'package:flutter_application_1/core/layout/text_scale.dart';
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import '../fixtures/ml_sample_data.dart';
 import '../test_helpers/real_fonts.dart';
 
 /// Widths the console content area actually sees. 1612 is the measured value
 /// on a 1920 window (1660 shell content minus the screen's own padding); the
-/// rest walk down through both two-column breakpoints.
-const _widths = <double>[1612, 1440, 1280, 1180, 1024, 860];
+/// rest walk down through both two-column breakpoints and on to a phone.
+///
+/// **This list used to stop at 860.** Every console screen was therefore
+/// unrendered below that — on every phone and most tablets — while this file
+/// reported that they "survive every width x text scale". The console is not
+/// a desktop-only surface: the shell has a phone layout with a bottom bar and
+/// a drawer, and Jean opens it on his own handset.
+///
+/// Extending it to 760 / 600 / 412 / 360 found six faults across three files,
+/// all of them the same family (CLAUDE.md §10.4 — a Row hands a non-flex child
+/// unbounded width) and none of them visible above 860:
+///
+///   * the dashboard's org table, four columns that cannot fit a phone
+///   * its tab chips, unbounded inside a Wrap
+///   * `MlSectionHead`, shared by every console section
+///   * the organizations filter bar, its pagination footer, and its dropdowns
+///   * `MlRailIdentity`, drawing a 280dp block in an 80dp rail
+const _widths = <double>[1612, 1280, 1024, 860, 760, 600, 412, 360];
 
 /// 1.0, the two ends of the UiPrefs slider, and on up to the effective
 /// ceiling the shells actually install.
@@ -132,7 +149,7 @@ void main() {
           ProviderScope(
             overrides: overrides,
             child: MaterialApp(
-              theme: ThemeData(brightness: Brightness.dark),
+              theme: AppTheme.darkTheme,
               // Inside MaterialApp — its own MediaQuery.fromView replaces an
               // outer one, exactly as the console shell does it.
               builder: (context, c) => MediaQuery(

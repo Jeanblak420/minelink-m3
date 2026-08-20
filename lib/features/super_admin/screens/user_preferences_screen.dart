@@ -151,9 +151,15 @@ class UserPreferencesScreen extends ConsumerWidget {
                     Icon(Icons.person_outline_rounded,
                         size: 15, color: s.textMuted),
                     const SizedBox(width: 6),
-                    Text(
-                      'Saved to your account only',
-                      style: TextStyle(fontSize: 12, color: s.textMuted),
+                    // Expanded, so the sentence wraps instead of pushing the
+                    // row over (CLAUDE.md 10.4). Wrapping rather than
+                    // ellipsising: it is one short line telling the admin
+                    // where these settings live, and half of it is no use.
+                    Expanded(
+                      child: Text(
+                        'Saved to your account only',
+                        style: TextStyle(fontSize: 12, color: s.textMuted),
+                      ),
                     ),
                   ],
                 ),

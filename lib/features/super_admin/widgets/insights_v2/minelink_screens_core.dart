@@ -522,11 +522,21 @@ class MlSectionHead extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = tokens;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: Column(
+    return LayoutBuilder(builder: (context, c) {
+      // The trailing meta/link column is unflexed -- deliberately, because a
+      // short right-aligned block given flex: 1 lands mid-row instead of at
+      // the edge (CLAUDE.md 10.4). Unflexed means unbounded, though, so when
+      // it genuinely cannot fit beside the title it overflows rather than
+      // shrinking. Below this floor it goes underneath instead, which is the
+      // only honest option: it is a real sentence and a real action, so
+      // neither ellipsis nor omission would do.
+      //
+      // Scale-aware, because the squeeze is text as much as width -- this
+      // header is fine at 1024px and overflows at 1024px x 1.6.
+      final scale = MediaQuery.textScalerOf(context).scale(11.5) / 11.5;
+      final stacked = (meta != null || link != null) && c.maxWidth < 420 * scale;
+
+      final titleBlock = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -563,12 +573,11 @@ class MlSectionHead extends StatelessWidget {
                 ),
               ],
             ],
-          ),
-        ),
-        if (meta != null || link != null) ...[
-          const SizedBox(width: 14),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          );
+
+      final trailing = Column(
+            crossAxisAlignment:
+                stacked ? CrossAxisAlignment.start : CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
               if (meta != null)
@@ -594,10 +603,30 @@ class MlSectionHead extends StatelessWidget {
                 ),
               ],
             ],
-          ),
+          );
+
+      if (stacked) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            titleBlock,
+            const SizedBox(height: 8),
+            trailing,
+          ],
+        );
+      }
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(child: titleBlock),
+          if (meta != null || link != null) ...[
+            const SizedBox(width: 14),
+            trailing,
+          ],
         ],
-      ],
-    );
+      );
+    });
   }
 }
 
