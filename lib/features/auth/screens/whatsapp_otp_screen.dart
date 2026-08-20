@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
@@ -121,11 +122,9 @@ class _WhatsAppOtpScreenState extends ConsumerState<WhatsAppOtpScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'Enter the code we sent on WhatsApp',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: MlTokens.fsH3,
-                    fontWeight: FontWeight.w800,
+                  style: context.mlText.titleMedium.copyWith(
                     color: semantic.textStrong,
+                    fontWeight: FontWeight.w800,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -169,9 +168,7 @@ class _WhatsAppOtpScreenState extends ConsumerState<WhatsAppOtpScreen> {
                     ),
                     child: Text(state.error!,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 13,
+                        style: context.mlText.bodyMedium.copyWith(
                           color: errTone.fg,
                         )),
                   ),

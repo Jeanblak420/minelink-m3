@@ -151,7 +151,7 @@ class OvPill extends StatelessWidget {
     required this.tone,
     this.mono = false,
     this.padding = const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-    this.fontSize = 10.5,
+    this.fontSize = 11,
   });
 
   final MlOv tokens;

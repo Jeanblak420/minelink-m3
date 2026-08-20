@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/widgets/avatar_stack.dart';
 import 'package:flutter_application_1/core/widgets/m3_dropdown_field.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
@@ -82,21 +83,16 @@ class CommunicationsHubScreen extends ConsumerWidget {
                   children: [
                     Text(
                       access.company.companyName,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: MlTokens.fsH2,
-                        fontWeight: FontWeight.w800,
+                      style: context.mlText.titleLarge.copyWith(
                         color: MlSemantic.of(context).textStrong,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     MlCard.heroTitleRule(),
                     Text(
                       'Live announcements and team conversations for ${access.currentUserName}.',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: MlTokens.fsBody,
+                      style: context.mlText.bodyLarge.copyWith(
                         color: MlSemantic.of(context).textMuted,
-                        height: 1.45,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -175,9 +171,7 @@ class CommunicationsHubScreen extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             state.error!,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontSans,
-                              fontSize: MlTokens.fsBodySm,
+                            style: context.mlText.bodyMedium.copyWith(
                               color: tone.fg,
                             ),
                           ),
@@ -326,11 +320,10 @@ class _CommunicationChip extends StatelessWidget {
           const SizedBox(width: 9),
           Text(
             '$value ',
-            style: TextStyle(
-              fontFamily: MlTokens.fontMono,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
+            style: context.mlText.code(
               color: semantic.textStrong,
+              size: 14,
+              weight: FontWeight.w700,
             ),
           ),
           // The COUNT above is never allowed to shrink; the word after it is.
@@ -345,10 +338,7 @@ class _CommunicationChip extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: MlTokens.fsBodySm,
-                fontWeight: FontWeight.w600,
+              style: context.mlText.titleSmall.copyWith(
                 color: semantic.textMuted,
               ),
             ),
@@ -388,11 +378,8 @@ class _AnnouncementsTab extends StatelessWidget {
               ),
               Text(
                 'Publish live updates to the team and keep everyone aligned in real time.',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: MlTokens.fsBodySm,
+                style: context.mlText.bodyMedium.copyWith(
                   color: semantic.textMuted,
-                  height: 1.45,
                 ),
               ),
               const SizedBox(height: 16),
@@ -438,11 +425,9 @@ class _AnnouncementsTab extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   announcement.title,
-                                  style: TextStyle(
-                                    fontFamily: MlTokens.fontSans,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
+                                  style: context.mlText.titleMedium.copyWith(
                                     color: semantic.textStrong,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ),
@@ -458,11 +443,8 @@ class _AnnouncementsTab extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             announcement.message,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontSans,
-                              fontSize: 13,
+                            style: context.mlText.bodyMedium.copyWith(
                               color: semantic.textMuted,
-                              height: 1.45,
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -470,10 +452,10 @@ class _AnnouncementsTab extends StatelessWidget {
                             DateFormat(
                               'MMM d · h:mm a',
                             ).format(MlTime.sast(announcement.timestamp)),
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontMono,
-                              fontSize: 12,
+                            style: context.mlText.code(
                               color: semantic.textFaint,
+                              size: 12,
+                              weight: FontWeight.w400,
                             ),
                           ),
                         ],
@@ -540,11 +522,8 @@ class _ChatRoomsTab extends StatelessWidget {
               ),
               Text(
                 'Create focused rooms, collaborate live, and step straight into realtime messaging.',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: MlTokens.fsBodySm,
+                style: context.mlText.bodyMedium.copyWith(
                   color: semantic.textMuted,
-                  height: 1.45,
                 ),
               ),
               const SizedBox(height: 16),
@@ -605,11 +584,9 @@ class _ChatRoomsTab extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   room.name,
-                                  style: TextStyle(
-                                    fontFamily: MlTokens.fontSans,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
+                                  style: context.mlText.titleMedium.copyWith(
                                     color: semantic.textStrong,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ),
@@ -618,10 +595,10 @@ class _ChatRoomsTab extends StatelessWidget {
                                 DateFormat('MMM d · h:mm a').format(
                                   MlTime.sast(room.lastMessageTimestamp ?? room.createdAt),
                                 ),
-                                style: TextStyle(
-                                  fontFamily: MlTokens.fontMono,
-                                  fontSize: 11,
+                                style: context.mlText.code(
                                   color: semantic.textFaint,
+                                  size: 11,
+                                  weight: FontWeight.w400,
                                 ),
                               ),
                             ],
@@ -633,13 +610,9 @@ class _ChatRoomsTab extends StatelessWidget {
                                 : 'No messages yet',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontSans,
-                              fontSize: 13,
-                              fontStyle: hasLast
-                                  ? FontStyle.normal
-                                  : FontStyle.italic,
+                            style: context.mlText.bodyMedium.copyWith(
                               color: semantic.textMuted,
+                              fontStyle: hasLast ? FontStyle.normal : FontStyle.italic,
                             ),
                           ),
                           if (participants.isNotEmpty) ...[

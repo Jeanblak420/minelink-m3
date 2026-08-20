@@ -132,7 +132,7 @@ class _Header extends StatelessWidget {
         Text(
           data.eyebrow.toUpperCase(),
           style: t.s(
-            size: 10.5,
+            size: 11,
             weight: FontWeight.w600,
             color: t.inkLo,
             letterSpacing: 1.89,
@@ -270,7 +270,7 @@ class _BackChipState extends State<_BackChip> {
                   Text(
                     'Back to overview',
                     style: t.s(
-                      size: 11.5,
+                      size: 12,
                       color: _hovered ? t.acc2 : t.inkMid,
                     ),
                   ),
@@ -319,7 +319,7 @@ class _PeriodChip extends StatelessWidget {
           child: Text(
             label,
             style: t.s(
-              size: 11.5,
+              size: 12,
               weight: active ? FontWeight.w600 : FontWeight.w400,
               color: active ? t.acc2 : t.inkMid,
             ),
@@ -724,7 +724,7 @@ class _RunnerUpCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.right,
                     style: t.m(
-                      size: 11.5,
+                      size: 12,
                       color: entry.deltaUp ? t.good : t.bad,
                     ),
                   ),
@@ -766,7 +766,7 @@ class _RunnerUpCard extends StatelessWidget {
             entry.shareLabel,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: t.m(size: 10.5, color: t.inkLo),
+            style: t.m(size: 11, color: t.inkLo),
           ),
         ],
       ),
@@ -845,7 +845,7 @@ class _RankingTable extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         data.tableSubtitle,
-                        style: t.s(size: 11.5, color: t.inkMid),
+                        style: t.s(size: 12, color: t.inkMid),
                       ),
                     ],
                   ),
@@ -871,7 +871,7 @@ class _RankingTable extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(22, 8, 22, 28),
               child: Text(
                 'No transporters are registered yet.',
-                style: t.s(size: 12.5, color: t.inkMid),
+                style: t.s(size: 13, color: t.inkMid),
               ),
             )
           else
@@ -1001,7 +1001,7 @@ class _HeaderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = tokens;
     final style = t.s(
-      size: 9.5,
+      size: 10,
       weight: FontWeight.w600,
       color: t.inkMid,
       letterSpacing: 1.14,
@@ -1118,7 +1118,7 @@ class _BodyRow extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: t.s(
-              size: 13.5,
+              size: 14,
               weight: row.inactive ? FontWeight.w500 : FontWeight.w600,
               color: row.inactive ? t.inkMid : t.inkHi,
             ),
@@ -1129,7 +1129,7 @@ class _BodyRow extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: t.s(
-              size: 10.5,
+              size: 11,
               color: row.inactive ? t.inkXlo : t.inkLo,
             ),
           ),

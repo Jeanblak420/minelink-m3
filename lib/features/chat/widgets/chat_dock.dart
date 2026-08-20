@@ -1,5 +1,6 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/chat/services/attachment_url.dart';
 import 'dart:math' as math;
@@ -631,11 +632,9 @@ class _TitleBar extends StatelessWidget {
               'Messages',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
+              style: context.mlText.titleSmall.copyWith(
                 color: pal.headerText,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -767,15 +766,16 @@ class _ContentHeader extends StatelessWidget {
                 Text(title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
-                        color: pal.bodyText)),
+                    style: context.mlText.titleMedium.copyWith(
+                      color: pal.bodyText,
+                      fontWeight: FontWeight.w800,
+                    )),
                 Text(subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, color: pal.bodySubtle)),
+                    style: context.mlText.bodySmall.copyWith(
+                      color: pal.bodySubtle,
+                    )),
               ],
             ),
           ),
@@ -917,11 +917,9 @@ class _SupportFabState extends State<_SupportFab> {
                           padding: const EdgeInsets.only(left: 8),
                           child: Text(
                             'Support',
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontSans,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
+                            style: context.mlText.titleSmall.copyWith(
                               color: pal.accentText,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         )
@@ -965,11 +963,9 @@ class _SegTabs extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               label,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                fontSize: 14,
+              style: context.mlText.titleSmall.copyWith(
                 color: active ? pal.accent : pal.bodySubtle,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ),
@@ -1194,13 +1190,9 @@ class _ConversationsList extends ConsumerWidget {
                                   displayName,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: MlTokens.fontSans,
-                                    fontWeight: hasUnread
-                                        ? FontWeight.w800
-                                        : FontWeight.w700,
-                                    fontSize: 14,
+                                  style: context.mlText.titleSmall.copyWith(
                                     color: pal.accent,
+                                    fontWeight: hasUnread ? FontWeight.w800 : FontWeight.w700,
                                   ),
                                 ),
                               ),
@@ -1208,15 +1200,10 @@ class _ConversationsList extends ConsumerWidget {
                                 Text(
                                   DateFormat('HH:mm')
                                       .format(c.lastMessageTimestamp!),
-                                  style: TextStyle(
-                                    fontFamily: MlTokens.fontMono,
-                                    fontSize: 11,
-                                    fontWeight: hasUnread
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
-                                    color: (hasUnread || hovering)
-                                        ? pal.accent
-                                        : pal.bodySubtle,
+                                  style: context.mlText.code(
+                                    color: (hasUnread || hovering) ? pal.accent : pal.bodySubtle,
+                                    size: 11,
+                                    weight: hasUnread ? FontWeight.w700 : FontWeight.w500,
                                   ),
                                 ),
                             ],
@@ -1279,14 +1266,9 @@ class _ConversationsList extends ConsumerWidget {
                                                 c.lastMessageContent!),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: hasUnread
-                                              ? FontWeight.w600
-                                              : FontWeight.w400,
-                                          color: hasUnread
-                                              ? pal.bodyText
-                                              : pal.bodySubtle,
+                                        style: context.mlText.titleSmall.copyWith(
+                                          color: hasUnread ? pal.bodyText : pal.bodySubtle,
+                                          fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
                                         ),
                                       ),
                               ),
@@ -1409,18 +1391,14 @@ class _ContactsListState extends ConsumerState<_ContactsList> {
             ),
             const SizedBox(width: 8),
             Text(title,
-                style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.0,
-                    color: pal.bodyText)),
+                style: context.mlText.overline.copyWith(color: pal.bodyText)),
             const SizedBox(width: 6),
             Text('${members.length}',
-                style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 11,
-                    color: pal.bodySubtle)),
+                style: context.mlText.code(
+                  color: pal.bodySubtle,
+                  size: 11,
+                  weight: FontWeight.w400,
+                )),
           ],
         ),
       ),
@@ -1442,19 +1420,15 @@ class _ContactsListState extends ConsumerState<_ContactsList> {
               Flexible(
                 child: Text(k.toUpperCase(),
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
-                        color: pal.accent)),
+                    style: context.mlText.overline.copyWith(color: pal.accent)),
               ),
               const SizedBox(width: 6),
               Text('${subs[k]!.length}',
-                  style: TextStyle(
-                      fontFamily: MlTokens.fontMono,
-                      fontSize: 11,
-                      color: pal.bodySubtle)),
+                  style: context.mlText.code(
+                    color: pal.bodySubtle,
+                    size: 11,
+                    weight: FontWeight.w400,
+                  )),
               const SizedBox(width: 4),
               AnimatedRotation(
                 turns: collapsed ? -0.25 : 0,
@@ -1574,11 +1548,9 @@ class _ContactTile extends ConsumerWidget {
                     isSelf ? '${contact.displayName} (you)' : contact.displayName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
+                    style: context.mlText.titleSmall.copyWith(
                       color: pal.bodyText,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   _PresenceText(
@@ -2271,12 +2243,7 @@ class _DateSeparator extends StatelessWidget {
           ),
           child: Text(
             _dateSeparatorLabel(date),
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              color: pal.bodyText,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
+            style: context.mlText.titleSmall.copyWith(color: pal.bodyText),
           ),
         ),
       ),
@@ -2312,10 +2279,10 @@ class _TypingIndicatorRow extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     '$first is typing…',
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic,
-                        color: pal.bodySubtle),
+                    style: context.mlText.bodySmall.copyWith(
+                      color: pal.bodySubtle,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                 ],
               ),
@@ -2421,10 +2388,10 @@ class _UploadingChip extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text('Sending…',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: pal.accentText)),
+              style: context.mlText.labelMedium.copyWith(
+                color: pal.accentText,
+                fontWeight: FontWeight.w700,
+              )),
         ],
       ),
     );
@@ -2448,7 +2415,7 @@ class _MessageText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseStyle = TextStyle(fontSize: 14, color: color, height: 1.35);
+    final baseStyle = context.mlText.bodyMedium.copyWith(color: color);
     final matches = _kMentionToken.allMatches(text).toList();
     if (matches.isEmpty) return Text(text, style: baseStyle);
 
@@ -2480,11 +2447,11 @@ class _MessageText extends StatelessWidget {
                 borderRadius: MlShape.radiusSmall,
               ),
               child: Text('@$display',
-                  style: TextStyle(
-                      fontSize: 13,
-                      height: 1.2,
-                      fontWeight: FontWeight.w700,
-                      color: chipFg)),
+                  style: context.mlText.titleSmall.copyWith(
+                    color: chipFg,
+                    fontWeight: FontWeight.w700,
+                    height: 1.2,
+                  )),
             ),
           ),
         ),
@@ -2581,17 +2548,17 @@ class _ReplyQuote extends StatelessWidget {
                     senderName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        color: nameColor,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12),
+                    style: context.mlText.labelMedium.copyWith(
+                      color: nameColor,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   if (preview.isNotEmpty)
                     Text(
                       preview,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: textColor, fontSize: 12),
+                      style: context.mlText.bodySmall.copyWith(color: textColor),
                     ),
                 ],
               ),
@@ -2662,11 +2629,9 @@ class _Bubble extends StatelessWidget {
                 ),
                 child: Text(
                   message.senderName,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
+                  style: context.mlText.labelMedium.copyWith(
                     color: pal.senderName,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -2739,10 +2704,9 @@ class _Bubble extends StatelessWidget {
                 ],
                 Text(
                   DateFormat('HH:mm').format(message.timestamp),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
+                  style: context.mlText.labelSmall.copyWith(
                     color: fg.withValues(alpha: 0.75),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -2768,16 +2732,20 @@ class _Bubble extends StatelessWidget {
       future: resolveAttachmentUrlCached(message.fileUrl),
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
-          return _attachmentPlaceholder(fg, spinner: true);
+          return _attachmentPlaceholder(context, fg, spinner: true);
         }
         final url = snap.data;
-        if (url == null) return _attachmentPlaceholder(fg, spinner: false);
-        return _attachmentBody(fg, url);
+        if (url == null) {
+          return _attachmentPlaceholder(context, fg, spinner: false);
+        }
+        return _attachmentBody(context, fg, url);
       },
     );
   }
 
-  Widget _attachmentPlaceholder(Color fg, {required bool spinner}) => Container(
+  Widget _attachmentPlaceholder(BuildContext context, Color fg,
+          {required bool spinner}) =>
+      Container(
         margin: const EdgeInsets.symmetric(vertical: 2),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
@@ -2804,17 +2772,16 @@ class _Bubble extends StatelessWidget {
                     : 'Attachment unavailable',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: fg.withValues(alpha: spinner ? 1 : 0.7)),
+                style: context.mlText.titleSmall.copyWith(
+                  color: fg.withValues(alpha: spinner ? 1 : 0.7),
+                ),
               ),
             ),
           ],
         ),
       );
 
-  Widget _attachmentBody(Color fg, String url) {
+  Widget _attachmentBody(BuildContext context, Color fg, String url) {
     if (message.fileType == 'image') {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 2),
@@ -2875,8 +2842,7 @@ class _Bubble extends StatelessWidget {
                 message.fileName ?? 'File',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w600, color: fg),
+                style: context.mlText.titleSmall.copyWith(color: fg),
               ),
             ),
             const SizedBox(width: 8),
@@ -2996,10 +2962,10 @@ class _BubbleRowState extends State<_BubbleRow> {
         backgroundImage: provider,
         child: provider == null
             ? Text(initials,
-                style: TextStyle(
-                    color: pal.accentText,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11))
+                style: context.mlText.labelSmall.copyWith(
+                  color: pal.accentText,
+                  fontWeight: FontWeight.bold,
+                ))
             : null,
       ),
     );
@@ -3075,10 +3041,10 @@ class _BubbleRowState extends State<_BubbleRow> {
                         Text(e.key, style: const TextStyle(fontSize: 12)),
                         const SizedBox(width: 3),
                         Text('${e.value.length}',
-                            style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: pal.bodyText)),
+                            style: context.mlText.labelSmall.copyWith(
+                              color: pal.bodyText,
+                              fontWeight: FontWeight.w700,
+                            )),
                       ],
                     ),
                   ),
@@ -3595,17 +3561,18 @@ class _ComposerState extends ConsumerState<_Composer> {
                           Text('@${c.displayName}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontFamily: MlTokens.fontSans,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 13,
-                                  color: pal.bodyText)),
+                              style: context.mlText.titleSmall.copyWith(
+                                color: pal.bodyText,
+                                fontWeight: FontWeight.w700,
+                              )),
                           if (c.companyName != null)
                             Text(c.companyName!,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    fontSize: 11, color: pal.bodySubtle)),
+                                style: context.mlText.labelSmall.copyWith(
+                                  color: pal.bodySubtle,
+                                  fontWeight: FontWeight.w400,
+                                )),
                         ],
                       ),
                     ),
@@ -3634,15 +3601,15 @@ class _ComposerState extends ConsumerState<_Composer> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title,
-                        style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
-                            color: pal.bodyText)),
+                        style: context.mlText.titleSmall.copyWith(
+                          color: pal.bodyText,
+                          fontWeight: FontWeight.w700,
+                        )),
                     const SizedBox(height: 2),
                     Text(body,
-                        style: TextStyle(
-                            fontSize: 12, height: 1.35, color: pal.bodySubtle)),
+                        style: context.mlText.bodySmall.copyWith(
+                          color: pal.bodySubtle,
+                        )),
                   ],
                 ),
               ),
@@ -3666,11 +3633,10 @@ class _ComposerState extends ConsumerState<_Composer> {
                 Icon(Icons.info_outline_rounded, size: 18, color: pal.accent),
                 const SizedBox(width: 8),
                 Text('How the composer works',
-                    style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                        color: pal.bodyText)),
+                    style: context.mlText.titleSmall.copyWith(
+                      color: pal.bodyText,
+                      fontWeight: FontWeight.w800,
+                    )),
                 const Spacer(),
                 InkWell(
                   onTap: () => setState(() => _showHelp = false),
@@ -3754,9 +3720,7 @@ class _ComposerState extends ConsumerState<_Composer> {
                     ),
                     child: Text(
                       _suggestions[i],
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                      style: context.mlText.titleSmall.copyWith(
                         color: selected ? pal.accentText : pal.bodyText,
                       ),
                     ),
@@ -3844,7 +3808,9 @@ class _ComposerState extends ConsumerState<_Composer> {
                       if (_showEmoji) setState(() => _showEmoji = false);
                     },
                     cursorColor: pal.accent,
-                    style: TextStyle(fontSize: 14, color: pal.bodyText),
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: pal.bodyText,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Write a message…',
                       hintStyle: TextStyle(color: pal.bodySubtle),
@@ -3990,18 +3956,18 @@ class _ProfileView extends StatelessWidget {
                     Text(
                       contact.displayName,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
+                      style: context.mlText.titleLarge.copyWith(
                         color: pal.bodyText,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       contact.companyName ?? _orgTypeLabel,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13, color: pal.bodySubtle),
+                      style: context.mlText.bodyMedium.copyWith(
+                        color: pal.bodySubtle,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     _PresenceText(
@@ -4048,11 +4014,9 @@ class _ProfileView extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Message',
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                          style: context.mlText.titleSmall.copyWith(
                             color: pal.accentText,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ],
@@ -4099,8 +4063,10 @@ class _ProfileView extends StatelessWidget {
                       child: Text(
                         'This is their public profile as set up in their '
                         'company information — you can view it but not edit it.',
-                        style: TextStyle(
-                            fontSize: 12, height: 1.5, color: pal.bodySubtle),
+                        style: context.mlText.bodySmall.copyWith(
+                          color: pal.bodySubtle,
+                          height: 1.5,
+                        ),
                       ),
                     ),
                   ],
@@ -4142,16 +4108,14 @@ class _InfoRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label,
-                    style: TextStyle(
-                        fontSize: 12,
-                        letterSpacing: 0.3,
-                        color: pal.bodySubtle)),
+                    style: context.mlText.bodySmall.copyWith(
+                      color: pal.bodySubtle,
+                    )),
                 const SizedBox(height: 2),
                 Text(value,
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: pal.bodyText)),
+                    style: context.mlText.titleSmall.copyWith(
+                      color: pal.bodyText,
+                    )),
               ],
             ),
           ),
@@ -4187,11 +4151,10 @@ class _SettingsView extends ConsumerWidget {
               Icon(Icons.settings_outlined, size: 17, color: pal.accent),
               const SizedBox(width: 8),
               Text('Messages Settings',
-                  style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                      color: pal.bodyText)),
+                  style: context.mlText.titleSmall.copyWith(
+                    color: pal.bodyText,
+                    fontWeight: FontWeight.w700,
+                  )),
             ],
           ),
         ),
@@ -4204,7 +4167,7 @@ class _SettingsView extends ConsumerWidget {
               Text(
                 'Pick a colour scheme just for your messenger. Every theme is '
                 'tuned for high contrast — names and messages stay easy to read.',
-                style: TextStyle(fontSize: 12, height: 1.4, color: pal.bodySubtle),
+                style: context.mlText.bodySmall.copyWith(color: pal.bodySubtle),
               ),
               const SizedBox(height: 12),
               GridView.builder(
@@ -4245,16 +4208,16 @@ class _SettingsView extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Follow the cursor',
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: pal.bodyText)),
+                              style: context.mlText.titleSmall.copyWith(
+                                color: pal.bodyText,
+                              )),
                           const SizedBox(height: 2),
                           Text(
                             'The floating chat icon turns to face your mouse '
                             'anywhere on screen. Turn off to keep it still.',
-                            style: TextStyle(
-                                fontSize: 12, height: 1.3, color: pal.bodySubtle),
+                            style: context.mlText.bodySmall.copyWith(
+                              color: pal.bodySubtle,
+                            ),
                           ),
                         ],
                       ),
@@ -4285,18 +4248,16 @@ class _SettingsView extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Play a sound on new messages',
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: pal.bodyText)),
+                                  style: context.mlText.titleSmall.copyWith(
+                                    color: pal.bodyText,
+                                  )),
                               const SizedBox(height: 2),
                               Text(
                                 'A soft tone plays when a message arrives and '
                                 'when you send one.',
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    height: 1.3,
-                                    color: pal.bodySubtle),
+                                style: context.mlText.bodySmall.copyWith(
+                                  color: pal.bodySubtle,
+                                ),
                               ),
                             ],
                           ),
@@ -4314,10 +4275,9 @@ class _SettingsView extends ConsumerWidget {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text('Default sound',
-                            style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: pal.bodySubtle)),
+                            style: context.mlText.labelMedium.copyWith(
+                              color: pal.bodySubtle,
+                            )),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -4388,8 +4348,9 @@ class _SettingsView extends ConsumerWidget {
                       Text(
                         'Tip: grab free tones from Pixabay or Mixkit, then pick '
                         'them with Custom…',
-                        style: TextStyle(
-                            fontSize: 12, height: 1.3, color: pal.bodySubtle),
+                        style: context.mlText.bodySmall.copyWith(
+                          color: pal.bodySubtle,
+                        ),
                       ),
                     ],
                   ],
@@ -4402,7 +4363,7 @@ class _SettingsView extends ConsumerWidget {
                   'Give a specific person their own incoming tone. "Default" '
                   'uses the sound above.',
                   style:
-                      TextStyle(fontSize: 12, height: 1.4, color: pal.bodySubtle),
+                      context.mlText.bodySmall.copyWith(color: pal.bodySubtle),
                 ),
                 const SizedBox(height: 12),
                 _PerContactSounds(pal: pal),
@@ -4435,11 +4396,7 @@ class _SectionLabel extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(text,
-          style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.2,
-              color: pal.accent)),
+          style: context.mlText.overline.copyWith(color: pal.accent)),
     );
   }
 }
@@ -4475,10 +4432,10 @@ class _ThemeTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _swatch('Aa', p.incomingBubble, p.incomingText),
+                    _swatch(context, 'Aa', p.incomingBubble, p.incomingText),
                     Align(
                       alignment: Alignment.centerRight,
-                      child: _swatch('Aa', p.outgoingBubble, p.outgoingText),
+                      child: _swatch(context, 'Aa', p.outgoingBubble, p.outgoingText),
                     ),
                   ],
                 ),
@@ -4493,10 +4450,10 @@ class _ThemeTile extends StatelessWidget {
                     child: Text(p.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: p.headerText)),
+                        style: context.mlText.labelMedium.copyWith(
+                          color: p.headerText,
+                          fontWeight: FontWeight.w700,
+                        )),
                   ),
                   if (selected)
                     Icon(Icons.check_circle_rounded, size: 15, color: p.accent),
@@ -4509,13 +4466,16 @@ class _ThemeTile extends StatelessWidget {
     );
   }
 
-  Widget _swatch(String t, Color bg, Color fg) => Container(
+  Widget _swatch(BuildContext context, String t, Color bg, Color fg) =>
+      Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
         decoration:
             BoxDecoration(color: bg, borderRadius: MlShape.radiusSmall),
         child: Text(t,
-            style: TextStyle(
-                fontSize: 10, fontWeight: FontWeight.w700, color: fg)),
+            style: context.mlText.labelSmall.copyWith(
+              color: fg,
+              fontWeight: FontWeight.w700,
+            )),
       );
 }
 
@@ -4556,19 +4516,22 @@ class _BubblePreview extends StatelessWidget {
                       border: Border(
                           bottom: BorderSide(color: pal.bubbleSeparator))),
                   child: Text('Johan Steyn',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13,
-                          color: pal.senderName)),
+                      style: context.mlText.titleSmall.copyWith(
+                        color: pal.senderName,
+                        fontWeight: FontWeight.w800,
+                      )),
                 ),
                 Text('Trucks are loaded and ready to roll.',
-                    style: TextStyle(fontSize: 14, color: pal.incomingText)),
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: pal.incomingText,
+                    )),
                 const SizedBox(height: 3),
                 Text('09:19',
-                    style: TextStyle(
-                        fontFamily: MlTokens.fontMono,
-                        fontSize: 11,
-                        color: pal.incomingText.withValues(alpha: 0.6))),
+                    style: context.mlText.code(
+                      color: pal.incomingText.withValues(alpha: 0.6),
+                      size: 11,
+                      weight: FontWeight.w400,
+                    )),
               ],
             ),
           ),
@@ -4591,13 +4554,16 @@ class _BubblePreview extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text('Great — sending waybills now.',
-                      style: TextStyle(fontSize: 14, color: pal.outgoingText)),
+                      style: context.mlText.bodyMedium.copyWith(
+                        color: pal.outgoingText,
+                      )),
                   const SizedBox(height: 3),
                   Text('09:20 ✓✓',
-                      style: TextStyle(
-                          fontFamily: MlTokens.fontMono,
-                          fontSize: 11,
-                          color: pal.outgoingText.withValues(alpha: 0.7))),
+                      style: context.mlText.code(
+                        color: pal.outgoingText.withValues(alpha: 0.7),
+                        size: 11,
+                        weight: FontWeight.w400,
+                      )),
                 ],
               ),
             ),
@@ -4684,10 +4650,9 @@ class _SoundChip extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: selected ? pal.accentText : pal.bodyText),
+                style: context.mlText.titleSmall.copyWith(
+                  color: selected ? pal.accentText : pal.bodyText,
+                ),
               ),
             ),
           ],
@@ -4718,7 +4683,7 @@ class _PerContactSounds extends ConsumerWidget {
             list.where((c) => c.userId != myId && !c.isBlocked).toList();
         if (people.isEmpty) {
           return Text('No other contacts yet.',
-              style: TextStyle(fontSize: 12, color: pal.bodySubtle));
+              style: context.mlText.bodySmall.copyWith(color: pal.bodySubtle));
         }
         return Column(
           children: [
@@ -4744,10 +4709,9 @@ class _PerContactSounds extends ConsumerWidget {
                         child: Text(c.displayName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: pal.bodyText)),
+                            style: context.mlText.titleSmall.copyWith(
+                              color: pal.bodyText,
+                            )),
                       ),
                       const SizedBox(width: 8),
                       DropdownButtonHideUnderline(
@@ -4757,7 +4721,9 @@ class _PerContactSounds extends ConsumerWidget {
                           dropdownColor: pal.header,
                           borderRadius: MlShape.radiusMedium,
                           style:
-                              TextStyle(color: pal.bodyText, fontSize: 13),
+                              context.mlText.bodyMedium.copyWith(
+                                color: pal.bodyText,
+                              ),
                           iconEnabledColor: pal.accent,
                           items: [
                             const DropdownMenuItem(
@@ -4901,11 +4867,10 @@ class _Pill extends StatelessWidget {
           Icon(icon, size: 14, color: color),
           const SizedBox(width: 5),
           Text(label,
-              style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: color)),
+              style: context.mlText.labelMedium.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
+              )),
         ],
       ),
     );
@@ -4943,15 +4908,14 @@ class _Empty extends StatelessWidget {
             const SizedBox(height: 14),
             Text(title,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: pal.bodyText)),
+                style: context.mlText.titleMedium.copyWith(
+                  color: pal.bodyText,
+                  fontWeight: FontWeight.w700,
+                )),
             const SizedBox(height: 6),
             Text(message,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, height: 1.4, color: pal.bodySubtle)),
+                style: context.mlText.bodyMedium.copyWith(color: pal.bodySubtle)),
           ],
         ),
       ),
@@ -5065,11 +5029,10 @@ class _SupportHeader extends StatelessWidget {
             child: Text(title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                    color: pal.bodyText)),
+                style: context.mlText.titleMedium.copyWith(
+                  color: pal.bodyText,
+                  fontWeight: FontWeight.w800,
+                )),
           ),
           if (trailing != null) trailing!,
         ],
@@ -5169,11 +5132,10 @@ class _TicketRow extends StatelessWidget {
                         child: Text(ticket.subject,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontFamily: MlTokens.fontSans,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                                color: pal.bodyText)),
+                            style: context.mlText.titleSmall.copyWith(
+                              color: pal.bodyText,
+                              fontWeight: FontWeight.w700,
+                            )),
                       ),
                       const SizedBox(width: 8),
                       _StatusPill(status: ticket.status),
@@ -5183,7 +5145,9 @@ class _TicketRow extends StatelessWidget {
                   Text(subtitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, color: pal.bodySubtle)),
+                      style: context.mlText.bodySmall.copyWith(
+                        color: pal.bodySubtle,
+                      )),
                 ],
               ),
             ),
@@ -5223,14 +5187,10 @@ class _SupportHome extends ConsumerWidget {
     );
   }
 
-  Widget _label(String t) => Padding(
+  Widget _label(BuildContext context, String t) => Padding(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
         child: Text(t,
-            style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.0,
-                color: pal.bodySubtle)),
+            style: context.mlText.overline.copyWith(color: pal.bodySubtle)),
       );
 
   Widget _user(BuildContext context, WidgetRef ref) {
@@ -5257,11 +5217,10 @@ class _SupportHome extends ConsumerWidget {
                         Icon(Icons.add_rounded, size: 20, color: pal.accentText),
                         const SizedBox(width: 8),
                         Text('Log a support ticket',
-                            style: TextStyle(
-                                fontFamily: MlTokens.fontSans,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                                color: pal.accentText)),
+                            style: context.mlText.titleSmall.copyWith(
+                              color: pal.accentText,
+                              fontWeight: FontWeight.w700,
+                            )),
                       ],
                     ),
                   ),
@@ -5272,7 +5231,7 @@ class _SupportHome extends ConsumerWidget {
                 'Questions, queries, problems or bugs — sent to the '
                 'Mine-Link team.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: pal.bodySubtle),
+                style: context.mlText.bodySmall.copyWith(color: pal.bodySubtle),
               ),
             ],
           ),
@@ -5284,7 +5243,7 @@ class _SupportHome extends ConsumerWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _label('UPDATES'),
+                _label(context, 'UPDATES'),
                 ...unreadFirst.take(5).map((n) => InkWell(
                       onTap: () => onOpenTicket(n.ticketId),
                       child: Container(
@@ -5309,18 +5268,18 @@ class _SupportHome extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(n.text,
-                                      style: TextStyle(
-                                          fontSize: 13,
-                                          height: 1.4,
-                                          color: pal.bodyText)),
+                                      style: context.mlText.bodyMedium.copyWith(
+                                        color: pal.bodyText,
+                                      )),
                                   const SizedBox(height: 2),
                                   Text(
                                       DateFormat('d MMM · HH:mm')
                                           .format(n.createdAt),
-                                      style: TextStyle(
-                                          fontFamily: MlTokens.fontMono,
-                                          fontSize: 11,
-                                          color: pal.bodySubtle)),
+                                      style: context.mlText.code(
+                                        color: pal.bodySubtle,
+                                        size: 11,
+                                        weight: FontWeight.w400,
+                                      )),
                                 ],
                               ),
                             ),
@@ -5340,7 +5299,7 @@ class _SupportHome extends ConsumerWidget {
           data: (list) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _label('MY TICKETS · ${list.length}'),
+              _label(context, 'MY TICKETS · ${list.length}'),
               if (list.isEmpty)
                 Padding(
                   padding: const EdgeInsets.all(24),
@@ -5368,7 +5327,7 @@ class _SupportHome extends ConsumerWidget {
     final tickets = ref.watch(allTicketsProvider);
     return ListView(
       children: [
-        _label('WHO RECEIVES TICKETS'),
+        _label(context, 'WHO RECEIVES TICKETS'),
         _InboxToggles(pal: pal),
         tickets.when(
           loading: () => Padding(
@@ -5380,7 +5339,7 @@ class _SupportHome extends ConsumerWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _label('OPEN · ${open.length}'),
+                _label(context, 'OPEN · ${open.length}'),
                 if (open.isEmpty)
                   Padding(
                     padding: const EdgeInsets.all(20),
@@ -5396,7 +5355,7 @@ class _SupportHome extends ConsumerWidget {
                             '${t.category}${t.acceptedByName != null ? ' · handling: ${t.acceptedByName}' : ' · unassigned'}',
                         onTap: () => onOpenTicket(t.id),
                       )),
-                if (done.isNotEmpty) _label('COMPLETED · ${done.length}'),
+                if (done.isNotEmpty) _label(context, 'COMPLETED · ${done.length}'),
                 ...done.map((t) => _TicketRow(
                       pal: pal,
                       ticket: t,
@@ -5446,16 +5405,16 @@ class _InboxTogglesState extends ConsumerState<_InboxToggles> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(a.name,
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: pal.bodyText)),
+                              style: context.mlText.titleSmall.copyWith(
+                                color: pal.bodyText,
+                              )),
                           Text(
                               on
                                   ? 'Receiving new tickets'
                                   : 'Not receiving tickets',
-                              style: TextStyle(
-                                  fontSize: 12, color: pal.bodySubtle)),
+                              style: context.mlText.bodySmall.copyWith(
+                                color: pal.bodySubtle,
+                              )),
                         ],
                       ),
                     ),
@@ -5493,8 +5452,9 @@ class _InboxTogglesState extends ConsumerState<_InboxToggles> {
                     child: Text(
                       'Both admins can be assigned. Whoever accepts a ticket '
                       'becomes its handler and it moves to In progress.',
-                      style: TextStyle(
-                          fontSize: 12, height: 1.4, color: pal.bodySubtle),
+                      style: context.mlText.bodySmall.copyWith(
+                        color: pal.bodySubtle,
+                      ),
                     ),
                   ),
                 ],
@@ -5575,10 +5535,7 @@ class _NewTicketFormState extends ConsumerState<_NewTicketForm> {
   Widget _fieldLabel(ChatPalette pal, String t) => Padding(
         padding: const EdgeInsets.only(bottom: 6),
         child: Text(t,
-            style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: pal.bodyText)),
+            style: context.mlText.titleSmall.copyWith(color: pal.bodyText)),
       );
 
   @override
@@ -5599,7 +5556,7 @@ class _NewTicketFormState extends ConsumerState<_NewTicketForm> {
               _fieldLabel(pal, 'Subject'),
               TextField(
                 controller: _subject,
-                style: TextStyle(fontSize: 14, color: pal.bodyText),
+                style: context.mlText.bodyMedium.copyWith(color: pal.bodyText),
                 cursorColor: pal.accent,
                 decoration:
                     _dec(pal, 'Short summary of your question or issue'),
@@ -5618,7 +5575,9 @@ class _NewTicketFormState extends ConsumerState<_NewTicketForm> {
                     value: _category,
                     isExpanded: true,
                     dropdownColor: pal.body,
-                    style: TextStyle(fontSize: 14, color: pal.bodyText),
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: pal.bodyText,
+                    ),
                     icon: Icon(Icons.expand_more_rounded, color: pal.bodySubtle),
                     items: kSupportCategories
                         .map((c) =>
@@ -5635,7 +5594,7 @@ class _NewTicketFormState extends ConsumerState<_NewTicketForm> {
                 controller: _body,
                 minLines: 4,
                 maxLines: 8,
-                style: TextStyle(fontSize: 14, color: pal.bodyText),
+                style: context.mlText.bodyMedium.copyWith(color: pal.bodyText),
                 cursorColor: pal.accent,
                 decoration: _dec(pal,
                     'What happened, what you expected, and any steps to reproduce.'),
@@ -5650,7 +5609,9 @@ class _NewTicketFormState extends ConsumerState<_NewTicketForm> {
                     child: Text(
                       "Your ticket goes to the Mine-Link support team. You'll "
                       'get a notification here at every stage.',
-                      style: TextStyle(fontSize: 12, color: pal.bodySubtle),
+                      style: context.mlText.bodySmall.copyWith(
+                        color: pal.bodySubtle,
+                      ),
                     ),
                   ),
                 ],
@@ -5679,11 +5640,10 @@ class _NewTicketFormState extends ConsumerState<_NewTicketForm> {
                               size: 18, color: pal.accentText),
                         const SizedBox(width: 8),
                         Text(_sending ? 'Sending…' : 'Send ticket',
-                            style: TextStyle(
-                                fontFamily: MlTokens.fontSans,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                                color: pal.accentText)),
+                            style: context.mlText.titleSmall.copyWith(
+                              color: pal.accentText,
+                              fontWeight: FontWeight.w700,
+                            )),
                       ],
                     ),
                   ),
@@ -5866,11 +5826,9 @@ class _TicketViewState extends ConsumerState<_TicketView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('PROGRESS',
-                          style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.0,
-                              color: pal.bodySubtle)),
+                          style: context.mlText.overline.copyWith(
+                            color: pal.bodySubtle,
+                          )),
                       const SizedBox(height: 10),
                       ...list.map((e) => Padding(
                             padding: const EdgeInsets.only(bottom: 10),
@@ -5896,17 +5854,18 @@ class _TicketViewState extends ConsumerState<_TicketView> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(_eventLabel(e),
-                                          style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w700,
-                                              color: pal.bodyText)),
+                                          style: context.mlText.titleSmall.copyWith(
+                                            color: pal.bodyText,
+                                            fontWeight: FontWeight.w700,
+                                          )),
                                       Text(
                                           DateFormat('d MMM · HH:mm')
                                               .format(e.createdAt),
-                                          style: TextStyle(
-                                              fontFamily: MlTokens.fontMono,
-                                              fontSize: 11,
-                                              color: pal.bodySubtle)),
+                                          style: context.mlText.code(
+                                            color: pal.bodySubtle,
+                                            size: 11,
+                                            weight: FontWeight.w400,
+                                          )),
                                     ],
                                   ),
                                 ),
@@ -5935,18 +5894,16 @@ class _TicketViewState extends ConsumerState<_TicketView> {
                       Expanded(
                         child: Text(
                           '${ticket!.acceptedByName} is handling this ticket.',
-                          style: TextStyle(fontSize: 13, color: pal.bodyText),
+                          style: context.mlText.bodyMedium.copyWith(
+                            color: pal.bodyText,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
               Text('CONVERSATION',
-                  style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.0,
-                      color: pal.bodySubtle)),
+                  style: context.mlText.overline.copyWith(color: pal.bodySubtle)),
               const SizedBox(height: 8),
               messages.when(
                 loading: () => _loading(pal),
@@ -6034,11 +5991,10 @@ class _TicketViewState extends ConsumerState<_TicketView> {
                   Icon(Icons.how_to_reg_rounded, size: 18, color: pal.accentText),
                   const SizedBox(width: 8),
                   Text('Accept ticket',
-                      style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                          color: pal.accentText)),
+                      style: context.mlText.titleSmall.copyWith(
+                        color: pal.accentText,
+                        fontWeight: FontWeight.w700,
+                      )),
                 ],
               ),
             ),
@@ -6084,7 +6040,9 @@ class _TicketViewState extends ConsumerState<_TicketView> {
                     textInputAction: TextInputAction.send,
                     onSubmitted: (_) => _send(),
                     cursorColor: pal.accent,
-                    style: TextStyle(fontSize: 14, color: pal.bodyText),
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: pal.bodyText,
+                    ),
                     decoration: InputDecoration(
                       hintText: widget.isAdmin
                           ? 'Ask the user a question…'

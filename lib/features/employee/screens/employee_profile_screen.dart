@@ -22,6 +22,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/chat/providers/chat_presence_provider.dart';
@@ -294,7 +295,9 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
               const SizedBox(height: 8),
               Text(friendlyError(e),
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: semantic.textMuted, fontSize: 12)),
+                  style: context.mlText.bodySmall.copyWith(
+                    color: semantic.textMuted,
+                  )),
               const SizedBox(height: 12),
               TextButton(
                   onPressed: () => ref
@@ -379,11 +382,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
     Widget crumb(String t, {bool strong = false}) => Text(
           t,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.5,
+          style: context.mlText.overline.copyWith(
             color: strong ? MlTone.transit.colors(Theme.of(context).brightness).fg : s.textFaint,
           ),
         );
@@ -415,8 +414,9 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                   const BoxDecoration(color: _green, shape: BoxShape.circle)),
           const SizedBox(width: 7),
           Text('Live · Synced ${_ago(syncedAt)}',
-              style: TextStyle(
-                  fontSize: 12, color: _green.withValues(alpha: 0.95))),
+              style: context.mlText.bodySmall.copyWith(
+                color: _green.withValues(alpha: 0.95),
+              )),
         ]),
       ),
       const SizedBox(width: 10),
@@ -465,7 +465,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           child: Text(
             'Live profile · Auto-updates on any change · Synced ${_ago(syncedAt)}',
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 12, color: s.textFaint),
+            style: context.mlText.bodySmall.copyWith(color: s.textFaint),
           ),
         ),
         const Spacer(),
@@ -562,11 +562,9 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                 alignment: Alignment.center,
                 child: e.profilePhotoUrl == null
                     ? Text(initials,
-                        style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 27,
-                            color: tc.fg))
+                        style: context.mlText.headlineMedium.copyWith(
+                          color: tc.fg,
+                        ))
                     : null,
               ),
               Positioned(
@@ -600,12 +598,10 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                                 fontWeight: FontWeight.w600),
                           ),
                       ]),
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSerif,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        height: 1.05,
+                      style: context.mlText.figure(
                         color: s.textStrong,
+                        size: 28,
+                        height: 1.05,
                       ),
                     ),
                   ),
@@ -632,11 +628,10 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                               color: tc.fg, shape: BoxShape.circle)),
                       const SizedBox(width: 6),
                       Text(roleLabel.toUpperCase(),
-                          style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.5,
-                              color: tc.fg)),
+                          style: context.mlText.labelSmall.copyWith(
+                            color: tc.fg,
+                            fontWeight: FontWeight.w700,
+                          )),
                     ]),
                   ),
                   Container(
@@ -648,17 +643,22 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                       borderRadius: MlShape.radiusSmall,
                     ),
                     child: Text(code,
-                        style: TextStyle(
-                            fontFamily: MlTokens.fontMono,
-                            fontSize: 11,
-                            color: s.textFaint)),
+                        style: context.mlText.code(
+                          color: s.textFaint,
+                          size: 11,
+                          weight: FontWeight.w400,
+                        )),
                   ),
                 ]),
                 const SizedBox(height: 10),
                 Text('${b.company.name} · $groupLabel',
-                    style: TextStyle(fontSize: 13, color: s.textMuted)),
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: s.textMuted,
+                    )),
                 Text(posting,
-                    style: TextStyle(fontSize: 13, color: s.textFaint)),
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: s.textFaint,
+                    )),
               ]),
             ),
           ]),
@@ -675,10 +675,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                   size: 14, color: s.textFaint),
               const SizedBox(width: 7),
               Text(widget.canManage ? 'Managed profile' : 'Read-only profile',
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: s.textMuted)),
+                  style: context.mlText.labelMedium.copyWith(color: s.textMuted)),
             ]),
           ),
           const SizedBox(height: 14),
@@ -703,18 +700,16 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                     _Presence.away => 'Away · recently active',
                     _Presence.offline => 'Offline',
                   },
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: presColor),
+                  style: context.mlText.titleSmall.copyWith(color: presColor),
                 ),
               ),
               Text(
                 'last ping · ${presence == _Presence.online ? 'live' : _ago(seen)}',
-                style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 11,
-                    color: s.textFaint),
+                style: context.mlText.code(
+                  color: s.textFaint,
+                  size: 11,
+                  weight: FontWeight.w400,
+                ),
               ),
             ]),
           ),
@@ -808,7 +803,10 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
     return _PCard(
       title: 'CONTACT & IDENTITY',
       right: Text('Tap to copy',
-          style: TextStyle(fontSize: 11, color: s.textFaint)),
+          style: context.mlText.labelSmall.copyWith(
+            color: s.textFaint,
+            fontWeight: FontWeight.w400,
+          )),
       child: Column(children: [
         for (final (icon, label, value, mono) in rows)
           InkWell(
@@ -820,7 +818,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                 Icon(icon, size: 16, color: s.textFaint),
                 const SizedBox(width: 10),
                 Text(label,
-                    style: TextStyle(fontSize: 12, color: s.textMuted)),
+                    style: context.mlText.bodySmall.copyWith(color: s.textMuted)),
                 const Spacer(),
                 Flexible(
                   child: Text(
@@ -852,8 +850,9 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
               Expanded(
                 child: Text(
                   'WhatsApp-only account — signs in with their WhatsApp number.',
-                  style: TextStyle(
-                      fontSize: 12, color: _green.withValues(alpha: 0.95)),
+                  style: context.mlText.bodySmall.copyWith(
+                    color: _green.withValues(alpha: 0.95),
+                  ),
                 ),
               ),
             ]),
@@ -892,17 +891,18 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                 : expiring > 0
                     ? '$expiring expiring'
                     : '',
-            style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: allGreen ? _green : _amber),
+            style: context.mlText.labelSmall.copyWith(
+              color: allGreen ? _green : _amber,
+            ),
           ),
           child: Column(children: [
             if (docs.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text('No documents on file yet.',
-                    style: TextStyle(fontSize: 13, color: s.textMuted)),
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: s.textMuted,
+                    )),
               ),
             for (final d in docs) ...[
               _DocTile(doc: d, onOpen: () => _openDoc(d)),
@@ -924,10 +924,9 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                         size: 16, color: s.textMuted),
                     const SizedBox(width: 7),
                     Text('Upload document',
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: s.textMuted)),
+                        style: context.mlText.titleSmall.copyWith(
+                          color: s.textMuted,
+                        )),
                   ]),
                 ),
               ),
@@ -970,18 +969,14 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label,
-                style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                    color: s.textFaint)),
+                style: context.mlText.overline.copyWith(color: s.textFaint)),
             const SizedBox(height: 5),
             Text(value,
-                style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: color)),
+                style: context.mlText.code(
+                  color: color,
+                  size: 14,
+                  weight: FontWeight.w700,
+                )),
           ],
         );
 
@@ -1002,27 +997,27 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                       color: _green)),
             ])
           : Text('OFF SHIFT',
-              style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: s.textFaint)),
+              style: context.mlText.labelSmall.copyWith(
+                color: s.textFaint,
+                fontWeight: FontWeight.w700,
+              )),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
               child: Text(_postingLabel(b),
-                  style: TextStyle(
-                      fontFamily: MlTokens.fontSerif,
-                      fontSize: 21,
-                      fontWeight: FontWeight.w700,
-                      color: s.textStrong)),
+                  style: context.mlText.editorialMedium.copyWith(
+                    color: s.textStrong,
+                    fontWeight: FontWeight.w700,
+                  )),
             ),
             Text('05:00 → 17:00',
-                style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 13,
-                    color: s.textBody)),
+                style: context.mlText.code(
+                  color: s.textBody,
+                  size: 13,
+                  weight: FontWeight.w400,
+                )),
           ],
         ),
         const SizedBox(height: 14),
@@ -1079,10 +1074,11 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           children: [
             for (final t in const ['05:00', '08:00', '11:00', '14:00', '17:00'])
               Text(t,
-                  style: TextStyle(
-                      fontFamily: MlTokens.fontMono,
-                      fontSize: 11,
-                      color: s.textFaint)),
+                  style: context.mlText.code(
+                    color: s.textFaint,
+                    size: 11,
+                    weight: FontWeight.w400,
+                  )),
           ],
         ),
         const SizedBox(height: 16),
@@ -1109,17 +1105,20 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
     return _PCard(
       title: "TODAY'S PRODUCTIVITY",
       right: Text('vs. weekly avg',
-          style: TextStyle(fontSize: 11, color: s.textFaint)),
+          style: context.mlText.labelSmall.copyWith(
+            color: s.textFaint,
+            fontWeight: FontWeight.w400,
+          )),
       child: metricsAsync.when(
         loading: () => const SizedBox(
             height: 120, child: Center(child: CircularProgressIndicator())),
         error: (_, __) => Text('Metrics unavailable',
-            style: TextStyle(fontSize: 12, color: s.textMuted)),
+            style: context.mlText.bodySmall.copyWith(color: s.textMuted)),
         data: (metrics) {
           if (metrics.isEmpty) {
             return Text('No recorded productivity yet — live counters appear '
                 'as this person works in the app.',
-                style: TextStyle(fontSize: 13, color: s.textMuted));
+                style: context.mlText.bodyMedium.copyWith(color: s.textMuted));
           }
           return LayoutBuilder(builder: (context, c) {
             final narrow = c.maxWidth < 560;
@@ -1178,7 +1177,10 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
       title: 'LOCATION & ASSIGNMENT',
       right: Text(
           loc?.at != null ? 'Auto-detected · ${_ago(loc!.at)}' : 'Live',
-          style: TextStyle(fontSize: 11, color: s.textFaint)),
+          style: context.mlText.labelSmall.copyWith(
+            color: s.textFaint,
+            fontWeight: FontWeight.w400,
+          )),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Container(
@@ -1195,12 +1197,12 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(locName,
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: s.textStrong)),
+                  style: context.mlText.titleMedium.copyWith(
+                    color: s.textStrong,
+                    fontWeight: FontWeight.w700,
+                  )),
               Text('${b.company.name} · ${b.company.orgType.label}',
-                  style: TextStyle(fontSize: 12, color: s.textMuted)),
+                  style: context.mlText.bodySmall.copyWith(color: s.textMuted)),
             ]),
           ),
           Container(
@@ -1223,12 +1225,10 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                       shape: BoxShape.circle)),
               const SizedBox(width: 6),
               Text(presence == _Presence.online ? 'ON-SITE' : 'OFF-SITE',
-                  style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: presence == _Presence.online
-                          ? _green
-                          : s.textFaint)),
+                  style: context.mlText.labelSmall.copyWith(
+                    color: presence == _Presence.online ? _green : s.textFaint,
+                    fontWeight: FontWeight.w700,
+                  )),
             ]),
           ),
         ]),
@@ -1285,10 +1285,10 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                         .take(2)
                         .map((w) => w.characters.first.toUpperCase())
                         .join(),
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: MlTone.transit.colors(brightness).fg),
+                style: context.mlText.titleSmall.copyWith(
+                  color: MlTone.transit.colors(brightness).fg,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -1296,20 +1296,16 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
               child:
                   Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(isLeader ? 'REPORTS TO' : 'REPORTING SUPERVISOR',
-                    style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.1,
-                        color: s.textFaint)),
+                    style: context.mlText.overline.copyWith(color: s.textFaint)),
                 const SizedBox(height: 2),
                 Text(
                   isLeader || sup == null
                       ? 'Board / Directors'
                       : '${sup.name} · ${sup.roleLabel}',
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: s.textStrong),
+                  style: context.mlText.titleSmall.copyWith(
+                    color: s.textStrong,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ]),
             ),
@@ -1323,9 +1319,10 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                         shape: BoxShape.circle)),
                 const SizedBox(width: 6),
                 Text(supOnline ? 'Online' : 'Offline',
-                    style: TextStyle(
-                        fontSize: 11,
-                        color: supOnline ? _green : s.textFaint)),
+                    style: context.mlText.labelSmall.copyWith(
+                      color: supOnline ? _green : s.textFaint,
+                      fontWeight: FontWeight.w400,
+                    )),
               ]),
           ]),
         ),
@@ -1365,11 +1362,11 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
         loading: () => const SizedBox(
             height: 80, child: Center(child: CircularProgressIndicator())),
         error: (_, __) => Text('Activity unavailable',
-            style: TextStyle(fontSize: 12, color: s.textMuted)),
+            style: context.mlText.bodySmall.copyWith(color: s.textMuted)),
         data: (items) {
           if (items.isEmpty) {
             return Text('No recorded activity in the last 24 hours.',
-                style: TextStyle(fontSize: 13, color: s.textMuted));
+                style: context.mlText.bodyMedium.copyWith(color: s.textMuted));
           }
           return Column(children: [
             for (var i = 0; i < items.length; i++)
@@ -1435,24 +1432,23 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(label,
-                style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
-                    color: s.textFaint)),
+                style: context.mlText.overline.copyWith(color: s.textFaint)),
             const SizedBox(height: 4),
             Text(value,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: s.textStrong)),
+                style: context.mlText.code(
+                  color: s.textStrong,
+                  size: 14,
+                  weight: FontWeight.w700,
+                )),
             if (sub != null) ...[
               const SizedBox(height: 2),
               Text(sub,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 11, color: s.textFaint)),
+                  style: context.mlText.labelSmall.copyWith(
+                    color: s.textFaint,
+                    fontWeight: FontWeight.w400,
+                  )),
             ],
           ]),
         );
@@ -1461,7 +1457,10 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
     return _PCard(
       title: 'ROLE SNAPSHOT',
       right: Text('updated by ${updatedBy.split(' ').first}',
-          style: TextStyle(fontSize: 11, color: s.textFaint)),
+          style: context.mlText.labelSmall.copyWith(
+            color: s.textFaint,
+            fontWeight: FontWeight.w400,
+          )),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         // IntrinsicHeight: these rows stretch tiles to equal height, but the
         // parent Column gives them unbounded height — stretch alone would
@@ -1504,11 +1503,11 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                   borderRadius: MlShape.radiusSmall,
                 ),
                 child: Text(label,
-                    style: TextStyle(
-                        fontFamily: MlTokens.fontMono,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: _toneColor(tone, s))),
+                    style: context.mlText.code(
+                      color: _toneColor(tone, s),
+                      size: 11,
+                      weight: FontWeight.w600,
+                    )),
               ),
           ]),
         ],
@@ -1522,7 +1521,10 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
     return _PCard(
       title: 'NOTES & FLAGS',
       right: Text('${flags.length} open',
-          style: TextStyle(fontSize: 11, color: s.textFaint)),
+          style: context.mlText.labelSmall.copyWith(
+            color: s.textFaint,
+            fontWeight: FontWeight.w400,
+          )),
       child: Column(children: [
         if (flags.isEmpty)
           _FlagTile(
@@ -1565,10 +1567,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                 Icon(Icons.add_rounded, size: 16, color: s.textBody),
                 const SizedBox(width: 7),
                 Text('Add note or flag',
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: s.textBody)),
+                    style: context.mlText.titleSmall.copyWith(color: s.textBody)),
               ]),
             ),
           ),
@@ -1613,11 +1612,7 @@ class _PCard extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(title,
-                  style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.6,
-                      color: s.textFaint)),
+                  style: context.mlText.overline.copyWith(color: s.textFaint)),
             ),
             if (right != null) right!,
           ]),
@@ -1725,13 +1720,16 @@ class _DocTile extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(doc.title,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: s.textStrong)),
+                style: context.mlText.titleSmall.copyWith(
+                  color: s.textStrong,
+                  fontWeight: FontWeight.w700,
+                )),
             const SizedBox(height: 3),
             Text(doc.subtitle,
-                style: TextStyle(fontSize: 11, color: s.textFaint)),
+                style: context.mlText.labelSmall.copyWith(
+                  color: s.textFaint,
+                  fontWeight: FontWeight.w400,
+                )),
             const SizedBox(height: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
@@ -1743,10 +1741,10 @@ class _DocTile extends StatelessWidget {
                 borderRadius: MlShape.radiusSmall,
               ),
               child: Text(doc.statusLabel,
-                  style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: statusColor)),
+                  style: context.mlText.labelSmall.copyWith(
+                    color: statusColor,
+                    fontWeight: FontWeight.w700,
+                  )),
             ),
           ]),
         ),
@@ -1792,12 +1790,11 @@ class _MetricTile extends StatelessWidget {
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(
               child: Text(m.label,
-                  style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.9,
-                      height: 1.35,
-                      color: s.textFaint)),
+                  style: context.mlText.labelSmall.copyWith(
+                    color: s.textFaint,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.9,
+                  )),
             ),
             if (m.delta != null)
               Row(mainAxisSize: MainAxisSize.min, children: [
@@ -1808,10 +1805,11 @@ class _MetricTile extends StatelessWidget {
                     size: 16,
                     color: deltaColor),
                 Text('${m.delta}',
-                    style: TextStyle(
-                        fontFamily: MlTokens.fontMono,
-                        fontSize: 11,
-                        color: deltaColor)),
+                    style: context.mlText.code(
+                      color: deltaColor,
+                      size: 11,
+                      weight: FontWeight.w400,
+                    )),
               ]),
           ]),
           const SizedBox(height: 4),
@@ -1821,19 +1819,21 @@ class _MetricTile extends StatelessWidget {
               if (m.unit.isNotEmpty)
                 TextSpan(
                     text: m.unit,
-                    style: TextStyle(fontSize: 15, color: s.textMuted)),
+                    style: context.mlText.bodyLarge.copyWith(color: s.textMuted)),
             ]),
-            style: TextStyle(
-                fontFamily: MlTokens.fontSerif,
-                fontSize: 32,
-                fontWeight: FontWeight.w700,
-                height: 1,
-                color: s.textStrong),
+            style: context.mlText.figure(
+              color: s.textStrong,
+              size: 32,
+              height: 1,
+            ),
           ),
           const SizedBox(height: 5),
           Text(m.sub,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 10, color: s.textFaint)),
+              style: context.mlText.labelSmall.copyWith(
+                color: s.textFaint,
+                fontWeight: FontWeight.w400,
+              )),
           // An empty series is a metric with no daily history — a snapshot
           // count. It draws nothing rather than a level line, which would be a
           // chart asserting a week of stability that was never measured
@@ -1976,16 +1976,26 @@ class _ZonePainter extends CustomPainter {
           ..strokeWidth = 1.5
           ..color = marker.withValues(alpha: 0.5));
 
+    // `MlType.code` rather than `context.mlText.code`: a CustomPainter has no
+    // BuildContext, which is the same reason `MlSemantic.from(Brightness)`
+    // exists beside `MlSemantic.of(context)`. It is the only kind of site in
+    // this file that cannot reach the theme.
+    //
+    // The sizes were 9.5 and 10.5 — half-points, which the scale does not have.
+    // They survived the `no-half-point-font-size` guard by hiding in a
+    // PARAMETER DEFAULT (`{double fs = 9.5}`) and a named argument, so no
+    // `fontSize:` literal ever carried the half. 11 and 10 now, which are the
+    // labelLarge/labelSmall steps this map's captions belong on.
     void label(String text, Offset at, Color color,
-        {double fs = 9.5, double ls = 0, TextAlign align = TextAlign.left}) {
+        {double fs = 10, double ls = 0, TextAlign align = TextAlign.left}) {
       final tp = TextPainter(
         text: TextSpan(
             text: text,
-            style: TextStyle(
-                fontFamily: MlTokens.fontMono,
-                fontSize: fs,
-                letterSpacing: ls,
-                color: color)),
+            style: MlType.code(
+                color: color,
+                size: fs,
+                weight: FontWeight.w400,
+                letterSpacing: ls)),
         textDirection: TextDirection.ltr,
         textAlign: align,
       )..layout(maxWidth: w - 28);
@@ -1995,17 +2005,18 @@ class _ZonePainter extends CustomPainter {
     final topTp = TextPainter(
       text: TextSpan(
           text: topLabel,
-          style: TextStyle(
-              fontFamily: MlTokens.fontMono,
-              fontSize: 10,
-              letterSpacing: 1.2,
-              color: faint)),
+          style: MlType.code(
+            color: faint,
+            size: 10,
+            weight: FontWeight.w400,
+            letterSpacing: 1.2,
+          )),
       textDirection: TextDirection.ltr,
     )..layout();
     topTp.paint(canvas, Offset(w - topTp.width - 14, 12));
 
-    label(bottomLabel, Offset(14, h - 36), labelColor, fs: 10.5);
-    label(coords, Offset(14, h - 22), faint, fs: 9.5);
+    label(bottomLabel, Offset(14, h - 36), labelColor, fs: 11);
+    label(coords, Offset(14, h - 22), faint, fs: 10);
   }
 
   @override
@@ -2073,16 +2084,18 @@ class _TimelineRow extends StatelessWidget {
                                 color: s.textStrong)),
                         TextSpan(text: item.rest),
                       ]),
-                      style: TextStyle(
-                          fontSize: 13, height: 1.4, color: s.textBody),
+                      style: context.mlText.bodyMedium.copyWith(
+                        color: s.textBody,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Text(timeLabel,
-                      style: TextStyle(
-                          fontFamily: MlTokens.fontMono,
-                          fontSize: 11,
-                          color: s.textFaint)),
+                      style: context.mlText.code(
+                        color: s.textFaint,
+                        size: 11,
+                        weight: FontWeight.w400,
+                      )),
                 ]),
               ),
             ),
@@ -2130,16 +2143,21 @@ class _FlagTile extends StatelessWidget {
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(title,
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: s.textStrong)),
+                style: context.mlText.titleSmall.copyWith(
+                  color: s.textStrong,
+                  fontWeight: FontWeight.w700,
+                )),
             const SizedBox(height: 5),
             Text(body,
-                style: TextStyle(
-                    fontSize: 12, height: 1.5, color: s.textMuted)),
+                style: context.mlText.bodySmall.copyWith(
+                  color: s.textMuted,
+                  height: 1.5,
+                )),
             const SizedBox(height: 8),
-            Text(meta, style: TextStyle(fontSize: 11, color: s.textFaint)),
+            Text(meta, style: context.mlText.labelSmall.copyWith(
+              color: s.textFaint,
+              fontWeight: FontWeight.w400,
+            )),
           ]),
         ),
       ]),

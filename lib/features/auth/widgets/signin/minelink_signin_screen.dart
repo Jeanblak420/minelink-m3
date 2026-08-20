@@ -20,6 +20,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart' show TapGestureRecognizer;
 import 'package:flutter/material.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/legal/legal_documents.dart';
 
 import 'minelink_signin_theme.dart';
@@ -780,13 +781,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Text(
                 'OR',
-                style: TextStyle(
-                  fontFamily: MlAuth.sans,
-                  fontSize: 11,
-                  letterSpacing: 1.7,
-                  fontWeight: FontWeight.w700,
-                  color: MlAuth.inkXlo,
-                ),
+                style: context.mlText.overline.copyWith(color: MlAuth.inkXlo),
               ),
             ),
             const Expanded(child: Divider(color: MlAuth.line2, height: 1)),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/notifications/providers/notification_provider.dart';
 import 'package:flutter_application_1/features/notifications/models/notification_model.dart';
 import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
@@ -85,19 +86,15 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                       children: [
                         Text(
                           'Recent alerts and updates',
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontSize: MlTokens.fsH2,
-                            fontWeight: FontWeight.w800,
+                          style: context.mlText.titleLarge.copyWith(
                             color: semantic.textStrong,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           '$unread unread · ${notifications.length} total',
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontSize: MlTokens.fsBodySm,
+                          style: context.mlText.bodyMedium.copyWith(
                             color: semantic.textMuted,
                           ),
                         ),
@@ -216,11 +213,9 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
           children: [
             Text(
               label,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
+              style: context.mlText.titleSmall.copyWith(
                 color: selected ? MlTokens.inkOnFill : semantic.textBody,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(width: 7),
@@ -234,11 +229,10 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
               ),
               child: Text(
                 '$count',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                style: context.mlText.code(
                   color: selected ? MlTokens.inkOnFill : semantic.textMuted,
+                  size: 12,
+                  weight: FontWeight.w600,
                 ),
               ),
             ),

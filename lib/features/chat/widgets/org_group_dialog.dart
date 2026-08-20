@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/chat/providers/messaging_providers.dart';
@@ -96,7 +97,9 @@ class _OrgGroupDialogState extends ConsumerState<_OrgGroupDialog> {
             Text(
               'Add up to two other companies — one mine, one buyer, one '
               'transporter at most. Your own company is always included.',
-              style: TextStyle(fontSize: 13, color: semantic.textMuted),
+              style: context.mlText.bodyMedium.copyWith(
+                color: semantic.textMuted,
+              ),
             ),
             const SizedBox(height: 10),
             Flexible(
@@ -149,11 +152,8 @@ class _OrgGroupDialogState extends ConsumerState<_OrgGroupDialog> {
                               : full
                                   ? 'Group is full — three companies maximum'
                                   : c.orgType.name,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: disabled
-                                ? semantic.textFaint
-                                : semantic.textMuted,
+                          style: context.mlText.bodySmall.copyWith(
+                            color: disabled ? semantic.textFaint : semantic.textMuted,
                           ),
                         ),
                       );

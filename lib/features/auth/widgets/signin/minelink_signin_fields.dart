@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'minelink_signin_theme.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 /// What the identity field believes it is holding.
@@ -175,10 +176,9 @@ class MlFieldHint extends StatelessWidget {
                   text ?? '',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: MlAuth.sans,
-                    fontSize: 11,
+                  style: context.mlText.labelSmall.copyWith(
                     color: color,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ),
@@ -386,12 +386,10 @@ class _MlIdentityFieldState extends State<MlIdentityField> {
               // settle. inkMid, NOT cyan: the floated rule's colour outranks
               // `:focus-within`'s there, so the caption stays quiet and the
               // focus is carried by the ring and tint instead. Red on refusal.
-              floatingLabelStyle: TextStyle(
-                fontFamily: MlAuth.sans,
-                fontSize: 10,
-                letterSpacing: 0.7,
-                fontWeight: FontWeight.w700,
+              floatingLabelStyle: context.mlText.labelSmall.copyWith(
                 color: showError ? MlAuth.bad : MlAuth.inkMid,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.7,
               ),
             ),
           ),
@@ -537,12 +535,10 @@ class _MlPasswordFieldState extends State<MlPasswordField> {
                   color: MlAuth.inkLo,
                   fontWeight: FontWeight.w500,
                 ),
-                floatingLabelStyle: TextStyle(
-                  fontFamily: MlAuth.sans,
-                  fontSize: 10,
-                  letterSpacing: 0.7,
-                  fontWeight: FontWeight.w700,
+                floatingLabelStyle: context.mlText.labelSmall.copyWith(
                   color: hasError ? MlAuth.bad : MlAuth.inkMid,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.7,
                 ),
               ),
             ),
@@ -557,10 +553,9 @@ class _MlPasswordFieldState extends State<MlPasswordField> {
                 const SizedBox(width: 6),
                 Text(
                   'Caps Lock is on',
-                  style: TextStyle(
-                    fontFamily: MlAuth.sans,
-                    fontSize: 11,
+                  style: context.mlText.labelSmall.copyWith(
                     color: MlAuth.warn,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],

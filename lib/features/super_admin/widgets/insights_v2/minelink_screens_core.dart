@@ -292,7 +292,7 @@ class MlPanel extends StatelessWidget {
 
 /// Letterspaced uppercase caption.
 class MlCap extends StatelessWidget {
-  const MlCap(this.text, {super.key, required this.tokens, this.size = 10.5});
+  const MlCap(this.text, {super.key, required this.tokens, this.size = 11});
 
   final String text;
   final MlGlass tokens;

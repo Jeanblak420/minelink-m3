@@ -321,7 +321,7 @@ class _ChartBlock extends StatelessWidget {
                             k.label,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: t.s(size: 10.5, color: t.inkMid),
+                            style: t.s(size: 11, color: t.inkMid),
                           ),
                         ),
                       ],

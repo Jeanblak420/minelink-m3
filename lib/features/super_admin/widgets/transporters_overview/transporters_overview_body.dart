@@ -287,7 +287,7 @@ class _FilterChip extends StatelessWidget {
               Text(
                 label,
                 style: t.s(
-                  size: 11.5,
+                  size: 12,
                   weight: FontWeight.w500,
                   color: active ? t.acc2 : t.inkMid,
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/utils/logger.dart';
@@ -185,10 +186,9 @@ class _DeactivateAccountCardState extends State<DeactivateAccountCard> {
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
+            style: context.mlText.titleMedium.copyWith(
               color: MlTone.error.colors(brightness).fg,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
@@ -551,7 +551,9 @@ class _ConfirmDeactivationDialogState
                   Text(
                     _error!.detail!,
                     softWrap: true,
-                    style: TextStyle(fontSize: 12, color: semantic.textFaint),
+                    style: context.mlText.bodySmall.copyWith(
+                      color: semantic.textFaint,
+                    ),
                   ),
                 ],
               ],

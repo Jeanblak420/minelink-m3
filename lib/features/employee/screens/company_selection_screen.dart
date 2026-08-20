@@ -1,4 +1,5 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -128,10 +129,7 @@ class _CompanySelectionScreenState
           child: Builder(
             builder: (context) => Text(
               'Please select the company you work for:',
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: MlTokens.fsBody,
-                fontWeight: FontWeight.w600,
+              style: context.mlText.titleMedium.copyWith(
                 color: MlSemantic.of(context).textMuted,
               ),
             ),
@@ -165,19 +163,15 @@ class _CompanySelectionScreenState
                           children: [
                             Text(
                               company.companyName,
-                              style: TextStyle(
-                                fontFamily: MlTokens.fontSans,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16,
+                              style: context.mlText.titleMedium.copyWith(
                                 color: semantic.textStrong,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                             const SizedBox(height: 3),
                             Text(
                               company.orgType.label,
-                              style: TextStyle(
-                                fontFamily: MlTokens.fontSans,
-                                fontSize: 13,
+                              style: context.mlText.bodyMedium.copyWith(
                                 color: semantic.textMuted,
                               ),
                             ),

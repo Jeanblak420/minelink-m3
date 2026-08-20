@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/features/company/models/seat_limit.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
@@ -98,8 +99,7 @@ Future<void> showSeatLimitDialog(
                 // the limit, so it is shown rather than paraphrased.
                 Text(
                   serverMessage,
-                  style: TextStyle(
-                    fontSize: 13,
+                  style: context.mlText.bodyMedium.copyWith(
                     color: Theme.of(ctx).colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -129,8 +129,7 @@ Future<void> showSeatLimitDialog(
                   const SizedBox(height: 10),
                   Text(
                     error!,
-                    style: TextStyle(
-                      fontSize: 13,
+                    style: context.mlText.bodyMedium.copyWith(
                       color: Theme.of(ctx).colorScheme.error,
                     ),
                   ),

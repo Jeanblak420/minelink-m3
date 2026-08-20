@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 import 'package:flutter_application_1/features/company/providers/company_provider.dart';
@@ -621,10 +622,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 8),
           Text(
             'This account is only meant to be used by the company\'s CEO. Should you not be the CEO, please IMMEDIATELY sign out after you\'ve added the First and Last name of your Company\'s CEO.',
-            style: TextStyle(
+            style: context.mlText.titleSmall.copyWith(
               color: MlTone.error.colors(Theme.of(context).brightness).fg,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 16),
@@ -1066,7 +1065,9 @@ class _LegalCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             'What you agreed to when you signed in.',
-            style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant),
+            style: context.mlText.bodyMedium.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 10),
           for (final doc in LegalDocument.all)

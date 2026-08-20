@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -358,16 +359,16 @@ class _CompanyEmployeesScreenState
             const SizedBox(height: 16),
             Text(
               'The employee will be accepted without a role. You will need to assign a role separately.',
-              style: TextStyle(
-                  fontSize: 14, color: MlSemantic.of(context).textMuted),
+              style: context.mlText.bodyMedium.copyWith(
+                color: MlSemantic.of(context).textMuted,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'The employee cannot use the app until a role is assigned.',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+              style: context.mlText.titleSmall.copyWith(
                 color: MlTone.warn.colors(Theme.of(context).brightness).fg,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
@@ -590,11 +591,9 @@ class _CompanyEmployeesScreenState
           textAlign: TextAlign.center,
           overflow: TextOverflow.fade,
           softWrap: false,
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
+          style: context.mlText.titleSmall.copyWith(
             color: isSelected ? MlTokens.inkOnFill : semantic.textBody,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -670,9 +669,7 @@ class _CompanyEmployeesScreenState
           const SizedBox(height: 4),
           Text(
             'This employee has been accepted but cannot use the app until assigned a role.',
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 13,
+            style: context.mlText.bodyMedium.copyWith(
               color: MlSemantic.of(context).textMuted,
             ),
           ),
@@ -681,11 +678,9 @@ class _CompanyEmployeesScreenState
           const SizedBox(height: 12),
           Text(
             'Select Role:',
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
+            style: context.mlText.titleSmall.copyWith(
               color: MlSemantic.of(context).textStrong,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 4),
@@ -718,11 +713,9 @@ class _CompanyEmployeesScreenState
         children: [
           Text(
             'Manage User And Role',
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontWeight: FontWeight.w800,
-              fontSize: 16,
+            style: context.mlText.titleMedium.copyWith(
               color: MlSemantic.of(context).textStrong,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 8),
@@ -869,22 +862,19 @@ class _CompanyEmployeesScreenState
         padding: const EdgeInsets.only(bottom: 6),
         child: Text(
           'DIRECTORY',
-          style: TextStyle(
-            fontFamily: MlTokens.fontMono,
-            fontSize: 11,
-            letterSpacing: 2.2,
-            fontWeight: FontWeight.w700,
+          style: context.mlText.code(
             color: semantic.textFaint,
+            size: 11,
+            weight: FontWeight.w700,
+            letterSpacing: 2.2,
           ),
         ),
       ),
       Text(
         'Employee register',
-        style: TextStyle(
-          fontFamily: MlTokens.fontSerif,
-          fontSize: 26,
-          fontWeight: FontWeight.w600,
+        style: context.mlText.editorialLarge.copyWith(
           color: semantic.textStrong,
+          fontWeight: FontWeight.w600,
         ),
       ),
       const SizedBox(height: 10),
@@ -1027,22 +1017,19 @@ class _RegisterGroup extends StatelessWidget {
                       child: Text(
                         label,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
+                        style: context.mlText.titleMedium.copyWith(
                           color: semantic.textStrong,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '${people.length}',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontMono,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                      style: context.mlText.code(
                         color: semantic.textFaint,
+                        size: 13,
+                        weight: FontWeight.w700,
                       ),
                     ),
                   ]),
@@ -1051,9 +1038,7 @@ class _RegisterGroup extends StatelessWidget {
                       desc,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 12,
+                      style: context.mlText.bodySmall.copyWith(
                         color: semantic.textMuted,
                       ),
                     ),
@@ -1151,11 +1136,9 @@ class _RegisterRowState extends State<_RegisterRow> {
         child: e.profilePhotoUrl == null
             ? Text(
                 initials,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14,
+                style: context.mlText.titleSmall.copyWith(
                   color: toneColors.fg,
+                  fontWeight: FontWeight.w800,
                 ),
               )
             : null,
@@ -1201,11 +1184,9 @@ class _RegisterRowState extends State<_RegisterRow> {
                       children: [
                         Text(
                           e.fullName,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 15,
+                          style: context.mlText.titleMedium.copyWith(
                             color: semantic.textStrong,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                         Container(
@@ -1218,12 +1199,11 @@ class _RegisterRowState extends State<_RegisterRow> {
                           ),
                           child: Text(
                             widget.code,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontMono,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.3,
+                            style: context.mlText.code(
                               color: semantic.textFaint,
+                              size: 11,
+                              weight: FontWeight.w600,
+                              letterSpacing: 0.3,
                             ),
                           ),
                         ),
@@ -1248,10 +1228,10 @@ class _RegisterRowState extends State<_RegisterRow> {
                       ].join(' · '),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontMono,
-                        fontSize: 11,
+                      style: context.mlText.code(
                         color: semantic.textMuted,
+                        size: 11,
+                        weight: FontWeight.w400,
                       ),
                     ),
                   ],

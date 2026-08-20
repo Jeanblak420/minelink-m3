@@ -22,6 +22,7 @@ import 'package:flutter/services.dart';
 // since the token layer imports nothing but Flutter. Re-exported so every
 // existing `import 'minelink_signin_theme.dart'` still resolves MlAuth.
 export 'package:flutter_application_1/core/design/tokens/ml_auth_tokens.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_auth_tokens.dart';
 
 /// Carries the "play anyway" override down the tree.
@@ -250,11 +251,9 @@ class _MlGhostButtonState extends State<MlGhostButton> {
                   widget.label,
                   textAlign: TextAlign.center,
                   maxLines: 2,
-                  style: TextStyle(
-                    fontFamily: MlAuth.sans,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
+                  style: context.mlText.titleSmall.copyWith(
                     color: _hover ? MlAuth.inkHiGood : MlAuth.inkHi,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -313,10 +312,7 @@ class MlBanner extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                fontFamily: MlAuth.sans,
-                fontSize: 13,
-                height: 1.5,
+              style: context.mlText.bodyMedium.copyWith(
                 color: error ? MlAuth.inkOnBad : MlAuth.inkOnAccentBanner,
               ),
             ),

@@ -554,12 +554,29 @@ final guards = <Guard>[
         'nearest, because shrinking text is the direction that makes '
         'something unreadable without making it look broken, while growing it '
         'can only cause an overflow, which the sweeps catch. The token layer '
-        'is exempt: it is where the scale is defined.',
+        'is exempt: it is where the scale is defined.\n'
+        '\n'
+        'WIDENED 2026-08-20, because it only ever looked at the literal '
+        '"fontSize:" and that is not the only way a size reaches a TextStyle. '
+        'SIXTEEN half-points were alive behind two other shapes on the day the '
+        'product was described as having none: a PARAMETER DEFAULT '
+        '({double fs = 9.5} in a CustomPainter, {this.size = 10.5} on MlCap, '
+        '{this.fontSize = 10.5} on a transporters-overview primitive) and a '
+        'NAMED ARGUMENT to a type helper (t.s(size: 11.5), t.m(size: 10.5)) — '
+        'MlOv ships its own s()/m() rather than reaching the theme, so its '
+        'callers never write "fontSize" at all. The name, not the constructor, '
+        'is what this now matches: fontSize, fs, textSize, and size.\n'
+        '\n'
+        'It therefore also catches an Icon at 10.5, and that is deliberate. The '
+        'scale has no half-points and neither should anything measured beside '
+        'text; there was no such site in the tree when this was widened, so it '
+        'costs nothing and closes the gap rather than leaving a shape of it.',
     mode: Mode.block,
     roots: ['lib'],
     extension: '.dart',
     exemptPath: RegExp(r'lib/core/design/tokens/'),
-    pattern: RegExp(r'fontSize:\s*[0-9]+\.[0-9]'),
+    pattern: RegExp(r'\b(?:fontSize|fs|textSize|size)\s*[:=]\s*'
+        r'[0-9]+\.(?!0+\b)[0-9]'),
     exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
     plantFile: 'planted.dart',
     plantLine: 'style: TextStyle(fontSize: 12.5),',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/chat/models/messaging_models.dart';
 import 'package:flutter_application_1/features/chat/providers/messaging_providers.dart';
@@ -41,11 +42,9 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
       backgroundColor: semantic.surfaceApp,
       appBar: AppBar(
         title: const Text('Messages'),
-        titleTextStyle: TextStyle(
-          fontFamily: MlTokens.fontSans,
-          fontSize: 20,
-          fontWeight: FontWeight.w800,
+        titleTextStyle: context.mlText.titleLarge.copyWith(
           color: semantic.textStrong,
+          fontWeight: FontWeight.w800,
         ),
         actions: [
           // S8-3 / P10-08. Only an owner, management or admin may commit their
@@ -136,11 +135,9 @@ class _SegTabs extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               label,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
+              style: context.mlText.titleSmall.copyWith(
                 color: active ? MlTokens.inkOnFill : semantic.textMuted,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -229,21 +226,19 @@ class _ConversationTile extends StatelessWidget {
                           conversation.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
+                          style: context.mlText.titleSmall.copyWith(
                             color: semantic.textStrong,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                       if (time != null)
                         Text(
                           DateFormat('HH:mm').format(time),
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontMono,
-                            fontSize: 11,
+                          style: context.mlText.code(
                             color: semantic.textFaint,
+                            size: 11,
+                            weight: FontWeight.w400,
                           ),
                         ),
                     ],
@@ -253,7 +248,9 @@ class _ConversationTile extends StatelessWidget {
                     conversation.lastMessageContent ?? 'No messages yet',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 13, color: semantic.textMuted),
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: semantic.textMuted,
+                    ),
                   ),
                 ],
               ),
@@ -293,11 +290,7 @@ class _ContactsList extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
             child: Text(
               label.toUpperCase(),
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.8,
+              style: context.mlText.overline.copyWith(
                 color: MlSemantic.of(context).textFaint,
               ),
             ),
@@ -344,11 +337,9 @@ class _ContactTile extends ConsumerWidget {
                     contact.displayName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
+                    style: context.mlText.titleSmall.copyWith(
                       color: semantic.textStrong,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   if (contact.companyName != null)
@@ -356,7 +347,9 @@ class _ContactTile extends ConsumerWidget {
                       contact.companyName!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, color: semantic.textMuted),
+                      style: context.mlText.bodySmall.copyWith(
+                        color: semantic.textMuted,
+                      ),
                     ),
                 ],
               ),
@@ -559,11 +552,9 @@ class _ConvHeader extends ConsumerWidget {
                   room.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
+                  style: context.mlText.titleMedium.copyWith(
                     color: semantic.textStrong,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 Text(
@@ -572,7 +563,9 @@ class _ConvHeader extends ConsumerWidget {
                       : room.type == ChatRoomType.orgGroup
                           ? 'Organisation group'
                           : 'Group',
-                  style: TextStyle(fontSize: 12, color: semantic.textMuted),
+                  style: context.mlText.bodySmall.copyWith(
+                    color: semantic.textMuted,
+                  ),
                 ),
               ],
             ),
@@ -686,27 +679,25 @@ class _MessageBubble extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 3),
                 child: Text(
                   message.senderName,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 12,
+                  style: context.mlText.labelMedium.copyWith(
+                    color: mine ? MlTokens.navy950.withValues(alpha: 0.7) : MlTokens.accent,
                     fontWeight: FontWeight.w700,
-                    color: mine
-                        ? MlTokens.navy950.withValues(alpha: 0.7)
-                        : MlTokens.accent,
                   ),
                 ),
               ),
-            Text(message.content, style: TextStyle(fontSize: 14, color: fg, height: 1.35)),
+            Text(message.content, style: context.mlText.bodyMedium.copyWith(
+              color: fg,
+            )),
             const SizedBox(height: 3),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   DateFormat('HH:mm').format(message.timestamp),
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 10,
+                  style: context.mlText.code(
                     color: mine ? MlTokens.inkOnFill70 : semantic.textFaint,
+                    size: 10,
+                    weight: FontWeight.w400,
                   ),
                 ),
                 if (mine) ...[
@@ -796,7 +787,7 @@ class _BlockedBanner extends StatelessWidget {
             child: Text(
               'You can no longer send or receive messages with $companyName. '
               'Contact Mine-Link to request permission to chat again.',
-              style: TextStyle(color: tone.fg, fontSize: 13, fontWeight: FontWeight.w600),
+              style: context.mlText.titleSmall.copyWith(color: tone.fg),
             ),
           ),
         ],
@@ -829,10 +820,8 @@ class _EndedBanner extends StatelessWidget {
             child: Text(
               'This conversation has been ended. Everything said is still here '
               'to read, but no new messages can be sent.',
-              style: TextStyle(
+              style: context.mlText.titleSmall.copyWith(
                 color: semantic.textMuted,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -869,11 +858,9 @@ class _Avatar extends StatelessWidget {
           ? Icon(Icons.groups_rounded, color: color, size: 20)
           : Text(
               initials,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
+              style: context.mlText.titleSmall.copyWith(
                 color: color,
+                fontWeight: FontWeight.w800,
               ),
             ),
     );

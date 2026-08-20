@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/features/tutorial/models/tutorial_step.dart';
 import 'package:flutter_application_1/features/tutorial/providers/tutorial_providers.dart';
@@ -219,11 +220,9 @@ class _StepCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   step.title,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSerif,
-                    fontSize: MlTokens.fsH3,
-                    fontWeight: FontWeight.w700,
+                  style: context.mlText.editorialSmall.copyWith(
                     color: semantic.textStrong,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -233,13 +232,7 @@ class _StepCard extends StatelessWidget {
           // Description
           Text(
             step.description,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: MlTokens.fsBody,
-              fontWeight: FontWeight.w400,
-              color: semantic.textBody,
-              height: 1.5,
-            ),
+            style: context.mlText.bodyLarge.copyWith(color: semantic.textBody),
           ),
           const SizedBox(height: 24),
           // Action button (go to the feature this step describes)
@@ -283,11 +276,9 @@ class _StepCard extends StatelessWidget {
                 ),
                 child: Text(
                   'Skip',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: MlTokens.fsBodySm,
-                    fontWeight: FontWeight.w500,
+                  style: context.mlText.bodyMedium.copyWith(
                     color: semantic.textMuted,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/notifications/models/notification_model.dart';
 import 'package:flutter_application_1/features/notifications/services/notification_service.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -109,11 +110,9 @@ class NotificationCard extends ConsumerWidget {
                         notification.title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                        style: context.mlText.titleMedium.copyWith(
                           color: semantic.textStrong,
+                          fontWeight: FontWeight.w700,
                           height: 1.25,
                         ),
                       ),
@@ -131,11 +130,8 @@ class NotificationCard extends ConsumerWidget {
                 const SizedBox(height: 3),
                 Text(
                   notification.message,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 13,
+                  style: context.mlText.bodyMedium.copyWith(
                     color: semantic.textMuted,
-                    height: 1.45,
                   ),
                 ),
                 const SizedBox(height: 7),
@@ -154,9 +150,7 @@ class NotificationCard extends ConsumerWidget {
                         text: '  ·  by ${notification.actionedBy ?? 'System'}',
                       ),
                     ],
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 12,
+                    style: context.mlText.bodySmall.copyWith(
                       color: semantic.textFaint,
                     ),
                   ),

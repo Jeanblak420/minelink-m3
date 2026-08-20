@@ -111,7 +111,7 @@ class _AlertRow extends StatelessWidget {
                 Text(
                   item.title,
                   style: t.s(
-                    size: 12.5,
+                    size: 13,
                     weight: FontWeight.w600,
                     color: t.inkHi,
                   ),

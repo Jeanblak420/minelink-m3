@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 import 'package:flutter_application_1/features/auth/widgets/auth_shell.dart';
@@ -146,22 +147,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         Text(
           'We\'ve sent password reset instructions to your email address. Click the link in the email to set a new password.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: MlTokens.fsBody,
-            height: 1.5,
-            color: semantic.textBody,
-          ),
+          style: context.mlText.bodyLarge.copyWith(color: semantic.textBody),
         ),
         const SizedBox(height: 8),
         Text(
           'If you don\'t see the email, check your spam folder or try again.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: MlTokens.fsBodySm,
-            color: semantic.textMuted,
-          ),
+          style: context.mlText.bodyMedium.copyWith(color: semantic.textMuted),
         ),
         const SizedBox(height: 24),
         MlButton.primary(

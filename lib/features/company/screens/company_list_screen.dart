@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/mcp/models/company_model.dart';
 import 'package:flutter_application_1/core/mcp/repositories/company_repository.dart';
 import 'package:flutter_application_1/core/widgets/infinite_list.dart';
@@ -91,20 +92,18 @@ class CompanyListScreen extends ConsumerWidget {
                 children: [
                   Text(
                     company.companyName,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 16,
+                    style: context.mlText.titleMedium.copyWith(
                       color: semantic.textStrong,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     company.whatsappNumber,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontMono,
-                      fontSize: 13,
+                    style: context.mlText.code(
                       color: semantic.textMuted,
+                      size: 13,
+                      weight: FontWeight.w400,
                     ),
                   ),
                 ],
@@ -248,10 +247,7 @@ class CompanyDetailsScreen extends StatelessWidget {
             width: 130,
             child: Text(
               label,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontWeight: FontWeight.w600,
-                fontSize: MlTokens.fsBodySm,
+              style: context.mlText.titleSmall.copyWith(
                 color: semantic.textMuted,
               ),
             ),
@@ -259,10 +255,7 @@ class CompanyDetailsScreen extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontWeight: FontWeight.w600,
-                fontSize: MlTokens.fsBody,
+              style: context.mlText.titleMedium.copyWith(
                 color: semantic.textStrong,
               ),
             ),

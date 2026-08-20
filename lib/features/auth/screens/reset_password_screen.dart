@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 import 'package:flutter_application_1/features/auth/widgets/auth_shell.dart';
 import 'package:flutter_application_1/core/utils/validators.dart';
@@ -226,12 +227,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
         Text(
           'Your password has been reset successfully. You can now log in with your new password.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: MlTokens.fsBody,
-            height: 1.5,
-            color: semantic.textBody,
-          ),
+          style: context.mlText.bodyLarge.copyWith(color: semantic.textBody),
         ),
         const SizedBox(height: 24),
         MlButton.primary(

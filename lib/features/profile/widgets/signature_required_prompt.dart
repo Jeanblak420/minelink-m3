@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/profile/services/signature_service.dart';
 
 /// The outcome of [ensureSignatureBeforeSigning].
@@ -94,10 +95,9 @@ Future<SignaturePromptOutcome> ensureSignatureBeforeSigning(
             Text(
               'Drawing it takes a moment and it is reused automatically on '
               'every waybill, proof of delivery and approval after this one.',
-              style: TextStyle(
-                  color: semantic.textMuted,
-                  fontSize: MlTokens.fsBodySm,
-                  height: 1.45),
+              style: context.mlText.bodyMedium.copyWith(
+                color: semantic.textMuted,
+              ),
             ),
           ],
         ),

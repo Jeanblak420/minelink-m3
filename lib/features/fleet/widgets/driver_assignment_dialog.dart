@@ -2,6 +2,7 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_model.dart';
 import 'package:flutter_application_1/features/fleet/models/vehicle_driver.dart';
 import 'package:flutter_application_1/features/fleet/providers/fleet_provider.dart';
@@ -141,8 +142,7 @@ class _DriverAssignmentDialogState
                   Text(
                     '${assigned.length}/$maxDrivers drivers assigned '
                     '(default 2 for long-distance; max 5).',
-                    style: TextStyle(
-                      fontSize: 13,
+                    style: context.mlText.bodyMedium.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -165,11 +165,9 @@ class _DriverAssignmentDialogState
                         subtitle: d.onRoute
                             ? Text(
                                 'DRIVER ON ROUTE',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  letterSpacing: 0.6,
-                                  fontWeight: FontWeight.w700,
+                                style: context.mlText.labelSmall.copyWith(
                                   color: scheme.error,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               )
                             : const Text('Available'),

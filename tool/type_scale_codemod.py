@@ -244,6 +244,16 @@ def match_paren(src: str, start: int) -> int:
     return -1
 
 
+# Flutter's `TextStyle`, and ONLY Flutter's.
+#
+# `\bTextStyle\s*\(` also matches `pw.TextStyle(` — the `pdf` package's own
+# class, which shares the name and nothing else. employee_profile_pdf.dart and
+# waybill_pdf.dart are full of them, and rewriting one produces
+# `pw.context.mlText.titleSmall` in a file that has no BuildContext and never
+# will: a PDF is composed off-screen. The lookbehind is what makes the tool
+# refuse a qualified name rather than guess at it.
+TEXT_STYLE = re.compile(r'(?<![\w.$])TextStyle\s*\(')
+
 CONST_CALL = re.compile(r'\bconst\s+(?:[A-Z]\w*(?:\.\w+)?\s*)?[(\[{]')
 
 
@@ -721,7 +731,7 @@ def process(path: str, receiver: str, apply: bool, verbose: bool):
 
     consts = const_regions(src)
     edits, skips, notes = [], [], []
-    for m in re.finditer(r'\bTextStyle\s*\(', src):
+    for m in re.finditer(TEXT_STYLE, src):
         s = m.end() - 1
         before = src[max(0, m.start() - 8):m.start()]
         if before.rstrip().endswith('const'):
@@ -811,7 +821,7 @@ def audit_serif():
         if excluded(n):
             continue
         src = open(path, encoding='utf-8', errors='replace', newline='').read()
-        for m in re.finditer(r'\bTextStyle\s*\(', src):
+        for m in re.finditer(TEXT_STYLE, src):
             e = match_paren(src, m.end() - 1)
             if e < 0:
                 continue
@@ -894,6 +904,17 @@ def selftest() -> int:
         got, _ = decide(parse_args(body), 'context.mlText')
         if got != want:
             print(f'FAIL  {body}\n        got  {got}\n        want {want}')
+            bad += 1
+
+    # A prefixed TextStyle is somebody else's class. `pw.TextStyle` is the pdf
+    # package's, in files composed off-screen with no BuildContext anywhere.
+    for src_text, want in ((' TextStyle(', 1), ('pw.TextStyle(', 0),
+                           ('x.TextStyle(', 0), ('MyTextStyle(', 0),
+                           ('\nTextStyle(', 1), ('const TextStyle(', 1)):
+        got = len(TEXT_STYLE.findall(src_text))
+        if got != want:
+            print(f'FAIL  TEXT_STYLE matched {got} in {src_text!r}, '
+                  f'expected {want}')
             bad += 1
 
     # And the refusals must still refuse.

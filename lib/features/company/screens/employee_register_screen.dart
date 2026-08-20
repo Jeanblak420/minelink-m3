@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/theme/theme_mode_provider.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/chat/providers/chat_presence_provider.dart';
@@ -434,27 +435,17 @@ class _EmployeeRegisterScreenState
           child: Text(
             'EMPLOYEES',
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 12,
-              letterSpacing: 1.2,
-              fontWeight: FontWeight.w700,
-              color: _p.textMuted,
-            ),
+            style: context.mlText.overline.copyWith(color: _p.textMuted),
           ),
         ),
-        Text('  /  ', style: TextStyle(fontSize: 12, color: _p.textMuted)),
+        Text('  /  ', style: context.mlText.bodySmall.copyWith(
+          color: _p.textMuted,
+        )),
         Flexible(
           child: Text(
             'EMPLOYEE REGISTER',
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 12,
-              letterSpacing: 1.2,
-              fontWeight: FontWeight.w800,
-              color: _p.textStrong,
-            ),
+            style: context.mlText.overline.copyWith(color: _p.textStrong),
           ),
         ),
       ],
@@ -521,13 +512,15 @@ class _EmployeeRegisterScreenState
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              _syncedLabel,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: _p.green,
+            Flexible(
+              child: Text(
+                _syncedLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.mlText.titleSmall.copyWith(
+                  color: _p.green,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -546,12 +539,10 @@ class _EmployeeRegisterScreenState
               child: Text(
                 '${company.companyName.toUpperCase()} · DIRECTORY',
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 13,
-                  letterSpacing: 1.6,
-                  fontWeight: FontWeight.w800,
+                style: context.mlText.titleSmall.copyWith(
                   color: _p.blue,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.6,
                 ),
               ),
             ),
@@ -560,12 +551,10 @@ class _EmployeeRegisterScreenState
         const SizedBox(height: 12),
         RichText(
           text: TextSpan(
-            style: TextStyle(
-              fontFamily: MlTokens.fontSerif,
-              fontSize: 46,
-              height: 1.05,
-              fontWeight: FontWeight.w500,
+            style: context.mlText.figure(
               color: _p.textStrong,
+              size: 46,
+              height: 1.05,
             ),
             children: [
               const TextSpan(text: 'Employee '),
@@ -579,11 +568,9 @@ class _EmployeeRegisterScreenState
         const SizedBox(height: 12),
         RichText(
           text: TextSpan(
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 14,
-              height: 1.55,
+            style: context.mlText.bodyMedium.copyWith(
               color: _p.textMuted,
+              height: 1.55,
             ),
             children: [
               const TextSpan(
@@ -619,13 +606,15 @@ class _EmployeeRegisterScreenState
                 children: [
                   Icon(Icons.lock_outline, size: 14, color: _p.textMuted),
                   const SizedBox(width: 7),
-                  Text(
-                    'Read-only',
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: _p.textMuted,
+                  Flexible(
+                    child: Text(
+                      'Read-only',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.mlText.titleSmall.copyWith(
+                        color: _p.textMuted,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
@@ -661,13 +650,15 @@ class _EmployeeRegisterScreenState
               size: 18,
               color: color,
             ),
-            Text(
-              '${d.abs()}',
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: color,
+            Flexible(
+              child: Text(
+                '${d.abs()}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.mlText.labelSmall.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ],
@@ -691,13 +682,7 @@ class _EmployeeRegisterScreenState
                 Flexible(
                   child: Text(
                     label.toUpperCase(),
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 11,
-                      letterSpacing: 1.1,
-                      fontWeight: FontWeight.w800,
-                      color: _p.textMuted,
-                    ),
+                    style: context.mlText.overline.copyWith(color: _p.textMuted),
                   ),
                 ),
                 if (delta != null) delta,
@@ -706,12 +691,7 @@ class _EmployeeRegisterScreenState
             const SizedBox(height: 10),
             Text(
               value,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSerif,
-                fontSize: 38,
-                fontWeight: FontWeight.w500,
-                color: _p.textStrong,
-              ),
+              style: context.mlText.figure(color: _p.textStrong, size: 38),
             ),
             const SizedBox(height: 8),
             Row(
@@ -732,9 +712,7 @@ class _EmployeeRegisterScreenState
                     sub ?? '',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 12,
+                    style: context.mlText.bodySmall.copyWith(
                       color: _p.textMuted,
                     ),
                   ),
@@ -817,11 +795,9 @@ class _EmployeeRegisterScreenState
           ),
           child: Text(
             label,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
+            style: context.mlText.titleSmall.copyWith(
               color: active ? _p.blue : _p.textMuted,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
@@ -851,18 +827,12 @@ class _EmployeeRegisterScreenState
               controller: _search,
               focusNode: _searchFocus,
               onChanged: (_) => setState(() {}),
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 13,
-                color: _p.textStrong,
-              ),
+              style: context.mlText.bodyMedium.copyWith(color: _p.textStrong),
               cursorColor: _p.blue,
               decoration: InputDecoration(
                 isDense: true,
                 hintText: 'Search by name, role, or employee ID…',
-                hintStyle: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 13,
+                hintStyle: context.mlText.bodyMedium.copyWith(
                   color: _p.textMuted,
                 ),
                 prefixIcon: Icon(Icons.search, size: 18, color: _p.textMuted),
@@ -879,10 +849,10 @@ class _EmployeeRegisterScreenState
                     alignment: Alignment.center,
                     child: Text(
                       'Ctrl K',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontMono,
-                        fontSize: 10,
+                      style: context.mlText.code(
                         color: _p.textMuted,
+                        size: 10,
+                        weight: FontWeight.w400,
                       ),
                     ),
                   ),
@@ -968,55 +938,78 @@ class _EmployeeRegisterScreenState
                     color: _roleFilter == null ? _p.textMuted : _p.blue,
                   ),
                   const SizedBox(width: 7),
-                  Text(
-                    _roleFilter == null
-                        ? 'Filter'
-                        : 'Filter: ${_roleFilter!.label}',
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: _roleFilter == null ? _p.textMuted : _p.blue,
+                  Flexible(
+                    child: Text(
+                      _roleFilter == null
+                          ? 'Filter'
+                          : 'Filter: ${_roleFilter!.label}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.mlText.titleSmall.copyWith(
+                        color: _roleFilter == null ? _p.textMuted : _p.blue,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: _p.surfaceTile,
-              borderRadius: BorderRadius.circular(MlTokens.rMd),
-              border: Border.all(color: _p.borderCard),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<_Presence?>(
-                value: _statusFilter,
-                dropdownColor: _p.surfaceCard,
-                iconEnabledColor: _p.textMuted,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: _p.textStrong,
+          // `isExpanded` + a maxWidth, and the items ellipsise.
+          //
+          // A DropdownButton lays its selected item out at its NATURAL width
+          // unless told otherwise, and it sizes to the widest item in the list
+          // — so "Status: Offline" decides the width of the control whatever is
+          // selected. At 430px and text scale 1.6 that put this 31px past the
+          // filter bar. It is the same trap CLAUDE.md §10.4 records for
+          // `DropdownButtonFormField`; the plain `DropdownButton` has it too.
+          //
+          // The cap is 220 rather than unbounded because `isExpanded` alone
+          // makes the control claim the whole Wrap line, which on a desktop
+          // would put every filter on a row of its own.
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 220),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: _p.surfaceTile,
+                borderRadius: BorderRadius.circular(MlTokens.rMd),
+                border: Border.all(color: _p.borderCard),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<_Presence?>(
+                  value: _statusFilter,
+                  isExpanded: true,
+                  dropdownColor: _p.surfaceCard,
+                  iconEnabledColor: _p.textMuted,
+                  style: context.mlText.titleSmall.copyWith(
+                    color: _p.textStrong,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: null,
+                      child: Text('Status: All',
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                    DropdownMenuItem(
+                      value: _Presence.online,
+                      child: Text('Status: Online',
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                    DropdownMenuItem(
+                      value: _Presence.away,
+                      child: Text('Status: Away',
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                    DropdownMenuItem(
+                      value: _Presence.offline,
+                      child: Text('Status: Offline',
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() => _statusFilter = v),
                 ),
-                items: const [
-                  DropdownMenuItem(value: null, child: Text('Status: All')),
-                  DropdownMenuItem(
-                    value: _Presence.online,
-                    child: Text('Status: Online'),
-                  ),
-                  DropdownMenuItem(
-                    value: _Presence.away,
-                    child: Text('Status: Away'),
-                  ),
-                  DropdownMenuItem(
-                    value: _Presence.offline,
-                    child: Text('Status: Offline'),
-                  ),
-                ],
-                onChanged: (v) => setState(() => _statusFilter = v),
               ),
             ),
           ),
@@ -1210,13 +1203,15 @@ class _RoleSection extends StatelessWidget {
               decoration: BoxDecoration(shape: BoxShape.circle, color: color),
             ),
             const SizedBox(width: 7),
-            Text(
-              '$n $label',
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: pal.textMuted,
+            Flexible(
+              child: Text(
+                '$n $label',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.mlText.labelMedium.copyWith(
+                  color: pal.textMuted,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -1246,13 +1241,25 @@ class _RoleSection extends StatelessWidget {
               color: c,
             ),
             const SizedBox(width: 6),
-            Text(
-              expiring ? '$docsExpiring expiring · 30d' : 'Docs valid',
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: expiring ? c : pal.textMuted,
+            // Flexible, because this Row is `mainAxisSize: min` inside a
+            // bounded parent and the label grows with the text scale — a
+            // non-flex child is handed unbounded width, so its own ellipsis
+            // never engages (CLAUDE.md §10.4).
+            //
+            // It began overflowing by exactly 9px at 1024 × 2.0 when the label
+            // moved onto `labelMedium`, whose letterSpacing is 0.5 where this
+            // site had been silently inheriting bodyMedium's 0.25. 18
+            // characters × 0.25 × 2.0 = 9. The tracking is the slot's and is
+            // right; the chip having no slack at all was the fault.
+            Flexible(
+              child: Text(
+                expiring ? '$docsExpiring expiring · 30d' : 'Docs valid',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.mlText.labelMedium.copyWith(
+                  color: expiring ? c : pal.textMuted,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -1294,11 +1301,7 @@ class _RoleSection extends StatelessWidget {
                     k.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 10,
-                      letterSpacing: 1.1,
-                      fontWeight: FontWeight.w800,
+                    style: context.mlText.overline.copyWith(
                       color: pal.textMuted,
                     ),
                   ),
@@ -1306,11 +1309,9 @@ class _RoleSection extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   pct == null ? '—' : '$pct%',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSerif,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
+                  style: context.mlText.editorialLarge.copyWith(
                     color: pal.textStrong,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -1318,11 +1319,10 @@ class _RoleSection extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               k.detail,
-              style: TextStyle(
-                fontFamily: MlTokens.fontMono,
-                fontSize: 10,
-                color:
-                    pct == null ? pal.textMuted : color.withValues(alpha: 0.9),
+              style: context.mlText.code(
+                color: pct == null ? pal.textMuted : color.withValues(alpha: 0.9),
+                size: 10,
+                weight: FontWeight.w400,
               ),
             ),
           ],
@@ -1384,11 +1384,9 @@ class _RoleSection extends StatelessWidget {
                       children: [
                         Text(
                           group.title,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSerif,
-                            fontSize: 21,
-                            fontWeight: FontWeight.w600,
+                          style: context.mlText.editorialMedium.copyWith(
                             color: pal.textStrong,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         Container(
@@ -1403,10 +1401,10 @@ class _RoleSection extends StatelessWidget {
                           ),
                           child: Text(
                             '$total ${total == 1 ? 'person' : 'people'}',
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontMono,
-                              fontSize: 11,
+                            style: context.mlText.code(
                               color: pal.textMuted,
+                              size: 11,
+                              weight: FontWeight.w400,
                             ),
                           ),
                         ),
@@ -1415,9 +1413,7 @@ class _RoleSection extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       group.description,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 13,
+                      style: context.mlText.bodyMedium.copyWith(
                         color: pal.textMuted,
                       ),
                     ),
@@ -1626,11 +1622,9 @@ class _MemberCard extends ConsumerWidget {
                   child: e.profilePhotoUrl == null
                       ? Text(
                           initials.isEmpty ? '?' : initials,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
+                          style: context.mlText.titleMedium.copyWith(
                             color: groupColor,
+                            fontWeight: FontWeight.w800,
                           ),
                         )
                       : null,
@@ -1662,11 +1656,9 @@ class _MemberCard extends ConsumerWidget {
                     children: [
                       Text(
                         e.fullName.trim().isEmpty ? 'Employee' : e.fullName,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
+                        style: context.mlText.titleMedium.copyWith(
                           color: pal.textStrong,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       Container(
@@ -1681,10 +1673,10 @@ class _MemberCard extends ConsumerWidget {
                         ),
                         child: Text(
                           code,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontMono,
-                            fontSize: 11,
+                          style: context.mlText.code(
                             color: pal.textMuted,
+                            size: 11,
+                            weight: FontWeight.w400,
                           ),
                         ),
                       ),
@@ -1708,21 +1700,15 @@ class _MemberCard extends ConsumerWidget {
                       ),
                       Text(
                         _presenceLabel,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 12,
+                        style: context.mlText.labelMedium.copyWith(
+                          color: presence == _Presence.offline ? pal.textMuted : _presenceColor,
                           fontWeight: FontWeight.w700,
-                          color: presence == _Presence.offline
-                              ? pal.textMuted
-                              : _presenceColor,
                         ),
                       ),
                       Text(
                         '·  ${e.role?.label ?? 'No role set'}'
                         '${e.whatsappNumber.trim().isEmpty ? '' : '  ·  ${e.whatsappNumber}'}',
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 12,
+                        style: context.mlText.bodySmall.copyWith(
                           color: pal.textMuted,
                         ),
                       ),

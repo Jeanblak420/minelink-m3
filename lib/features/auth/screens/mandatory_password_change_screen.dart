@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/routing/app_router.dart';
 import 'package:flutter_application_1/core/utils/auth_error_message.dart';
 import 'package:flutter_application_1/core/utils/validators.dart';
@@ -117,11 +118,9 @@ class _MandatoryPasswordChangeScreenState
                     const SizedBox(height: 16),
                     Text(
                       'Set a new password',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: MlTokens.fsH2,
-                        fontWeight: FontWeight.w800,
+                      style: context.mlText.titleLarge.copyWith(
                         color: semantic.textStrong,
+                        fontWeight: FontWeight.w800,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -154,10 +153,7 @@ class _MandatoryPasswordChangeScreenState
                             child: Text(
                               'Your new password must be different from the temporary password '
                               'you just used to sign in.',
-                              style: TextStyle(
-                                fontFamily: MlTokens.fontSans,
-                                fontSize: 13,
-                                height: 1.4,
+                              style: context.mlText.bodyMedium.copyWith(
                                 color: semantic.textBody,
                               ),
                             ),
@@ -178,11 +174,8 @@ class _MandatoryPasswordChangeScreenState
                         padding: const EdgeInsets.all(12),
                         child: Text(
                           _inlineError!,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
+                          style: context.mlText.bodyMedium.copyWith(
                             color: errTone.fg,
-                            fontSize: 13,
-                            height: 1.35,
                           ),
                         ),
                       ),

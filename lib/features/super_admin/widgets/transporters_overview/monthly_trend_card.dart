@@ -31,7 +31,7 @@ class OvMonthlyTrendCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: t.s(
-              size: 10.5,
+              size: 11,
               weight: FontWeight.w600,
               color: t.inkMid,
               letterSpacing: 1.68,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/notifications/providers/notification_provider.dart';
 import 'package:flutter_application_1/features/notifications/models/notification_model.dart';
 import 'package:flutter_application_1/features/notifications/widgets/notification_card.dart';
@@ -129,12 +130,7 @@ class _NotificationManagementScreenState
           Expanded(
             child: Text(
               'This management screen shows all your notifications history. Unlike the bell icon, notifications here cannot be deleted and provide a persistent record.',
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: MlTokens.fsBodySm,
-                color: tone.fg,
-                height: 1.45,
-              ),
+              style: context.mlText.bodyMedium.copyWith(color: tone.fg),
             ),
           ),
         ],
