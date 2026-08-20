@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -384,7 +385,7 @@ class _ThemePreviewSwatch extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: MlShape.radiusMedium,
         border: Border.all(color: palette?.border ?? MlTokens.navy700),
       ),
       child: Column(

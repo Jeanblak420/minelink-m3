@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
@@ -239,11 +240,11 @@ class _ModeButton extends StatelessWidget {
     return Material(
       color: selected ? accent : s.surfaceCard,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: MlShape.radiusMedium,
         side: BorderSide(color: selected ? accent : s.borderStrong),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: MlShape.radiusMedium,
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
@@ -286,14 +287,14 @@ class _AccentSwatch extends StatelessWidget {
     return Tooltip(
       message: accent.label,
       child: InkWell(
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: MlShape.radiusMedium,
         onTap: onTap,
         child: Container(
           width: 32,
           height: 32,
           decoration: BoxDecoration(
             color: accent.color,
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: MlShape.radiusMedium,
             border: Border.all(
               width: 2.5,
               color: selected ? s.textStrong : Colors.transparent,

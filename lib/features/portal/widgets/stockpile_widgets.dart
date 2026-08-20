@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_entry.dart';
@@ -39,7 +41,7 @@ class StockpileCard extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: MlShape.radiusLargeIncreased,
         border: Border.all(color: PortalColors.accent, width: 2),
         boxShadow: [
           BoxShadow(
@@ -130,7 +132,7 @@ class _StockpileFillBar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: MlShape.radiusSmall,
           child: LinearProgressIndicator(
             value: frac,
             minHeight: 8,

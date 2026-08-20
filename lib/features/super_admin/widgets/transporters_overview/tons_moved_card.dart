@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 
 import 'charts.dart';
@@ -237,7 +238,7 @@ class _ChartBlock extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: t.calloutFill,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: MlShape.radiusSmall,
                           border:
                               Border.all(color: t.acc.withValues(alpha: 0.4)),
                           boxShadow: t.cardShadow,

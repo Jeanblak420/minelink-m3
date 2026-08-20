@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/portal/models/workflow_notification.dart';
@@ -113,7 +114,7 @@ class _NotifTile extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: PortalColors.accent.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: MlShape.radiusMedium,
             ),
             child: Icon(icon, size: 18, color: PortalColors.accent),
           ),

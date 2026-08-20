@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
@@ -66,13 +68,13 @@ class DispatchRouteCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: MlSemantic.of(context).surfaceCard,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: MlShape.radiusLarge,
         border: Border.all(color: MlSemantic.of(context).borderCard),
       ),
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: MlShape.radiusLarge,
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -131,7 +133,7 @@ class _MiniChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
         color: PortalColors.accent.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: MlShape.radiusLargeIncreased,
       ),
       child: Text(text,
           style: Theme.of(context)
@@ -167,7 +169,7 @@ class _DispatchStatusChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: c.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: MlShape.radiusLargeIncreased,
       ),
       child: Text(label,
           style: TextStyle(color: c, fontWeight: FontWeight.w700, fontSize: 12)),
@@ -472,7 +474,7 @@ class _MetricsStrip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         decoration: BoxDecoration(
           color: MlSemantic.of(context).surfaceCard,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: MlShape.radiusLarge,
           border: Border.all(color: MlSemantic.of(context).borderCard),
         ),
         child: Column(

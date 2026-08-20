@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/core/design/tokens/ml_rail_tokens.dart';
@@ -25,14 +26,14 @@ class MlHomeChip extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: MlShape.radiusMedium,
         onTap: onTap,
         child: Container(
           width: 38,
           height: 38,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: MlShape.radiusMedium,
             // Design: 1px accent-ink border (matches the glyph ink).
             border: Border.all(color: ink),
           ),

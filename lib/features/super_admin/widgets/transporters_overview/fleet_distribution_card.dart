@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 
 import 'charts.dart';
@@ -114,7 +115,7 @@ class _LegendRow extends StatelessWidget {
           height: 10,
           decoration: BoxDecoration(
             color: t.tone(slice.tone),
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: MlShape.radiusExtraSmall,
           ),
         ),
         const SizedBox(width: 8),

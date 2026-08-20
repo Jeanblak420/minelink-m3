@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
@@ -32,7 +33,7 @@ class OrderFillLine extends ConsumerWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: MlSemantic.of(context).surfaceCard,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: MlShape.radiusMedium,
             border: Border.all(color: MlSemantic.of(context).borderCard),
           ),
           child: Column(
@@ -61,7 +62,7 @@ class OrderFillLine extends ConsumerWidget {
               if (cap != null) ...[
                 const SizedBox(height: 8),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: MlShape.radiusSmall,
                   child: LinearProgressIndicator(
                     value: fill.fraction,
                     minHeight: 7,

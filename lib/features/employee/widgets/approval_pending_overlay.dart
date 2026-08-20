@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
@@ -79,7 +80,7 @@ class _ApprovalPendingOverlayState
             margin: const EdgeInsets.all(24.0),
             elevation: 8,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: MlShape.radiusLarge,
             ),
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -104,7 +105,7 @@ class _ApprovalPendingOverlayState
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: MlTone.transit.colors(Theme.of(context).brightness).bg,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: MlShape.radiusSmall,
                       border: Border.all(
                         color: MlTone.transit
                             .colors(Theme.of(context).brightness)
@@ -160,7 +161,7 @@ class _ApprovalPendingOverlayState
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: MlSemantic.of(context).surfaceSunken,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: MlShape.radiusSmall,
                         border:
                             Border.all(color: MlSemantic.of(context).borderSubtle),
                       ),

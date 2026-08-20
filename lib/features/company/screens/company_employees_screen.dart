@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
 
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
@@ -1138,7 +1139,7 @@ class _RegisterRowState extends State<_RegisterRow> {
         height: 40,
         decoration: BoxDecoration(
           color: widget.tone.well(brightness),
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: MlShape.radiusMedium,
           image: e.profilePhotoUrl != null
               ? DecorationImage(
                   image: CachedNetworkImageProvider(e.profilePhotoUrl!),
@@ -1213,7 +1214,7 @@ class _RegisterRowState extends State<_RegisterRow> {
                           decoration: BoxDecoration(
                             color: semantic.surfaceApp,
                             border: Border.all(color: semantic.divider),
-                            borderRadius: BorderRadius.circular(5),
+                            borderRadius: MlShape.radiusSmall,
                           ),
                           child: Text(
                             widget.code,
@@ -1260,7 +1261,7 @@ class _RegisterRowState extends State<_RegisterRow> {
               Tooltip(
                 message: _open ? 'Hide management' : 'Manage user & role',
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(7),
+                  borderRadius: MlShape.radiusSmall,
                   onTap: () => setState(() => _open = !_open),
                   child: Padding(
                     padding: const EdgeInsets.all(3),

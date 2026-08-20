@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -220,7 +221,7 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                             end: Alignment.bottomRight,
                             colors: [MlTokens.cyan400, MlTokens.cyan600],
                           ),
-                          borderRadius: BorderRadius.circular(13),
+                          borderRadius: MlShape.radiusLarge,
                         ),
                         child: const Icon(Icons.local_shipping_rounded,
                             size: 24, color: MlTokens.inkOnFill),
@@ -1086,7 +1087,7 @@ class _Banner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: MlTokens.accent.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: MlShape.radiusMedium,
       ),
       child: Row(
         children: [

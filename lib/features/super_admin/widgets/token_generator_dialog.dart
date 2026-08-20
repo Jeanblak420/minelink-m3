@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -145,7 +147,7 @@ class _TokenGeneratorDialogState extends ConsumerState<TokenGeneratorDialog> {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: MlTokens.orange500.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: MlShape.radiusSmall,
                 border: Border.all(color: MlTokens.orange500.withValues(alpha: 0.3)),
               ),
               child: const Row(
@@ -218,7 +220,7 @@ class _TokenGeneratorDialogState extends ConsumerState<TokenGeneratorDialog> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: MlShape.radiusSmall,
               ),
               child: SelectableText(_generatedToken!, style: const TextStyle(fontFamily: 'monospace', fontSize: 16)),
             ),

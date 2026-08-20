@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/layout/app_breakpoints.dart';
 import 'package:intl/intl.dart';
@@ -156,7 +157,7 @@ class FleetVehicleTable extends StatelessWidget {
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: MlShape.radiusExtraLarge,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
@@ -508,7 +509,7 @@ class FleetVehicleTable extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: MlShape.pill,
         gradient: LinearGradient(
           colors: !vehicle.isActive
               ? [MlTokens.slate400, MlTokens.slate500]

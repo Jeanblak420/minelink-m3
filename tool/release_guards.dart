@@ -543,6 +543,28 @@ final guards = <Guard>[
     plantLine: 'final delta = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);',
   ),
   Guard(
+    id: 'no-off-scale-corner-radius',
+    why: 'a corner radius written as a number is a guess at the shape scale. '
+        'Measured across lib/ on 2026-08-20: 320 sites carrying TWENTY-FOUR '
+        'distinct values — 1, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, '
+        '14, 15, 16, 18, 20, 24, 26, 28, 30 and 999. That is not a design '
+        'system, it is 320 independent guesses at one, and it is the single '
+        'most visible reason two MineLink screens do not look like the same '
+        'product. `MlShape` names the seven M3 steps; use them. The token '
+        'layer is exempt because it is the layer that DEFINES the scale, and '
+        'a definition written in terms of itself is circular — the same '
+        'exemption, for the same reason, as the two colour guards.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    exemptPath: RegExp(r'lib/core/design/tokens/'),
+    pattern: RegExp(r'Radius\.circular\(\s*[0-9]'),
+    // Prose about the rule has to be able to quote what the rule forbids.
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'planted.dart',
+    plantLine: 'borderRadius: BorderRadius.circular(11),',
+  ),
+  Guard(
     id: 'test-renders-under-the-app-theme',
     why: 'a bare `MaterialApp` in a test renders in stock Material\'s type '
         'scale and stock Material\'s font family — a measurement of text the '

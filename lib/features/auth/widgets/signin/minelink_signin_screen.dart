@@ -14,6 +14,7 @@
 // 2027" reads better than "Request failed".
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
 
 import 'package:flutter/gestures.dart' show TapGestureRecognizer;
@@ -507,7 +508,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
               MlTokens.overlayLight.withValues(alpha: 0.02),
             ],
           ),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: MlShape.radiusLargeIncreased,
           border: Border.all(color: MlAuth.line2),
         ),
         child: Image.asset(MlAuth.iconAsset,
@@ -702,7 +703,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
 
   Widget _rememberToggle() => InkWell(
         onTap: () => setState(() => _remember = !_remember),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: MlShape.radiusSmall,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
           child: Row(
@@ -722,7 +723,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
                   color: _remember
                       ? null
                       : MlTokens.overlayLight.withValues(alpha: 0.03),
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: MlShape.radiusSmall,
                   border: Border.all(
                     color: _remember ? Colors.transparent : MlAuth.lineStrong,
                   ),

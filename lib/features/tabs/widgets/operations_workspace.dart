@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+
 import 'package:flutter/material.dart';
 
 class WorkspaceMetric {
@@ -84,7 +86,7 @@ class OperationsWorkspace extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: MlShape.radiusExtraLarge,
               gradient: LinearGradient(
                 colors: [
                   Color.alphaBlend(
@@ -146,7 +148,7 @@ class OperationsWorkspace extends StatelessWidget {
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
                       color: scheme.surface.withAlpha(190),
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: MlShape.radiusExtraLarge,
                       border: Border.all(
                         color: scheme.outlineVariant.withAlpha(150),
                       ),
@@ -219,7 +221,7 @@ class OperationsWorkspace extends StatelessWidget {
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
                 color: scheme.surface.withAlpha(190),
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: MlShape.radiusExtraLarge,
                 border: Border.all(color: scheme.outlineVariant.withAlpha(150)),
               ),
               child: Column(
@@ -253,7 +255,7 @@ class OperationsWorkspace extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: scheme.surface.withAlpha(190),
-                      borderRadius: BorderRadius.circular(26),
+                      borderRadius: MlShape.radiusExtraLarge,
                       border: Border.all(
                         color: scheme.outlineVariant.withAlpha(150),
                       ),
@@ -265,7 +267,7 @@ class OperationsWorkspace extends StatelessWidget {
                         height: 44,
                         decoration: BoxDecoration(
                           color: scheme.primaryContainer.withAlpha(220),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: MlShape.radiusLarge,
                         ),
                         child: Icon(item.icon, color: scheme.primary),
                       ),
@@ -279,7 +281,7 @@ class OperationsWorkspace extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: scheme.secondaryContainer.withAlpha(200),
-                                borderRadius: BorderRadius.circular(999),
+                                borderRadius: MlShape.pill,
                               ),
                               child: Text(
                                 item.trailing!,
@@ -314,7 +316,7 @@ class _WorkspaceChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface.withAlpha(185),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: MlShape.pill,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
@@ -138,7 +140,7 @@ class VehicleDetailsFields extends StatelessWidget {
         const SizedBox(height: 12),
         InkWell(
           onTap: onPickExpiryDate,
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: MlShape.radiusExtraSmall,
           child: InputDecorator(
             decoration: const InputDecoration(
               labelText: 'Licence disk expiry',
@@ -409,7 +411,7 @@ class _SectionHeader extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: MlShape.radiusMedium,
           ),
           child: Icon(icon, size: 20, color: color),
         ),

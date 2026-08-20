@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_application_1/core/config/supabase_config.dart';
@@ -104,7 +105,7 @@ class _ChangePasswordSectionState extends State<ChangePasswordSection> {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: MlShape.radiusLarge,
         side: BorderSide(color: cs.outlineVariant.withAlpha(180)),
       ),
       child: Padding(

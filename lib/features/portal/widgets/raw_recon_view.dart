@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -693,7 +694,7 @@ class _ExcelReconTable extends StatelessWidget {
     final display = c.code && value != '—' ? _breakable(value) : value;
     return InkWell(
       onTap: () => onWaybillTap!(r),
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: MlShape.radiusExtraSmall,
       child: Text(
         display,
         softWrap: true,
@@ -714,7 +715,7 @@ class _ExcelReconTable extends StatelessWidget {
   Widget _podLink(String value, RawReconRow r) {
     return InkWell(
       onTap: () => onPodTap!(r),
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: MlShape.radiusExtraSmall,
       child: Text(
         value,
         softWrap: true,

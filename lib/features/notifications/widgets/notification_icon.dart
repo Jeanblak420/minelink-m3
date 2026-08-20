@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/notifications/providers/notification_provider.dart';
@@ -23,7 +24,7 @@ class NotificationIcon extends ConsumerWidget {
               context: context,
               isScrollControlled: true,
               shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(MlShape.large)),
               ),
               builder: (context) => const NotificationScreen(),
             );
@@ -37,7 +38,7 @@ class NotificationIcon extends ConsumerWidget {
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 color: MlTokens.red600,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: MlShape.radiusMedium,
               ),
               constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(

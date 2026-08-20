@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+
 import 'dart:typed_data';
 
 import 'package:desktop_drop/desktop_drop.dart';
@@ -162,7 +164,7 @@ class _MultiFileDropPickerState extends State<MultiFileDropPicker> {
           },
           child: InkWell(
             onTap: widget.enabled ? _browse : null,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: MlShape.radiusMedium,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 14),
@@ -170,7 +172,7 @@ class _MultiFileDropPickerState extends State<MultiFileDropPicker> {
                 color: _dragging
                     ? scheme.primary.withValues(alpha: 0.08)
                     : scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: MlShape.radiusMedium,
                 border: Border.all(
                   color: borderColor,
                   width: _dragging ? 2 : 1,

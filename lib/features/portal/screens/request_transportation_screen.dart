@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
@@ -506,7 +508,7 @@ class _SentBackBanner extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: scheme.tertiaryContainer.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
         border: Border.all(color: scheme.outlineVariant),
       ),
       child: Row(

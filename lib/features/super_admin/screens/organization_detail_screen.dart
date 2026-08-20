@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -72,7 +73,7 @@ class _EmployeeThumb extends StatelessWidget {
     final url = imageUrl?.trim();
     if (url != null && url.isNotEmpty) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: MlShape.radiusExtraLarge,
         child: CachedNetworkImage(
           imageUrl: url,
           width: dim,
@@ -707,7 +708,7 @@ class _UsersTab extends ConsumerWidget {
                     margin: const EdgeInsets.only(bottom: 8),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: MlShape.radiusMedium,
                       side: BorderSide(
                         color: isSuspended
                             ? MlTokens.red600.withValues(alpha: 0.4)
@@ -747,7 +748,7 @@ class _UsersTab extends ConsumerWidget {
                                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                             decoration: BoxDecoration(
                                               color: MlTokens.red600.withValues(alpha: 0.1),
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius: MlShape.radiusSmall,
                                             ),
                                             child: const Text(
                                               'Suspended',
@@ -1433,7 +1434,7 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
                           margin: const EdgeInsets.only(bottom: 8),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: MlShape.radiusMedium,
                             side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                           ),
                           child: ExpansionTile(

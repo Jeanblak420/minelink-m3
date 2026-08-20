@@ -19,6 +19,7 @@
 // primitives the Transporters overview uses.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -262,7 +263,7 @@ class _OrgCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: t.panel,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: MlShape.radiusMedium,
           border: Border.all(
             color: hovered ? tone.withValues(alpha: 0.30) : t.line2,
           ),
@@ -361,7 +362,7 @@ class _PendingCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: t.panel,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: MlShape.radiusMedium,
           border: Border.all(
             color: hovered ? tone.withValues(alpha: 0.30) : t.line2,
           ),
@@ -383,7 +384,7 @@ class _PendingCard extends StatelessWidget {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: t.warn,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: MlShape.pill,
                       border: Border.all(color: t.panel, width: 2),
                     ),
                     child: Text('${req.count}',
@@ -452,7 +453,7 @@ class _NewBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: t.good.withValues(alpha: 0.14),
         border: Border.all(color: t.good.withValues(alpha: 0.3)),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: MlShape.pill,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -505,7 +506,7 @@ class _RegistryTile extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(18, 15, 16, 15),
         decoration: BoxDecoration(
           color: t.panel,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: MlShape.radiusMedium,
           border: Border.all(
               color: hovered ? tone.withValues(alpha: 0.3) : t.line2),
         ),
@@ -730,7 +731,7 @@ class _ExpiredBanner extends StatelessWidget {
             ],
             stops: const [0, 0.45, 1],
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: MlShape.radiusMedium,
           border: Border.all(color: t.line2),
         ),
         child: Row(
@@ -781,7 +782,7 @@ class _ExpiredBanner extends StatelessWidget {
               decoration: BoxDecoration(
                 color: t.warn.withValues(alpha: hovered ? 0.24 : 0.16),
                 border: Border.all(color: t.warn.withValues(alpha: 0.4)),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: MlShape.radiusSmall,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -885,7 +886,7 @@ class _ActionButtonState extends State<_ActionButton> {
             border: Border.all(
               color: widget.primary ? t.accent.withValues(alpha: 0.34) : t.line2,
             ),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: MlShape.radiusMedium,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -1057,7 +1058,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                                     color: sel
                                         ? t.accent.withValues(alpha: 0.35)
                                         : t.line),
-                                borderRadius: BorderRadius.circular(7),
+                                borderRadius: MlShape.radiusSmall,
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -1186,7 +1187,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
         decoration: BoxDecoration(
           color: hovered ? t.inkHi.withValues(alpha: 0.025) : Colors.transparent,
           border: Border.all(color: t.line),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: MlShape.radiusMedium,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1205,7 +1206,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                       end: Alignment.bottomRight,
                       colors: r.avatarColors,
                     ),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: MlShape.radiusMedium,
                   ),
                   child: Text(r.initials,
                       style: const TextStyle(
@@ -1398,7 +1399,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                         end: Alignment.bottomRight,
                         colors: r.avatarColors,
                       ),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: MlShape.radiusMedium,
                     ),
                     child: Text(r.initials,
                         style: const TextStyle(
@@ -1572,7 +1573,7 @@ class _ManageAllState extends State<_ManageAll> {
           decoration: BoxDecoration(
             color: t.accent.withValues(alpha: _h ? 0.16 : 0.08),
             border: Border.all(color: t.accent.withValues(alpha: 0.25)),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: MlShape.radiusSmall,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

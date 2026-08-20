@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -222,7 +223,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                   constraints: const BoxConstraints(maxHeight: 150),
                   decoration: BoxDecoration(
                     border: Border.all(color: scheme.outlineVariant),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: MlShape.radiusSmall,
                   ),
                   child: ListView(
                     shrinkWrap: true,
@@ -266,7 +267,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
               const SizedBox(height: 6),
               Expanded(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: MlShape.radiusMedium,
                   child: FlutterMap(
                     mapController: _mapController,
                     options: MapOptions(

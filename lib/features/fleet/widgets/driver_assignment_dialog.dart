@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -187,7 +188,7 @@ class _DriverAssignmentDialogState
                         color: scheme.surfaceContainerHighest.withValues(
                           alpha: 0.5,
                         ),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: MlShape.radiusMedium,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

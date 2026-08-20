@@ -10,6 +10,7 @@
 // reason it works on this data.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
@@ -138,7 +139,7 @@ class MlShortTermChart extends StatelessWidget {
           height: 10,
           decoration: BoxDecoration(
             color: outline ? null : c,
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: MlShape.radiusExtraSmall,
             border: outline
                 ? Border.all(
                     color: c,
@@ -209,7 +210,7 @@ class _ShortTermPainter extends CustomPainter {
         final ty = y(m.target);
         final rect = RRect.fromRectAndRadius(
           Rect.fromLTWH(cx - gw / 2, ty, gw, size.height - ty),
-          const Radius.circular(3),
+          const Radius.circular(MlShape.extraSmall),
         );
         canvas.drawRRect(
           rect,
@@ -240,7 +241,7 @@ class _ShortTermPainter extends CustomPainter {
         canvas.drawRRect(
           RRect.fromRectAndRadius(
             Rect.fromLTWH(cx - aw / 2, ay, aw, size.height - ay),
-            const Radius.circular(2.5),
+            const Radius.circular(MlShape.extraSmall),
           ),
           Paint()
             ..color = mlOutcomeColor(t, m.outcome)
@@ -371,7 +372,7 @@ class _HorizonPainter extends CustomPainter {
           outcome == MlTargetOutcome.none) {
         final rect = RRect.fromRectAndRadius(
           Rect.fromLTWH(cx - bw / 2, size.height - 26, bw, 26),
-          const Radius.circular(4),
+          const Radius.circular(MlShape.extraSmall),
         );
         canvas.drawRRect(
           rect,
@@ -389,7 +390,7 @@ class _HorizonPainter extends CustomPainter {
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(cx - bw / 2, by, bw, size.height - by),
-          const Radius.circular(4),
+          const Radius.circular(MlShape.extraSmall),
         ),
         Paint()..color = color.withValues(alpha: 0.9),
       );

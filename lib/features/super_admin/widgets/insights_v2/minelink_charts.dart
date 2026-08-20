@@ -14,6 +14,7 @@
 //   MlMeter          thin progress bar                 (utilisation / seats)
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'dart:math' as math;
@@ -379,7 +380,7 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
           decoration: BoxDecoration(
             color: t.bg0.withValues(alpha: 0.94),
             border: Border.all(color: t.lineStrong),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: MlShape.radiusMedium,
             boxShadow: [
               BoxShadow(
                 color: MlTokens.overlayDark.withValues(alpha: t.isDark ? 0.9 : 0.18),
@@ -533,7 +534,7 @@ class _LatestPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: t.bg0.withValues(alpha: 0.92),
         border: Border.all(color: t.accent.withValues(alpha: 0.4)),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: MlShape.radiusSmall,
         boxShadow: [
           BoxShadow(
             color: t.accent.withValues(alpha: 0.10),
@@ -851,7 +852,7 @@ class MlRidge extends StatelessWidget {
                 constraints: const BoxConstraints(minWidth: 3),
                 height: math.max(3, (data[i] / max) * height),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(1),
+                  borderRadius: MlShape.radiusExtraSmall,
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,

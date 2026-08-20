@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/chat/services/attachment_url.dart';
@@ -675,7 +676,7 @@ class _WinBtn extends StatelessWidget {
       message: tip,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(7),
+        borderRadius: MlShape.radiusSmall,
         hoverColor: pal.headerText.withValues(alpha: 0.12),
         child: Padding(
           padding: const EdgeInsets.all(7),
@@ -894,7 +895,7 @@ class _SupportFabState extends State<_SupportFab> {
             padding: EdgeInsets.symmetric(horizontal: _hover ? 16 : 13),
             decoration: BoxDecoration(
               color: pal.accent,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: MlShape.radiusLarge,
               boxShadow: [
                 BoxShadow(
                   color: pal.accent.withValues(alpha: _hover ? 0.5 : 0.35),
@@ -1085,7 +1086,7 @@ class _ChatRowHoverState extends State<_ChatRowHover> {
                 decoration: BoxDecoration(
                   color: accent,
                   borderRadius:
-                      const BorderRadius.horizontal(right: Radius.circular(3)),
+                      const BorderRadius.horizontal(right: Radius.circular(MlShape.extraSmall)),
                   boxShadow: active
                       ? [
                           BoxShadow(
@@ -1300,7 +1301,7 @@ class _ConversationsList extends ConsumerWidget {
                                     // Red unread badge (matches the disc) — kept
                                     // distinct from the blue "read" tick.
                                     color: MlChatTone.offline,
-                                    borderRadius: BorderRadius.circular(999),
+                                    borderRadius: MlShape.pill,
                                   ),
                                   child: Text(
                                     c.unreadCount > 99
@@ -2020,7 +2021,7 @@ class _ThreadViewState extends ConsumerState<_ThreadView> {
                         margin: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: pal.accent.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: MlShape.radiusLarge,
                           border: Border.all(color: pal.accent, width: 2),
                         ),
                         alignment: Alignment.center,
@@ -2265,7 +2266,7 @@ class _DateSeparator extends StatelessWidget {
           decoration: BoxDecoration(
             color:
                 Color.alphaBlend(pal.accent.withValues(alpha: 0.08), pal.body),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: MlShape.radiusLargeIncreased,
             border: Border.all(color: pal.divider),
           ),
           child: Text(
@@ -2407,7 +2408,7 @@ class _UploadingChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: pal.accent,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: MlShape.pill,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -2476,7 +2477,7 @@ class _MessageText extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
               decoration: BoxDecoration(
                 color: chipBg,
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: MlShape.radiusSmall,
               ),
               child: Text('@$display',
                   style: TextStyle(
@@ -2558,7 +2559,7 @@ class _ReplyQuote extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: MlShape.radiusSmall,
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -2567,7 +2568,7 @@ class _ReplyQuote extends StatelessWidget {
               width: 3,
               decoration: BoxDecoration(
                 color: barColor,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: MlShape.radiusExtraSmall,
               ),
             ),
             const SizedBox(width: 8),
@@ -2640,8 +2641,8 @@ class _Bubble extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(20),
-            topRight: const Radius.circular(20),
+            topLeft: const Radius.circular(MlShape.largeIncreased),
+            topRight: const Radius.circular(MlShape.largeIncreased),
             bottomLeft: Radius.circular(mine ? 20 : 4),
             bottomRight: Radius.circular(mine ? 4 : 20),
           ),
@@ -2781,7 +2782,7 @@ class _Bubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: fg.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: MlShape.radiusMedium,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -2818,7 +2819,7 @@ class _Bubble extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 2),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: MlShape.radiusMedium,
           child: GestureDetector(
             onTap: () =>
                 launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
@@ -2862,7 +2863,7 @@ class _Bubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: fg.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: MlShape.radiusMedium,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -3011,7 +3012,7 @@ class _BubbleRowState extends State<_BubbleRow> {
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
         color: pal.body,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: MlShape.pill,
         border: Border.all(color: pal.divider),
         boxShadow: MlTokens.shadowMd,
       ),
@@ -3023,7 +3024,7 @@ class _BubbleRowState extends State<_BubbleRow> {
                     widget.onReact(e);
                     setState(() => _pickerOpen = false);
                   },
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: MlShape.pill,
                   child: Padding(
                     padding: const EdgeInsets.all(6),
                     child: Text(e, style: const TextStyle(fontSize: 20)),
@@ -3064,7 +3065,7 @@ class _BubbleRowState extends State<_BubbleRow> {
                       color: reacted
                           ? pal.accent.withValues(alpha: 0.18)
                           : pal.tabSelectedBg,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: MlShape.pill,
                       border:
                           Border.all(color: reacted ? pal.accent : pal.divider),
                     ),
@@ -3719,7 +3720,7 @@ class _ComposerState extends ConsumerState<_Composer> {
               itemCount: _kEmojis.length,
               itemBuilder: (context, i) => InkWell(
                 onTap: () => _insert(_kEmojis[i]),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: MlShape.radiusSmall,
                 child: Center(
                   child: Text(_kEmojis[i],
                       style: const TextStyle(fontSize: 20)),
@@ -3747,7 +3748,7 @@ class _ComposerState extends ConsumerState<_Composer> {
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
                       color: selected ? pal.accent : pal.tabSelectedBg,
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: MlShape.pill,
                       border: Border.all(
                           color: selected ? pal.accent : pal.divider),
                     ),
@@ -4456,7 +4457,7 @@ class _ThemeTile extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: MlShape.radiusMedium,
           border: Border.all(
               color: selected ? p.accent : p.divider, width: selected ? 2 : 1),
           boxShadow: selected
@@ -4511,7 +4512,7 @@ class _ThemeTile extends StatelessWidget {
   Widget _swatch(String t, Color bg, Color fg) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
         decoration:
-            BoxDecoration(color: bg, borderRadius: BorderRadius.circular(6)),
+            BoxDecoration(color: bg, borderRadius: MlShape.radiusSmall),
         child: Text(t,
             style: TextStyle(
                 fontSize: 10, fontWeight: FontWeight.w700, color: fg)),
@@ -4528,7 +4529,7 @@ class _BubblePreview extends StatelessWidget {
       decoration: BoxDecoration(
         color: pal.body,
         border: Border.all(color: pal.divider),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -4539,10 +4540,10 @@ class _BubblePreview extends StatelessWidget {
             decoration: BoxDecoration(
               color: pal.incomingBubble,
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-                bottomLeft: Radius.circular(4),
+                topLeft: Radius.circular(MlShape.large),
+                topRight: Radius.circular(MlShape.large),
+                bottomRight: Radius.circular(MlShape.large),
+                bottomLeft: Radius.circular(MlShape.extraSmall),
               ),
             ),
             child: Column(
@@ -4580,10 +4581,10 @@ class _BubblePreview extends StatelessWidget {
               decoration: BoxDecoration(
                 color: pal.outgoingBubble,
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                  bottomLeft: Radius.circular(16),
-                  bottomRight: Radius.circular(4),
+                  topLeft: Radius.circular(MlShape.large),
+                  topRight: Radius.circular(MlShape.large),
+                  bottomLeft: Radius.circular(MlShape.large),
+                  bottomRight: Radius.circular(MlShape.extraSmall),
                 ),
               ),
               child: Column(
@@ -4622,7 +4623,7 @@ class _Toggle extends StatelessWidget {
         height: 26,
         decoration: BoxDecoration(
           color: on ? pal.accent : pal.divider,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: MlShape.pill,
         ),
         child: AnimatedAlign(
           duration: MlTokens.durFast,
@@ -4668,7 +4669,7 @@ class _SoundChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
           color: selected ? pal.accent : pal.tabSelectedBg,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: MlShape.pill,
           border: Border.all(color: selected ? pal.accent : pal.divider),
         ),
         child: Row(
@@ -4754,7 +4755,7 @@ class _PerContactSounds extends ConsumerWidget {
                           value: prefs.perContactSound[c.userId] ?? '',
                           isDense: true,
                           dropdownColor: pal.header,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: MlShape.radiusMedium,
                           style:
                               TextStyle(color: pal.bodyText, fontSize: 12.5),
                           iconEnabledColor: pal.accent,
@@ -4892,7 +4893,7 @@ class _Pill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: MlShape.pill,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -5105,7 +5106,7 @@ class _StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration:
-          BoxDecoration(color: c, borderRadius: BorderRadius.circular(999)),
+          BoxDecoration(color: c, borderRadius: MlShape.pill),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -5151,7 +5152,7 @@ class _TicketRow extends StatelessWidget {
               height: 38,
               decoration: BoxDecoration(
                 color: pal.tabSelectedBg,
-                borderRadius: BorderRadius.circular(11),
+                borderRadius: MlShape.radiusMedium,
               ),
               alignment: Alignment.center,
               child: Icon(Icons.confirmation_number_outlined,
@@ -5246,10 +5247,10 @@ class _SupportHome extends ConsumerWidget {
                 width: double.infinity,
                 child: Material(
                   color: pal.accent,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: MlShape.radiusMedium,
                   child: InkWell(
                     onTap: onNew,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: MlShape.radiusMedium,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -5293,7 +5294,7 @@ class _SupportHome extends ConsumerWidget {
                           color: n.read
                               ? Colors.transparent
                               : pal.tabSelectedBg,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: MlShape.radiusMedium,
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -5481,7 +5482,7 @@ class _InboxTogglesState extends ConsumerState<_InboxToggles> {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: pal.tabSelectedBg,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: MlShape.radiusMedium,
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -5659,10 +5660,10 @@ class _NewTicketFormState extends ConsumerState<_NewTicketForm> {
                 height: 46,
                 child: Material(
                   color: pal.accent,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: MlShape.radiusMedium,
                   child: InkWell(
                     onTap: _sending ? null : _send,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: MlShape.radiusMedium,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -5859,7 +5860,7 @@ class _TicketViewState extends ConsumerState<_TicketView> {
                   margin: const EdgeInsets.only(bottom: 14),
                   decoration: BoxDecoration(
                     border: Border.all(color: pal.divider),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: MlShape.radiusMedium,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -5924,7 +5925,7 @@ class _TicketViewState extends ConsumerState<_TicketView> {
                   padding: const EdgeInsets.all(11),
                   decoration: BoxDecoration(
                     color: pal.tabSelectedBg,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: MlShape.radiusMedium,
                   ),
                   child: Row(
                     children: [
@@ -5987,7 +5988,7 @@ class _TicketViewState extends ConsumerState<_TicketView> {
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: MlTokens.green600.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: MlShape.pill,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -6023,10 +6024,10 @@ class _TicketViewState extends ConsumerState<_TicketView> {
           height: 46,
           child: Material(
             color: pal.accent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: MlShape.radiusMedium,
             child: InkWell(
               onTap: _busy ? null : _accept,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: MlShape.radiusMedium,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 
 import 'charts.dart';
@@ -74,7 +75,7 @@ class _Identity extends StatelessWidget {
           height: 48,
           padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: MlShape.radiusLarge,
             gradient: SweepGradient(
               startAngle: 3.66, // 210°
               endAngle: 3.66 + 6.2832,
@@ -90,7 +91,7 @@ class _Identity extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: t.avatarInner,
-              borderRadius: BorderRadius.circular(13),
+              borderRadius: MlShape.radiusLarge,
             ),
             child: Text(
               row.code,

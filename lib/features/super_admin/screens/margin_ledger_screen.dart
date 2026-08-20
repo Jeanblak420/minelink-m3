@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -281,7 +282,7 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
       tooltip: 'Filter by the mine where these routes take place',
       color: semantic.surfaceCard,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
         side: BorderSide(color: semantic.borderCard),
       ),
       onSelected: (v) => setState(() => _mineFilter = v.isEmpty ? null : v),
@@ -367,7 +368,7 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
           color: focused
               ? accent.withValues(alpha: 0.12)
               : semantic.surfaceCard,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: MlShape.pill,
           border: Border.all(
             color: focused
                 ? accent.withValues(alpha: 0.55)

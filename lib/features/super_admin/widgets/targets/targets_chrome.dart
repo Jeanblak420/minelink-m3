@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screens_core.dart';
@@ -227,7 +228,7 @@ class TargetsBand extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.12),
           border: Border.all(color: color.withValues(alpha: 0.34)),
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: MlShape.radiusSmall,
         ),
         child: Text(
           label,
@@ -276,7 +277,7 @@ class TargetsScopePill extends StatelessWidget {
           border: Border.all(
             color: selected ? t.accent.withValues(alpha: 0.45) : t.line,
           ),
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: MlShape.radiusMedium,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

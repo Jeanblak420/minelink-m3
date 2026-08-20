@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 
 import 'overview_models.dart';
@@ -155,7 +156,7 @@ class _GhostButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: MlShape.radiusSmall,
             border: Border.all(color: t.line2),
           ),
           child: Text(label, style: t.s(size: 11, color: t.inkMid)),

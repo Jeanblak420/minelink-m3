@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -1175,7 +1176,7 @@ class _DriverNavigationScreenState
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
       decoration: BoxDecoration(
         color: _navy,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: MlShape.radiusLarge,
         boxShadow: const [
           BoxShadow(
               color: MlTokens.navyShadowSoft,

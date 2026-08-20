@@ -11,6 +11,7 @@
 // gives main ≈ 1176 and aside ≈ 756, with the fleet card pinned at 320.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 
 import 'fleet_distribution_card.dart';
@@ -275,7 +276,7 @@ class _FilterChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           decoration: BoxDecoration(
             color: active ? t.acc.withValues(alpha: 0.10) : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: MlShape.radiusSmall,
             border: Border.all(
               color: active ? t.acc.withValues(alpha: 0.4) : t.line2,
             ),

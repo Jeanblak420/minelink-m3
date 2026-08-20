@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -227,11 +228,11 @@ class _OrganizationManagementScreenState
                     fillColor: s.surfaceSunken,
                     contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: MlShape.radiusMedium,
                       borderSide: BorderSide(color: s.borderCard),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: MlShape.radiusMedium,
                       borderSide: BorderSide(color: s.borderCard),
                     ),
                   ),
@@ -452,7 +453,7 @@ class _OrganizationManagementScreenState
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: tc.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: MlShape.radiusMedium,
                       border: Border.all(color: tc.withValues(alpha: 0.28)),
                     ),
                     child: Icon(_typeIcon(type), size: 17, color: tc),
@@ -502,7 +503,7 @@ class _OrganizationManagementScreenState
                   ),
                   decoration: BoxDecoration(
                     color: s.surfaceSunken,
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: MlShape.pill,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -645,7 +646,7 @@ class _OrganizationManagementScreenState
       padding: EdgeInsets.symmetric(horizontal: dense ? 10 : 12),
       decoration: BoxDecoration(
         color: s.surfaceCard,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: MlShape.radiusMedium,
         border: Border.all(color: s.borderCard),
       ),
       child: DropdownButtonHideUnderline(
@@ -657,7 +658,7 @@ class _OrganizationManagementScreenState
           // With the cap above, this is what makes the label ellipsize inside
           // the box instead of pushing past it.
           isExpanded: true,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: MlShape.radiusMedium,
           icon: Icon(Icons.expand_more, size: 18, color: s.textMuted),
           style: TextStyle(
             fontFamily: MlTokens.fontSans,
@@ -681,16 +682,16 @@ class _OrganizationManagementScreenState
       opacity: enabled ? 1 : 0.4,
       child: Material(
         color: s.surfaceCard,
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: MlShape.radiusMedium,
         child: InkWell(
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: MlShape.radiusMedium,
           onTap: enabled ? onTap : null,
           child: Container(
             width: 34,
             height: 34,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: MlShape.radiusMedium,
               border: Border.all(color: s.borderCard),
             ),
             child: Icon(icon, size: 18, color: s.textBody),
@@ -709,9 +710,9 @@ class _OrganizationManagementScreenState
     const accent = MlTokens.accent;
     return Material(
       color: selected ? accent : s.surfaceCard,
-      borderRadius: BorderRadius.circular(9),
+      borderRadius: MlShape.radiusMedium,
       child: InkWell(
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: MlShape.radiusMedium,
         onTap: onTap,
         child: Container(
           constraints: const BoxConstraints(minWidth: 34),
@@ -719,7 +720,7 @@ class _OrganizationManagementScreenState
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: MlShape.radiusMedium,
             border: Border.all(color: selected ? accent : s.borderCard),
           ),
           child: Text(

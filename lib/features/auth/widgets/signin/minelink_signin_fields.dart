@@ -10,6 +10,7 @@
 // retype a figure the server has already told them is wrong.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -696,7 +697,7 @@ class MlOtpRowState extends State<MlOtpRow> {
                         : filled
                             ? MlAuth.good.withValues(alpha: 0.06)
                             : MlTokens.overlayLight.withValues(alpha: 0.03),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: MlShape.radiusMedium,
                     border: Border.all(
                       color: focused
                           ? MlAuth.accent.withValues(alpha: 0.7)

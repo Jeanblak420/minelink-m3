@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
 import 'package:intl/intl.dart';
@@ -34,7 +35,7 @@ class OverviewHeroTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final radius = BorderRadius.circular(20);
+    final radius = MlShape.radiusLargeIncreased;
     final fill = MlSemantic.of(context).surfaceCard;
     final deep = Color.alphaBlend(
       PortalColors.accent.withValues(alpha: muted ? 0.05 : 0.16),
@@ -56,7 +57,7 @@ class OverviewHeroTile extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: MlSemantic.of(context).surfaceSunken,
-                    borderRadius: BorderRadius.circular(11),
+                    borderRadius: MlShape.radiusMedium,
                     border: Border.all(color: MlSemantic.of(context).borderCard),
                   ),
                   child: Icon(icon, color: PortalColors.accent, size: 20),
@@ -85,7 +86,7 @@ class OverviewHeroTile extends StatelessWidget {
             width: 44,
             decoration: BoxDecoration(
               color: PortalColors.accent.withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(3),
+              borderRadius: MlShape.radiusExtraSmall,
             ),
           ),
           const SizedBox(height: 16),
@@ -139,7 +140,7 @@ class OverviewPlaceholderBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: MlShape.radiusLargeIncreased,
         border: Border.all(color: MlSemantic.of(context).borderCard),
       ),
       child: Row(
@@ -418,7 +419,7 @@ class RequestBuyersCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(20);
+    final radius = MlShape.radiusLargeIncreased;
     return ClipRRect(
       borderRadius: radius,
       child: DecoratedBox(

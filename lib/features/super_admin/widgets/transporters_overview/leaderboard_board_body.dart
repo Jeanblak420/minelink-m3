@@ -23,6 +23,7 @@
 //     because the period control can put a quarter or a year behind it.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -171,7 +172,7 @@ class _Header extends StatelessWidget {
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: t.overlay(0.02),
-              borderRadius: BorderRadius.circular(11),
+              borderRadius: MlShape.radiusMedium,
               border: Border.all(color: t.line2),
             ),
             child: Wrap(
@@ -309,7 +310,7 @@ class _PeriodChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           decoration: BoxDecoration(
             color: active ? t.acc.withValues(alpha: 0.12) : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: MlShape.radiusSmall,
             border: Border.all(
               color:
                   active ? t.acc.withValues(alpha: 0.30) : Colors.transparent,
@@ -357,7 +358,7 @@ class _OutlineButton extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 34),
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: MlShape.radiusMedium,
               border: Border.all(color: t.line2),
             ),
             child: Row(
@@ -409,7 +410,7 @@ class _KpiTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       decoration: BoxDecoration(
         color: t.overlay(0.025),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: MlShape.radiusLarge,
         border: Border.all(color: t.line),
       ),
       child: Column(
@@ -506,7 +507,7 @@ class _LeaderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = tokens;
-    final radius = BorderRadius.circular(20);
+    final radius = MlShape.radiusLargeIncreased;
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
@@ -568,7 +569,7 @@ class _LeaderCard extends StatelessWidget {
                           height: 38,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: MlShape.radiusMedium,
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -690,7 +691,7 @@ class _RunnerUpCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: t.overlay(0.025),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: MlShape.radiusLargeIncreased,
         border: Border.all(color: t.line),
       ),
       child: Column(
@@ -706,7 +707,7 @@ class _RunnerUpCard extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: t.overlay(0.05),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: MlShape.radiusMedium,
                   border: Border.all(color: t.line2),
                 ),
                 child: Text(
@@ -1081,7 +1082,7 @@ class _BodyRow extends StatelessWidget {
           height: 26,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: MlShape.radiusSmall,
             gradient: leader
                 ? LinearGradient(
                     begin: Alignment.topLeft,

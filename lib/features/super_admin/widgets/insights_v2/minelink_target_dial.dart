@@ -12,6 +12,7 @@
 // still be focused and puzzled over; an absent one cannot.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -149,7 +150,7 @@ class _MlTargetDialState extends State<MlTargetDial> {
         color: widget.highlighted
             ? t.accent.withValues(alpha: 0.06)
             : t.inkHi.withValues(alpha: 0.015),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
         border: Border.all(
           color: widget.highlighted
               ? t.accent.withValues(alpha: 0.38)
@@ -160,7 +161,7 @@ class _MlTargetDialState extends State<MlTargetDial> {
       foregroundDecoration: widget.editable
           ? null
           : BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: MlShape.radiusMedium,
               border: Border.all(color: t.line),
             ),
       child: Column(
@@ -356,7 +357,7 @@ class _MlTargetDialState extends State<MlTargetDial> {
                     ? t.accent.withValues(alpha: 0.16)
                     : t.inkHi.withValues(alpha: 0.04),
                 border: Border.all(color: t.line2),
-                borderRadius: BorderRadius.circular(7),
+                borderRadius: MlShape.radiusSmall,
               ),
               child: Icon(icon, size: 15, color: t.accent2),
             ),
@@ -413,19 +414,19 @@ class _MlTargetDialState extends State<MlTargetDial> {
                     filled: true,
                     fillColor: t.inkHi.withValues(alpha: 0.04),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(7),
+                      borderRadius: MlShape.radiusSmall,
                       borderSide: BorderSide(color: t.line2),
                     ),
                     // Red while the server is refusing this value, so the
                     // field itself carries the state and not just the note
                     // beneath it.
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(7),
+                      borderRadius: MlShape.radiusSmall,
                       borderSide: BorderSide(
                           color: widget.errorText != null ? t.bad : t.line2),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(7),
+                      borderRadius: MlShape.radiusSmall,
                       borderSide: BorderSide(
                         color: widget.errorText != null
                             ? t.bad
@@ -453,7 +454,7 @@ class _MlTargetDialState extends State<MlTargetDial> {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           border: Border.all(color: t.line),
-          borderRadius: BorderRadius.circular(7),
+          borderRadius: MlShape.radiusSmall,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

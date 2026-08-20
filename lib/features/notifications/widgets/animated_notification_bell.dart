@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/routing/notifications_inbox_route.dart';
@@ -174,7 +175,7 @@ class _AnimatedNotificationBellState
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 color: MlTokens.red600,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: MlShape.radiusMedium,
               ),
               constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(

@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -243,7 +245,7 @@ Future<void> _showRequestDialog({
                           color: scheme.tertiaryContainer.withValues(
                             alpha: 0.4,
                           ),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: MlShape.radiusMedium,
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,

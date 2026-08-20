@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
@@ -398,8 +399,8 @@ class _ChatWidgetState extends State<ChatWidget> {
                           ? MlTokens.accent
                           : semantic.surfaceCard,
                       borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(16),
-                        topRight: const Radius.circular(16),
+                        topLeft: const Radius.circular(MlShape.large),
+                        topRight: const Radius.circular(MlShape.large),
                         bottomLeft: Radius.circular(isCurrentUser ? 16 : 4),
                         bottomRight: Radius.circular(isCurrentUser ? 4 : 16),
                       ),
@@ -577,9 +578,9 @@ class _ChatWidgetState extends State<ChatWidget> {
     if (isImage) {
       return InkWell(
         onTap: () => _openAttachment(signedUrl),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: MlShape.radiusSmall,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: MlShape.radiusSmall,
           child: CachedNetworkImage(
             imageUrl: signedUrl,
             width: 200,
@@ -803,15 +804,15 @@ class _ChatWidgetState extends State<ChatWidget> {
                   color: semantic.textFaint,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: MlShape.radiusLargeIncreased,
                   borderSide: BorderSide(color: semantic.borderStrong),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: MlShape.radiusLargeIncreased,
                   borderSide: BorderSide(color: semantic.borderStrong),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: MlShape.radiusLargeIncreased,
                   borderSide: const BorderSide(
                     color: MlTokens.accent,
                     width: 1.5,

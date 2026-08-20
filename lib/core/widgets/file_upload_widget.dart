@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -296,7 +298,7 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

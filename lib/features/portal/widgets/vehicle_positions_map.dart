@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
@@ -41,7 +42,7 @@ class VehiclePositionsMap extends StatelessWidget {
     final highlight = MlTokens.accent;
 
     final map = ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: MlShape.radiusMedium,
       child: FlutterMap(
         options: MapOptions(
           initialCameraFit: fit,

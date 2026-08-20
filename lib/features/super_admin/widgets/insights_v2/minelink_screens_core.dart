@@ -8,6 +8,7 @@
 // Zero package dependencies: Flutter SDK + Material icons only.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_console_palettes.dart';
@@ -355,7 +356,7 @@ class MlPill extends StatelessWidget {
         color: neutral ? t.inkHi.withValues(alpha: 0.05) : fg.withValues(alpha: 0.12),
         border:
             Border.all(color: neutral ? t.lineStrong : fg.withValues(alpha: 0.3)),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: MlShape.pill,
       ),
       child: Text(
         text,

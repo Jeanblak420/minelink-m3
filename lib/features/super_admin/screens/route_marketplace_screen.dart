@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -104,7 +105,7 @@ class RouteMarketplaceScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: MlTone.atMine.colors(Theme.of(context).brightness).bg,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: MlShape.radiusMedium,
             ),
             child: Text(
               'Visible to you only for now. This marketplace will become '

@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -152,15 +153,15 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
                     filled: true,
                     fillColor: t.inkHi.withValues(alpha: 0.04),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: MlShape.radiusSmall,
                       borderSide: BorderSide(color: t.line2),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: MlShape.radiusSmall,
                       borderSide: BorderSide(color: t.line2),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: MlShape.radiusSmall,
                       borderSide:
                           BorderSide(color: t.accent.withValues(alpha: 0.65)),
                     ),

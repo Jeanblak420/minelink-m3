@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -454,7 +455,7 @@ class _ActiveTripHero extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                       color: MlTokens.inkOnFill.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(999)),
+                      borderRadius: MlShape.pill),
                   child: Text(statusLabel,
                       style: const TextStyle(
                           fontSize: 11.5,
@@ -472,7 +473,7 @@ class _ActiveTripHero extends StatelessWidget {
                   height: 52,
                   decoration: BoxDecoration(
                       color: MlTokens.inkOnFill.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(15)),
+                      borderRadius: MlShape.radiusLarge),
                   child: const Icon(Icons.local_shipping,
                       size: 28, color: MlTokens.inkOnFill),
                 ),
@@ -702,7 +703,7 @@ class _WeekChartCard extends StatelessWidget {
                                         : i == todayIndex
                                             ? MlTokens.accent
                                             : MlTone.accent.well(brightness),
-                                    borderRadius: BorderRadius.circular(7),
+                                    borderRadius: MlShape.radiusSmall,
                                   ),
                                 ),
                               ),

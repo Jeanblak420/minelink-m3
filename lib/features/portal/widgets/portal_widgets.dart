@@ -1,4 +1,5 @@
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
@@ -23,7 +24,7 @@ class PortalStatCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final valueColor = MlSemantic.of(context).textStrong;
     final iconColor = MlTokens.accent;
-    final borderRadius = BorderRadius.circular(16);
+    final borderRadius = MlShape.radiusLarge;
     final isTappable = onTap != null;
 
     final cardBody = Padding(
@@ -36,7 +37,7 @@ class PortalStatCard extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: MlSemantic.of(context).surfaceSunken,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: MlShape.radiusMedium,
               border: Border.all(color: MlSemantic.of(context).borderCard),
             ),
             child: Icon(icon, color: iconColor, size: 24),
@@ -118,7 +119,7 @@ class PortalFeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final borderRadius = BorderRadius.circular(16);
+    final borderRadius = MlShape.radiusLarge;
 
     return Card(
       elevation: 0,

@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/design/charts/ml_sparkline.dart';
@@ -170,7 +171,7 @@ class SaNewPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: MlConsolePalettes.newPillFill,
         border: Border.all(color: MlConsolePalettes.newPillBorder),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: MlShape.pill,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -276,7 +277,7 @@ class SaOrgTypeCard extends StatelessWidget {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: accent.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(11),
+                      borderRadius: MlShape.radiusMedium,
                       border: Border.all(color: accent.withValues(alpha: 0.28)),
                     ),
                     child: Icon(icon, color: iconFg ?? accent, size: 19),
@@ -464,7 +465,7 @@ class SaStatTile extends StatelessWidget {
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: tint.withValues(alpha: 0.10),
-                                borderRadius: BorderRadius.circular(11),
+                                borderRadius: MlShape.radiusMedium,
                                 border: Border.all(
                                   color: tint.withValues(alpha: 0.28),
                                 ),

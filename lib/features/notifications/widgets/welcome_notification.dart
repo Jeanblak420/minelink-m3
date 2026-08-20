@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
@@ -69,7 +70,7 @@ class _WelcomeNotificationState extends ConsumerState<WelcomeNotification>
         opacity: _animation,
         child: AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: MlShape.radiusLarge,
           ),
           title: Row(
             children: [

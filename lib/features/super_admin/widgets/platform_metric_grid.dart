@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/layout/app_breakpoints.dart';
 
@@ -98,7 +100,7 @@ class PlatformMetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final valueColor = Color.lerp(cs.onSurface, item.accent, 0.72) ?? item.accent;
-    final borderRadius = BorderRadius.circular(16);
+    final borderRadius = MlShape.radiusLarge;
     final isTappable = item.onTap != null;
 
     final cardBody = Padding(
@@ -112,7 +114,7 @@ class PlatformMetricCard extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: platformMetricIconWellColor(cs, item.accent),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: MlShape.radiusMedium,
             ),
             child: Icon(item.icon, color: valueColor, size: 22),
           ),

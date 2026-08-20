@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/portal/models/tons_out_entry.dart';
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
@@ -196,7 +197,7 @@ class _SummaryBox extends StatelessWidget {
                 PortalColors.accent.withValues(alpha: 0.16), scheme.surface),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: MlShape.radiusLarge,
         border: Border.all(color: MlSemantic.of(context).borderCard),
       ),
       child: Column(
@@ -211,7 +212,7 @@ class _SummaryBox extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: PortalColors.accent.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(7),
+                  borderRadius: MlShape.radiusSmall,
                 ),
                 child: Text(code,
                     style: textTheme.labelMedium?.copyWith(
@@ -276,7 +277,7 @@ class _FilterBar extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: MlSemantic.of(context).surfaceCard,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: MlShape.radiusLarge,
         border: Border.all(color: MlSemantic.of(context).borderCard),
       ),
       child: Column(
@@ -498,7 +499,7 @@ class _ResultsTable extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 48),
         decoration: BoxDecoration(
           color: MlSemantic.of(context).surfaceCard,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: MlShape.radiusLarge,
           border: Border.all(color: MlSemantic.of(context).borderCard),
         ),
         child: Column(
@@ -517,7 +518,7 @@ class _ResultsTable extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: MlShape.radiusLarge,
         border: Border.all(color: MlSemantic.of(context).borderCard),
       ),
       clipBehavior: Clip.antiAlias,
@@ -563,7 +564,7 @@ class _ResultsTable extends StatelessWidget {
                           const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
                         color: massCellColor,
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: MlShape.radiusSmall,
                       ),
                       child: Text(massFmt.format(e.netMass),
                           style: const TextStyle(fontWeight: FontWeight.w700)),

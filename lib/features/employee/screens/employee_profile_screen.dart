@@ -11,6 +11,7 @@
 /// real PDF export.
 library;
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -404,7 +405,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
         decoration: BoxDecoration(
           color: _green.withValues(alpha: 0.10),
           border: Border.all(color: _green.withValues(alpha: 0.35)),
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: MlShape.pill,
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Container(
@@ -480,7 +481,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                 fontWeight: FontWeight.w600,
                 fontFamily: MlTokens.fontSans),
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                RoundedRectangleBorder(borderRadius: MlShape.radiusMedium),
           ),
         ),
       ]),
@@ -540,7 +541,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
             colors: [tc.bg, s.surfaceCard],
           ),
           border: Border.all(color: s.borderCard),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: MlShape.radiusLargeIncreased,
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -550,7 +551,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                 height: 78,
                 decoration: BoxDecoration(
                   color: tone.well(brightness),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: MlShape.radiusLargeIncreased,
                   border: Border.all(color: s.borderCard),
                   image: e.profilePhotoUrl != null
                       ? DecorationImage(
@@ -621,7 +622,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                     decoration: BoxDecoration(
                       color: s.surfaceSunken,
                       border: Border.all(color: tc.fg.withValues(alpha: 0.4)),
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: MlShape.pill,
                     ),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
                       Container(
@@ -644,7 +645,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                     decoration: BoxDecoration(
                       color: s.surfaceSunken,
                       border: Border.all(color: s.borderCard),
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: MlShape.radiusSmall,
                     ),
                     child: Text(code,
                         style: TextStyle(
@@ -667,7 +668,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
             decoration: BoxDecoration(
               color: s.surfaceSunken,
               border: Border.all(color: s.borderCard),
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: MlShape.pill,
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               Icon(widget.canManage ? Icons.manage_accounts_outlined : Icons.lock_outline,
@@ -686,7 +687,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
             decoration: BoxDecoration(
               color: s.surfaceSunken,
               border: Border.all(color: s.divider),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: MlShape.radiusMedium,
             ),
             child: Row(children: [
               Container(
@@ -734,7 +735,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                         fontWeight: FontWeight.w600,
                         fontFamily: MlTokens.fontSans),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                        borderRadius: MlShape.radiusMedium),
                   ),
                 ),
               ),
@@ -812,7 +813,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
         for (final (icon, label, value, mono) in rows)
           InkWell(
             onTap: () => _copy(label, value),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: MlShape.radiusSmall,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 9),
               child: Row(children: [
@@ -843,7 +844,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
             decoration: BoxDecoration(
               color: _green.withValues(alpha: 0.08),
               border: Border.all(color: _green.withValues(alpha: 0.3)),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: MlShape.radiusMedium,
             ),
             child: Row(children: [
               const Icon(Icons.chat_outlined, size: 16, color: _green),
@@ -910,13 +911,13 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
             if (widget.canManage)
               InkWell(
                 onTap: _pushCompliance,
-                borderRadius: BorderRadius.circular(11),
+                borderRadius: MlShape.radiusMedium,
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
                     border: Border.all(color: s.borderStrong),
-                    borderRadius: BorderRadius.circular(11),
+                    borderRadius: MlShape.radiusMedium,
                   ),
                   child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     Icon(Icons.upload_file_outlined,
@@ -1039,7 +1040,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                   decoration: BoxDecoration(
                     color: s.surfaceSunken,
                     border: Border.all(color: s.divider),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: MlShape.pill,
                   ),
                 ),
               ),
@@ -1052,7 +1053,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                   decoration: BoxDecoration(
                     gradient:
                         const LinearGradient(colors: [_blue, _green]),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: MlShape.pill,
                   ),
                 ),
               ),
@@ -1186,7 +1187,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
             decoration: BoxDecoration(
               color: MlTone.done.well(brightness),
               border: Border.all(color: s.borderCard),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: MlShape.radiusMedium,
             ),
             child: Icon(Icons.location_on_outlined, size: 22, color: tone.fg),
           ),
@@ -1210,7 +1211,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
               border: Border.all(
                   color: (presence == _Presence.online ? _green : s.textFaint)
                       .withValues(alpha: 0.35)),
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: MlShape.pill,
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               Container(
@@ -1233,13 +1234,13 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
         ]),
         const SizedBox(height: 14),
         ClipRRect(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: MlShape.radiusLarge,
           child: Container(
             height: 168,
             decoration: BoxDecoration(
               color: s.surfaceSunken,
               border: Border.all(color: s.divider),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: MlShape.radiusLarge,
             ),
             child: CustomPaint(
               size: const Size(double.infinity, 168),
@@ -1264,7 +1265,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           onTap: sup == null
               ? null
               : () => setState(() => _employeeId = sup.employeeId),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: MlShape.radiusMedium,
           child: Row(children: [
             Container(
               width: 38,
@@ -1272,7 +1273,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
               decoration: BoxDecoration(
                 color: MlTone.transit.well(brightness),
                 border: Border.all(color: s.borderCard),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: MlShape.radiusMedium,
               ),
               alignment: Alignment.center,
               child: Text(
@@ -1430,7 +1431,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           decoration: BoxDecoration(
             color: s.surfaceSunken,
             border: Border.all(color: s.divider),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: MlShape.radiusMedium,
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(label,
@@ -1500,7 +1501,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                   color: _toneColor(tone, s).withValues(alpha: 0.10),
                   border: Border.all(
                       color: _toneColor(tone, s).withValues(alpha: 0.4)),
-                  borderRadius: BorderRadius.circular(7),
+                  borderRadius: MlShape.radiusSmall,
                 ),
                 child: Text(label,
                     style: TextStyle(
@@ -1551,14 +1552,14 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
           const SizedBox(height: 4),
           InkWell(
             onTap: _pushCompliance,
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: MlShape.radiusMedium,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
                 color: s.surfaceSunken,
                 border: Border.all(color: s.borderCard),
-                borderRadius: BorderRadius.circular(11),
+                borderRadius: MlShape.radiusMedium,
               ),
               child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Icon(Icons.add_rounded, size: 16, color: s.textBody),
@@ -1596,7 +1597,7 @@ class _PCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: s.surfaceCard,
         border: Border.all(color: s.borderCard),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: MlShape.radiusLargeIncreased,
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Container(
@@ -1684,7 +1685,7 @@ class _MoreMenu extends StatelessWidget {
         decoration: BoxDecoration(
           color: s.surfaceSunken,
           border: Border.all(color: s.borderCard),
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: MlShape.radiusMedium,
         ),
         child: Icon(Icons.more_horiz_rounded, size: 18, color: s.textBody),
       ),
@@ -1706,7 +1707,7 @@ class _DocTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: s.surfaceSunken,
         border: Border.all(color: s.divider),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
       ),
       child: Row(children: [
         Container(
@@ -1715,7 +1716,7 @@ class _DocTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: _red.withValues(alpha: 0.12),
             border: Border.all(color: _red.withValues(alpha: 0.3)),
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: MlShape.radiusMedium,
           ),
           child: const Icon(Icons.description_outlined, size: 18, color: _red),
         ),
@@ -1739,7 +1740,7 @@ class _DocTile extends StatelessWidget {
                     ? _green.withValues(alpha: 0.1)
                     : Colors.transparent,
                 border: Border.all(color: statusColor.withValues(alpha: 0.45)),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: MlShape.radiusSmall,
               ),
               child: Text(doc.statusLabel,
                   style: TextStyle(
@@ -1782,7 +1783,7 @@ class _MetricTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: s.surfaceSunken,
         border: Border.all(color: s.divider),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: MlShape.radiusLarge,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2035,7 +2036,7 @@ class _TimelineRow extends StatelessWidget {
     final dot = _toneColor(item.tone, s);
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: MlShape.radiusSmall,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
         child: IntrinsicHeight(
@@ -2117,11 +2118,11 @@ class _FlagTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: s.surfaceSunken,
         border: Border.all(color: s.divider),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
       ),
       foregroundDecoration: BoxDecoration(
         border: Border(left: BorderSide(color: c, width: 3)),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
       ),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Icon(icon, size: 18, color: c),

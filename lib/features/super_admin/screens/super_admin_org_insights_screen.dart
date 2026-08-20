@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -386,7 +387,7 @@ class _SuperAdminOrgInsightsScreenState
                       ),
                       decoration: BoxDecoration(
                         color: MlControlRoom.cyan.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: MlShape.pill,
                         border: Border.all(
                           color: MlControlRoom.cyan.withValues(alpha: 0.35),
                         ),
@@ -510,7 +511,7 @@ class _SuperAdminOrgInsightsScreenState
                                 height: 9,
                                 decoration: BoxDecoration(
                                   color: slices[i].color,
-                                  borderRadius: BorderRadius.circular(2.5),
+                                  borderRadius: MlShape.radiusExtraSmall,
                                 ),
                               ),
                               const SizedBox(width: 11),
@@ -655,7 +656,7 @@ class _SuperAdminOrgInsightsScreenState
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: tint.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: MlShape.radiusMedium,
               border: Border.all(color: tint.withValues(alpha: 0.25)),
             ),
             child: Icon(icon, size: 16, color: tint),
@@ -834,7 +835,7 @@ class _SuperAdminOrgInsightsScreenState
                         color: (delta >= 0 ? MlControlRoom.green : MlControlRoom.red).withValues(
                           alpha: 0.14,
                         ),
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: MlShape.pill,
                       ),
                       child: Text(
                         '${delta >= 0 ? '▲' : '▼'} '
@@ -981,7 +982,7 @@ class _SuperAdminOrgInsightsScreenState
           padding: const EdgeInsets.fromLTRB(15, 13, 15, 12),
           decoration: BoxDecoration(
             color: MlControlRoom.surfaceTile,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: MlShape.radiusMedium,
             border: Border.all(color: MlControlRoom.tileBorder),
           ),
           child: Column(
@@ -1192,7 +1193,7 @@ class _SuperAdminOrgInsightsScreenState
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: MlShape.radiusMedium,
         onTap: () => context.go(
           '/super-admin/insights/${widget.orgType}/company/${c.companyId}',
         ),
@@ -1200,7 +1201,7 @@ class _SuperAdminOrgInsightsScreenState
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
           decoration: BoxDecoration(
             color: lead ? MlControlRoom.cyan.withValues(alpha: 0.06) : MlControlRoom.surfaceTileAlt,
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: MlShape.radiusMedium,
             border: Border.all(
               color: lead ? MlControlRoom.cyan.withValues(alpha: 0.4) : MlControlRoom.tileBorder,
             ),
@@ -1304,7 +1305,7 @@ class _SuperAdminOrgInsightsScreenState
               Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: MlShape.radiusSmall,
                   onTap: () => context.go('/super-admin/disputes'),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -1312,7 +1313,7 @@ class _SuperAdminOrgInsightsScreenState
                       vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: MlShape.radiusSmall,
                       border: Border.all(color: MlControlRoom.borderStrong),
                     ),
                     child: Text(
@@ -1358,7 +1359,7 @@ class _SuperAdminOrgInsightsScreenState
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       decoration: BoxDecoration(
         color: MlControlRoom.surfaceTileAlt,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
         border: Border.all(color: MlControlRoom.tileBorder),
       ),
       child: Row(
@@ -1370,7 +1371,7 @@ class _SuperAdminOrgInsightsScreenState
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: tint.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: MlShape.radiusMedium,
               border: Border.all(color: tint.withValues(alpha: 0.25)),
             ),
             child: Icon(a.icon, size: 15, color: tint),
@@ -1507,9 +1508,9 @@ class _SuperAdminOrgInsightsScreenState
                 color: _filter == f
                     ? MlControlRoom.cyan.withValues(alpha: 0.12)
                     : MlControlRoom.surfaceTile,
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: MlShape.pill,
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: MlShape.pill,
                   onTap: () => setState(() => _filter = f),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -1517,7 +1518,7 @@ class _SuperAdminOrgInsightsScreenState
                       vertical: 7,
                     ),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: MlShape.pill,
                       border: Border.all(
                         color: _filter == f
                             ? MlControlRoom.cyan.withValues(alpha: 0.35)
@@ -1545,7 +1546,7 @@ class _SuperAdminOrgInsightsScreenState
                             ),
                             decoration: BoxDecoration(
                               color: MlControlRoom.cyan.withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(999),
+                              borderRadius: MlShape.pill,
                             ),
                             child: Text(
                               '${counts[f]}',
@@ -1595,7 +1596,7 @@ class _SuperAdminOrgInsightsScreenState
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.13),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: MlShape.pill,
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(
@@ -1699,7 +1700,7 @@ class _SuperAdminOrgInsightsScreenState
         ),
         Expanded(
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: MlShape.pill,
             child: SizedBox(
               height: 4,
               child: Stack(
@@ -1751,7 +1752,7 @@ class _SuperAdminOrgInsightsScreenState
             // Design monogram: the deep panel ink behind cyan initials, ringed
             // in the brand hue at 40%.
             color: MlControlRoom.surfaceCard,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: MlShape.radiusMedium,
             border: Border.all(color: MlControlRoom.cyan.withValues(alpha: 0.4)),
           ),
           child: Text(
@@ -1849,9 +1850,9 @@ class _SuperAdminOrgInsightsScreenState
         const SizedBox(height: 22),
         Material(
           color: MlControlRoom.surfaceTile,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: MlShape.radiusMedium,
           child: InkWell(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: MlShape.radiusMedium,
             onTap: () => context.go(
               '/super-admin/insights/${widget.orgType}/company/${s.companyId}',
             ),
@@ -1863,7 +1864,7 @@ class _SuperAdminOrgInsightsScreenState
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: MlShape.radiusMedium,
                 border: Border.all(color: MlControlRoom.cyan.withValues(alpha: 0.35)),
               ),
               child: Row(
@@ -2516,7 +2517,7 @@ class _MovementChart extends StatelessWidget {
                     decoration: BoxDecoration(
                       // Design `.fs-pill`: rgba(6,11,21,.92) — --bg-0 at 92%.
                       color: MlControlRoom.pageBg.withValues(alpha: 0.92),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: MlShape.radiusSmall,
                       border: Border.all(
                         color: MlControlRoom.cyan.withValues(alpha: 0.4),
                       ),
@@ -2929,7 +2930,7 @@ class _TempoBarsPainter extends CustomPainter {
       final x = i * slot + (slot - barW) / 2;
       final r = RRect.fromRectAndRadius(
         Rect.fromLTWH(x, size.height - h, barW, h),
-        const Radius.circular(2),
+        const Radius.circular(MlShape.extraSmall),
       );
       canvas.drawRRect(
         r,

@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1309,7 +1310,7 @@ class _TripsCell extends StatelessWidget {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: semantic.surfaceSunken,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: MlShape.radiusExtraSmall,
               ),
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -1318,7 +1319,7 @@ class _TripsCell extends StatelessWidget {
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: fillColor,
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: MlShape.radiusExtraSmall,
                     ),
                   ),
                 ),

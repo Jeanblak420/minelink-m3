@@ -14,6 +14,8 @@
 // Nothing here is functional. All of it stops under "reduce motion".
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+
 import 'dart:math' as math;
 
 // `dart:ui show FontFeature` was in the drop; material re-exports it and this
@@ -372,7 +374,7 @@ class _MlBrandPanelState extends State<MlBrandPanel>
             decoration: BoxDecoration(
               color: MlTokens.overlayLight.withValues(alpha: 0.03),
               border: Border.all(color: MlAuth.line2),
-              borderRadius: BorderRadius.circular(7),
+              borderRadius: MlShape.radiusSmall,
             ),
             child: Icon(s.icon, size: 13, color: MlAuth.accent2),
           ),

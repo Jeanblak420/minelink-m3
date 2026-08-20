@@ -13,6 +13,7 @@
 // target the backend rejected.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 
 import 'minelink_screens_core.dart';
@@ -133,7 +134,7 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
           decoration: BoxDecoration(
             color: on ? t.accent.withValues(alpha: 0.16) : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: MlShape.radiusSmall,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -175,7 +176,7 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
           decoration: BoxDecoration(
             color: t.inkHi.withValues(alpha: 0.04),
             border: Border.all(color: t.line),
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: MlShape.radiusMedium,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -481,7 +482,7 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: t.panel,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: MlShape.radiusLarge,
           side: BorderSide(color: t.line2),
         ),
         title: Text(
@@ -546,7 +547,7 @@ class _CycleCompleteBanner extends StatelessWidget {
         gradient: LinearGradient(
           colors: [t.good.withValues(alpha: 0.13), t.good.withValues(alpha: 0.02)],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
         border: Border.all(color: t.good.withValues(alpha: 0.38)),
       ),
       child: Row(
@@ -719,7 +720,7 @@ class _CycleCard extends StatelessWidget {
                           horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         border: Border.all(color: t.line2),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: MlShape.radiusSmall,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -833,7 +834,7 @@ class _LockWarning extends StatelessWidget {
         gradient: LinearGradient(
           colors: [t.warn.withValues(alpha: 0.11), t.warn.withValues(alpha: 0.02)],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
         border: Border.all(color: t.warn.withValues(alpha: 0.34)),
       ),
       child: Row(
@@ -1088,7 +1089,7 @@ class _MonthTable extends StatelessWidget {
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
           color: t.inkHi.withValues(alpha: 0.015),
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: MlShape.radiusSmall,
           border: Border.all(color: t.line2),
         ),
         child: Row(
@@ -1155,7 +1156,7 @@ class _HorizonLadder extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
       decoration: BoxDecoration(
         color: t.inkHi.withValues(alpha: 0.015),
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: MlShape.radiusMedium,
         border: Border.all(color: t.line),
       ),
       child: Row(
@@ -1334,7 +1335,7 @@ class _TargetHistory extends StatelessWidget {
               : t.inkHi.withValues(alpha: hovered ? 0.04 : 0.015),
           border: Border.all(
               color: on ? t.accent.withValues(alpha: 0.4) : t.line),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: MlShape.radiusMedium,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1343,7 +1344,7 @@ class _TargetHistory extends StatelessWidget {
               width: 9,
               height: 9,
               decoration: BoxDecoration(
-                  color: color, borderRadius: BorderRadius.circular(3)),
+                  color: color, borderRadius: MlShape.radiusExtraSmall),
             ),
             const SizedBox(width: 9),
             Column(
@@ -1533,7 +1534,7 @@ class _CycleArchive extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(15, 14, 15, 14),
       decoration: BoxDecoration(
         color: t.inkHi.withValues(alpha: 0.015),
-        borderRadius: BorderRadius.circular(11),
+        borderRadius: MlShape.radiusMedium,
         border: Border.all(color: t.line),
       ),
       child: Column(
@@ -1573,7 +1574,7 @@ class _CycleArchive extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
                 decoration: BoxDecoration(
                   color: t.inkHi.withValues(alpha: 0.02),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: MlShape.radiusSmall,
                   border: Border.all(color: t.line),
                 ),
                 child: Column(
@@ -1606,7 +1607,7 @@ class _CycleArchive extends StatelessWidget {
                     ),
                     const SizedBox(height: 7),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: MlShape.pill,
                       child: Container(
                         height: 3,
                         color: t.inkHi.withValues(alpha: 0.08),
@@ -1658,7 +1659,7 @@ class _AttBar extends StatelessWidget {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: t.inkHi.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: MlShape.pill,
               ),
             ),
           ),
@@ -1678,7 +1679,7 @@ class _AttBar extends StatelessWidget {
                       )
                     : LinearGradient(
                         colors: [color.withValues(alpha: 0.65), color]),
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: MlShape.pill,
               ),
             ),
           ),
@@ -1732,7 +1733,7 @@ class _OutcomeBadge extends StatelessWidget {
         border: Border.all(
           color: color.withValues(alpha: dashed ? 0.34 : 0.38),
         ),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: MlShape.radiusSmall,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1776,7 +1777,7 @@ class _StatusBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.13),
           border: Border.all(color: color.withValues(alpha: 0.34)),
-          borderRadius: BorderRadius.circular(7),
+          borderRadius: MlShape.radiusSmall,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1824,7 +1825,7 @@ class _FilledButton extends StatelessWidget {
               ? LinearGradient(colors: [t.accent2, t.accent])
               : null,
           color: enabled ? null : t.inkHi.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: MlShape.radiusMedium,
         ),
         child: Text(
           label,

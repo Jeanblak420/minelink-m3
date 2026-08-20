@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 
 import 'overview_models.dart';
@@ -88,7 +89,7 @@ class _OvLeaderboardCardState extends State<OvLeaderboardCard> {
                 height: 34,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(11),
+                  borderRadius: MlShape.radiusMedium,
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -167,7 +168,7 @@ class _OvLeaderboardCardState extends State<OvLeaderboardCard> {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: t.acc.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: MlShape.radiusSmall,
                     border: Border.all(color: t.acc.withValues(alpha: 0.30)),
                   ),
                   child: Icon(
@@ -258,7 +259,7 @@ class _LeaderRow extends StatelessWidget {
             height: 26,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: MlShape.radiusSmall,
               gradient: leader
                   ? LinearGradient(
                       begin: Alignment.topLeft,

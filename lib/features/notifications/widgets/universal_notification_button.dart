@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/core/routing/notifications_manage_route.dart';
@@ -56,7 +57,7 @@ class UniversalNotificationButton extends ConsumerWidget {
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 color: MlTokens.red600,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: MlShape.radiusMedium,
               ),
               constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
               child: Text(

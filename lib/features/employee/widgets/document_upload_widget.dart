@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -125,7 +126,7 @@ class _DocumentUploadWidgetState extends ConsumerState<DocumentUploadWidget> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: semantic.surfaceSunken,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: MlShape.radiusSmall,
         border: Border.all(color: semantic.borderSubtle),
       ),
       child: Column(

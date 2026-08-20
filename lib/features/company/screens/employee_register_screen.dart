@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -801,13 +802,13 @@ class _EmployeeRegisterScreenState
     Widget segButton(String label, bool active, VoidCallback onTap) {
       return InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: MlShape.radiusMedium,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
           decoration: BoxDecoration(
             color:
                 active ? _p.blue.withValues(alpha: 0.14) : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: MlShape.radiusMedium,
             border: Border.all(
               color: active
                   ? _p.blue.withValues(alpha: 0.5)

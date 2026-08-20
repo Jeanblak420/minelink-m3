@@ -14,6 +14,7 @@
 // series are guaranteed to share one scale.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart' show listEquals;
@@ -425,7 +426,7 @@ class OvTempoBars extends StatelessWidget {
                       ? 6
                       : math.max(6, (values[i] / max) * height),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(1),
+                    borderRadius: MlShape.radiusExtraSmall,
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,

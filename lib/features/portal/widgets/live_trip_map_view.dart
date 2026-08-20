@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
@@ -157,7 +158,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
         );
 
     final map = ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: MlShape.radiusMedium,
       child: FlutterMap(
         mapController: _camera.mapController,
         options: MapOptions(
@@ -544,7 +545,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               decoration: BoxDecoration(
                 color: MlTokens.accent.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: MlShape.radiusSmall,
               ),
               child: Row(
                 children: [

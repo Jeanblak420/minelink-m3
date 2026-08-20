@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -204,13 +205,13 @@ class _CompanySelectionScreenState
     final bytes = decodeDataUriImage(value);
     if (bytes != null) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: MlShape.radiusLarge,
         child: Image.memory(bytes, width: 50, height: 50, fit: BoxFit.cover),
       );
     }
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: MlShape.radiusLarge,
       child: CachedNetworkImage(
         imageUrl: value,
         width: 50,

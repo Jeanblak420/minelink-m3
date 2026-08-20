@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/portal/models/transportation_request.dart';
@@ -177,7 +178,7 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: _accent.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(11),
+                      borderRadius: MlShape.radiusMedium,
                       border: Border.all(
                         color: _accent.withValues(alpha: 0.28),
                       ),
@@ -743,7 +744,7 @@ class _NewBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: MlShape.pill,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -819,7 +820,7 @@ class _FilterTab extends StatelessWidget {
                   color: selected
                       ? MlTokens.overlayLight.withValues(alpha: 0.22)
                       : s.surfaceSunken,
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: MlShape.pill,
                 ),
                 child: Text(
                   '$count',
@@ -889,7 +890,7 @@ class _DetailPanel extends ConsumerWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: MlShape.radiusLarge,
         border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
@@ -1751,7 +1752,7 @@ class _SelectedPartiesSummary extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
         border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(

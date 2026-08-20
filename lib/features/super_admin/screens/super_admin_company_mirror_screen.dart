@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -206,11 +207,11 @@ class _MirrorSearchBox extends ConsumerWidget {
               vertical: 12,
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: MlShape.pill,
               borderSide: BorderSide(color: MlControlRoom.borderCard),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: MlShape.pill,
               borderSide: BorderSide(color: MlControlRoom.blue.withValues(alpha: 0.55)),
             ),
           ),
@@ -225,7 +226,7 @@ class _MirrorSearchBox extends ConsumerWidget {
               constraints: const BoxConstraints(maxHeight: 320),
               decoration: BoxDecoration(
                 color: MlControlRoom.surfaceCard,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: MlShape.radiusLarge,
                 border: Border.all(color: MlControlRoom.borderCard),
                 boxShadow: const [
                   BoxShadow(
@@ -241,7 +242,7 @@ class _MirrorSearchBox extends ConsumerWidget {
                 children: [
                   for (final h in options)
                     InkWell(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: MlShape.radiusMedium,
                       onTap: () => onSelected(h),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -288,7 +289,7 @@ class _MirrorSearchBox extends ConsumerWidget {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(999),
+                                borderRadius: MlShape.pill,
                                 border: Border.all(color: MlControlRoom.borderCard),
                                 color: MlControlRoom.surfaceTile,
                               ),
@@ -526,7 +527,7 @@ class _HeroHeader extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
               decoration: BoxDecoration(
                 color: chip.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: MlShape.pill,
                 border: Border.all(color: chip.withValues(alpha: 0.45)),
               ),
               child: Text(
@@ -563,7 +564,7 @@ class _HeroHeader extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: MlShape.pill,
             border: Border.all(color: MlControlRoom.borderCard),
           ),
           child: Text(
@@ -583,7 +584,7 @@ class _HeroHeader extends StatelessWidget {
               foregroundColor: MlTokens.inkOnFill,
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: MlShape.pill,
               ),
               textStyle: const TextStyle(
                 fontFamily: MlTokens.fontSans,
@@ -673,7 +674,7 @@ class _ReadOnlyBanner extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: MlShape.pill,
                 border: Border.all(color: MlControlRoom.borderCard),
                 color: MlControlRoom.surfaceTile,
               ),
@@ -710,7 +711,7 @@ class _PillTabBar extends StatelessWidget {
           dividerColor: Colors.transparent,
           indicatorSize: TabBarIndicatorSize.tab,
           indicator: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: MlShape.pill,
             color: MlControlRoom.blue.withValues(alpha: 0.16),
             border: Border.all(color: MlControlRoom.blue.withValues(alpha: 0.5)),
           ),
@@ -1050,7 +1051,7 @@ class _DashboardBody extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: MlShape.pill,
           border: Border.all(color: color.withValues(alpha: 0.4)),
         ),
         child: Text(
@@ -1409,7 +1410,7 @@ class _DashboardBody extends StatelessWidget {
                                   : math.max(4, 160 * d.tons / maxTons),
                               decoration: BoxDecoration(
                                 borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(5),
+                                  top: Radius.circular(MlShape.small),
                                 ),
                                 color: d.tons == 0
                                     ? MlControlRoom.borderCard
@@ -1999,7 +2000,7 @@ class _MirrorLiveMapPreview extends ConsumerWidget {
                 ),
                 decoration: BoxDecoration(
                   color: MlControlRoom.surfaceCardFloating,
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: MlShape.pill,
                   border: Border.all(color: MlControlRoom.borderCard),
                 ),
                 child: Row(

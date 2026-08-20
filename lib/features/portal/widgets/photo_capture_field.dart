@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -62,7 +64,7 @@ class _PhotoCaptureFieldState extends State<PhotoCaptureField> {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: MlSemantic.of(context).surfaceCard,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
         border: Border.all(
           color: captured
               ? PortalColors.accent.withValues(alpha: 0.6)
@@ -121,14 +123,14 @@ class _PhotoCaptureFieldState extends State<PhotoCaptureField> {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: scheme.surface,
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: MlShape.radiusMedium,
           border: Border.all(color: MlSemantic.of(context).borderCard),
         ),
         child: Icon(Icons.image_outlined, size: 20, color: scheme.onSurfaceVariant),
       );
     }
     return ClipRRect(
-      borderRadius: BorderRadius.circular(9),
+      borderRadius: MlShape.radiusMedium,
       child: kIsWeb
           ? Image.network(_file!.path, width: size, height: size, fit: BoxFit.cover)
           : Image.file(File(_file!.path), width: size, height: size, fit: BoxFit.cover),

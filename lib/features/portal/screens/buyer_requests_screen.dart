@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/portal/models/transportation_request.dart';
@@ -195,7 +196,7 @@ class _RequestSectionHeader extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: MlShape.pill,
             ),
             child: Text(
               '$count',
@@ -249,7 +250,7 @@ class _RequestCard extends StatelessWidget {
                   margin: const EdgeInsets.only(right: 8),
                   decoration: BoxDecoration(
                     color: scheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: MlShape.radiusSmall,
                   ),
                   child: Text(
                     typeLabel,
@@ -298,7 +299,7 @@ class _RequestCard extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: scheme.tertiaryContainer.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: MlShape.radiusMedium,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,7 +420,7 @@ class _AllocatedTrucksSection extends ConsumerWidget {
                       color: scheme.surfaceContainerHighest.withValues(
                         alpha: 0.5,
                       ),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: MlShape.radiusMedium,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

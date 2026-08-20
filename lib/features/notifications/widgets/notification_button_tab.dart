@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
@@ -20,7 +21,7 @@ class NotificationButtonTab extends ConsumerWidget {
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: RoundedRectangleBorder(borderRadius: MlShape.radiusSmall),
       child: InkWell(
         onTap: () {
           context.go(
@@ -30,7 +31,7 @@ class NotificationButtonTab extends ConsumerWidget {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: MlShape.radiusSmall,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(

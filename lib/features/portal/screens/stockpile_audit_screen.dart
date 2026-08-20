@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_transaction.dart';
@@ -74,7 +75,7 @@ class StockpileAuditScreen extends ConsumerWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: scheme.surface,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: MlShape.radiusLarge,
                       border:
                           Border.all(color: MlSemantic.of(context).borderCard),
                     ),
@@ -129,7 +130,7 @@ class _BuyerBalanceCard extends StatelessWidget {
                 PortalColors.accent.withValues(alpha: 0.16), scheme.surface),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: MlShape.radiusLarge,
         border: Border.all(color: MlSemantic.of(context).borderCard),
       ),
       child: Column(
@@ -222,7 +223,7 @@ class _TxnRow extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: MlShape.radiusMedium,
             ),
             child: Icon(
               isOut ? Icons.south_rounded : Icons.north_rounded,

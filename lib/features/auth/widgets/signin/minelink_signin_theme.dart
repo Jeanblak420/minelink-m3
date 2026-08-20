@@ -9,6 +9,7 @@
 // Palette matches the console: gold is the brand mark, cyan is the action.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -294,7 +295,7 @@ class MlBanner extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
         color: tint.withValues(alpha: 0.09),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: MlShape.radiusMedium,
         border: Border.all(color: tint.withValues(alpha: 0.34)),
       ),
       child: Row(
@@ -361,7 +362,7 @@ class MlMotionNotice extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(15, 11, 13, 11),
         decoration: BoxDecoration(
           color: MlAuth.panel.withValues(alpha: 0.94),
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: MlShape.radiusLarge,
           border: Border.all(color: MlAuth.line2),
           boxShadow: [
             BoxShadow(
@@ -474,7 +475,7 @@ class _NoticeActionState extends State<_NoticeAction> {
                   ? const [MlAuth.accentLift1, MlAuth.accentLift2]
                   : const [MlAuth.accent2, MlAuth.accent],
             ),
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: MlShape.radiusMedium,
           ),
           child: const Text(
             'Play anyway',
