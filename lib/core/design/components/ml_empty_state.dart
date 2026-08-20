@@ -34,6 +34,7 @@ class MlEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semantic = MlSemantic.of(context);
+    final text = Theme.of(context).textTheme;
     return SingleChildScrollView(
       // `shrinkWrap`-like behaviour: centres when there is room, scrolls when
       // there is not, instead of overflowing.
@@ -50,9 +51,7 @@ class MlEmptyState extends StatelessWidget {
                 Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: MlTokens.fsTitle,
+                  style: text.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: semantic.textStrong,
                   ),
@@ -62,9 +61,10 @@ class MlEmptyState extends StatelessWidget {
                   Text(
                     message!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: MlTokens.fsBodySm,
+                    // Looser than the 16/12 the slot specifies: this is the one
+                    // paragraph of prose on an otherwise empty screen, and it is
+                    // read rather than scanned.
+                    style: text.bodySmall?.copyWith(
                       color: semantic.textMuted,
                       height: 1.5,
                     ),

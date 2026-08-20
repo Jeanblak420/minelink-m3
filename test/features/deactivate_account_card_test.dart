@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/profile/models/account_deactivation_request.dart';
@@ -78,7 +79,20 @@ class _HostileFakeService implements AccountDeactivationService {
   Future<void> cancel() async {}
 }
 
+/// Hosts the card under **the app's own theme**, not a bare `MaterialApp`.
+///
+/// It used to be bare, which meant `Theme.of(context).textTheme` was stock
+/// Material — a different type scale, in a different family, from anything
+/// that ships. That was survivable only while every component hard-coded its
+/// own `TextStyle`; now that they take type from the theme (which is what
+/// makes one design system one system), a themeless host measures text the app
+/// will never draw. Same family of fault as the fallback-font trap in
+/// `CLAUDE.md` §10.5: the test was green about a rendering nobody sees.
+///
+/// 20 other test files still host this way — recorded in
+/// `docs/redesign/VERIFICATION.md` rather than fixed in passing.
 Widget _host(Widget child, {double scale = 1.0}) => MaterialApp(
+      theme: AppTheme.darkTheme,
       home: MediaQuery(
         data: MediaQueryData(textScaler: TextScaler.linear(scale)),
         child: Scaffold(body: SingleChildScrollView(child: child)),

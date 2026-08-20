@@ -1,9 +1,32 @@
 import 'package:flutter/material.dart';
+
+import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
-/// Lifecycle status pill — the single most repeated motif of the MineLink
-/// design. Fully rounded, tonal fg/bg pair, 12px w700 UPPERCASE with slight
-/// letter-spacing and an optional leading dot.
+/// The lifecycle status pill — the single most repeated motif in MineLink, and
+/// **43 of the census's hand-rolled decorations** are an attempt at it.
+///
+/// Fully rounded, a tonal fg/bg pair from [MlTone], uppercase tracked label,
+/// optional leading dot.
+///
+/// ## What changed in the M3 rebuild
+///
+/// **The label is no longer shouted at screen readers.** The pill renders
+/// `label.toUpperCase()` because that is the design, but several screen-reader
+/// engines treat an all-caps token as an initialism and spell it out — so
+/// `LOADED` was read "L, O, A, D, E, D" and `EN ROUTE TO OFFLOAD` became
+/// nineteen letters. The visual text is still uppercase; the semantics node
+/// now carries the original string, so it is *rendered* upper and *announced*
+/// as written. This is why the `Text` is wrapped rather than simply styled.
+///
+/// **Type comes from the theme.** It was a hand-built `TextStyle` naming
+/// `fontSans`, size 12 and w700. That is `labelMedium` plus a weight and a
+/// little more tracking, which is what uppercase needs to stop the letters
+/// crowding — expressed as a `copyWith` on the theme slot so a change to the
+/// type scale reaches it.
+///
+/// **The radius is a scale step.** `MlTokens.rPill` and [MlShape.pill] are
+/// both 999; the value is unchanged, the name now says which scale it is on.
 class MlStatusBadge extends StatelessWidget {
   final String label;
   final MlTone tone;
@@ -21,27 +44,41 @@ class MlStatusBadge extends StatelessWidget {
   /// confirmed, orange = maintenance/departed, red = declined/error.
   static MlTone toneForStatus(String status) {
     final s = status.trim().toLowerCase();
-    if (s.contains('otw') || s.contains('transit') || s.contains('on trip') ||
-        s.contains('en route') || s.contains('pending')) {
+    if (s.contains('otw') ||
+        s.contains('transit') ||
+        s.contains('on trip') ||
+        s.contains('en route') ||
+        s.contains('pending')) {
       return MlTone.transit;
     }
-    if (s.contains('at mine') || s.contains('arrived') || s.contains('waiting')) {
+    if (s.contains('at mine') ||
+        s.contains('arrived') ||
+        s.contains('waiting')) {
       return MlTone.atMine;
     }
-    if (s.contains('loaded') || s.contains('available') ||
-        s.contains('approved') || s.contains('confirmed') ||
-        s.contains('completed') || s.contains('active') || s.contains('done')) {
+    if (s.contains('loaded') ||
+        s.contains('available') ||
+        s.contains('approved') ||
+        s.contains('confirmed') ||
+        s.contains('completed') ||
+        s.contains('active') ||
+        s.contains('done')) {
       return MlTone.done;
     }
-    if (s.contains('maintenance') || s.contains('departed') ||
-        s.contains('left') || s.contains('disputed')) {
+    if (s.contains('maintenance') ||
+        s.contains('departed') ||
+        s.contains('left') ||
+        s.contains('disputed')) {
       return MlTone.warn;
     }
     // 'dismissed' was in this list until the dismissal feature was removed
     // (client ruling, 2026-08-11). No status string in the app can carry it any
     // more, so matching on it only invited it back.
-    if (s.contains('declined') || s.contains('error') || s.contains('rejected') ||
-        s.contains('expired') || s.contains('failed')) {
+    if (s.contains('declined') ||
+        s.contains('error') ||
+        s.contains('rejected') ||
+        s.contains('expired') ||
+        s.contains('failed')) {
       return MlTone.error;
     }
     return MlTone.neutral;
@@ -58,39 +95,46 @@ class MlStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = tone.colors(Theme.of(context).brightness);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: colors.bg,
-        borderRadius: BorderRadius.circular(MlTokens.rPill),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (dot) ...[
-            Container(
-              width: 6,
-              height: 6,
-              decoration:
-                  BoxDecoration(color: colors.fg, shape: BoxShape.circle),
+    final theme = Theme.of(context);
+    final colors = tone.colors(theme.brightness);
+
+    return Semantics(
+      // Announced as written; rendered uppercase below.
+      label: label,
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: colors.bg,
+          borderRadius: MlShape.pill,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (dot) ...[
+              Container(
+                width: 6,
+                height: 6,
+                decoration:
+                    BoxDecoration(color: colors.fg, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 6),
+            ],
+            Flexible(
+              child: Text(
+                label.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: colors.fg,
+                  height: 1.3,
+                ),
+              ),
             ),
-            const SizedBox(width: 6),
           ],
-          Text(
-            label.toUpperCase(),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.6,
-              color: colors.fg,
-              height: 1.3,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

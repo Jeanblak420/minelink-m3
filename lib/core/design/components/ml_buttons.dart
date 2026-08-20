@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_motion.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 enum _MlButtonKind { primary, go, leave, tonal, outline, ghost, danger }
@@ -263,8 +264,11 @@ class _MlButtonState extends State<MlButton> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: AnimatedContainer(
-        duration: MlTokens.durFast,
-        curve: Curves.easeOut,
+        // Through MlMotion, so the hover lift stops when the user has asked
+        // the system to stop moving things. A bare Duration + Curves pair
+        // never consults MediaQuery.disableAnimations.
+        duration: MlMotion.of(context, MlMotion.stateChange),
+        curve: MlMotion.curveOf(context, MlMotion.standard),
         transform: Matrix4.translationValues(
             0, _hovered && enabled ? -1 : 0, 0),
         decoration: BoxDecoration(

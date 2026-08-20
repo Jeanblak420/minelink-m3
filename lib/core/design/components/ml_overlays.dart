@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_motion.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 /// MineLink modal: navy scrim (~45%), 16px card, fade+pop entrance,
@@ -16,7 +17,7 @@ Future<T?> showMlModal<T>(
     barrierDismissible: barrierDismissible,
     barrierLabel: title,
     barrierColor: MlTokens.barrierStrong,
-    transitionDuration: MlTokens.durBase,
+    transitionDuration: MlMotion.of(context, MlMotion.enter),
     pageBuilder: (context, _, __) {
       final semantic = MlSemantic.of(context);
       return SafeArea(
@@ -106,7 +107,7 @@ Future<T?> showMlModal<T>(
     transitionBuilder: (context, animation, _, child) {
       final curved = CurvedAnimation(
         parent: animation,
-        curve: Curves.easeOutCubic,
+        curve: MlMotion.curveOf(context, MlMotion.decelerate),
       );
       return FadeTransition(
         opacity: curved,
@@ -139,7 +140,7 @@ Future<T?> showMlSlideOver<T>(
     barrierDismissible: true,
     barrierLabel: title,
     barrierColor: MlTokens.barrierSoft,
-    transitionDuration: MlTokens.durSlideOver,
+    transitionDuration: MlMotion.of(context, MlMotion.page),
     pageBuilder: (context, _, __) {
       final semantic = MlSemantic.of(context);
       final maxW = MediaQuery.sizeOf(context).width * 0.92;
@@ -245,7 +246,7 @@ Future<T?> showMlSlideOver<T>(
     transitionBuilder: (context, animation, _, child) {
       final curved = CurvedAnimation(
         parent: animation,
-        curve: Curves.easeOutCubic,
+        curve: MlMotion.curveOf(context, MlMotion.decelerate),
       );
       return SlideTransition(
         position: Tween(

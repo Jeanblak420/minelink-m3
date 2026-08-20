@@ -194,7 +194,13 @@ class _DeactivateAccountCardState extends State<DeactivateAccountCard> {
         ),
         if (trailing != null) ...[
           const SizedBox(width: 10),
-          trailing,
+          // Flexible, not bare. A Row hands a non-flex child UNBOUNDED width
+          // (CLAUDE.md §10.4), so the status badge measured at its natural
+          // width and its own `overflow: ellipsis` could never engage — the
+          // header simply overflowed instead. At 360px / text scale 1.3 the
+          // "Pending review" badge was inside its box by well under a pixel,
+          // so any change to the badge's metrics tipped it over, and one did.
+          Flexible(child: trailing),
         ],
       ],
     );
