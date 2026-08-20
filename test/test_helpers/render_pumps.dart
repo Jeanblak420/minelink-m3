@@ -33,9 +33,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// How long `RawScrollbar` takes to fade a thumb in. Not exported by Flutter
-/// (`_kScrollbarFadeDuration`), so it is restated — and the final pump below is
-/// comfortably longer than it.
+/// (`_kScrollbarFadeDuration`), so it is restated.
 const Duration kScrollbarFade = Duration(milliseconds: 300);
+
+/// The longest animation the design system runs on data arriving.
+///
+/// `MlMotion.count` — the stat-card count-up, `Durations.extralong2`. It is the
+/// slowest thing on a screen and it starts LAST, because it cannot start until
+/// the figure exists. That combination is what the final pump has to cover.
+const Duration kCountUp = Duration(milliseconds: 800);
 
 /// Settle a freshly-pumped widget tree to the point where it can be
 /// photographed.
@@ -65,10 +71,20 @@ Future<void> pumpForCapture(WidgetTester tester) async {
     }
   });
 
-  // 4. A LAST TIMED pump — the one that was missing.
+  // 4. A LAST TIMED pump — the one that was missing, and then too short.
   //
-  //    Long enough for a fade that only began at step 2 to finish. A bare
+  //    Long enough for anything that only began at step 2 to FINISH. A bare
   //    `pump()` does not move the clock at all, which is what left every
   //    future-fed table's scrollbar captured at zero opacity.
-  await tester.pump(kScrollbarFade + const Duration(milliseconds: 100));
+  //
+  //    It was `kScrollbarFade + 100`, which covered the fade and missed the
+  //    count-up by 50ms. Measured 2026-08-20 on the supervisor's stockpiles:
+  //    three piles whose fixture values are 128.4, 18.0 and 412.6 photographed
+  //    as **128.254, 17.98 and 412.131** — every one of them 99.886% of the
+  //    real figure, which is a `TweenAnimationBuilder` caught one frame short.
+  //
+  //    A render that prints a tonnage nobody entered is worse than no render:
+  //    it is a picture of a number, and the number is wrong. Sized to the
+  //    longest animation the system has rather than to the one that bit first.
+  await tester.pump(kCountUp + const Duration(milliseconds: 200));
 }

@@ -39,6 +39,14 @@ import 'package:flutter_application_1/features/fleet/screens/fleet_management_sc
 import 'package:flutter_application_1/features/operations/screens/operations_hub_screen.dart';
 import 'package:flutter_application_1/features/chat/screens/communications_hub_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_portal_dashboard_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_loads_value_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/earnings_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_production_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_quality_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/supervisor_view_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_maintenance_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_routes_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/trucks_on_route_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/driver_navigation_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/driver_routes_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/load_controller_screen.dart';
@@ -625,6 +633,164 @@ void main() {
         ),
         const Size(412, 1100),
         'screen-profile-setup-phone-dark',
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // THE REST OF THE WORKING DAY.
+  //
+  // Every screen in this group is swept with rows by
+  // `portal_overflow_sweep_test.dart`, which is what fails a build. These are
+  // the pictures — the thing a sweep cannot give you, and the thing every
+  // defect this phase was found by.
+  group('the rest of the working day', () {
+    testWidgets('mine production — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const MineProductionScreen(),
+          title: 'Fixture Chrome Mine',
+          subtitle: 'Production',
+          orgType: OrgType.mineSupplier,
+          role: UserRole.admin,
+          selectedRoute: '/portal/mine/production',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 2000),
+        'screen-mine-production-desktop-dark',
+      );
+    });
+
+    testWidgets('mine quality — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const MineQualityScreen(),
+          title: 'Fixture Chrome Mine',
+          subtitle: 'Quality',
+          orgType: OrgType.mineSupplier,
+          role: UserRole.admin,
+          selectedRoute: '/portal/mine/quality',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1500),
+        'screen-mine-quality-desktop-dark',
+      );
+    });
+
+    // The supervisor's stockpiles: the +30t collect-ready flow CLAUDE.md §4
+    // describes, with one pile over the threshold and one under it.
+    testWidgets('supervisor & stockpiles — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const SupervisorViewScreen(),
+          title: 'Fixture Chrome Mine',
+          subtitle: 'Supervisor',
+          orgType: OrgType.mineSupplier,
+          role: UserRole.supervisorForeman,
+          selectedRoute: '/portal/mine/stockpiles',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1600),
+        'screen-supervisor-stockpiles-desktop-dark',
+      );
+    });
+
+    testWidgets('transporter routes & dispatches — desktop dark',
+        (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const TransporterRoutesScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Routes & dispatches',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter/routes',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1500),
+        'screen-transporter-routes-desktop-dark',
+      );
+    });
+
+    testWidgets('transporter maintenance — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const TransporterMaintenanceScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Maintenance',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter/maintenance',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1600),
+        'screen-transporter-maintenance-desktop-dark',
+      );
+    });
+
+    testWidgets('earnings — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const EarningsScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Earnings',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter/earnings',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1900),
+        'screen-earnings-desktop-dark',
+      );
+    });
+
+    // Light, and the buyer's money screen: the one place a customer reads
+    // invoice variance, and the light theme's densest table.
+    testWidgets('buyer loads & value — desktop light', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.light,
+          child: const BuyerLoadsValueScreen(),
+          title: 'Fixture Metals',
+          subtitle: 'Loads & value',
+          orgType: OrgType.buyer,
+          role: UserRole.admin,
+          selectedRoute: '/portal/buyer/loads-value',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1700),
+        'screen-buyer-loads-value-desktop-light',
+      );
+    });
+
+    testWidgets('trucks on route — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const TrucksOnRouteScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Trucks on route',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter/trucks',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 1500),
+        'screen-trucks-on-route-phone-dark',
       );
     });
   });
