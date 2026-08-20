@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/portal/screens/tons_out_detail_screen.dart';
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
 import 'package:flutter_application_1/features/portal/utils/tons_out_mapping.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
 
 /// The searchable, sortable view of the same loads the recon table shows.

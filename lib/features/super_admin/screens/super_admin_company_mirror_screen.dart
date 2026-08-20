@@ -22,7 +22,7 @@ import 'package:flutter_application_1/features/super_admin/data/models/company_m
 import 'package:flutter_application_1/features/super_admin/screens/company_employee_register_screen.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/features/super_admin/utils/super_admin_insights_export.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_control_room_palette.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';

@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/widgets/multi_file_drop_picker.dart';
 import 'package:flutter_application_1/features/portal/models/load_quality.dart';
 import 'package:flutter_application_1/features/portal/services/quality_service.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 
 /// Attach/edit the quality certificate on a delivered load (mine side):

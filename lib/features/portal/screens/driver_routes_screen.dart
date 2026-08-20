@@ -22,10 +22,9 @@ import 'package:flutter_application_1/features/portal/services/reconciliation_se
 import 'package:flutter_application_1/features/portal/widgets/driver_live_tracking_card.dart';
 import 'package:flutter_application_1/features/portal/widgets/driver_resolution_error.dart';
 import 'package:flutter_application_1/features/portal/widgets/pod_photo_link.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/portal/widgets/photo_capture_field.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
-import 'package:flutter_application_1/core/design/components/ml_page_body.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/features/profile/widgets/signature_required_prompt.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';

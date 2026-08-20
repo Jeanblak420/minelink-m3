@@ -40,7 +40,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/features/portal/providers/mirror_company_context_provider.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml_empty_state.dart';
+import 'package:flutter_application_1/core/design/components/ml_empty_state.dart';
 
 import 'package:flutter_application_1/features/portal/screens/buyer_loads_value_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_reconciliations_screen.dart';

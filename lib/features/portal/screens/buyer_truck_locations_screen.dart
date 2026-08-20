@@ -5,9 +5,7 @@ import 'package:flutter_application_1/features/portal/providers/truck_highlight_
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
 import 'package:flutter_application_1/features/portal/widgets/truck_locations_panel.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
-import 'package:flutter_application_1/core/design/components/ml_page_body.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
-import 'package:flutter_application_1/core/design/components/ml_page_header.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 class BuyerTruckLocationsScreen extends ConsumerWidget {
   const BuyerTruckLocationsScreen({super.key});

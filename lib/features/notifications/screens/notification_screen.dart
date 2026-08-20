@@ -11,7 +11,7 @@ import 'package:flutter_application_1/features/portal/providers/portal_workspace
 import 'package:flutter_application_1/core/routing/notifications_inbox_route.dart';
 import 'package:flutter_application_1/core/routing/notifications_manage_route.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/platform_role.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:go_router/go_router.dart';

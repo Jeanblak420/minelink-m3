@@ -37,9 +37,7 @@ import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/m
 import 'package:flutter_application_1/features/super_admin/widgets/transporters_overview/overview_models.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/transporters_overview/transporters_overview_body.dart';
 import 'package:flutter_application_1/features/portal/models/raw_recon_row.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
-import 'package:flutter_application_1/core/design/components/ml_page_body.dart';
-import 'package:flutter_application_1/core/design/components/ml_page_header.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/super_admin/screens/transporters_overview_v2_screen.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -61,8 +59,6 @@ import 'package:flutter_application_1/features/portal/screens/load_controller_sc
 import 'package:flutter_application_1/features/portal/screens/portal_tons_out_screen.dart';
 
 import '../fixtures/ml_sample_data.dart';
-import 'package:flutter_application_1/core/design/components/ml_expiry_notice.dart';
-import 'package:flutter_application_1/core/design/components/ml_locked_action.dart';
 import 'package:flutter_application_1/features/portal/models/company_access.dart';
 import 'package:flutter_application_1/features/chat/models/messaging_models.dart';
 

@@ -8,13 +8,11 @@ import 'package:flutter_application_1/features/portal/utils/portal_company_resol
 import 'package:flutter_application_1/features/portal/utils/request_grouping.dart';
 import 'package:flutter_application_1/features/portal/widgets/available_routes_section.dart';
 import 'package:flutter_application_1/features/portal/widgets/order_fill_line.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/portal/widgets/request_attachment_chips.dart';
 import 'package:flutter_application_1/features/portal/widgets/request_dialogs.dart';
 import 'package:flutter_application_1/features/portal/widgets/request_tracking_view.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
-import 'package:flutter_application_1/core/design/components/ml_page_body.dart';
-import 'package:flutter_application_1/core/design/components/ml_page_header.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 
 /// "Requests" — raise a transportation request and track its review status

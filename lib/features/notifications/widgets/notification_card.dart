@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/notifications/models/notification_model.dart';
 import 'package:flutter_application_1/features/notifications/services/notification_service.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Type → (icon, tone) mapping, mirroring `ui_kits/notifications/screens.jsx`

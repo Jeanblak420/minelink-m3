@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml_buttons.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml_empty_state.dart';
+import 'package:flutter_application_1/core/design/components/ml_buttons.dart';
+import 'package:flutter_application_1/core/design/components/ml_empty_state.dart';
 
 /// The panel a portal screen shows when its data could not be loaded.
 ///

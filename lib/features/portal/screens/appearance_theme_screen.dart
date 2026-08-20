@@ -5,7 +5,7 @@ import 'package:flutter_application_1/core/theme/theme_mode_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/mine_appearance_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/portal_workspace_provider.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_mine_premium_theme.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// Appearance & theme settings page.
 ///

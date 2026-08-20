@@ -7,7 +7,7 @@ import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 import 'package:flutter_application_1/core/routing/app_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_application_1/core/utils/image_provider_utils.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class CompanySelectionScreen extends ConsumerStatefulWidget {

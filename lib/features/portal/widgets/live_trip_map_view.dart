@@ -14,7 +14,7 @@ import 'package:flutter_application_1/features/portal/providers/hazard_provider.
 import 'package:flutter_application_1/features/portal/providers/live_tracking_provider.dart';
 import 'package:flutter_application_1/features/portal/widgets/live_truck_marker.dart';
 import 'package:flutter_application_1/features/portal/widgets/map_fit.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Live trip map (§4 Live GPS tracking): every active trip the caller may see,

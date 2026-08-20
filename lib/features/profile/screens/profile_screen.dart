@@ -21,7 +21,7 @@ import 'package:flutter_application_1/features/profile/widgets/company_token_req
 import 'package:flutter_application_1/features/profile/widgets/deactivate_account_card.dart';
 import 'package:flutter_application_1/features/profile/widgets/profile_signature_card.dart';
 import 'package:flutter_application_1/features/portal/widgets/company_locations_section.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/profile_setup/providers/profile_setup_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// A company name rendered as a link. Tapping navigates the super-admin to that
 /// company's profile (`/super-admin/organization/:id`).

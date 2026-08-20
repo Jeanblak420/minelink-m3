@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/core/config/supabase_config.dart';
 import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// One-time-code entry for WhatsApp OTP login / re-verification.
 ///

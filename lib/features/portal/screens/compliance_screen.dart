@@ -9,12 +9,10 @@ import 'package:flutter_application_1/features/fleet/providers/fleet_provider.da
 import 'package:flutter_application_1/features/portal/models/compliance_document.dart';
 import 'package:flutter_application_1/features/portal/services/compliance_service.dart';
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/profile_setup/providers/profile_setup_provider.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
-import 'package:flutter_application_1/core/design/components/ml_page_body.dart';
-import 'package:flutter_application_1/core/design/components/ml_page_header.dart';
 
 /// Compliance register: every expiring document this company manages — vehicles
 /// (registration, COF, licence disc, insurance/GIT), drivers (licence, PrDP,

@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/utils/logger.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/profile/models/account_deactivation_request.dart';
 import 'package:flutter_application_1/features/profile/services/account_deactivation_service.dart';
 

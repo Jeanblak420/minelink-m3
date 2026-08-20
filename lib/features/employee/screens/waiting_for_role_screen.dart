@@ -5,7 +5,7 @@ import 'package:flutter_application_1/features/employee/providers/employee_statu
 import 'package:flutter_application_1/features/employee/widgets/employee_status_timeline.dart';
 import 'package:flutter_application_1/features/auth/services/logout_service.dart';
 import 'package:flutter_application_1/core/widgets/back_button_handler.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 class WaitingForRoleScreen extends ConsumerStatefulWidget {
   const WaitingForRoleScreen({super.key});

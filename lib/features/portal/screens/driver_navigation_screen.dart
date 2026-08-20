@@ -32,7 +32,7 @@ import 'package:flutter_application_1/features/portal/services/routing_service.d
 import 'package:flutter_application_1/features/portal/utils/nav_math.dart';
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
 import 'package:flutter_application_1/features/portal/widgets/hazard_report_sheet.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/portal/widgets/security_confirmation_dialog.dart';
 import 'package:flutter_application_1/features/portal/widgets/waypoint_progress_bar.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';

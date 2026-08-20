@@ -6,7 +6,7 @@ import 'package:flutter_application_1/core/mcp/repositories/company_repository.d
 import 'package:flutter_application_1/core/widgets/infinite_list.dart';
 import 'package:flutter_application_1/core/utils/image_provider_utils.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// Provider for the company repository
 final companyRepositoryProvider = Provider<CompanyRepository>((ref) {

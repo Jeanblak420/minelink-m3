@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml_card.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml_icon_well.dart';
+import 'package:flutter_application_1/core/design/components/ml_card.dart';
+import 'package:flutter_application_1/core/design/components/ml_icon_well.dart';
 
 /// KPI stat tile, in the reference's treatment.
 ///

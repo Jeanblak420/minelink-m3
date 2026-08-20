@@ -6,7 +6,7 @@ import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/chat/providers/messaging_providers.dart';
 import 'package:flutter_application_1/features/company/services/company_service.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// Create an organisation group chat (S8-3 / P10-08).
 ///

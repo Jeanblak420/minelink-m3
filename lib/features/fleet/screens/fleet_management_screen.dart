@@ -10,7 +10,7 @@ import 'package:flutter_application_1/features/fleet/widgets/add_vehicle_form.da
 import 'package:flutter_application_1/features/fleet/widgets/edit_vehicle_dialog.dart';
 import 'package:flutter_application_1/features/fleet/widgets/driver_assignment_dialog.dart';
 import 'package:flutter_application_1/features/fleet/widgets/fleet_vehicle_table.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 class FleetManagementScreen extends ConsumerWidget {
   const FleetManagementScreen({super.key});

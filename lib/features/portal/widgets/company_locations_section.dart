@@ -6,7 +6,7 @@ import 'package:flutter_application_1/features/portal/models/company_location.da
 import 'package:flutter_application_1/features/portal/providers/company_location_provider.dart';
 import 'package:flutter_application_1/features/portal/utils/maps_short_link.dart';
 import 'package:flutter_application_1/features/portal/widgets/location_picker.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 
 /// "Locations" on the company profile (spec 2026-07-16 §3): named map points,

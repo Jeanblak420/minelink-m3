@@ -11,7 +11,7 @@ import 'package:flutter_application_1/core/routing/waybill_link.dart';
 import 'package:flutter_application_1/features/portal/models/waybill_data.dart';
 import 'package:flutter_application_1/features/portal/services/trip_waybill_builder.dart';
 import 'package:flutter_application_1/features/portal/services/waybill_pdf.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// Pops up the **real, linked waybill** for a trip as an in-app modal — the same
 /// server-authoritative copy the Load Controller / Driver see (built from

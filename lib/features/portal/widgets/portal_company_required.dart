@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 import 'package:flutter_application_1/features/company/providers/company_provider.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// What a portal screen shows when [resolvePortalCompanyId] returns null
 /// (P4-02).

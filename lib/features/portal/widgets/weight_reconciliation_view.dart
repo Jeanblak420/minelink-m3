@@ -7,7 +7,7 @@ import 'package:flutter_application_1/features/portal/services/dispute_service.d
 import 'package:flutter_application_1/features/portal/services/recon_exporter.dart';
 import 'package:flutter_application_1/features/portal/services/reconciliation_service.dart';
 import 'package:flutter_application_1/features/portal/widgets/dispute_widgets.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/portal/widgets/pod_photo_link.dart';
 import 'package:flutter_application_1/features/portal/utils/variance_severity.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';

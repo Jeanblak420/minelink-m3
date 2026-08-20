@@ -4,7 +4,7 @@ import 'package:flutter_application_1/core/routing/notifications_inbox_route.dar
 import 'package:flutter_application_1/features/notifications/providers/notification_provider.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 class AnimatedNotificationBell extends ConsumerStatefulWidget {
   const AnimatedNotificationBell({super.key});

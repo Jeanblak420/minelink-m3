@@ -6,7 +6,7 @@ import 'package:flutter_application_1/core/config/supabase_config.dart';
 import 'package:flutter_application_1/core/routing/app_router.dart';
 import 'package:flutter_application_1/core/utils/auth_error_message.dart';
 import 'package:flutter_application_1/core/utils/validators.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// Shown after login when `profiles.must_change_password` is true (platform-registered company).
 class MandatoryPasswordChangeScreen extends ConsumerStatefulWidget {

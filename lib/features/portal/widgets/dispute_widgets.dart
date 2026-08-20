@@ -6,7 +6,7 @@ import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/recon_dispute.dart';
 import 'package:flutter_application_1/features/portal/services/dispute_service.dart';
 import 'package:flutter_application_1/features/portal/services/reconciliation_service.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 
 /// Status → design tone (CLAUDE.md §5). open = needs attention (warn),

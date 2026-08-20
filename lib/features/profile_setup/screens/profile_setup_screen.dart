@@ -7,7 +7,7 @@ import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/core/widgets/multi_file_drop_picker.dart';
 import 'package:flutter_application_1/features/company/providers/company_provider.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/profile/services/signature_service.dart';
 import 'package:flutter_application_1/features/profile/widgets/profile_signature_card.dart';
 import 'package:flutter_application_1/features/profile_setup/models/profile_setup.dart';

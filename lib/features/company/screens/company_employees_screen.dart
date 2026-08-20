@@ -12,7 +12,7 @@ import 'package:flutter_application_1/features/company/widgets/company_employee_
 import 'package:flutter_application_1/features/employee/models/employee_model.dart';
 import 'package:flutter_application_1/features/employee/screens/employee_profile_screen.dart';
 import 'package:flutter_application_1/features/company/widgets/seat_limit_dialog.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/profile_setup/providers/profile_setup_provider.dart';
 import 'package:go_router/go_router.dart';
 

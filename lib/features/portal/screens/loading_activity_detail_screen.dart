@@ -7,7 +7,7 @@ import 'package:flutter_application_1/features/portal/utils/portal_company_resol
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
 import 'package:flutter_application_1/features/portal/models/trip_status.dart';
 import 'package:flutter_application_1/features/portal/utils/trip_status_tone.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Full loading-activity view: the same incoming / scheduled signal as the

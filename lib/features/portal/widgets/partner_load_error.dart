@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 
 import 'package:flutter_application_1/features/portal/providers/logistics_provider.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// Shown when the partner-companies read fails (P2-04 / P2-09).
 ///

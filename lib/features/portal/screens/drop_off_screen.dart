@@ -7,10 +7,8 @@ import 'package:flutter_application_1/features/portal/models/trip_waypoint.dart'
 import 'package:flutter_application_1/features/portal/providers/trip_waypoint_provider.dart';
 import 'package:flutter_application_1/features/portal/utils/maps_link.dart';
 import 'package:flutter_application_1/features/portal/widgets/location_picker.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
-import 'package:flutter_application_1/core/design/components/ml_page_body.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
-import 'package:flutter_application_1/core/design/components/ml_page_header.dart';
 
 /// `/portal/transporter/drop-off/:tripId` (phase-5 T8, design §3.5) — set or
 /// move a trip's final drop-off waypoint (waypoint 6 of the MG→WB→LP→WB→MG→

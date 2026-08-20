@@ -10,7 +10,7 @@ import 'package:flutter_application_1/features/company/models/company_model.dart
 import 'package:flutter_application_1/features/company/providers/company_provider.dart';
 import 'package:flutter_application_1/features/employee/models/employee_model.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';

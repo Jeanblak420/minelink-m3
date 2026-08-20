@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 
 enum DocumentType { idDocument, passport, workVisa, license }

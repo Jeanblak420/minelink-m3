@@ -29,7 +29,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml_stat_card.dart';
+import 'package:flutter_application_1/core/design/components/ml_stat_card.dart';
 
 Future<void> _loadFont(String family, List<String> files) async {
   final loader = FontLoader(family);

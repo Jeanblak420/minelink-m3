@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_application_1/features/employee/models/employee_model.dart';
 import 'package:flutter_application_1/features/company/models/company_model.dart';
 import 'package:flutter_application_1/features/employee/models/employee_status_model.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// A timeline widget that displays the employee's approval process stages
 class EmployeeStatusTimeline extends ConsumerWidget {

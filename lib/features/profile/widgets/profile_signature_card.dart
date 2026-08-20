@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/profile/services/signature_service.dart';
 import 'package:flutter_application_1/features/profile/widgets/signature_pad.dart';
 import 'package:flutter_application_1/features/profile_setup/providers/profile_setup_provider.dart';

@@ -10,7 +10,7 @@ import 'package:flutter_application_1/features/portal/providers/lifecycle_provid
 import 'package:flutter_application_1/features/portal/providers/security_confirmation_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/workflow_notification_provider.dart';
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';

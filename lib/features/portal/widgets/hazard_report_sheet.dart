@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// What the driver filled in on the hazard report sheet. The caller supplies
 /// the position (reports are always made AT the reporter's current location)

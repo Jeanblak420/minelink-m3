@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/profile/models/account_deactivation_request.dart';
 import 'package:flutter_application_1/features/profile/services/account_deactivation_service.dart';
 import 'package:flutter_application_1/features/profile/widgets/deactivate_account_card.dart';

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:flutter_application_1/core/services/storage_asset_service.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// Opens the POD photo at [path] (private `pod_photos` bucket) via a
 /// short-lived signed URL. Every party on the trip's transaction — mine,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/features/portal/models/trip_waypoint.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// Ordered waypoint chips for a trip's mine-nav sequence (phase-5 design §3.2):
 /// Main Gate → Weighbridge → Loading Point → Weighbridge → Main Gate →

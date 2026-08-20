@@ -31,7 +31,7 @@ import 'package:flutter_application_1/features/profile_setup/widgets/profile_set
 import 'package:flutter_application_1/features/employee/services/employee_profile_pdf.dart';
 import 'package:flutter_application_1/features/employee/services/employee_profile_service.dart';
 import 'package:flutter_application_1/features/portal/screens/compliance_screen.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 

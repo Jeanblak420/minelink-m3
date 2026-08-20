@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml_icon_well.dart';
+import 'package:flutter_application_1/core/design/components/ml_icon_well.dart';
 
 /// Honest, instructive empty state: faint icon in a well, short title,
 /// one calm explanatory sentence, optional action.

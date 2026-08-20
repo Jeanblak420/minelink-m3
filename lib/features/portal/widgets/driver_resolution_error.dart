@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml_empty_state.dart';
+import 'package:flutter_application_1/core/design/components/ml_empty_state.dart';
 
 /// Shown on a driver screen when its trip / assignment data could not be
 /// resolved because a query failed (RLS denial, dropped connection, schema

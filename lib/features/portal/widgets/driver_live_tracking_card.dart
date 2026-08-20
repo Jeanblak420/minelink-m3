@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_application_1/features/portal/providers/live_tracking_provider.dart';
 import 'package:flutter_application_1/features/portal/services/trip_position_reporter.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// The driver's live GPS-sharing toggle (30s pings via

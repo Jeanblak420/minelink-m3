@@ -33,7 +33,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_application_1/features/portal/models/raw_recon_row.dart';
 import 'package:flutter_application_1/features/portal/services/reconciliation_service.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml_stat_card.dart';
+import 'package:flutter_application_1/core/design/components/ml_stat_card.dart';
 import 'package:flutter_application_1/features/portal/widgets/raw_recon_view.dart';
 
 /// CLAUDE.md §4, verbatim and in order. Written out rather than imported so

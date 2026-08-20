@@ -5,7 +5,7 @@ import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 import 'package:flutter_application_1/features/auth/widgets/auth_shell.dart';
 import 'package:flutter_application_1/core/utils/validators.dart';
 import 'package:flutter_application_1/core/routing/app_router.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});

@@ -16,7 +16,7 @@ import 'package:flutter_application_1/features/chat/providers/messaging_provider
 import 'package:flutter_application_1/features/super_admin/widgets/token_generator_dialog.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/token_access_details.dart';
 import 'package:flutter_application_1/features/super_admin/utils/audit_log_csv_exporter.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 
 String _nz(String? v) => (v != null && v.trim().isNotEmpty) ? v.trim() : '—';

@@ -14,11 +14,10 @@ import 'package:flutter_application_1/features/portal/services/logistics_service
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
 import 'package:flutter_application_1/features/portal/widgets/available_routes_section.dart';
 import 'package:flutter_application_1/features/portal/widgets/dashboard/portal_dashboard_kit.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_charts.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screens_core.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
-import 'package:flutter_application_1/core/design/components/ml_page_body.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// The Buyer dashboard (P7-20, P7-22, P7-24, P7-25).

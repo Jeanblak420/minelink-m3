@@ -3,7 +3,7 @@ import 'package:flutter_application_1/core/layout/app_breakpoints.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/fleet_vehicle_model.dart';
-import 'package:flutter_application_1/features/portal/widgets/ml/ml.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 class FleetVehicleTable extends StatelessWidget {
