@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_application_1/core/config/supabase_config.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/models.dart';
@@ -21,35 +20,11 @@ class TokenRequestsScreen extends ConsumerStatefulWidget {
 }
 
 class _TokenRequestsScreenState extends ConsumerState<TokenRequestsScreen> {
-  RealtimeChannel? _channel;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _subscribeRealtime());
-  }
-
-  void _subscribeRealtime() {
-    _channel?.unsubscribe();
-    _channel = SupabaseConfig.client
-        .channel('token-requests-ui')
-        ..onPostgresChanges(
-          event: PostgresChangeEvent.all,
-          schema: 'public',
-          table: 'token_requests',
-          callback: (_) {
-            ref.invalidate(openTokenRequestsProvider);
-            ref.invalidate(dashboardStatsProvider);
-          },
-        )
-        ..subscribe();
-  }
-
-  @override
-  void dispose() {
-    _channel?.unsubscribe();
-    super.dispose();
-  }
+  // The realtime channel used to be opened HERE, from a post-frame callback in
+  // `initState`, straight onto `SupabaseConfig.client` — the only screen in the
+  // product that did, and the thing CLAUDE.md §6 forbids by name. It lives in
+  // `tokenRequestsRealtimeProvider` now; see that provider for what it cost.
+  // Watching it in `build` is what keeps it alive, and Riverpod disposes it.
 
   String? get _currentUserId => Supabase.instance.client.auth.currentUser?.id;
 
@@ -78,6 +53,9 @@ class _TokenRequestsScreenState extends ConsumerState<TokenRequestsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Opens the channel and keeps it open for as long as this screen is on
+    // screen. A test overrides it with a no-op.
+    ref.watch(tokenRequestsRealtimeProvider);
     final async = ref.watch(openTokenRequestsProvider);
     return Scaffold(
       body: async.when(
@@ -146,7 +124,7 @@ class _TokenRequestsScreenState extends ConsumerState<TokenRequestsScreen> {
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              '${r.requestKindLabel} · ${r.organizationType}',
+                              '${r.requestKindLabel} · ${r.organizationTypeLabel}',
                               style: context.mlText.bodyMedium.copyWith(
                                 color: semantic.textMuted,
                               ),
@@ -381,7 +359,7 @@ class _RequestDetailPanelState extends ConsumerState<_RequestDetailPanel> {
           ),
           const SizedBox(height: 8),
           Text('Kind: ${r.requestKindLabel}'),
-          Text('Org type: ${r.organizationType}'),
+          Text('Org type: ${r.organizationTypeLabel}'),
           Text('Seats: ${r.currentSeatsUsed} / ${r.currentSeatLimit}'),
           if (r.requestKind == 'seat_expansion')
             Text('Requested total: ${r.requestedNewTotal} (+${r.requestedExtraSeats})'),

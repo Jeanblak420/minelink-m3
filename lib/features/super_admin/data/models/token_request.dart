@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
+
 /// Company token / seat request (platform queue).
 class TokenRequest {
   final String id;
@@ -101,6 +103,20 @@ class TokenRequest {
   bool get isInProgress => status == 'in_progress';
   bool get isApproved => status == 'approved';
   bool get isRejected => status == 'rejected';
+
+  /// [organizationType] as a person reads it.
+  ///
+  /// The raw value is the wire string — `mineSupplier`, `buyer`, `transporter`
+  /// — and the token-requests screen printed it straight, in both the list row
+  /// and the detail sheet: "Seat expansion · mineSupplier". Every other surface
+  /// in the product goes through a label (`OrgType.label`,
+  /// `RequestCompanyInfo.orgTypeLabel`), so this was the one screen showing an
+  /// admin the database's vocabulary. Found 2026-08-20 by photographing it.
+  ///
+  /// Falls back to the raw value rather than to a dash: an unknown org type is
+  /// something to see, not something to hide.
+  String get organizationTypeLabel =>
+      OrgType.tryParse(organizationType)?.label ?? organizationType;
 
   String get requestKindLabel {
     switch (requestKind) {

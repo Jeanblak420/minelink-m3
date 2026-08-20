@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/config/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 import '../data/models/models.dart';
@@ -78,6 +79,44 @@ final organizationSeatsProvider = FutureProvider.family<List<OrganizationSeat>, 
 final openTokenRequestsProvider = FutureProvider<List<TokenRequest>>((ref) async {
   final repo = ref.watch(superAdminRepositoryProvider);
   return repo.getOpenTokenRequests();
+});
+
+/// Keeps [openTokenRequestsProvider] and [dashboardStatsProvider] live while
+/// something is watching it.
+///
+/// ## Why this is a provider and not four lines in the screen
+///
+/// It WAS four lines in the screen: `TokenRequestsScreen.initState` opened a
+/// `SupabaseConfig.client.channel(...)` from a post-frame callback. That is the
+/// only place in this product where a SCREEN dials the database directly —
+/// every other realtime source in `lib/` (18 files, 33 channels) sits behind a
+/// provider or a service — and CLAUDE.md §6 says so in as many words: "Screens
+/// and providers must not call `SupabaseConfig.client` directly."
+///
+/// The cost showed up the first time anyone tried to photograph the screen. A
+/// channel opened from a screen has no seam, so the socket attempt outlived the
+/// widget tree and the golden failed on "A Timer is still pending even after
+/// the widget tree was disposed" — the same failure that kept fleet management,
+/// the operations hub and the communications hub out of the render set until
+/// their notifiers grew a `start()`. A component nobody can reach cannot serve
+/// a preview, a print view, a render or a test.
+///
+/// Behaviour in the running app is unchanged: the screen watches this, the
+/// channel opens, and `ref.onDispose` unsubscribes it when the last watcher
+/// goes — which is what the screen's own `dispose` did by hand.
+final tokenRequestsRealtimeProvider = Provider<void>((ref) {
+  final channel = SupabaseConfig.client.channel('token-requests-ui')
+    ..onPostgresChanges(
+      event: PostgresChangeEvent.all,
+      schema: 'public',
+      table: 'token_requests',
+      callback: (_) {
+        ref.invalidate(openTokenRequestsProvider);
+        ref.invalidate(dashboardStatsProvider);
+      },
+    )
+    ..subscribe();
+  ref.onDispose(() => channel.unsubscribe());
 });
 
 /// Crash report rows for the console screen (Task 4), filtered SERVER-SIDE

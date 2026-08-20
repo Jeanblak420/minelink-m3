@@ -57,6 +57,10 @@ import 'package:flutter_application_1/features/portal/screens/mine_supplier_port
 import 'package:flutter_application_1/features/portal/screens/transporter_reconciliations_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/recon_tables_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/request_review_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/dispute_inbox_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/organization_management_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/targets_platform_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/token_requests_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/margin_ledger_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/super_admin_org_insights_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/transporter_portal_dashboard_screen.dart';
@@ -1491,6 +1495,84 @@ void main() {
         ),
         const Size(412, 1900),
         'screen-requests-mine-transport-phone-dark',
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // THE CONSOLE'S TAIL — the registry, the queues and the targets board.
+  //
+  // Every one of these had been swept and none had been LOOKED AT, and the
+  // strike rate on unlooked-at screens this phase has been 100%.
+  //
+  // The targets board is the one with the most stated rules to break:
+  // CLAUDE.md §4 says a dial with no target reads "Not set" and never "0", an
+  // unreached horizon renders dashed and grey and never red, and the org-type
+  // chart draws a DAILY PACE rather than the month's figure. All three are
+  // things a picture can check and a sweep cannot.
+  group('the console tail', () {
+    testWidgets('targets — platform, desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const TargetsPlatformScreen(),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1900),
+        'screen-targets-platform-desktop-dark',
+      );
+    });
+
+    testWidgets('organizations — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const OrganizationManagementScreen(),
+          extraOverrides: consoleCaptureOverrides(),
+        ),
+        const Size(1600, 1500),
+        'screen-organizations-desktop-dark',
+      );
+    });
+
+    testWidgets('token requests — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const TokenRequestsScreen(),
+          extraOverrides: consoleCaptureOverrides(),
+        ),
+        const Size(1600, 1500),
+        'screen-token-requests-desktop-dark',
+      );
+    });
+
+    testWidgets('disputes — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const DisputeInboxScreen(),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1400),
+        'screen-disputes-desktop-dark',
+      );
+    });
+
+    testWidgets('organizations — phone dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const OrganizationManagementScreen(),
+          extraOverrides: consoleCaptureOverrides(),
+        ),
+        const Size(412, 1800),
+        'screen-organizations-phone-dark',
       );
     });
   });

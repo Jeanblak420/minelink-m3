@@ -84,11 +84,31 @@ class MlStatusBadge extends StatelessWidget {
     return MlTone.neutral;
   }
 
+  /// A wire status as a person reads it: `in_progress` → `in progress`.
+  ///
+  /// Most callers hand this factory a label that is already prose — `Arrived at
+  /// mine`, `LOADED` — and for those this is a no-op, because there is nothing
+  /// to replace. The ones that hand it a raw column value are why it exists:
+  /// the token-requests screen rendered a pill reading **`IN_PROGRESS`**,
+  /// underscore and all, which is the database's vocabulary on an admin's
+  /// screen. Photographed 2026-08-20.
+  ///
+  /// It is done HERE rather than at that call site because the factory is the
+  /// one that says "give me a status" — a caller passing a status is doing the
+  /// right thing, and every future one will pass a raw value too. The badge
+  /// renders uppercase, so the visible change is the separator; the spoken
+  /// label stops saying "in underscore progress".
+  static String humaniseStatus(String status) =>
+      status.replaceAll(RegExp(r'[_-]+'), ' ').trim();
+
   /// Convenience: badge with the tone derived from the status string.
   factory MlStatusBadge.forStatus(String status, {Key? key, bool dot = false}) =>
       MlStatusBadge(
         key: key,
-        label: status,
+        label: humaniseStatus(status),
+        // Tone from the RAW string: `toneForStatus` matches on substrings like
+        // `in_progress` and `sent_back`, and humanising first would change what
+        // it is matching against.
         tone: toneForStatus(status),
         dot: dot,
       );

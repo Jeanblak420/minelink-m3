@@ -20,6 +20,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_application_1/features/super_admin/data/models/company_monthly_ops_stats.dart';
+import 'package:flutter_application_1/features/super_admin/data/models/token_request.dart';
+import 'package:flutter_application_1/features/super_admin/data/models/platform_role.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/features/super_admin/screens/margin_ledger_screen.dart';
 
@@ -217,6 +219,126 @@ MonthlyInsightsBundle kTransporterInsights = MonthlyInsightsBundle(
   rangeEndIso: '2026-08-31',
 );
 
+
+// ---------------------------------------------------------------------------
+// The registry — organisations, seats and token requests
+// ---------------------------------------------------------------------------
+
+/// One organisation row, shaped exactly as `companies` selects it.
+///
+/// `organizationsProvider` returns raw maps rather than a model, so the fixture
+/// has to be a map too. The keys are the column names; getting one wrong shows
+/// up as a blank cell rather than an error, which is why they are written once
+/// here instead of at each call site.
+Map<String, dynamic> _org(
+  String id,
+  String name,
+  String type, {
+  String status = 'active',
+  int seatLimit = 5,
+  int seatsUsed = 4,
+  String tokenExpiresAt = '2026-12-01T08:00:00Z',
+}) =>
+    {
+      'id': id,
+      'company_name': name,
+      'org_type': type,
+      'status': status,
+      'seat_limit': seatLimit,
+      'seats_used': seatsUsed,
+      'created_at': '2026-07-01T08:00:00Z',
+      'token_expires_at': tokenExpiresAt,
+      'physical_address': '12 Long Industrial Road, Emalahleni, Mpumalanga',
+      'email': 'ops@example.com',
+    };
+
+/// The registry, in five states rather than one.
+///
+/// Active, seats FULL, suspended, expired, and a name long enough to test a
+/// row — "Consolidated Mineral Offtake & Logistics Holdings" is the string the
+/// console sweep has used since Phase 2 to find rigid columns, and it belongs
+/// with the rest of the fixture rather than in a test file's private helper.
+final List<Map<String, dynamic>> kOrganizations = [
+  _org('o1', 'Iron Hills Mining', 'mineSupplier'),
+  _org('o2', 'Atlas Buyer Group', 'buyer', seatLimit: 3, seatsUsed: 3),
+  _org('o3', 'Roadhaul Logistics', 'transporter'),
+  _org('o4', 'Consolidated Mineral Offtake & Logistics Holdings', 'buyer',
+      status: 'suspended'),
+  _org('o5', 'Sable Ridge Chrome', 'mineSupplier',
+      status: 'expired', tokenExpiresAt: '2026-08-01T08:00:00Z'),
+];
+
+/// Seat requests waiting on the admin.
+///
+/// One org at its limit asking for more, one asking for a longer token, and one
+/// already being handled by another admin — that last state is the one a second
+/// admin has to see, and a fixture of identical rows cannot show it.
+///
+/// The `requestKind` and `status` strings are the WIRE values the model
+/// switches on (`seat_expansion` / `token_renewal`, `open` / `in_progress`).
+/// The first draft invented `seats` and `validity`, which fall through
+/// `requestKindLabel`'s `default:` — so a token-renewal request rendered as
+/// "Seat expansion", and a row carrying a `handlingDisplayName` with
+/// `status: 'open'` described a state `isInProgress` can never see. Rendering
+/// the screen is what caught both.
+final List<TokenRequest> kTokenRequests = [
+  TokenRequest(
+    id: 'tr-1',
+    organizationId: 'o2',
+    organizationName: 'Atlas Buyer Group',
+    organizationType: 'buyer',
+    requestKind: 'seat_expansion',
+    currentSeatLimit: 3,
+    currentSeatsUsed: 3,
+    requestedExtraSeats: 2,
+    requestedNewTotal: 5,
+    reason: 'Two new procurement officers start on the 1st.',
+    requestedByUserId: 'u-1',
+    requestedByEmail: 'ops@atlas.co.za',
+    status: 'open',
+    createdAt: _ago(const Duration(hours: 9)),
+    updatedAt: _ago(const Duration(hours: 9)),
+  ),
+  TokenRequest(
+    id: 'tr-2',
+    organizationId: 'o1',
+    organizationName: 'Iron Hills Mining',
+    organizationType: 'mineSupplier',
+    requestKind: 'token_renewal',
+    currentSeatLimit: 5,
+    currentSeatsUsed: 4,
+    requestedExtraSeats: 0,
+    requestedNewTotal: 5,
+    requestedValidDays: 365,
+    reason: 'Annual renewal ahead of the token lapsing in December.',
+    requestedByUserId: 'u-2',
+    requestedByEmail: 'admin@ironhills.co.za',
+    status: 'open',
+    createdAt: _ago(const Duration(days: 2)),
+    updatedAt: _ago(const Duration(days: 2)),
+  ),
+  TokenRequest(
+    id: 'tr-3',
+    organizationId: 'o3',
+    organizationName: 'Roadhaul Logistics',
+    organizationType: 'transporter',
+    requestKind: 'seat_expansion',
+    currentSeatLimit: 5,
+    currentSeatsUsed: 5,
+    requestedExtraSeats: 3,
+    requestedNewTotal: 8,
+    reason: 'Three new drivers rostered for the Richards Bay run.',
+    requestedByUserId: 'u-3',
+    requestedByEmail: 'fleet@roadhaul.co.za',
+    status: 'in_progress',
+    handlingUserId: 'admin-2',
+    handlingStartedAt: _ago(const Duration(minutes: 4)),
+    handlingDisplayName: 'Second Admin',
+    createdAt: _ago(const Duration(days: 1)),
+    updatedAt: _ago(const Duration(minutes: 4)),
+  ),
+];
+
 /// Overrides the console's own data providers.
 ///
 /// `monthlyInsightsBundleProvider` is a family keyed by org type and is
@@ -227,4 +349,18 @@ List<Override> consoleCaptureOverrides() => [
       marginLedgerProvider.overrideWith((ref) async => kMarginLedger),
       monthlyInsightsBundleProvider
           .overrideWith((ref, _) async => kTransporterInsights),
+      organizationsProvider.overrideWith((ref) async => kOrganizations),
+      openTokenRequestsProvider.overrideWith((ref) async => kTokenRequests),
+      // The console's own screens gate on this: without a platform role the
+      // registry renders its restricted notice, which is a real state and not
+      // the one worth photographing.
+      currentPlatformRoleProvider
+          .overrideWith((ref) async => PlatformRole.superGlobalSerialAdminMain),
+      // No socket. `TokenRequestsScreen` keeps a realtime channel alive by
+      // watching this; against the dummy Supabase instance a render harness
+      // uses, that is a real connect attempt whose retry timer outlives the
+      // widget tree — which fails the test with "A Timer is still pending even
+      // after the widget tree was disposed", exactly as the three portal
+      // notifiers did before they grew a `start()`.
+      tokenRequestsRealtimeProvider.overrideWithValue(null),
     ];
