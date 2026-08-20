@@ -563,6 +563,11 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
         AppSidebarPrefs.writePortalExpanded(expanded);
       },
       body: Column(
+        // Stretch. This is the SHELL, so a centred banner here is a centred
+        // banner on every portal screen that shows one: the account-setup nag
+        // and the licence notice would each size to their own text while the
+        // workspace below them ran the full width. A Column centres by default.
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Account-setup nag: renders nothing once setup is complete, and is
           // suppressed on the setup screen itself.

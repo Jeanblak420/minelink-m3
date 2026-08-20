@@ -100,6 +100,10 @@ class OperationsHubScreen extends ConsumerWidget {
           ],
         ),
         body: Column(
+          // See the same note on the communications hub: a Column centres its
+          // children and sizes each to its own content, so this hero card
+          // floated mid-page while the tabs and the list below ran full width.
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _OperationsSummaryHeader(access: access, state: operationsState),
             Padding(

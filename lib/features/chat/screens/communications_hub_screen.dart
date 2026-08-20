@@ -73,6 +73,16 @@ class CommunicationsHubScreen extends ConsumerWidget {
           ],
         ),
         body: Column(
+          // A Column CENTRES its children and sizes each to its own content
+          // unless told otherwise, so the hero card floated in the middle of
+          // the page at whatever width its chips happened to need, while the
+          // tabs and the list below it — which stretch for their own reasons —
+          // ran the full width. One screen, two margins.
+          //
+          // Nothing overflowed and no test failed. It was visible the moment
+          // the screen was first photographed, on 2026-08-20, and invisible
+          // until then.
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),

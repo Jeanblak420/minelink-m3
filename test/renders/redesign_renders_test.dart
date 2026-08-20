@@ -170,6 +170,25 @@ void main() {
     // animations (the live pill, the bell).
     await tester.pump(const Duration(milliseconds: 900));
 
+    // Then load every `Image` for real.
+    //
+    // `Image.asset` reads the bundle asynchronously, and a widget test's fake
+    // async never lets that future complete — so an image resolves only if it
+    // is ALREADY in the global cache, which depends entirely on whether an
+    // earlier test in the same file happened to draw it. The rail's MineLink
+    // wordmark is one, and it is in every render in this file.
+    //
+    // The symptom was a render that passed alone and failed in the suite:
+    // "Pixel test failed, 0.05%, 895px". 895px is the wordmark. The note above
+    // records an earlier "0.04%, 895px" that was hunted as an animation and was
+    // this same thing — an image cache warmed by test order.
+    await tester.runAsync(() async {
+      for (final element in find.byType(Image).evaluate()) {
+        await precacheImage((element.widget as Image).image, element);
+      }
+    });
+    await tester.pump();
+
 
     FlutterError.onError = previousOnError;
     tester.takeException();
@@ -346,36 +365,34 @@ void main() {
   }
 
   group('real screens, real layout', () {
-    // 🚨 THREE SCREENS ARE DELIBERATELY ABSENT: fleet management, the
-    // operations hub and the communications hub. The reason is a real property
-    // of the app and worth keeping.
+    // Fleet management, the operations hub and the communications hub were
+    // DELIBERATELY ABSENT here until 2026-08-20, and the reason is worth
+    // keeping because the fix is not what it looked like.
     //
-    // All three reach the network while building — `FleetNotifier` opens a
-    // Supabase realtime channel UNCONDITIONALLY in its constructor (not behind
-    // a company gate like the others), and the two hubs issue queries. Against
-    // the dummy localhost instance these tests use, that is a real socket
-    // attempt, and it leaves a pending timer. A golden test then fails on "A Timer is
-    // still pending even after the widget tree was disposed" — which is a true
-    // statement, not a harness artefact.
+    // All three reached the network while BUILDING: `FleetNotifier`,
+    // `OperationsNotifier` and `CommunicationsNotifier` each loaded and opened
+    // realtime channels from their CONSTRUCTORS. Against the dummy localhost
+    // instance these tests use that is a real socket attempt, and it leaves a
+    // pending timer — so a golden failed on "A Timer is still pending even
+    // after the widget tree was disposed", which was a true statement rather
+    // than a harness artefact. A sweep survives it (it pumps and ends) while
+    // `expectLater(matchesGoldenFile)` keeps the body alive long enough for the
+    // invariant check to see the timer.
     //
-    // A SWEEP survives this and a GOLDEN does not, because a sweep pumps and
-    // ends while `expectLater(matchesGoldenFile)` keeps the test body alive
-    // long enough for the invariant check to see the timer. So both screens ARE
-    // covered for layout at every width and text scale by
-    // untested_screens_sweep_test; what they lack is a picture.
+    // The note here said this needed "a Supabase transport fake". It did not.
+    // It needed the notifiers to be CONSTRUCTIBLE without a network, which is
+    // `start()` — a seam that matters outside tests too, since a notifier that
+    // dials out from its constructor cannot serve a preview or a print view.
+    // Pumping past the retry never helps, and that is still true: the reconnect
+    // reschedules itself, so each pump creates another timer.
     //
-    // Faking one by stubbing realtime would be a picture of a stub, so there
-    // isn't one. Rendering these properly needs a Supabase transport fake,
-    // which is a piece of test infrastructure rather than a design task.
-    //
-    // Pumping past the retry does not help: the reconnect reschedules itself,
-    // so each pump creates another timer. That was worth trying and worth
-    // recording as tried.
-    //
-    // A golden diff hid this for a while: the first attempts reported "Pixel
-    // test failed, 0.04%, 895px" and I went hunting for an animation. Deleting
-    // the golden let the actual error surface. A failing comparison can mask a
-    // failing test.
+    // AND THE 895px WAS THE WORDMARK. This note used to record "Pixel test
+    // failed, 0.04%, 895px" as something hunted as an animation. It was
+    // `Image.asset` — the rail's MineLink mark, which resolves only if it is
+    // already in the global image cache, which depends on whether an earlier
+    // test in the file happened to draw it. `shoot()` precaches every image
+    // now, and these renders are order-independent. A failing comparison can
+    // still mask a failing test; this one WAS the failing test.
 
     testWidgets('profile setup — desktop light', (tester) async {
       await shoot(

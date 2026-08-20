@@ -378,6 +378,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ],
       ),
       body: Column(
+        // Stretch, or the conditional file-upload panel above the message
+        // list is centred and sized to its own content while the list below
+        // it — an Expanded — runs full width. A Column centres by default.
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // File upload widget (conditionally shown)
           if (_isAttaching)
