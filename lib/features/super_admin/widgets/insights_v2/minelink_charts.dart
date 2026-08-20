@@ -14,6 +14,8 @@
 //   MlMeter          thin progress bar                 (utilisation / seats)
 // ============================================================================
 
+import 'package:intl/intl.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'dart:math' as math;
 import 'dart:ui' show FontFeature, PathMetric;
 import 'package:flutter/material.dart';
@@ -180,11 +182,11 @@ class MlFlagshipTrend extends StatefulWidget {
     this.target,
     this.targetLabel,
     this.latestLabel = '',
-    this.priorLabel = 'Jul 2026',
+    this.priorLabel,
     this.height = 150,
     this.xLabels = const {0: '01', 4: '05', 8: '09', 12: '13', 16: '17'},
     this.unitCaption = 'Daily · Tons',
-    this.monthLabel = 'Aug',
+    this.monthLabel,
   });
 
   final List<double> current;
@@ -196,11 +198,25 @@ class MlFlagshipTrend extends StatefulWidget {
   /// Caption for the target line. Derived from [target] when omitted.
   final String? targetLabel;
   final String latestLabel;
-  final String priorLabel;
+  /// Legend label for the prior series. Defaults to the **previous calendar
+  /// month** in South African time.
+  ///
+  /// It defaulted to the literal `'Jul 2026'`. All three portal dashboards
+  /// pass their own, so that default was only ever one new call site away
+  /// from shipping a year-stale legend.
+  final String? priorLabel;
   final double height;
   final Map<int, String> xLabels;
   final String unitCaption;
-  final String monthLabel;
+  /// Month shown in the crosshair tooltip (`AUG 03`). Defaults to the
+  /// **current** month in South African time.
+  ///
+  /// It defaulted to the literal `'Aug'`, and **not one of the three call
+  /// sites passes it** — so every flagship chart in the portal told every
+  /// buyer, mine and transporter that each point was in August, whatever the
+  /// date. It reads correctly for one month a year, which is exactly why it
+  /// survived: it was written in August and looked right.
+  final String? monthLabel;
 
   @override
   State<MlFlagshipTrend> createState() => _MlFlagshipTrendState();
@@ -208,6 +224,21 @@ class MlFlagshipTrend extends StatefulWidget {
 
 class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
   int? _hoverIndex;
+
+  /// SAST, per CLAUDE.md §7.1 — these name a business month, and the device's
+  /// zone is not the product's.
+  String get _monthLabel =>
+      widget.monthLabel ?? DateFormat('MMM').format(MlTime.now());
+
+  String get _priorLabel {
+    if (widget.priorLabel != null) return widget.priorLabel!;
+    final now = MlTime.now();
+    // Day 1 of this month, minus a day, lands in the previous month whatever
+    // its length — no 30/31 arithmetic to get wrong in February.
+    final prior = DateTime(now.year, now.month, 1)
+        .subtract(const Duration(days: 1));
+    return DateFormat('MMM y').format(prior);
+  }
 
   double _min = 0;
   double _max = 1;
@@ -362,7 +393,7 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${widget.monthLabel} ${(i + 1).toString().padLeft(2, '0')}'
+                '$_monthLabel ${(i + 1).toString().padLeft(2, '0')}'
                     .toUpperCase(),
                 style: TextStyle(
                   fontFamily: MlGlass.mono,
@@ -385,7 +416,7 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
               if (prev != null) ...[
                 const SizedBox(height: 3),
                 Text(
-                  '${widget.priorLabel.split(' ').first} · ${_fmt(prev)} t',
+                  '${_priorLabel.split(' ').first} · ${_fmt(prev)} t',
                   style: TextStyle(
                     fontFamily: MlGlass.mono,
                     fontSize: 10,
@@ -458,7 +489,7 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
             runSpacing: 6,
             children: [
               legend('This period', swatch(t.accent)),
-              legend(widget.priorLabel,
+              legend(_priorLabel,
                   swatch(t.inkMid.withValues(alpha: 0.7), dashed: true)),
               legend('Target', swatch(t.accent2.withValues(alpha: 0.6), dashed: true)),
             ],

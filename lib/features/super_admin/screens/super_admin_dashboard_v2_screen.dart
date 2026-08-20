@@ -83,6 +83,13 @@ class SuperAdminDashboardV2Screen extends ConsumerWidget {
           pendingRequests: vm.pendingRequests,
           registry: vm.registry,
           recentOrgs: vm.recentOrgs,
+          // The view model already derives these three and puts two of them on
+          // the registry tiles as deltas. The screen was drawing hardcoded
+          // stand-ins beside them — see the fields' docs on
+          // MineLinkDashboardScreen. Same `stats` map, same read helper.
+          newCompanies24h: (stats['newCompanies24h'] as num?)?.toInt(),
+          newUsers24h: (stats['newUsers24h'] as num?)?.toInt(),
+          expiredCompanies: (stats['expiredCompanies'] as num?)?.toInt(),
         );
       },
     );

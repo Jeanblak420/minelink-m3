@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_application_1/core/design/shell/ml_nav_rail.dart';
+
 import 'package:flutter_application_1/core/design/tokens/m3/ml_chrome.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_motion.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
@@ -19,6 +21,9 @@ class MlRailBrand extends StatelessWidget {
     this.subtitle,
   });
 
+  /// The caller's preference. The **rail's own** state wins where one is
+  /// published — see [MlRailScope]. This is the fallback for a block drawn
+  /// outside a rail: the modal drawer, which is full width, and tests.
   final bool expanded;
   final VoidCallback onTap;
 
@@ -29,9 +34,12 @@ class MlRailBrand extends StatelessWidget {
   Widget build(BuildContext context) {
     final chrome = MlChrome.of(context);
     final text = Theme.of(context).textTheme;
+    // The rail's own state where it publishes one; the parameter is only a
+    // fallback for a block drawn outside a rail (MlRailScope explains why).
+    final open = MlRailScope.maybeOf(context) ?? expanded;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(expanded ? 16 : 8, 16, expanded ? 16 : 8, 8),
+      padding: EdgeInsets.fromLTRB(open ? 16 : 8, 16, open ? 16 : 8, 8),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -40,12 +48,12 @@ class MlRailBrand extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             child: Row(
-              mainAxisAlignment: expanded
+              mainAxisAlignment: open
                   ? MainAxisAlignment.start
                   : MainAxisAlignment.center,
               children: [
                 const MineLinkLogo(height: 28, onDark: true),
-                if (expanded && subtitle != null) ...[
+                if (open && subtitle != null) ...[
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -84,6 +92,9 @@ class MlRailIdentity extends StatelessWidget {
     this.actions = const <UserIdentityAction>[],
   });
 
+  /// The caller's preference. The **rail's own** state wins where one is
+  /// published — see [MlRailScope]. This is the fallback for a block drawn
+  /// outside a rail: the modal drawer, which is full width, and tests.
   final bool expanded;
   final UserIdentity identity;
   final VoidCallback onOpenProfile;
@@ -118,8 +129,12 @@ class MlRailIdentity extends StatelessWidget {
       ),
     );
 
+    // The rail's own state where it publishes one; the parameter is only a
+    // fallback for a block drawn outside a rail (MlRailScope explains why).
+    final open = MlRailScope.maybeOf(context) ?? expanded;
+
     return Padding(
-      padding: EdgeInsets.fromLTRB(expanded ? 12 : 8, 8, expanded ? 12 : 8, 12),
+      padding: EdgeInsets.fromLTRB(open ? 12 : 8, 8, open ? 12 : 8, 12),
       child: UserIdentityFlyout(
         user: identity,
         accent: scheme.primary,
@@ -136,7 +151,7 @@ class MlRailIdentity extends StatelessWidget {
               child: AnimatedSize(
                 duration: MlMotion.of(context, MlMotion.stateChange),
                 curve: MlMotion.curveOf(context, MlMotion.standard),
-                child: expanded
+                child: open
                     ? Row(
                         children: [
                           avatar,

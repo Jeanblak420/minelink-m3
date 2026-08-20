@@ -543,6 +543,39 @@ final guards = <Guard>[
     plantLine: 'final delta = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);',
   ),
   Guard(
+    id: 'no-hardcoded-month-in-ui',
+    why: 'a month name and a year written into a UI string is a date that '
+        'stopped moving. Found 2026-08-20 in TWO places on screens people '
+        'read daily. The console dashboard headed its "Live operations … this '
+        'calendar month" section with the literal `This month · Jul 2026` — '
+        'written in July, still saying July in August, on the platform '
+        "admin's landing screen. `MlFlagshipTrend` defaulted `priorLabel` to "
+        "`'Jul 2026'` and `monthLabel` to `'Aug'`, and NOT ONE of its three "
+        'call sites passes `monthLabel` — so the crosshair tooltip on the '
+        'buyer, mine and transporter dashboards labelled every point AUG NN '
+        'whatever the date. That one reads correctly for one month a year, '
+        'which is exactly why it survived: it was written in August and '
+        'looked right. Dates come from the clock — MlTime, in South African '
+        'time (CLAUDE.md §7.1) — never from a literal. Test fixtures pin '
+        'dates on purpose and are not scanned.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // A month abbreviation or full name followed by a four-digit year, or a
+    // bare quoted month abbreviation used as a default value. Both shapes were
+    // live.
+    pattern: RegExp(
+      r"'[^']*\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+20\d\d\b"
+      r"|=\s*'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)',",
+    ),
+    // Prose explaining the trap has to be able to quote the literals it is
+    // about, or the doc comment recording this fix trips the guard that the
+    // fix installed. Same exemption, and same reason, as the polyline codec's.
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'minelink_charts.dart',
+    plantLine: "    this.priorLabel = 'Jul 2026',",
+  ),
+  Guard(
     id: 'mockito-not-in-dependencies',
     why: 'mockito in `dependencies` ships a mocking library inside the '
         'consumer binary. It is tree-shaken only by luck, and it is a '

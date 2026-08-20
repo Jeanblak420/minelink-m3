@@ -40,6 +40,8 @@ SuperAdminDashboardV2ViewModel _emptyVm() =>
     );
 
 void main() {
+  _fabricationTests();
+
   setUp(() {
     // 1920x1080 so the four-up registry grid is the path under test.
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -178,9 +180,143 @@ void main() {
 /// fabricated platform totals to a real admin (P9-03). They are required now,
 /// so a layout test has to say out loud that it is using sample data — which
 /// is the one place doing so is correct.
-MineLinkDashboardScreen _sampleDashboard() => MineLinkDashboardScreen(
+/// ---------------------------------------------------------------------------
+/// Four figures on the platform admin's landing screen were LITERALS.
+///
+/// The view model beside them is scrupulous — its own doc says a figure with no
+/// source is "derived from something real or left blank rather than filled with
+/// a plausible number", and it does exactly that. The discipline was applied to
+/// the data layer and skipped in the view, where these sat:
+///
+///   'This month · Jul 2026'                        written in July, read in August
+///   '… open · 2 aging > 24h'                       MlPendingRequest has no timestamp
+///   'Last 24h · +2 companies, +14 users'           a fake copy of stats the vm already reads
+///   '3 companies need approvals … oldest 5 days'   the banner took NO data and always showed
+///
+/// These tests are the reason none of them can come back quietly.
+/// ---------------------------------------------------------------------------
+void _fabricationTests() {
+  group('no fabricated figures on the landing screen', () {
+    testWidgets('the month follows the clock, not the month it was written in',
+        (tester) async {
+      tester.view.physicalSize = const Size(1920, 1080);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_host(
+        _sampleDashboard(asOf: DateTime(2027, 3, 9)),
+        _contentWidth,
+      ));
+      await tester.pump();
+
+      expect(find.text('This month · Mar 2027'), findsOneWidget);
+      expect(find.textContaining('Jul 2026'), findsNothing);
+    });
+
+    testWidgets('the 24h registry line names real counts, and says so when '
+        'there were none', (tester) async {
+      tester.view.physicalSize = const Size(1920, 1080);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_host(
+        _sampleDashboard(newCompanies24h: 1, newUsers24h: 7),
+        _contentWidth,
+      ));
+      await tester.pump();
+      // Singular/plural is real work here: "+1 companies" reads as a bug to the
+      // one person who would notice it was right.
+      expect(find.text('Last 24h · +1 company, +7 users'), findsOneWidget);
+
+      await tester.pumpWidget(_host(
+        _sampleDashboard(newCompanies24h: 0, newUsers24h: 0),
+        _contentWidth,
+      ));
+      await tester.pump();
+      expect(find.text('Last 24h · no new registrations'), findsOneWidget);
+      expect(find.textContaining('+2 companies'), findsNothing);
+    });
+
+    testWidgets('the pending meta states the count and claims nothing about age',
+        (tester) async {
+      tester.view.physicalSize = const Size(1920, 1080);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(_host(_sampleDashboard(), _contentWidth));
+      await tester.pump();
+
+      expect(find.textContaining('aging'), findsNothing);
+      expect(find.textContaining(RegExp(r'^\d+ open$')), findsOneWidget);
+    });
+
+    testWidgets('the expired banner is an alert, so it counts — and stays away '
+        'when there is nothing to alert about', (tester) async {
+      tester.view.physicalSize = const Size(1920, 1080);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      // Nothing expired: no standing amber alert.
+      await tester.pumpWidget(
+          _host(_sampleDashboard(expiredCompanies: 0), _contentWidth));
+      await tester.pump();
+      expect(find.text('Expired token requests'), findsNothing);
+
+      // One expired: shown, counted, and singular.
+      await tester.pumpWidget(
+          _host(_sampleDashboard(expiredCompanies: 1), _contentWidth));
+      await tester.pump();
+      expect(find.text('Expired token requests'), findsOneWidget);
+      expect(
+        find.text('1 company needs approvals or action from the Admin panel.'),
+        findsOneWidget,
+      );
+
+      // Five expired: plural, and the invented "oldest 5 days" is gone.
+      await tester.pumpWidget(
+          _host(_sampleDashboard(expiredCompanies: 5), _contentWidth));
+      await tester.pump();
+      expect(
+        find.text('5 companies need approvals or action from the Admin panel.'),
+        findsOneWidget,
+      );
+      // Specifically the invented age clause. Not a bare 'oldest' — the
+      // pending-requests subtitle legitimately says "oldest first, ordered by
+      // criticality", and matching that too would make this test fail for
+      // being right.
+      expect(find.textContaining('days waiting'), findsNothing);
+    });
+
+    testWidgets('a caller that knows nothing shows nothing, rather than zero',
+        (tester) async {
+      tester.view.physicalSize = const Size(1920, 1080);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      // All three props omitted — the state a new call site starts in.
+      await tester.pumpWidget(_host(_sampleDashboard(), _contentWidth));
+      await tester.pump();
+
+      expect(find.textContaining('Last 24h'), findsNothing);
+      expect(find.text('Expired token requests'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  });
+}
+
+MineLinkDashboardScreen _sampleDashboard({
+  int? newCompanies24h,
+  int? newUsers24h,
+  int? expiredCompanies,
+  DateTime? asOf,
+}) =>
+    MineLinkDashboardScreen(
       orgAggregates: MlSampleData.orgAggregates,
       pendingRequests: MlSampleData.pendingRequests,
       registry: MlSampleData.registry,
       recentOrgs: MlSampleData.recentOrgs,
+      newCompanies24h: newCompanies24h,
+      newUsers24h: newUsers24h,
+      expiredCompanies: expiredCompanies,
+      asOf: asOf,
     );

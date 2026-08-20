@@ -20,6 +20,7 @@
 // ============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'minelink_screens_core.dart';
 import 'minelink_charts.dart';
@@ -27,6 +28,7 @@ import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart'
 import 'package:flutter_application_1/core/design/charts/ml_sparkline.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_console_palettes.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 class MineLinkDashboardScreen extends StatelessWidget {
   const MineLinkDashboardScreen({
@@ -41,9 +43,46 @@ class MineLinkDashboardScreen extends StatelessWidget {
     required this.pendingRequests,
     required this.registry,
     required this.recentOrgs,
+    this.newCompanies24h,
+    this.newUsers24h,
+    this.expiredCompanies,
+    this.asOf,
     this.tokens,
     this.padding = const EdgeInsets.fromLTRB(24, 20, 24, 40),
   });
+
+  /// Companies and users added in the trailing 24 hours.
+  ///
+  /// **These were hardcoded.** The registry section's meta line read
+  /// `'Last 24h · +2 companies, +14 users'` — a literal, on the platform
+  /// admin's landing screen, next to eight tiles the view model derives with
+  /// visible care. `SuperAdminDashboardV2ViewModel` already reads
+  /// `stats['newCompanies24h']` and `stats['newUsers24h']` and puts them on
+  /// the tiles as deltas, so the screen was drawing a *fake version of a
+  /// number it already had*.
+  ///
+  /// Null means the caller has no figure, and the clause is omitted rather
+  /// than shown as zero — the same rule the targets store follows
+  /// (`CLAUDE.md` §4: a placeholder nobody chose that looks like a decision).
+  final int? newCompanies24h;
+  final int? newUsers24h;
+
+  /// Companies whose token has expired. Drives the expired-token banner, which
+  /// **took no data at all** before this: it always read *"3 companies need
+  /// approvals or action … oldest 5 days waiting"* and was rendered
+  /// unconditionally, so a platform with nothing expired still saw a standing
+  /// amber alert claiming three companies needed action. Null or zero now
+  /// hides the banner.
+  final int? expiredCompanies;
+
+  /// The instant the screen labels itself with. Defaults to [MlTime.now] —
+  /// South African time, per `CLAUDE.md` §7.1, because this is a business-day
+  /// label and the device's own zone is not the product's.
+  ///
+  /// The month used to be the literal `'Jul 2026'`. It was written in July and
+  /// read `Jul 2026` in August; the section it heads is *"Live operations …
+  /// this calendar month"*.
+  final DateTime? asOf;
 
   /// Fires with a nav id — the same ids the sidebar emits.
   final ValueChanged<String>? onNavigate;
@@ -61,6 +100,26 @@ class MineLinkDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = tokens ?? MlGlass.of(context);
+    final now = asOf ?? MlTime.now();
+
+    // "Last 24h · +2 companies, +14 users" — but only the parts that are real.
+    // Nothing new in a quiet 24 hours is a fact worth stating plainly, so the
+    // line still appears; it just says so instead of naming invented figures.
+    final registryMeta = (newCompanies24h == null && newUsers24h == null)
+        ? null
+        : () {
+            final parts = <String>[
+              if (newCompanies24h != null && newCompanies24h! > 0)
+                '+$newCompanies24h ${newCompanies24h == 1 ? 'company' : 'companies'}',
+              if (newUsers24h != null && newUsers24h! > 0)
+                '+$newUsers24h ${newUsers24h == 1 ? 'user' : 'users'}',
+            ];
+            return parts.isEmpty
+                ? 'Last 24h · no new registrations'
+                : 'Last 24h · ${parts.join(', ')}';
+          }();
+
+    final expired = expiredCompanies ?? 0;
 
     return Container(
       color: t.bg0,
@@ -83,7 +142,7 @@ class MineLinkDashboardScreen extends StatelessWidget {
                   title: 'Live operations by organization type',
                   subtitle: 'Tap a card to drill into company-level monthly '
                       'rollups this calendar month.',
-                  meta: 'This month · Jul 2026',
+                  meta: 'This month · ${DateFormat('MMM y').format(now)}',
                   link: 'View insights',
                   onLink: () => _go('insights.mines'),
                 ),
@@ -107,8 +166,11 @@ class MineLinkDashboardScreen extends StatelessWidget {
                         'first, ordered by criticality.',
                     badge: _NewBadge(tokens: t),
                     meta:
+                        // '· 2 aging > 24h' used to follow this. MlPendingRequest
+                        // carries no timestamp, so nothing on this screen could
+                        // ever have known it; the count is real, the age was not.
                         '${pendingRequests.fold<int>(0, (a, r) => a + r.count)}'
-                        ' open · 2 aging > 24h',
+                        ' open',
                     link: 'All requests',
                     onLink: () => _go('requests'),
                   ),
@@ -130,7 +192,7 @@ class MineLinkDashboardScreen extends StatelessWidget {
                   title: 'Platform registry',
                   subtitle: 'Companies, users and throughput — updated live '
                       'read fresh on every load.',
-                  meta: 'Last 24h · +2 companies, +14 users',
+                  meta: registryMeta,
                   link: 'Export snapshot',
                   onLink: () => _go('orgs'),
                 ),
@@ -145,9 +207,13 @@ class MineLinkDashboardScreen extends StatelessWidget {
                 ),
 
                 // 4 ─────────────────────────────────────────────────────────
-                const SizedBox(height: 26),
-                _ExpiredBanner(
-                    tokens: t, onTap: () => _go('tokens.requests')),
+                if (expired > 0) ...[
+                  const SizedBox(height: 26),
+                  _ExpiredBanner(
+                      tokens: t,
+                      count: expired,
+                      onTap: () => _go('tokens.requests')),
+                ],
 
                 // 5 ─────────────────────────────────────────────────────────
                 const SizedBox(height: 26),
@@ -630,9 +696,18 @@ class _Delta extends StatelessWidget {
 // ===========================================================================
 
 class _ExpiredBanner extends StatelessWidget {
-  const _ExpiredBanner({required this.tokens, this.onTap});
+  const _ExpiredBanner({
+    required this.tokens,
+    required this.count,
+    this.onTap,
+  });
 
   final MlGlass tokens;
+
+  /// How many companies are actually expired. Required — this banner is an
+  /// alert, and an alert that cannot count is worse than no alert.
+  final int count;
+
   final VoidCallback? onTap;
 
   @override
@@ -680,8 +755,12 @@ class _ExpiredBanner extends StatelessWidget {
                       )),
                   const SizedBox(height: 3),
                   Text(
-                    '3 companies need approvals or action from the Admin '
-                    'panel · oldest 5 days waiting.',
+                    // The "· oldest 5 days waiting" clause is gone with the
+                    // literal count: nothing reaching this screen carries how
+                    // long a token has been expired, so the age was invented
+                    // alongside the number.
+                    '$count ${count == 1 ? 'company needs' : 'companies need'} '
+                    'approvals or action from the Admin panel.',
                     style: TextStyle(
                       fontFamily: MlGlass.sans,
                       fontSize: 11.5,
@@ -1011,20 +1090,231 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
             ],
           ),
           const SizedBox(height: 16),
-          _head(t),
-          Container(height: 1, color: t.line2),
-          if (rows.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 28),
-              child: Text(
-                'No organizations of this type in the current window.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontFamily: MlGlass.sans, fontSize: 12.5, color: t.inkMid),
-              ),
-            ),
-          ...rows.map((r) => _row(t, r)),
+          // A four-column table is a desktop shape. Below `_tableFloor` each
+          // organization becomes a stacked card instead — see [_card].
+          LayoutBuilder(
+            builder: (context, c) {
+              final asTable = c.maxWidth >= _tableFloor;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (asTable) ...[
+                    _head(t),
+                    Container(height: 1, color: t.line2),
+                  ],
+                  if (rows.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 28),
+                      child: Text(
+                        'No organizations of this type in the current window.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontFamily: MlGlass.sans,
+                            fontSize: 12.5,
+                            color: t.inkMid),
+                      ),
+                    ),
+                  ...rows.map((r) => asTable ? _row(t, r) : _card(t, r)),
+                ],
+              );
+            },
+          ),
         ],
+      ),
+    );
+  }
+
+  /// Below this the table becomes a list of cards.
+  ///
+  /// 720 is not a guess: the row has a fixed 76px action column and four flex
+  /// columns weighted 32/14/16/24. At 412px the token-expiry cell (flex 24)
+  /// resolves to roughly 74px and has to hold a status dot, a
+  /// `42d 08 : 34 : 55` countdown AND a date -- it cannot, at any text scale.
+  /// Four of the six rows overflowed there. Widening that cell only moves the
+  /// squeeze onto the company name; a four-column table is simply a desktop
+  /// shape, and the fix is to stop drawing one on a phone.
+  static const double _tableFloor = 720;
+
+  /// One organization as a stacked card -- the phone rendering of [_row].
+  ///
+  /// Same data, same order, nothing dropped: identity, then type and seats,
+  /// then the token countdown. It reads top-to-bottom instead of
+  /// left-to-right, which is the only thing that actually changes.
+  Widget _card(MlGlass t, MlRecentOrg r) {
+    final dot = _dot(t, r.expiryState);
+    final full = r.seatsUsed >= r.seats;
+
+    Widget label(String s) => Text(s.toUpperCase(),
+        style: TextStyle(
+          fontFamily: MlGlass.sans,
+          fontSize: 9,
+          letterSpacing: 1.15,
+          fontWeight: FontWeight.w600,
+          color: t.inkLo,
+        ));
+
+    return MlHoverLift(
+      lift: 0,
+      onTap: () => widget.onNavigate?.call('orgs'),
+      builder: (context, hovered) => AnimatedContainer(
+        duration: mlScreenMotion(context, const Duration(milliseconds: 120)),
+        margin: const EdgeInsets.only(top: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: hovered ? t.inkHi.withValues(alpha: 0.025) : Colors.transparent,
+          border: Border.all(color: t.line),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ---- identity ----
+            Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: r.avatarColors,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(r.initials,
+                      style: const TextStyle(
+                        fontFamily: MlGlass.mono,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: MlTokens.inkOnFill,
+                      )),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(r.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: MlGlass.sans,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: t.inkHi,
+                          )),
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          Container(
+                            width: 5,
+                            height: 5,
+                            decoration: BoxDecoration(
+                                color: dot, shape: BoxShape.circle),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              '${r.status} - ${r.location} - ${r.users} users',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  fontFamily: MlGlass.sans,
+                                  fontSize: 11,
+                                  color: t.inkMid),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded,
+                    size: 18, color: hovered ? t.accent2 : t.inkLo),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // ---- org type + seats ----
+            Row(
+              children: [
+                MlPill(r.type.toUpperCase(),
+                    tokens: t, kind: _pillKind(r.type)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      label('Seats'),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: MlMeter(
+                              value: r.seats == 0 ? 0 : r.seatsUsed / r.seats,
+                              track: t.inkHi.withValues(alpha: 0.07),
+                              fill: full ? t.warn : t.accent3,
+                              gradientEnd: full ? t.warn : t.accent,
+                              height: 3,
+                              radius: 999,
+                            ),
+                          ),
+                          const SizedBox(width: 9),
+                          Text('${r.seatsUsed}/${r.seats}',
+                              style: TextStyle(
+                                fontFamily: MlGlass.mono,
+                                fontSize: 11,
+                                color: t.inkMid,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures()
+                                ],
+                              )),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // ---- token expiry: the cell that could not fit as a column ----
+            label('Token expiry'),
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                Container(
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+                ),
+                const SizedBox(width: 9),
+                Flexible(
+                  child: Text(r.expiry,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: MlGlass.mono,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color:
+                            r.expiryState == MlExpiry.expired ? t.bad : t.inkHi,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      )),
+                ),
+                const SizedBox(width: 9),
+                Flexible(
+                  child: Text(r.date,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontFamily: MlGlass.sans,
+                          fontSize: 10.5,
+                          color: t.inkLo)),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1195,11 +1485,18 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                         )),
                   ),
                   const SizedBox(width: 9),
-                  Text(r.date,
-                      style: TextStyle(
-                          fontFamily: MlGlass.sans,
-                          fontSize: 10.5,
-                          color: t.inkLo)),
+                  // Flexible, like the countdown beside it. A Row hands a
+                  // non-flex child unbounded width (CLAUDE.md 10.4), so this
+                  // date could not ellipsize and simply pushed the cell over --
+                  // four of the six rows overflowed at 412px.
+                  Flexible(
+                    child: Text(r.date,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontFamily: MlGlass.sans,
+                            fontSize: 10.5,
+                            color: t.inkLo)),
+                  ),
                 ],
               ),
             ),

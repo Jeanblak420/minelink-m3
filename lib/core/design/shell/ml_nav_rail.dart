@@ -27,6 +27,50 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 /// M3 type scale, `Badge` for counts, and `Durations`/`Easing` for motion. The
 /// component theme in `AppTheme` still configures `NavigationRail` for anyone
 /// who drops one in — this simply is not one.
+/// The rail's **effective** expanded state, published to whatever it contains.
+///
+/// ## Why this exists
+///
+/// `MlAppShell` decides whether the rail is expanded from two things — the
+/// caller's preference AND the window class:
+///
+/// ```dart
+/// expanded: windowClass.usesExpandedRail && widget.expanded
+/// ```
+///
+/// so on a medium window the rail narrows however the caller set the flag.
+/// But `railHeader` and `railFooter` are **pre-built widgets** handed in by
+/// that same caller, who set their `expanded` from the preference alone. On a
+/// 760px window the shell narrowed the rail to 80dp while `MlRailIdentity`
+/// went on building its 280dp layout — an avatar, a name and a role in a Row —
+/// inside it. That is the 2px overflow the redesign renders reported at
+/// `760x1400`, and it would have been every medium window in the product.
+///
+/// Two sources of truth for one fact, and the one that was wrong is the one
+/// the widgets read. The rail now publishes what it actually did, and the
+/// blocks below prefer it to what they were told.
+///
+/// Absent — a block rendered outside a rail, in a test or in the modal drawer,
+/// where the surface is full width — [maybeOf] returns null and the block
+/// falls back to its own parameter.
+class MlRailScope extends InheritedWidget {
+  const MlRailScope({
+    super.key,
+    required this.expanded,
+    required super.child,
+  });
+
+  final bool expanded;
+
+  static bool? maybeOf(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<MlRailScope>()
+      ?.expanded;
+
+  @override
+  bool updateShouldNotify(MlRailScope oldWidget) =>
+      oldWidget.expanded != expanded;
+}
+
 class MlNavRail extends StatefulWidget {
   const MlNavRail({
     super.key,
@@ -162,61 +206,64 @@ class _MlNavRailState extends State<MlNavRail> {
           alignment: Alignment.centerLeft,
           minWidth: targetWidth,
           maxWidth: targetWidth,
-          child: SafeArea(
-            right: false,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (widget.header != null) widget.header!,
-                if (expanded && widget.showSearch) _buildSearch(chrome),
-                Expanded(
-                  child: _query.isNotEmpty && tree.isEmpty
-                      ? _EmptySearch(chrome: chrome, query: _query)
-                      : ListView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 8,
+          child: MlRailScope(
+            expanded: expanded,
+            child: SafeArea(
+              right: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (widget.header != null) widget.header!,
+                  if (expanded && widget.showSearch) _buildSearch(chrome),
+                  Expanded(
+                    child: _query.isNotEmpty && tree.isEmpty
+                        ? _EmptySearch(chrome: chrome, query: _query)
+                        : ListView(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 8,
+                            ),
+                            children: [
+                              for (final node in tree)
+                                if (node.isGroup)
+                                  _RailGroup(
+                                    node: node,
+                                    expanded: expanded,
+                                    // A search result is always open: hiding matches
+                                    // inside a closed group is the same fault as not
+                                    // matching them at all.
+                                    open: _query.isNotEmpty || _isOpen(node),
+                                    selectedRoute: _selected,
+                                    count: _countFor(node),
+                                    countFor: _countFor,
+                                    onToggle: () => setState(() {
+                                      _groupOverride[node.label] = !_isOpen(node);
+                                    }),
+                                    onNavigate: widget.onNavigate,
+                                  )
+                                else
+                                  _RailTile(
+                                    node: node,
+                                    expanded: expanded,
+                                    selected: node.route == _selected,
+                                    count: _countFor(node),
+                                    onTap: () => widget.onNavigate(node.route!),
+                                  ),
+                            ],
                           ),
-                          children: [
-                            for (final node in tree)
-                              if (node.isGroup)
-                                _RailGroup(
-                                  node: node,
-                                  expanded: expanded,
-                                  // A search result is always open: hiding matches
-                                  // inside a closed group is the same fault as not
-                                  // matching them at all.
-                                  open: _query.isNotEmpty || _isOpen(node),
-                                  selectedRoute: _selected,
-                                  count: _countFor(node),
-                                  countFor: _countFor,
-                                  onToggle: () => setState(() {
-                                    _groupOverride[node.label] = !_isOpen(node);
-                                  }),
-                                  onNavigate: widget.onNavigate,
-                                )
-                              else
-                                _RailTile(
-                                  node: node,
-                                  expanded: expanded,
-                                  selected: node.route == _selected,
-                                  count: _countFor(node),
-                                  onTap: () => widget.onNavigate(node.route!),
-                                ),
-                          ],
-                        ),
-                ),
-                if (widget.onToggleExpanded != null)
-                  _CollapseControl(
-                    expanded: expanded,
-                    onPressed: widget.onToggleExpanded!,
-                    chrome: chrome,
                   ),
-                if (widget.footer != null) ...[
-                  Divider(height: 1, thickness: 1, color: chrome.railDivider),
-                  widget.footer!,
+                  if (widget.onToggleExpanded != null)
+                    _CollapseControl(
+                      expanded: expanded,
+                      onPressed: widget.onToggleExpanded!,
+                      chrome: chrome,
+                    ),
+                  if (widget.footer != null) ...[
+                    Divider(height: 1, thickness: 1, color: chrome.railDivider),
+                    widget.footer!,
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
