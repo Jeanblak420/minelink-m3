@@ -41,14 +41,30 @@ import 'package:flutter_application_1/features/profile_setup/providers/profile_s
 
 final DateTime _fixtureDate = DateTime.utc(2020, 1, 1);
 
-/// A transporter, because that org type unlocks the most tabs and therefore the
-/// widest layouts — the ones most likely to overflow.
-Company fixtureCompany() => Company(
+/// A transporter by default, because that org type unlocks the most tabs and
+/// therefore the widest layouts — the ones most likely to overflow.
+///
+/// [orgType] is a parameter because the mine-floor screens (Security's gate, the
+/// Load Controller's weighbridge) belong to a MINE, and a render whose rail says
+/// "Iron Hills Mining" while the company behind it is a haulier is a picture of
+/// a state that cannot exist. The company **id** does not change with it —
+/// everything downstream keys off `FIXTURE-company`, and the fixture providers
+/// are overridden family-wide so the id is ignored anyway.
+Company fixtureCompany({
+  OrgType orgType = OrgType.transporter,
+  String? companyName,
+}) =>
+    Company(
       id: 'FIXTURE-company',
       userId: 'FIXTURE-user',
-      companyName: 'Fixture Haulage (Pty) Ltd',
+      companyName: companyName ??
+          switch (orgType) {
+            OrgType.transporter => 'Fixture Haulage (Pty) Ltd',
+            OrgType.mineSupplier => 'Fixture Chrome Mine (Pty) Ltd',
+            OrgType.buyer => 'Fixture Metals (Pty) Ltd',
+          },
       whatsappNumber: '+27000000000',
-      orgType: OrgType.transporter,
+      orgType: orgType,
       createdAt: _fixtureDate,
       physicalAddress: '1 Fixture Road, Fixtureville, Gauteng',
     );
@@ -212,14 +228,17 @@ Override authOverride({UserType userType = UserType.company}) {
 /// [canManageEmployees] selects which branch of `CompanyEmployeesScreen`
 /// renders, and **both are real user-facing states**: managers get the roster,
 /// everyone else gets the restricted notice.
-Override companyOverride({bool canManageEmployees = true}) {
+Override companyOverride({
+  bool canManageEmployees = true,
+  OrgType orgType = OrgType.transporter,
+}) {
   return companyProvider.overrideWith((ref) => FixtureCompanyNotifier(
         ref.watch(companyServiceProvider),
         ref.watch(companyDatabaseServiceProvider),
         ref.watch(notificationServiceProvider),
         ref.watch(authStateProvider.notifier),
         fixture: CompanyState(
-          company: fixtureCompany(),
+          company: fixtureCompany(orgType: orgType),
           employees: fixtureRoster(),
           canManageEmployees: canManageEmployees,
         ),
@@ -228,26 +247,33 @@ Override companyOverride({bool canManageEmployees = true}) {
 
 /// The employee gate. `fleet_management` resolves its company id from EITHER
 /// this or [companyOverride], so both are supplied wherever it matters.
-Override employeeOverride({UserRole role = UserRole.admin}) {
+Override employeeOverride({
+  UserRole role = UserRole.admin,
+  OrgType orgType = OrgType.transporter,
+}) {
   return employeeProvider.overrideWith((ref) => FixtureEmployeeNotifier(
         ref.watch(employeeServiceProvider),
         ref.watch(companyServiceProvider),
         ref.watch(authStateProvider.notifier),
         fixture: EmployeeState(
           employee: fixtureEmployee(role: role),
-          company: fixtureCompany(),
+          company: fixtureCompany(orgType: orgType),
         ),
       ));
 }
 
 /// `companyAccessProvider` is a plain `Provider`, so it can simply be handed a
 /// value.
-Override companyAccessOverride({bool canManageEmployees = true}) {
+Override companyAccessOverride({
+  bool canManageEmployees = true,
+  OrgType orgType = OrgType.transporter,
+  UserRole role = UserRole.admin,
+}) {
   return companyAccessProvider.overrideWithValue(
     CompanyAccessContext(
-      company: fixtureCompany(),
+      company: fixtureCompany(orgType: orgType),
       visibleEmployees: fixtureRoster(),
-      currentEmployee: fixtureEmployee(),
+      currentEmployee: fixtureEmployee(role: role),
       isCompanyAccount: true,
       canManageEmployees: canManageEmployees,
     ),
@@ -385,12 +411,17 @@ Override profileSetupOverride() {
 List<Override> companyScopeOverrides({
   bool canManageEmployees = true,
   UserRole role = UserRole.admin,
+  OrgType orgType = OrgType.transporter,
 }) =>
     [
       authOverride(),
-      companyOverride(canManageEmployees: canManageEmployees),
-      employeeOverride(role: role),
-      companyAccessOverride(canManageEmployees: canManageEmployees),
+      companyOverride(
+          canManageEmployees: canManageEmployees, orgType: orgType),
+      employeeOverride(role: role, orgType: orgType),
+      companyAccessOverride(
+          canManageEmployees: canManageEmployees,
+          orgType: orgType,
+          role: role),
       fleetOverride(),
     ];
 

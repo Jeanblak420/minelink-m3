@@ -39,6 +39,8 @@ import 'package:flutter_application_1/features/operations/screens/operations_hub
 import 'package:flutter_application_1/features/chat/screens/communications_hub_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_portal_dashboard_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/driver_routes_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/load_controller_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/security_checkin_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/mine_supplier_portal_dashboard_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/transporter_portal_dashboard_screen.dart';
 import 'package:flutter_application_1/features/portal/nav/portal_nav.dart';
@@ -50,6 +52,7 @@ import '../fixtures/ml_sample_data.dart';
 import '../fixtures/portal_capture_fixtures.dart';
 import '../fixtures/screen_fixtures.dart';
 import '../test_helpers/real_fonts.dart';
+import '../test_helpers/render_pumps.dart';
 
 void main() {
   _noOrphanGoldensTest();
@@ -165,43 +168,10 @@ void main() {
     };
 
     await tester.pumpWidget(widget);
-    // Long enough for the shell's entrance transition and any staged reveal to
-    // settle. pumpAndSettle would hang: the console has continuously running
-    // animations (the live pill, the bell).
-    await tester.pump(const Duration(milliseconds: 900));
-    // Then a SECOND pump, for anything a POST-FRAME CALLBACK started.
-    //
-    // `pumpWidget` + one timed pump is not enough for those: the callback
-    // registered during the first frame does not run until the start of the
-    // second, so an animation it kicks off begins at t=900 and has not
-    // advanced when that frame paints.
-    //
-    // `RawScrollbar` is exactly this. It fades its thumb in from a post-frame
-    // callback, so **no scrollbar had ever appeared in any render in this
-    // file** — measured 2026-08-20 by setting the thumb to pure red and finding
-    // zero red pixels in the output. The wide tables' only affordance was
-    // invisible in every picture taken of them.
-    await tester.pump(const Duration(milliseconds: 400));
-
-    // Then load every `Image` for real.
-    //
-    // `Image.asset` reads the bundle asynchronously, and a widget test's fake
-    // async never lets that future complete — so an image resolves only if it
-    // is ALREADY in the global cache, which depends entirely on whether an
-    // earlier test in the same file happened to draw it. The rail's MineLink
-    // wordmark is one, and it is in every render in this file.
-    //
-    // The symptom was a render that passed alone and failed in the suite:
-    // "Pixel test failed, 0.05%, 895px". 895px is the wordmark. The note above
-    // records an earlier "0.04%, 895px" that was hunted as an animation and was
-    // this same thing — an image cache warmed by test order.
-    await tester.runAsync(() async {
-      for (final element in find.byType(Image).evaluate()) {
-        await precacheImage((element.widget as Image).image, element);
-      }
-    });
-    await tester.pump();
-
+    // The whole settle schedule, and the reasoning behind every step of it,
+    // lives in `test/test_helpers/render_pumps.dart` — shared with the test
+    // that proves the schedule is long enough, so the two cannot drift.
+    await pumpForCapture(tester);
 
     FlutterError.onError = previousOnError;
     tester.takeException();
@@ -335,7 +305,10 @@ void main() {
     List<Override> extraOverrides = const [],
   }) {
     return ProviderScope(
-      overrides: [...companyScopeOverrides(role: role), ...extraOverrides],
+      overrides: [
+        ...companyScopeOverrides(role: role, orgType: orgType),
+        ...extraOverrides,
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: AppTheme.build(brightness),
@@ -351,17 +324,25 @@ void main() {
             MlNavBadge.pendingRequests: 2,
             MlNavBadge.unreadNotifications: 5,
           },
+          // The role's OWN label, not a hardcoded 'ADMIN'.
+          //
+          // It was hardcoded, so the Load Controller's weighbridge and the
+          // guard's gate both photographed with a rail reading ADMIN over an
+          // identity card reading Admin — a picture of a permission level that
+          // is not the one the screen belongs to. The rail's role line is the
+          // one piece of chrome that tells a reader whose screen they are
+          // looking at, and it was the piece that lied.
           railHeader: MlRailBrand(
             expanded: railExpanded,
-            subtitle: 'ADMIN',
+            subtitle: role.label.toUpperCase(),
             onTap: () {},
           ),
           railFooter: MlRailIdentity(
             expanded: railExpanded,
-            identity: const UserIdentity(
+            identity: UserIdentity(
               name: 'Fixture Operator',
               email: 'operator@fixture.co.za',
-              roleLabel: 'Admin',
+              roleLabel: role.label,
             ),
             onOpenProfile: () {},
           ),
@@ -549,6 +530,103 @@ void main() {
         ),
         const Size(412, 1100),
         'screen-profile-setup-phone-dark',
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // THE MINE FLOOR.
+  //
+  // Security's gate screen and the Load Controller's weighbridge are where the
+  // tonnage this whole product reconciles is actually created, and neither had
+  // ever been photographed. Both read `mineInboundTripsProvider`, which
+  // `portalCaptureOverrides()` has supplied since it was written — `kInboundTrips`
+  // holds one truck at each stage the floor sees, so the queue is not four rows
+  // of the same pill.
+  //
+  // Rendered as a MINE, not as the default transporter fixture: these screens
+  // belong to a mine's own staff, and a rail that says "Mine workspace" over a
+  // company whose org type is `transporter` is a picture of a state that cannot
+  // exist. `fixtureCompany(orgType:)` is what makes that honest.
+  //
+  // Phone-first, because that is how both are used — a guard at a boom and a
+  // controller at a weighbridge window, one-handed, outdoors. Security's screen
+  // is explicitly built for it (`maxWidth: 520`, its own compact header);
+  // the controller's is the desktop-shaped `MlPageBody`, so it gets both.
+  group('the mine floor', () {
+    testWidgets('security check-in — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const SecurityCheckinScreen(),
+          title: 'Fixture Chrome Mine',
+          subtitle: 'Gate',
+          orgType: OrgType.mineSupplier,
+          role: UserRole.security,
+          selectedRoute: '/portal/mine/gate',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 1600),
+        'screen-security-checkin-phone-dark',
+      );
+    });
+
+    // The same screen in GATE MODE, where the departure section leads. It is a
+    // different screen to the guard checking trucks OUT at end of shift, and
+    // `focusDepartures` is the only thing that differs — so if the ordering ever
+    // silently stops applying, this is the picture that shows it.
+    testWidgets('security check-in — gate mode, desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const SecurityCheckinScreen(focusDepartures: true),
+          title: 'Fixture Chrome Mine',
+          subtitle: 'Gate — check-out',
+          orgType: OrgType.mineSupplier,
+          role: UserRole.security,
+          selectedRoute: '/portal/mine/gate',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1400, 1600),
+        'screen-security-checkin-desktop-dark',
+      );
+    });
+
+    testWidgets('load controller — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const LoadControllerScreen(),
+          title: 'Fixture Chrome Mine',
+          subtitle: 'Weighbridge',
+          orgType: OrgType.mineSupplier,
+          role: UserRole.controllerWB,
+          selectedRoute: '/portal/mine/weighbridge',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1500),
+        'screen-load-controller-desktop-dark',
+      );
+    });
+
+    testWidgets('load controller — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const LoadControllerScreen(),
+          title: 'Fixture Chrome Mine',
+          subtitle: 'Weighbridge',
+          orgType: OrgType.mineSupplier,
+          role: UserRole.controllerWB,
+          selectedRoute: '/portal/mine/weighbridge',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 1700),
+        'screen-load-controller-phone-dark',
       );
     });
   });

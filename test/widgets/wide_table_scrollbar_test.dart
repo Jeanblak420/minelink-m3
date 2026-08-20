@@ -13,17 +13,22 @@
 // screens that were converted to it, because "we added a scrollbar" is exactly
 // the kind of claim that quietly stops being true.
 import 'dart:math' as math;
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_application_1/core/design/components/ml_wide_table.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import '../test_helpers/real_fonts.dart';
+import '../test_helpers/render_pumps.dart';
 
 void main() {
   setUpAll(loadRealFonts);
   _contrastTests();
+  _paintTests();
 
   Future<void> pump(WidgetTester tester, Widget child, double width) async {
     await tester.pumpWidget(MaterialApp(
@@ -114,10 +119,10 @@ void main() {
 /// the other by reading the source, which is why the ratio is computed here
 /// from the theme's own colours rather than trusted.
 ///
-/// This asserts the COLOUR, not the painting. That the thumb paints at all is
-/// covered above, and separately by the render harness: `shoot()` had to learn
-/// to pump twice, because `RawScrollbar` fades in from a post-frame callback
-/// and until 2026-08-20 no scrollbar had ever appeared in any render.
+/// This asserts the COLOUR, not the painting. Painting is `_paintTests` below —
+/// which had to be written because "the structure is right and the colour is
+/// legible" was true for a whole session while the renders still showed a
+/// truncated table with no bar on it at all.
 void _contrastTests() {
   const kNonTextContrast = 3.0;
 
@@ -184,5 +189,123 @@ void _contrastTests() {
       final hovered = t.thickness!.resolve({WidgetState.hovered})!;
       expect(hovered, greaterThan(resting));
     });
+  });
+}
+
+/// The thumb has to be **on the picture**, and that is pixels, not structure.
+///
+/// Everything above this asserts that a `Scrollbar` is in the tree and that its
+/// colour would be legible if drawn. Both were true, for a whole session, while
+/// `docs/redesign/renders/screen-load-controller-phone-dark.png` showed a table
+/// cut off mid-column with no bar anywhere on it — the exact fault `MlWideTable`
+/// exists to end, in the picture of `MlWideTable` working.
+///
+/// The cause was the render harness's pump schedule, not the component: a screen
+/// fed by a `FutureProvider` renders a spinner on frame one, so the table is not
+/// built until frame two, its scroll metrics notify from *that* frame's
+/// post-frame callback, and the 300ms fade has not started when frame three
+/// paints. `shoot()`'s last pump carried no duration, so the clock never moved.
+///
+/// This drives the real schedule — [pumpForCapture], the same function the
+/// render harness calls — over a table whose rows arrive from a future, and then
+/// counts thumb-coloured pixels in the captured image. Shorten the schedule and
+/// this fails.
+void _paintTests() {
+  testWidgets('the thumb is PAINTED when the rows arrive from a future',
+      (tester) async {
+    tester.view.physicalSize = const ui.Size(400, 300);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    // A future that resolves after the first frame, exactly like every portal
+    // provider on a real screen. A table built synchronously does not reproduce
+    // this — that is why it went unnoticed.
+    final rows = Future<List<String>>.delayed(
+      const Duration(milliseconds: 1),
+      () => const ['BX 09 LM NW'],
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      theme: AppTheme.darkTheme,
+      home: Scaffold(
+        body: Center(
+          child: SizedBox(
+            width: 400,
+            child: Card(
+              child: FutureBuilder<List<String>>(
+                future: rows,
+                builder: (context, snap) {
+                  if (!snap.hasData) {
+                    return const SizedBox(
+                        height: 60,
+                        child: Center(child: CircularProgressIndicator()));
+                  }
+                  return MlWideTable(
+                    minWidth: 900,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (final r in snap.data!)
+                          SizedBox(height: 60, child: Text(r)),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await pumpForCapture(tester);
+
+    final thumb = AppTheme.darkTheme.scrollbarTheme.thumbColor!
+        .resolve(<WidgetState>{})!;
+    final surface = AppTheme.darkTheme.cardTheme.color ??
+        AppTheme.darkTheme.colorScheme.surface;
+    // What the eye receives: the thumb's alpha composited onto the card.
+    final expected = Color.from(
+      alpha: 1,
+      red: thumb.r * thumb.a + surface.r * (1 - thumb.a),
+      green: thumb.g * thumb.a + surface.g * (1 - thumb.a),
+      blue: thumb.b * thumb.a + surface.b * (1 - thumb.a),
+    );
+
+    final boundary = tester.renderObject<RenderRepaintBoundary>(
+        find.byType(RepaintBoundary).first);
+    late Uint8List data;
+    late int w, h;
+    await tester.runAsync(() async {
+      final image = await boundary.toImage();
+      final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      data = bytes!.buffer.asUint8List();
+      w = image.width;
+      h = image.height;
+    });
+
+    // The longest unbroken horizontal run of pixels near the thumb's composited
+    // colour. A run is the right measure: text antialiasing scatters a handful
+    // of similar pixels across a row, a thumb is a solid bar.
+    var longest = 0;
+    for (var y = 0; y < h; y++) {
+      var run = 0;
+      for (var x = 0; x < w; x++) {
+        final i = (y * w + x) * 4;
+        final near = (data[i] - (expected.r * 255)).abs() < 12 &&
+            (data[i + 1] - (expected.g * 255)).abs() < 12 &&
+            (data[i + 2] - (expected.b * 255)).abs() < 12;
+        run = near ? run + 1 : 0;
+        if (run > longest) longest = run;
+      }
+    }
+
+    // The viewport is 400 of 900, so the thumb is roughly 4/9 of the track.
+    expect(longest, greaterThan(100),
+        reason: 'no bar of the thumb colour was painted. The Scrollbar is in '
+            'the tree and its colour is legible — both are asserted above — so '
+            'this is the capture schedule finishing before the fade does, and '
+            'every render taken with it shows a truncated table with no '
+            'affordance. Longest run found: $longest px.');
   });
 }
