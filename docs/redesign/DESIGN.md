@@ -466,6 +466,8 @@ principle. Consolidating them means moving 18px sub-headings to 16 or 22, and
 that is a per-screen design decision that a blanket rewrite could easily get
 wrong in a way that looks deliberate.
 
+**Phase 3 did them, and the way it did them is the point.** See §9.
+
 ### The sweeps were measuring the wrong thing
 
 Every layout defect in this phase was found by making a test render something it
@@ -485,3 +487,194 @@ had not rendered before, and there were three separate ways they were not:
 
 All three are now guarded, because all three were invisible: each one reported
 green about a thing it had never looked at.
+
+---
+
+## 9. Phase 3 — the type work, and what it cost to do properly
+
+Phase 2 collapsed the *scales*. Phase 3 moved the product onto them: **902
+hand-built `TextStyle` literals** across 150 files, rewritten to reach a slot.
+
+### Why 900 sites were a defect and not a style preference
+
+A `TextStyle` written from scratch carries only what is written into it.
+`height` and `letterSpacing` are inherited from whatever `DefaultTextStyle` is
+in scope — inside a `Scaffold`, that is `bodyMedium`. So this:
+
+```dart
+TextStyle(fontFamily: MlTokens.fontSans, fontWeight: FontWeight.w800,
+          fontSize: 15, color: pal.bodyText)   // a conversation title
+```
+
+was drawn with **body** metrics: line height 1.43 where a title wants 1.27, and
+tracking +0.25 where a bold title wants −0.1. It is *nearly* right, which is
+exactly why nobody fixed it and why nine hundred of them accumulated. The
+visible symptom was the one in the brief: line spacing differing between two
+cards on the same screen.
+
+### `MlText` — the scale as a screen reaches for it
+
+```dart
+style: context.mlText.titleSmall.copyWith(color: pal.headerText),
+```
+
+Fifteen M3 slots, **non-null**. `TextTheme`'s fields are `TextStyle?` and this
+app never leaves one null, but the type system does not know that — so every
+one of nine hundred call sites would have ended in a `!`, which is nine hundred
+places a reader has to decide whether the bang is safe. Decided once.
+
+### The serif had two jobs and the scale named one
+
+`docs/design-reference.md` §3 gives Fraunces *"section titles, **and** every
+large numeral"*. Only the numeral was on the scale: `display*` is 45/36/32 and
+`MlType.figure` covers it. A Fraunces **section title** runs 16–26 across twenty
+sites and had no rung at all, so every one was hand-written.
+
+Three rungs at **24 / 20 / 16**, chosen so the sizes actually in use (16, 18,
+19, 20, 21, 22, 24, 26) each move by at most 2px. Each shares the line box of
+the sans title slot at its own size, so a serif title and a sans title on the
+same row sit on the same baseline. Deliberately **not** tabular: `figure()` is
+tabular because a numeral re-measuring every frame visibly jitters, and a title
+is words.
+
+The 28px boundary between the two jobs is a **measurement, not a rule**:
+`tool/type_scale_codemod.py --audit-serif` prints both lists, and every site
+below 28 is a title while every site at 28 and above is a hero figure.
+
+### There was a fourth typeface
+
+`kConsoleSans = 'Sora'`, alive at seven sites in the console's own dashboard
+widgets. The design drop *did* set the console sans to Sora — but only half of
+that override ever landed. `mlConsoleSans`, the rail's copy of the same string,
+had already become dead code, so the rail ran Plus Jakarta Sans while seven
+cards sitting inside it ran Sora. One screen, two sans faces, in a system that
+has three.
+
+Sora was never *chosen* over Plus Jakarta Sans here; it is the surviving half of
+an override nobody finished. Retired from `lib/` and from `pubspec.yaml` — five
+weights, 292 KB, in every web build and every APK. The `.ttf` files stay:
+`reference_capture_test.dart` reproduces the drop and loads them straight off
+disk with a `FontLoader`, which does not consult `pubspec`.
+
+Three more sites named the family `monospace` — a *generic* family that Flutter
+resolves to whatever the OS calls monospace, silently. A driver's trip
+timestamp, a token preview and a generated serial token: three machine
+identifiers, which is precisely what the brand mono exists for.
+
+### The codemod's five refusals, each learned by running it
+
+`tool/type_scale_codemod.py` rewrites only what it can decide, because the
+failure mode of a type codemod is a screen that still compiles and now says
+something slightly different about its own hierarchy.
+
+1. **The pdf package's `TextStyle` is not Flutter's.** It ships a class with the
+   same name and nothing else in common. A word-boundary match finds the
+   qualified name happily, and the first run produced a `context.mlText` call
+   prefixed by the pdf import alias, in files that have no `BuildContext` and
+   never will — a PDF is composed off-screen. A lookbehind refuses a qualified
+   name rather than guessing.
+2. **`const` propagates.** Checking for a literal `const TextStyle(` is not
+   enough: a plain `TextStyle(...)` inside `const Text(...)` is itself const.
+   The tool computes the const spans in a file and skips anything inside one.
+3. **The scale defines itself.** `lib/core/design/tokens/` and `app_theme.dart`
+   are refused whatever glob is typed, because `lib/**/*.dart` is the obvious
+   thing to type and it is the thing that would rewrite `MlTypeScale.textTheme`
+   into `context.mlText.bodyMedium`.
+4. **An import can be made dead.** Converting the last `MlGlass` site leaves
+   `ml_surface_tokens.dart` unused, and `unused_import` is a warning — a clean
+   `analyze` silently became a dirty one. Removal is derived by reading the
+   imported file's declarations, with comments stripped, and is scoped to the
+   token layer: a general unused-import sweep would delete imports whose only
+   use is an **extension** method, which is never named at the call site.
+   `context.mlText` is one.
+5. **A serif below 14 is neither job.** It is the small companion to a numeral —
+   a unit, or an italic sub-label beside a 28px figure. Snapping one onto the
+   editorial floor of 16 grows it by a third and detaches it from the figure it
+   belongs to.
+
+### Where `context` did not exist — 32 sites out of 902
+
+Twenty-nine were private helpers that took a *palette* but no context, and whose
+callers all had one; they simply never needed it, because a hand-written
+`TextStyle` needs nothing from the tree. Context was threaded in. Three of them
+shared the name `_row` across three classes in one file, which is the single
+case where threading by grep would have been wrong.
+
+The other three are `CustomPainter.paint()`, which has no `BuildContext` by
+construction. They use `MlType` directly — the same arrangement
+`MlSemantic.from(Brightness)` has beside `MlSemantic.of(context)`.
+
+### Sixteen half-points that the guard could not see
+
+`no-half-point-font-size` matched the literal `fontSize:` and nothing else, and
+that is not the only way a size reaches a `TextStyle`. On the day the product
+was described as having no half-points, sixteen were alive behind two other
+shapes:
+
+- a **parameter default** — a 9.5 in a map painter, a 10.5 on `MlCap`, a 10.5 on
+  a transporters-overview primitive;
+- a **named argument to a type helper** — `MlOv` ships its own `s()`/`m()`
+  rather than reaching the theme, so its callers pass `size:` and never write
+  `fontSize` at all.
+
+The guard matches the **name** now — `fontSize`, `fs`, `textSize`, `size` —
+rather than the constructor.
+
+### Five layout defects, each found by a sweep and worth its diagnosis
+
+- **A compliance chip, 9px at 1024 × 2.0.** The label moved onto `labelMedium`,
+  whose letterSpacing is 0.5 where the site had been silently inheriting
+  `bodyMedium`'s 0.25. Eighteen characters × 0.25 × 2.0 = 9. The tracking is the
+  slot's and is right; the chip having no slack at all was the fault. Five pills
+  in that file shared the rigid shape.
+- **A `DropdownButton`, 31px at 430 × 1.6.** It lays its selected item out at
+  natural width unless told otherwise **and** sizes to the widest item in the
+  list, so one long option decided the control's width whatever was selected.
+  CLAUDE.md §10.4 records this for `DropdownButtonFormField`; the plain one has
+  it too.
+- **The platform dashboard, 3.4px at 360 × 2.0.** An org-type pill and a seat
+  count in one Row. The pill is the part that can afford to give — but it could
+  not, because `MlPill` had no `maxLines` and no overflow behaviour, so a
+  bounded width would have made it overflow internally instead. The component
+  was fixed first, then the call site.
+- **The targets tabs, 131px.** Their label moved 13 → 14. The note beside them is
+  explicit that nothing there can ellipsize without destroying the meaning, so
+  the label **wraps** instead.
+- **The org-type targets screen, 60px on the BOTTOM.** Not horizontal for once.
+  An unflexed child of a `Column` does not shrink, and at text scale 2.0 the
+  band is taller than the viewport on its own. Fixed as a *shape*: `TargetsPage`
+  now owns the band-plus-body column for all three targets screens and caps the
+  band at half the viewport with an internal scroll. The other two do not
+  overflow today and use it anyway — the shape is the fault, not the one screen
+  that crossed the line first.
+
+### What is deliberately left, and the measurement behind it
+
+**128 sites still name a typeface**, held by the `typeface-named-by-hand`
+ratchet. They are three different things and none of them is an oversight:
+
+- **`const` literals.** `Theme.of` is not a constant, and a const style with no
+  colour *deliberately* inherits the ambient ink — swapping it for a theme slot
+  would take `onSurface` and get the colour wrong inside a filled button or a
+  chip. That is a worse fault than the drift, which measures like this (a stated
+  size under `bodyMedium`'s inherited 20/14 ratio):
+
+  | size | inherited box | scale box | delta |
+  |---|---|---|---|
+  | 11 | 15.7 | 16.0 | −0.3 |
+  | 12 | 17.1 | 16.0 | **+1.1** |
+  | 14 | 20.0 | 20.0 | 0.0 |
+  | 16 | 22.9 | 24.0 | −1.1 |
+  | 22 | 31.4 | 28.0 | **+3.4** |
+
+  85 of the 96 const sites that state a size are at 17px or below, so they sit
+  in the ±1.4px band. Of the eleven at 18px and up: two are `TextSpan`s inside a
+  parent span that already states the metrics, so they drift by **zero**; two
+  are `TextField` styles; the rest are single-line figures, an avatar's initials
+  and an emoji-picker glyph. None of them is a paragraph.
+- **`MlOv`'s `s()`/`m()`**, a byte-for-byte port of an external drop that ships
+  its own type function.
+- **`CustomPainter.paint()`**, per above.
+
+The ratchet can only shrink. It is deliberately not a block: turning it into one
+today would mean making one of those three changes for the wrong reason.

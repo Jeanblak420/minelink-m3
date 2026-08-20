@@ -211,14 +211,15 @@ flutter build windows --debug                  # blocked — see above
 
 ---
 
-## Current state — 2026-08-20
+## Current state — 2026-08-20 (Phase 3)
 
 | | |
 |---|---|
 | `flutter analyze` | no issues |
-| `flutter test` | **1,559 passed** |
-| `dart tool/release_guards.dart` | **26/26**, every one selftest-proven to bite |
-| Renders | 13 files, zero layout faults at any size |
+| `flutter test` | **1,573 passed**, 1 skipped (a tag-gated capture task) |
+| `dart tool/release_guards.dart` | **27/27**, every one selftest-proven to bite |
+| `type_scale_codemod.py --selftest` | OK — slot table, editorial rungs, five rewrites, three refusals |
+| Renders | 18 files, zero layout faults at any size |
 | Screens proving something | **18 / 18** in the untested-screens check; its baseline of excuses is empty |
 | Web (dart2js release) | builds |
 | Android debug APK | builds |
@@ -236,20 +237,58 @@ flutter build windows --debug                  # blocked — see above
 | `no-half-point-font-size` | a font size belonging to neither scale |
 | `text-scale-sweep-reaches-the-ceiling` | a sweep capping below `kMaxEffectiveTextScale` |
 
+### Guard added during Phase 3
+
+| guard | what it stops |
+|---|---|
+| `typeface-named-by-hand` | a `TextStyle` built from scratch instead of reaching a slot — a ratchet at 128, which can only shrink |
+
+`no-half-point-font-size` was **widened** in the same phase: it matched the
+literal `fontSize:` and nothing else, and sixteen half-points were alive behind
+a parameter default and a named argument to `MlOv`'s own type helper. It matches
+the *name* now — `fontSize`, `fs`, `textSize`, `size`.
+
+### What Phase 3 closed
+
+- **902 hand-built `TextStyle` literals** across 150 files now reach a slot.
+  `fontFamily` sites in `lib/` went 497 → 128 and raw `fontSize` ~1,031 → 212;
+  the tool reports **zero** convertible sites left. The residue is what it is
+  built to refuse — const expressions, non-literal sizes, `CustomPainter` — and
+  DESIGN.md §9 carries the per-shape measurement of what that costs.
+- **Three editorial rungs** added for the serif at title size, which had no rung
+  on the scale at all.
+- **A fourth typeface retired** (Sora, seven sites, 292 KB of bundled font) and
+  **three sites** that were rendering in the OS's generic monospace rather than
+  JetBrains Mono.
+- **Five layout defects**, all surfaced by the sweeps rather than by reading:
+  a compliance chip, a `DropdownButton`, a dashboard pill, the targets tabs, and
+  a targets band 60px taller than the viewport. The last was fixed as a *shape*
+  (`TargetsPage`) rather than as an instance.
+
 ### Still open, stated plainly
 
-- **~640 raw `fontSize:` literals across 27 whole-point values.** Left
-  deliberately: consolidating them moves 18px sub-headings to 16 or 22, which is
-  a per-screen design decision a blanket rewrite could get wrong in a way that
-  looks deliberate. The half-points are gone because no scale has half-points.
-- **~500 sites naming a font family by hand.** These are safe but not free: a
-  `TextStyle` built from scratch does not inherit the scale's `height` and
-  `letterSpacing`, so line spacing varies across the product. Fixing it means
-  converting each to `textTheme.<slot>.copyWith(...)`, which needs a
-  `BuildContext` many of these sites do not have.
+- **128 sites still name a typeface**, held by a ratchet. They are const
+  literals (where a theme slot would take `onSurface` and get the ink wrong
+  inside a filled subtree), `MlOv`'s ported `s()`/`m()` helpers, and
+  `CustomPainter.paint()` which has no `BuildContext`. DESIGN.md §9 measures the
+  drift: ±1.4px of line box for 85 of the 96 const sites that state a size, and
+  zero for the two that sit inside a parent span.
 - **No screen has been hand-rebuilt.** Every screen changed — theme, shell,
   components, shape scale, type scale — and the layout defects found along the
   way are fixed, but the ~20 screens of Phase 2 and the ~80 of Phase 3 have not
-  been individually redesigned.
+  been individually redesigned against the console reference.
+- **Seven screens have never been photographed**, not three. The handoff names
+  fleet management, the operations hub and the communications hub, which cannot
+  be goldened because a realtime channel opened in a constructor leaves a
+  pending timer that a golden's `expectLater` outlives. But the four `portal-*`
+  renders are **shell only** — the workspace body is a placeholder that says so
+  in the picture: *"The dashboards need a live session; a picture of their
+  loading state would not be a picture of the design."* So the three portal
+  dashboards, the screens that carry the product, have no picture either.
 - **Nothing has run on a physical handset**, and nothing has been driven against
   the live database in a browser as a signed-in user.
+- **Thirteen `DropdownButton`s have no `isExpanded`.** They pass the sweeps
+  today, so this is hardening rather than a live break — but one of them
+  overflowed by 31px the moment its label grew by a single point, and changing a
+  dropdown's width changes the row it sits in, which is not a change to make
+  from a grep.

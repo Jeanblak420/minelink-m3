@@ -582,6 +582,47 @@ final guards = <Guard>[
     plantLine: 'style: TextStyle(fontSize: 12.5),',
   ),
   Guard(
+    id: 'typeface-named-by-hand',
+    why: 'a TextStyle built from scratch carries ONLY what is written into it. '
+        '`height` and `letterSpacing` come from whatever DefaultTextStyle is in '
+        'scope, which inside a Scaffold is bodyMedium — so a hand-written 15px '
+        'w800 conversation title was drawn with BODY metrics: line height 1.43 '
+        'where a title wants 1.27, tracking +0.25 where a bold title wants '
+        '-0.1. It looks nearly right, which is why 497 of them accumulated and '
+        'why line spacing visibly differed between two cards on one screen.\n'
+        '\n'
+        'Naming a typeface is the tell. A site that writes out a family has, '
+        'by construction, also written out a size and a weight and inherited '
+        'the two metrics it forgot. Reaching a slot instead — '
+        '`context.mlText.titleSmall.copyWith(color: …)` — states all four.\n'
+        '\n'
+        'A RATCHET, not a block, and the remaining 130 are worth naming '
+        'because they are not one thing:\n'
+        '  * const literals. `Theme.of` is not a constant, and a const style '
+        '    with no colour deliberately inherits the ambient ink — swapping it '
+        '    for a theme slot would take onSurface and get the colour WRONG '
+        '    inside a filled button or a chip. That is a worse fault than a '
+        '    line box 1.1px loose, which is what the drift measures at 12px.\n'
+        '  * MlOv\'s own s()/m() helpers, a ported drop that ships its own type '
+        '    function rather than reaching the theme.\n'
+        '  * CustomPainter.paint(), which has no BuildContext by construction '
+        '    and uses MlType directly — the same arrangement '
+        '    MlSemantic.from(Brightness) has beside MlSemantic.of(context).\n'
+        '\n'
+        'The token layer is exempt because it DEFINES the faces, and the PDF '
+        'and spreadsheet exporters because `pw.TextStyle` is a different class '
+        'that happens to share the name.',
+    mode: Mode.ratchet,
+    roots: ['lib'],
+    extension: '.dart',
+    exemptPath: RegExp(r'lib/core/design/tokens/|_pdf\.dart$|exporter\.dart$'),
+    pattern: RegExp(r'fontFamily:\s*(?:MlTokens\.font|MlGlass\.|MlAuth\.|'
+        r'kConsoleSans|kEditorialSerif)'),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'planted.dart',
+    plantLine: 'style: TextStyle(fontFamily: MlTokens.fontSans, fontSize: 14),',
+  ),
+  Guard(
     id: 'text-scale-sweep-reaches-the-ceiling',
     why: 'a sweep that stops below the scale the shells actually install '
         'leaves real sizes unrendered while reporting that a screen "survives '
