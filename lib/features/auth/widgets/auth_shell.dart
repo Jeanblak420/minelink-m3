@@ -189,12 +189,19 @@ class _AuthRail extends StatelessWidget {
             // blind to this one — on the two screens (`/forgot-password`,
             // `/reset-password`) this shell actually renders. Same numbers,
             // one source, and the guard now covers every place they appear.
-            Row(
+            // A Wrap, not a Row. Three stat columns with fixed 26px gaps were
+            // all unflexed, so each took its natural width from an unbounded
+            // constraint (CLAUDE.md §10.4) — at text scale 2.0 that is 62px
+            // more than the rail has, and the brand panel on /forgot-password
+            // and /reset-password overflowed. Wrapping lets the third stat
+            // drop to a second line, which is what a rail this narrow should
+            // do anyway; the spacing is unchanged at the sizes where they fit.
+            Wrap(
+              spacing: 26,
+              runSpacing: 18,
               children: [
-                for (var i = 0; i < kMlPlaceholderBrandStats.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 26),
-                  _RailStat(stat: kMlPlaceholderBrandStats[i]),
-                ],
+                for (final stat in kMlPlaceholderBrandStats)
+                  _RailStat(stat: stat),
               ],
             ),
           ],
