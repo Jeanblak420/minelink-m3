@@ -3,7 +3,7 @@
 // The transporter's and the buyer's dashboards passed `unit: 'R'` to their money
 // KPI, and `PortalKpi` renders `unit` AFTER the number in the small muted style
 // it uses for "t" and "%". So the dashboards read **"29 159 R"** — while the
-// very same file writes "R29 159" for its peak-per-day caption and its earnings
+// very same file writes "R29,159" for its peak-per-day caption and its earnings
 // table, and the margin ledger writes "R 141,306.00". Three spellings of one
 // currency on one product, one of them grammatically wrong.
 //
@@ -71,7 +71,7 @@ void main() {
   /// Walks `RichText`, not `Text`: the KPI tile builds its figure and its unit
   /// as two `TextSpan`s of ONE paragraph, so `find.text` cannot see it and a
   /// `Text`-only sweep misses the exact widget this test is about. Measured —
-  /// the first version of this returned `[Peak R29 159/day, R14 309, R14 850]`
+  /// the first version of this returned `[Peak R29,159/day, R14,309, R14,850]`
   /// and not the KPI at all. Every `Text` compiles down to a `RichText`, so one
   /// pass covers both.
   List<String> moneyStrings(WidgetTester tester) {
@@ -87,8 +87,11 @@ void main() {
     await pumpDash(tester, const TransporterPortalDashboardScreen(),
         OrgType.transporter);
 
-    // `kTripEarnings`: 14 850.20 + 14 309.00, rounded and space-grouped.
-    expect(moneyStrings(tester), contains('R29 159'),
+    // `kTripEarnings`: 14 850.20 + 14 309.00, rounded and comma-grouped by the
+    // shared `NumberFormat` — the same one the earnings screen and the margin
+    // ledger use. The dashboards hand-rolled a SPACE separator until
+    // 2026-08-20, so one currency had two spellings one click apart.
+    expect(moneyStrings(tester), contains('R29,159'),
         reason: 'the revenue KPI is not showing a prefixed Rand figure. If the '
             'R is being passed as `unit:` again it renders after the number, '
             'in the style reserved for units of measure.');
@@ -100,11 +103,30 @@ void main() {
             'money site in this product prefixes it.');
   });
 
+  testWidgets('one currency, one thousands separator', (tester) async {
+    // The dashboards hand-rolled their grouping with a SPACE while the earnings
+    // screen one click away and the margin ledger both used `NumberFormat` and
+    // a comma. Which separator is right for South Africa is a decision — SANS
+    // 920 says a thin space, most local software says a comma — but having TWO
+    // is not.
+    await pumpDash(tester, const TransporterPortalDashboardScreen(),
+        OrgType.transporter);
+
+    final spaced = moneyStrings(tester)
+        .where((s) => RegExp(r'R\s?\d{1,3} \d{3}').hasMatch(s))
+        .toList();
+    expect(spaced, isEmpty,
+        reason: 'these figures group their thousands with a space while the '
+            'rest of the product uses `NumberFormat`: $spaced. Change the '
+            'pattern in one place if the convention is meant to move — do not '
+            'reintroduce a second implementation.');
+  });
+
   testWidgets('the buyer dashboard prefixes its Rand', (tester) async {
     await pumpDash(tester, const BuyerPortalDashboardScreen(), OrgType.buyer);
 
     // `kBuyerValues`: payable 40 920 for the one load that has a payable value.
-    expect(moneyStrings(tester), contains('R40 920'),
+    expect(moneyStrings(tester), contains('R40,920'),
         reason: 'the payable KPI is not showing a prefixed Rand figure.');
 
     final trailing =

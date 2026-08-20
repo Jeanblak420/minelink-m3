@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -519,15 +520,21 @@ class _BuyerPortalDashboardScreenState
       ? v.toStringAsFixed(0)
       : v.toStringAsFixed(v == v.roundToDouble() ? 0 : 1);
 
-  static String _rand(double v) {
-    final whole = v.round().toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < whole.length; i++) {
-      if (i > 0 && (whole.length - i) % 3 == 0) buf.write(' ');
-      buf.write(whole[i]);
-    }
-    return buf.toString();
-  }
+  /// Rand, grouped by `NumberFormat` like every other money site in the product.
+  ///
+  /// This hand-rolled its own grouping loop with a SPACE separator, so the
+  /// dashboards printed `R29 159` while the earnings screen one click away
+  /// printed `R29,159` and the margin ledger printed `R 141,306.00` — both of
+  /// those through `intl`. Two separators for one currency, and the outlier was
+  /// the copy that did not use the shared formatter. Found 2026-08-20 by
+  /// photographing the two screens side by side.
+  ///
+  /// If South African spacing (SANS 920: a thin space, not a comma) is wanted
+  /// later, it is now ONE pattern in one place rather than three
+  /// implementations to find.
+  static final _randFmt = NumberFormat('#,##0');
+
+  static String _rand(double v) => _randFmt.format(v.round());
 
   static String _date(DateTime d) {
     final local = MlTime.sast(d);
