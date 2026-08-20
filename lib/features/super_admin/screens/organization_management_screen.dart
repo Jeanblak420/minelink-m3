@@ -321,10 +321,35 @@ class _OrganizationManagementScreenState
               ),
             ),
           )
-        else ...[
-          _headerRow(s),
-          for (final o in shown) _dataRow(context, s, o),
-        ],
+        else
+          // The registry SCROLLS below 620px rather than compressing.
+          //
+          // Its four columns are all `Expanded`, so on a 412px phone they got
+          // roughly 70px each and every one of them truncated: the company
+          // names read "Iron …", "Atlas …", "Cons…", the org-type pills read
+          // "MI…", "BU…", "TR…" and the token expiry read "10…", "1D…", "Ex…".
+          // A registry where no column can be read is not a narrow registry, it
+          // is a blank one. Photographed 2026-08-20, the first time this screen
+          // was rendered at phone width.
+          //
+          // 620 is what the CONTENT needs: a company name wants ~180px at
+          // flex 16, the "TRANSPORTER" pill ~100px at flex 10, and the expiry
+          // ~110px at flex 13 — the widest of those puts the table at 584 plus
+          // the 44px chevron column. It therefore never scrolls on a laptop and
+          // always scrolls on a phone, which is the right way round.
+          //
+          // Header and rows go inside ONE `MlWideTable` so they scroll
+          // together; two would drift apart the moment anyone touched it.
+          MlWideTable(
+            minWidth: 620,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _headerRow(s),
+                for (final o in shown) _dataRow(context, s, o),
+              ],
+            ),
+          ),
         // ── Pagination footer ──
         Container(
           margin: const EdgeInsets.only(top: 16),
@@ -361,7 +386,20 @@ class _OrganizationManagementScreenState
                     DropdownMenuItem(value: n, child: Text('$n / page')),
                 ],
               ),
-              const Spacer(),
+              // NO `Spacer` HERE. A `Spacer` is an `Expanded`, and a `Wrap`
+              // cannot accept `FlexParentData` — it throws "Incorrect use of
+              // ParentDataWidget" on every build of this screen, in debug,
+              // which is every build a developer ever sees.
+              //
+              // The comment above this Wrap said "every child here is
+              // unflexed", and that was the claim the Spacer falsified. It was
+              // presumably left behind when the footer changed from a `Row`.
+              //
+              // Nothing replaces it: a Wrap has no free space to distribute, so
+              // the Spacer could never have pushed the pager right even if it
+              // had been legal. The pager sits after the rows-per-page control
+              // and wraps under it when the footer is narrow, which is what the
+              // Wrap is for.
               _pageBtn(
                 s,
                 Icons.chevron_left_rounded,

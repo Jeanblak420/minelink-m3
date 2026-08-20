@@ -217,7 +217,19 @@ void main() {
       final s = d.exception.toString();
       if (s.contains('overflowed') ||
           s.contains('forces an infinite') ||
-          s.contains('BoxConstraints')) {
+          s.contains('BoxConstraints') ||
+          // A misused ParentDataWidget throws on every build and is NOT a
+          // layout fault by the three tests above, so it fell through to
+          // `previousOnError` — where `tester.takeException()` swallowed it and
+          // the render was written anyway.
+          //
+          // That is exactly what happened to the organisation registry: a
+          // `Spacer` inside a `Wrap` (a `Spacer` IS an `Expanded`, and a `Wrap`
+          // cannot take `FlexParentData`) threw "Incorrect use of
+          // ParentDataWidget" on every frame, and the golden looked fine. It
+          // was found only because a widget test on the same screen reported
+          // it — which is one screen's luck, not a system.
+          s.contains('ParentDataWidget')) {
         captured.add(s.split('\n').first);
       } else {
         previousOnError?.call(d);
