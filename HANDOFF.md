@@ -1,6 +1,6 @@
 # MineLink M3 — session handoff
 
-**Rewritten 2026-08-20, end of the Phase 3 session.** Everything below is
+**Rewritten 2026-08-20, end of the Phase 4 session.** Everything below is
 verified state, not intention. It replaces the previous handoff of the same
 name; the parts of that one still true have been folded in.
 
@@ -11,14 +11,14 @@ name; the parts of that one still true have been folded in.
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **41 commits**, clean tree. |
+| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **53 commits**, clean tree. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
 
 **Nothing whatsoever changes inside `worktree-2026-05-05T11-53-29`.** That was
 Jean's instruction and it has held for every commit. Its verified baseline,
-re-checked at the start, middle and end of this session:
+re-checked at the start and end of this session:
 
 ```
 HEAD              df451d0
@@ -61,11 +61,10 @@ Later instructions, which still stand:
   continue with web and mobile please"* — Windows is blocked by two pre-existing
   faults (§6); web and Android both build.
 - **Work long, don't stop to check in.** *"don't worry about me seeing
-  anything, I'll want to see when everything is complete and done, so don't stop
-  so much in between please run the task for as long as possible so that we can
-  get this completely done and sorted please, correct yourself where you make
-  mistakes and fix the mistakes and make sure you don't implement anything with
-  gaps in them make sure its full and proper like the original"**
+  anything, I'll want to see when everything is complete and done… correct
+  yourself where you make mistakes and fix the mistakes and make sure you don't
+  implement anything with gaps in them make sure its full and proper like the
+  original"*
 
 Four decisions settled before any code, recorded in `docs/redesign/DESIGN.md`:
 
@@ -83,159 +82,158 @@ project.
 
 ## 2. Verified state, right now
 
+Every one of these was run at the end of the session, in this order:
+
 ```
-flutter analyze                    no issues
-flutter test                       1592 passed, 1 skipped (a tag-gated
-                                   capture task, not a disabled assertion)
-dart tool/release_guards.dart      27/27 PASS
-dart tool/release_guards.dart --selftest    all guards bite
-py -3 tool/type_scale_codemod.py --selftest   OK
-py -3 tool/dropdown_width_check.py            passes; --selftest OK
-py -3 tool/glyph_coverage_check.py            passes; --selftest OK
-flutter build web --release        builds, main.dart.js 7.86 MB
-flutter build apk --debug          builds
-docs/redesign/renders/             25 PNGs, zero layout faults at any size
+flutter analyze                                 no issues
+flutter test                                    1692 passed, 1 skipped
+dart tool/release_guards.dart                   28/28 PASS, 0 FAIL
+dart tool/release_guards.dart --selftest        all guards bite
+py -3 tool/type_scale_codemod.py --selftest     OK
+py -3 tool/dropdown_width_check.py              passes
+py -3 tool/glyph_coverage_check.py              passes
+flutter build web --release                     builds
+flutter build apk --debug                       builds
+docs/redesign/renders/                          58 PNGs, 22 of them phone-width
 ```
 
-Layout is swept at **8 widths (1612 → 360px) × 6 text scales (0.85 → 2.0)**
-across the console, the portal, and the 22 screens nothing had ever rendered.
+Layout is swept at **8 widths (1612 → 360px) × 6 text scales (0.85 → 2.0)**,
+and — new this session — **again with real rows in every table** at 360/800/1280
+by 1.0/1.3, on 22 portal screens and 4 console screens.
 
 ---
 
-## 3. What Phase 3 did (this session, commits 30–41)
+## 3. What Phase 4 did (this session, commits 42–53)
 
-Full reasoning is in each commit message and in `docs/redesign/DESIGN.md` §9.
+Full reasoning is in each commit message and in `docs/redesign/DESIGN.md` §10.
 `git log` is a real record — read it rather than trusting this summary.
 
-### 3.1 The type work (§4.1 of the old handoff) — DONE
+**The method, unchanged and still working:** add the screen to
+`test/renders/redesign_renders_test.dart` with the fixtures it needs, regenerate,
+**look at the PNG**, **measure it with PIL rather than squint**, fix the *shape*
+where the fault is structural, pin it with a test, and **prove the test bites**
+by removing the fix and watching it fail.
 
-**902 hand-built `TextStyle` literals across ~150 files** now reach a scale slot.
-`fontFamily` sites in `lib/` went **497 → 128**; raw `fontSize` **~1,031 → 212**.
-The codemod reports **zero** convertible sites left.
+**Renders went 25 → 58.** Every screen photographed turned up a real defect, and
+almost all of them share one property: **the fault was a layout that FITS.** An
+ellipsis, a word broken in half, a truncated label and a mislabelled figure are
+all valid layouts. Nothing raises; no overflow sweep fails. Only a measurement of
+the painted result sees them.
 
-- **`MlText`** (`lib/core/design/tokens/m3/ml_typography.dart`) — the scale as a
-  screen reaches for it: `context.mlText.titleSmall.copyWith(color: …)`.
-  Fifteen M3 slots, non-null, so 900 call sites do not each end in a `!`.
-- **Three `editorial` rungs** at 24/20/16 — Fraunces at *title* size, which had
-  no rung at all. The serif does two jobs and the scale named one.
-- **`tool/type_scale_codemod.py`** — the engine, with five documented refusals
-  and a `--selftest`. Re-runnable.
-- **A fourth typeface retired** — `kConsoleSans = 'Sora'`, alive at 7 console
-  sites while the rail beside them ran Plus Jakarta Sans. Out of `lib/` and out
-  of `pubspec.yaml` (5 weights, 292 KB in every build).
-- **Three sites rendered in the OS's generic monospace**, not JetBrains Mono.
-- **16 half-points the guard could not see** — behind parameter defaults and
-  `MlOv.s(size:)`. `no-half-point-font-size` matches the *name* now.
-- **New guard `typeface-named-by-hand`** — a ratchet at 128, which can only
-  shrink. The 128 are const literals, `MlOv`'s ported helpers, and
-  `CustomPainter.paint()`; DESIGN.md §9 measures what that costs (±1.4px of line
-  box for 85 of the 96 const sites, zero for the two inside a parent span).
+### 3.1 The screens that had no picture, and what each one had wrong
 
-### 3.2 The renders (§4.2 of the old handoff) — DONE, and it was never a transport fake
+| screen | what the picture showed |
+|---|---|
+| security gate | KPI chips reading "Incoming Tod…"/"Departed Tod…" — and "Incoming Today" was not scoped to today at all |
+| weighbridge | heading "Trucks at Mine — Ready for Lo…"; recon table with no scrollbar |
+| every phone screen | the bottom nav clipping wrapped labels in **10 of 12 trees** |
+| combined recon table | header reading "DELIVER / ED", "VARIAN / CE", "PO / D" |
+| combined recon table | five period-total cards showing an icon and the letters D, W, M, Y, T |
+| mine reconciliations | one load as `0.42 t` on the stat card and `−0.42 t` in the row beneath |
+| margin ledger | `R 141,306.00` rendered as the single character `R` |
+| org insights | a row labelled **On-time** fed the waybill-completion rate (91% where the measure said 30%), and 0% where the model demands a dash |
+| driver navigation | a crash, a HUD breaking every word, "In 0 m", the destination named twice with the first copy truncated, and an ETA off the device's clock |
+| request inboxes | the page title running **157px** past a phone |
+| trucks on route | a plate pill 21px past the card at 360 × 1.3 |
+| request tracking | the trips cell 10px over at 1024 × 1.3 |
+| the dashboards | `29 159 R` — a currency symbol rendered as a unit of measure — and a second thousands separator |
+| supervisor stockpiles | 128.254 / 17.98 / 412.131 tons — a count-up caught one frame short |
 
-The old handoff asked for a Supabase transport fake so three screens could be
-photographed. The real blocker was a **constructor**: `FleetNotifier`,
-`OperationsNotifier` and `CommunicationsNotifier` each loaded and opened realtime
-channels from theirs, so none could be *constructed* without a network.
-**`start()`** is the seam; the providers call it immediately, so the running app
-is unchanged.
+### 3.2 The shapes that changed, rather than the instances
 
-The dashboards needed no seam at all — `test/fixtures/portal_capture_fixtures.dart`
-already overrode every portal data provider and was only wired into the
-design-*reference* capture.
+- **`MlColumn.minWidth`** + `MlDataTable` widening its scroll minimum to honour
+  it, **scaled by the live text scaler**.
+- **`MlDataTable` headers get two lines**; **`MlSectionTitle` gets two lines**.
+- **The bottom navigation bar computes its height** from the label style and the
+  text scaler, instead of the constant 72 the theme carried.
+- **`routingServiceProvider`** — `RoutingService()` was constructed at the call
+  site, so the driver's navigation screen could not be handed a route.
+- **`MlTime.debugClock`** — one hook freezes the whole product's clock for the
+  render harness.
+- **`mlConsoleCanvas*` forwards to `MlGlass.bg0`**, and the canvas texture is off
+  by default: measured, every design-reference page is a single flat colour.
+- **`pumpForCapture`** (`test/test_helpers/render_pumps.dart`) — the settle
+  schedule, now shared with the tests that prove it is long enough.
 
-**Seven screens that had no picture now have one**: fleet management, the
-operations hub, the communications hub, the three role dashboards, and the
-driver's Trip screen. Renders went 18 → 25.
+### 3.3 The sweeps stopped passing over empty states
 
-Four fixture gaps found by photographing: `kFleetStatus` existed and was never
-registered; `fleetMaintenanceProvider` had no fixture (so the third fleet state
-had never been drawn); `vehicleDriversProvider` had none (the driver hero read
-*"Couldn't load your trip"*); and the two fixture files **described two
-different fleets** — one namespace now.
-
-### 3.3 Design and layout work (§4.3, STARTED — see §4)
-
-- **13 dropdowns** free to size themselves to their widest option, one of which
-  overflowed 31px at 430×1.6. `tool/dropdown_width_check.py` holds it.
-- **A character no shipped font can draw** — `✓` in two driver buttons and a
-  chat receipt. `tool/glyph_coverage_check.py` reads the `cmap` out of each TTF.
-- **Four screens with two margins** — a `Column` centres its children, so a hero
-  card floated mid-page while everything below ran full width. One of the four
-  was the **portal shell**.
-- **15 of 16 horizontal scroll views had no scrollbar** — a table showing a
-  column cut off mid-word with nothing to say more existed. `MlWideTable`, plus
-  a themed scrollbar whose contrast is **measured** (3:1 minimum, both themes).
-- **Every dashboard floated in the middle of the window** — the shell's Row used
-  the default `crossAxisAlignment: center`, so the workspace shrink-wrapped and
-  was centred. Measured 168px of nothing above and below on a 1900px window, and
-  the gap scaled with the window. Pinned by
-  `test/widgets/shell_workspace_alignment_test.dart`, proven to bite.
-
-Also fixed: **no scrollbar had ever appeared in any render**, because
-`RawScrollbar` fades in from a post-frame callback and `shoot()` pumped once.
-And **the 895px mystery** the render file blamed on an animation was
-`Image.asset` resolving only when an earlier test had warmed the cache.
+`portal_overflow_sweep_test.dart` renders every portal screen with **no data**
+and says so in its own header. That is half a job — with no rows there is no
+plate pill to overflow. A second pass sweeps 22 screens **with the capture
+fixtures installed**; it found seven failing screens the day it was written and
+two more when it was widened. `super_admin_overflow_sweep_test.dart` now has the
+same second pass over four console screens.
 
 ---
 
 ## 4. What is NOT done — PICK UP HERE
 
-### 4.1 §4.3 — the per-screen redesign against the console reference (IN PROGRESS)
+### 4.1 Screens still without a picture
 
-This is the main remaining work and where the last session stopped.
+The render set covers the whole daily flow now. What is left is the tail, and
+it is genuinely a tail — but each one has been unlooked-at, and the strike rate
+on unlooked-at screens this session was 100%.
 
-Every screen *changed* (theme, shell, components, shape scale, type scale) and
-the systemic faults above are fixed, but **the ~20 screens of Phase 2 and the
-~80 of Phase 3 have not been hand-rebuilt against the console reference.**
+- **Console:** targets (platform / org-type / company), disputes inbox,
+  organizations, organization detail, platform users, token requests & history,
+  audit logs, available routes, route marketplace, crash reports, account
+  deactivations, live map, the company mirror.
+- **Portal:** buyer waybills, buyer requests, buyer routes & mines, mine
+  locations, tons-out detail, trip detail, stockpile detail/audit, the three
+  truck-location maps, transporter drivers, fuel costs, drop-off, compliance,
+  own-company, request-transportation (the form itself).
+- **Shared:** chat / messages, notifications, profile, account security,
+  appearance & theme, employee register.
 
-The method that has been working, and should continue:
+The fixtures for most of these already exist — `portal_capture_fixtures.dart`,
+`console_capture_fixtures.dart` and `nav_fixtures.dart` between them cover the
+providers. Where one does not, adding it has repeatedly been the thing that
+found the defect (see `kFleetStatus`, `vehicleDriversProvider`,
+`requestTrackingProvider`, `assignedDriverId`).
 
-1. **Add the screen to `test/renders/redesign_renders_test.dart`** with the
-   fixtures it needs, and regenerate:
-   `flutter test test/renders --update-goldens`
-2. **Look at the PNG.** Every defect in §3.3 was found this way and none of them
-   failed a test.
-3. **Measure, do not squint.** `PIL` is available. Reading pixel values out of a
-   render is how the scrollbar contrast, the top gap and the tofu glyph were all
-   settled. Three plausible explanations for the top gap were wrong before the
-   measurement found the fourth.
-4. Fix the *shape* rather than the instance where the fault is structural —
-   `TargetsPage`, `MlWideTable`, the shell Row.
-5. Pin it with a test that would have caught it, and **prove the test bites** by
-   removing the fix and watching it fail.
+### 4.2 Dialogs and flows nothing has photographed
 
-**Screens still without a picture** (start here — every one photographed so far
-found something):
+`shoot()` now takes an `act:` callback, so an interaction can happen before the
+picture is taken (used for opening a request). Nothing yet photographs:
 
-- the mine dashboard is rendered but has not been *looked at* closely
-- the load controller, security check-in, the recon tables, reconciliations
-- the request/dispatch dialogs, the margin ledger, the org insights screens
-- the driver navigation screen
-- anything on a phone: only 4 of the 25 renders are phone-width
+- the **due-diligence gate** — preview → "are you sure" → the green tick → the
+  transporter list → the final confirm. It needs an `approved` request and a
+  sequence of taps.
+- the **Record Load sheet** (tare/gross, seal photos, wayslip).
+- the **hazard report sheet**, the **quality-cert dialog**, the **invoice
+  capture dialog**, the **add-vehicle dialog**.
 
-**Known cosmetic items already spotted and not yet fixed:**
+`test/test_helpers/dialog_sweep.dart` and
+`form_dialog_overflow_sweep_test.dart` already sweep dialogs for overflow; what
+is missing is pictures.
 
-- The hub hero cards sit in a `MlCard(hero: true)` whose accent border reads
-  heavier than the console's equivalent. Compare against
-  `docs/design-reference/super-admin-dashboard-dark.png`.
-- The buyer light dashboard's canvas gradient is a much stronger step than the
-  dark one — worth measuring both.
+### 4.3 A decision waiting on Jean
 
-### 4.2 The 128 remaining hand-named typefaces
+**The margin ledger's TOTALS row sums the three per-ton RATE columns** —
+R 520 + R 638 + R 495 = "R 1,653.00" — which is a figure with no meaning, printed
+in the same style as the money beside it. The code calls these "the plain column
+totals requested", and the Excel/CSV/PDF export already omits them (it summarises
+routes, tons and margin earned only), so the screen and its own export disagree.
+Left alone because it reads as a deliberate instruction. Say the word and it
+becomes a dash or a tonnage-weighted average.
+
+### 4.4 The 128 remaining hand-named typefaces
 
 Held by the `typeface-named-by-hand` ratchet, which can only shrink. They are
 three different things and DESIGN.md §9 measures each. **Not** a gap — a
 decision — but the ratchet is there so it can be revisited.
 
-### 4.3 Nothing has run on real hardware
+### 4.5 Nothing has run on real hardware
 
 - No APK installed on a handset. (Jean's phone can be driven — see the
   `driving-jeans-phone` skill in the global `CLAUDE.md`.)
 - Nothing driven against the live database in a browser as a signed-in user.
 - iOS not attempted; no reachable Apple Developer account.
+- **The map tiles are blank in every render.** Tiles come from OpenStreetMap over
+  HTTP and `flutter_test` answers every request with a 400. The route line, the
+  puck, the banner and the HUD are all real; the tiles need a device.
 
-### 4.4 Windows — blocked, and not this project's fault
+### 4.6 Windows — blocked, and not this project's fault
 
 Two independent pre-existing faults, both recorded with exact errors in
 `docs/redesign/VERIFICATION.md`:
@@ -257,8 +255,8 @@ Jean said to skip it. Moving the folder to a path without `!` is his call.
 cd "/c/Users/Somebody Someone/Music/SHOWME!/MineLink-M3"
 
 flutter analyze                                  # must be clean
-flutter test                                     # 1592 passing
-dart tool/release_guards.dart                    # 27/27
+flutter test                                     # 1692 passing
+dart tool/release_guards.dart                    # 28/28
 dart tool/release_guards.dart --selftest         # every guard must BITE
 py -3 tool/type_scale_codemod.py --selftest
 py -3 tool/dropdown_width_check.py
@@ -273,37 +271,41 @@ flutter build apk --debug
 - **`dart format` on a directory reformats files you did not touch.** It did 131
   files once and 106 another time. **The repo is not dart-format clean**, so
   formatting even a single file you edited churns it entirely — measured, 620
-  lines for a 14-site change. Emit correctly-formatted code instead; the codemod
-  does.
+  lines for a 14-site change. Emit correctly-formatted code instead.
 - **A codemod must not edit prose.** One rewrote the doc comment *explaining* a
-  rule into something that no longer said it. The same trap caught a *test*:
-  `one_type_scale_test.dart` failed on the comment recording that Sora had been
-  retired. It strips comments now.
+  rule into something that no longer said it. It strips comments now.
 - **Read files with `newline=''` in Python.** Universal newlines turn a 340-line
   change into 5,342 insertions.
+- **Write multi-line Python and commit messages to a FILE.** A bash heredoc
+  mangles backticks, `$` and backslashes even when quoted — it corrupted a
+  replacement string this session and silently skipped one edit. `py -3 file.py`
+  and `git commit -F file`.
 - **A failing golden comparison can mask a failing test.** Delete the golden and
   re-run to see the real error.
-- **Backticks in a bash heredoc get executed**, and heredocs mangle `$` and
-  backslashes. Write commit messages and multi-line scripts to a **file** and use
-  `git commit -F` / `py -3 file.py`.
 - **`git add -A` sweeps `test/renders/failures/`** — golden-comparison scratch.
   It is `.gitignore`d now.
 - **Never `git stash`, `git checkout -- .`, or `git clean`** in the original
   worktree — other agent sessions write it (`CLAUDE.md` §10.1).
 - **A Windows console is cp1252** and cannot encode the characters these tools
-  talk about. Both Python checks force UTF-8 on stdout; `glyph_coverage_check.py`
-  died printing its own findings before that.
+  talk about. Both Python checks force UTF-8 on stdout.
+- **`find.text` cannot see a `TextSpan`.** Two tests this session were written
+  against `Text` and silently measured nothing — the org-insights readout and
+  the dashboards' money KPI both build their figure as spans of one paragraph.
+  Walk `RichText` and read `toPlainText()`.
+- **A render that passes alone and fails in the suite is a CLOCK or an image
+  cache**, not a flake. `MlTime.debugClock` and `precacheImage` handle both.
 
 ### Where the reasoning lives
 
-- `docs/redesign/DESIGN.md` — decisions and what each cost. §8 is the Phase 2
-  census, **§9 is the Phase 3 record** (the type work, the codemod's refusals,
-  the measured drift table).
+- `docs/redesign/DESIGN.md` — decisions and what each cost. §8 Phase 2, **§9 the
+  type work, §10 the Phase 4 record**.
 - `docs/redesign/VERIFICATION.md` — what was actually executed, and what has not
   been. Its "still open" list is current.
 - `docs/design-reference/` — the **pre-redesign** reference PNGs, committed in
-  the baseline commit. **Do not regenerate them**; they are the before-image.
-- `docs/redesign/renders/` — 25 PNGs of the redesign.
+  the baseline commit. **Do not regenerate them**; they are the before-image, and
+  they are the thing to measure against when a treatment is in doubt. Two
+  "cosmetic" items were settled this session by reading pixels out of them.
+- `docs/redesign/renders/` — 58 PNGs of the redesign.
 - Every commit message carries its own reasoning.
 
 ---
@@ -313,13 +315,16 @@ flutter build apk --debug
 `CLAUDE.md` in this repo is the fork's copy of the shipping app's. The ones that
 keep mattering:
 
-- **§10.4** — a `Row` hands a non-flex child unbounded width. Nearly every
-  layout defect in this project has been this, or its sibling: a `Row`/`Column`
-  **centring** a child because nobody named `crossAxisAlignment`.
+- **§10.4** — a `Row` hands a non-flex child unbounded width. This session hit
+  it **four separate times** (three plate pills and a page title), plus its
+  siblings: a `Wrap` laying out against unbounded width, and two flex children
+  splitting a row that should have had one.
 - **§10.5** — a green test over an empty fixture, an error state, or a fallback
   font proves nothing. Report *screens proving something / N*.
 - **§7** — `flutter test` renders in a fallback font unless you load the real
   ones. If an overflow figure looks like `characters × fontSize`, that is why.
 - **§7.1** — one clock, Africa/Johannesburg. `MlTime`, never `DateTime.now()`.
+  A source guard, `driver-eta-is-not-the-device-clock`, now holds the one place
+  a unit test could not.
 - **§10.6** — Dart bitwise operators are unsigned 32-bit on the web.
 - **§1** — the package is `flutter_application_1`. Do not rename it.

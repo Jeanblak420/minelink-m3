@@ -323,3 +323,72 @@ the *name* now — `fontSize`, `fs`, `textSize`, `size`.
   overflowed by 31px the moment its label grew by a single point, and changing a
   dropdown's width changes the row it sits in, which is not a change to make
   from a grep.
+
+---
+
+## Current state — 2026-08-20 (Phase 4)
+
+Every line below was executed at the end of the Phase 4 session, in this order.
+
+| | |
+|---|---|
+| `flutter analyze` | no issues |
+| `flutter test` | **1,692 passed**, 1 skipped (a tag-gated capture task) |
+| `dart tool/release_guards.dart` | **28/28 PASS, 0 FAIL** |
+| `dart tool/release_guards.dart --selftest` | all guards bite |
+| `type_scale_codemod.py --selftest` | OK |
+| `dropdown_width_check.py` | passes |
+| `glyph_coverage_check.py` | passes |
+| Renders | **58 files, 22 of them phone-width**, zero layout faults reported at any of them |
+| Web (dart2js release) | builds |
+| Android debug APK | builds |
+| Windows | **blocked, pre-existing** — see above |
+| iOS | not attempted; no reachable Apple Developer account |
+| Original worktree | `df451d0`, 14163 files, the same 3 pre-existing modified files — **untouched**, verified at the start and the end |
+
+### The guard added during Phase 4
+
+| guard | what it stops |
+|---|---|
+| `driver-eta-is-not-the-device-clock` | `DateTime.now().add(` in the driver's navigation screen — an arrival hour read off the device's zone rather than South Africa's. A unit test cannot catch it: on a machine already running SAST both expressions are identical. |
+
+### What is newly PROVEN, and by what
+
+- **A wide table's scrollbar is actually painted.** `wide_table_scrollbar_test.dart`
+  drives the real capture schedule over a table whose rows arrive from a future
+  and counts thumb pixels in the captured image. The two tests that existed
+  before asserted the structure and the colour, and both passed for a whole
+  session while the renders showed a truncated table with no bar on it.
+- **A count-up figure is settled before the picture is taken.**
+  `render_settle_test.dart`. The schedule had been 50ms short, and the
+  supervisor's stockpiles photographed as 128.254 / 17.98 / 412.131 against
+  fixture values of 128.4 / 18.0 / 412.6.
+- **No bottom-nav label is clipped or collides**, in every (org type, role) tree
+  the product can build, at 360 and 412 by 1.0 and 1.3.
+  `bottom_nav_labels_test.dart` enumerates the trees from
+  `UserRole.getRolesForOrgType` rather than listing them, so a role added later
+  is covered without anyone remembering.
+- **No recon header breaks inside a word**, checked AT the table's own declared
+  minimum width rather than at some width that happens to be wider.
+- **No margin figure is ellipsised**, at 900 / 1280 / 1600.
+- **The two halves of a Reconciliations screen agree about the sign of a
+  variance.**
+- **The insights board's On-time row is the measured on-time rate**, and a
+  company with nothing judgeable renders a dash.
+- **Money is prefixed and grouped one way**, on both dashboards.
+- **22 portal screens and 4 console screens survive 360/800/1280 × 1.0/1.3 WITH
+  REAL ROWS IN THEM** — not the empty states the sweeps had been passing over.
+
+### What is still NOT proven
+
+Unchanged from Phase 3 except where noted:
+
+- **Nothing has run on real hardware.** No APK on a handset, nothing driven in a
+  browser against the live database, no iOS build.
+- **The map tiles are blank in every render.** `flutter_test` answers every HTTP
+  request with a 400, so the canvas under the route line is the empty-tile
+  colour. Everything drawn on top of it is real.
+- **The due-diligence gate has never been photographed or driven** — preview,
+  confirm, the green tick, the transporter list, the final confirm. `shoot()`
+  can interact now (`act:`), so the mechanism exists; the sequence does not.
+- **Windows** — two pre-existing faults, neither this project's.
