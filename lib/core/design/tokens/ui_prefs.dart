@@ -61,6 +61,20 @@ class UiPrefs {
   final ConsoleAccent accent;
 
   /// Engineering dot-grid + brand washes behind the light workspace canvas.
+  ///
+  /// **Off by default from 2026-08-20, and that is the reference speaking.**
+  /// Every design-reference page in `docs/design-reference/` is a single flat
+  /// colour — measured, a 136×140 patch of the console light reference's margin
+  /// holds exactly ONE distinct colour, and the portal's light reference is a
+  /// flat slate-50. `docs/design-reference.md` never mentions a dot grid or a
+  /// wash at all. And every v2 console screen paints `MlControlRoom.pageBg`
+  /// straight over the canvas, so no admin has ever seen this texture on the
+  /// screen it was written for; only the portal showed it, which is what made
+  /// the buyer's light dashboard read as a different product from the console
+  /// beside it.
+  ///
+  /// It is a preference, not a deletion. Anyone who wants it turns it on in
+  /// Settings → User Preferences, and a stored `true` is untouched.
   final bool canvasTexture;
 
   /// Text scale factor (1.0 = default). Clamped to [0.85, 1.3].
@@ -71,7 +85,7 @@ class UiPrefs {
   const UiPrefs({
     this.darkMode = true,
     this.accent = ConsoleAccent.defaultAccent,
-    this.canvasTexture = true,
+    this.canvasTexture = false,
     this.textScale = 1.0,
     this.highContrast = false,
     this.boldText = false,
@@ -107,7 +121,9 @@ class UiPrefs {
   static UiPrefs fromJson(Map<String, dynamic> j) => UiPrefs(
         darkMode: j['dark'] as bool? ?? true,
         accent: ConsoleAccent.parse(j['accent'] as String?),
-        canvasTexture: j['canvas'] as bool? ?? true,
+        // `?? false` matches the constructor default. A stored value still
+        // wins, so anyone who had the texture on keeps it.
+        canvasTexture: j['canvas'] as bool? ?? false,
         // A stored `sidebar` key from before the M3 redesign is deliberately
         // read and discarded — there is one rail now, so there is nothing for
         // it to select and nothing to migrate.

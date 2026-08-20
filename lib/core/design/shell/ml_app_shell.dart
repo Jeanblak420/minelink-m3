@@ -58,7 +58,11 @@ class MlAppShell extends StatefulWidget {
     this.onExpandedChanged,
     this.floatingActionButton,
     this.overlay,
-    this.showCanvasTexture = true,
+    // Matches `UiPrefs.canvasTexture`, which went to false on 2026-08-20 —
+    // every design reference page is a single flat colour. The console shell
+    // passes the user's preference; this default is what a caller that has no
+    // preference to pass gets, and it must not disagree with the one that does.
+    this.showCanvasTexture = false,
     this.constrainContent = false,
     this.navEnabled = true,
     this.bottomNavOverride,

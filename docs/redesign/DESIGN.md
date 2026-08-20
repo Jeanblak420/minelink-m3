@@ -678,3 +678,120 @@ ratchet. They are three different things and none of them is an oversight:
 
 The ratchet can only shrink. It is deliberately not a block: turning it into one
 today would mean making one of those three changes for the wrong reason.
+
+---
+
+## 10. Phase 4 — photographing the rest, and the two "cosmetic" items measured
+
+Phase 4 continued §4.3 of the handoff: add a screen to the render harness, look
+at the PNG, **measure it rather than squint**, fix the shape where the fault is
+structural, pin it, and prove the pin bites. Renders went **25 → 36**.
+
+Every screen photographed turned up a real defect, and the pattern in almost all
+of them is the same: **the fault was a layout that FITS.** An ellipsis, a wrapped
+word, a truncated label and a mislabelled figure are all perfectly valid
+layouts. Nothing raises. No overflow sweep fails. The only instrument that sees
+them is a measurement of the painted result — `didExceedMaxLines`, a paragraph's
+height against a one-line reference, or a rect.
+
+### 10.1 The two items the Phase 3 handoff left as "known cosmetic"
+
+Both were listed as things to fix. Measuring turned one into a real, systemic
+fix and the other into a non-defect — which is the point of measuring.
+
+**"The hub hero cards' accent border reads heavier than the console's
+equivalent." — NOT A DEFECT.** Measured by finding every long horizontal run of
+dim cyan in both images and comparing the composited pixel:
+
+| | accent-border pixels |
+|---|---|
+| `docs/design-reference/super-admin-dashboard-dark.png` | (12,54,68) (13,59,73) (11,50,64) (18,59,77) |
+| `screen-communications-hub-desktop-dark.png` (hero cards) | (15,51,70) (16,54,72) |
+
+The same range. The full-strength accent is also identical — `#22D3EE` appears
+literally in the reference (`portal-mine-dashboard-dark.png`, y=487) and in our
+renders. There is nothing to fix, and saying so is worth more than an adjustment
+nobody could justify afterwards.
+
+**"The buyer light dashboard's canvas gradient is a much stronger step than the
+dark one." — REAL, and bigger than it looked.**
+
+Measured, the dark canvas is flat and the light one carries a base, two radial
+brand washes and a 24px dot grid. That much was by design. What the measurement
+also found is that **the console's own page is neither of them**:
+
+| surface | dark | light |
+|---|---|---|
+| `docs/design-reference/super-admin-dashboard-*.png` | `#060B15` flat | `#EEF2F8` flat |
+| `docs/design-reference/portal-components-light.png` | — | `#F8FAFC` flat |
+| `mlConsoleCanvas*` (the shell painted this) | `#070C17` | `#E0E7F0` + washes + dots |
+| `MlControlRoom.pageBg` (every v2 console screen paints this) | `#060B15` | `#EEF2F8` |
+
+A 136×140 patch of the light reference's margin holds **exactly one distinct
+colour**. `docs/design-reference.md` never mentions a dot grid or a wash.
+
+So the console covered its own shell canvas with a flat page, and only the
+portal ever showed the texture — which is precisely why the buyer's light
+dashboard read as a different product from the console beside it. In dark the
+two bases differ by one RGB unit and nobody could see it; in light by 14 units
+of luminance.
+
+Two changes, both narrow:
+
+- `mlConsoleCanvasDark/Light` now **forward to `MlGlass.bg0`** — the value the
+  reference shows and the value every v2 console screen already paints —
+  instead of re-stating a fourth opinion. Same pattern `MlControlRoom` uses for
+  its shared keys, and for the same reason.
+- **The texture layer is off by default.** It is not deleted: it stays in
+  Settings → User Preferences and a stored `true` still wins. It is off because
+  no reference image has it and no admin has ever seen it.
+
+Verified after: a margin patch of `console-desktop-light`, `dash-buyer-desktop-light`
+and the reference all hold one colour, and it is the same colour.
+
+### 10.2 What the newly-photographed screens turned up
+
+| screen | what the picture showed |
+|---|---|
+| security gate | KPI chips reading "Incoming Tod…" / "Departed Tod…"; and "Incoming Today" was not scoped to today at all, while "Departed Today" 10px away was |
+| weighbridge | section heading "Trucks at Mine — Ready for Lo…"; the recon table with no scrollbar |
+| every phone screen | the bottom navigation bar clipping wrapped labels in **10 of 12 trees** |
+| combined recon table | header reading "DELIVER / ED", "VARIAN / CE", "PO / D" — Flutter breaking inside words |
+| combined recon table | five period-total cards showing an icon and the letters D, W, M, Y, T, with the tonnage ellipsised away |
+| mine reconciliations | one load reported as `0.42 t` on the stat card and `−0.42 t` in the row beneath it |
+| margin ledger | `R 141,306.00` rendered as the single character `R` |
+| org insights | a row labelled **On-time** fed the waybill-completion rate — 91% where the measured figure was 30% — and 0% where the model demands a dash |
+| driver navigation | a crash, a HUD breaking every word, "In 0 m", and the destination named twice with the first copy truncated |
+
+### 10.3 The shapes that changed, rather than the instances
+
+- **`MlColumn.minWidth`.** Flex weights say how space is *shared*; they say
+  nothing about how much there has to be. A cell holding an `MlPlatePill` is
+  114px of fixed content, and a `Row` hands a non-flex child unbounded width —
+  so a 90px column does not squeeze a plate, it overflows behind it. Seven
+  tables put a plate in a cell. `MlDataTable` widens its scroll minimum until
+  every declared minimum is met, **scaled by the live text scaler**: the first
+  version took the number literally and overflowed by 18px at scale 1.3 on six
+  screens, which is the same fault as the bottom bar's fixed height.
+- **`MlDataTable` headers get two lines**, so a header wraps at its space or
+  slash instead of losing words.
+- **`MlSectionTitle` gets two lines**, for the same reason at ~32 sites.
+- **The bottom navigation bar computes its height** from the label style and the
+  text scaler instead of the constant 72 the theme carried. 72 is exactly one
+  line of label, and `NavigationBar` does not ellipsize.
+- **`routingServiceProvider`.** `RoutingService()` was constructed at the call
+  site, so the driver's navigation screen could not be handed a route by
+  anything. Same seam, and the same reasoning, as `FleetNotifier.start()`.
+- **`MlTime.debugClock`.** Every time in this product already goes through
+  `MlTime`, so one hook freezes the clock for the whole render harness. Written
+  because the navigation HUD prints an ETA and its golden could never match
+  twice; it settles every screen with a relative date or a countdown.
+
+### 10.4 The sweep had been passing over empty states
+
+`portal_overflow_sweep_test.dart` renders every portal screen with **no data**,
+27 corners each, and says so in its own header. That is half a job, and the half
+it misses is the half with tables in it: with no rows there is no plate to
+overflow. A second pass now sweeps sixteen screens with the capture fixtures
+installed. It found **seven failing screens immediately**, at 360px.
+

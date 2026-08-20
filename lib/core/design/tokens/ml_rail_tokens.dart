@@ -17,6 +17,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/core/design/tokens/ml_sidebar_tokens.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 const mlRailAccent = Color(0xFF2563EB);
@@ -32,14 +33,45 @@ const mlRailSearchInk = Color(0xFF657795);
 /// gradient partner to [MlRailTokens.accent] on navy.
 const mlRailAccentLift = Color(0xFF8FD0FF);
 
-/// The console canvas the rail and cards sit on. Deliberately NOT
-/// `MlSemantic.surfaceApp`: the design puts the console one step darker than
-/// the portal in dark mode (#070C17 against #0A1424) and one step *cooler*
-/// than it in light (#E0E7F0 against slate-50), so white cards read as raised
-/// rather than as part of the page. Two literals in
-/// `super_admin_shell_layout.dart` before S5-19.
-const mlConsoleCanvasDark = Color(0xFF070C17);
-const mlConsoleCanvasLight = Color(0xFFE0E7F0);
+/// The console canvas the rail and cards sit on.
+///
+/// Deliberately NOT `MlSemantic.surfaceApp`: the design puts the console a step
+/// away from the portal so white cards read as raised rather than as part of
+/// the page. Two literals in `super_admin_shell_layout.dart` before S5-19.
+///
+/// ## Now [MlGlass.bg0], because the reference says so
+///
+/// These were `#070C17` and `#E0E7F0`, and the comment here justified them as
+/// "one step darker than the portal in dark mode… one step cooler than it in
+/// light". Measured against `docs/design-reference/super-admin-dashboard-*.png`
+/// on 2026-08-20 — the console images this whole redesign is aligned to — the
+/// page in both is a SINGLE FLAT COLOUR, and it is `MlGlass.bg0`:
+///
+/// | | reference PNG | this token was |
+/// |---|---|---|
+/// | dark | `#060B15` | `#070C17` |
+/// | light | `#EEF2F8` | `#E0E7F0` |
+///
+/// A 136×140 patch of the light reference's margin holds exactly ONE distinct
+/// colour — no wash, no dot grid. And every v2 console screen already paints
+/// `MlControlRoom.pageBg`, which IS `MlGlass.bg0`, straight over this canvas —
+/// so the console covered its own shell surface and only the portal ever
+/// showed it. In dark the difference is one RGB unit and invisible; in light it
+/// is 14 units of luminance, which is what made the buyer dashboard look like a
+/// different product from the console beside it.
+///
+/// Forwarded rather than re-stated, the same way `MlControlRoom` forwards its
+/// shared keys, so a third opinion cannot appear.
+///
+/// The texture layer — the two brand washes and the dot grid — is untouched and
+/// still on by default. It is a user preference (Settings → User Preferences →
+/// canvas texture) and belongs to whoever is reading the screen; the BASE
+/// belongs to the design.
+// , not : Dart cannot const-evaluate a field access on a const
+// object. Forwarding is worth losing the const for — the alternative is a
+// fourth copy of two colours that have already been re-stated three times.
+final mlConsoleCanvasDark = MlGlass.dark.bg0;
+final mlConsoleCanvasLight = MlGlass.light.bg0;
 
 /// High-contrast overrides for the console's `ColorScheme`, applied when an
 /// admin turns on High Contrast in Settings → User Preferences. They exist as
