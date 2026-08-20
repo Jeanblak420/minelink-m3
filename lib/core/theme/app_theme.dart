@@ -369,7 +369,26 @@ class AppTheme {
       // and so a bare NavigationBar in a test still looks right.
 
       navigationBarTheme: NavigationBarThemeData(
-        height: 72,
+        // NO FIXED HEIGHT.
+        //
+        // It was 72 — a number that fits exactly one 16px line of label and
+        // then stops. A `NavigationBar` does not ellipsize, so a label too long
+        // for its slot wraps, and a wrapped label in a fixed-height bar is
+        // clipped rather than overflowed: nothing raises, no sweep fails, and
+        // the words are simply not there. Measured at 360px: the mine guard's
+        // "Incidents & gate checks" took three lines and ran 6px past the
+        // bottom of the bar, and the supervisor's "Supervisor & stockpiles"
+        // did the same.
+        //
+        // Worse, 72 ignored the text scale entirely, while this console lets
+        // every user set one (`ConsolePrefs.textScale`, 0.85–1.3). A fixed
+        // chrome height under a user-controlled type size can only be right at
+        // one setting.
+        //
+        // `MlAppShell` computes the height from the label style and the live
+        // text scaler instead — see `_bottomBarHeight`. Left unset here so
+        // there is one answer, not a theme value and a widget value that can
+        // disagree. Pinned by `test/widgets/bottom_nav_labels_test.dart`.
         backgroundColor: chrome.topBarSurface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,

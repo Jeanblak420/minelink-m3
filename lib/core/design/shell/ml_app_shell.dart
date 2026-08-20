@@ -398,6 +398,47 @@ class _MlAppShellState extends State<MlAppShell> {
     );
   }
 
+  /// How tall the bottom bar has to be for the labels it is actually given.
+  ///
+  /// ## Why this is computed and not a constant
+  ///
+  /// The theme carried `height: 72`. That is exactly one 16px line of label —
+  /// derived: a destination is a 32px indicator, a 4px gap and the label, so
+  /// 32 + 4 + 16 = 52, centred in 72 with 10px above and below. It is also the
+  /// height at which a `NavigationBar` silently starts destroying words, for
+  /// two reasons that compound:
+  ///
+  ///   1. **`NavigationBar` does not ellipsize.** A label too long for its slot
+  ///      wraps. At 360px a five-destination bar gives each label a 72px slot,
+  ///      and 72px does not hold "Compliance", "Procurement" or
+  ///      "Reconciliation" on one line — 20 labels across 10 of this product's
+  ///      trees wrapped, measured 2026-08-20. A wrapped label in a
+  ///      fixed-height bar is CLIPPED, not overflowed, so nothing raises.
+  ///   2. **72 ignored the text scale**, which this console hands to the user
+  ///      (`ConsolePrefs.textScale`, 0.85–1.3). A fixed chrome height under a
+  ///      user-controlled type size can only be right at one setting.
+  ///
+  /// So the bar is sized for **two** lines of the label style at the live text
+  /// scale, plus real clearance. Two rather than one because the alternative is
+  /// abbreviating "Reconciliation" until it stops naming anything; three is not
+  /// allowed — a node whose label needs three lines gets a `shortLabel`, and
+  /// `bottom_nav_labels_test.dart` fails until it does.
+  double _bottomBarHeight(BuildContext context) {
+    const indicator = 32.0; // M3's selected-destination pill
+    const gap = 4.0; // indicator → label
+    const clearance = 8.0; // above and below, so nothing sits on an edge
+    const maxLabelLines = 2;
+
+    final style = Theme.of(context).navigationBarTheme.labelTextStyle
+            ?.resolve(<WidgetState>{}) ??
+        Theme.of(context).textTheme.labelMedium;
+    final size = style?.fontSize ?? 12.0;
+    final lineHeight =
+        MediaQuery.textScalerOf(context).scale(size) * (style?.height ?? 1.33);
+
+    return indicator + gap + maxLabelLines * lineHeight + 2 * clearance;
+  }
+
   Widget _buildBottomBar(BuildContext context) {
     final destinations = _bottomDestinations;
     final selectedIndex = () {
@@ -411,6 +452,7 @@ class _MlAppShellState extends State<MlAppShell> {
     }();
 
     return NavigationBar(
+      height: _bottomBarHeight(context),
       selectedIndex: selectedIndex,
       onDestinationSelected: (i) {
         if (i == destinations.length) {

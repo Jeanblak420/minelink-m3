@@ -245,6 +245,10 @@ List<PortalNavNode> _mineTree(UserRole? role) {
       ),
       const PortalNavNode.leaf(
         label: 'Incidents & gate checks',
+        // Three lines in a 72px bottom-bar slot at 360px, and the third was
+        // clipped away by the bar. The full label is still what the rail, the
+        // drawer and the bar's long-press tooltip say.
+        shortLabel: 'Incidents',
         icon: Icons.report_gmailerrorred_outlined,
         route: '/portal/mine/operations',
       ),
@@ -264,6 +268,11 @@ List<PortalNavNode> _mineTree(UserRole? role) {
       ),
       const PortalNavNode.leaf(
         label: 'Weighbridge records',
+        // Two long words: at the console's top text scale (1.3) neither fits a
+        // 72px bottom-bar slot, so Flutter breaks INSIDE a word and the label
+        // needs three lines. The full label is what the rail, the drawer and
+        // the bar's long-press tooltip say.
+        shortLabel: 'Records',
         icon: Icons.scale_outlined,
         route: '/portal/mine/operations',
       ),
@@ -283,6 +292,11 @@ List<PortalNavNode> _mineTree(UserRole? role) {
       ),
       const PortalNavNode.leaf(
         label: 'Supervisor & stockpiles',
+        // Same three-line clipping as "Incidents & gate checks" above.
+        // "Stockpiles" rather than "Supervisor": it names the thing this
+        // destination is for, and the person reading it already is the
+        // supervisor.
+        shortLabel: 'Stockpiles',
         icon: Icons.supervisor_account_outlined,
         route: '/portal/mine/stockpiles',
       ),
@@ -293,6 +307,9 @@ List<PortalNavNode> _mineTree(UserRole? role) {
       ),
       const PortalNavNode.leaf(
         label: 'Truck locations',
+        // Same as "Weighbridge records" above — "locations" alone overruns a
+        // 72px slot at text scale 1.3 and the label takes three lines.
+        shortLabel: 'Trucks',
         icon: Icons.map_outlined,
         route: '/portal/mine/truck-locations',
       ),

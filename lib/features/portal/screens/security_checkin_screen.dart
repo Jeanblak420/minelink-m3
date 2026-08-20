@@ -271,35 +271,55 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                   ),
                   const SizedBox(height: 14),
                   // ---- KPI chips ----
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _MiniStat(
-                          icon: Icons.login_rounded,
-                          value: '${inbound.length}',
-                          label: 'Incoming Today',
-                          tone: MlTone.accent,
+                  //
+                  // `IntrinsicHeight` + `stretch` so the three cards are the
+                  // same height once a label wraps. This is the one sanctioned
+                  // use of `CrossAxisAlignment.stretch` — CLAUDE.md §10.4 bans
+                  // it under an UNBOUNDED parent, and IntrinsicHeight is
+                  // precisely what makes the height bounded.
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: _MiniStat(
+                            icon: Icons.login_rounded,
+                            value: '${inbound.length}',
+                            // NOT "Incoming Today". `isInbound` is
+                            // `scheduled || en_route_to_load` with no date
+                            // filter at all, so this counts every truck heading
+                            // here whenever it was dispatched — which is the
+                            // right count for a guard, and the wrong label.
+                            // "Departed Today" beside it really is scoped to
+                            // the SAST day, so the two disagreed about what
+                            // "Today" meant while sitting 10px apart. The load
+                            // controller's equivalent already says "Inbound
+                            // Trucks"; this is the same fact under the same
+                            // vocabulary.
+                            label: 'Incoming',
+                            tone: MlTone.accent,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _MiniStat(
-                          icon: Icons.shield_outlined,
-                          value: '${onSite.length + loadedReady.length}',
-                          label: 'At Mine',
-                          tone: MlTone.atMine,
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _MiniStat(
+                            icon: Icons.shield_outlined,
+                            value: '${onSite.length + loadedReady.length}',
+                            label: 'At Mine',
+                            tone: MlTone.atMine,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _MiniStat(
-                          icon: Icons.check_circle_outline,
-                          value: '$departedToday',
-                          label: 'Departed Today',
-                          tone: MlTone.done,
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _MiniStat(
+                            icon: Icons.check_circle_outline,
+                            value: '$departedToday',
+                            label: 'Departed Today',
+                            tone: MlTone.done,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
                   if (q.isNotEmpty && matches.isEmpty && selected == null)
@@ -736,11 +756,17 @@ class _MiniStat extends StatelessWidget {
                 height: 1,
               )),
           const SizedBox(height: 2),
+          // Two lines, like `MlStatCard`'s label. At one line a 117px chip on a
+          // 412px phone rendered "Incoming Tod…" and "Departed Tod…" — the
+          // guard could not tell "Today" from "Total", on the count they act
+          // on. The bespoke chip was the only stat label in the product still
+          // capped at one line.
           Text(label,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: context.mlText.bodySmall.copyWith(
                 color: semantic.textMuted,
+                height: 1.25,
               )),
         ],
       ),

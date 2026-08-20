@@ -148,7 +148,20 @@ class MlSectionTitle extends StatelessWidget {
             children: [
               Text(
                 title,
-                maxLines: 1,
+                // TWO lines, not one.
+                //
+                // A section heading is the thing that says what the list under
+                // it is, and at one line the Load Controller's weighbridge read
+                // "Trucks at Mine — Ready for Lo…" on a 412px phone. Fraunces
+                // at the editorial-medium rung is 20px; almost no real heading
+                // in this product fits 338px on one line of it, so the phone
+                // was ellipsising headings as a matter of course.
+                //
+                // Nothing that already fits moves: a one-line title lays out
+                // identically under `maxLines: 2`. Only the headings that were
+                // losing words gain a line, and every one of them is inside a
+                // scrolling page.
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 // Fraunces, matching MlSectionHead on the reference screens.
                 // The weight drops from w800 to w400 with it: the serif's
