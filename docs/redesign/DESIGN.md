@@ -399,3 +399,89 @@ one design system.
 
 **A green sweep over the wrong widths, in the wrong font, is the same class of
 thing as a hardcoded figure: something that reports a fact it never checked.**
+
+---
+
+## 8. Making it look like one product
+
+Phase 1 built four primitives — a `ColorScheme`, `MlShape`, `MlMotion`, a
+`TextTheme`. Phase 2 found that almost nothing used them, and that in three
+cases a *second* system was quietly competing with each.
+
+### The census, and what it settled
+
+| | before | after |
+|---|---|---|
+| corner radii in `lib/` | **24 distinct values** over 320 sites | 7 scale steps |
+| font sizes | **37 distinct values** over 1,015 sites, ten of them half-points | 27, no half-points |
+| type scales | **two**, 1px apart at the sizes that matter | one |
+| names per typeface | **two** each | one each |
+
+None of that is a matter of taste. `MlTokens.fsBodySm` was 13 and
+`textTheme.bodyMedium` was 14, and both meant "small body text" — so two labels
+on the same card could differ by a pixel depending on which constant the author
+reached for. `MlGlass.sans` and `MlTokens.fontSans` were two string literals
+naming one font, which means renaming a family in `pubspec.yaml` would have
+fixed half the product and silently changed the typeface of the other half,
+because **a Flutter `fontFamily` that does not resolve does not throw** — it
+falls back.
+
+### Which side wins, and why it is always the same answer
+
+The theme. Every time.
+
+`ColorScheme`, `TextTheme` and `ThemeData` are what a Material widget resolves
+*without being told*. A parallel token file is only consulted by code that
+remembers to consult it, so the moment one exists the product has two answers to
+one question and no way to tell which a given widget got. Phase 1 made
+`MlSemantic` a view onto the scheme for exactly this reason; Phase 2 did the
+same for the type scale and the face names.
+
+The tokens are kept as **names**, not deleted. `fsBodySm` reads better than
+`14.0` at 96 call sites, and a name is what makes the next change one edit
+rather than ninety-six.
+
+### What a codemod may and may not do
+
+Three passes were mechanical: radii onto the shape scale, half-points onto whole
+points, tokens onto slots. Each ran over the whole tree, and each taught
+something about the limits of that:
+
+- **It may not edit prose.** The radius pass rewrote a doc comment that read
+  *"Not `BorderRadius.circular(11)`"* — the sentence explaining the rule — into
+  *"Not `MlShape.radiusMedium`"*, which no longer says anything. A codemod that
+  edits documentation is worse than one that misses a site.
+- **It may not reformat what it did not change.** Reading files with Python's
+  default universal newlines converted CRLF to LF and turned a 340-line change
+  into 5,342 insertions and 5,264 deletions. The real edit was still in there,
+  where no reviewer would ever find it.
+- **It must know what it is safe to change.** Snapping a radius cannot move
+  geometry — Flutter clamps a corner to half the shorter side, so raising one is
+  paint-only. Snapping a *font size* can, which is why the half-point pass
+  rounded **up**: growing text can only cause an overflow, and the sweeps catch
+  those; shrinking it makes something unreadable without making it look broken.
+
+The remaining ~640 raw `fontSize:` literals were left alone on that last
+principle. Consolidating them means moving 18px sub-headings to 16 or 22, and
+that is a per-screen design decision that a blanket rewrite could easily get
+wrong in a way that looks deliberate.
+
+### The sweeps were measuring the wrong thing
+
+Every layout defect in this phase was found by making a test render something it
+had not rendered before, and there were three separate ways they were not:
+
+1. **The console sweep stopped at 860px** — so no console screen had ever been
+   rendered on a phone, while nine tests reported they "survive every width x
+   text scale".
+2. **Fourteen sweeps stopped at text scale 1.3**, while the shells compose the
+   in-app slider with the platform's and cap at 2.0. Everything between was a
+   size a real user could reach and nothing had drawn there. Raising them found
+   seven overflows, none of which reproduce at or below 1.3.
+3. **Twenty test files rendered under a bare `MaterialApp`** — stock Material's
+   type scale in stock Material's font family. Harmless while every component
+   hard-coded its own `TextStyle`; the moment they started taking type from the
+   theme, those tests were measuring a rendering that does not ship.
+
+All three are now guarded, because all three were invisible: each one reported
+green about a thing it had never looked at.

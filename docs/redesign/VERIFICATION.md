@@ -165,7 +165,7 @@ above.
   rail sweep down to 360, and the portal sweep up to text scale 2.0 (the
   ceiling the shells actually install). See the commits for what that found.
 
-### 20 test files still render under a theme the app never ships
+### ~~20 test files still render under a theme the app never ships~~ ✅ CLOSED
 
 `_host(...)` helpers that build a bare `MaterialApp` with no `theme:` measure
 **stock Material's type scale in stock Material's font family**. That was
@@ -208,3 +208,48 @@ flutter build web  --dart-define-from-file=config/supabase.live.json
 flutter build apk --debug                      # 180 MB, verified 2026-08-20
 flutter build windows --debug                  # blocked — see above
 ```
+
+---
+
+## Current state — 2026-08-20
+
+| | |
+|---|---|
+| `flutter analyze` | no issues |
+| `flutter test` | **1,559 passed** |
+| `dart tool/release_guards.dart` | **26/26**, every one selftest-proven to bite |
+| Renders | 13 files, zero layout faults at any size |
+| Screens proving something | **18 / 18** in the untested-screens check; its baseline of excuses is empty |
+| Web (dart2js release) | builds |
+| Android debug APK | builds |
+| Windows | **blocked, pre-existing** — see above |
+| iOS | not attempted; no reachable Apple Developer account |
+
+### Guards added during Phase 2
+
+| guard | what it stops |
+|---|---|
+| `no-hardcoded-month-in-ui` | a month name and a year written into a UI string |
+| `no-row-around-a-header-that-has-an-actions-slot` | wrapping a header in a `Row` to put a button beside it |
+| `test-renders-under-the-app-theme` | a bare `MaterialApp` in a test |
+| `no-off-scale-corner-radius` | a corner radius written as a number |
+| `no-half-point-font-size` | a font size belonging to neither scale |
+| `text-scale-sweep-reaches-the-ceiling` | a sweep capping below `kMaxEffectiveTextScale` |
+
+### Still open, stated plainly
+
+- **~640 raw `fontSize:` literals across 27 whole-point values.** Left
+  deliberately: consolidating them moves 18px sub-headings to 16 or 22, which is
+  a per-screen design decision a blanket rewrite could get wrong in a way that
+  looks deliberate. The half-points are gone because no scale has half-points.
+- **~500 sites naming a font family by hand.** These are safe but not free: a
+  `TextStyle` built from scratch does not inherit the scale's `height` and
+  `letterSpacing`, so line spacing varies across the product. Fixing it means
+  converting each to `textTheme.<slot>.copyWith(...)`, which needs a
+  `BuildContext` many of these sites do not have.
+- **No screen has been hand-rebuilt.** Every screen changed — theme, shell,
+  components, shape scale, type scale — and the layout defects found along the
+  way are fixed, but the ~20 screens of Phase 2 and the ~80 of Phase 3 have not
+  been individually redesigned.
+- **Nothing has run on a physical handset**, and nothing has been driven against
+  the live database in a browser as a signed-in user.
