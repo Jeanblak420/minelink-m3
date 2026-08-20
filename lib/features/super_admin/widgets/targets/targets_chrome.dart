@@ -143,23 +143,45 @@ class TargetsBand extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
+                // A Wrap, not a Row.
+                //
+                // As a Row the two tags were unflexed and the TITLE was the
+                // `Flexible`, so on a phone the tags kept their full width and
+                // the screen's own name was cut to **"Plat…"** — four
+                // characters of "Platform targets", beside 190px of decoration
+                // saying PLATFORM-WIDE and CYCLE LOCKED. Photographed
+                // 2026-08-20; it is a layout that fits, so nothing had ever
+                // failed on it.
+                //
+                // Wrapping puts the tags on their own line when the title
+                // cannot share one, which is the right order of sacrifice: the
+                // scope tag repeats what the title already says, and the lock
+                // state is said again on the cycle card below.
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 10,
+                  runSpacing: 7,
                   children: [
-                    Flexible(
-                      child: Text(
-                        title,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.mlText.editorialMedium.copyWith(
-                          color: t.inkHi,
-                        ),
+                    // A `Wrap` gives a horizontal child `maxWidth` equal to its
+                    // own, so this still ellipsises when a single company name
+                    // is longer than the whole band.
+                    Text(
+                      title,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.mlText.editorialMedium.copyWith(
+                        color: t.inkHi,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    _tag(t, scopeLabel, t.accent2),
-                    if (headline?.cycleLocked ?? false) ...[
-                      const SizedBox(width: 6),
-                      _tag(t, 'CYCLE LOCKED', t.inkLo),
-                    ],
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        _tag(t, scopeLabel, t.accent2),
+                        if (headline?.cycleLocked ?? false)
+                          _tag(t, 'CYCLE LOCKED', t.inkLo),
+                      ],
+                    ),
                   ],
                 ),
                 const SizedBox(height: 5),

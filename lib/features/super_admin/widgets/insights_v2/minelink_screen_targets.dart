@@ -13,6 +13,7 @@
 // target the backend rejected.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/components/ml_wide_table.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 
@@ -919,23 +920,57 @@ class _MonthTable extends StatelessWidget {
                 'and cannot be edited from anywhere on this screen.',
           ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(flex: 24, child: _th(t, 'Month')),
-              Expanded(flex: 20, child: _th(t, 'Target')),
-              Expanded(flex: 20, child: _th(t, 'Actual')),
-              Expanded(flex: 36, child: _th(t, 'Attainment')),
-            ],
+          // Four `Expanded` columns and no minimum, which on a phone is the
+          // registry's disease exactly: at 412px the ATTAINMENT cell got
+          // 118.8px for content needing 154.9 (bar + `117%` + a `SURPASSED`
+          // badge) and the locked TARGET field got 46px for 55.2. Twenty-two
+          // overflows in one screen, found 2026-08-20 by rendering the board at
+          // phone width for the first time.
+          //
+          // `_minWidth` is what the columns actually need, so the table scrolls
+          // sideways below it and lays out normally above it.
+          MlWideTable(
+            minWidth: _minWidth(context),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(flex: 24, child: _th(t, 'Month')),
+                    Expanded(flex: 20, child: _th(t, 'Target')),
+                    Expanded(flex: 20, child: _th(t, 'Actual')),
+                    Expanded(flex: 36, child: _th(t, 'Attainment')),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(height: 1, color: t.line2),
+                for (var i = 0; i < data.months.length; i++) ...[
+                  if (i == data.currentIndex + 1) _plannedDivider(t),
+                  _row(context, t, i),
+                ],
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          Container(height: 1, color: t.line2),
-          for (var i = 0; i < data.months.length; i++) ...[
-            if (i == data.currentIndex + 1) _plannedDivider(t),
-            _row(context, t, i),
-          ],
         ],
       ),
     );
+  }
+
+  /// The width below which the four columns stop fitting.
+  ///
+  /// Derived from the widest cell rather than picked: ATTAINMENT carries a
+  /// progress bar, a right-aligned percentage (44px) and an outcome badge, and
+  /// it is 36% of the row — so the row cannot be narrower than that cell's
+  /// needs divided by its share. Scaled by the live text scaler because the
+  /// console lets each admin set one (`ConsolePrefs.textScale`, and the
+  /// platform's on top of it); a fixed figure would be right at 1.0 and wrong
+  /// for anybody who moved the slider.
+  double _minWidth(BuildContext context) {
+    const attainmentCell = 212.0; // bar 56 + 10 + pct 44 + 8 + badge ~94
+    const attainmentShare = 36 / 100;
+    final scale = MediaQuery.textScalerOf(context).scale(12) / 12;
+    return (attainmentCell / attainmentShare) * scale;
   }
 
   Widget _th(MlGlass t, String s) => Text(
@@ -1320,10 +1355,40 @@ class _TargetHistory extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          for (final e in shown) _row(context, t, e.value),
+          // Five flexed columns plus a fixed 116px badge column. At 360px the
+          // attainment cell had 44.2px for a `117%` needing 54, and the bar
+          // beside it had already been squeezed to nothing — so the row read as
+          // a percentage with a blank space where its meter should be. Same
+          // treatment as the month table above it.
+          //
+          // The filter chips stay OUTSIDE the scroll view: they are a control,
+          // not a column, and a control that slides away from the table it
+          // filters is worse than a narrow one.
+          MlWideTable(
+            minWidth: _minWidth(context),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [for (final e in shown) _row(context, t, e.value)],
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  /// The width below which the history columns stop fitting.
+  ///
+  /// The badge column is a fixed 116px, so it comes off the top; the rest is
+  /// governed by ATTAINMENT, which is 24 of the remaining 88 flex units and
+  /// carries a bar, a gap and a right-aligned percentage. Scaled by the live
+  /// text scaler, because the console has a per-admin text-size slider.
+  double _minWidth(BuildContext context) {
+    const badgeColumn = 116.0;
+    const attainmentCell = 110.0; // bar 56 + gap 10 + pct 44
+    const attainmentShare = 24 / 88;
+    final scale = MediaQuery.textScalerOf(context).scale(12) / 12;
+    return (attainmentCell / attainmentShare + badgeColumn) * scale;
   }
 
   Widget _filterChip(

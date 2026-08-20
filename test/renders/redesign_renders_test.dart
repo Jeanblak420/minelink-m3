@@ -1536,6 +1536,23 @@ void main() {
       );
     });
 
+    // The targets board on a phone. Its "All months" list is the one remaining
+    // hand-rolled flex table in `lib/` — four `Expanded` columns, no
+    // `MlWideTable` — and the registry beside it was blank at this width for
+    // exactly that reason.
+    testWidgets('targets — platform, phone dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const TargetsPlatformScreen(),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 4340),
+        'screen-targets-platform-phone-dark',
+      );
+    });
+
     testWidgets('organizations — desktop dark', (tester) async {
       await shoot(
         tester,
