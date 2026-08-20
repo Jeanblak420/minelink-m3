@@ -104,9 +104,24 @@ class _AnimatedNotificationBellState
     final notificationState = ref.watch(notificationProvider);
     final unreadCount = notificationState.unreadCount;
 
+    // Not when the user has asked the system to stop moving things.
+    //
+    // This bell shakes when a notification arrives AND THEN RE-SHAKES EVERY 30
+    // SECONDS, indefinitely, for as long as anything is unread — see the
+    // Future.delayed below. It sits in the app bar of every screen in the
+    // product, so for somebody with vestibular sensitivity it is a permanent,
+    // unavoidable motion source that only stops when they clear their inbox.
+    //
+    // The guard is on the TRIGGER rather than on the duration: shortening a
+    // shake to 1ms still moves the icon, and the re-arming timer would go on
+    // firing forever. The bell still turns red and still carries its unread
+    // badge; it simply stops waving.
+    final reduce = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+
     // Trigger animation when unread count increases or when there are unread notifications
-    if (unreadCount > _previousUnreadCount ||
-        (unreadCount > 0 && !_controller.isAnimating)) {
+    if (!reduce &&
+        (unreadCount > _previousUnreadCount ||
+            (unreadCount > 0 && !_controller.isAnimating))) {
       _controller.reset();
       _controller.forward().then((_) {
         // If there are still unread notifications, repeat the animation periodically

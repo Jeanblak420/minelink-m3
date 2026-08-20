@@ -155,7 +155,7 @@ class _WaypointDot extends StatelessWidget {
       child: completed
           ? const Icon(Icons.check_rounded, size: 14, color: MlTokens.inkOnFill)
           : isCurrent
-              ? _PulsingDot(color: currentColors.fg)
+              ? MlPulsingDot(color: currentColors.fg)
               : Icon(icon, size: 12, color: semantic.textFaint),
     );
 
@@ -189,24 +189,55 @@ class _WaypointDot extends StatelessWidget {
 }
 
 /// Soft pulse on the current waypoint's dot.
-class _PulsingDot extends StatefulWidget {
+///
+/// Public so `test/widgets/reduce_motion_test.dart` can drive THIS class rather
+/// than a copy of it. A copy would be free to drift from the thing it stands
+/// for, and the property under test — that a repeating controller is never
+/// started when the user has asked the system to stop moving things — is
+/// exactly the sort that a copy keeps while the original loses it.
+class MlPulsingDot extends StatefulWidget {
   final Color color;
-  const _PulsingDot({required this.color});
+  const MlPulsingDot({super.key, required this.color});
 
   @override
-  State<_PulsingDot> createState() => _PulsingDotState();
+  State<MlPulsingDot> createState() => MlPulsingDotState();
 }
 
-class _PulsingDotState extends State<_PulsingDot>
+class MlPulsingDotState extends State<MlPulsingDot>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1200),
-  )..repeat(reverse: true);
+    // Starts settled, and only repeats if the user has not asked the system to
+    // stop moving things — see didChangeDependencies.
+    value: 1,
+  );
   late final Animation<double> _animation =
       Tween<double>(begin: 0.45, end: 1.0).animate(
     CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
   );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // A REPEATING animation cannot be handled the way a one-shot can. Collapsing
+    // its duration to 1ms — which is what MlMotion does, correctly, for a
+    // transition — would spin this dot at a thousand frames a second. The only
+    // right answer for a loop is not to start it, and to hold the settled
+    // frame: here that is full opacity, the state the pulse returns to.
+    //
+    // This dot marks the CURRENT waypoint on a trip in progress, so it is on
+    // screen for as long as the driver is driving. An unstoppable pulse in
+    // somebody's peripheral vision for a four-hour haul is exactly what
+    // `disableAnimations` exists to switch off.
+    final reduce = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (reduce) {
+      if (_controller.isAnimating) _controller.stop();
+      _controller.value = 1;
+    } else if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
+  }
 
   @override
   void dispose() {

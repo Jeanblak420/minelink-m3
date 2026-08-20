@@ -8,6 +8,8 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_selector/file_selector.dart'
     show openFile, openFiles, XTypeGroup;
 import 'package:flutter/material.dart';
+
+import 'package:flutter_application_1/core/design/tokens/m3/ml_motion.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -66,7 +68,7 @@ class _ChatDockState extends ConsumerState<ChatDock>
   // Open ⇄ closed morph. 0 = just the disc, 1 = full window.
   late final AnimationController _anim = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 260),
+    duration: MlMotion.of(context, MlMotion.enter),
     reverseDuration: const Duration(milliseconds: 210),
   );
 
@@ -885,7 +887,7 @@ class _SupportFabState extends State<_SupportFab> {
         child: GestureDetector(
           onTap: widget.onTap,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
+            duration: MlMotion.of(context, MlMotion.instant),
             curve: Curves.easeOut,
             transform: Matrix4.translationValues(0, _hover ? -2 : 0, 0),
             height: 50,
@@ -907,7 +909,7 @@ class _SupportFabState extends State<_SupportFab> {
                 Icon(Icons.support_agent_rounded,
                     size: 24, color: pal.accentText),
                 AnimatedSize(
-                  duration: const Duration(milliseconds: 150),
+                  duration: MlMotion.of(context, MlMotion.instant),
                   curve: Curves.easeOut,
                   child: _hover
                       ? Padding(
@@ -1170,7 +1172,7 @@ class _ConversationsList extends ConsumerWidget {
                   children: [
                     AnimatedScale(
                       scale: hovering ? 1.06 : 1.0,
-                      duration: const Duration(milliseconds: 170),
+                      duration: MlMotion.of(context, MlMotion.instant),
                       curve: Curves.easeOut,
                       child: _MiniAvatar(
                           pal: pal,
@@ -1455,7 +1457,7 @@ class _ContactsListState extends ConsumerState<_ContactsList> {
               const SizedBox(width: 4),
               AnimatedRotation(
                 turns: collapsed ? -0.25 : 0,
-                duration: const Duration(milliseconds: 170),
+                duration: MlMotion.of(context, MlMotion.instant),
                 curve: Curves.easeOut,
                 child: Icon(Icons.expand_more, size: 15, color: pal.accent),
               ),
@@ -1549,7 +1551,7 @@ class _ContactTile extends ConsumerWidget {
               message: 'View profile',
               child: AnimatedScale(
                 scale: hovering ? 1.06 : 1.0,
-                duration: const Duration(milliseconds: 170),
+                duration: MlMotion.of(context, MlMotion.instant),
                 curve: Curves.easeOut,
                 child: InkWell(
                   onTap: () => onProfile(contact),
@@ -1603,7 +1605,7 @@ class _ContactTile extends ConsumerWidget {
               // Trailing "start chat" affordance — fills into an accent pill on
               // hover so the row reads as a clear call to action (CPS parity).
               AnimatedContainer(
-                duration: const Duration(milliseconds: 170),
+                duration: MlMotion.of(context, MlMotion.instant),
                 curve: Curves.easeOut,
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
@@ -1674,7 +1676,7 @@ class _ThreadViewState extends ConsumerState<_ThreadView> {
     final ctx = _msgKeys[id]?.currentContext;
     if (ctx != null) {
       Scrollable.ensureVisible(ctx,
-          duration: const Duration(milliseconds: 300),
+          duration: MlMotion.of(context, MlMotion.enter),
           alignment: 0.3,
           curve: Curves.easeOut);
     }
@@ -2295,7 +2297,7 @@ class _TypingIndicatorRow extends StatelessWidget {
     final first =
         name.trim().isEmpty ? 'Someone' : name.trim().split(RegExp(r'\s+')).first;
     return AnimatedSize(
-      duration: const Duration(milliseconds: 180),
+      duration: MlMotion.of(context, MlMotion.instant),
       alignment: Alignment.topCenter,
       curve: Curves.easeOut,
       child: visible
@@ -2332,8 +2334,30 @@ class _TypingDots extends StatefulWidget {
 class _TypingDotsState extends State<_TypingDots>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 1100))
-    ..repeat();
+      vsync: this, duration: const Duration(milliseconds: 1100));
+
+  bool _reduce = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // A LOOP cannot be shortened into submission — collapsing 1100ms to 1ms
+    // would run this wave at a thousand frames a second. The only right answer
+    // for a repeating animation is not to start it.
+    //
+    // The dots still appear: "somebody is typing" is information, and only the
+    // wave is decoration. But simply freezing the controller is not enough —
+    // the three dots are 120° apart in the sine below, so a stopped controller
+    // leaves them at three DIFFERENT opacities, which reads as a rendering
+    // fault rather than as a deliberate still. `_reduce` makes build draw them
+    // at one flat opacity instead.
+    _reduce = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (_reduce) {
+      if (_c.isAnimating) _c.stop();
+    } else if (!_c.isAnimating) {
+      _c.repeat();
+    }
+  }
 
   @override
   void dispose() {
@@ -2352,7 +2376,10 @@ class _TypingDotsState extends State<_TypingDots>
             final wave =
                 (math.sin(_c.value * 2 * math.pi - i * (2 * math.pi / 3)) + 1) /
                     2;
-            final op = 0.35 + 0.65 * wave;
+            // Mid-wave for all three when motion is off — one steady row of
+            // dots, rather than three frozen at whatever phase they happened
+            // to hold.
+            final op = _reduce ? 0.675 : 0.35 + 0.65 * wave;
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 1.5),
               child: Container(
