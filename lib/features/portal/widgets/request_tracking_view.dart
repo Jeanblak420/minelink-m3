@@ -77,8 +77,10 @@ class RequestTrackingView extends ConsumerWidget {
                       'one — as requester, mine or transporter.',
                 );
               }
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
+              // No outer scroll view: MlDataTable owns its own now, with a
+              // scrollbar. Two nested horizontal scrollers is one too many.
+              return MlWideTable(
+                minWidth: 1200,
                 child: SizedBox(
                   width: 1200,
                   child: MlDataTable(

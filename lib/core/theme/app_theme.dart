@@ -162,6 +162,43 @@ class AppTheme {
         thickness: 1,
       ),
 
+      // A scrollbar you can see on a navy card.
+      //
+      // Material's default thumb is `onSurface` at 8% — drawn over this app's
+      // console surfaces that is very nearly nothing, which matters because a
+      // scrollbar is not decoration: on the wide tables it is the ONLY thing
+      // saying there are columns past the right edge (see `MlWideTable`).
+      //
+      // `onSurfaceVariant` — the muted-ink role — rather than the accent: a
+      // scrollbar is chrome, and a cyan bar under every table would read as a
+      // control. Thicker on hover, because the thumb is also a drag target and
+      // 6px is not one.
+      //
+      // The alpha is MEASURED, not chosen. `outline` at 0.55 composited to
+      // (59,72,99) on the console card — **2.01:1**, under WCAG's 3:1 for a
+      // non-text control, which for the one thing telling a reader a table has
+      // more columns is not good enough. 0.6 then measured 2.88:1 in the LIGHT
+      // theme, which is the sort of near-miss only a number catches. 0.7 clears
+      // both; `wide_table_scrollbar_test.dart` computes it from these colours.
+      scrollbarTheme: ScrollbarThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.dragged)) {
+            return scheme.primary;
+          }
+          if (states.contains(WidgetState.hovered)) {
+            return scheme.onSurfaceVariant.withValues(alpha: 0.85);
+          }
+          return scheme.onSurfaceVariant.withValues(alpha: 0.7);
+        }),
+        thickness: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.hovered) ? 10 : 6,
+        ),
+        radius: const Radius.circular(MlShape.small),
+        crossAxisMargin: 2,
+        mainAxisMargin: 4,
+        interactive: true,
+      ),
+
       // ------------------------------------------------------------- buttons
       //
       // All four families share a height and a shape so a row of mixed buttons

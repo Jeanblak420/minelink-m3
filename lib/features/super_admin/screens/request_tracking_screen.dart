@@ -371,12 +371,9 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
                 if (constraints.maxWidth >= _tableMinWidth) {
                   return _table(context, pageRows);
                 }
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SizedBox(
-                    width: _tableMinWidth,
-                    child: _table(context, pageRows),
-                  ),
+                return MlWideTable(
+                  minWidth: _tableMinWidth,
+                  child: _table(context, pageRows),
                 );
               },
             ),

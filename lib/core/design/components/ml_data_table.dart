@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:flutter_application_1/core/design/components/ml_wide_table.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
@@ -97,15 +99,11 @@ class MlDataTable extends StatelessWidget {
       ],
     );
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth >= minWidth) return table;
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SizedBox(width: minWidth, child: table),
-        );
-      },
-    );
+    // MlWideTable, not a bare SingleChildScrollView: a horizontal scroll view
+    // draws no scrollbar unless one is asked for, so a table narrower than its
+    // columns showed a last column cut off mid-word with nothing to say the
+    // rest was reachable.
+    return MlWideTable(minWidth: minWidth, child: table);
   }
 }
 

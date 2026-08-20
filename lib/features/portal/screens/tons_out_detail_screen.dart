@@ -6,6 +6,7 @@ import 'package:flutter_application_1/features/portal/utils/tons_out_filter.dart
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/core/design/components/ml_wide_table.dart';
 
 /// Premium drill-down for the overview "Tons out" tile: rolling-window summary
 /// boxes plus a fully filterable / sortable dispatch table.
@@ -522,8 +523,7 @@ class _ResultsTable extends StatelessWidget {
         border: Border.all(color: MlSemantic.of(context).borderCard),
       ),
       clipBehavior: Clip.antiAlias,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
+      child: MlWideTable(
         child: ConstrainedBox(
           constraints: BoxConstraints(
             minWidth: MediaQuery.of(context).size.width - 64,

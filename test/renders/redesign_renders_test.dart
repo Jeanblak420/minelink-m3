@@ -169,6 +169,19 @@ void main() {
     // settle. pumpAndSettle would hang: the console has continuously running
     // animations (the live pill, the bell).
     await tester.pump(const Duration(milliseconds: 900));
+    // Then a SECOND pump, for anything a POST-FRAME CALLBACK started.
+    //
+    // `pumpWidget` + one timed pump is not enough for those: the callback
+    // registered during the first frame does not run until the start of the
+    // second, so an animation it kicks off begins at t=900 and has not
+    // advanced when that frame paints.
+    //
+    // `RawScrollbar` is exactly this. It fades its thumb in from a post-frame
+    // callback, so **no scrollbar had ever appeared in any render in this
+    // file** — measured 2026-08-20 by setting the thumb to pure red and finding
+    // zero red pixels in the output. The wide tables' only affordance was
+    // invisible in every picture taken of them.
+    await tester.pump(const Duration(milliseconds: 400));
 
     // Then load every `Image` for real.
     //

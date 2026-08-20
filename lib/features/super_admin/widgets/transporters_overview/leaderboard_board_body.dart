@@ -30,6 +30,7 @@ import 'package:flutter/material.dart';
 
 import 'leaderboard_models.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_overview_tokens.dart';
+import 'package:flutter_application_1/core/design/components/ml_wide_table.dart';
 import 'primitives.dart';
 
 class OvLeaderboardBoardBody extends StatelessWidget {
@@ -903,10 +904,7 @@ class _RankingTable extends StatelessWidget {
                   ),
                 );
                 if (width <= c.maxWidth) return table;
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: table,
-                );
+                return MlWideTable(child: table);
               },
             ),
           Container(

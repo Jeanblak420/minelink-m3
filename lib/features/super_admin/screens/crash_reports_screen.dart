@@ -351,8 +351,9 @@ class _CrashReportCard extends StatelessWidget {
               SizedBox(
                 key: ValueKey('stack-scroll-${report.id}'),
                 width: double.infinity,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
+                // A stack frame past the right edge is a stack frame nobody
+                // knows is there.
+                child: MlWideTable(
                   child: Text(
                     report.stack!,
                     style: TextStyle(

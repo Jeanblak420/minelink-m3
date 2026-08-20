@@ -1062,8 +1062,7 @@ class _TokensTabState extends ConsumerState<_TokensTab> {
                               ),
                         ),
                         const SizedBox(height: 8),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
+                        MlWideTable(
                           child: DataTable(
                             headingRowHeight: 44,
                             dataRowMinHeight: 52,

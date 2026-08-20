@@ -80,5 +80,6 @@ export 'ml_expiry_notice.dart';
 
 // ---- Data & media ----
 export 'ml_data_table.dart';
+export 'ml_wide_table.dart';
 export 'ml_map_canvas.dart';
 export 'ml_overlays.dart';

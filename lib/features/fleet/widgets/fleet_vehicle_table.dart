@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/fleet_vehicle_model.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
-import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 class FleetVehicleTable extends StatelessWidget {
   final List<FleetVehicle> vehicles;
@@ -158,8 +157,11 @@ class FleetVehicleTable extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: ClipRRect(
         borderRadius: MlShape.radiusExtraLarge,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
+        // Thirteen columns do not fit a laptop and should not be truncated to
+        // try — but a bare horizontal scroll view draws no bar, so what a
+        // reader saw was "Passport Num…" cut off at the edge and no reason to
+        // think there was anything past it.
+        child: MlWideTable(
           child: DataTable(
             headingRowColor: WidgetStateProperty.all(
               scheme.surfaceContainerHighest,
