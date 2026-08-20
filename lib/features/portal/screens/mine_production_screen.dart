@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/production_entry.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_entry.dart';
@@ -248,33 +249,28 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
                       [
                         Text(
                           _dateFmt.format(e.entryDate),
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: context.mlText.bodyMedium.copyWith(
                             color: semantic.textBody,
                           ),
                         ),
                         Text(
                           _t(e.tons),
                           textAlign: TextAlign.right,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontMono,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                          style: context.mlText.code(
                             color: semantic.textStrong,
-                            fontFeatures: const [FontFeature.tabularFigures()],
+                            size: 13,
+                            weight: FontWeight.w600,
                           ),
                         ),
                         Text(
                           e.commodity ?? '—',
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: context.mlText.bodyMedium.copyWith(
                             color: semantic.textBody,
                           ),
                         ),
                         Text(
                           e.pitSection ?? '—',
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: context.mlText.bodyMedium.copyWith(
                             color: semantic.textBody,
                           ),
                         ),
@@ -284,8 +280,7 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
                               : (pileNames[e.stockpileId] ?? '—'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: context.mlText.bodyMedium.copyWith(
                             color: semantic.textMuted,
                           ),
                         ),
@@ -293,8 +288,7 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
                           e.notes ?? '—',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: context.mlText.bodyMedium.copyWith(
                             color: semantic.textMuted,
                           ),
                         ),
@@ -469,8 +463,7 @@ class _ReportSection extends StatelessWidget {
                       [
                         Text(
                           _dateFmt.format(d.day),
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: context.mlText.bodyMedium.copyWith(
                             color: semantic.textBody,
                           ),
                         ),
@@ -493,12 +486,10 @@ class _ReportSection extends StatelessWidget {
   Widget _mono(BuildContext context, String text) => Text(
     text,
     textAlign: TextAlign.right,
-    style: TextStyle(
-      fontFamily: MlTokens.fontMono,
-      fontSize: 13,
-      fontWeight: FontWeight.w600,
+    style: context.mlText.code(
       color: MlSemantic.of(context).textStrong,
-      fontFeatures: const [FontFeature.tabularFigures()],
+      size: 13,
+      weight: FontWeight.w600,
     ),
   );
 
@@ -517,12 +508,10 @@ class _ReportSection extends StatelessWidget {
         ),
         child: Text(
           '${v > 0 ? '+' : ''}${v.toStringAsFixed(2)} t',
-          style: TextStyle(
-            fontFamily: MlTokens.fontMono,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+          style: context.mlText.code(
             color: colors.fg,
-            fontFeatures: const [FontFeature.tabularFigures()],
+            size: 12,
+            weight: FontWeight.w700,
           ),
         ),
       ),
@@ -568,8 +557,7 @@ class _ProductionPileCard extends StatelessWidget {
                     ),
                     Text(
                       'ROM / production pile',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: context.mlText.bodySmall.copyWith(
                         color: semantic.textFaint,
                       ),
                     ),
@@ -581,12 +569,10 @@ class _ProductionPileCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             '${pile.tons.toStringAsFixed(2)} t',
-            style: TextStyle(
-              fontFamily: MlTokens.fontMono,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
+            style: context.mlText.code(
               color: semantic.textStrong,
-              fontFeatures: const [FontFeature.tabularFigures()],
+              size: 22,
+              weight: FontWeight.w800,
             ),
           ),
           if (pile.mineral != null || pile.grade != null) ...[
@@ -598,7 +584,9 @@ class _ProductionPileCard extends StatelessWidget {
               ].join(' · '),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 13, color: semantic.textMuted),
+              style: context.mlText.bodyMedium.copyWith(
+                color: semantic.textMuted,
+              ),
             ),
           ],
           const SizedBox(height: 12),

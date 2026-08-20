@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/load_quality.dart';
 import 'package:flutter_application_1/features/portal/services/quality_service.dart';
@@ -145,12 +146,10 @@ class _RouteSpecTile extends ConsumerWidget {
               children: [
                 Text(
                   spec.routeNumber ?? 'Route',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
+                  style: context.mlText.code(
                     color: semantic.textStrong,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                    size: 13,
+                    weight: FontWeight.w700,
                   ),
                 ),
                 Text(
@@ -161,7 +160,9 @@ class _RouteSpecTile extends ConsumerWidget {
                   ].join(' '),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12, color: semantic.textMuted),
+                  style: context.mlText.bodySmall.copyWith(
+                    color: semantic.textMuted,
+                  ),
                 ),
               ],
             ),
@@ -178,8 +179,7 @@ class _RouteSpecTile extends ConsumerWidget {
                       if (spec.specSizing != null) 'sizing ${spec.specSizing}',
                     ].join(' · ')
                   : 'No spec set — loads on this route are not penalised.',
-              style: TextStyle(
-                fontSize: 13,
+              style: context.mlText.bodyMedium.copyWith(
                 color: spec.hasSpec ? semantic.textBody : semantic.textFaint,
               ),
             ),

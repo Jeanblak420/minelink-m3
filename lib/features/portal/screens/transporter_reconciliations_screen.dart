@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/providers/logistics_provider.dart';
 import 'package:flutter_application_1/features/portal/services/logistics_service.dart' show CompanyPin;
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
@@ -114,11 +115,10 @@ class TransporterReconciliationsScreen extends ConsumerWidget {
                           MaterialLocalizations.of(context)
                               .formatShortDate(r.updatedAt),
                           textAlign: TextAlign.right,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontMono,
-                            fontSize: 13,
+                          style: context.mlText.code(
                             color: MlSemantic.of(context).textMuted,
-                            fontFeatures: const [FontFeature.tabularFigures()],
+                            size: 13,
+                            weight: FontWeight.w400,
                           ),
                         ),
                       ],

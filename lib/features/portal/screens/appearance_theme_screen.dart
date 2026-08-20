@@ -2,6 +2,7 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/theme/theme_mode_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/mine_appearance_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/portal_workspace_provider.dart';
@@ -37,11 +38,9 @@ class AppearanceThemeScreen extends ConsumerWidget {
             children: [
               Text(
                 'Appearance & theme',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: MlTokens.fsH2,
-                  fontWeight: FontWeight.w800,
+                style: context.mlText.titleLarge.copyWith(
                   color: semantic.textStrong,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 4),
@@ -49,11 +48,8 @@ class AppearanceThemeScreen extends ConsumerWidget {
                 'Personalise how MineLink looks. Light or dark applies everywhere; '
                 'the dashboard theme and density apply to your Mine / Supplier '
                 'dashboard.',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: MlTokens.fsBodySm,
+                style: context.mlText.bodyMedium.copyWith(
                   color: semantic.textMuted,
-                  height: 1.5,
                 ),
               ),
               const SizedBox(height: 24),
@@ -191,21 +187,15 @@ class _SectionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
+            style: context.mlText.titleMedium.copyWith(
               color: semantic.textStrong,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             subtitle,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 13,
-              color: semantic.textMuted,
-            ),
+            style: context.mlText.bodyMedium.copyWith(color: semantic.textMuted),
           ),
           const SizedBox(height: 16),
           child,
@@ -260,11 +250,9 @@ class _ChoiceChipTile extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 label,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                style: context.mlText.titleSmall.copyWith(
                   color: selected ? semantic.textStrong : semantic.textBody,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
@@ -317,21 +305,16 @@ class _ThemeDirectionTile extends StatelessWidget {
                   children: [
                     Text(
                       direction.label,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
+                      style: context.mlText.titleMedium.copyWith(
                         color: semantic.textStrong,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       _describe(direction),
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 13,
+                      style: context.mlText.bodyMedium.copyWith(
                         color: semantic.textMuted,
-                        height: 1.4,
                       ),
                     ),
                   ],

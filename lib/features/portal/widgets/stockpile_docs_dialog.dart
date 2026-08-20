@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/services/storage_asset_service.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/core/widgets/multi_file_drop_picker.dart';
@@ -125,7 +126,9 @@ class _StockpileDocsDialogState extends ConsumerState<_StockpileDocsDialog> {
                         'below and open in your browser.'
                     : 'Lab-result PDFs / reports for this stockpile. Uploaded '
                         'documents are listed below and open in your browser.',
-                style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+                style: context.mlText.bodyMedium.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 14),
               docsAsync.when(

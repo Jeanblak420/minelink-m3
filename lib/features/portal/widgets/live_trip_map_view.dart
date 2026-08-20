@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/widgets/osm_tile_layer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -396,8 +397,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
                           t.transporterName ?? '—',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: context.mlText.bodySmall.copyWith(
                             color: semantic.textMuted,
                           ),
                         ),
@@ -421,18 +421,19 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
                 _journeyLine(t),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 12, color: semantic.textMuted),
+                style: context.mlText.bodySmall.copyWith(
+                  color: semantic.textMuted,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
                 _gpsLine(t),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: 11,
+                style: context.mlText.code(
                   color: semantic.textFaint,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+                  size: 11,
+                  weight: FontWeight.w400,
                 ),
               ),
               // Full driver-navigation mirror + trip timeline (2026-07-17):
@@ -455,15 +456,16 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
       children: [
         Text(
           value,
-          style: TextStyle(
-            fontFamily: MlTokens.fontMono,
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
+          style: context.mlText.code(
             color: color ?? semantic.textStrong,
-            fontFeatures: const [FontFeature.tabularFigures()],
+            size: 14,
+            weight: FontWeight.w800,
           ),
         ),
-        Text(label, style: TextStyle(fontSize: 10, color: semantic.textMuted)),
+        Text(label, style: context.mlText.labelSmall.copyWith(
+          color: semantic.textMuted,
+          fontWeight: FontWeight.w400,
+        )),
       ],
     );
 
@@ -513,7 +515,10 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
               width: 92,
               child: Text(
                 label,
-                style: TextStyle(fontSize: 11, color: semantic.textMuted),
+                style: context.mlText.labelSmall.copyWith(
+                  color: semantic.textMuted,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
             Expanded(
@@ -521,11 +526,10 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
                 '${hm.format(MlTime.sast(at))}${suffix ?? ''}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: 11,
+                style: context.mlText.code(
                   color: semantic.textStrong,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+                  size: 11,
+                  weight: FontWeight.w400,
                 ),
               ),
             ),
@@ -560,10 +564,9 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
                       t.navInstruction!,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                      style: context.mlText.labelMedium.copyWith(
                         color: semantic.textStrong,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -595,10 +598,9 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
                   const SizedBox(width: 5),
                   Text(
                     'Not moving for ${_dur(stationary)}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
+                    style: context.mlText.labelSmall.copyWith(
                       color: MlTone.warn.colors(brightness).fg,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],

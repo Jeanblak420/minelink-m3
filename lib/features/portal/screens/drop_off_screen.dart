@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/trip_waypoint.dart';
 import 'package:flutter_application_1/features/portal/providers/trip_waypoint_provider.dart';
@@ -135,15 +136,16 @@ class _DropOffScreenState extends ConsumerState<DropOffScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Final drop-off for this trip',
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: semantic.textStrong)),
+                            style: context.mlText.titleMedium.copyWith(
+                              color: semantic.textStrong,
+                              fontWeight: FontWeight.w800,
+                            )),
                         Text(
                             'The last stop of the trip\'s waypoint sequence — '
                             'where the load is delivered.',
-                            style: TextStyle(
-                                fontSize: 13, color: semantic.textMuted)),
+                            style: context.mlText.bodyMedium.copyWith(
+                              color: semantic.textMuted,
+                            )),
                       ],
                     ),
                   ),
@@ -190,12 +192,11 @@ class _DropOffScreenState extends ConsumerState<DropOffScreen> {
                         'Selected point: '
                         '${_point!.latitude.toStringAsFixed(6)}, '
                         '${_point!.longitude.toStringAsFixed(6)}',
-                        style: TextStyle(
-                            fontFamily: MlTokens.fontMono,
-                            fontSize: 12,
-                            color: semantic.textMuted,
-                            fontFeatures: const [FontFeature.tabularFigures()],
-                          )),
+                        style: context.mlText.code(
+                          color: semantic.textMuted,
+                          size: 12,
+                          weight: FontWeight.w400,
+                        )),
                     const SizedBox(height: 10),
                   ],
                   // Wrap, not Row. These two buttons overflowed by 22px at

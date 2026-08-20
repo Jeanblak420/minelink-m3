@@ -27,6 +27,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/super_admin_dashboard_widgets.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
@@ -312,11 +313,9 @@ class _QueueRow extends StatelessWidget {
                     item.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: MlTokens.fsBodySm,
-                      fontWeight: FontWeight.w700,
+                    style: context.mlText.titleSmall.copyWith(
                       color: s.textStrong,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -330,10 +329,9 @@ class _QueueRow extends StatelessWidget {
                             : '$n waiting',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: MlTokens.fsMicro,
+                    style: context.mlText.labelSmall.copyWith(
                       color: s.textMuted,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ],
@@ -349,12 +347,10 @@ class _QueueRow extends StatelessWidget {
                 widthFactor: 1,
                 child: Text(
                   n == null ? (item.loading ? '…' : '—') : '$n',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontMono,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+                  style: context.mlText.code(
                     color: clear || n == null ? s.textFaint : tone.fg,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                    size: 17,
+                    weight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -453,11 +449,9 @@ class PortalPeriodSelector extends StatelessWidget {
                 ),
                 child: Text(
                   p.label,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: MlTokens.fsLabel,
-                    fontWeight: FontWeight.w700,
+                  style: context.mlText.labelMedium.copyWith(
                     color: p == value ? accent.fg : s.textMuted,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -539,21 +533,16 @@ class PortalLiveStrip extends StatelessWidget {
                     children: [
                       Text(
                         t.registration,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontMono,
-                          fontSize: MlTokens.fsBodySm,
-                          fontWeight: FontWeight.w700,
+                        style: context.mlText.code(
                           color: s.textStrong,
-                          fontFeatures: const [FontFeature.tabularFigures()],
+                          size: 14,
+                          weight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         t.detail == null ? t.status : '${t.status} · ${t.detail}',
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: MlTokens.fsMicro,
-                          fontWeight: FontWeight.w600,
+                        style: context.mlText.labelSmall.copyWith(
                           color: tone.fg,
                         ),
                       ),

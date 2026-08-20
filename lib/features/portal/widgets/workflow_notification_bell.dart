@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/workflow_notification.dart';
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
 import 'package:flutter_application_1/features/portal/providers/workflow_notification_provider.dart';
@@ -145,10 +146,10 @@ class _NotifTile extends StatelessWidget {
                           size: 12, color: PortalColors.accent),
                       const SizedBox(width: 4),
                       Text('Open ${n.tabLabel}',
-                          style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: PortalColors.accent)),
+                          style: context.mlText.labelSmall.copyWith(
+                            color: PortalColors.accent,
+                            fontWeight: FontWeight.w700,
+                          )),
                     ],
                   ),
                 ],

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/services/storage_asset_service.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/core/widgets/multi_file_drop_picker.dart';
@@ -94,8 +95,7 @@ class _ReconUploadsPanelState extends ConsumerState<ReconUploadsPanel> {
                 Text(
                   'The original system export is kept unchanged; this upload '
                   'replaces only the previous edited copy.',
-                  style: TextStyle(
-                    fontSize: 13,
+                  style: context.mlText.bodyMedium.copyWith(
                     color: Theme.of(ctx).colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -243,10 +243,9 @@ class _ReconUploadsPanelState extends ConsumerState<ReconUploadsPanel> {
           width: 150,
           child: Text(
             label,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
+            style: context.mlText.titleSmall.copyWith(
               color: semantic.textStrong,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
@@ -254,7 +253,9 @@ class _ReconUploadsPanelState extends ConsumerState<ReconUploadsPanel> {
           child: pair == null
               ? Text(
                   'No edited copy uploaded yet.',
-                  style: TextStyle(fontSize: 13, color: semantic.textFaint),
+                  style: context.mlText.bodyMedium.copyWith(
+                    color: semantic.textFaint,
+                  ),
                 )
               : Wrap(
                   spacing: 8,

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/routing/waybill_link.dart';
 import 'package:flutter_application_1/features/portal/models/waybill_data.dart';
 import 'package:flutter_application_1/features/portal/services/trip_waybill_builder.dart';
@@ -176,11 +177,9 @@ class _WaybillModalState extends State<_WaybillModal> {
                   Expanded(
                     child: Text(
                       title,
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
+                      style: context.mlText.titleMedium.copyWith(
                         color: semantic.textStrong,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
@@ -278,7 +277,9 @@ class _Message extends StatelessWidget {
             Text(
               text,
               textAlign: TextAlign.center,
-              style: TextStyle(color: semantic.textMuted, fontSize: 14),
+              style: context.mlText.bodyMedium.copyWith(
+                color: semantic.textMuted,
+              ),
             ),
           ],
         ),

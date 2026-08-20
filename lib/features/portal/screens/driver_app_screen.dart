@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/auth/services/logout_service.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_model.dart';
@@ -369,12 +370,14 @@ class _DashboardHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title,
-                  style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: semantic.textStrong)),
+                  style: context.mlText.titleLarge.copyWith(
+                    color: semantic.textStrong,
+                    fontWeight: FontWeight.w800,
+                  )),
               Text(subtitle,
-                  style: TextStyle(fontSize: 14, color: semantic.textMuted)),
+                  style: context.mlText.bodyMedium.copyWith(
+                    color: semantic.textMuted,
+                  )),
             ],
           ),
         ),
@@ -584,17 +587,19 @@ class _MiniStat extends StatelessWidget {
                 child: Text(value,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.4,
-                        color: semantic.textStrong)),
+                    style: context.mlText.headlineSmall.copyWith(
+                      color: semantic.textStrong,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                    )),
               ),
             ],
           ),
           const SizedBox(height: 1),
           Text(label,
-              style: TextStyle(fontSize: 13, color: semantic.textMuted)),
+              style: context.mlText.bodyMedium.copyWith(
+                color: semantic.textMuted,
+              )),
         ],
       ),
     );
@@ -638,14 +643,15 @@ class _WeekChartCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Tons delivered',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: semantic.textStrong)),
+                        style: context.mlText.titleMedium.copyWith(
+                          color: semantic.textStrong,
+                          fontWeight: FontWeight.w800,
+                        )),
                     const SizedBox(height: 2),
                     Text('This week',
-                        style: TextStyle(
-                            fontSize: 13, color: semantic.textMuted)),
+                        style: context.mlText.bodyMedium.copyWith(
+                          color: semantic.textMuted,
+                        )),
                   ],
                 ),
               ),
@@ -653,23 +659,19 @@ class _WeekChartCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(formatTons(weekTotal),
-                      style: TextStyle(
-                          fontFamily: 'JetBrainsMono',
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: semantic.textStrong,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        )),
+                      style: context.mlText.code(
+                        color: semantic.textStrong,
+                        size: 22,
+                        weight: FontWeight.w800,
+                      )),
                   if (prevWeekTotal > 0)
                     Text(
                         '${deltaUp ? '▲' : '▼'} '
                         '${formatTons(delta.abs())} vs last week',
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: (deltaUp ? MlTone.done : MlTone.warn)
-                                .colors(brightness)
-                                .fg)),
+                        style: context.mlText.labelMedium.copyWith(
+                          color: (deltaUp ? MlTone.done : MlTone.warn) .colors(brightness) .fg,
+                          fontWeight: FontWeight.w700,
+                        )),
                 ],
               ),
             ],
@@ -711,14 +713,10 @@ class _WeekChartCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 7),
                           Text(_labels[i],
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: i == todayIndex
-                                      ? FontWeight.w800
-                                      : FontWeight.w600,
-                                  color: i == todayIndex
-                                      ? MlTokens.accent
-                                      : semantic.textFaint)),
+                              style: context.mlText.labelSmall.copyWith(
+                                color: i == todayIndex ? MlTokens.accent : semantic.textFaint,
+                                fontWeight: i == todayIndex ? FontWeight.w800 : FontWeight.w600,
+                              )),
                         ],
                       ),
                     ),
@@ -851,15 +849,17 @@ class DriverProfileTab extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(name,
-                    style: TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
-                        color: semantic.textStrong)),
+                    style: context.mlText.titleLarge.copyWith(
+                      color: semantic.textStrong,
+                      fontWeight: FontWeight.w800,
+                    )),
                 const SizedBox(height: 2),
                 Text(
                     'Driver · ${employeeState.company?.companyName ?? ''}',
                     style:
-                        TextStyle(fontSize: 14, color: semantic.textMuted)),
+                        context.mlText.bodyMedium.copyWith(
+                          color: semantic.textMuted,
+                        )),
                 const SizedBox(height: 12),
                 MlPlatePill(myVehicle?.vehicleRegistrationNumber ?? '—',
                     fontSize: 12),
@@ -975,8 +975,9 @@ class _TripHistoryList extends StatelessWidget {
                   Text(
                       '${MlTime.sast(t.updatedAt).toString().substring(0, 16)}'
                       '${t.netTons != null ? ' · ${formatTons(t.netTons!)}' : ''}',
-                      style: TextStyle(
-                          fontSize: 12, color: semantic.textMuted)),
+                      style: context.mlText.bodySmall.copyWith(
+                        color: semantic.textMuted,
+                      )),
                 ],
               ),
             ),
@@ -1022,14 +1023,15 @@ class _ProfileRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(label,
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: semantic.textStrong)),
+                      style: context.mlText.titleMedium.copyWith(
+                        color: semantic.textStrong,
+                        fontWeight: FontWeight.w700,
+                      )),
                   const SizedBox(height: 1),
                   Text(value,
-                      style: TextStyle(
-                          fontSize: 13, color: semantic.textMuted)),
+                      style: context.mlText.bodyMedium.copyWith(
+                        color: semantic.textMuted,
+                      )),
                 ],
               ),
             ),

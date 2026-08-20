@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/live_trip_position.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
@@ -205,8 +206,7 @@ class _TruckInfoCard extends StatelessWidget {
                           t.transporterName ?? 'Transporter —',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: context.mlText.bodySmall.copyWith(
                             color: semantic.textMuted,
                           ),
                         ),
@@ -344,10 +344,9 @@ class _MotionRow extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
+              style: context.mlText.titleSmall.copyWith(
                 color: colors.fg,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -395,7 +394,9 @@ class _DetailRow extends StatelessWidget {
             width: 74,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: semantic.textFaint),
+              style: context.mlText.bodySmall.copyWith(
+                color: semantic.textFaint,
+              ),
             ),
           ),
           Expanded(

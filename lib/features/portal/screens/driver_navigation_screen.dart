@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/core/widgets/osm_tile_layer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -854,10 +855,10 @@ class _DriverNavigationScreenState
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text('You have arrived.',
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: semantic.textStrong)),
+                      style: context.mlText.titleMedium.copyWith(
+                        color: semantic.textStrong,
+                        fontWeight: FontWeight.w800,
+                      )),
                 ),
                 _offloadLeg
                     ? MlButton.go(
@@ -1092,17 +1093,17 @@ class _DriverNavigationScreenState
                   '${_offloadLeg ? 'Offloading at' : 'Loading at'}  $headline',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: semantic.textStrong),
+                  style: context.mlText.titleSmall.copyWith(
+                    color: semantic.textStrong,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 Text(detail,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 12,
-                        color: fallback ? colors.fg : semantic.textMuted)),
+                    style: context.mlText.bodySmall.copyWith(
+                      color: fallback ? colors.fg : semantic.textMuted,
+                    )),
               ],
             ),
           ),
@@ -1264,15 +1265,16 @@ class _DriverNavigationScreenState
     Widget cell(String value, String label, {Color? color}) => Expanded(
           child: Column(children: [
             Text(value,
-                style: TextStyle(
-                    fontFamily: 'JetBrainsMono',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: color ?? semantic.textStrong,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  )),
+                style: context.mlText.code(
+                  color: color ?? semantic.textStrong,
+                  size: 16,
+                  weight: FontWeight.w800,
+                )),
             Text(label,
-                style: TextStyle(fontSize: 11, color: semantic.textMuted)),
+                style: context.mlText.labelSmall.copyWith(
+                  color: semantic.textMuted,
+                  fontWeight: FontWeight.w400,
+                )),
           ]),
         );
 

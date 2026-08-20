@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/logistics_models.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/portal/widgets/vehicle_positions_map.dart';
@@ -169,11 +170,10 @@ class TruckLocationsPanel extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       '${p.lat.toStringAsFixed(4)}, ${p.lng.toStringAsFixed(4)}',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontMono,
-                        fontSize: 12,
+                      style: context.mlText.code(
                         color: semantic.textMuted,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+                        size: 12,
+                        weight: FontWeight.w400,
                       ),
                     ),
                   ],
@@ -181,11 +181,10 @@ class TruckLocationsPanel extends StatelessWidget {
               ),
               Text(
                 DateFormat('dd MMM').format(MlTime.sast(p.recordedAt)),
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: 12,
+                style: context.mlText.code(
                   color: semantic.textFaint,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+                  size: 12,
+                  weight: FontWeight.w400,
                 ),
               ),
             ],

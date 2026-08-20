@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/providers/logistics_provider.dart';
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
 import 'package:flutter_application_1/features/portal/utils/portal_dashboard_navigation.dart';
@@ -103,9 +104,7 @@ class BuyerRoutesMinesScreen extends ConsumerWidget {
                                     const SizedBox(height: 10),
                                     Text(
                                       'Updated ${MaterialLocalizations.of(context).formatShortDate(snap.routes[i].updatedAt)}',
-                                      style: TextStyle(
-                                        fontFamily: MlTokens.fontSans,
-                                        fontSize: 12,
+                                      style: context.mlText.bodySmall.copyWith(
                                         color: semantic.textMuted,
                                       ),
                                     ),
@@ -180,12 +179,7 @@ class _RouteArrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semantic = MlSemantic.of(context);
-    final style = TextStyle(
-      fontFamily: MlTokens.fontSans,
-      fontSize: 14,
-      fontWeight: FontWeight.w600,
-      color: semantic.textStrong,
-    );
+    final style = context.mlText.titleSmall.copyWith(color: semantic.textStrong);
     return Wrap(
       spacing: 7,
       crossAxisAlignment: WrapCrossAlignment.center,

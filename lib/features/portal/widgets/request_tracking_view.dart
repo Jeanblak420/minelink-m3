@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/request_tracking.dart';
 import 'package:flutter_application_1/features/portal/providers/request_provider.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -153,12 +154,9 @@ class RequestTrackingView extends ConsumerWidget {
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontSize: 13,
+        style: context.mlText.titleSmall.copyWith(
+          color: strong ? MlSemantic.of(context).textStrong : MlSemantic.of(context).textBody,
           fontWeight: strong ? FontWeight.w700 : FontWeight.w400,
-          color: strong
-              ? MlSemantic.of(context).textStrong
-              : MlSemantic.of(context).textBody,
         ),
       );
 
@@ -166,12 +164,10 @@ class RequestTrackingView extends ConsumerWidget {
     text,
     textAlign: TextAlign.right,
     maxLines: 1,
-    style: TextStyle(
-      fontFamily: MlTokens.fontMono,
-      fontSize: 13,
-      fontWeight: FontWeight.w600,
+    style: context.mlText.code(
       color: MlSemantic.of(context).textStrong,
-      fontFeatures: const [FontFeature.tabularFigures()],
+      size: 13,
+      weight: FontWeight.w600,
     ),
   );
 }

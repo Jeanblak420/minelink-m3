@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/company_location.dart';
 import 'package:flutter_application_1/features/portal/providers/company_location_provider.dart';
@@ -42,15 +43,16 @@ class CompanyLocationsSection extends ConsumerWidget {
                 children: [
                   Text(
                     'Locations',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                    style: context.mlText.titleMedium.copyWith(
                       color: semantic.textStrong,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   Text(
                     'Drivers are routed to the primary location automatically.',
-                    style: TextStyle(fontSize: 13, color: semantic.textMuted),
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: semantic.textMuted,
+                    ),
                   ),
                 ],
               );
@@ -153,10 +155,9 @@ class CompanyLocationsSection extends ConsumerWidget {
               children: [
                 Text(
                   l.name,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
+                  style: context.mlText.titleSmall.copyWith(
                     color: semantic.textStrong,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
@@ -165,11 +166,10 @@ class CompanyLocationsSection extends ConsumerWidget {
                       : '${l.point!.latitude.toStringAsFixed(6)}, '
                             '${l.point!.longitude.toStringAsFixed(6)}'
                             '${l.isPrimary ? ' · Primary' : ''}',
-                  style: TextStyle(
-                    fontFamily: 'JetBrainsMono',
-                    fontSize: 12,
+                  style: context.mlText.code(
                     color: semantic.textMuted,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                    size: 12,
+                    weight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -399,8 +399,7 @@ class _LocationEditDialogState extends State<_LocationEditDialog> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   _error!,
-                  style: TextStyle(
-                    fontSize: 13,
+                  style: context.mlText.bodyMedium.copyWith(
                     color: MlTone.error.colors(Theme.of(context).brightness).fg,
                   ),
                 ),
@@ -410,11 +409,10 @@ class _LocationEditDialogState extends State<_LocationEditDialog> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Saved point: $_mapLink',
-                  style: TextStyle(
-                    fontFamily: 'JetBrainsMono',
-                    fontSize: 11,
+                  style: context.mlText.code(
                     color: semantic.textMuted,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                    size: 11,
+                    weight: FontWeight.w400,
                   ),
                 ),
               ),

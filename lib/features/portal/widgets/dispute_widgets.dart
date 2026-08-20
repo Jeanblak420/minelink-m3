@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/recon_dispute.dart';
 import 'package:flutter_application_1/features/portal/services/dispute_service.dart';
@@ -347,11 +348,9 @@ class _DisputeDetailDialogState extends ConsumerState<_DisputeDetailDialog> {
                   Expanded(
                     child: Text(
                       d.reference ?? 'Dispute',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontSans,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
+                      style: context.mlText.titleMedium.copyWith(
                         color: semantic.textStrong,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
@@ -571,10 +570,10 @@ class _CommentThread extends ConsumerWidget {
                         Text(
                           c.authorName ??
                               (c.authorIsAdmin ? 'Platform admin' : 'User'),
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                              color: semantic.textStrong),
+                          style: context.mlText.titleSmall.copyWith(
+                            color: semantic.textStrong,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         const SizedBox(width: 6),
                         if (c.authorIsAdmin)
@@ -586,8 +585,9 @@ class _CommentThread extends ConsumerWidget {
                             child: Text('· ${c.authorCompanyName}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    fontSize: 12, color: semantic.textMuted)),
+                                style: context.mlText.bodySmall.copyWith(
+                                  color: semantic.textMuted,
+                                )),
                           ),
                         ],
                       ]),

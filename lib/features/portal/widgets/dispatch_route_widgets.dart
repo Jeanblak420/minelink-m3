@@ -2,6 +2,7 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_status.dart';
 import 'package:flutter_application_1/features/fleet/providers/fleet_provider.dart';
@@ -172,7 +173,10 @@ class _DispatchStatusChip extends StatelessWidget {
         borderRadius: MlShape.radiusLargeIncreased,
       ),
       child: Text(label,
-          style: TextStyle(color: c, fontWeight: FontWeight.w700, fontSize: 12)),
+          style: context.mlText.labelMedium.copyWith(
+            color: c,
+            fontWeight: FontWeight.w700,
+          )),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/services/storage_asset_service.dart';
 import 'package:flutter_application_1/features/portal/models/transportation_request.dart';
 
@@ -41,7 +42,7 @@ class RequestAttachmentChips extends ConsumerWidget {
       children: [
         Text(
           'Attachments',
-          style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+          style: context.mlText.bodySmall.copyWith(color: cs.onSurfaceVariant),
         ),
         const SizedBox(height: 6),
         Wrap(

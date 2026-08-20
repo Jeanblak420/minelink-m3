@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/recon_dispute.dart';
 import 'package:flutter_application_1/features/portal/models/trip_reconciliation.dart';
 import 'package:flutter_application_1/features/portal/services/dispute_service.dart';
@@ -265,8 +266,7 @@ class WeightReconciliationView extends ConsumerWidget {
               r.commodity!,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12,
+              style: context.mlText.bodySmall.copyWith(
                 color: MlSemantic.of(context).textMuted,
               ),
             ),
@@ -280,8 +280,7 @@ class WeightReconciliationView extends ConsumerWidget {
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontSize: 14,
+        style: context.mlText.bodyMedium.copyWith(
           color: MlSemantic.of(context).textBody,
         ),
       );
@@ -290,14 +289,10 @@ class WeightReconciliationView extends ConsumerWidget {
         text,
         textAlign: TextAlign.right,
         maxLines: 1,
-        style: TextStyle(
-          fontFamily: MlTokens.fontMono,
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: muted
-              ? MlSemantic.of(context).textFaint
-              : MlSemantic.of(context).textStrong,
-          fontFeatures: const [FontFeature.tabularFigures()],
+        style: context.mlText.code(
+          color: muted ? MlSemantic.of(context).textFaint : MlSemantic.of(context).textStrong,
+          size: 13,
+          weight: FontWeight.w600,
         ),
       );
 
@@ -319,12 +314,10 @@ class WeightReconciliationView extends ConsumerWidget {
         ),
         child: Text(
           '$sign${v.abs().toStringAsFixed(2)} t',
-          style: TextStyle(
-            fontFamily: MlTokens.fontMono,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
+          style: context.mlText.code(
             color: tone.fg,
-            fontFeatures: const [FontFeature.tabularFigures()],
+            size: 13,
+            weight: FontWeight.w700,
           ),
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/trip_waypoint.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
@@ -171,15 +172,9 @@ class _WaypointDot extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: MlTokens.fsMicro,
+            style: context.mlText.labelSmall.copyWith(
+              color: completed ? doneColors.fg : isCurrent ? currentColors.fg : semantic.textMuted,
               fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-              color: completed
-                  ? doneColors.fg
-                  : isCurrent
-                      ? currentColors.fg
-                      : semantic.textMuted,
             ),
           ),
         ],

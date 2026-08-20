@@ -1,5 +1,6 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
@@ -456,9 +457,8 @@ class RequestBuyersCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     'Ask the platform to connect you with more buyers.',
-                    style: TextStyle(
+                    style: context.mlText.bodyMedium.copyWith(
                       color: MlTokens.overlayLight.withValues(alpha: 0.85),
-                      fontSize: 13,
                     ),
                   ),
                   const SizedBox(height: 16),

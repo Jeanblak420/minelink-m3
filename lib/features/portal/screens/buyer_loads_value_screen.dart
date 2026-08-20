@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/buyer_load_value.dart';
 import 'package:flutter_application_1/features/portal/services/buyer_value_service.dart';
@@ -241,7 +242,7 @@ class _Body extends ConsumerWidget {
           Text(
             '$unpriced load(s) have no rate yet — pricing is set when the '
             'MineLink admin links the order.',
-            style: TextStyle(fontSize: 13, color: semantic.textMuted),
+            style: context.mlText.bodyMedium.copyWith(color: semantic.textMuted),
           ),
         ],
         const SizedBox(height: 16),
@@ -335,8 +336,7 @@ class _Body extends ConsumerWidget {
               r.commodity!,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12,
+              style: context.mlText.bodySmall.copyWith(
                 color: MlSemantic.of(context).textMuted,
               ),
             ),
@@ -350,21 +350,19 @@ class _Body extends ConsumerWidget {
     text,
     maxLines: 1,
     overflow: TextOverflow.ellipsis,
-    style: TextStyle(fontSize: 13, color: MlSemantic.of(context).textBody),
+    style: context.mlText.bodyMedium.copyWith(
+      color: MlSemantic.of(context).textBody,
+    ),
   );
 
   Widget _mono(BuildContext context, String text, {bool muted = false}) => Text(
     text,
     textAlign: TextAlign.right,
     maxLines: 1,
-    style: TextStyle(
-      fontFamily: MlTokens.fontMono,
-      fontSize: 13,
-      fontWeight: FontWeight.w600,
-      color: muted
-          ? MlSemantic.of(context).textFaint
-          : MlSemantic.of(context).textStrong,
-      fontFeatures: const [FontFeature.tabularFigures()],
+    style: context.mlText.code(
+      color: muted ? MlSemantic.of(context).textFaint : MlSemantic.of(context).textStrong,
+      size: 13,
+      weight: FontWeight.w600,
     ),
   );
 
@@ -394,7 +392,7 @@ class _Body extends ConsumerWidget {
     if (!r.hasInvoice) {
       return Text(
         'Not captured',
-        style: TextStyle(fontSize: 13, color: semantic.textFaint),
+        style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint),
       );
     }
     return Column(
@@ -405,17 +403,15 @@ class _Body extends ConsumerWidget {
           r.invoiceNumber ?? '—',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontFamily: MlTokens.fontMono,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+          style: context.mlText.code(
             color: semantic.textStrong,
-            fontFeatures: const [FontFeature.tabularFigures()],
+            size: 12,
+            weight: FontWeight.w700,
           ),
         ),
         Text(
           BuyerLoadsValueScreen.money(r.invoicedAmount, r.currency),
-          style: TextStyle(fontSize: 12, color: semantic.textMuted),
+          style: context.mlText.bodySmall.copyWith(color: semantic.textMuted),
         ),
       ],
     );
@@ -438,12 +434,10 @@ class _Body extends ConsumerWidget {
         ),
         child: Text(
           '${v > 0 ? '+' : ''}${BuyerLoadsValueScreen.money(v, r.currency)}',
-          style: TextStyle(
-            fontFamily: MlTokens.fontMono,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+          style: context.mlText.code(
             color: colors.fg,
-            fontFeatures: const [FontFeature.tabularFigures()],
+            size: 12,
+            weight: FontWeight.w700,
           ),
         ),
       ),
@@ -588,7 +582,9 @@ class _InvoiceDialogState extends ConsumerState<_InvoiceDialog> {
                   if (r.deliveredTons != null)
                     'delivered ${r.deliveredTons!.toStringAsFixed(2)} t',
                 ].join(' · '),
-                style: TextStyle(fontSize: 13, color: semantic.textMuted),
+                style: context.mlText.bodyMedium.copyWith(
+                  color: semantic.textMuted,
+                ),
               ),
               const SizedBox(height: 14),
               TextField(

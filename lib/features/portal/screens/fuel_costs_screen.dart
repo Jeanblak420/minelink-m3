@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/fleet/providers/fleet_provider.dart';
 import 'package:flutter_application_1/features/portal/models/fuel_models.dart';
 import 'package:flutter_application_1/features/portal/services/fuel_service.dart';
@@ -176,12 +177,10 @@ class _EconomyCard extends StatelessWidget {
     s,
     textAlign: TextAlign.right,
     maxLines: 1,
-    style: TextStyle(
-      fontFamily: MlTokens.fontMono,
-      fontSize: 13,
-      fontWeight: strong ? FontWeight.w800 : FontWeight.w600,
+    style: c.mlText.code(
       color: MlSemantic.of(c).textStrong,
-      fontFeatures: const [FontFeature.tabularFigures()],
+      size: 13,
+      weight: strong ? FontWeight.w800 : FontWeight.w600,
     ),
   );
 
@@ -428,7 +427,9 @@ class _Line extends StatelessWidget {
                 ),
                 Text(
                   secondary,
-                  style: TextStyle(fontSize: 13, color: semantic.textMuted),
+                  style: context.mlText.bodyMedium.copyWith(
+                    color: semantic.textMuted,
+                  ),
                 ),
               ],
             ),
@@ -650,8 +651,7 @@ class _LogFuelDialogState extends ConsumerState<_LogFuelDialog> {
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
                     '≈ R${_num1.format(ppl)} / litre',
-                    style: TextStyle(
-                      fontSize: 13,
+                    style: context.mlText.bodyMedium.copyWith(
                       color: MlSemantic.of(context).textMuted,
                     ),
                   ),
@@ -677,12 +677,8 @@ class _LogFuelDialogState extends ConsumerState<_LogFuelDialog> {
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
                     sinceLast,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: sinceLastWarn
-                          ? MlTone.error.colors(Theme.of(context).brightness).fg
-                          : MlSemantic.of(context).textMuted,
+                    style: context.mlText.titleSmall.copyWith(
+                      color: sinceLastWarn ? MlTone.error.colors(Theme.of(context).brightness).fg : MlSemantic.of(context).textMuted,
                     ),
                   ),
                 ),

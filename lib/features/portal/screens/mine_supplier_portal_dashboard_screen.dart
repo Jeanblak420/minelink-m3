@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/operations/models/operations_models.dart';
 import 'package:flutter_application_1/features/portal/models/mine_trip.dart';
 import 'package:flutter_application_1/features/portal/models/recon_dispute.dart';
@@ -465,20 +466,14 @@ class _MineSupplierPortalDashboardScreenState
             children: [
               Text(
                 '$pct%',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSerif,
-                  fontSize: 30,
-                  fontWeight: FontWeight.w600,
-                  color: s.textStrong,
-                ),
+                style: context.mlText.figure(color: s.textStrong, size: 30),
               ),
               Text(
                 '${_tons(filled)} / ${_tons(capacity)} t',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: MlTokens.fsMicro,
+                style: context.mlText.code(
                   color: s.textMuted,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+                  size: 11,
+                  weight: FontWeight.w400,
                 ),
               ),
             ],

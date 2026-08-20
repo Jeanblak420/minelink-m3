@@ -379,16 +379,17 @@ class _DriverStatsStrip extends StatelessWidget {
               Text(value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 21,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                      color: semantic.textStrong)),
+                  style: context.mlText.titleLarge.copyWith(
+                    color: semantic.textStrong,
+                    fontWeight: FontWeight.w800,
+                  )),
               const SizedBox(height: 2),
               Text(label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 13, color: semantic.textMuted)),
+                  style: context.mlText.bodyMedium.copyWith(
+                    color: semantic.textMuted,
+                  )),
             ],
           ),
         );
@@ -439,8 +440,10 @@ class _CurrentTripCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final semantic = MlSemantic.of(context);
     final textTheme = Theme.of(context).textTheme;
-    final titleStyle = TextStyle(
-        fontSize: 19, fontWeight: FontWeight.w800, color: semantic.textStrong);
+    final titleStyle = context.mlText.titleLarge.copyWith(
+      color: semantic.textStrong,
+      fontWeight: FontWeight.w800,
+    );
 
     if (trip == null) {
       return MlCard(
@@ -651,10 +654,10 @@ class _RouteTimeline extends StatelessWidget {
                 .bodySmall
                 ?.copyWith(color: semantic.textMuted)),
         Text(value,
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: semantic.textStrong)),
+            style: context.mlText.titleMedium.copyWith(
+              color: semantic.textStrong,
+              fontWeight: FontWeight.w800,
+            )),
       ],
     );
   }
@@ -706,10 +709,10 @@ class _RecentTripsCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Recent Trips',
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: semantic.textStrong)),
+              style: context.mlText.titleMedium.copyWith(
+                color: semantic.textStrong,
+                fontWeight: FontWeight.w800,
+              )),
           const SizedBox(height: 8),
           for (var i = 0; i < trips.length; i++)
             _row(context, trips[i],

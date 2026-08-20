@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 
 /// What the driver filled in on the hazard report sheet. The caller supplies
 /// the position (reports are always made AT the reporter's current location)
@@ -73,13 +74,14 @@ class _HazardReportSheetState extends State<HazardReportSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Report a hazard',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: semantic.textStrong)),
+                        style: context.mlText.titleMedium.copyWith(
+                          color: semantic.textStrong,
+                          fontWeight: FontWeight.w800,
+                        )),
                     Text('Placed at your current position on the road.',
-                        style: TextStyle(
-                            fontSize: 13, color: semantic.textMuted)),
+                        style: context.mlText.bodyMedium.copyWith(
+                          color: semantic.textMuted,
+                        )),
                   ],
                 ),
               ),

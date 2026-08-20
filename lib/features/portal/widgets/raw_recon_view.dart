@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/raw_recon_row.dart';
 import 'package:flutter_application_1/features/portal/services/recon_exporter.dart';
 import 'package:flutter_application_1/features/portal/services/reconciliation_service.dart';
@@ -376,12 +377,10 @@ class _RawReconViewState extends ConsumerState<RawReconView> {
                     alignment: Alignment.centerRight,
                     child: Text(
                       'Total Tons = ${_totalTons(filtered).toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontFamily: MlTokens.fontMono,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                      style: context.mlText.code(
                         color: semantic.textStrong,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+                        size: 14,
+                        weight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -543,12 +542,10 @@ class _ExcelReconTable extends StatelessWidget {
         child: Text(
           value,
           textAlign: TextAlign.right,
-          style: TextStyle(
-            fontFamily: MlTokens.fontMono,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+          style: context.mlText.code(
             color: colors.fg,
-            fontFeatures: const [FontFeature.tabularFigures()],
+            size: 12,
+            weight: FontWeight.w700,
           ),
         ),
       ),
@@ -582,11 +579,7 @@ class _ExcelReconTable extends StatelessWidget {
                 Text(
                   c.label.toUpperCase(),
                   textAlign: c.right ? TextAlign.right : TextAlign.left,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.8,
+                  style: context.mlText.overline.copyWith(
                     color: semantic.textFaint,
                   ),
                 ),
@@ -669,7 +662,7 @@ class _ExcelReconTable extends StatelessWidget {
                     r.waybillNumber != null
                 ? _waybillLink(semantic, _cols[col], values[col], r)
                 : col == _colPod && onPodTap != null && r.podPhotoPath != null
-                ? _podLink(values[col], r)
+                ? _podLink(context, values[col], r)
                 : col == _colVariance
                 ? _varianceText(
                     context,
@@ -712,19 +705,17 @@ class _ExcelReconTable extends StatelessWidget {
     );
   }
 
-  Widget _podLink(String value, RawReconRow r) {
+  Widget _podLink(BuildContext context, String value, RawReconRow r) {
     return InkWell(
       onTap: () => onPodTap!(r),
       borderRadius: MlShape.radiusExtraSmall,
       child: Text(
         value,
         softWrap: true,
-        style: TextStyle(
-          fontFamily: MlTokens.fontSans,
-          fontSize: 13,
+        style: context.mlText.titleSmall.copyWith(
+          color: MlTokens.accent,
           fontWeight: FontWeight.w700,
           height: 1.25,
-          color: MlTokens.accent,
           decoration: TextDecoration.underline,
           decorationColor: MlTokens.accent,
         ),

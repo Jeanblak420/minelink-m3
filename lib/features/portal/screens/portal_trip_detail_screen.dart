@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/operations/models/operations_models.dart';
 import 'package:flutter_application_1/features/portal/models/logistics_models.dart';
 import 'package:flutter_application_1/features/portal/models/trip_status.dart';
@@ -145,9 +146,8 @@ class PortalTripDetailScreen extends ConsumerWidget {
                           width: 160,
                           child: Text(
                             label,
-                            style: TextStyle(
+                            style: context.mlText.bodyMedium.copyWith(
                               color: semantic.textMuted,
-                              fontSize: 13,
                             ),
                           ),
                         ),

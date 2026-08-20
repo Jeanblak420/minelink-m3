@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/load_quality.dart';
 import 'package:flutter_application_1/features/portal/services/quality_service.dart';
@@ -165,9 +166,7 @@ class LoadQualityTable extends ConsumerWidget {
                 children: [
                   Text(
                     '$certified of ${rows.length} load(s) certified',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                    style: context.mlText.titleSmall.copyWith(
                       color: semantic.textMuted,
                     ),
                   ),
@@ -260,11 +259,10 @@ class LoadQualityTable extends ConsumerWidget {
               r.reference!,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12,
-                fontFamily: MlTokens.fontMono,
+              style: context.mlText.code(
                 color: MlSemantic.of(context).textMuted,
-                fontFeatures: const [FontFeature.tabularFigures()],
+                size: 12,
+                weight: FontWeight.w400,
               ),
             ),
           ),
@@ -277,21 +275,19 @@ class LoadQualityTable extends ConsumerWidget {
     text,
     maxLines: 1,
     overflow: TextOverflow.ellipsis,
-    style: TextStyle(fontSize: 13, color: MlSemantic.of(context).textBody),
+    style: context.mlText.bodyMedium.copyWith(
+      color: MlSemantic.of(context).textBody,
+    ),
   );
 
   Widget _mono(BuildContext context, String text, {bool muted = false}) => Text(
     text,
     textAlign: TextAlign.right,
     maxLines: 1,
-    style: TextStyle(
-      fontFamily: MlTokens.fontMono,
-      fontSize: 13,
-      fontWeight: FontWeight.w600,
-      color: muted
-          ? MlSemantic.of(context).textFaint
-          : MlSemantic.of(context).textStrong,
-      fontFeatures: const [FontFeature.tabularFigures()],
+    style: context.mlText.code(
+      color: muted ? MlSemantic.of(context).textFaint : MlSemantic.of(context).textStrong,
+      size: 13,
+      weight: FontWeight.w600,
     ),
   );
 
@@ -322,12 +318,10 @@ class LoadQualityTable extends ConsumerWidget {
         ),
         child: Text(
           '${_p(actual)}${spec != null ? ' / ${_p(spec)}' : ''}',
-          style: TextStyle(
-            fontFamily: MlTokens.fontMono,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+          style: context.mlText.code(
             color: colors.fg,
-            fontFeatures: const [FontFeature.tabularFigures()],
+            size: 12,
+            weight: FontWeight.w700,
           ),
         ),
       ),
@@ -358,12 +352,10 @@ class LoadQualityTable extends ConsumerWidget {
           ),
           child: Text(
             _t(r.payableTons),
-            style: TextStyle(
-              fontFamily: MlTokens.fontMono,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+            style: context.mlText.code(
               color: colors.fg,
-              fontFeatures: const [FontFeature.tabularFigures()],
+              size: 12,
+              weight: FontWeight.w700,
             ),
           ),
         ),

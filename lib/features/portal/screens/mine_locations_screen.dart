@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/mine_location.dart';
 import 'package:flutter_application_1/features/portal/providers/mine_location_provider.dart';
@@ -103,15 +104,16 @@ class _MineAnchorsSection extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Mine anchor points',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: semantic.textStrong)),
+                      style: context.mlText.titleMedium.copyWith(
+                        color: semantic.textStrong,
+                        fontWeight: FontWeight.w800,
+                      )),
                   Text(
                       'Main Gate, Weighbridge and Loading Point — used to '
                       'auto-generate each trip\'s waypoint sequence.',
-                      style: TextStyle(
-                          fontSize: 13, color: semantic.textMuted)),
+                      style: context.mlText.bodyMedium.copyWith(
+                        color: semantic.textMuted,
+                      )),
                 ],
               ),
             ),
@@ -196,10 +198,10 @@ class _AnchorRow extends ConsumerWidget {
                         : type.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: semantic.textStrong),
+                    style: context.mlText.titleSmall.copyWith(
+                      color: semantic.textStrong,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -212,11 +214,10 @@ class _AnchorRow extends ConsumerWidget {
                   ),
                   child: Text(
                     _configured ? 'CONFIGURED' : 'NOT SET',
-                    style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.4,
-                        color: _configured ? done.fg : semantic.textMuted),
+                    style: context.mlText.labelSmall.copyWith(
+                      color: _configured ? done.fg : semantic.textMuted,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ]),
@@ -375,11 +376,9 @@ class _AnchorEditDialogState extends State<_AnchorEditDialog> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(_error!,
-                  style: TextStyle(
-                      fontSize: 13,
-                      color: MlTone.error
-                          .colors(Theme.of(context).brightness)
-                          .fg)),
+                  style: context.mlText.bodyMedium.copyWith(
+                    color: MlTone.error .colors(Theme.of(context).brightness) .fg,
+                  )),
             ),
           if (_point != null)
             Align(
@@ -387,12 +386,11 @@ class _AnchorEditDialogState extends State<_AnchorEditDialog> {
               child: Text(
                   'Point: ${_point!.latitude.toStringAsFixed(6)}, '
                   '${_point!.longitude.toStringAsFixed(6)}',
-                  style: TextStyle(
-                      fontFamily: MlTokens.fontMono,
-                      fontSize: 11,
-                      color: semantic.textMuted,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    )),
+                  style: context.mlText.code(
+                    color: semantic.textMuted,
+                    size: 11,
+                    weight: FontWeight.w400,
+                  )),
             ),
         ]),
       ),

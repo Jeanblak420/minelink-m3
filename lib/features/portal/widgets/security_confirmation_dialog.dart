@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/utils/logger.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
@@ -200,11 +201,9 @@ class _SecurityConfirmationDialogState
                 ? '$typeLabel Confirmed'
                 : '$typeLabel — ${widget.gateName}',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSerif,
-              fontSize: MlTokens.fsH3,
-              fontWeight: FontWeight.w700,
+            style: context.mlText.editorialSmall.copyWith(
               color: semantic.textStrong,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -223,11 +222,7 @@ class _SecurityConfirmationDialogState
                             ? 'Waiting for the driver to confirm...'
                             : 'Confirm this ${typeLabel.toLowerCase()} for the driver.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: MlTokens.fsBodySm,
-              color: semantic.textMuted,
-            ),
+            style: context.mlText.bodyMedium.copyWith(color: semantic.textMuted),
           ),
           const SizedBox(height: 16),
 
@@ -386,11 +381,9 @@ class _PartyIndicator extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: MlTokens.fsMicro,
-            fontWeight: isConfirmed ? FontWeight.w600 : FontWeight.w400,
+          style: context.mlText.labelSmall.copyWith(
             color: isConfirmed ? done.fg : semantic.textMuted,
+            fontWeight: isConfirmed ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
       ],

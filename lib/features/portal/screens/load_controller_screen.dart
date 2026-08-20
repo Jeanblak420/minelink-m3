@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/mine_trip.dart';
 import 'package:flutter_application_1/features/portal/services/trip_waybill_builder.dart';
 import 'package:flutter_application_1/features/portal/services/waybill_pdf.dart';
@@ -263,11 +264,9 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
       text,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        fontFamily: MlTokens.fontSans,
-        fontSize: 14,
-        fontWeight: strong ? FontWeight.w600 : FontWeight.w400,
+      style: context.mlText.titleSmall.copyWith(
         color: strong ? semantic.textStrong : semantic.textBody,
+        fontWeight: strong ? FontWeight.w600 : FontWeight.w400,
       ),
     );
   }
@@ -276,11 +275,10 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
     return Text(
       text,
       maxLines: 1,
-      style: TextStyle(
-        fontFamily: MlTokens.fontMono,
-        fontSize: 14,
+      style: context.mlText.code(
         color: MlSemantic.of(context).textMuted,
-        fontFeatures: const [FontFeature.tabularFigures()],
+        size: 14,
+        weight: FontWeight.w400,
       ),
     );
   }
@@ -305,11 +303,10 @@ class _ReadyTruckRow extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 11,
-              letterSpacing: 0.7,
+            style: context.mlText.labelSmall.copyWith(
               color: semantic.textFaint,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0.7,
             ),
           ),
           const SizedBox(height: 2),
@@ -317,11 +314,9 @@ class _ReadyTruckRow extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: 14,
-              fontWeight: strong ? FontWeight.w600 : FontWeight.w400,
+            style: context.mlText.titleSmall.copyWith(
               color: strong ? semantic.textStrong : semantic.textBody,
+              fontWeight: strong ? FontWeight.w600 : FontWeight.w400,
             ),
           ),
         ],
@@ -684,11 +679,9 @@ class _RecordLoadSheetState extends ConsumerState<_RecordLoadSheet> {
       children: [
         Text(
           '${trip.transporterName ?? 'Transporter'} · ${trip.buyerLabel} · ${trip.materialLabel}',
-          style: TextStyle(
-            fontFamily: MlTokens.fontSans,
-            fontSize: 14,
-            height: 1.6,
+          style: context.mlText.bodyMedium.copyWith(
             color: semantic.textMuted,
+            height: 1.6,
           ),
         ),
         const SizedBox(height: 18),
@@ -722,9 +715,7 @@ class _RecordLoadSheetState extends ConsumerState<_RecordLoadSheet> {
                 Text(
                   'Weigh the truck empty, then send it to load. You will weigh '
                   'it again when it comes back and the app works out the cargo.',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 12,
+                  style: context.mlText.bodySmall.copyWith(
                     color: semantic.textMuted,
                   ),
                 ),
@@ -797,9 +788,7 @@ class _RecordLoadSheetState extends ConsumerState<_RecordLoadSheet> {
                   child: Text(
                     'This route requires a photo of each seal & its number — '
                     "you can't complete the load without them.",
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 12,
+                    style: context.mlText.bodySmall.copyWith(
                       color: semantic.textMuted,
                     ),
                   ),
@@ -886,10 +875,8 @@ class _RecordLoadSheetState extends ConsumerState<_RecordLoadSheet> {
                 Expanded(
                   child: Text(
                     _error!,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color:
-                          MlTone.error.colors(Theme.of(context).brightness).fg,
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: MlTone.error.colors(Theme.of(context).brightness).fg,
                     ),
                   ),
                 ),
@@ -1022,12 +1009,10 @@ class _NetBox extends StatelessWidget {
           const Spacer(),
           Text(
             net == null ? '—' : '${net!.toStringAsFixed(2)} t',
-            style: TextStyle(
-              fontFamily: MlTokens.fontMono,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+            style: context.mlText.code(
               color: PortalColors.accent,
-              fontFeatures: const [FontFeature.tabularFigures()],
+              size: 20,
+              weight: FontWeight.w700,
             ),
           ),
         ],

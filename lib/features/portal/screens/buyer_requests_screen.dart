@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/transportation_request.dart';
 import 'package:flutter_application_1/features/portal/models/trip_status.dart';
 import 'package:flutter_application_1/features/portal/providers/request_provider.dart';
@@ -184,11 +185,9 @@ class _RequestSectionHeader extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             group.title.toUpperCase(),
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.6,
+            style: context.mlText.labelMedium.copyWith(
               color: color,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(width: 8),
@@ -200,10 +199,9 @@ class _RequestSectionHeader extends StatelessWidget {
             ),
             child: Text(
               '$count',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
+              style: context.mlText.labelMedium.copyWith(
                 color: color,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -254,10 +252,9 @@ class _RequestCard extends StatelessWidget {
                   ),
                   child: Text(
                     typeLabel,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
+                    style: context.mlText.labelSmall.copyWith(
                       color: scheme.onSecondaryContainer,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -383,14 +380,16 @@ class _AllocatedTrucksSection extends ConsumerWidget {
       ),
       error: (e, _) => Text(
         'Could not load allocated trucks. ${friendlyError(e)}',
-        style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+        style: context.mlText.bodySmall.copyWith(color: scheme.onSurfaceVariant),
       ),
       data: (trucks) {
         if (trucks.isEmpty) {
           return Text(
             'Allocated trucks: none yet — the transporter has not accepted '
             'the route.',
-            style: TextStyle(fontSize: 13, color: scheme.onSurfaceVariant),
+            style: context.mlText.bodyMedium.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
           );
         }
         return Column(
@@ -398,11 +397,10 @@ class _AllocatedTrucksSection extends ConsumerWidget {
           children: [
             Text(
               'ALLOCATED TRUCKS',
-              style: TextStyle(
-                fontSize: 11,
-                letterSpacing: 0.7,
-                fontWeight: FontWeight.w700,
+              style: context.mlText.labelSmall.copyWith(
                 color: scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.7,
               ),
             ),
             const SizedBox(height: 6),
@@ -433,8 +431,7 @@ class _AllocatedTrucksSection extends ConsumerWidget {
                             if (t.drivers != null) t.drivers!,
                             TripStatus.parse(t.tripStatus).label,
                           ].join(' · '),
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: context.mlText.bodySmall.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),

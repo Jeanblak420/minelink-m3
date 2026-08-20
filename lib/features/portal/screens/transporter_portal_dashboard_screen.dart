@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_status.dart';
 import 'package:flutter_application_1/features/fleet/providers/fleet_provider.dart';
 import 'package:flutter_application_1/features/fleet/providers/maintenance_providers.dart';
@@ -446,20 +447,14 @@ class _TransporterPortalDashboardScreenState
             children: [
               Text(
                 '${fleet.length}',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSerif,
-                  fontSize: 30,
-                  fontWeight: FontWeight.w600,
-                  color: s.textStrong,
-                ),
+                style: context.mlText.figure(color: s.textStrong, size: 30),
               ),
               Text(
                 'trucks',
-                style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: MlTokens.fsMicro,
+                style: context.mlText.code(
                   color: s.textMuted,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+                  size: 11,
+                  weight: FontWeight.w400,
                 ),
               ),
             ],

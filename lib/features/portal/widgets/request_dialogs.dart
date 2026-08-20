@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FilteringTextInputFormatter;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/widgets/multi_file_drop_picker.dart';
 import 'package:flutter_application_1/features/portal/models/transportation_request.dart';
 import 'package:flutter_application_1/features/portal/providers/request_provider.dart';
@@ -231,10 +232,8 @@ Future<void> _showRequestDialog({
                           ? 'MineLink sent this request back — update the '
                               'details below and resubmit.'
                           : blurb,
-                      style: TextStyle(
+                      style: context.mlText.bodyMedium.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontSize: 13,
-                        height: 1.4,
                       ),
                     ),
                     if (editing && existing.adminNotes != null) ...[
@@ -403,8 +402,7 @@ Future<void> _showRequestDialog({
                       const SizedBox(height: 16),
                       Text(
                         'Current attachments (kept on resubmit)',
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: context.mlText.bodySmall.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
                       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/widgets/multi_file_drop_picker.dart';
 import 'package:flutter_application_1/features/portal/models/load_quality.dart';
 import 'package:flutter_application_1/features/portal/services/quality_service.dart';
@@ -161,8 +162,9 @@ class _QualityCertDialogState extends ConsumerState<_QualityCertDialog> {
                       ].join(' · '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          fontSize: 13, color: semantic.textMuted),
+                      style: context.mlText.bodyMedium.copyWith(
+                        color: semantic.textMuted,
+                      ),
                     ),
                   ),
                 ],
@@ -176,7 +178,9 @@ class _QualityCertDialogState extends ConsumerState<_QualityCertDialog> {
                   '${r.specCr2o3Pct != null ? 'Cr₂O₃ ≥ ${r.specCr2o3Pct}% ' : ''}'
                   '${r.specMoistureMaxPct != null ? '· moisture ≤ ${r.specMoistureMaxPct}% ' : ''}'
                   '${r.specSizing != null ? '· sizing ${r.specSizing}' : ''}',
-                  style: TextStyle(fontSize: 12, color: semantic.textMuted),
+                  style: context.mlText.bodySmall.copyWith(
+                    color: semantic.textMuted,
+                  ),
                 ),
               ],
               const SizedBox(height: 14),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
@@ -222,14 +223,16 @@ class _Stat extends StatelessWidget {
               Text(value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: semantic.textStrong)),
+                  style: context.mlText.titleLarge.copyWith(
+                    color: semantic.textStrong,
+                    fontWeight: FontWeight.w800,
+                  )),
               Text(label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 13, color: semantic.textMuted)),
+                  style: context.mlText.bodyMedium.copyWith(
+                    color: semantic.textMuted,
+                  )),
             ],
           ),
         ),

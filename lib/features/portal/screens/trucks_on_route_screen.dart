@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_model.dart';
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_status.dart';
@@ -182,11 +183,10 @@ class _OnRouteCard extends ConsumerWidget {
           children: [
             Text(
               label.toUpperCase(),
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 11,
-                letterSpacing: 0.7,
+              style: context.mlText.labelSmall.copyWith(
                 color: semantic.textFaint,
+                fontWeight: FontWeight.w400,
+                letterSpacing: 0.7,
               ),
             ),
             const SizedBox(height: 2),
@@ -194,10 +194,7 @@ class _OnRouteCard extends ConsumerWidget {
               value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+              style: context.mlText.titleSmall.copyWith(
                 color: semantic.textStrong,
               ),
             ),
@@ -267,9 +264,7 @@ class _OnRouteCard extends ConsumerWidget {
                       child: Text(
                         'No driver is assigned to this truck. It cannot report '
                         'its position or upload a proof of delivery until one is.',
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 13,
+                        style: context.mlText.bodyMedium.copyWith(
                           color: semantic.textStrong,
                         ),
                       ),

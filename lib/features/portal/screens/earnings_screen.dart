@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/fuel_models.dart';
 import 'package:flutter_application_1/features/portal/models/trip_earning.dart';
 import 'package:flutter_application_1/features/portal/services/earnings_service.dart';
@@ -239,8 +240,7 @@ class _EarningsBody extends StatelessWidget {
                 child: Text(
                   '$unpriced delivered trip(s) have no rate set yet, so their '
                   'revenue is not counted. They show as "—" below.',
-                  style: TextStyle(
-                    fontSize: 13,
+                  style: context.mlText.bodyMedium.copyWith(
                     color: MlSemantic.of(context).textMuted,
                   ),
                 ),
@@ -380,8 +380,7 @@ class _EarningsBody extends StatelessWidget {
                 'Net per trip = revenue − its share of costs. Costs tagged to a '
                 'trip count directly; a vehicle\'s untagged fuel, tyres, tolls '
                 'and maintenance are split across its trips by tonnage.',
-                style: TextStyle(
-                  fontSize: 13,
+                style: context.mlText.bodyMedium.copyWith(
                   color: MlSemantic.of(context).textMuted,
                 ),
               ),
@@ -423,7 +422,9 @@ class _EarningsBody extends StatelessWidget {
     s,
     maxLines: 1,
     overflow: TextOverflow.ellipsis,
-    style: TextStyle(fontSize: 14, color: MlSemantic.of(context).textBody),
+    style: context.mlText.bodyMedium.copyWith(
+      color: MlSemantic.of(context).textBody,
+    ),
   );
 
   Widget _mono(
@@ -435,14 +436,10 @@ class _EarningsBody extends StatelessWidget {
     s,
     textAlign: TextAlign.right,
     maxLines: 1,
-    style: TextStyle(
-      fontFamily: MlTokens.fontMono,
-      fontSize: 13,
-      fontWeight: strong ? FontWeight.w800 : FontWeight.w600,
-      color: muted
-          ? MlSemantic.of(context).textFaint
-          : MlSemantic.of(context).textStrong,
-      fontFeatures: const [FontFeature.tabularFigures()],
+    style: context.mlText.code(
+      color: muted ? MlSemantic.of(context).textFaint : MlSemantic.of(context).textStrong,
+      size: 13,
+      weight: strong ? FontWeight.w800 : FontWeight.w600,
     ),
   );
 }
@@ -536,22 +533,18 @@ class _PeriodTile extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
+            style: context.mlText.labelSmall.copyWith(
               color: semantic.textMuted,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             value,
-            style: TextStyle(
-              fontFamily: MlTokens.fontMono,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
+            style: context.mlText.code(
               color: semantic.textStrong,
-              fontFeatures: const [FontFeature.tabularFigures()],
+              size: 16,
+              weight: FontWeight.w800,
             ),
           ),
         ],

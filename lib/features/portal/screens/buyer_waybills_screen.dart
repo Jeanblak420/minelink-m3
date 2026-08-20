@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/operations/models/operations_models.dart';
 import 'package:flutter_application_1/features/portal/providers/logistics_provider.dart';
@@ -122,9 +123,7 @@ class BuyerWaybillsScreen extends ConsumerWidget {
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontFamily: MlTokens.fontSans,
-          fontSize: 14,
+        style: context.mlText.bodyMedium.copyWith(
           color: MlSemantic.of(context).textBody,
         ),
       );

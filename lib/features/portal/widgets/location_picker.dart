@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/widgets/osm_tile_layer.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -202,7 +203,9 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(_error!,
-                      style: TextStyle(color: scheme.error, fontSize: 12)),
+                      style: context.mlText.bodySmall.copyWith(
+                        color: scheme.error,
+                      )),
                 ),
               // The results are for a BROADER query than the one typed, because
               // nothing matched the full one. Saying so is the difference
@@ -214,7 +217,9 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                     'No exact match — showing results for '
                     '“${_results.first.matchedQuery}”. For the precise point, '
                     'paste the place’s Google Maps link or long-press the map.',
-                    style: TextStyle(fontSize: 12, color: scheme.tertiary),
+                    style: context.mlText.bodySmall.copyWith(
+                      color: scheme.tertiary,
+                    ),
                   ),
                 ),
               if (_results.isNotEmpty)
@@ -256,14 +261,17 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                             'not have this building — search the street, or '
                             'find the place in Google Maps and paste its link '
                             'here for an exact pin.',
-                    style: TextStyle(
-                        fontSize: 12, color: scheme.onSurfaceVariant),
+                    style: context.mlText.bodySmall.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               const SizedBox(height: 10),
               Text('Long-press the map to drop a pin, or paste “lat, lng”.',
                   style:
-                      TextStyle(fontSize: 12, color: scheme.onSurfaceVariant)),
+                      context.mlText.bodySmall.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      )),
               const SizedBox(height: 6),
               Expanded(
                 child: ClipRRect(
@@ -316,7 +324,9 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                       : 'Selected: ${_pin!.latitude.toStringAsFixed(5)}, '
                           '${_pin!.longitude.toStringAsFixed(5)}',
                   style:
-                      TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+                      context.mlText.bodySmall.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                 ),
               ),
               const SizedBox(height: 8),

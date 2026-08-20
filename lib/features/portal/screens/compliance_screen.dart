@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/core/widgets/multi_file_drop_picker.dart';
 import 'package:flutter_application_1/features/fleet/providers/fleet_provider.dart';
@@ -179,12 +180,10 @@ class _SummaryChip extends StatelessWidget {
         children: [
           Text(
             value,
-            style: TextStyle(
-              fontFamily: MlTokens.fontMono,
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
+            style: context.mlText.code(
               color: c.fg,
-              fontFeatures: const [FontFeature.tabularFigures()],
+              size: 18,
+              weight: FontWeight.w800,
             ),
           ),
           const SizedBox(width: 8),
@@ -292,10 +291,9 @@ class _DocCard extends ConsumerWidget {
                   children: [
                     Text(
                       d.displayTitle,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
+                      style: context.mlText.titleMedium.copyWith(
                         color: semantic.textStrong,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     MlStatusBadge(label: d.status.label, tone: tone),
@@ -305,18 +303,24 @@ class _DocCard extends ConsumerWidget {
                 Text(
                   '${d.ownerName ?? d.ownerType.label}'
                   '${d.docNumber != null ? ' · ${d.docNumber}' : ''}',
-                  style: TextStyle(fontSize: 13, color: semantic.textBody),
+                  style: context.mlText.bodyMedium.copyWith(
+                    color: semantic.textBody,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   _expiryText(),
-                  style: TextStyle(fontSize: 13, color: semantic.textMuted),
+                  style: context.mlText.bodyMedium.copyWith(
+                    color: semantic.textMuted,
+                  ),
                 ),
                 if (d.notes != null) ...[
                   const SizedBox(height: 4),
                   Text(
                     d.notes!,
-                    style: TextStyle(fontSize: 13, color: semantic.textFaint),
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: semantic.textFaint,
+                    ),
                   ),
                 ],
               ],

@@ -2,6 +2,7 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/mine_trip.dart';
 import 'package:flutter_application_1/features/portal/models/trip_status.dart';
@@ -232,16 +233,12 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('Mine Security',
-                                style: TextStyle(
-                                  fontFamily: MlTokens.fontSans,
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w800,
+                                style: context.mlText.titleLarge.copyWith(
                                   color: semantic.textStrong,
+                                  fontWeight: FontWeight.w800,
                                 )),
                             Text('Gate control — arrivals & departures',
-                                style: TextStyle(
-                                  fontFamily: MlTokens.fontSans,
-                                  fontSize: 13,
+                                style: context.mlText.bodyMedium.copyWith(
                                   color: semantic.textMuted,
                                 )),
                           ],
@@ -482,9 +479,7 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                                             '${t.status.label} · ${t.buyerLabel}',
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontFamily: MlTokens.fontSans,
-                                              fontSize: 12,
+                                            style: context.mlText.bodySmall.copyWith(
                                               color: semantic.textMuted,
                                             ),
                                           ),
@@ -494,11 +489,10 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                                     Text(
                                       DateFormat.Hm()
                                           .format(MlTime.sast(t.updatedAt)),
-                                      style: TextStyle(
-                                        fontFamily: MlTokens.fontMono,
-                                        fontSize: 13,
+                                      style: context.mlText.code(
                                         color: semantic.textFaint,
-                                        fontFeatures: const [FontFeature.tabularFigures()],
+                                        size: 13,
+                                        weight: FontWeight.w400,
                                       ),
                                     ),
                                   ],
@@ -625,9 +619,7 @@ class _PendingGateConfirmationsState
             Text(
               'Two-party sign-off: the driver confirms at the gate, then '
               'security confirms here.',
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 12,
+              style: context.mlText.bodySmall.copyWith(
                 color: semantic.textMuted,
               ),
             ),
@@ -676,9 +668,7 @@ class _PendingGateConfirmationsState
                                 '${c.driverConfirmed ? 'driver confirmed' : 'waiting for driver'}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontFamily: MlTokens.fontSans,
-                                  fontSize: 12,
+                                style: context.mlText.bodySmall.copyWith(
                                   color: semantic.textMuted,
                                 ),
                               ),
@@ -740,20 +730,16 @@ class _MiniStat extends StatelessWidget {
           MlIconWell(icon: icon, tone: tone, size: 34, radius: 10),
           const SizedBox(height: 6),
           Text(value,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 22,
+              style: context.mlText.titleLarge.copyWith(
+                color: semantic.textStrong,
                 fontWeight: FontWeight.w800,
                 height: 1,
-                color: semantic.textStrong,
               )),
           const SizedBox(height: 2),
           Text(label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 12,
+              style: context.mlText.bodySmall.copyWith(
                 color: semantic.textMuted,
               )),
         ],
@@ -789,11 +775,9 @@ class _GateSection extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(title,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
+                    style: context.mlText.titleMedium.copyWith(
                       color: semantic.textStrong,
+                      fontWeight: FontWeight.w800,
                     )),
               ),
             ],
@@ -837,18 +821,14 @@ class _GateTruck extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(label,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 11,
+                        style: context.mlText.labelSmall.copyWith(
                           color: semantic.textFaint,
+                          fontWeight: FontWeight.w400,
                         )),
                     Text(val,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: MlTokens.fontSans,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                        style: context.mlText.titleSmall.copyWith(
                           color: semantic.textStrong,
                         )),
                   ],
@@ -903,9 +883,7 @@ class _GateTruck extends StatelessWidget {
             padding: const EdgeInsets.only(top: 10),
             child: Text(
               footnote!,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 12,
+              style: context.mlText.bodySmall.copyWith(
                 color: MlSemantic.of(context).textMuted,
               ),
             ),
@@ -923,9 +901,7 @@ class _EmptyLine extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TextStyle(
-        fontFamily: MlTokens.fontSans,
-        fontSize: 13,
+      style: context.mlText.bodyMedium.copyWith(
         color: MlSemantic.of(context).textMuted,
       ),
     );
@@ -963,9 +939,7 @@ class _CheckinCard extends StatelessWidget {
           ),
           MlCard.heroTitleRule(),
           Text('${trip.buyerLabel} · ${trip.materialLabel}',
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 13,
+              style: context.mlText.bodyMedium.copyWith(
                 color: semantic.textMuted,
               )),
           const SizedBox(height: 16),
