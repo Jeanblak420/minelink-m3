@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/features/portal/models/company_access.dart';
 
@@ -129,12 +129,7 @@ class MlLockedBadge extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: MlGlass.sans,
-                fontSize: MlTokens.fsLabel,
-                fontWeight: FontWeight.w600,
-                color: tones.fg,
-              ),
+              style: context.mlText.labelMedium.copyWith(color: tones.fg),
             ),
           ),
         ],

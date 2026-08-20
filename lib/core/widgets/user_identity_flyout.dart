@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/utils/image_provider_utils.dart';
 
@@ -352,12 +353,10 @@ class UserIdentityCard extends StatelessWidget {
                           user.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontSize: 14,
+                          style: context.mlText.titleSmall.copyWith(
+                            color: semantic.textStrong,
                             fontWeight: FontWeight.w800,
                             height: 1.25,
-                            color: semantic.textStrong,
                           ),
                         ),
                         if (user.email.isNotEmpty) ...[
@@ -554,10 +553,7 @@ class _ActionRowState extends State<_ActionRow> {
                     widget.action.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                    style: context.mlText.titleSmall.copyWith(
                       color: _hovered ? widget.accent : tint,
                     ),
                   ),

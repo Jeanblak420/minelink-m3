@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/services/file_selection_service.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 
@@ -147,9 +148,7 @@ class _MultiFileDropPickerState extends State<MultiFileDropPicker> {
       children: [
         Text(
           widget.label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+          style: context.mlText.titleSmall.copyWith(
             color: scheme.onSurfaceVariant,
           ),
         ),
@@ -188,9 +187,7 @@ class _MultiFileDropPickerState extends State<MultiFileDropPicker> {
                   Text(
                     widget.hint,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 13,
-                      height: 1.35,
+                    style: context.mlText.bodyMedium.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -204,7 +201,7 @@ class _MultiFileDropPickerState extends State<MultiFileDropPicker> {
             padding: const EdgeInsets.only(top: 6),
             child: Text(
               _error!,
-              style: TextStyle(fontSize: 12, color: scheme.error),
+              style: context.mlText.bodySmall.copyWith(color: scheme.error),
             ),
           ),
         if (widget.files.isNotEmpty)

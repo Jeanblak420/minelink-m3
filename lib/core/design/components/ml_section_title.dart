@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 // `mlCount` — the shared meta-line count formatter (S5-22). Re-exported so it
 // is in scope wherever a section header is.
 export 'package:flutter_application_1/core/design/components/ml_meta.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 
@@ -152,26 +153,25 @@ class MlSectionTitle extends StatelessWidget {
                 // Fraunces, matching MlSectionHead on the reference screens.
                 // The weight drops from w800 to w400 with it: the serif's
                 // stroke contrast carries the emphasis that the sans needed
-                // extra weight for, and w800 Fraunces at 18px reads as a
-                // different design language rather than the same one.
-                style: TextStyle(
-                  fontFamily: MlGlass.display,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: -0.2,
+                // extra weight for, and a heavy Fraunces at this size reads as
+                // a different design language rather than the same one.
+                //
+                // 18px until 2026-08-20, when the editorial rungs were pitched
+                // at 24/20/16 and this became the 20. Fraunces registers only
+                // w500 and w600, so the w400 asked for here has always rendered
+                // as Medium — it is kept as written because it is the *intent*
+                // that matters, and the day a w400 lands in pubspec this should
+                // get lighter rather than stay where a rename left it.
+                style: context.mlText.editorialMedium.copyWith(
                   color: semantic.textStrong,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
               if (subtitle != null) ...[
                 const SizedBox(height: 3),
                 Text(
                   subtitle!,
-                  style: TextStyle(
-                    fontFamily: MlGlass.sans,
-                    fontSize: 12,
-                    height: 1.4,
-                    color: glass.inkMid,
-                  ),
+                  style: context.mlText.bodySmall.copyWith(color: glass.inkMid),
                 ),
               ],
             ],
@@ -243,10 +243,9 @@ class MlSectionTitle extends StatelessWidget {
             Text(
               meta!,
               textAlign: alignEnd ? TextAlign.end : TextAlign.start,
-              style: TextStyle(
-                fontFamily: MlGlass.sans,
-                fontSize: 11,
+              style: context.mlText.labelSmall.copyWith(
                 color: glass.inkLo,
+                fontWeight: FontWeight.w400,
               ),
             ),
           if (link != null) ...[
@@ -257,10 +256,7 @@ class MlSectionTitle extends StatelessWidget {
                 onTap: onLink,
                 child: Text(
                   '$link →',
-                  style: TextStyle(
-                    fontFamily: MlGlass.sans,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                  style: context.mlText.labelMedium.copyWith(
                     color: glass.accent,
                   ),
                 ),

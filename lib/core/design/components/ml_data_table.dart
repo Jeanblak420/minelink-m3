@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 /// Column spec for [MlDataTable]. [flex] sizes the column; [width] pins it.
@@ -62,11 +63,7 @@ class MlDataTable extends StatelessWidget {
                 c.label.toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.0,
+                style: context.mlText.overline.copyWith(
                   color: semantic.textFaint,
                 ),
               ),

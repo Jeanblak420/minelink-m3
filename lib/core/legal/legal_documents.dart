@@ -21,6 +21,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 /// One legal document: what to call it, and where it is in the bundle.
@@ -158,11 +159,9 @@ class _Markdownish extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final body = TextStyle(
-      fontFamily: MlTokens.fontSans,
-      fontSize: 13,
-      height: 1.6,
+    final body = context.mlText.bodyMedium.copyWith(
       color: scheme.onSurface,
+      height: 1.6,
     );
     final children = <Widget>[];
 

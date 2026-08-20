@@ -81,3 +81,9 @@ config/map_tiles.local.json
 # this repo (see the config/ comment in pubspec.yaml).
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+
+# Golden-comparison scratch. `flutter test` writes master/test/diff PNGs here
+# whenever a golden fails, and they are reproduction artifacts of one run, not
+# a record of anything. Eight of them were swept into a commit on 2026-08-20 by
+# a `git add -A` run right after regenerating two renders.
+test/renders/failures/

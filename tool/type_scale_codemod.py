@@ -172,6 +172,23 @@ TABULAR = ('[FontFeature.tabularFigures()]',
            'const [FontFeature.tabularFigures()]',
            '<FontFeature>[FontFeature.tabularFigures()]')
 
+# Files this tool must never rewrite, whatever glob is typed at it.
+#
+# The token layer is where the raw `TextStyle(...)` literals are SUPPOSED to
+# live — it is the definition of the scale. Rewriting `MlTypeScale.textTheme`
+# into `context.mlText.bodyMedium` would define the scale in terms of itself, in
+# a file that has no BuildContext to do it with. The theme is the same case one
+# level up.
+#
+# This is a property of the tool rather than of the caller's glob, because
+# `lib/**/*.dart` is the obvious thing to type and it is the thing that breaks.
+NEVER = ('/core/design/tokens/', '/core/theme/app_theme.dart')
+
+
+def excluded(path: str) -> bool:
+    n = '/' + path.replace(os.sep, '/').lstrip('./')
+    return any(bit in n for bit in NEVER)
+
 
 def snap(size: float) -> int:
     """Nearest step, ties up. See the module docstring."""
@@ -220,6 +237,65 @@ def match_paren(src: str, start: int) -> int:
         if c == '(':
             depth += 1
         elif c == ')':
+            depth -= 1
+            if depth == 0:
+                return i
+        i += 1
+    return -1
+
+
+CONST_CALL = re.compile(r'\bconst\s+(?:[A-Z]\w*(?:\.\w+)?\s*)?[(\[{]')
+
+
+def const_regions(src: str) -> list[tuple[int, int]]:
+    """Spans of `const` expressions, which everything inside inherits.
+
+    Checking for a literal `const TextStyle(` is not enough: Dart propagates
+    const down a whole expression, so a plain `TextStyle(...)` sitting inside
+    `const Text(...)` is itself const. Rewriting one of those to a method call
+    compiles to `const_eval_method_invocation` — which is at least loud, but the
+    point of a codemod is not to hand the compiler work it should not have been
+    given.
+
+    Conservative on purpose. A span it gets wrong means a literal is skipped and
+    reported, never that one is rewritten wrongly.
+    """
+    spans = []
+    for m in CONST_CALL.finditer(src):
+        open_at = m.end() - 1
+        if src[open_at] == '(':
+            end = match_paren(src, open_at)
+        else:
+            end = _match_bracket(src, open_at)
+        if end > 0:
+            spans.append((m.start(), end))
+    return spans
+
+
+def _match_bracket(src: str, start: int) -> int:
+    """`match_paren` for `[` and `{`, for `const [...]` and `const {...}`."""
+    pairs = {'[': ']', '{': '}'}
+    opener = src[start]
+    closer = pairs[opener]
+    depth = 0
+    i, n = start, len(src)
+    while i < n:
+        c = src[i]
+        if c in "'\"":
+            q = c
+            i += 1
+            while i < n:
+                if src[i] == '\\':
+                    i += 2
+                    continue
+                if src[i] == q or src[i] == '\n':
+                    i += 1
+                    break
+                i += 1
+            continue
+        if c == opener:
+            depth += 1
+        elif c == closer:
             depth -= 1
             if depth == 0:
                 return i
@@ -528,12 +604,30 @@ def _num(x: float) -> str:
 TYPO_IMPORT = ("import 'package:flutter_application_1/core/design/tokens/"
                "m3/ml_typography.dart';")
 
-# Names whose import becomes dead once every literal that used them is gone.
-# Checked by re-reading the rewritten source, never by assuming.
-IMPORT_OWNERS = {
-    'ml_tokens.dart': ('MlTokens', 'MlSemantic', 'MlType', 'MlTone',
-                       'MlSemanticScope'),
-}
+# Only imports of the token layer can be made dead by this rewrite: it consumes
+# `MlTokens.fontSans`, `MlGlass.display`, `MlAuth.mono` and their siblings, and
+# nothing else. Restricting the removal to that directory matters — a general
+# unused-import sweep would delete imports whose only use is an EXTENSION
+# method, which is never named at the call site. `context.mlText` is itself one.
+TOKEN_IMPORT = re.compile(
+    r"^import 'package:flutter_application_1/(core/design/tokens/[^']+)';$")
+
+# Top-level names a Dart file exports, near enough for "is this import still
+# used". Read from the imported file rather than hardcoded, so adding a token
+# class does not quietly break the check.
+DECLARES = re.compile(
+    r'^(?:abstract\s+)?(?:final\s+|base\s+|sealed\s+|interface\s+)?'
+    r'(?:class|enum|mixin|extension|typedef)\s+([A-Za-z_]\w*)|'
+    r'^(?:const|final)\s+(?:[A-Za-z_][\w<>,?\s]*\s+)?([a-zA-Z_]\w*)\s*=',
+    re.M)
+
+
+def exported_names(rel: str) -> set[str] | None:
+    try:
+        text = open(f'lib/{rel}', encoding='utf-8', errors='replace').read()
+    except OSError:
+        return None
+    return {g for m in DECLARES.finditer(text) for g in m.groups() if g}
 
 
 def fix_imports(src: str, nl: str) -> str:
@@ -550,17 +644,27 @@ def fix_imports(src: str, nl: str) -> str:
         lines.insert(at, TYPO_IMPORT)
         src = nl.join(lines)
 
-    for tail, names in IMPORT_OWNERS.items():
+    while True:
         lines = src.split(nl)
-        for i, l in enumerate(lines):
-            if not (l.startswith('import ') and l.endswith(f"{tail}';")
-                    and 'ml_typography' not in l):
+        for i, line in enumerate(lines):
+            m = TOKEN_IMPORT.match(line)
+            if not m or 'ml_typography' in line:
+                continue
+            names = exported_names(m.group(1))
+            if not names:
                 continue
             body = nl.join(lines[:i] + lines[i + 1:])
-            if not any(re.search(r'\b' + n + r'\b', body) for n in names):
-                src = body
+            # Comments do not keep an import alive, and a comment naming the
+            # class that just stopped being used is exactly what this rewrite
+            # leaves behind.
+            code = re.sub(r'//[^\n]*|/\*.*?\*/', '', body, flags=re.S)
+            if any(re.search(r'\b' + re.escape(n) + r'\b', code)
+                   for n in names):
+                continue
+            src = body
             break
-    return src
+        else:
+            return src
 
 
 def newline_of(src: str) -> str:
@@ -615,12 +719,16 @@ def process(path: str, receiver: str, apply: bool, verbose: bool):
                 hi = mid - 1
         return lo + 1
 
+    consts = const_regions(src)
     edits, skips, notes = [], [], []
     for m in re.finditer(r'\bTextStyle\s*\(', src):
         s = m.end() - 1
         before = src[max(0, m.start() - 8):m.start()]
         if before.rstrip().endswith('const'):
             skips.append((lineno(m.start()), 'const TextStyle('))
+            continue
+        if any(a <= m.start() < b for a, b in consts):
+            skips.append((lineno(m.start()), 'inside a const expression'))
             continue
         e = match_paren(src, s)
         if e < 0:
@@ -672,7 +780,7 @@ def stats():
     rows = []
     for f in glob.glob('lib/**/*.dart', recursive=True):
         f = f.replace('\\', '/')
-        if '/design/tokens/' in f:
+        if excluded(f):
             continue  # the scale defines itself in raw TextStyles, by design
         s = open(f, encoding='utf-8', errors='replace', newline='').read()
         fam = len(re.findall(r'fontFamily:\s*MlTokens\.font', s))
@@ -700,7 +808,7 @@ def audit_serif():
     small, big, other = [], [], []
     for path in sorted(glob.glob('lib/**/*.dart', recursive=True)):
         n = path.replace(os.sep, '/')
-        if '/design/tokens/' in n:
+        if excluded(n):
             continue
         src = open(path, encoding='utf-8', errors='replace', newline='').read()
         for m in re.finditer(r'\bTextStyle\s*\(', src):
@@ -833,6 +941,10 @@ def main():
     for f in files:
         if not os.path.exists(f):
             print(f'missing: {f}')
+            continue
+        if excluded(f):
+            print(f'\n=== {f}\n  HELD BACK  this file defines the scale; '
+                  f'see NEVER in this tool')
             continue
         r = process(f, a.receiver, apply=bool(a.apply), verbose=True)
         tot = [x + y for x, y in zip(tot, r)]

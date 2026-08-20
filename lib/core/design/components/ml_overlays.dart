@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_motion.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 /// MineLink modal: navy scrim (~45%), 16px card, fade+pop entrance,
@@ -49,11 +50,9 @@ Future<T?> showMlModal<T>(
                           Expanded(
                             child: Text(
                               title,
-                              style: TextStyle(
-                                fontFamily: MlTokens.fontSans,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w800,
+                              style: context.mlText.titleMedium.copyWith(
                                 color: semantic.textStrong,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                           ),
@@ -188,11 +187,9 @@ Future<T?> showMlSlideOver<T>(
                                 title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontFamily: MlTokens.fontSans,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w800,
+                                style: context.mlText.titleMedium.copyWith(
                                   color: semantic.textStrong,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ),

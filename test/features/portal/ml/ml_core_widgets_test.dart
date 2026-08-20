@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -107,7 +108,7 @@ void main() {
     // emphasis the sans needed w800 for. Fuller coverage of the reference
     // treatment (meta line, View → link, both themes) lives in
     // test/widgets/portal_section_header_test.dart.
-    testWidgets('renders icon + 18px display-face title + action',
+    testWidgets('renders icon + an editorial-rung title + action',
         (tester) async {
       await tester.pumpWidget(_host(
         MlSectionTitle(
@@ -117,8 +118,19 @@ void main() {
         ),
       ));
       final text = tester.widget<Text>(find.text('Active Trips'));
-      expect(text.style?.fontSize, 18);
+      // 18px until 2026-08-20. The serif had no rung on the type scale at all —
+      // it ran 16 to 26 across twenty hand-written sites — so this asserted a
+      // number that only this one widget believed in. It is `editorialMedium`
+      // now, and the assertion is against the scale rather than against 20, so
+      // moving the rung moves the test with it instead of breaking it.
+      final scale = MlText.forTheme(Theme.of(
+              tester.element(find.text('Active Trips')))
+          .textTheme);
+      expect(text.style?.fontSize, scale.editorialMedium.fontSize);
       expect(text.style?.fontFamily, MlGlass.display);
+      // And it states a line height, which is what a hand-written literal
+      // could not: it inherited bodyMedium's from the ambient DefaultTextStyle.
+      expect(text.style?.height, scale.editorialMedium.height);
       expect(find.text('View all'), findsOneWidget);
     });
   });

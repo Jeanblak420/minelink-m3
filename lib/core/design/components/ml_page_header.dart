@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 export 'package:flutter_application_1/core/design/components/ml_meta.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
@@ -70,12 +71,9 @@ class MlPageHeader extends StatelessWidget {
 
     final titleText = Text(
       title,
-      style: TextStyle(
-        fontFamily: MlGlass.display,
-        fontSize: 24,
-        fontWeight: FontWeight.w400,
-        letterSpacing: -0.3,
+      style: context.mlText.editorialLarge.copyWith(
         color: semantic.textStrong,
+        fontWeight: FontWeight.w400,
       ),
     );
 
@@ -111,10 +109,9 @@ class MlPageHeader extends StatelessWidget {
                       if (meta != null)
                         Text(
                           meta!,
-                          style: TextStyle(
-                            fontFamily: MlGlass.sans,
-                            fontSize: 11,
+                          style: context.mlText.labelSmall.copyWith(
                             color: glass.inkLo,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ...actions,
@@ -127,10 +124,7 @@ class MlPageHeader extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               description!,
-              style: TextStyle(
-                fontFamily: MlGlass.sans,
-                fontSize: MlTokens.fsBodySm,
-                height: 1.45,
+              style: context.mlText.bodyMedium.copyWith(
                 color: semantic.textMuted,
               ),
             ),

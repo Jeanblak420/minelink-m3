@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/features/portal/models/company_access.dart';
@@ -186,10 +187,7 @@ class MlExpiryNotice extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     access.explanation,
-                    style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: MlTokens.fsBodySm,
-                      height: 1.45,
+                    style: context.mlText.bodyMedium.copyWith(
                       color: semantic.textMuted,
                     ),
                   ),
@@ -251,11 +249,9 @@ class _NoticeAction extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   label,
-                  style: TextStyle(
-                    fontFamily: MlGlass.sans,
-                    fontSize: MlTokens.fsLabel,
-                    fontWeight: FontWeight.w700,
+                  style: context.mlText.labelMedium.copyWith(
                     color: filled ? ink : semantic.textStrong,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],

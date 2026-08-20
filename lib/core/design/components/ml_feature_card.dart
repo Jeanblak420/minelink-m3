@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/design/components/ml_buttons.dart';
 import 'package:flutter_application_1/core/design/components/ml_card.dart';
@@ -37,23 +38,16 @@ class MlFeatureCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             title,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: MlTokens.fsH3,
-              fontWeight: FontWeight.w800,
+            style: context.mlText.titleMedium.copyWith(
               color: semantic.textStrong,
+              fontWeight: FontWeight.w800,
               height: 1.2,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             description,
-            style: TextStyle(
-              fontFamily: MlTokens.fontSans,
-              fontSize: MlTokens.fsBodySm,
-              color: semantic.textMuted,
-              height: 1.45,
-            ),
+            style: context.mlText.bodyMedium.copyWith(color: semantic.textMuted),
           ),
           if (onOpen != null) ...[
             const SizedBox(height: 16),

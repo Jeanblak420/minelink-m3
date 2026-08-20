@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/widgets/avatar_stack.dart';
 import 'package:flutter_application_1/features/chat/services/attachment_url.dart';
@@ -304,11 +305,9 @@ class _ChatWidgetState extends State<ChatWidget> {
             Expanded(
               child: Text(
                 widget.title!,
-                style: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
+                style: context.mlText.titleMedium.copyWith(
                   color: semantic.textStrong,
+                  fontWeight: FontWeight.w800,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -416,13 +415,8 @@ class _ChatWidgetState extends State<ChatWidget> {
                         if (message.content.isNotEmpty)
                           Text(
                             message.content,
-                            style: TextStyle(
-                              fontFamily: MlTokens.fontSans,
-                              fontSize: 15,
-                              height: 1.45,
-                              color: isCurrentUser
-                                  ? MlTokens.inkOnFill
-                                  : semantic.textStrong,
+                            style: context.mlText.bodyLarge.copyWith(
+                              color: isCurrentUser ? MlTokens.inkOnFill : semantic.textStrong,
                             ),
                           ),
 
@@ -443,12 +437,10 @@ class _ChatWidgetState extends State<ChatWidget> {
                               if (widget.showMessageTimestamp)
                                 Text(
                                   DateFormat.Hm().format(message.timestamp),
-                                  style: TextStyle(
-                                    fontFamily: MlTokens.fontMono,
-                                    fontSize: 11,
-                                    color: isCurrentUser
-                                        ? MlTokens.overlayLight.withValues(alpha: 0.68)
-                                        : semantic.textFaint,
+                                  style: context.mlText.code(
+                                    color: isCurrentUser ? MlTokens.overlayLight.withValues(alpha: 0.68) : semantic.textFaint,
+                                    size: 11,
+                                    weight: FontWeight.w400,
                                   ),
                                 ),
                               if (isCurrentUser && widget.showReadReceipts) ...[
@@ -547,12 +539,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                   : 'Attachment unavailable',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: fg,
-              ),
+              style: context.mlText.titleSmall.copyWith(color: fg),
             ),
           ),
         ],
@@ -632,12 +619,7 @@ class _ChatWidgetState extends State<ChatWidget> {
               Flexible(
                 child: Text(
                   message.fileName ?? 'File',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: chipFg,
-                  ),
+                  style: context.mlText.titleSmall.copyWith(color: chipFg),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -739,9 +721,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                   _replyToMessage!.content,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 13,
+                  style: context.mlText.bodyMedium.copyWith(
                     color: semantic.textMuted,
                   ),
                 ),
@@ -790,17 +770,13 @@ class _ChatWidgetState extends State<ChatWidget> {
               controller: _messageController,
               onChanged: _handleMessageChanged,
               onSubmitted: (_) => _sendMessage(),
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontSize: 15,
+              style: context.mlText.bodyLarge.copyWith(
                 color: semantic.textStrong,
               ),
               cursorColor: MlTokens.accent,
               decoration: InputDecoration(
                 hintText: 'Type a message…',
-                hintStyle: TextStyle(
-                  fontFamily: MlTokens.fontSans,
-                  fontSize: 15,
+                hintStyle: context.mlText.bodyLarge.copyWith(
                   color: semantic.textFaint,
                 ),
                 border: OutlineInputBorder(
