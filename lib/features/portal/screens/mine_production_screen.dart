@@ -54,41 +54,39 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
       return const PortalCompanyRequired();
     }
     final semantic = MlSemantic.of(context);
-    final reportAsync = ref
-        .watch(productionReportProvider((companyId: companyId, days: _days)));
+    final reportAsync = ref.watch(
+      productionReportProvider((companyId: companyId, days: _days)),
+    );
     final entriesAsync = ref.watch(productionEntriesProvider(companyId));
     final stockpiles =
         ref.watch(stockpilesProvider(companyId)).valueOrNull ?? const [];
-    final productionPiles =
-        stockpiles.where((s) => s.isProduction).toList();
+    final productionPiles = stockpiles.where((s) => s.isProduction).toList();
 
     return MlPageBody(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    MlPageHeader(
-                      title: 'Production',
-                      meta: mlCount(productionPiles.length, 'ROM pile'),
-                      description:
-                          'Record what the pit produces, keep your own ROM piles, '
-                          'and see mined vs dispatched — yield and pit-to-port '
-                          'loss at a glance.',
-                      padding: EdgeInsets.zero,
-                    ),
-                  ],
-                ),
-              ),
+          // The action goes in MlPageHeader's own `actions` slot rather than a
+          // Row wrapped around it. That slot lays the title and the actions
+          // out as siblings in one Wrap, so the button drops under the title
+          // when the row runs out of width — which on a 360px phone at text
+          // scale 2.0 it does, by 15px. A Row gives an unflexed button
+          // unbounded width instead (CLAUDE.md §10.4), and a button cannot
+          // ellipsize its way out: clamping it truncates the hit target, not
+          // just the label.
+          MlPageHeader(
+            title: 'Production',
+            meta: mlCount(productionPiles.length, 'ROM pile'),
+            description:
+                'Record what the pit produces, keep your own ROM piles, '
+                'and see mined vs dispatched — yield and pit-to-port '
+                'loss at a glance.',
+            padding: EdgeInsets.zero,
+            actions: [
               MlButton.primary(
                 label: 'Record production',
                 icon: Icons.add_chart_outlined,
-                onPressed: () =>
-                    _recordProduction(companyId, productionPiles),
+                onPressed: () => _recordProduction(companyId, productionPiles),
               ),
             ],
           ),
@@ -119,9 +117,11 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
               child: Center(child: CircularProgressIndicator()),
             ),
             error: (e, _) => MlLoadFailure(
-                subject: 'the production report',
-                error: e,
-                onRetry: () => ref.invalidate(productionReportProvider((companyId: companyId, days: _days))),
+              subject: 'the production report',
+              error: e,
+              onRetry: () => ref.invalidate(
+                productionReportProvider((companyId: companyId, days: _days)),
+              ),
             ),
             data: (days) => _ReportSection(
               days: days,
@@ -134,7 +134,7 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
                   'DATE',
                   'MINED (t)',
                   'DISPATCHED (t)',
-                  'DAY LOSS (t)'
+                  'DAY LOSS (t)',
                 ],
                 rows: [
                   for (final d in days)
@@ -151,32 +151,31 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
           const SizedBox(height: 24),
 
           // The mine's own ROM/production piles.
-          Row(
-            children: [
-              Expanded(
-                child: MlSectionTitle(
-                  'ROM / production piles',
-                  meta: mlCount(productionPiles.length, 'pile'),
-                  icon: Icons.terrain_outlined,
-                  margin: EdgeInsets.zero,
-                ),
-              ),
-              MlButton.outline(
-                label: 'Add production pile',
-                icon: Icons.add_rounded,
-                compact: true,
-                onPressed: () => _createPile(companyId),
-              ),
-            ],
+          // MlSectionTitle's own `action` slot, not a Row wrapped around it.
+          // The Row gave the button UNBOUNDED width and squeezed the Expanded
+          // title to whatever was left — at 360px and text scale 2.0 that was
+          // less than the 22px icon and its 10px gap, so the title's own row
+          // overflowed by 25px. The slot knows how to move the action under
+          // the title instead.
+          MlSectionTitle(
+            'ROM / production piles',
+            meta: mlCount(productionPiles.length, 'pile'),
+            icon: Icons.terrain_outlined,
+            margin: EdgeInsets.zero,
+            action: MlButton.outline(
+              label: 'Add production pile',
+              icon: Icons.add_rounded,
+              compact: true,
+              onPressed: () => _createPile(companyId),
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             'Your own piles — separate from the capped order stockpiles the '
             'system creates per buyer order.',
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: semantic.textMuted),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: semantic.textMuted),
           ),
           const SizedBox(height: 12),
           if (productionPiles.isEmpty)
@@ -203,18 +202,22 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
           const SizedBox(height: 24),
 
           // Recent tons-mined entries.
-          MlSectionTitle('Production log',
-              icon: Icons.history_rounded,
-              meta: entriesAsync.valueOrNull == null
-                  ? null
-                  : mlCount(entriesAsync.value!.length, 'entry', 'entries')),
+          MlSectionTitle(
+            'Production log',
+            icon: Icons.history_rounded,
+            meta: entriesAsync.valueOrNull == null
+                ? null
+                : mlCount(entriesAsync.value!.length, 'entry', 'entries'),
+          ),
           entriesAsync.when(
             loading: () => const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (e, _) => Text('Could not load entries. ${friendlyError(e)}',
-                style: TextStyle(color: semantic.textMuted)),
+            error: (e, _) => Text(
+              'Could not load entries. ${friendlyError(e)}',
+              style: TextStyle(color: semantic.textMuted),
+            ),
             data: (entries) {
               if (entries.isEmpty) {
                 return MlCard(
@@ -228,9 +231,7 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
                   ),
                 );
               }
-              final pileNames = {
-                for (final s in stockpiles) s.id: s.name,
-              };
+              final pileNames = {for (final s in stockpiles) s.id: s.name};
               return MlCard(
                 padding: const EdgeInsets.all(18),
                 child: MlDataTable(
@@ -245,9 +246,13 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
                   rows: [
                     for (final e in entries)
                       [
-                        Text(_dateFmt.format(e.entryDate),
-                            style: TextStyle(
-                                fontSize: 13, color: semantic.textBody)),
+                        Text(
+                          _dateFmt.format(e.entryDate),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: semantic.textBody,
+                          ),
+                        ),
                         Text(
                           _t(e.tons),
                           textAlign: TextAlign.right,
@@ -259,12 +264,20 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
-                        Text(e.commodity ?? '—',
-                            style: TextStyle(
-                                fontSize: 13, color: semantic.textBody)),
-                        Text(e.pitSection ?? '—',
-                            style: TextStyle(
-                                fontSize: 13, color: semantic.textBody)),
+                        Text(
+                          e.commodity ?? '—',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: semantic.textBody,
+                          ),
+                        ),
+                        Text(
+                          e.pitSection ?? '—',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: semantic.textBody,
+                          ),
+                        ),
                         Text(
                           e.stockpileId == null
                               ? '—'
@@ -272,13 +285,19 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                              fontSize: 12.5, color: semantic.textMuted),
+                            fontSize: 12.5,
+                            color: semantic.textMuted,
+                          ),
                         ),
-                        Text(e.notes ?? '—',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                fontSize: 12.5, color: semantic.textMuted)),
+                        Text(
+                          e.notes ?? '—',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: semantic.textMuted,
+                          ),
+                        ),
                       ],
                   ],
                 ),
@@ -305,7 +324,8 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
     if (saved == true) {
       ref.invalidateIfMounted(productionEntriesProvider(companyId));
       ref.invalidateIfMounted(
-          productionReportProvider((companyId: companyId, days: _days)));
+        productionReportProvider((companyId: companyId, days: _days)),
+      );
       ref.invalidateIfMounted(stockpilesProvider(companyId));
       _snack('Production recorded.');
     }
@@ -326,11 +346,14 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
     final tons = await showAddTonsDialog(context, pile);
     if (tons == null) return;
     try {
-      final newBalance =
-          await ref.read(lifecycleServiceProvider).addTons(pile.id, tons);
+      final newBalance = await ref
+          .read(lifecycleServiceProvider)
+          .addTons(pile.id, tons);
       ref.invalidateIfMounted(stockpilesProvider(companyId));
-      _snack('${tons.toStringAsFixed(2)} t added to ${pile.name} — now '
-          '${newBalance.toStringAsFixed(0)} t.');
+      _snack(
+        '${tons.toStringAsFixed(2)} t added to ${pile.name} — now '
+        '${newBalance.toStringAsFixed(0)} t.',
+      );
     } catch (e) {
       _snack('Could not add tons. ${friendlyError(e)}');
     }
@@ -360,76 +383,77 @@ class _ReportSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LayoutBuilder(builder: (context, c) {
-          final cols = c.maxWidth > 900 ? 4 : (c.maxWidth > 560 ? 2 : 1);
-          const gap = 12.0;
-          final w =
-              cols == 1 ? c.maxWidth : (c.maxWidth - gap * (cols - 1)) / cols;
-          final tiles = [
-            MlStatCard(
-              label: 'Mined',
-              value: '${mined.toStringAsFixed(2)} t',
-              icon: Icons.terrain_outlined,
-              tone: MlTone.accent,
-            ),
-            MlStatCard(
-              label: 'Dispatched',
-              value: '${dispatched.toStringAsFixed(2)} t',
-              icon: Icons.local_shipping_outlined,
-              tone: MlTone.transit,
-            ),
-            MlStatCard(
-              label: 'Yield',
-              value: yieldPct == null ? '—' : '${yieldPct.toStringAsFixed(1)}%',
-              icon: Icons.percent_rounded,
-              tone: yieldPct == null
-                  ? MlTone.neutral
-                  : (yieldPct >= 85 ? MlTone.done : MlTone.warn),
-            ),
-            MlStatCard(
-              label: 'Pit-to-port loss',
-              value: '${loss.toStringAsFixed(2)} t',
-              icon: Icons.trending_down_rounded,
-              tone: loss > 0 ? MlTone.warn : MlTone.done,
-            ),
-          ];
-          return Wrap(
-            spacing: gap,
-            runSpacing: gap,
-            children: [for (final t in tiles) SizedBox(width: w, child: t)],
-          );
-        }),
+        LayoutBuilder(
+          builder: (context, c) {
+            final cols = c.maxWidth > 900 ? 4 : (c.maxWidth > 560 ? 2 : 1);
+            const gap = 12.0;
+            final w = cols == 1
+                ? c.maxWidth
+                : (c.maxWidth - gap * (cols - 1)) / cols;
+            final tiles = [
+              MlStatCard(
+                label: 'Mined',
+                value: '${mined.toStringAsFixed(2)} t',
+                icon: Icons.terrain_outlined,
+                tone: MlTone.accent,
+              ),
+              MlStatCard(
+                label: 'Dispatched',
+                value: '${dispatched.toStringAsFixed(2)} t',
+                icon: Icons.local_shipping_outlined,
+                tone: MlTone.transit,
+              ),
+              MlStatCard(
+                label: 'Yield',
+                value: yieldPct == null
+                    ? '—'
+                    : '${yieldPct.toStringAsFixed(1)}%',
+                icon: Icons.percent_rounded,
+                tone: yieldPct == null
+                    ? MlTone.neutral
+                    : (yieldPct >= 85 ? MlTone.done : MlTone.warn),
+              ),
+              MlStatCard(
+                label: 'Pit-to-port loss',
+                value: '${loss.toStringAsFixed(2)} t',
+                icon: Icons.trending_down_rounded,
+                tone: loss > 0 ? MlTone.warn : MlTone.done,
+              ),
+            ];
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [for (final t in tiles) SizedBox(width: w, child: t)],
+            );
+          },
+        ),
         const SizedBox(height: 12),
         MlCard(
           padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: MlSectionTitle(
-                      'Daily — last $windowDays days',
-                      meta: '${mined.toStringAsFixed(2)} t mined · '
-                          '${dispatched.toStringAsFixed(2)} t dispatched',
-                      icon: Icons.calendar_view_day_outlined,
-                      margin: EdgeInsets.zero,
-                    ),
-                  ),
-                  MlButton.outline(
-                    label: 'Export',
-                    icon: Icons.download_outlined,
-                    compact: true,
-                    onPressed: onExport,
-                  ),
-                ],
+              MlSectionTitle(
+                'Daily — last $windowDays days',
+                meta:
+                    '${mined.toStringAsFixed(2)} t mined · '
+                    '${dispatched.toStringAsFixed(2)} t dispatched',
+                icon: Icons.calendar_view_day_outlined,
+                margin: EdgeInsets.zero,
+                action: MlButton.outline(
+                  label: 'Export',
+                  icon: Icons.download_outlined,
+                  compact: true,
+                  onPressed: onExport,
+                ),
               ),
               const SizedBox(height: 12),
               if (days.isEmpty)
                 MlEmptyState(
                   icon: Icons.calendar_view_day_outlined,
                   title: 'No activity in this window.',
-                  message: 'Record production and load trucks to build the '
+                  message:
+                      'Record production and load trucks to build the '
                       'mined-vs-dispatched picture.',
                 )
               else
@@ -443,12 +467,18 @@ class _ReportSection extends StatelessWidget {
                   rows: [
                     for (final d in days.reversed)
                       [
-                        Text(_dateFmt.format(d.day),
-                            style: TextStyle(
-                                fontSize: 13, color: semantic.textBody)),
+                        Text(
+                          _dateFmt.format(d.day),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: semantic.textBody,
+                          ),
+                        ),
                         _mono(context, '${d.minedTons.toStringAsFixed(2)} t'),
-                        _mono(context,
-                            '${d.dispatchedTons.toStringAsFixed(2)} t'),
+                        _mono(
+                          context,
+                          '${d.dispatchedTons.toStringAsFixed(2)} t',
+                        ),
                         _balanceCell(context, d.minedTons - d.dispatchedTons),
                       ],
                   ],
@@ -461,16 +491,16 @@ class _ReportSection extends StatelessWidget {
   }
 
   Widget _mono(BuildContext context, String text) => Text(
-        text,
-        textAlign: TextAlign.right,
-        style: TextStyle(
-          fontFamily: MlTokens.fontMono,
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: MlSemantic.of(context).textStrong,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
-      );
+    text,
+    textAlign: TextAlign.right,
+    style: TextStyle(
+      fontFamily: MlTokens.fontMono,
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      color: MlSemantic.of(context).textStrong,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    ),
+  );
 
   Widget _balanceCell(BuildContext context, double v) {
     final tone = v.abs() < 0.005
@@ -517,24 +547,32 @@ class _ProductionPileCard extends StatelessWidget {
           Row(
             children: [
               const MlIconWell(
-                  icon: Icons.terrain_outlined,
-                  tone: MlTone.done,
-                  size: 40,
-                  radius: 11),
+                icon: Icons.terrain_outlined,
+                tone: MlTone.done,
+                size: 40,
+                radius: 11,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(pile.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            color: semantic.textStrong)),
-                    Text('ROM / production pile',
-                        style: TextStyle(
-                            fontSize: 11.5, color: semantic.textFaint)),
+                    Text(
+                      pile.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: semantic.textStrong,
+                      ),
+                    ),
+                    Text(
+                      'ROM / production pile',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: semantic.textFaint,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -617,17 +655,21 @@ class _RecordProductionDialogState
     final tons = double.tryParse(_tons.text.trim());
     if (tons == null || tons <= 0) {
       messenger.showSnackBar(
-          const SnackBar(content: Text('Enter the tons mined first.')));
+        const SnackBar(content: Text('Enter the tons mined first.')),
+      );
       return;
     }
     setState(() => _saving = true);
     try {
-      await ref.read(productionServiceProvider).recordProduction(
+      await ref
+          .read(productionServiceProvider)
+          .recordProduction(
             companyId: widget.companyId,
             tons: tons,
             entryDate: _date,
-            commodity:
-                _commodity.text.trim().isEmpty ? null : _commodity.text.trim(),
+            commodity: _commodity.text.trim().isEmpty
+                ? null
+                : _commodity.text.trim(),
             pitSection: _pit.text.trim().isEmpty ? null : _pit.text.trim(),
             stockpileId: _pileId,
             notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
@@ -636,7 +678,10 @@ class _RecordProductionDialogState
     } catch (e) {
       if (mounted) setState(() => _saving = false);
       messenger.showSnackBar(
-          SnackBar(content: Text('Could not record production. ${friendlyError(e)}')));
+        SnackBar(
+          content: Text('Could not record production. ${friendlyError(e)}'),
+        ),
+      );
     }
   }
 
@@ -653,8 +698,9 @@ class _RecordProductionDialogState
             children: [
               TextField(
                 controller: _tons,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                 ],
@@ -667,14 +713,12 @@ class _RecordProductionDialogState
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.event_outlined, size: 18),
-                label: Text(
-                    'Date: ${DateFormat('dd MMM yyyy').format(_date)}'),
+                label: Text('Date: ${DateFormat('dd MMM yyyy').format(_date)}'),
                 onPressed: () async {
                   final picked = await showDatePicker(
                     context: context,
                     initialDate: _date,
-                    firstDate:
-                        MlTime.now().subtract(const Duration(days: 365)),
+                    firstDate: MlTime.now().subtract(const Duration(days: 365)),
                     lastDate: DateTime.now(),
                   );
                   if (picked != null && mounted) setState(() => _date = picked);
@@ -716,12 +760,13 @@ class _RecordProductionDialogState
                 ),
                 items: [
                   const DropdownMenuItem<String?>(
-                      value: null, child: Text('Log only — no pile')),
+                    value: null,
+                    child: Text('Log only — no pile'),
+                  ),
                   for (final p in widget.productionPiles)
                     DropdownMenuItem<String?>(
                       value: p.id,
-                      child: Text(
-                          '${p.name} (${p.tons.toStringAsFixed(0)} t)'),
+                      child: Text('${p.name} (${p.tons.toStringAsFixed(0)} t)'),
                     ),
                 ],
                 onChanged: (v) => setState(() => _pileId = v),
@@ -750,7 +795,8 @@ class _RecordProductionDialogState
               ? const SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2))
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : const Text('Record'),
         ),
       ],
@@ -792,17 +838,19 @@ class _CreatePileDialogState extends ConsumerState<_CreatePileDialog> {
     final name = _name.text.trim();
     if (name.isEmpty) {
       messenger.showSnackBar(
-          const SnackBar(content: Text('Give the pile a name first.')));
+        const SnackBar(content: Text('Give the pile a name first.')),
+      );
       return;
     }
     setState(() => _saving = true);
     try {
-      await ref.read(productionServiceProvider).createProductionPile(
+      await ref
+          .read(productionServiceProvider)
+          .createProductionPile(
             companyId: widget.companyId,
             name: name,
             openingTons: double.tryParse(_opening.text.trim()) ?? 0,
-            mineral:
-                _mineral.text.trim().isEmpty ? null : _mineral.text.trim(),
+            mineral: _mineral.text.trim().isEmpty ? null : _mineral.text.trim(),
             cr2o3Pct: double.tryParse(_cr2o3.text.trim()),
             moisturePct: double.tryParse(_moisture.text.trim()),
             sizing: _sizing.text.trim().isEmpty ? null : _sizing.text.trim(),
@@ -811,7 +859,10 @@ class _CreatePileDialogState extends ConsumerState<_CreatePileDialog> {
     } catch (e) {
       if (mounted) setState(() => _saving = false);
       messenger.showSnackBar(
-          SnackBar(content: Text('Could not create the pile. ${friendlyError(e)}')));
+        SnackBar(
+          content: Text('Could not create the pile. ${friendlyError(e)}'),
+        ),
+      );
     }
   }
 
@@ -850,7 +901,8 @@ class _CreatePileDialogState extends ConsumerState<_CreatePileDialog> {
                     child: TextField(
                       controller: _opening,
                       keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
+                        decimal: true,
+                      ),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       ],
@@ -870,7 +922,8 @@ class _CreatePileDialogState extends ConsumerState<_CreatePileDialog> {
                     child: TextField(
                       controller: _cr2o3,
                       keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
+                        decimal: true,
+                      ),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       ],
@@ -886,7 +939,8 @@ class _CreatePileDialogState extends ConsumerState<_CreatePileDialog> {
                     child: TextField(
                       controller: _moisture,
                       keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
+                        decimal: true,
+                      ),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       ],
@@ -923,7 +977,8 @@ class _CreatePileDialogState extends ConsumerState<_CreatePileDialog> {
               ? const SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2))
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : const Text('Create pile'),
         ),
       ],

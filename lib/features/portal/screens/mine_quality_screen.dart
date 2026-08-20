@@ -50,34 +50,32 @@ class MineQualityScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: MlSectionTitle(
-                        'Contract quality specs',
-                        meta: specsAsync.valueOrNull == null
-                            ? null
-                            : mlCount(specsAsync.value!.length, 'route'),
-                        icon: Icons.rule_outlined,
-                        margin: EdgeInsets.zero,
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Refresh',
-                      onPressed: () => ref
-                          .invalidate(supplierRouteSpecsProvider(companyId)),
-                      icon: const Icon(Icons.refresh_rounded, size: 20),
-                    ),
-                  ],
+                // The action goes in the header's own slot rather than a Row wrapped
+                // around it: a Row hands an unflexed button UNBOUNDED width
+                // (CLAUDE.md 10.4) and squeezes the Expanded title to whatever is
+                // left, which on a phone is less than the title needs. The slot
+                // drops the action under the title instead.
+                MlSectionTitle(
+                  'Contract quality specs',
+                  meta: specsAsync.valueOrNull == null
+                      ? null
+                      : mlCount(specsAsync.value!.length, 'route'),
+                  icon: Icons.rule_outlined,
+                  margin: EdgeInsets.zero,
+                  action: IconButton(
+                    tooltip: 'Refresh',
+                    onPressed: () =>
+                        ref.invalidate(supplierRouteSpecsProvider(companyId)),
+                    icon: const Icon(Icons.refresh_rounded, size: 20),
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'One spec per Route ID. Loads on the route are judged '
                   'against these values.',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: semantic.textMuted),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: semantic.textMuted),
                 ),
                 const SizedBox(height: 12),
                 specsAsync.when(
@@ -85,8 +83,10 @@ class MineQualityScreen extends ConsumerWidget {
                     padding: EdgeInsets.symmetric(vertical: 20),
                     child: Center(child: CircularProgressIndicator()),
                   ),
-                  error: (e, _) => Text('Could not load routes. ${friendlyError(e)}',
-                      style: TextStyle(color: semantic.textMuted)),
+                  error: (e, _) => Text(
+                    'Could not load routes. ${friendlyError(e)}',
+                    style: TextStyle(color: semantic.textMuted),
+                  ),
                   data: (specs) {
                     if (specs.isEmpty) {
                       return MlEmptyState(
@@ -175,14 +175,12 @@ class _RouteSpecTile extends ConsumerWidget {
                         'Cr₂O₃ ≥ ${spec.specCr2o3Pct}%',
                       if (spec.specMoistureMaxPct != null)
                         'moisture ≤ ${spec.specMoistureMaxPct}%',
-                      if (spec.specSizing != null)
-                        'sizing ${spec.specSizing}',
+                      if (spec.specSizing != null) 'sizing ${spec.specSizing}',
                     ].join(' · ')
                   : 'No spec set — loads on this route are not penalised.',
               style: TextStyle(
                 fontSize: 12.5,
-                color:
-                    spec.hasSpec ? semantic.textBody : semantic.textFaint,
+                color: spec.hasSpec ? semantic.textBody : semantic.textFaint,
               ),
             ),
           ),
@@ -228,9 +226,11 @@ class _SpecDialogState extends ConsumerState<_SpecDialog> {
   void initState() {
     super.initState();
     _cr2o3 = TextEditingController(
-        text: widget.spec.specCr2o3Pct?.toString() ?? '');
+      text: widget.spec.specCr2o3Pct?.toString() ?? '',
+    );
     _moisture = TextEditingController(
-        text: widget.spec.specMoistureMaxPct?.toString() ?? '');
+      text: widget.spec.specMoistureMaxPct?.toString() ?? '',
+    );
     _sizing = TextEditingController(text: widget.spec.specSizing ?? '');
     _sealRequired = widget.spec.sealRequired;
   }
@@ -253,20 +253,26 @@ class _SpecDialogState extends ConsumerState<_SpecDialog> {
     if (_cr2o3.text.trim().isNotEmpty && cr2o3 == null ||
         _moisture.text.trim().isNotEmpty && moisture == null) {
       messenger.showSnackBar(
-          const SnackBar(content: Text('Enter valid percentages.')));
+        const SnackBar(content: Text('Enter valid percentages.')),
+      );
       return;
     }
     setState(() => _saving = true);
     try {
-      await ref.read(qualityServiceProvider).setRouteQualitySpec(
+      await ref
+          .read(qualityServiceProvider)
+          .setRouteQualitySpec(
             routeId: widget.spec.routeId,
             specCr2o3Pct: cr2o3,
             specMoistureMaxPct: moisture,
-            specSizing:
-                _sizing.text.trim().isEmpty ? null : _sizing.text.trim(),
+            specSizing: _sizing.text.trim().isEmpty
+                ? null
+                : _sizing.text.trim(),
           );
       if (_sealRequired != widget.spec.sealRequired) {
-        await ref.read(qualityServiceProvider).setRouteSealRequirement(
+        await ref
+            .read(qualityServiceProvider)
+            .setRouteSealRequirement(
               routeId: widget.spec.routeId,
               required: _sealRequired,
             );
@@ -274,8 +280,9 @@ class _SpecDialogState extends ConsumerState<_SpecDialog> {
       navigator.pop(true);
     } catch (e) {
       if (mounted) setState(() => _saving = false);
-      messenger
-          .showSnackBar(SnackBar(content: Text('Could not save the spec. ${friendlyError(e)}')));
+      messenger.showSnackBar(
+        SnackBar(content: Text('Could not save the spec. ${friendlyError(e)}')),
+      );
     }
   }
 
@@ -300,8 +307,9 @@ class _SpecDialogState extends ConsumerState<_SpecDialog> {
                 Expanded(
                   child: TextField(
                     controller: _cr2o3,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                     ],
@@ -316,8 +324,9 @@ class _SpecDialogState extends ConsumerState<_SpecDialog> {
                 Expanded(
                   child: TextField(
                     controller: _moisture,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                     ],
@@ -353,8 +362,9 @@ class _SpecDialogState extends ConsumerState<_SpecDialog> {
                 'and a photo for each seal.',
               ),
               value: _sealRequired,
-              onChanged:
-                  _saving ? null : (v) => setState(() => _sealRequired = v),
+              onChanged: _saving
+                  ? null
+                  : (v) => setState(() => _sealRequired = v),
             ),
           ],
         ),
@@ -370,7 +380,8 @@ class _SpecDialogState extends ConsumerState<_SpecDialog> {
               ? const SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2))
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : const Text('Save spec'),
         ),
       ],

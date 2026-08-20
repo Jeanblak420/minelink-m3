@@ -79,18 +79,18 @@ class WeightReconciliationView extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: MlSectionTitle(
-                  'Weight reconciliation',
-                  meta: async.valueOrNull == null
-                      ? null
-                      : mlCount(async.value!.length, 'delivered load'),
-                  icon: Icons.compare_arrows_rounded,
-                  margin: EdgeInsets.zero,
-                ),
-              ),
+          // Two actions in MlSectionTitle's single `action` slot, gathered
+          // into a Wrap so they can still fall to a second line. A Row around
+          // the header would hand them UNBOUNDED width (CLAUDE.md §10.4) and
+          // squeeze the title to whatever was left.
+          MlSectionTitle(
+            'Weight reconciliation',
+            meta: async.valueOrNull == null
+                ? null
+                : mlCount(async.value!.length, 'delivered load'),
+            icon: Icons.compare_arrows_rounded,
+            margin: EdgeInsets.zero,
+            action: Wrap(spacing: 8, runSpacing: 8, children: [
               async.maybeWhen(
                 data: (rows) {
                   final delivered = rows.where((r) => r.isDelivered).toList();
@@ -126,7 +126,7 @@ class WeightReconciliationView extends ConsumerWidget {
                     ref.invalidate(tripReconciliationsProvider(companyId)),
                 icon: const Icon(Icons.refresh_rounded, size: 20),
               ),
-            ],
+            ]),
           ),
           const SizedBox(height: 4),
           Text(

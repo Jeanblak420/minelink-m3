@@ -543,6 +543,34 @@ final guards = <Guard>[
     plantLine: 'final delta = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);',
   ),
   Guard(
+    id: 'no-row-around-a-header-that-has-an-actions-slot',
+    why: 'wrapping MlPageHeader or MlSectionTitle in a Row to put a button '
+        'beside it hands that button UNBOUNDED width (CLAUDE.md §10.4), and a '
+        'button cannot ellipsize its way out — clamping one truncates its hit '
+        'target, not merely its label. Both components already have a slot '
+        'for exactly this (`actions:` / `action:`) which lays the title and '
+        'the actions out as siblings in one Wrap, so an action drops UNDER '
+        'the title when the row runs out of width. Seven call sites did it by '
+        'hand anyway. Two overflowed on a phone before this guard existed — '
+        'mine production by 25px at 360px x text scale 2.0, where the button '
+        'squeezed the Expanded title down to less than its own 22px icon — '
+        'and the other five were latent. Pass the button to the slot.',
+    mode: Mode.block,
+    roots: ['lib/features'],
+    extension: '.dart',
+    // `Expanded(child: MlPageHeader` / `child: MlSectionTitle`, and the
+    // Column-wrapped variant four of the screens used. spanLines, because the
+    // formatter decides where these break and has already blinded one guard
+    // here by moving a token onto the next line.
+    spanLines: true,
+    pattern: RegExp(r'Expanded\(\s*child:\s*(Column\([^)]*children:\s*\[\s*)?'
+        r'Ml(PageHeader|SectionTitle)\('),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'some_screen.dart',
+    plantLine: 'Expanded(child: MlPageHeader(title: 1)),',
+    plantWrapped: 'Expanded(\n      child: MlPageHeader(title: 1)),',
+  ),
+  Guard(
     id: 'no-hardcoded-month-in-ui',
     why: 'a month name and a year written into a UI string is a date that '
         'stopped moving. Found 2026-08-20 in TWO places on screens people '

@@ -56,25 +56,25 @@ class LoadQualityTable extends ConsumerWidget {
   ];
 
   static List<List<String>> exportRows(List<LoadQualityRow> rows) => [
-        for (final r in rows)
-          [
-            r.reference ?? '',
-            r.truckReg ?? '',
-            r.commodity ?? '',
-            r.sourceName ?? '',
-            r.customerName ?? '',
-            r.netTons?.toStringAsFixed(2) ?? '',
-            r.deliveredTons?.toStringAsFixed(2) ?? '',
-            r.cr2o3Pct?.toStringAsFixed(2) ?? '',
-            r.specCr2o3Pct?.toStringAsFixed(2) ?? '',
-            r.moisturePct?.toStringAsFixed(2) ?? '',
-            r.specMoistureMaxPct?.toStringAsFixed(2) ?? '',
-            r.sizing ?? '',
-            r.payableTons?.toStringAsFixed(2) ?? '',
-            r.gradeFactor?.toStringAsFixed(4) ?? '',
-            r.certPath == null ? '' : (r.certFileName ?? 'attached'),
-          ],
-      ];
+    for (final r in rows)
+      [
+        r.reference ?? '',
+        r.truckReg ?? '',
+        r.commodity ?? '',
+        r.sourceName ?? '',
+        r.customerName ?? '',
+        r.netTons?.toStringAsFixed(2) ?? '',
+        r.deliveredTons?.toStringAsFixed(2) ?? '',
+        r.cr2o3Pct?.toStringAsFixed(2) ?? '',
+        r.specCr2o3Pct?.toStringAsFixed(2) ?? '',
+        r.moisturePct?.toStringAsFixed(2) ?? '',
+        r.specMoistureMaxPct?.toStringAsFixed(2) ?? '',
+        r.sizing ?? '',
+        r.payableTons?.toStringAsFixed(2) ?? '',
+        r.gradeFactor?.toStringAsFixed(4) ?? '',
+        r.certPath == null ? '' : (r.certFileName ?? 'attached'),
+      ],
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -86,52 +86,57 @@ class LoadQualityTable extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: MlSectionTitle(
-                  'Load quality certificates',
-                  meta: async.valueOrNull == null
-                      ? null
-                      : mlCount(async.value!.length, 'certificate'),
-                  icon: Icons.science_outlined,
-                  margin: EdgeInsets.zero,
-                ),
-              ),
-              async.maybeWhen(
-                data: (rows) => MlButton.outline(
-                  label: 'Export',
-                  icon: Icons.download_outlined,
-                  compact: true,
-                  onPressed: () => ReconExporter.pickFormatAndExport(
-                    context,
-                    title: 'Load quality certificates',
-                    filenameBase: 'load_quality',
-                    headers: exportHeaders,
-                    rows: exportRows(rows),
+          // The action goes in the header's own slot rather than a Row wrapped
+          // around it: a Row hands an unflexed button UNBOUNDED width
+          // (CLAUDE.md 10.4) and squeezes the Expanded title to whatever is
+          // left, which on a phone is less than the title needs. The slot
+          // drops the action under the title instead.
+          MlSectionTitle(
+            'Load quality certificates',
+            meta: async.valueOrNull == null
+                ? null
+                : mlCount(async.value!.length, 'certificate'),
+            icon: Icons.science_outlined,
+            margin: EdgeInsets.zero,
+            action: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                async.maybeWhen(
+                  data: (rows) => MlButton.outline(
+                    label: 'Export',
+                    icon: Icons.download_outlined,
+                    compact: true,
+                    onPressed: () => ReconExporter.pickFormatAndExport(
+                      context,
+                      title: 'Load quality certificates',
+                      filenameBase: 'load_quality',
+                      headers: exportHeaders,
+                      rows: exportRows(rows),
+                    ),
                   ),
+                  orElse: () => const SizedBox.shrink(),
                 ),
-                orElse: () => const SizedBox.shrink(),
-              ),
-              IconButton(
-                tooltip: 'Refresh',
-                onPressed: () => ref.invalidate(loadQualityProvider(companyId)),
-                icon: const Icon(Icons.refresh_rounded, size: 20),
-              ),
-            ],
+                IconButton(
+                  tooltip: 'Refresh',
+                  onPressed: () =>
+                      ref.invalidate(loadQualityProvider(companyId)),
+                  icon: const Icon(Icons.refresh_rounded, size: 20),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             canEdit
                 ? 'Attach the lab certificate to each delivered load: Cr₂O₃ %, '
-                    'moisture % and sizing against the contract spec. Excess '
-                    'moisture and low grade reduce the payable tons.'
+                      'moisture % and sizing against the contract spec. Excess '
+                      'moisture and low grade reduce the payable tons.'
                 : 'Each delivered load\'s certified quality vs the contract '
-                    'spec, with the payable-tons penalty calc.',
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: semantic.textMuted),
+                      'spec, with the payable-tons penalty calc.',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: semantic.textMuted),
           ),
           const SizedBox(height: 14),
           async.when(
@@ -139,14 +144,17 @@ class LoadQualityTable extends ConsumerWidget {
               padding: EdgeInsets.symmetric(vertical: 28),
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (e, _) => Text('Could not load quality data. ${friendlyError(e)}',
-                style: TextStyle(color: semantic.textMuted)),
+            error: (e, _) => Text(
+              'Could not load quality data. ${friendlyError(e)}',
+              style: TextStyle(color: semantic.textMuted),
+            ),
             data: (rows) {
               if (rows.isEmpty) {
                 return MlEmptyState(
                   icon: Icons.science_outlined,
                   title: 'No loaded trips yet.',
-                  message: 'Loads appear here once trucks are weighed at the '
+                  message:
+                      'Loads appear here once trucks are weighed at the '
                       'weighbridge; the mine then attaches each load\'s '
                       'quality certificate.',
                 );
@@ -170,11 +178,17 @@ class LoadQualityTable extends ConsumerWidget {
                       const MlColumn('Product', flex: 2),
                       const MlColumn('Net', flex: 2, align: TextAlign.right),
                       const MlColumn('Cr₂O₃', flex: 2, align: TextAlign.right),
-                      const MlColumn('Moisture', flex: 2,
-                          align: TextAlign.right),
+                      const MlColumn(
+                        'Moisture',
+                        flex: 2,
+                        align: TextAlign.right,
+                      ),
                       const MlColumn('Sizing', flex: 2),
-                      const MlColumn('Payable', flex: 2,
-                          align: TextAlign.right),
+                      const MlColumn(
+                        'Payable',
+                        flex: 2,
+                        align: TextAlign.right,
+                      ),
                       const MlColumn('Cert', flex: 1, align: TextAlign.center),
                       if (canEdit) const MlColumn('', flex: 2),
                     ],
@@ -184,11 +198,18 @@ class LoadQualityTable extends ConsumerWidget {
                           _truckCell(context, r),
                           _text(context, r.commodity ?? '—'),
                           _mono(context, _t(r.netTons)),
-                          _pctCell(context, r.cr2o3Pct, r.specCr2o3Pct,
-                              belowIsBad: true),
-                          _pctCell(context, r.moisturePct,
-                              r.specMoistureMaxPct,
-                              belowIsBad: false),
+                          _pctCell(
+                            context,
+                            r.cr2o3Pct,
+                            r.specCr2o3Pct,
+                            belowIsBad: true,
+                          ),
+                          _pctCell(
+                            context,
+                            r.moisturePct,
+                            r.specMoistureMaxPct,
+                            belowIsBad: false,
+                          ),
                           _text(context, r.sizing ?? '—'),
                           _payableCell(context, r),
                           _CertCell(row: r),
@@ -210,7 +231,8 @@ class LoadQualityTable extends ConsumerWidget {
                                   );
                                   if (saved) {
                                     ref.invalidateIfMounted(
-                                        loadQualityProvider(companyId));
+                                      loadQualityProvider(companyId),
+                                    );
                                   }
                                 },
                               ),
@@ -252,29 +274,26 @@ class LoadQualityTable extends ConsumerWidget {
   }
 
   Widget _text(BuildContext context, String text) => Text(
-        text,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontSize: 13,
-          color: MlSemantic.of(context).textBody,
-        ),
-      );
+    text,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: TextStyle(fontSize: 13, color: MlSemantic.of(context).textBody),
+  );
 
   Widget _mono(BuildContext context, String text, {bool muted = false}) => Text(
-        text,
-        textAlign: TextAlign.right,
-        maxLines: 1,
-        style: TextStyle(
-          fontFamily: MlTokens.fontMono,
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: muted
-              ? MlSemantic.of(context).textFaint
-              : MlSemantic.of(context).textStrong,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
-      );
+    text,
+    textAlign: TextAlign.right,
+    maxLines: 1,
+    style: TextStyle(
+      fontFamily: MlTokens.fontMono,
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      color: muted
+          ? MlSemantic.of(context).textFaint
+          : MlSemantic.of(context).textStrong,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    ),
+  );
 
   /// Actual vs spec percentage: tinted red/amber when the value breaches the
   /// contract spec ([belowIsBad] true = grade must reach spec; false =
@@ -363,12 +382,15 @@ class _CertCell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (row.certPath == null) {
       return Center(
-        child: Text('—',
-            style: TextStyle(color: MlSemantic.of(context).textFaint)),
+        child: Text(
+          '—',
+          style: TextStyle(color: MlSemantic.of(context).textFaint),
+        ),
       );
     }
     return IconButton(
-      tooltip: 'Open certificate'
+      tooltip:
+          'Open certificate'
           '${row.certFileName != null ? ' (${row.certFileName})' : ''}',
       icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
       visualDensity: VisualDensity.compact,
@@ -379,15 +401,16 @@ class _CertCell extends ConsumerWidget {
               .read(qualityServiceProvider)
               .resolveCertUrl(row.certPath);
           if (url == null) {
-            messenger.showSnackBar(const SnackBar(
-                content: Text('Could not open the certificate.')));
+            messenger.showSnackBar(
+              const SnackBar(content: Text('Could not open the certificate.')),
+            );
             return;
           }
-          await launchUrl(Uri.parse(url),
-              mode: LaunchMode.externalApplication);
+          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
         } catch (_) {
-          messenger.showSnackBar(const SnackBar(
-              content: Text('Could not open the certificate.')));
+          messenger.showSnackBar(
+            const SnackBar(content: Text('Could not open the certificate.')),
+          );
         }
       },
     );

@@ -173,53 +173,58 @@ class _RawReconViewState extends ConsumerState<RawReconView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: MlSectionTitle(
-                  'Recon table (raw records)',
-                  meta: async.valueOrNull == null
-                      ? null
-                      : mlCount(async.value!.length, 'row'),
-                  icon: Icons.table_rows_outlined,
-                  margin: EdgeInsets.zero,
+          // The action goes in the header's own slot rather than a Row wrapped
+          // around it: a Row hands an unflexed button UNBOUNDED width
+          // (CLAUDE.md 10.4) and squeezes the Expanded title to whatever is
+          // left, which on a phone is less than the title needs. The slot
+          // drops the action under the title instead.
+          MlSectionTitle(
+            'Recon table (raw records)',
+            meta: async.valueOrNull == null
+                ? null
+                : mlCount(async.value!.length, 'row'),
+            icon: Icons.table_rows_outlined,
+            margin: EdgeInsets.zero,
+            action: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                async.maybeWhen(
+                  data: (rows) => MlButton.outline(
+                    label: 'Export',
+                    icon: Icons.download_outlined,
+                    compact: true,
+                    onPressed: () {
+                      // Period stat cards are all-time over ALL rows (§4); the
+                      // table + its total are the filtered view.
+                      final stats = _windows(rows);
+                      ReconExporter.pickFormatAndExport(
+                        context,
+                        title: 'Recon table — raw records',
+                        filenameBase: 'recon_table',
+                        headers: RawReconView.csvHeaders,
+                        rows: RawReconView.csvRows(_filtered(rows)),
+                        filters: {
+                          'Transporter': _transporter ?? 'All',
+                          'Product': _product ?? 'All',
+                        },
+                        summary: {
+                          for (final s in _statOrder)
+                            s: '${(stats[s] ?? 0).toStringAsFixed(2)} t',
+                        },
+                      );
+                    },
+                  ),
+                  orElse: () => const SizedBox.shrink(),
                 ),
-              ),
-              async.maybeWhen(
-                data: (rows) => MlButton.outline(
-                  label: 'Export',
-                  icon: Icons.download_outlined,
-                  compact: true,
-                  onPressed: () {
-                    // Period stat cards are all-time over ALL rows (§4); the
-                    // table + its total are the filtered view.
-                    final stats = _windows(rows);
-                    ReconExporter.pickFormatAndExport(
-                      context,
-                      title: 'Recon table — raw records',
-                      filenameBase: 'recon_table',
-                      headers: RawReconView.csvHeaders,
-                      rows: RawReconView.csvRows(_filtered(rows)),
-                      filters: {
-                        'Transporter': _transporter ?? 'All',
-                        'Product': _product ?? 'All',
-                      },
-                      summary: {
-                        for (final s in _statOrder)
-                          s: '${(stats[s] ?? 0).toStringAsFixed(2)} t',
-                      },
-                    );
-                  },
+                IconButton(
+                  tooltip: 'Refresh',
+                  onPressed: () =>
+                      ref.invalidate(rawReconRowsProvider(widget.companyId)),
+                  icon: const Icon(Icons.refresh_rounded, size: 20),
                 ),
-                orElse: () => const SizedBox.shrink(),
-              ),
-              IconButton(
-                tooltip: 'Refresh',
-                onPressed: () =>
-                    ref.invalidate(rawReconRowsProvider(widget.companyId)),
-                icon: const Icon(Icons.refresh_rounded, size: 20),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -423,7 +428,6 @@ class _RawReconViewState extends ConsumerState<RawReconView> {
       ),
     );
   }
-
 }
 
 /// Column spec for the Excel-style recon grid.
@@ -460,7 +464,11 @@ class _ReconCol {
 /// width; on genuinely narrow viewports the whole grid scrolls horizontally
 /// (with a visible scrollbar) at a sensible minimum width.
 class _ExcelReconTable extends StatelessWidget {
-  const _ExcelReconTable({required this.rows, this.onWaybillTap, this.onPodTap});
+  const _ExcelReconTable({
+    required this.rows,
+    this.onWaybillTap,
+    this.onPodTap,
+  });
 
   final List<RawReconRow> rows;
 
@@ -511,8 +519,10 @@ class _ExcelReconTable extends StatelessWidget {
     double? variance,
     double? netMass,
   ) {
-    final severity =
-        varianceSeverityOf(varianceTons: variance, netTons: netMass);
+    final severity = varianceSeverityOf(
+      varianceTons: variance,
+      netTons: netMass,
+    );
     // Balanced and not-comparable both render as plain text: a tinted pill on
     // every row would make the tint meaningless, which is the fault this
     // shared classifier was extracted to fix.
@@ -658,11 +668,17 @@ class _ExcelReconTable extends StatelessWidget {
                     r.waybillNumber != null
                 ? _waybillLink(semantic, _cols[col], values[col], r)
                 : col == _colPod && onPodTap != null && r.podPhotoPath != null
-                    ? _podLink(values[col], r)
-                    : col == _colVariance
-                        ? _varianceText(context, semantic, _cols[col],
-                            values[col], r.varianceTons, r.netMass)
-                        : _valueText(semantic, _cols[col], values[col]),
+                ? _podLink(values[col], r)
+                : col == _colVariance
+                ? _varianceText(
+                    context,
+                    semantic,
+                    _cols[col],
+                    values[col],
+                    r.varianceTons,
+                    r.netMass,
+                  )
+                : _valueText(semantic, _cols[col], values[col]),
           ),
       ],
     );
@@ -733,7 +749,7 @@ class _ExcelReconTable extends StatelessWidget {
   }
 
   Widget _cell(Widget child) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
-        child: child,
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+    child: child,
+  );
 }

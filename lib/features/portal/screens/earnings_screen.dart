@@ -37,31 +37,29 @@ class EarningsScreen extends ConsumerWidget {
     final earningsAsync = ref.watch(tripEarningsProvider(companyId));
     final costs =
         ref.watch(vehicleCostBreakdownProvider(companyId)).asData?.value ??
-            const <VehicleCostBreakdown>[];
+        const <VehicleCostBreakdown>[];
 
     return MlPageBody(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    MlPageHeader(
-                      title: 'Earnings',
-                      meta: earningsAsync.valueOrNull == null
-                          ? null
-                          : '${mlCount(earningsAsync.value!.length, 'trip')} · '
-                              '${mlCount(costs.length, 'vehicle')} costed',
-                      description:
-                          'Revenue from your delivered tons at your agreed rate, '
-                          'less maintenance — per period, vehicle and route.',
-                    ),
-                  ],
-                ),
-              ),
+          // Actions live in MlPageHeader's own `actions` slot, not a Row wrapped
+          // around it. That slot makes the title and the actions siblings in one
+          // Wrap, so an action drops under the title when the row runs out of
+          // width -- which it does on a phone, and at an accessibility text size
+          // on a tablet. A Row gives an unflexed button unbounded width instead
+          // (CLAUDE.md 10.4), and a button cannot ellipsize its way out: clamping
+          // one truncates its hit target, not merely its label.
+          MlPageHeader(
+            title: 'Earnings',
+            meta: earningsAsync.valueOrNull == null
+                ? null
+                : '${mlCount(earningsAsync.value!.length, 'trip')} · '
+                      '${mlCount(costs.length, 'vehicle')} costed',
+            description:
+                'Revenue from your delivered tons at your agreed rate, '
+                'less maintenance — per period, vehicle and route.',
+            actions: [
               IconButton(
                 tooltip: 'Refresh',
                 onPressed: () {
@@ -79,15 +77,12 @@ class EarningsScreen extends ConsumerWidget {
               child: Center(child: CircularProgressIndicator()),
             ),
             error: (e, _) => MlLoadFailure(
-                subject: 'the earnings',
-                error: e,
-                onRetry: () => ref.invalidate(tripEarningsProvider(companyId)),
+              subject: 'the earnings',
+              error: e,
+              onRetry: () => ref.invalidate(tripEarningsProvider(companyId)),
             ),
-            data: (trips) => _EarningsBody(
-              trips: trips,
-              costs: costs,
-              companyId: companyId,
-            ),
+            data: (trips) =>
+                _EarningsBody(trips: trips, costs: costs, companyId: companyId),
           ),
           const SizedBox(height: 40),
         ],
@@ -151,7 +146,9 @@ class _EarningsBody extends StatelessWidget {
     for (final t in trips) {
       final vid = t.vehicleId ?? '—';
       final agg = byVehicle.putIfAbsent(
-          vid, () => _VehAgg(reg: t.truckReg ?? 'Unassigned'));
+        vid,
+        () => _VehAgg(reg: t.truckReg ?? 'Unassigned'),
+      );
       agg.trips++;
       agg.tons += t.netTons ?? 0;
       agg.revenue += t.revenue ?? 0;
@@ -159,7 +156,9 @@ class _EarningsBody extends StatelessWidget {
     }
     for (final c in costs) {
       byVehicle.putIfAbsent(
-          c.vehicleId, () => _VehAgg(reg: c.reg ?? 'Vehicle'));
+        c.vehicleId,
+        () => _VehAgg(reg: c.reg ?? 'Vehicle'),
+      );
     }
     for (final entry in byVehicle.entries) {
       entry.value.cost = costByVeh[entry.key]?.totalCost ?? 0;
@@ -172,10 +171,11 @@ class _EarningsBody extends StatelessWidget {
     for (final t in trips) {
       final rid = t.routeId ?? t.tripId;
       final agg = byRoute.putIfAbsent(
-          rid,
-          () => _RouteAgg(
-              label:
-                  '${t.commodity ?? 'Load'} → ${t.customerName ?? '—'}'));
+        rid,
+        () => _RouteAgg(
+          label: '${t.commodity ?? 'Load'} → ${t.customerName ?? '—'}',
+        ),
+      );
       agg.trips++;
       agg.tons += t.netTons ?? 0;
       agg.revenue += t.revenue ?? 0;
@@ -187,53 +187,66 @@ class _EarningsBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // KPI cards
-        LayoutBuilder(builder: (context, c) {
-          final cols = c.maxWidth > 820 ? 4 : (c.maxWidth > 420 ? 2 : 1);
-          const gap = 12.0;
-          final w = (c.maxWidth - gap * (cols - 1)) / cols;
-          final tiles = [
-            MlStatCard(
+        LayoutBuilder(
+          builder: (context, c) {
+            final cols = c.maxWidth > 820 ? 4 : (c.maxWidth > 420 ? 2 : 1);
+            const gap = 12.0;
+            final w = (c.maxWidth - gap * (cols - 1)) / cols;
+            final tiles = [
+              MlStatCard(
                 label: 'Total revenue',
                 value: money(revTotal),
                 icon: Icons.payments_outlined,
-                tone: MlTone.accent),
-            MlStatCard(
+                tone: MlTone.accent,
+              ),
+              MlStatCard(
                 label: 'This month',
                 value: money(revM),
                 icon: Icons.calendar_month_outlined,
-                tone: MlTone.transit),
-            MlStatCard(
+                tone: MlTone.transit,
+              ),
+              MlStatCard(
                 label: 'Costs (fuel + maint.)',
                 value: money(totalCosts),
                 icon: Icons.local_gas_station_outlined,
-                tone: MlTone.warn),
-            MlStatCard(
+                tone: MlTone.warn,
+              ),
+              MlStatCard(
                 label: 'Net profit',
                 value: money(net),
                 icon: Icons.trending_up_rounded,
-                tone: net >= 0 ? MlTone.done : MlTone.error),
-          ];
-          return Wrap(
-            spacing: gap,
-            runSpacing: gap,
-            children: [for (final t in tiles) SizedBox(width: w, child: t)],
-          );
-        }),
+                tone: net >= 0 ? MlTone.done : MlTone.error,
+              ),
+            ];
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [for (final t in tiles) SizedBox(width: w, child: t)],
+            );
+          },
+        ),
         if (unpriced > 0) ...[
           const SizedBox(height: 10),
-          Row(children: [
-            Icon(Icons.info_outline,
-                size: 15, color: MlSemantic.of(context).textFaint),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                '$unpriced delivered trip(s) have no rate set yet, so their '
-                'revenue is not counted. They show as "—" below.',
-                style: TextStyle(
-                    fontSize: 12.5, color: MlSemantic.of(context).textMuted),
+          Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                size: 15,
+                color: MlSemantic.of(context).textFaint,
               ),
-            ),
-          ]),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  '$unpriced delivered trip(s) have no rate set yet, so their '
+                  'revenue is not counted. They show as "—" below.',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: MlSemantic.of(context).textMuted,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
         const SizedBox(height: 20),
         // Revenue period windows
@@ -241,13 +254,17 @@ class _EarningsBody extends StatelessWidget {
           title: 'Revenue by period',
           icon: Icons.timeline_outlined,
           meta: 'Total ${money(revTotal)}',
-          child: Wrap(spacing: 12, runSpacing: 12, children: [
-            _PeriodTile('Day', money(revD)),
-            _PeriodTile('Week', money(revW)),
-            _PeriodTile('Month', money(revM)),
-            _PeriodTile('Year', money(revY)),
-            _PeriodTile('Total', money(revTotal), strong: true),
-          ]),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _PeriodTile('Day', money(revD)),
+              _PeriodTile('Week', money(revW)),
+              _PeriodTile('Month', money(revM)),
+              _PeriodTile('Year', money(revY)),
+              _PeriodTile('Total', money(revTotal), strong: true),
+            ],
+          ),
         ),
         const SizedBox(height: 16),
         // Per-vehicle
@@ -364,7 +381,9 @@ class _EarningsBody extends StatelessWidget {
                 'trip count directly; a vehicle\'s untagged fuel, tyres, tolls '
                 'and maintenance are split across its trips by tonnage.',
                 style: TextStyle(
-                    fontSize: 12.5, color: MlSemantic.of(context).textMuted),
+                  fontSize: 12.5,
+                  color: MlSemantic.of(context).textMuted,
+                ),
               ),
               const SizedBox(height: 12),
               MlDataTable(
@@ -395,33 +414,37 @@ class _EarningsBody extends StatelessWidget {
     );
   }
 
-  Widget _plate(BuildContext context, String reg) =>
-      Align(alignment: Alignment.centerLeft, child: MlPlatePill(reg, fontSize: 12));
+  Widget _plate(BuildContext context, String reg) => Align(
+    alignment: Alignment.centerLeft,
+    child: MlPlatePill(reg, fontSize: 12),
+  );
 
   Widget _text(BuildContext context, String s) => Text(
-        s,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style:
-            TextStyle(fontSize: 13.5, color: MlSemantic.of(context).textBody),
-      );
+    s,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: TextStyle(fontSize: 13.5, color: MlSemantic.of(context).textBody),
+  );
 
-  Widget _mono(BuildContext context, String s,
-          {bool muted = false, bool strong = false}) =>
-      Text(
-        s,
-        textAlign: TextAlign.right,
-        maxLines: 1,
-        style: TextStyle(
-          fontFamily: MlTokens.fontMono,
-          fontSize: 13,
-          fontWeight: strong ? FontWeight.w800 : FontWeight.w600,
-          color: muted
-              ? MlSemantic.of(context).textFaint
-              : MlSemantic.of(context).textStrong,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
-      );
+  Widget _mono(
+    BuildContext context,
+    String s, {
+    bool muted = false,
+    bool strong = false,
+  }) => Text(
+    s,
+    textAlign: TextAlign.right,
+    maxLines: 1,
+    style: TextStyle(
+      fontFamily: MlTokens.fontMono,
+      fontSize: 13,
+      fontWeight: strong ? FontWeight.w800 : FontWeight.w600,
+      color: muted
+          ? MlSemantic.of(context).textFaint
+          : MlSemantic.of(context).textStrong,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    ),
+  );
 }
 
 class _VehAgg {
@@ -467,13 +490,22 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            Expanded(
-              child: MlSectionTitle(title,
-                  icon: icon, meta: meta, margin: EdgeInsets.zero),
-            ),
-            if (trailing != null) trailing!,
-          ]),
+          // The action goes in the header's own slot rather than a Row wrapped
+          // around it: a Row hands an unflexed button UNBOUNDED width
+          // (CLAUDE.md §10.4) and squeezes the Expanded title to whatever is
+          // left, which on a phone is less than the title needs. The slot
+          // drops the action under the title instead.
+          //
+          // `action` is nullable, so the caller's optional `trailing` passes
+          // straight through — the old code guarded it with a collection-if
+          // inside the Row's children.
+          MlSectionTitle(
+            title,
+            icon: icon,
+            meta: meta,
+            margin: EdgeInsets.zero,
+            action: trailing,
+          ),
           const SizedBox(height: 14),
           child,
         ],
@@ -502,21 +534,26 @@ class _PeriodTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label.toUpperCase(),
-              style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                  color: semantic.textMuted)),
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+              color: semantic.textMuted,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(value,
-              style: TextStyle(
-                  fontFamily: MlTokens.fontMono,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: semantic.textStrong,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                )),
+          Text(
+            value,
+            style: TextStyle(
+              fontFamily: MlTokens.fontMono,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: semantic.textStrong,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
         ],
       ),
     );

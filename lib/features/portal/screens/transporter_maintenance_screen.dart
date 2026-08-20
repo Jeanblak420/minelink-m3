@@ -60,25 +60,19 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        MlPageHeader(
-                          title: 'Maintenance',
-                          meta: '$downCount out of service · '
-                              '${mlCount(dueSoon.length, 'service')} due soon',
-                          description:
-                              'Service schedules, breakdowns and vehicle downtime. '
-                              'A truck in maintenance cannot be assigned to routes '
-                              'until it is marked fixed.',
-                        ),
-                      ],
-                    ),
-                  ),
+// The action goes in the header's own slot, not a Row wrapped around
+              // it: a Row hands an unflexed action UNBOUNDED width (CLAUDE.md
+              // 10.4) and squeezes the Expanded title to whatever is left. The
+              // slot drops the action under the title instead.
+              MlPageHeader(
+                title: 'Maintenance',
+                meta: '$downCount out of service · '
+                    '${mlCount(dueSoon.length, 'service')} due soon',
+                description:
+                    'Service schedules, breakdowns and vehicle downtime. '
+                    'A truck in maintenance cannot be assigned to routes '
+                    'until it is marked fixed.',
+                actions: [
                   IconButton(
                     tooltip: 'Refresh',
                     onPressed: () => _refresh(ref, companyId),

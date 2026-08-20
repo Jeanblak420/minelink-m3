@@ -171,35 +171,34 @@ class _ReconUploadsPanelState extends ConsumerState<ReconUploadsPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: MlSectionTitle(
-                  'Edited versions',
-                  meta: async.valueOrNull == null
-                      ? null
-                      : mlCount(async.value!.length, 'upload'),
-                  icon: Icons.history_edu_outlined,
-                  margin: EdgeInsets.zero,
-                ),
-              ),
-              IconButton(
-                tooltip: 'Refresh',
-                onPressed: () =>
-                    ref.invalidate(reconUploadPairsProvider(widget.companyId)),
-                icon: const Icon(Icons.refresh_rounded, size: 20),
-              ),
-            ],
+          // The action goes in the header's own slot rather than a Row wrapped
+          // around it: a Row hands an unflexed button UNBOUNDED width
+          // (CLAUDE.md 10.4) and squeezes the Expanded title to whatever is
+          // left, which on a phone is less than the title needs. The slot
+          // drops the action under the title instead.
+          MlSectionTitle(
+            'Edited versions',
+            meta: async.valueOrNull == null
+                ? null
+                : mlCount(async.value!.length, 'upload'),
+            icon: Icons.history_edu_outlined,
+            margin: EdgeInsets.zero,
+            action: IconButton(
+              tooltip: 'Refresh',
+              onPressed: () =>
+                  ref.invalidate(reconUploadPairsProvider(widget.companyId)),
+              icon: const Icon(Icons.refresh_rounded, size: 20),
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             widget.canEdit
                 ? 'Export a side, edit it externally, then re-upload. The '
-                    'original is never overwritten — the system keeps it next '
-                    'to your latest edited copy for future enquiries.'
+                      'original is never overwritten — the system keeps it next '
+                      'to your latest edited copy for future enquiries.'
                 : 'View-only: only the org that initiated the flow (or MineLink) '
-                    'can upload edited reconciliations. You can open the '
-                    'original and any edited copies here.',
+                      'can upload edited reconciliations. You can open the '
+                      'original and any edited copies here.',
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(color: semantic.textMuted),

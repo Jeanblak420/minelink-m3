@@ -24,17 +24,17 @@ class ComplianceScreen extends ConsumerWidget {
   static final _dateFmt = DateFormat('dd MMM yyyy');
 
   MlTone _tone(ComplianceStatus s) => switch (s) {
-        ComplianceStatus.valid => MlTone.done,
-        ComplianceStatus.expiring => MlTone.warn,
-        ComplianceStatus.expired => MlTone.error,
-        ComplianceStatus.noExpiry => MlTone.neutral,
-      };
+    ComplianceStatus.valid => MlTone.done,
+    ComplianceStatus.expiring => MlTone.warn,
+    ComplianceStatus.expired => MlTone.error,
+    ComplianceStatus.noExpiry => MlTone.neutral,
+  };
 
   IconData _ownerIcon(ComplianceOwnerType t) => switch (t) {
-        ComplianceOwnerType.vehicle => Icons.local_shipping_outlined,
-        ComplianceOwnerType.employee => Icons.badge_outlined,
-        ComplianceOwnerType.company => Icons.business_outlined,
-      };
+    ComplianceOwnerType.vehicle => Icons.local_shipping_outlined,
+    ComplianceOwnerType.employee => Icons.badge_outlined,
+    ComplianceOwnerType.company => Icons.business_outlined,
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,32 +48,29 @@ class ComplianceScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    MlPageHeader(
-                      title: 'Compliance',
-                      meta: async.valueOrNull == null
-                          ? null
-                          : mlCount(async.value!.length, 'document'),
-                      description:
-                          'Track licences, permits and certificates for your '
-                          'vehicles, drivers and the company. Management is reminded '
-                          'before anything expires.',
-                    ),
-                  ],
-                ),
-              ),
+          // Actions live in MlPageHeader's own `actions` slot, not a Row wrapped
+          // around it. That slot makes the title and the actions siblings in one
+          // Wrap, so an action drops under the title when the row runs out of
+          // width -- which it does on a phone, and at an accessibility text size
+          // on a tablet. A Row gives an unflexed button unbounded width instead
+          // (CLAUDE.md 10.4), and a button cannot ellipsize its way out: clamping
+          // one truncates its hit target, not merely its label.
+          MlPageHeader(
+            title: 'Compliance',
+            meta: async.valueOrNull == null
+                ? null
+                : mlCount(async.value!.length, 'document'),
+            description:
+                'Track licences, permits and certificates for your '
+                'vehicles, drivers and the company. Management is reminded '
+                'before anything expires.',
+            actions: [
               IconButton(
                 tooltip: 'Refresh',
                 onPressed: () =>
                     ref.invalidate(complianceDocumentsProvider(companyId)),
                 icon: const Icon(Icons.refresh_rounded),
               ),
-              const SizedBox(width: 6),
               MlButton.primary(
                 label: 'Add document',
                 icon: Icons.add_rounded,
@@ -90,9 +87,10 @@ class ComplianceScreen extends ConsumerWidget {
               child: Center(child: CircularProgressIndicator()),
             ),
             error: (e, _) => MlLoadFailure(
-                subject: 'the compliance documents',
-                error: e,
-                onRetry: () => ref.invalidate(complianceDocumentsProvider(companyId)),
+              subject: 'the compliance documents',
+              error: e,
+              onRetry: () =>
+                  ref.invalidate(complianceDocumentsProvider(companyId)),
             ),
             data: (docs) {
               final expired = docs
@@ -104,20 +102,27 @@ class ComplianceScreen extends ConsumerWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Wrap(spacing: 12, runSpacing: 12, children: [
-                    _SummaryChip(
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      _SummaryChip(
                         label: 'Expired',
                         value: '$expired',
-                        tone: MlTone.error),
-                    _SummaryChip(
+                        tone: MlTone.error,
+                      ),
+                      _SummaryChip(
                         label: 'Expiring ≤30 days',
                         value: '$expiring',
-                        tone: MlTone.warn),
-                    _SummaryChip(
+                        tone: MlTone.warn,
+                      ),
+                      _SummaryChip(
                         label: 'Total',
                         value: '${docs.length}',
-                        tone: MlTone.accent),
-                  ]),
+                        tone: MlTone.accent,
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 16),
                   if (docs.isEmpty)
                     MlEmptyState(
@@ -154,8 +159,11 @@ class _SummaryChip extends StatelessWidget {
   final String label;
   final String value;
   final MlTone tone;
-  const _SummaryChip(
-      {required this.label, required this.value, required this.tone});
+  const _SummaryChip({
+    required this.label,
+    required this.value,
+    required this.tone,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -166,19 +174,26 @@ class _SummaryChip extends StatelessWidget {
         color: tone.well(Theme.of(context).brightness),
         borderRadius: BorderRadius.circular(MlTokens.rMd),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Text(value,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
             style: TextStyle(
-                fontFamily: MlTokens.fontMono,
-                fontWeight: FontWeight.w800,
-                fontSize: 18,
-                color: c.fg,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              )),
-        const SizedBox(width: 8),
-        Text(label,
-            style: TextStyle(fontWeight: FontWeight.w600, color: c.fg)),
-      ]),
+              fontFamily: MlTokens.fontMono,
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
+              color: c.fg,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(fontWeight: FontWeight.w600, color: c.fg),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -210,11 +225,13 @@ class _DocCard extends ConsumerWidget {
 
   Future<void> _openFile(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
-    final url =
-        await ref.read(complianceServiceProvider).resolveFileUrl(doc.filePath!);
+    final url = await ref
+        .read(complianceServiceProvider)
+        .resolveFileUrl(doc.filePath!);
     if (url == null) {
       messenger.showSnackBar(
-          const SnackBar(content: Text('Could not open the file.')));
+        const SnackBar(content: Text('Could not open the file.')),
+      );
       return;
     }
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
@@ -229,8 +246,9 @@ class _DocCard extends ConsumerWidget {
         content: Text('Remove "${doc.displayTitle}"? This cannot be undone.'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
           MlButton.danger(
             label: 'Delete',
             compact: true,
@@ -244,7 +262,9 @@ class _DocCard extends ConsumerWidget {
       await ref.read(complianceServiceProvider).delete(doc.id);
       ref.invalidateIfMounted(complianceDocumentsProvider(companyId));
       ref.invalidateIfMounted(complianceDocumentsProvider(null));
-      messenger.showSnackBar(const SnackBar(content: Text('Document deleted.')));
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Document deleted.')),
+      );
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(friendlyError(e))));
     }
@@ -265,14 +285,22 @@ class _DocCard extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Wrap(spacing: 8, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-                  Text(d.displayTitle,
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      d.displayTitle,
                       style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                          color: semantic.textStrong)),
-                  MlStatusBadge(label: d.status.label, tone: tone),
-                ]),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                        color: semantic.textStrong,
+                      ),
+                    ),
+                    MlStatusBadge(label: d.status.label, tone: tone),
+                  ],
+                ),
                 const SizedBox(height: 3),
                 Text(
                   '${d.ownerName ?? d.ownerType.label}'
@@ -280,12 +308,16 @@ class _DocCard extends ConsumerWidget {
                   style: TextStyle(fontSize: 13, color: semantic.textBody),
                 ),
                 const SizedBox(height: 2),
-                Text(_expiryText(),
-                    style: TextStyle(fontSize: 12.5, color: semantic.textMuted)),
+                Text(
+                  _expiryText(),
+                  style: TextStyle(fontSize: 12.5, color: semantic.textMuted),
+                ),
                 if (d.notes != null) ...[
                   const SizedBox(height: 4),
-                  Text(d.notes!,
-                      style: TextStyle(fontSize: 12.5, color: semantic.textFaint)),
+                  Text(
+                    d.notes!,
+                    style: TextStyle(fontSize: 12.5, color: semantic.textFaint),
+                  ),
                 ],
               ],
             ),
@@ -299,8 +331,12 @@ class _DocCard extends ConsumerWidget {
           IconButton(
             tooltip: 'Edit',
             icon: const Icon(Icons.edit_outlined, size: 20),
-            onPressed: () => showComplianceDocDialog(context, ref,
-                companyId: companyId, existing: d),
+            onPressed: () => showComplianceDocDialog(
+              context,
+              ref,
+              companyId: companyId,
+              existing: d,
+            ),
           ),
           IconButton(
             tooltip: 'Delete',
@@ -358,7 +394,8 @@ class _ComplianceDocDialogState extends ConsumerState<_ComplianceDocDialog> {
     final e = widget.existing;
     _ownerType = e?.ownerType ?? ComplianceOwnerType.vehicle;
     _ownerId =
-        e?.ownerId ?? (_ownerType == ComplianceOwnerType.company ? widget.companyId : null);
+        e?.ownerId ??
+        (_ownerType == ComplianceOwnerType.company ? widget.companyId : null);
     final suggested = _ownerType.suggestedDocTypes.map((x) => x.key).toSet();
     _docType = e == null
         ? _ownerType.suggestedDocTypes.first.key
@@ -417,7 +454,9 @@ class _ComplianceDocDialogState extends ConsumerState<_ComplianceDocDialog> {
       return;
     }
     if (_ownerId == null) {
-      _err('Please choose which ${_ownerType.label.toLowerCase()} this is for.');
+      _err(
+        'Please choose which ${_ownerType.label.toLowerCase()} this is for.',
+      );
       return;
     }
     setState(() => _busy = true);
@@ -428,7 +467,10 @@ class _ComplianceDocDialogState extends ConsumerState<_ComplianceDocDialog> {
       String? filePath = widget.existing?.filePath;
       if (_files.isNotEmpty) {
         filePath = await svc.uploadFile(
-            widget.companyId, _files.first.bytes, _files.first.name);
+          widget.companyId,
+          _files.first.bytes,
+          _files.first.name,
+        );
       }
       await svc.upsert(
         companyId: widget.companyId,
@@ -438,8 +480,9 @@ class _ComplianceDocDialogState extends ConsumerState<_ComplianceDocDialog> {
         expiresAt: _expires,
         id: widget.existing?.id,
         title: _title.text.trim().isEmpty ? null : _title.text.trim(),
-        docNumber:
-            _docNumber.text.trim().isEmpty ? null : _docNumber.text.trim(),
+        docNumber: _docNumber.text.trim().isEmpty
+            ? null
+            : _docNumber.text.trim(),
         issuedAt: _issued,
         filePath: filePath,
         notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
@@ -451,10 +494,13 @@ class _ComplianceDocDialogState extends ConsumerState<_ComplianceDocDialog> {
       ref.invalidateIfMounted(myProfileSetupProvider);
       ref.invalidateIfMounted(employeeProfileSetupProvider);
       navigator.pop();
-      messenger.showSnackBar(SnackBar(
-          content: Text(widget.existing == null
-              ? 'Document added.'
-              : 'Document updated.')));
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.existing == null ? 'Document added.' : 'Document updated.',
+          ),
+        ),
+      );
     } catch (e) {
       if (mounted) setState(() => _busy = false);
       messenger.showSnackBar(SnackBar(content: Text(friendlyError(e))));
@@ -480,16 +526,20 @@ class _ComplianceDocDialogState extends ConsumerState<_ComplianceDocDialog> {
           items: [
             for (final v in vehicles)
               DropdownMenuItem(
-                  value: v.id, child: Text(v.vehicleRegistrationNumber)),
+                value: v.id,
+                child: Text(v.vehicleRegistrationNumber),
+              ),
           ],
           onChanged: _busy ? null : (v) => setState(() => _ownerId = v),
         );
       case ComplianceOwnerType.employee:
-        final async =
-            ref.watch(complianceEmployeeOptionsProvider(widget.companyId));
+        final async = ref.watch(
+          complianceEmployeeOptionsProvider(widget.companyId),
+        );
         return async.when(
           loading: () => const LinearProgressIndicator(),
-          error: (e, _) => Text('Could not load employees. ${friendlyError(e)}'),
+          error: (e, _) =>
+              Text('Could not load employees. ${friendlyError(e)}'),
           data: (opts) => DropdownButtonFormField<String>(
             initialValue: _ownerId,
             isExpanded: true,
@@ -518,7 +568,9 @@ class _ComplianceDocDialogState extends ConsumerState<_ComplianceDocDialog> {
             children: [
               DropdownButtonFormField<ComplianceOwnerType>(
                 initialValue: _ownerType,
-                decoration: const InputDecoration(labelText: 'This document is for'),
+                decoration: const InputDecoration(
+                  labelText: 'This document is for',
+                ),
                 items: [
                   for (final t in ComplianceOwnerType.values)
                     DropdownMenuItem(value: t, child: Text(t.label)),
@@ -538,7 +590,9 @@ class _ComplianceDocDialogState extends ConsumerState<_ComplianceDocDialog> {
                   for (final e in docTypes)
                     DropdownMenuItem(value: e.key, child: Text(e.value)),
                   const DropdownMenuItem(
-                      value: '__other__', child: Text('Other…')),
+                    value: '__other__',
+                    child: Text('Other…'),
+                  ),
                 ],
                 onChanged: _busy
                     ? null
@@ -549,8 +603,9 @@ class _ComplianceDocDialogState extends ConsumerState<_ComplianceDocDialog> {
                 TextField(
                   controller: _otherType,
                   enabled: !_busy,
-                  decoration:
-                      const InputDecoration(labelText: 'Document type name'),
+                  decoration: const InputDecoration(
+                    labelText: 'Document type name',
+                  ),
                 ),
               ],
               const SizedBox(height: 12),
@@ -558,47 +613,54 @@ class _ComplianceDocDialogState extends ConsumerState<_ComplianceDocDialog> {
                 controller: _title,
                 enabled: !_busy,
                 decoration: const InputDecoration(
-                    labelText: 'Title / label (optional)'),
+                  labelText: 'Title / label (optional)',
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _docNumber,
                 enabled: !_busy,
                 decoration: const InputDecoration(
-                    labelText: 'Document number (optional)'),
+                  labelText: 'Document number (optional)',
+                ),
               ),
               const SizedBox(height: 12),
-              Row(children: [
-                Expanded(
-                  child: _DateField(
-                    label: 'Issued (optional)',
-                    value: _issued,
-                    fmt: _fmt,
-                    onTap: _busy ? null : () => _pickDate(issued: true),
-                    onClear:
-                        _busy ? null : () => setState(() => _issued = null),
+              Row(
+                children: [
+                  Expanded(
+                    child: _DateField(
+                      label: 'Issued (optional)',
+                      value: _issued,
+                      fmt: _fmt,
+                      onTap: _busy ? null : () => _pickDate(issued: true),
+                      onClear: _busy
+                          ? null
+                          : () => setState(() => _issued = null),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _DateField(
-                    label: 'Expires',
-                    value: _expires,
-                    fmt: _fmt,
-                    onTap: _busy ? null : () => _pickDate(issued: false),
-                    onClear:
-                        _busy ? null : () => setState(() => _expires = null),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _DateField(
+                      label: 'Expires',
+                      value: _expires,
+                      fmt: _fmt,
+                      onTap: _busy ? null : () => _pickDate(issued: false),
+                      onClear: _busy
+                          ? null
+                          : () => setState(() => _expires = null),
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
               const SizedBox(height: 12),
               TextField(
                 controller: _notes,
                 enabled: !_busy,
                 minLines: 1,
                 maxLines: 3,
-                decoration:
-                    const InputDecoration(labelText: 'Notes (optional)'),
+                decoration: const InputDecoration(
+                  labelText: 'Notes (optional)',
+                ),
               ),
               const SizedBox(height: 12),
               MultiFileDropPicker(
@@ -652,7 +714,9 @@ class _DateField extends StatelessWidget {
           suffixIcon: value == null
               ? const Icon(Icons.calendar_today_outlined, size: 18)
               : IconButton(
-                  icon: const Icon(Icons.clear, size: 18), onPressed: onClear),
+                  icon: const Icon(Icons.clear, size: 18),
+                  onPressed: onClear,
+                ),
         ),
         child: Text(value == null ? 'Not set' : fmt.format(value!)),
       ),

@@ -16,6 +16,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FontLoader;
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
@@ -36,7 +37,7 @@ Future<void> _loadFont(String family, List<String> files) async {
 
 /// Widths spanning both sides of the sidebar breakpoint, so the drawer layout
 /// is swept too.
-const _widths = <double>[1600, 1280, 1024, 430];
+const _widths = <double>[1600, 1280, 1024, 430, 360];
 
 /// 1.0 plus the two ends of the user-settable scale range.
 const _scales = <double>[0.85, 1.0, 1.15, 1.3];
@@ -105,7 +106,7 @@ void main() {
         FlutterError.onError = captured.add;
 
         await tester.pumpWidget(MaterialApp(
-          theme: ThemeData(brightness: Brightness.dark),
+          theme: AppTheme.darkTheme,
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(context).copyWith(
               textScaler: TextScaler.linear(scale),

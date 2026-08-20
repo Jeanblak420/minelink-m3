@@ -55,26 +55,26 @@ class BuyerLoadsValueScreen extends ConsumerWidget {
   ];
 
   static List<List<String>> exportRows(List<BuyerLoadValue> rows) => [
-        for (final r in rows)
-          [
-            r.reference ?? '',
-            r.truckReg ?? '',
-            r.commodity ?? '',
-            r.sourceName ?? '',
-            r.transporterName ?? '',
-            r.netTons?.toStringAsFixed(2) ?? '',
-            r.deliveredTons?.toStringAsFixed(2) ?? '',
-            r.ratePerTon?.toStringAsFixed(2) ?? '',
-            r.loadedValue?.toStringAsFixed(2) ?? '',
-            r.deliveredValue?.toStringAsFixed(2) ?? '',
-            r.payableTons?.toStringAsFixed(2) ?? '',
-            r.payableValue?.toStringAsFixed(2) ?? '',
-            r.invoiceNumber ?? '',
-            r.invoicedAmount?.toStringAsFixed(2) ?? '',
-            r.invoiceVariance?.toStringAsFixed(2) ?? '',
-            r.invoiceDate == null ? '' : _dateFmt.format(r.invoiceDate!),
-          ],
-      ];
+    for (final r in rows)
+      [
+        r.reference ?? '',
+        r.truckReg ?? '',
+        r.commodity ?? '',
+        r.sourceName ?? '',
+        r.transporterName ?? '',
+        r.netTons?.toStringAsFixed(2) ?? '',
+        r.deliveredTons?.toStringAsFixed(2) ?? '',
+        r.ratePerTon?.toStringAsFixed(2) ?? '',
+        r.loadedValue?.toStringAsFixed(2) ?? '',
+        r.deliveredValue?.toStringAsFixed(2) ?? '',
+        r.payableTons?.toStringAsFixed(2) ?? '',
+        r.payableValue?.toStringAsFixed(2) ?? '',
+        r.invoiceNumber ?? '',
+        r.invoicedAmount?.toStringAsFixed(2) ?? '',
+        r.invoiceVariance?.toStringAsFixed(2) ?? '',
+        r.invoiceDate == null ? '' : _dateFmt.format(r.invoiceDate!),
+      ],
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -88,25 +88,23 @@ class BuyerLoadsValueScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    MlPageHeader(
-                      title: 'Loads & value',
-                      meta: async.valueOrNull == null
-                          ? null
-                          : mlCount(async.value!.length, 'load'),
-                      description:
-                          'Every load in Rand: your agreed rate × loaded, '
-                          'delivered and quality-adjusted payable tons — '
-                          'reconciled against the invoices you capture per load.',
-                    ),
-                  ],
-                ),
-              ),
+          // Actions live in MlPageHeader's own `actions` slot, not a Row wrapped
+          // around it. That slot makes the title and the actions siblings in one
+          // Wrap, so an action drops under the title when the row runs out of
+          // width -- which it does on a phone, and at an accessibility text size
+          // on a tablet. A Row gives an unflexed button unbounded width instead
+          // (CLAUDE.md 10.4), and a button cannot ellipsize its way out: clamping
+          // one truncates its hit target, not merely its label.
+          MlPageHeader(
+            title: 'Loads & value',
+            meta: async.valueOrNull == null
+                ? null
+                : mlCount(async.value!.length, 'load'),
+            description:
+                'Every load in Rand: your agreed rate × loaded, '
+                'delivered and quality-adjusted payable tons — '
+                'reconciled against the invoices you capture per load.',
+            actions: [
               async.maybeWhen(
                 data: (rows) => MlButton.outline(
                   label: 'Export',
@@ -137,9 +135,9 @@ class BuyerLoadsValueScreen extends ConsumerWidget {
               child: Center(child: CircularProgressIndicator()),
             ),
             error: (e, _) => MlLoadFailure(
-                subject: 'the load values',
-                error: e,
-                onRetry: () => ref.invalidate(buyerTripValuesProvider(companyId)),
+              subject: 'the load values',
+              error: e,
+              onRetry: () => ref.invalidate(buyerTripValuesProvider(companyId)),
             ),
             data: (rows) => _Body(rows: rows, companyId: companyId),
           ),
@@ -168,63 +166,76 @@ class _Body extends ConsumerWidget {
       return const MlEmptyState(
         icon: Icons.payments_outlined,
         title: 'No priced loads yet',
-        message: 'Loads appear here in Rand once trucks are weighed on a '
+        message:
+            'Loads appear here in Rand once trucks are weighed on a '
             'dispatched order with pricing set.',
       );
     }
     final currency = rows.first.currency;
-    final deliveredValue =
-        rows.fold<double>(0, (s, r) => s + (r.deliveredValue ?? 0));
-    final payableValue =
-        rows.fold<double>(0, (s, r) => s + (r.payableValue ?? 0));
-    final invoiced = rows.fold<double>(0, (s, r) => s + (r.invoicedAmount ?? 0));
+    final deliveredValue = rows.fold<double>(
+      0,
+      (s, r) => s + (r.deliveredValue ?? 0),
+    );
+    final payableValue = rows.fold<double>(
+      0,
+      (s, r) => s + (r.payableValue ?? 0),
+    );
+    final invoiced = rows.fold<double>(
+      0,
+      (s, r) => s + (r.invoicedAmount ?? 0),
+    );
     final withInvoice = rows.where((r) => r.hasInvoice).toList();
-    final variance =
-        withInvoice.fold<double>(0, (s, r) => s + (r.invoiceVariance ?? 0));
+    final variance = withInvoice.fold<double>(
+      0,
+      (s, r) => s + (r.invoiceVariance ?? 0),
+    );
     final unpriced = rows.where((r) => !r.isPriced).length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LayoutBuilder(builder: (context, c) {
-          final cols = c.maxWidth > 900 ? 4 : (c.maxWidth > 560 ? 2 : 1);
-          const gap = 12.0;
-          final w =
-              cols == 1 ? c.maxWidth : (c.maxWidth - gap * (cols - 1)) / cols;
-          final tiles = [
-            MlStatCard(
-              label: 'Delivered value',
-              value: BuyerLoadsValueScreen.money(deliveredValue, currency),
-              icon: Icons.local_shipping_outlined,
-              tone: MlTone.accent,
-            ),
-            MlStatCard(
-              label: 'Payable value',
-              value: BuyerLoadsValueScreen.money(payableValue, currency),
-              icon: Icons.verified_outlined,
-              tone: MlTone.done,
-            ),
-            MlStatCard(
-              label: 'Invoiced',
-              value: BuyerLoadsValueScreen.money(invoiced, currency),
-              icon: Icons.receipt_long_outlined,
-              tone: MlTone.transit,
-            ),
-            MlStatCard(
-              label: 'Invoice variance',
-              value: BuyerLoadsValueScreen.money(variance, currency),
-              icon: Icons.compare_arrows_rounded,
-              tone: variance.abs() <= _tolerance
-                  ? MlTone.done
-                  : (variance > 0 ? MlTone.error : MlTone.warn),
-            ),
-          ];
-          return Wrap(
-            spacing: gap,
-            runSpacing: gap,
-            children: [for (final t in tiles) SizedBox(width: w, child: t)],
-          );
-        }),
+        LayoutBuilder(
+          builder: (context, c) {
+            final cols = c.maxWidth > 900 ? 4 : (c.maxWidth > 560 ? 2 : 1);
+            const gap = 12.0;
+            final w = cols == 1
+                ? c.maxWidth
+                : (c.maxWidth - gap * (cols - 1)) / cols;
+            final tiles = [
+              MlStatCard(
+                label: 'Delivered value',
+                value: BuyerLoadsValueScreen.money(deliveredValue, currency),
+                icon: Icons.local_shipping_outlined,
+                tone: MlTone.accent,
+              ),
+              MlStatCard(
+                label: 'Payable value',
+                value: BuyerLoadsValueScreen.money(payableValue, currency),
+                icon: Icons.verified_outlined,
+                tone: MlTone.done,
+              ),
+              MlStatCard(
+                label: 'Invoiced',
+                value: BuyerLoadsValueScreen.money(invoiced, currency),
+                icon: Icons.receipt_long_outlined,
+                tone: MlTone.transit,
+              ),
+              MlStatCard(
+                label: 'Invoice variance',
+                value: BuyerLoadsValueScreen.money(variance, currency),
+                icon: Icons.compare_arrows_rounded,
+                tone: variance.abs() <= _tolerance
+                    ? MlTone.done
+                    : (variance > 0 ? MlTone.error : MlTone.warn),
+              ),
+            ];
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [for (final t in tiles) SizedBox(width: w, child: t)],
+            );
+          },
+        ),
         if (unpriced > 0) ...[
           const SizedBox(height: 10),
           Text(
@@ -241,7 +252,8 @@ class _Body extends ConsumerWidget {
             children: [
               MlSectionTitle(
                 'Per-load values & invoices',
-                meta: '${mlCount(rows.length, 'load')} · '
+                meta:
+                    '${mlCount(rows.length, 'load')} · '
                     '${rows.where((r) => r.invoicedAmount != null).length} invoiced',
                 icon: Icons.payments_outlined,
                 margin: EdgeInsets.zero,
@@ -251,10 +263,9 @@ class _Body extends ConsumerWidget {
                 'Variance = invoiced amount − the load\'s payable value '
                 '(quality-adjusted when a certificate exists, else the '
                 'delivered value). Red = over-invoiced.',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: semantic.textMuted),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: semantic.textMuted),
               ),
               const SizedBox(height: 14),
               MlDataTable(
@@ -275,17 +286,19 @@ class _Body extends ConsumerWidget {
                       _truckCell(context, r),
                       _text(context, r.sourceName ?? '—'),
                       _mono(
-                          context,
-                          r.isDelivered
-                              ? BuyerLoadsValueScreen._t(r.deliveredTons)
-                              : 'Pending',
-                          muted: !r.isDelivered),
+                        context,
+                        r.isDelivered
+                            ? BuyerLoadsValueScreen._t(r.deliveredTons)
+                            : 'Pending',
+                        muted: !r.isDelivered,
+                      ),
                       _mono(
-                          context,
-                          r.ratePerTon == null
-                              ? '—'
-                              : '${BuyerLoadsValueScreen.money(r.ratePerTon, r.currency)}/t',
-                          muted: r.ratePerTon == null),
+                        context,
+                        r.ratePerTon == null
+                            ? '—'
+                            : '${BuyerLoadsValueScreen.money(r.ratePerTon, r.currency)}/t',
+                        muted: r.ratePerTon == null,
+                      ),
                       _valueCell(context, r),
                       _invoiceCell(context, r),
                       _varianceCell(context, r),
@@ -334,40 +347,41 @@ class _Body extends ConsumerWidget {
   }
 
   Widget _text(BuildContext context, String text) => Text(
-        text,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style:
-            TextStyle(fontSize: 13, color: MlSemantic.of(context).textBody),
-      );
+    text,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: TextStyle(fontSize: 13, color: MlSemantic.of(context).textBody),
+  );
 
   Widget _mono(BuildContext context, String text, {bool muted = false}) => Text(
-        text,
-        textAlign: TextAlign.right,
-        maxLines: 1,
-        style: TextStyle(
-          fontFamily: MlTokens.fontMono,
-          fontSize: 12.5,
-          fontWeight: FontWeight.w600,
-          color: muted
-              ? MlSemantic.of(context).textFaint
-              : MlSemantic.of(context).textStrong,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
-      );
+    text,
+    textAlign: TextAlign.right,
+    maxLines: 1,
+    style: TextStyle(
+      fontFamily: MlTokens.fontMono,
+      fontSize: 12.5,
+      fontWeight: FontWeight.w600,
+      color: muted
+          ? MlSemantic.of(context).textFaint
+          : MlSemantic.of(context).textStrong,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    ),
+  );
 
   /// The load's Rand value: payable when quality-adjusted (tooltip shows the
   /// unadjusted delivered value), else delivered, else loaded.
   Widget _valueCell(BuildContext context, BuyerLoadValue r) {
     final v = r.payableValue ?? r.deliveredValue ?? r.loadedValue;
     if (v == null) return _mono(context, '—', muted: true);
-    final adjusted = r.payableValue != null &&
+    final adjusted =
+        r.payableValue != null &&
         r.deliveredValue != null &&
         (r.payableValue! - r.deliveredValue!).abs() > 0.005;
     final cell = _mono(context, BuyerLoadsValueScreen.money(v, r.currency));
     if (!adjusted) return cell;
     return Tooltip(
-      message: 'Quality-adjusted from '
+      message:
+          'Quality-adjusted from '
           '${BuyerLoadsValueScreen.money(r.deliveredValue, r.currency)} '
           '(payable ${r.payableTons?.toStringAsFixed(2)} t'
           '${r.gradeFactor != null ? ' × grade ${r.gradeFactor!.toStringAsFixed(3)}' : ''})',
@@ -376,11 +390,12 @@ class _Body extends ConsumerWidget {
   }
 
   Widget _invoiceCell(BuildContext context, BuyerLoadValue r) {
-
     final semantic = MlSemantic.of(context);
     if (!r.hasInvoice) {
-      return Text('Not captured',
-          style: TextStyle(fontSize: 12.5, color: semantic.textFaint));
+      return Text(
+        'Not captured',
+        style: TextStyle(fontSize: 12.5, color: semantic.textFaint),
+      );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -498,9 +513,11 @@ class _InvoiceDialogState extends ConsumerState<_InvoiceDialog> {
     final r = widget.row;
     _number = TextEditingController(text: r.invoiceNumber ?? '');
     _amount = TextEditingController(
-        text: r.invoicedAmount?.toStringAsFixed(2) ?? '');
+      text: r.invoicedAmount?.toStringAsFixed(2) ?? '',
+    );
     _tons = TextEditingController(
-        text: r.invoicedTons?.toStringAsFixed(2) ?? '');
+      text: r.invoicedTons?.toStringAsFixed(2) ?? '',
+    );
     _notes = TextEditingController();
     if (r.invoiceDate != null) _date = r.invoiceDate!;
   }
@@ -520,13 +537,18 @@ class _InvoiceDialogState extends ConsumerState<_InvoiceDialog> {
     final number = _number.text.trim();
     final amount = double.tryParse(_amount.text.trim());
     if (number.isEmpty || amount == null || amount < 0) {
-      messenger.showSnackBar(const SnackBar(
-          content: Text('Enter the invoice number and a valid amount.')));
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Enter the invoice number and a valid amount.'),
+        ),
+      );
       return;
     }
     setState(() => _saving = true);
     try {
-      await ref.read(buyerValueServiceProvider).saveInvoice(
+      await ref
+          .read(buyerValueServiceProvider)
+          .saveInvoice(
             tripId: widget.row.tripId,
             buyerCompanyId: widget.buyerCompanyId,
             invoiceNumber: number,
@@ -539,7 +561,10 @@ class _InvoiceDialogState extends ConsumerState<_InvoiceDialog> {
     } catch (e) {
       if (mounted) setState(() => _saving = false);
       messenger.showSnackBar(
-          SnackBar(content: Text('Could not save the invoice. ${friendlyError(e)}')));
+        SnackBar(
+          content: Text('Could not save the invoice. ${friendlyError(e)}'),
+        ),
+      );
     }
   }
 
@@ -580,7 +605,8 @@ class _InvoiceDialogState extends ConsumerState<_InvoiceDialog> {
                     child: TextField(
                       controller: _amount,
                       keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
+                        decimal: true,
+                      ),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       ],
@@ -596,7 +622,8 @@ class _InvoiceDialogState extends ConsumerState<_InvoiceDialog> {
                     child: TextField(
                       controller: _tons,
                       keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
+                        decimal: true,
+                      ),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       ],
@@ -613,7 +640,8 @@ class _InvoiceDialogState extends ConsumerState<_InvoiceDialog> {
               OutlinedButton.icon(
                 icon: const Icon(Icons.event_outlined, size: 18),
                 label: Text(
-                    'Invoice date: ${DateFormat('dd MMM yyyy').format(_date)}'),
+                  'Invoice date: ${DateFormat('dd MMM yyyy').format(_date)}',
+                ),
                 onPressed: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -648,7 +676,8 @@ class _InvoiceDialogState extends ConsumerState<_InvoiceDialog> {
               ? const SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2))
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : const Text('Save invoice'),
         ),
       ],

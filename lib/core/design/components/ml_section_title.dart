@@ -66,13 +66,57 @@ class MlSectionTitle extends StatelessWidget {
     return Padding(
       padding: margin,
       child: LayoutBuilder(
-        builder: (context, constraints) => _row(
-          context,
-          semantic,
-          glass,
-          hasTrailing: hasTrailing,
-          maxWidth: constraints.maxWidth,
-        ),
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth;
+
+          // ── When half a row is not enough for either half ──────────────
+          //
+          // The trailing block is capped at 50% of the row (see _row), and
+          // that was the right fix for the 44px overflow it was written for.
+          // A cap cannot help once BOTH halves need more than half: at 360px
+          // and text scale 1.6 the title's longest word and the meta's
+          // longest word each want more than 180px, and the row overflowed
+          // by 16px whatever the cap said. The `action` slot is unflexed on
+          // top of that -- its own comment predicted this exact failure and
+          // sent the fix here.
+          //
+          // Below this floor the trailing block goes underneath. Same
+          // reasoning as MlSectionHead: a header laid out side by side is a
+          // desktop shape, and on a phone at an accessibility text size
+          // there is no width left to divide.
+          final scale = MediaQuery.textScalerOf(context).scale(11.5) / 11.5;
+          final stacked = (hasTrailing || action != null) &&
+              maxWidth.isFinite &&
+              maxWidth < 400 * scale;
+
+          if (!stacked) {
+            return _row(
+              context,
+              semantic,
+              glass,
+              hasTrailing: hasTrailing,
+              maxWidth: maxWidth,
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // The title alone, with the whole width to itself.
+              _row(context, semantic, glass,
+                  hasTrailing: false, maxWidth: maxWidth, withAction: false),
+              const SizedBox(height: 8),
+              if (hasTrailing)
+                _trailing(context, glass,
+                    cap: maxWidth, alignEnd: false),
+              if (action != null) ...[
+                if (hasTrailing) const SizedBox(height: 8),
+                Align(alignment: Alignment.centerLeft, child: action!),
+              ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -83,6 +127,7 @@ class MlSectionTitle extends StatelessWidget {
     MlGlass glass, {
     required bool hasTrailing,
     required double maxWidth,
+    bool withAction = true,
   }) {
     // Half the row, and never more. See the note on the trailing block below
     // for why this is a cap rather than a flex.
@@ -162,51 +207,68 @@ class MlSectionTitle extends StatelessWidget {
           // The meta is deliberately allowed to WRAP rather than ellipsise:
           // it carries figures, and '120.00 t mined · 35.0…' is a truncated
           // number, which is worse than a second line.
-          ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: trailingCap),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (meta != null)
-                  Text(
-                    meta!,
-                    textAlign: TextAlign.end,
-                    style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 11,
-                      color: glass.inkLo,
-                    ),
-                  ),
-                if (link != null) ...[
-                  if (meta != null) const SizedBox(height: 3),
-                  MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: GestureDetector(
-                      onTap: onLink,
-                      child: Text(
-                        '$link →',
-                        style: TextStyle(
-                          fontFamily: MlGlass.sans,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                          color: glass.accent,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
+          _trailing(context, glass, cap: trailingCap, alignEnd: true),
         ],
         // `action` is left unflexed on purpose: it is a caller-supplied
         // widget, usually a button, and clamping an arbitrary child's width
         // truncates its hit target rather than its text. No call site
         // currently overflows through it; if one ever does, the fix belongs
         // at that call site, where what may be dropped is known.
-        if (action != null) ...[const SizedBox(width: 10), action!],
+        if (action != null && withAction) ...[
+          const SizedBox(width: 10),
+          action!,
+        ],
       ],
+    );
+  }
+
+  /// The meta / link block.
+  ///
+  /// Right-aligned and capped when it sits beside the title; left-aligned and
+  /// full width when [build] has moved it underneath.
+  Widget _trailing(
+    BuildContext context,
+    MlGlass glass, {
+    required double cap,
+    required bool alignEnd,
+  }) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: cap),
+      child: Column(
+        crossAxisAlignment:
+            alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (meta != null)
+            Text(
+              meta!,
+              textAlign: alignEnd ? TextAlign.end : TextAlign.start,
+              style: TextStyle(
+                fontFamily: MlGlass.sans,
+                fontSize: 11,
+                color: glass.inkLo,
+              ),
+            ),
+          if (link != null) ...[
+            if (meta != null) const SizedBox(height: 3),
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: onLink,
+                child: Text(
+                  '$link →',
+                  style: TextStyle(
+                    fontFamily: MlGlass.sans,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: glass.accent,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

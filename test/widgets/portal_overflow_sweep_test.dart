@@ -74,7 +74,7 @@ import 'package:flutter_application_1/features/portal/screens/tons_out_detail_sc
 /// Narrow phone, small tablet, desktop rail width. The 360 is the one that
 /// matters most: drivers and security run this on a phone.
 const _widths = <double>[360, 800, 1280];
-const _scales = <double>[0.85, 1.0, 1.3];
+const _scales = <double>[0.85, 1.0, 1.3, 1.6, 2.0];
 
 Future<void> _loadFont(String family, List<String> files) async {
   final loader = FontLoader(family);

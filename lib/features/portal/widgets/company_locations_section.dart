@@ -26,145 +26,235 @@ class CompanyLocationsSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            const MlIconWell(
+          // "Add location" is unflexed, so it takes its natural width from an
+          // unbounded constraint (CLAUDE.md 10.4) and pushed this header over
+          // on a phone. Below the floor it moves underneath rather than being
+          // clipped -- clamping a button truncates its hit target, not just
+          // its label.
+          LayoutBuilder(
+            builder: (context, c) {
+              final scale = MediaQuery.textScalerOf(context).scale(12.5) / 12.5;
+              final stacked = c.maxWidth < 420 * scale;
+
+              final title = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Locations',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: semantic.textStrong,
+                    ),
+                  ),
+                  Text(
+                    'Drivers are routed to the primary location automatically.',
+                    style: TextStyle(fontSize: 12.5, color: semantic.textMuted),
+                  ),
+                ],
+              );
+
+              final addButton = MlButton.tonal(
+                label: 'Add location',
+                icon: Icons.add_location_alt_outlined,
+                onPressed: () => _addOrEdit(context, ref),
+              );
+
+              const well = MlIconWell(
                 icon: Icons.location_on_outlined,
                 tone: MlTone.accent,
                 size: 40,
-                radius: 12),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
+                radius: 12,
+              );
+
+              if (stacked) {
+                return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Locations',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: semantic.textStrong)),
-                    Text('Drivers are routed to the primary location automatically.',
-                        style:
-                            TextStyle(fontSize: 12.5, color: semantic.textMuted)),
-                  ]),
-            ),
-            MlButton.tonal(
-                label: 'Add location',
-                icon: Icons.add_location_alt_outlined,
-                onPressed: () => _addOrEdit(context, ref)),
-          ]),
+                    Row(
+                      children: [
+                        well,
+                        const SizedBox(width: 12),
+                        Expanded(child: title),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Align(alignment: Alignment.centerLeft, child: addButton),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  well,
+                  const SizedBox(width: 12),
+                  Expanded(child: title),
+                  addButton,
+                ],
+              );
+            },
+          ),
           const SizedBox(height: 14),
           async.when(
             loading: () => const Padding(
-                padding: EdgeInsets.all(18),
-                child: Center(child: CircularProgressIndicator())),
+              padding: EdgeInsets.all(18),
+              child: Center(child: CircularProgressIndicator()),
+            ),
             error: (e, _) => MlLoadFailure(
-                icon: Icons.wifi_off_rounded,
-                subject: 'your saved locations',
-                error: e,
-                onRetry: () => ref.invalidate(companyLocationsProvider(companyId))),
+              icon: Icons.wifi_off_rounded,
+              subject: 'your saved locations',
+              error: e,
+              onRetry: () =>
+                  ref.invalidate(companyLocationsProvider(companyId)),
+            ),
             data: (rows) => rows.isEmpty
                 ? const MlEmptyState(
                     icon: Icons.add_location_alt_outlined,
                     title: 'No locations saved yet.',
                     message:
-                        'Add your collection point so drivers get directions automatically.')
+                        'Add your collection point so drivers get directions automatically.',
+                  )
                 : Column(
-                    children: [for (final l in rows) _row(context, ref, l, semantic)]),
+                    children: [
+                      for (final l in rows) _row(context, ref, l, semantic),
+                    ],
+                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _row(BuildContext context, WidgetRef ref, CompanyLocation l,
-      MlSemantic semantic) {
+  Widget _row(
+    BuildContext context,
+    WidgetRef ref,
+    CompanyLocation l,
+    MlSemantic semantic,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: semantic.divider))),
-      child: Row(children: [
-        Icon(l.isPrimary ? Icons.star_rounded : Icons.location_on_outlined,
+        border: Border(bottom: BorderSide(color: semantic.divider)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            l.isPrimary ? Icons.star_rounded : Icons.location_on_outlined,
             size: 20,
             color: l.isPrimary
                 ? MlTone.done.colors(Theme.of(context).brightness).fg
-                : semantic.textFaint),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(l.name,
-                style: TextStyle(
+                : semantic.textFaint,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.name,
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: semantic.textStrong)),
-            Text(
-                l.point == null
-                    ? l.mapLink
-                    : '${l.point!.latitude.toStringAsFixed(6)}, '
-                        '${l.point!.longitude.toStringAsFixed(6)}'
-                        '${l.isPrimary ? ' · Primary' : ''}',
-                style: TextStyle(
+                    color: semantic.textStrong,
+                  ),
+                ),
+                Text(
+                  l.point == null
+                      ? l.mapLink
+                      : '${l.point!.latitude.toStringAsFixed(6)}, '
+                            '${l.point!.longitude.toStringAsFixed(6)}'
+                            '${l.isPrimary ? ' · Primary' : ''}',
+                  style: TextStyle(
                     fontFamily: 'JetBrainsMono',
                     fontSize: 11.5,
                     color: semantic.textMuted,
                     fontFeatures: const [FontFeature.tabularFigures()],
-                  )),
-          ]),
-        ),
-        if (!l.isPrimary)
-          IconButton(
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (!l.isPrimary)
+            IconButton(
               tooltip: 'Set as primary',
               icon: const Icon(Icons.star_outline_rounded, size: 20),
-              onPressed: () => _mutate(context, ref,
-                  () => ref.read(companyLocationServiceProvider).setPrimary(l.id))),
-        IconButton(
+              onPressed: () => _mutate(
+                context,
+                ref,
+                () => ref.read(companyLocationServiceProvider).setPrimary(l.id),
+              ),
+            ),
+          IconButton(
             tooltip: 'Edit',
             icon: const Icon(Icons.edit_outlined, size: 19),
-            onPressed: () => _addOrEdit(context, ref, existing: l)),
-        IconButton(
+            onPressed: () => _addOrEdit(context, ref, existing: l),
+          ),
+          IconButton(
             tooltip: 'Delete',
             icon: const Icon(Icons.delete_outline_rounded, size: 20),
-            onPressed: () => _delete(context, ref, l)),
-      ]),
+            onPressed: () => _delete(context, ref, l),
+          ),
+        ],
+      ),
     );
   }
 
   Future<void> _mutate(
-      BuildContext context, WidgetRef ref, Future<void> Function() op) async {
+    BuildContext context,
+    WidgetRef ref,
+    Future<void> Function() op,
+  ) async {
     final messenger = ScaffoldMessenger.of(context);
     try {
       await op();
       ref.invalidateIfMounted(companyLocationsProvider(companyId));
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not save. ${friendlyError(e)}')));
+      messenger.showSnackBar(
+        SnackBar(content: Text('Could not save. ${friendlyError(e)}')),
+      );
     }
   }
 
   Future<void> _delete(
-      BuildContext context, WidgetRef ref, CompanyLocation l) async {
+    BuildContext context,
+    WidgetRef ref,
+    CompanyLocation l,
+  ) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete location?'),
-        content: Text('"${l.name}" will be removed. Drivers will no longer be '
-            'routed here automatically.'),
+        content: Text(
+          '"${l.name}" will be removed. Drivers will no longer be '
+          'routed here automatically.',
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Delete')),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
         ],
       ),
     );
     if (ok == true && context.mounted) {
       await _mutate(
-          context, ref, () => ref.read(companyLocationServiceProvider).remove(l.id));
+        context,
+        ref,
+        () => ref.read(companyLocationServiceProvider).remove(l.id),
+      );
     }
   }
 
-  Future<void> _addOrEdit(BuildContext context, WidgetRef ref,
-      {CompanyLocation? existing}) async {
+  Future<void> _addOrEdit(
+    BuildContext context,
+    WidgetRef ref, {
+    CompanyLocation? existing,
+  }) async {
     final result = await showDialog<({String name, String mapLink})>(
       context: context,
       builder: (_) => _LocationEditDialog(existing: existing),
@@ -259,66 +349,83 @@ class _LocationEditDialogState extends State<_LocationEditDialog> {
       title: Text(widget.existing == null ? 'Add location' : 'Edit location'),
       content: SizedBox(
         width: 420,
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
               controller: _name,
               decoration: const InputDecoration(
-                  labelText: 'Name',
-                  hintText: 'e.g. Main gate / Weighbridge 2')),
-          const SizedBox(height: 14),
-          Row(children: [
-            Expanded(
-                child: MlButton.outline(
+                labelText: 'Name',
+                hintText: 'e.g. Main gate / Weighbridge 2',
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: MlButton.outline(
                     label: _mapLink == null ? 'Pick on map' : 'Change on map',
                     icon: Icons.map_outlined,
-                    onPressed: _pickOnMap)),
-          ]),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _link,
-            decoration: InputDecoration(
-              labelText: 'Or paste a Google Maps link',
-              hintText: 'https://maps.app.goo.gl/…',
-              suffixIcon: _resolving
-                  ? const Padding(
-                      padding: EdgeInsets.all(10),
-                      child: SizedBox(
+                    onPressed: _pickOnMap,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _link,
+              decoration: InputDecoration(
+                labelText: 'Or paste a Google Maps link',
+                hintText: 'https://maps.app.goo.gl/…',
+                suffixIcon: _resolving
+                    ? const Padding(
+                        padding: EdgeInsets.all(10),
+                        child: SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2)))
-                  : IconButton(
-                      icon: const Icon(Icons.check_rounded),
-                      onPressed: _useLink),
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : IconButton(
+                        icon: const Icon(Icons.check_rounded),
+                        onPressed: _useLink,
+                      ),
+              ),
+              onSubmitted: (_) => _useLink(),
             ),
-            onSubmitted: (_) => _useLink(),
-          ),
-          const SizedBox(height: 10),
-          if (_error != null)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(_error!,
+            const SizedBox(height: 10),
+            if (_error != null)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  _error!,
                   style: TextStyle(
-                      fontSize: 12.5,
-                      color: MlTone.error
-                          .colors(Theme.of(context).brightness)
-                          .fg)),
-            ),
-          if (_mapLink != null)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Saved point: $_mapLink',
+                    fontSize: 12.5,
+                    color: MlTone.error.colors(Theme.of(context).brightness).fg,
+                  ),
+                ),
+              ),
+            if (_mapLink != null)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Saved point: $_mapLink',
                   style: TextStyle(
-                      fontFamily: 'JetBrainsMono',
-                      fontSize: 11,
-                      color: semantic.textMuted,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    )),
-            ),
-        ]),
+                    fontFamily: 'JetBrainsMono',
+                    fontSize: 11,
+                    color: semantic.textMuted,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
         FilledButton(
           onPressed: () {
             if (_name.text.trim().isEmpty) {
@@ -326,7 +433,9 @@ class _LocationEditDialogState extends State<_LocationEditDialog> {
               return;
             }
             if (_mapLink == null) {
-              setState(() => _error = 'Pick a point on the map or paste a link.');
+              setState(
+                () => _error = 'Pick a point on the map or paste a link.',
+              );
               return;
             }
             Navigator.pop(context, (name: _name.text, mapLink: _mapLink!));

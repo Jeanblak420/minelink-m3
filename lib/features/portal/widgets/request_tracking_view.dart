@@ -29,25 +29,24 @@ class RequestTrackingView extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: MlSectionTitle(
-                  'Request tracking',
-                  meta: async.valueOrNull == null
-                      ? null
-                      : mlCount(async.value!.length, 'request'),
-                  icon: Icons.track_changes_outlined,
-                  margin: EdgeInsets.zero,
-                ),
-              ),
-              IconButton(
-                tooltip: 'Refresh',
-                onPressed: () =>
-                    ref.invalidate(requestTrackingProvider(companyId)),
-                icon: const Icon(Icons.refresh_rounded, size: 20),
-              ),
-            ],
+          // The action goes in the header's own slot rather than a Row wrapped
+          // around it: a Row hands an unflexed button UNBOUNDED width
+          // (CLAUDE.md 10.4) and squeezes the Expanded title to whatever is
+          // left, which on a phone is less than the title needs. The slot
+          // drops the action under the title instead.
+          MlSectionTitle(
+            'Request tracking',
+            meta: async.valueOrNull == null
+                ? null
+                : mlCount(async.value!.length, 'request'),
+            icon: Icons.track_changes_outlined,
+            margin: EdgeInsets.zero,
+            action: IconButton(
+              tooltip: 'Refresh',
+              onPressed: () =>
+                  ref.invalidate(requestTrackingProvider(companyId)),
+              icon: const Icon(Icons.refresh_rounded, size: 20),
+            ),
           ),
           const SizedBox(height: 4),
           Text(

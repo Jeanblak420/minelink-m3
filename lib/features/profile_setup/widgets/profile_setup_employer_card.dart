@@ -46,30 +46,28 @@ class ProfileSetupEmployerCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: MlSectionTitle('Profile setup',
-                    icon: Icons.checklist_rounded,
-                    // The badge beside this says how *complete* the setup is;
-                    // the meta says what is actually outstanding, which is the
-                    // number the employer acts on.
-                    meta: outstanding.isEmpty && expiringOrExpired.isEmpty
-                        ? 'Nothing outstanding'
-                        : mlCount(
-                            outstanding.length + expiringOrExpired.length,
-                            'item needs attention',
-                            'items need attention'),
-                    margin: EdgeInsets.zero),
-              ),
-              MlStatusBadge(
+// The action goes in the header's own slot, not a Row wrapped around
+          // it: a Row hands an unflexed action UNBOUNDED width (CLAUDE.md
+          // 10.4) and squeezes the Expanded title to whatever is left. The
+          // slot drops the action under the title instead.
+          MlSectionTitle('Profile setup',
+              icon: Icons.checklist_rounded,
+              // The badge beside this says how *complete* the setup is;
+              // the meta says what is actually outstanding, which is the
+              // number the employer acts on.
+              meta: outstanding.isEmpty && expiringOrExpired.isEmpty
+                  ? 'Nothing outstanding'
+                  : mlCount(
+                      outstanding.length + expiringOrExpired.length,
+                      'item needs attention',
+                      'items need attention'),
+              margin: EdgeInsets.zero,
+              action: MlStatusBadge(
                 label: s.hasOutstandingRequired
                     ? '${s.completionPercent}% complete'
                     : (s.expiringCount > 0 ? 'Renewals due' : 'Complete'),
                 tone: tone,
-              ),
-            ],
-          ),
+              )),
           const SizedBox(height: 10),
           ClipRRect(
             borderRadius: BorderRadius.circular(MlTokens.rPill),

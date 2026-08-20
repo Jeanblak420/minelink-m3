@@ -33,29 +33,30 @@ class FuelCostsScreen extends ConsumerWidget {
     final costsAsync = ref.watch(operatingCostsProvider(companyId));
     final breakdown =
         ref.watch(vehicleCostBreakdownProvider(companyId)).asData?.value ??
-            const <VehicleCostBreakdown>[];
+        const <VehicleCostBreakdown>[];
 
     return MlPageBody(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    MlPageHeader(
-                      title: 'Fuel & costs',
-                      meta: mlCount(breakdown.length, 'vehicle costed',
-                          'vehicles costed'),
-                      description:
-                          'Log fuel fills and running costs. Odometer readings give '
-                          'you l/100km and cost/km; every cost feeds your Earnings net.',
-                    ),
-                  ],
-                ),
-              ),
+          // Actions live in MlPageHeader's own `actions` slot, not a Row wrapped
+          // around it. That slot makes the title and the actions siblings in one
+          // Wrap, so an action drops under the title when the row runs out of
+          // width -- which it does on a phone, and at an accessibility text size
+          // on a tablet. A Row gives an unflexed button unbounded width instead
+          // (CLAUDE.md 10.4), and a button cannot ellipsize its way out: clamping
+          // one truncates its hit target, not merely its label.
+          MlPageHeader(
+            title: 'Fuel & costs',
+            meta: mlCount(
+              breakdown.length,
+              'vehicle costed',
+              'vehicles costed',
+            ),
+            description:
+                'Log fuel fills and running costs. Odometer readings give '
+                'you l/100km and cost/km; every cost feeds your Earnings net.',
+            actions: [
               IconButton(
                 tooltip: 'Refresh',
                 onPressed: () {
@@ -65,19 +66,19 @@ class FuelCostsScreen extends ConsumerWidget {
                 },
                 icon: const Icon(Icons.refresh_rounded),
               ),
-              const SizedBox(width: 6),
               MlButton.outline(
                 label: 'Log cost',
                 icon: Icons.receipt_outlined,
                 compact: true,
-                onPressed: () => showLogCostDialog(context, ref, companyId: companyId),
+                onPressed: () =>
+                    showLogCostDialog(context, ref, companyId: companyId),
               ),
-              const SizedBox(width: 8),
               MlButton.primary(
                 label: 'Log fuel',
                 icon: Icons.local_gas_station_outlined,
                 compact: true,
-                onPressed: () => showLogFuelDialog(context, ref, companyId: companyId),
+                onPressed: () =>
+                    showLogFuelDialog(context, ref, companyId: companyId),
               ),
             ],
           ),
@@ -104,8 +105,10 @@ class _KpiRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final fuel = breakdown.fold<double>(0, (s, b) => s + b.fuelCost);
     final litres = breakdown.fold<double>(0, (s, b) => s + b.fuelLitres);
-    final tyresTolls =
-        breakdown.fold<double>(0, (s, b) => s + b.tyreCost + b.tollCost);
+    final tyresTolls = breakdown.fold<double>(
+      0,
+      (s, b) => s + b.tyreCost + b.tollCost,
+    );
     // Distance-weighted fleet economy from vehicles that have it.
     double wDist = 0, wL = 0, wC = 0;
     for (final b in breakdown) {
@@ -118,43 +121,50 @@ class _KpiRow extends StatelessWidget {
     final fleetL = wDist > 0 ? wL / wDist : null;
     final fleetCk = wDist > 0 ? wC / wDist : null;
 
-    return LayoutBuilder(builder: (context, c) {
-      final cols = c.maxWidth > 900 ? 5 : (c.maxWidth > 460 ? 2 : 1);
-      const gap = 12.0;
-      final w = (c.maxWidth - gap * (cols - 1)) / cols;
-      final tiles = [
-        MlStatCard(
+    return LayoutBuilder(
+      builder: (context, c) {
+        final cols = c.maxWidth > 900 ? 5 : (c.maxWidth > 460 ? 2 : 1);
+        const gap = 12.0;
+        final w = (c.maxWidth - gap * (cols - 1)) / cols;
+        final tiles = [
+          MlStatCard(
             label: 'Fuel spend',
             value: money(fuel),
             icon: Icons.local_gas_station_outlined,
-            tone: MlTone.warn),
-        MlStatCard(
+            tone: MlTone.warn,
+          ),
+          MlStatCard(
             label: 'Litres',
             value: _num.format(litres),
             icon: Icons.water_drop_outlined,
-            tone: MlTone.transit),
-        MlStatCard(
+            tone: MlTone.transit,
+          ),
+          MlStatCard(
             label: 'Fleet l/100km',
             value: fleetL == null ? '—' : _num1.format(fleetL),
             icon: Icons.speed_outlined,
-            tone: MlTone.accent),
-        MlStatCard(
+            tone: MlTone.accent,
+          ),
+          MlStatCard(
             label: 'Cost / km',
             value: fleetCk == null ? '—' : 'R${_num1.format(fleetCk)}',
             icon: Icons.route_outlined,
-            tone: MlTone.neutral),
-        MlStatCard(
+            tone: MlTone.neutral,
+          ),
+          MlStatCard(
             label: 'Tyres & tolls',
             value: money(tyresTolls),
             icon: Icons.tire_repair_outlined,
-            tone: MlTone.neutral),
-      ];
-      return Wrap(
-        spacing: gap,
-        runSpacing: gap,
-        children: [for (final t in tiles) SizedBox(width: w, child: t)],
-      );
-    });
+            tone: MlTone.neutral,
+          ),
+        ];
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [for (final t in tiles) SizedBox(width: w, child: t)],
+        );
+      },
+    );
   }
 }
 
@@ -162,29 +172,34 @@ class _EconomyCard extends StatelessWidget {
   final List<VehicleCostBreakdown> breakdown;
   const _EconomyCard({required this.breakdown});
 
-  Widget _mono(BuildContext c, String s, {bool strong = false}) => Text(s,
-      textAlign: TextAlign.right,
-      maxLines: 1,
-      style: TextStyle(
-          fontFamily: MlTokens.fontMono,
-          fontSize: 13,
-          fontWeight: strong ? FontWeight.w800 : FontWeight.w600,
-          color: MlSemantic.of(c).textStrong,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ));
+  Widget _mono(BuildContext c, String s, {bool strong = false}) => Text(
+    s,
+    textAlign: TextAlign.right,
+    maxLines: 1,
+    style: TextStyle(
+      fontFamily: MlTokens.fontMono,
+      fontSize: 13,
+      fontWeight: strong ? FontWeight.w800 : FontWeight.w600,
+      color: MlSemantic.of(c).textStrong,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
-    final rows = [...breakdown]..sort((a, b) => b.fuelCost.compareTo(a.fuelCost));
+    final rows = [...breakdown]
+      ..sort((a, b) => b.fuelCost.compareTo(a.fuelCost));
     return MlCard(
       padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          MlSectionTitle('Per vehicle',
-              icon: Icons.local_shipping_outlined,
-              meta: mlCount(rows.length, 'vehicle'),
-              margin: EdgeInsets.zero),
+          MlSectionTitle(
+            'Per vehicle',
+            icon: Icons.local_shipping_outlined,
+            meta: mlCount(rows.length, 'vehicle'),
+            margin: EdgeInsets.zero,
+          ),
           const SizedBox(height: 12),
           if (rows.isEmpty)
             const MlEmptyState(
@@ -207,18 +222,26 @@ class _EconomyCard extends StatelessWidget {
                 for (final b in rows)
                   [
                     Align(
-                        alignment: Alignment.centerLeft,
-                        child:
-                            MlPlatePill(b.reg ?? 'Vehicle', fontSize: 12)),
+                      alignment: Alignment.centerLeft,
+                      child: MlPlatePill(b.reg ?? 'Vehicle', fontSize: 12),
+                    ),
                     _mono(context, _num.format(b.fuelLitres)),
-                    _mono(context, b.lPer100km == null
-                        ? '—'
-                        : _num1.format(b.lPer100km)),
-                    _mono(context,
-                        b.costPerKm == null ? '—' : 'R${_num1.format(b.costPerKm)}'),
+                    _mono(
+                      context,
+                      b.lPer100km == null ? '—' : _num1.format(b.lPer100km),
+                    ),
+                    _mono(
+                      context,
+                      b.costPerKm == null
+                          ? '—'
+                          : 'R${_num1.format(b.costPerKm)}',
+                    ),
                     _mono(context, money(b.fuelCost)),
                     _mono(context, money(b.maintenanceCost)),
-                    _mono(context, money(b.tyreCost + b.tollCost + b.otherCost)),
+                    _mono(
+                      context,
+                      money(b.tyreCost + b.tollCost + b.otherCost),
+                    ),
                   ],
               ],
             ),
@@ -241,47 +264,57 @@ class _FuelListCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          MlSectionTitle('Fuel fills',
-              icon: Icons.local_gas_station_outlined,
-              meta: async.valueOrNull == null
-                  ? null
-                  : mlCount(async.value!.length, 'fill'),
-              margin: EdgeInsets.zero),
+          MlSectionTitle(
+            'Fuel fills',
+            icon: Icons.local_gas_station_outlined,
+            meta: async.valueOrNull == null
+                ? null
+                : mlCount(async.value!.length, 'fill'),
+            margin: EdgeInsets.zero,
+          ),
           const SizedBox(height: 12),
           async.when(
             loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(child: CircularProgressIndicator())),
-            error: (e, _) => Text('Could not load fuel. ${friendlyError(e)}',
-                style: TextStyle(color: semantic.textMuted)),
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, _) => Text(
+              'Could not load fuel. ${friendlyError(e)}',
+              style: TextStyle(color: semantic.textMuted),
+            ),
             data: (fills) {
               if (fills.isEmpty) {
-                return Text('No fuel logged yet.',
-                    style: TextStyle(color: semantic.textMuted));
+                return Text(
+                  'No fuel logged yet.',
+                  style: TextStyle(color: semantic.textMuted),
+                );
               }
-              return Column(children: [
-                for (final f in fills)
-                  _Line(
-                    plate: f.reg ?? 'Vehicle',
-                    primary:
-                        '${_num1.format(f.litres)} L · ${money(f.costZar)}'
-                        '${f.pricePerLitre != null ? ' · R${_num1.format(f.pricePerLitre)}/L' : ''}',
-                    secondary:
-                        '${_dateFmt.format(MlTime.sast(f.filledAt))}'
-                        '${f.odometerKm != null ? ' · ${_num.format(f.odometerKm)} km' : ''}'
-                        '${f.station != null ? ' · ${f.station}' : ''}',
-                    onDelete: () async {
-                      final messenger = ScaffoldMessenger.of(context);
-                      try {
-                        await ref.read(fuelServiceProvider).deleteFuel(f.id);
-                        _refresh(ref, companyId);
-                      } catch (e) {
-                        messenger.showSnackBar(
-                            SnackBar(content: Text(friendlyError(e))));
-                      }
-                    },
-                  ),
-              ]);
+              return Column(
+                children: [
+                  for (final f in fills)
+                    _Line(
+                      plate: f.reg ?? 'Vehicle',
+                      primary:
+                          '${_num1.format(f.litres)} L · ${money(f.costZar)}'
+                          '${f.pricePerLitre != null ? ' · R${_num1.format(f.pricePerLitre)}/L' : ''}',
+                      secondary:
+                          '${_dateFmt.format(MlTime.sast(f.filledAt))}'
+                          '${f.odometerKm != null ? ' · ${_num.format(f.odometerKm)} km' : ''}'
+                          '${f.station != null ? ' · ${f.station}' : ''}',
+                      onDelete: () async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        try {
+                          await ref.read(fuelServiceProvider).deleteFuel(f.id);
+                          _refresh(ref, companyId);
+                        } catch (e) {
+                          messenger.showSnackBar(
+                            SnackBar(content: Text(friendlyError(e))),
+                          );
+                        }
+                      },
+                    ),
+                ],
+              );
             },
           ),
         ],
@@ -303,46 +336,56 @@ class _CostListCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          MlSectionTitle('Running costs',
-              icon: Icons.receipt_long_outlined,
-              meta: async.valueOrNull == null
-                  ? null
-                  : mlCount(async.value!.length, 'entry', 'entries'),
-              margin: EdgeInsets.zero),
+          MlSectionTitle(
+            'Running costs',
+            icon: Icons.receipt_long_outlined,
+            meta: async.valueOrNull == null
+                ? null
+                : mlCount(async.value!.length, 'entry', 'entries'),
+            margin: EdgeInsets.zero,
+          ),
           const SizedBox(height: 12),
           async.when(
             loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(child: CircularProgressIndicator())),
-            error: (e, _) => Text('Could not load costs. ${friendlyError(e)}',
-                style: TextStyle(color: semantic.textMuted)),
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, _) => Text(
+              'Could not load costs. ${friendlyError(e)}',
+              style: TextStyle(color: semantic.textMuted),
+            ),
             data: (costs) {
               if (costs.isEmpty) {
-                return Text('No tyre/toll/other costs logged yet.',
-                    style: TextStyle(color: semantic.textMuted));
+                return Text(
+                  'No tyre/toll/other costs logged yet.',
+                  style: TextStyle(color: semantic.textMuted),
+                );
               }
-              return Column(children: [
-                for (final c in costs)
-                  _Line(
-                    plate: c.reg ?? 'Vehicle',
-                    primary: '${c.kind.label} · ${money(c.costZar)}',
-                    secondary:
-                        '${_dateFmt.format(MlTime.sast(c.incurredAt))}'
-                        '${c.description != null ? ' · ${c.description}' : ''}',
-                    onDelete: () async {
-                      final messenger = ScaffoldMessenger.of(context);
-                      try {
-                        await ref
-                            .read(fuelServiceProvider)
-                            .deleteOperatingCost(c.id);
-                        _refresh(ref, companyId);
-                      } catch (e) {
-                        messenger.showSnackBar(
-                            SnackBar(content: Text(friendlyError(e))));
-                      }
-                    },
-                  ),
-              ]);
+              return Column(
+                children: [
+                  for (final c in costs)
+                    _Line(
+                      plate: c.reg ?? 'Vehicle',
+                      primary: '${c.kind.label} · ${money(c.costZar)}',
+                      secondary:
+                          '${_dateFmt.format(MlTime.sast(c.incurredAt))}'
+                          '${c.description != null ? ' · ${c.description}' : ''}',
+                      onDelete: () async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        try {
+                          await ref
+                              .read(fuelServiceProvider)
+                              .deleteOperatingCost(c.id);
+                          _refresh(ref, companyId);
+                        } catch (e) {
+                          messenger.showSnackBar(
+                            SnackBar(content: Text(friendlyError(e))),
+                          );
+                        }
+                      },
+                    ),
+                ],
+              );
             },
           ),
         ],
@@ -376,13 +419,17 @@ class _Line extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(primary,
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: semantic.textStrong)),
-                Text(secondary,
-                    style:
-                        TextStyle(fontSize: 12.5, color: semantic.textMuted)),
+                Text(
+                  primary,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: semantic.textStrong,
+                  ),
+                ),
+                Text(
+                  secondary,
+                  style: TextStyle(fontSize: 12.5, color: semantic.textMuted),
+                ),
               ],
             ),
           ),
@@ -474,7 +521,9 @@ class _LogFuelDialogState extends ConsumerState<_LogFuelDialog> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
-      await ref.read(fuelServiceProvider).logFuel(
+      await ref
+          .read(fuelServiceProvider)
+          .logFuel(
             companyId: widget.companyId,
             vehicleId: _vehicleId!,
             litres: litres,
@@ -506,7 +555,8 @@ class _LogFuelDialogState extends ConsumerState<_LogFuelDialog> {
         : null;
     // Last recorded odometer for the chosen vehicle — used to show the distance
     // since the last fill and a live l/100km, so a wrong reading is obvious.
-    final fills = ref.watch(fuelEntriesProvider(widget.companyId)).asData?.value ??
+    final fills =
+        ref.watch(fuelEntriesProvider(widget.companyId)).asData?.value ??
         const <FuelEntry>[];
     double? lastOdo;
     for (final f in fills) {
@@ -526,7 +576,8 @@ class _LogFuelDialogState extends ConsumerState<_LogFuelDialog> {
         final dist = odo - lastOdo;
         sinceLast = '+${_num.format(dist)} km since last fill';
         if (litres != null && litres > 0 && dist > 0) {
-          sinceLast = '$sinceLast · ≈ ${_num1.format(litres / (dist / 100))} l/100km';
+          sinceLast =
+              '$sinceLast · ≈ ${_num1.format(litres / (dist / 100))} l/100km';
         }
       }
     }
@@ -552,59 +603,74 @@ class _LogFuelDialogState extends ConsumerState<_LogFuelDialog> {
                   items: [
                     for (final v in vehicles)
                       DropdownMenuItem(
-                          value: v.id,
-                          child: Text(v.vehicleRegistrationNumber)),
+                        value: v.id,
+                        child: Text(v.vehicleRegistrationNumber),
+                      ),
                   ],
-                  onChanged:
-                      _busy ? null : (v) => setState(() => _vehicleId = v),
+                  onChanged: _busy
+                      ? null
+                      : (v) => setState(() => _vehicleId = v),
                 ),
               const SizedBox(height: 12),
-              Row(children: [
-                Expanded(
-                  child: TextField(
-                    controller: _litres,
-                    enabled: !_busy,
-                    keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true),
-                    onChanged: (_) => setState(() {}),
-                    decoration: const InputDecoration(
-                        labelText: 'Litres', suffixText: 'L'),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _litres,
+                      enabled: !_busy,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: (_) => setState(() {}),
+                      decoration: const InputDecoration(
+                        labelText: 'Litres',
+                        suffixText: 'L',
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _cost,
-                    enabled: !_busy,
-                    keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true),
-                    onChanged: (_) => setState(() {}),
-                    decoration: const InputDecoration(
-                        labelText: 'Cost', prefixText: 'R'),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _cost,
+                      enabled: !_busy,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: (_) => setState(() {}),
+                      decoration: const InputDecoration(
+                        labelText: 'Cost',
+                        prefixText: 'R',
+                      ),
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
               if (ppl != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Text('≈ R${_num1.format(ppl)} / litre',
-                      style: TextStyle(
-                          fontSize: 12.5,
-                          color: MlSemantic.of(context).textMuted)),
+                  child: Text(
+                    '≈ R${_num1.format(ppl)} / litre',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: MlSemantic.of(context).textMuted,
+                    ),
+                  ),
                 ),
               const SizedBox(height: 12),
               TextField(
                 controller: _odo,
                 enabled: !_busy,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
-                    labelText: 'Odometer (optional)',
-                    helperText: lastOdo != null
-                        ? 'Last: ${_num.format(lastOdo)} km'
-                        : 'Needed for l/100km & cost/km',
-                    suffixText: 'km'),
+                  labelText: 'Odometer (optional)',
+                  helperText: lastOdo != null
+                      ? 'Last: ${_num.format(lastOdo)} km'
+                      : 'Needed for l/100km & cost/km',
+                  suffixText: 'km',
+                ),
               ),
               if (sinceLast != null)
                 Padding(
@@ -624,8 +690,9 @@ class _LogFuelDialogState extends ConsumerState<_LogFuelDialog> {
               TextField(
                 controller: _station,
                 enabled: !_busy,
-                decoration:
-                    const InputDecoration(labelText: 'Station (optional)'),
+                decoration: const InputDecoration(
+                  labelText: 'Station (optional)',
+                ),
               ),
               const SizedBox(height: 12),
               InkWell(
@@ -655,8 +722,9 @@ class _LogFuelDialogState extends ConsumerState<_LogFuelDialog> {
       ),
       actions: [
         TextButton(
-            onPressed: _busy ? null : () => Navigator.of(context).pop(),
-            child: const Text('Cancel')),
+          onPressed: _busy ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
         MlButton.primary(
           label: _busy ? 'Saving…' : 'Log fuel',
           compact: true,
@@ -710,14 +778,15 @@ class _LogCostDialogState extends ConsumerState<_LogCostDialog> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
-      await ref.read(fuelServiceProvider).logOperatingCost(
+      await ref
+          .read(fuelServiceProvider)
+          .logOperatingCost(
             companyId: widget.companyId,
             vehicleId: _vehicleId!,
             kind: _kind,
             costZar: cost,
             incurredAt: _when,
-            description:
-                _desc.text.trim().isEmpty ? null : _desc.text.trim(),
+            description: _desc.text.trim().isEmpty ? null : _desc.text.trim(),
           );
       _refresh(ref, widget.companyId);
       navigator.pop();
@@ -750,8 +819,9 @@ class _LogCostDialogState extends ConsumerState<_LogCostDialog> {
                 items: [
                   for (final v in vehicles)
                     DropdownMenuItem(
-                        value: v.id,
-                        child: Text(v.vehicleRegistrationNumber)),
+                      value: v.id,
+                      child: Text(v.vehicleRegistrationNumber),
+                    ),
                 ],
                 onChanged: _busy ? null : (v) => setState(() => _vehicleId = v),
               ),
@@ -763,23 +833,29 @@ class _LogCostDialogState extends ConsumerState<_LogCostDialog> {
                   for (final k in OperatingCostKind.values)
                     DropdownMenuItem(value: k, child: Text(k.label)),
                 ],
-                onChanged: _busy ? null : (k) => setState(() => _kind = k ?? _kind),
+                onChanged: _busy
+                    ? null
+                    : (k) => setState(() => _kind = k ?? _kind),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _cost,
                 enabled: !_busy,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                decoration:
-                    const InputDecoration(labelText: 'Cost', prefixText: 'R'),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(
+                  labelText: 'Cost',
+                  prefixText: 'R',
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _desc,
                 enabled: !_busy,
-                decoration:
-                    const InputDecoration(labelText: 'Description (optional)'),
+                decoration: const InputDecoration(
+                  labelText: 'Description (optional)',
+                ),
               ),
               const SizedBox(height: 12),
               InkWell(
@@ -809,8 +885,9 @@ class _LogCostDialogState extends ConsumerState<_LogCostDialog> {
       ),
       actions: [
         TextButton(
-            onPressed: _busy ? null : () => Navigator.of(context).pop(),
-            child: const Text('Cancel')),
+          onPressed: _busy ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
         MlButton.primary(
           label: _busy ? 'Saving…' : 'Log cost',
           compact: true,
