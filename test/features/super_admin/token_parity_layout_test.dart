@@ -45,7 +45,8 @@ void main() {
               (ref, orgType) async => <AuditLog>[],
             ),
           ],
-          child: const MaterialApp(
+          child: MaterialApp(
+          theme: AppTheme.darkTheme,
             home: TokenHistoryScreen(),
           ),
         ),
@@ -62,9 +63,10 @@ void main() {
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
       await tester.pumpWidget(
-        const ProviderScope(
+        ProviderScope(
           child: MaterialApp(
-            home: Scaffold(
+            theme: AppTheme.darkTheme,
+            home: const Scaffold(
               body: SingleChildScrollView(
                 child: CompanyTokenRequestsPanel(companyId: 'test-co'),
               ),
@@ -93,9 +95,10 @@ void main() {
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
       await tester.pumpWidget(
-        const ProviderScope(
+        ProviderScope(
           child: MaterialApp(
-            home: Scaffold(
+            theme: AppTheme.darkTheme,
+            home: const Scaffold(
               body: SizedBox(
                 width: wideWidth,
                 child: CompanyTokenRequestsPanel(companyId: 'test-co'),

@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/models.dart';
@@ -52,12 +53,15 @@ Future<void> _pumpAt(
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
-  await tester.pumpWidget(MaterialApp(
-    home: MediaQuery(
-      data: MediaQueryData(textScaler: TextScaler.linear(scale)),
-      child: Scaffold(body: CrashReportsScreen(reports: reports)),
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: AppTheme.darkTheme,
+      home: MediaQuery(
+        data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+        child: Scaffold(body: CrashReportsScreen(reports: reports)),
+      ),
     ),
-  ));
+  );
   await tester.pumpAndSettle();
 }
 
@@ -66,8 +70,9 @@ void main() {
 
   for (final width in <double>[360, 800, 1440]) {
     for (final scale in <double>[0.85, 1.0, 1.3]) {
-      testWidgets('renders without overflow at ${width}px / scale $scale',
-          (tester) async {
+      testWidgets('renders without overflow at ${width}px / scale $scale', (
+        tester,
+      ) async {
         await _pumpAt(tester, width: width, scale: scale, reports: const []);
 
         expect(tester.takeException(), isNull);
@@ -86,45 +91,42 @@ void main() {
   for (final width in <double>[360, 800, 1440]) {
     for (final scale in <double>[0.85, 1.0, 1.3]) {
       testWidgets(
-          'renders a populated list without overflow at ${width}px / scale $scale',
-          (tester) async {
-        await _pumpAt(
-          tester,
-          width: width,
-          scale: scale,
-          reports: _populatedReports,
-        );
+        'renders a populated list without overflow at ${width}px / scale $scale',
+        (tester) async {
+          await _pumpAt(
+            tester,
+            width: width,
+            scale: scale,
+            reports: _populatedReports,
+          );
 
-        expect(tester.takeException(), isNull);
+          expect(tester.takeException(), isNull);
 
-        // The collapsed row shows the full `error` string as its Text data
-        // (ellipsis only affects painting, not the widget's data), so this
-        // proves the unbroken 300-char token actually reached the card.
-        expect(find.text(_longToken), findsOneWidget);
-        expect(find.text('A normal handled error with ordinary spaces in it'),
-            findsOneWidget);
+          // The collapsed row shows the full `error` string as its Text data
+          // (ellipsis only affects painting, not the widget's data), so this
+          // proves the unbroken 300-char token actually reached the card.
+          expect(find.text(_longToken), findsOneWidget);
+          expect(
+            find.text('A normal handled error with ordinary spaces in it'),
+            findsOneWidget,
+          );
 
-        // Fatal vs handled pills — MlStatusBadge uppercases its label.
-        expect(find.text('FATAL'), findsOneWidget);
-        expect(find.text('HANDLED'), findsOneWidget);
+          // Fatal vs handled pills — MlStatusBadge uppercases its label.
+          expect(find.text('FATAL'), findsOneWidget);
+          expect(find.text('HANDLED'), findsOneWidget);
 
-        // Facet chips built from the long platform/app_version combination.
-        expect(find.text(_longPlatform), findsOneWidget);
-        expect(find.text('v$_longVersion'), findsOneWidget);
-      });
+          // Facet chips built from the long platform/app_version combination.
+          expect(find.text(_longPlatform), findsOneWidget);
+          expect(find.text('v$_longVersion'), findsOneWidget);
+        },
+      );
     }
   }
 
-  testWidgets(
-      'expanding a fatal report scrolls its stack trace instead of '
+  testWidgets('expanding a fatal report scrolls its stack trace instead of '
       'widening the page', (tester) async {
     const width = 360.0;
-    await _pumpAt(
-      tester,
-      width: width,
-      scale: 1.0,
-      reports: _populatedReports,
-    );
+    await _pumpAt(tester, width: width, scale: 1.0, reports: _populatedReports);
 
     // Tap the fatal row (its title is the long token) to expand it and
     // actually build the stack-trace scroll box.
@@ -134,8 +136,11 @@ void main() {
 
     final stackText = List.generate(6, _longStackLine).join('\n');
     final stackTextFinder = find.text(stackText);
-    expect(stackTextFinder, findsOneWidget,
-        reason: 'expanding the card must build the stack Text widget');
+    expect(
+      stackTextFinder,
+      findsOneWidget,
+      reason: 'expanding the card must build the stack Text widget',
+    );
 
     // The page itself must not have grown to accommodate the stack trace —
     // it stays exactly the viewport width the test set up.
@@ -145,8 +150,9 @@ void main() {
     // The stack scroll box's own container is bounded to the page (it is a
     // SizedBox(width: double.infinity) inside the card's content column) —
     // not stretched out to the width of the text it holds.
-    final scrollBoxRect =
-        tester.getRect(find.byKey(const ValueKey('stack-scroll-fatal-1')));
+    final scrollBoxRect = tester.getRect(
+      find.byKey(const ValueKey('stack-scroll-fatal-1')),
+    );
     expect(scrollBoxRect.width, lessThanOrEqualTo(scaffoldRect.width + 1));
 
     // But the TEXT inside that box is genuinely wider than the viewport —
@@ -159,12 +165,7 @@ void main() {
 
   testWidgets('a report with no stack trace says so instead of expanding '
       'into nothing', (tester) async {
-    await _pumpAt(
-      tester,
-      width: 360,
-      scale: 1.0,
-      reports: _populatedReports,
-    );
+    await _pumpAt(tester, width: 360, scale: 1.0, reports: _populatedReports);
 
     await tester.tap(
       find.text('A normal handled error with ordinary spaces in it'),

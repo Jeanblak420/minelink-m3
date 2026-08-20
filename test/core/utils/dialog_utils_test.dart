@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_1/core/utils/dialog_utils.dart';
@@ -9,6 +10,7 @@ void main() {
     Future<void> pumpWidth(WidgetTester tester, double screenWidth) async {
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.darkTheme,
           home: MediaQuery(
             data: MediaQueryData(size: Size(screenWidth, 800)),
             child: Builder(

@@ -10,6 +10,7 @@
 // whose every glyph is a full em wide. Against that, this screen's outcome
 // badges "overflow" by 4.4px — an artefact of the test font, not the layout.
 // Fake failures are as expensive as missed ones.
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -65,24 +66,24 @@ Widget _host(
   bool reduceMotion = false,
   double width = _contentWidth,
   double scale = 1.0,
-}) =>
-    MaterialApp(
-      home: Builder(
-        builder: (context) => MediaQuery(
-          // The console is used with reduce-motion on, so the animated tab
-          // switch has to be exercised that way too.
-          data: MediaQuery.of(context).copyWith(
-            disableAnimations: reduceMotion,
-            textScaler: TextScaler.linear(scale),
-          ),
-          child: Scaffold(
-            body: Center(
-              child: SizedBox(width: width, height: 1000, child: child),
-            ),
-          ),
+}) => MaterialApp(
+  theme: AppTheme.darkTheme,
+  home: Builder(
+    builder: (context) => MediaQuery(
+      // The console is used with reduce-motion on, so the animated tab
+      // switch has to be exercised that way too.
+      data: MediaQuery.of(context).copyWith(
+        disableAnimations: reduceMotion,
+        textScaler: TextScaler.linear(scale),
+      ),
+      child: Scaffold(
+        body: Center(
+          child: SizedBox(width: width, height: 1000, child: child),
         ),
       ),
-    );
+    ),
+  ),
+);
 
 void main() {
   setUpAll(() async {
@@ -93,8 +94,9 @@ void main() {
   MlTargetsData sample() => MlTargetsSample.build();
 
   group('short term', () {
-    testWidgets('a closed month renders no input, an open one does',
-        (tester) async {
+    testWidgets('a closed month renders no input, an open one does', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1920, 1080);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -151,14 +153,19 @@ void main() {
   });
 
   group('long term', () {
-    Future<void> openLongTerm(WidgetTester tester,
-        {bool reduceMotion = false}) async {
+    Future<void> openLongTerm(
+      WidgetTester tester, {
+      bool reduceMotion = false,
+    }) async {
       tester.view.physicalSize = const Size(1920, 1080);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(
-        _host(MineLinkTargetsScreen(data: sample()), reduceMotion: reduceMotion),
+        _host(
+          MineLinkTargetsScreen(data: sample()),
+          reduceMotion: reduceMotion,
+        ),
       );
       await tester.pump();
       await tester.tap(find.text('Long term targets & goals'));
@@ -174,8 +181,9 @@ void main() {
       expect(find.text('Progress against each horizon'), findsOneWidget);
     });
 
-    testWidgets('an unreached horizon reads pending, never short',
-        (tester) async {
+    testWidgets('an unreached horizon reads pending, never short', (
+      tester,
+    ) async {
       await openLongTerm(tester);
 
       final d = sample();
@@ -187,8 +195,9 @@ void main() {
       expect(find.text('not reached'), findsWidgets);
     });
 
-    testWidgets('the cycle card shows elapsed days and the reopen date',
-        (tester) async {
+    testWidgets('the cycle card shows elapsed days and the reopen date', (
+      tester,
+    ) async {
       await openLongTerm(tester);
 
       final d = sample();
@@ -220,24 +229,32 @@ void main() {
   // errorFor() with the same strings. The two are built in different files, so
   // this is what stops a rename quietly turning the message off.
   group('a refusal reaches the dial it belongs to', () {
-    testWidgets('a month refusal lands on that month, and nowhere else',
-        (tester) async {
+    testWidgets('a month refusal lands on that month, and nowhere else', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1920, 1080);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
       final d = sample();
-      final current = d.months[d.currentIndex].key;   // '2026-08'
-      await tester.pumpWidget(_host(MineLinkTargetsScreen(
-        data: d,
-        errorFor: (key) =>
-            key == 'm:$current' ? 'Target for $current is closed' : null,
-      )));
+      final current = d.months[d.currentIndex].key; // '2026-08'
+      await tester.pumpWidget(
+        _host(
+          MineLinkTargetsScreen(
+            data: d,
+            errorFor: (key) =>
+                key == 'm:$current' ? 'Target for $current is closed' : null,
+          ),
+        ),
+      );
       await tester.pump();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('Target for $current is closed'), findsOneWidget,
-          reason: 'exactly one dial claims it');
+      expect(
+        find.text('Target for $current is closed'),
+        findsOneWidget,
+        reason: 'exactly one dial claims it',
+      );
     });
 
     testWidgets('a horizon refusal lands on that horizon', (tester) async {
@@ -247,19 +264,24 @@ void main() {
 
       // The sample's cycle is locked, so the horizon dials are read-only and
       // must show no error UI at all — there is no input to correct.
-      await tester.pumpWidget(_host(MineLinkTargetsScreen(
-        data: sample(),
-        initialTab: MlTargetsTab.longTerm,
-        errorFor: (_) => 'should not be shown on a locked cycle',
-      )));
+      await tester.pumpWidget(
+        _host(
+          MineLinkTargetsScreen(
+            data: sample(),
+            initialTab: MlTargetsTab.longTerm,
+            errorFor: (_) => 'should not be shown on a locked cycle',
+          ),
+        ),
+      );
       await tester.pump();
 
       expect(tester.takeException(), isNull);
       expect(find.text('should not be shown on a locked cycle'), findsNothing);
     });
 
-    testWidgets('no errorFor callback renders no error anywhere',
-        (tester) async {
+    testWidgets('no errorFor callback renders no error anywhere', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1920, 1080);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -290,8 +312,10 @@ void main() {
 
           final failure = tester.takeException();
           if (failure != null) {
-            fail('Layout error at width=$width textScale=$scale '
-                'tab=${tab.name}: $failure');
+            fail(
+              'Layout error at width=$width textScale=$scale '
+              'tab=${tab.name}: $failure',
+            );
           }
         }
       }
@@ -322,30 +346,34 @@ void _dialTests() {
   String bigFigure(WidgetTester tester) => tester
       .widgetList<Text>(find.byType(Text))
       .map((w) => w.data ?? '')
-      .firstWhere((d) => d.isNotEmpty && RegExp(r'^[\d,]+$').hasMatch(d),
-          orElse: () => '');
+      .firstWhere(
+        (d) => d.isNotEmpty && RegExp(r'^[\d,]+$').hasMatch(d),
+        orElse: () => '',
+      );
 
   Widget hostDial({required double target, String? errorText}) => MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: Center(
-              child: SizedBox(
-                width: 260,
-                child: MlTargetDial(
-                  tokens: MlGlass.of(context),
-                  label: 'Sep 2026',
-                  target: target,
-                  errorText: errorText,
-                  onChanged: (_) {},
-                ),
-              ),
+    theme: AppTheme.darkTheme,
+    home: Builder(
+      builder: (context) => Scaffold(
+        body: Center(
+          child: SizedBox(
+            width: 260,
+            child: MlTargetDial(
+              tokens: MlGlass.of(context),
+              label: 'Sep 2026',
+              target: target,
+              errorText: errorText,
+              onChanged: (_) {},
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 
-  testWidgets('a refused write keeps what was typed, and says why',
-      (tester) async {
+  testWidgets('a refused write keeps what was typed, and says why', (
+    tester,
+  ) async {
     await tester.pumpWidget(hostDial(target: 450));
     await tester.pump();
     await tester.enterText(find.byType(TextField), '999');
@@ -354,37 +382,49 @@ void _dialTests() {
     // The server refuses, the screen re-reads, and the target comes back
     // unchanged — exactly when a naive didUpdateWidget would wipe the figure
     // the person is in the middle of correcting.
-    await tester.pumpWidget(hostDial(
-      target: 450,
-      errorText: 'Target for 2026-07 is closed and cannot be changed',
-    ));
+    await tester.pumpWidget(
+      hostDial(
+        target: 450,
+        errorText: 'Target for 2026-07 is closed and cannot be changed',
+      ),
+    );
     await tester.pump();
 
-    expect(fieldText(tester), '999',
-        reason: 'the typed value must survive the refusal');
+    expect(
+      fieldText(tester),
+      '999',
+      reason: 'the typed value must survive the refusal',
+    );
     expect(
       find.text('Target for 2026-07 is closed and cannot be changed'),
       findsOneWidget,
     );
   });
 
-  testWidgets('the figure shows the truth while the field keeps the correction',
-      (tester) async {
-    await tester.pumpWidget(hostDial(target: 450));
-    await tester.pump();
-    await tester.enterText(find.byType(TextField), '999');
-    await tester.pump();
+  testWidgets(
+    'the figure shows the truth while the field keeps the correction',
+    (tester) async {
+      await tester.pumpWidget(hostDial(target: 450));
+      await tester.pump();
+      await tester.enterText(find.byType(TextField), '999');
+      await tester.pump();
 
-    // Someone else's edit lands while the refusal is showing.
-    await tester.pumpWidget(hostDial(target: 500, errorText: 'refused'));
-    await tester.pump();
+      // Someone else's edit lands while the refusal is showing.
+      await tester.pumpWidget(hostDial(target: 500, errorText: 'refused'));
+      await tester.pump();
 
-    expect(fieldText(tester), '999', reason: 'correction is not wiped');
-    expect(bigFigure(tester), '500', reason: 'the headline still tells truth');
-  });
+      expect(fieldText(tester), '999', reason: 'correction is not wiped');
+      expect(
+        bigFigure(tester),
+        '500',
+        reason: 'the headline still tells truth',
+      );
+    },
+  );
 
-  testWidgets('with no error, an outside change does update the field',
-      (tester) async {
+  testWidgets('with no error, an outside change does update the field', (
+    tester,
+  ) async {
     await tester.pumpWidget(hostDial(target: 450));
     await tester.pump();
     expect(fieldText(tester), '450');

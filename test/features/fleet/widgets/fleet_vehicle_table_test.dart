@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_model.dart';
@@ -18,9 +19,12 @@ FleetVehicle _sampleVehicle({required String registration}) {
 
 void main() {
   group('FleetVehicleTable layout', () {
-    testWidgets('uses compact cards below compactTableMax width', (tester) async {
+    testWidgets('uses compact cards below compactTableMax width', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.darkTheme,
           home: Scaffold(
             body: SizedBox(
               width: 500,
@@ -41,6 +45,7 @@ void main() {
     testWidgets('uses DataTable at wide width', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.darkTheme,
           home: Scaffold(
             body: SizedBox(
               width: 800,

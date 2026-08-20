@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,8 +15,10 @@ import 'package:flutter_application_1/features/portal/widgets/portal_scaffold.da
 /// 2. The rail behaviour introduced by the nav rebuild (P7-03/04/06) — group
 ///    dropdowns, collapsed-rail flyouts, integer badges and tree-wide search.
 void main() {
-  final mineTree =
-      portalNavTree(orgType: OrgType.mineSupplier, role: UserRole.admin);
+  final mineTree = portalNavTree(
+    orgType: OrgType.mineSupplier,
+    role: UserRole.admin,
+  );
 
   Widget shell({
     String selectedRoute = '/portal/mine',
@@ -24,6 +27,7 @@ void main() {
     void Function(String route)? onNavigate,
   }) {
     return MaterialApp(
+      theme: AppTheme.darkTheme,
       home: PortalScaffold(
         nav: mineTree,
         selectedRoute: selectedRoute,
@@ -58,8 +62,9 @@ void main() {
     addTearDown(tester.view.reset);
   }
 
-  testWidgets('wide layout exposes sidebar navigation to semantics',
-      (tester) async {
+  testWidgets('wide layout exposes sidebar navigation to semantics', (
+    tester,
+  ) async {
     final semantics = tester.ensureSemantics();
     wide(tester);
 
@@ -109,8 +114,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('a leaf navigates to its route, not to a tab index',
-      (tester) async {
+  testWidgets('a leaf navigates to its route, not to a tab index', (
+    tester,
+  ) async {
     wide(tester);
     final taps = <String>[];
     await tester.pumpWidget(shell(onNavigate: taps.add));
@@ -130,8 +136,11 @@ void main() {
     expect(find.text('Quality'), findsOneWidget);
     await tester.tap(find.text('Operations'));
     await tester.pumpAndSettle();
-    expect(find.text('Quality'), findsNothing,
-        reason: 'closing a group must hide its children');
+    expect(
+      find.text('Quality'),
+      findsNothing,
+      reason: 'closing a group must hide its children',
+    );
   });
 
   testWidgets('the group holding the current route stays open', (tester) async {
@@ -143,30 +152,41 @@ void main() {
     expect(find.text('Quality'), findsOneWidget);
     await tester.tap(find.text('Operations'));
     await tester.pumpAndSettle();
-    expect(find.text('Quality'), findsOneWidget,
-        reason: 'the group containing the active route must not close under '
-            'you while you are inside it');
+    expect(
+      find.text('Quality'),
+      findsOneWidget,
+      reason:
+          'the group containing the active route must not close under '
+          'you while you are inside it',
+    );
   });
 
-  testWidgets('a detail route keeps its parent destination selected',
-      (tester) async {
+  testWidgets('a detail route keeps its parent destination selected', (
+    tester,
+  ) async {
     wide(tester);
     // Longest-match selection: exact equality would leave every detail page
     // with no highlight at all.
-    await tester
-        .pumpWidget(shell(selectedRoute: '/portal/mine/trips/abc/waybill'));
+    await tester.pumpWidget(
+      shell(selectedRoute: '/portal/mine/trips/abc/waybill'),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Trips'), findsOneWidget);
   });
 
-  testWidgets('badges render an integer and sum onto the group header',
-      (tester) async {
+  testWidgets('badges render an integer and sum onto the group header', (
+    tester,
+  ) async {
     wide(tester);
-    await tester.pumpWidget(shell(badges: {
-      PortalNavBadge.arrivalsAwaitingCheckIn: 3,
-      PortalNavBadge.loadsAwaitingWeigh: 4,
-    }));
+    await tester.pumpWidget(
+      shell(
+        badges: {
+          PortalNavBadge.arrivalsAwaitingCheckIn: 3,
+          PortalNavBadge.loadsAwaitingWeigh: 4,
+        },
+      ),
+    );
     await tester.pumpAndSettle();
 
     // The portal's badge was a boolean 8 px dot with no count, on one entry.
@@ -178,13 +198,12 @@ void main() {
 
   testWidgets('an empty queue shows no badge at all', (tester) async {
     wide(tester);
-    await tester.pumpWidget(shell(badges: {
-      PortalNavBadge.arrivalsAwaitingCheckIn: 0,
-    }));
+    await tester.pumpWidget(
+      shell(badges: {PortalNavBadge.arrivalsAwaitingCheckIn: 0}),
+    );
     await tester.pumpAndSettle();
 
-    expect(find.text('0'), findsNothing,
-        reason: 'an empty queue is not news');
+    expect(find.text('0'), findsNothing, reason: 'an empty queue is not news');
   });
 
   testWidgets('search reaches a leaf nested inside a group', (tester) async {

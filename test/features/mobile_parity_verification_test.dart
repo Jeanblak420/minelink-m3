@@ -143,7 +143,8 @@ void main() {
               (ref) async => _platformSettings(),
             ),
           ],
-          child: const MaterialApp(home: SuperAdminDashboardV2Screen()),
+          child: MaterialApp(
+          theme: AppTheme.darkTheme,home: SuperAdminDashboardV2Screen()),
         ),
       );
       await tester.pump();
@@ -164,7 +165,8 @@ void main() {
               (ref) async => _platformSettings(),
             ),
           ],
-          child: const MaterialApp(home: RegisterCompanyScreen()),
+          child: MaterialApp(
+          theme: AppTheme.darkTheme,home: RegisterCompanyScreen()),
         ),
       );
       await tester.pumpAndSettle();
@@ -180,6 +182,7 @@ void main() {
       var tapped = false;
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.darkTheme,
           home: Scaffold(
             body: PortalStatCard(
               label: 'Fleet vehicles',
@@ -201,6 +204,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.darkTheme,
           home: Builder(
             builder: (context) => Scaffold(
               body: Center(

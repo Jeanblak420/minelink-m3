@@ -24,6 +24,7 @@
 // required columns keep their required relative order. So the property
 // asserted is SUBSEQUENCE, not equality, and the extra columns are named here
 // so that adding a fourth is a decision someone makes on purpose.
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -127,21 +128,21 @@ Future<void> _loadRealFonts() async {
 List<RawReconRow> _rows() {
   final now = DateTime.now();
   RawReconRow at(String id, Duration ago, double tons) => RawReconRow(
-        tripId: id,
-        tripDate: now.subtract(ago),
-        timeIn: now.subtract(ago),
-        timeOut: now.subtract(ago),
-        waybillNumber: 'TRP-$id',
-        transporterName: 'Roadhaul Logistics',
-        truckReg: 'KVK007MP',
-        destination: 'Richards Bay',
-        product: 'Chrome Ore',
-        sourceName: 'Iron Hills Mining',
-        customerName: 'Atlas Buyer Group',
-        netMass: tons,
-        deliveredTons: tons,
-        varianceTons: 0,
-      );
+    tripId: id,
+    tripDate: now.subtract(ago),
+    timeIn: now.subtract(ago),
+    timeOut: now.subtract(ago),
+    waybillNumber: 'TRP-$id',
+    transporterName: 'Roadhaul Logistics',
+    truckReg: 'KVK007MP',
+    destination: 'Richards Bay',
+    product: 'Chrome Ore',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Atlas Buyer Group',
+    netMass: tons,
+    deliveredTons: tons,
+    varianceTons: 0,
+  );
   return [
     at('today', const Duration(hours: 2), 10),
     at('thisweek', const Duration(days: 3), 20),
@@ -162,6 +163,7 @@ Future<void> _pump(WidgetTester tester, {String? companyId}) async {
         rawReconRowsProvider(companyId).overrideWith((ref) async => _rows()),
       ],
       child: MaterialApp(
+        theme: AppTheme.darkTheme,
         home: Scaffold(
           body: SizedBox(
             width: 1600,
@@ -180,8 +182,9 @@ void main() {
   setUpAll(_loadRealFonts);
 
   group('S6-18 recon column order', () {
-    testWidgets('the eleven required headers are drawn in the required order',
-        (tester) async {
+    testWidgets('the eleven required headers are drawn in the required order', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(2200, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -198,44 +201,63 @@ void main() {
 
       // Guard against a vacuous pass: if the table collapsed to one column
       // every x would be equal and "ascending" would hold trivially.
-      expect(xs.values.toSet().length, _requiredScreen.length,
-          reason: 'headers share an x position - the table did not lay out');
+      expect(
+        xs.values.toSet().length,
+        _requiredScreen.length,
+        reason: 'headers share an x position - the table did not lay out',
+      );
 
       for (var i = 1; i < _requiredScreen.length; i++) {
-        expect(xs[_requiredScreen[i]]!, greaterThan(xs[_requiredScreen[i - 1]]!),
-            reason: '"${_requiredScreen[i]}" must be drawn to the right of '
-                '"${_requiredScreen[i - 1]}"');
+        expect(
+          xs[_requiredScreen[i]]!,
+          greaterThan(xs[_requiredScreen[i - 1]]!),
+          reason:
+              '"${_requiredScreen[i]}" must be drawn to the right of '
+              '"${_requiredScreen[i - 1]}"',
+        );
       }
     });
 
-    testWidgets('the three additional columns sit between Net mass and Time-out',
-        (tester) async {
-      tester.view.physicalSize = const Size(2200, 2400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
+    testWidgets(
+      'the three additional columns sit between Net mass and Time-out',
+      (tester) async {
+        tester.view.physicalSize = const Size(2200, 2400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
 
-      await _pump(tester);
+        await _pump(tester);
 
-      final netMass = tester.getTopLeft(find.text('NET MASS').first).dx;
-      final timeOut = tester.getTopLeft(find.text('TIME-OUT').first).dx;
-      for (final label in _additional) {
-        final x = tester.getTopLeft(find.text(label).first).dx;
-        expect(x, greaterThan(netMass),
-            reason: '"$label" must not displace a required column');
-        expect(x, lessThan(timeOut),
-            reason: '"$label" must stay ahead of Time-out');
-      }
-    });
+        final netMass = tester.getTopLeft(find.text('NET MASS').first).dx;
+        final timeOut = tester.getTopLeft(find.text('TIME-OUT').first).dx;
+        for (final label in _additional) {
+          final x = tester.getTopLeft(find.text(label).first).dx;
+          expect(
+            x,
+            greaterThan(netMass),
+            reason: '"$label" must not displace a required column',
+          );
+          expect(
+            x,
+            lessThan(timeOut),
+            reason: '"$label" must stay ahead of Time-out',
+          );
+        }
+      },
+    );
 
     test('the export headers carry the required order as a subsequence', () {
       final headers = RawReconView.csvHeaders;
       var i = 0;
       for (final want in _requiredExport) {
         final at = headers.indexWhere((h) => h.toUpperCase() == want, i);
-        expect(at, isNot(-1),
-            reason: '"$want" missing from csvHeaders, or out of order. The '
-                'export must carry the CLAUDE.md §4 names in full - the screen '
-                'may abbreviate, the export may not.');
+        expect(
+          at,
+          isNot(-1),
+          reason:
+              '"$want" missing from csvHeaders, or out of order. The '
+              'export must carry the CLAUDE.md §4 names in full - the screen '
+              'may abbreviate, the export may not.',
+        );
         i = at + 1;
       }
       // The export and the screen must not drift apart.
@@ -244,8 +266,9 @@ void main() {
   });
 
   group('S6-19 period cards', () {
-    testWidgets('each card says WHICH window it measures — S6-21',
-        (tester) async {
+    testWidgets('each card says WHICH window it measures — S6-21', (
+      tester,
+    ) async {
       // The windows are ROLLING, which is what §4 specifies ("a row of live
       // summary cards showing **rolling** NET MASS totals"). The labels did
       // not say so, and on 2026-08-16 that was measurably misleading: Iron
@@ -274,8 +297,9 @@ void main() {
       }
     });
 
-    testWidgets('Day/Week/Month/Year/Total render in full words',
-        (tester) async {
+    testWidgets('Day/Week/Month/Year/Total render in full words', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(2200, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -283,9 +307,13 @@ void main() {
       await _pump(tester);
 
       for (final label in ['Day', 'Week', 'Month', 'Year', 'Total']) {
-        expect(find.text(label), findsWidgets,
-            reason: 'the $label card must be labelled in full, not "'
-                '${label[0]}="');
+        expect(
+          find.text(label),
+          findsWidgets,
+          reason:
+              'the $label card must be labelled in full, not "'
+              '${label[0]}="',
+        );
       }
       // The abbreviated forms §4 explicitly rejects.
       for (final abbrev in ['D=', 'W=', 'M=', 'Y=', 'T=']) {
@@ -293,8 +321,7 @@ void main() {
       }
     });
 
-    testWidgets('every window is right, and Total is all-time',
-        (tester) async {
+    testWidgets('every window is right, and Total is all-time', (tester) async {
       tester.view.physicalSize = const Size(2200, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -341,8 +368,9 @@ void main() {
       }
     });
 
-    testWidgets('hiding a card removes it without touching the data',
-        (tester) async {
+    testWidgets('hiding a card removes it without touching the data', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(2200, 2400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -354,11 +382,17 @@ void main() {
       await tester.tap(find.widgetWithText(FilterChip, 'Total'));
       await tester.pumpAndSettle();
 
-      expect(find.text('318.00 t'), findsNothing,
-          reason: 'hiding Total must remove its card');
+      expect(
+        find.text('318.00 t'),
+        findsNothing,
+        reason: 'hiding Total must remove its card',
+      );
       // §4: hiding is display-only. The footer total, which is data, stays.
-      expect(find.textContaining('Total Tons ='), findsOneWidget,
-          reason: 'hiding a card must not remove the underlying data');
+      expect(
+        find.textContaining('Total Tons ='),
+        findsOneWidget,
+        reason: 'hiding a card must not remove the underlying data',
+      );
     });
   });
 }

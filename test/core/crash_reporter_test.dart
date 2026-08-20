@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/telemetry/crash_reporter.dart';
@@ -59,8 +60,9 @@ void main() {
     );
   });
 
-  testWidgets('a widget that throws during build is captured, not swallowed',
-      (tester) async {
+  testWidgets('a widget that throws during build is captured, not swallowed', (
+    tester,
+  ) async {
     // The real path: FlutterError.onError. Installed here rather than trusting
     // that main() did it, so this asserts the wiring and not the intent.
     final previousOnError = FlutterError.onError;
@@ -68,7 +70,10 @@ void main() {
     addTearDown(() => FlutterError.onError = previousOnError);
 
     await tester.pumpWidget(
-      MaterialApp(home: Builder(builder: (_) => throw StateError('build blew up'))),
+      MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: Builder(builder: (_) => throw StateError('build blew up')),
+      ),
     );
 
     // The framework also records it; clearing keeps the test from failing on
@@ -77,7 +82,8 @@ void main() {
     expect(
       sink.reports.where((r) => r.error is StateError),
       isNotEmpty,
-      reason: 'FlutterError.onError must route build failures to the reporter — '
+      reason:
+          'FlutterError.onError must route build failures to the reporter — '
           'before this existed they printed to a console nobody was attached to',
     );
   });
@@ -86,19 +92,22 @@ void main() {
     test('keeps the most recent first and bounds its size', () {
       final s = LoggingReportingSink(historyLimit: 3);
       for (var i = 0; i < 5; i++) {
-        s.report(CrashReport(
-          error: 'e$i',
-          stack: null,
-          at: DateTime(2026, 8, 16, 0, i),
-        ));
+        s.report(
+          CrashReport(
+            error: 'e$i',
+            stack: null,
+            at: DateTime(2026, 8, 16, 0, i),
+          ),
+        );
       }
       expect(s.history.map((r) => r.error).toList(), ['e4', 'e3', 'e2']);
     });
   });
 
   group('the error panel', () {
-    testWidgets('says what happened and what to do, without a Theme',
-        (tester) async {
+    testWidgets('says what happened and what to do, without a Theme', (
+      tester,
+    ) async {
       // It is built from INSIDE a failed build, so it cannot assume a
       // Directionality or a resolvable Theme. Pumped bare on purpose.
       await tester.pumpWidget(
@@ -107,13 +116,20 @@ void main() {
         ),
       );
 
-      expect(find.text('This part of the screen could not be shown'), findsOneWidget);
-      expect(find.textContaining('the fault has been recorded'), findsOneWidget);
+      expect(
+        find.text('This part of the screen could not be shown'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('the fault has been recorded'),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('does not put the exception on screen outside debug',
-        (tester) async {
+    testWidgets('does not put the exception on screen outside debug', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         mlErrorWidgetBuilder(
           FlutterErrorDetails(exception: StateError('SECRET-IDENTIFIER')),
@@ -122,9 +138,13 @@ void main() {
       // Tests run in debug, so the detail IS shown here — which is the point of
       // the branch. Asserting the branch exists rather than asserting a release
       // behaviour the test binary cannot produce.
-      expect(kDebugMode, isTrue,
-          reason: 'flutter test runs in debug; the release branch hides the '
-              'exception text and is covered by inspection, not by this test');
+      expect(
+        kDebugMode,
+        isTrue,
+        reason:
+            'flutter test runs in debug; the release branch hides the '
+            'exception text and is covered by inspection, not by this test',
+      );
       expect(find.textContaining('SECRET-IDENTIFIER'), findsOneWidget);
     });
   });

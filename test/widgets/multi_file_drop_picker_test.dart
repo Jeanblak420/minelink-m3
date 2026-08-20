@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'dart:typed_data';
 
 import 'package:cross_file/cross_file.dart';
@@ -14,7 +15,7 @@ class _FakePickedFile extends PickedAppFile {
   final Uint8List _bytes;
 
   _FakePickedFile(this._name, this._bytes)
-      : super(file: XFile.fromData(_bytes), isImage: false);
+    : super(file: XFile.fromData(_bytes), isImage: false);
 
   @override
   String get name => _name;
@@ -47,6 +48,7 @@ PickedAppFile _fakeFile(String name, {int size = 10}) {
 
 Widget _host(Widget child) {
   return MaterialApp(
+    theme: AppTheme.darkTheme,
     home: Scaffold(body: SingleChildScrollView(child: child)),
   );
 }
@@ -59,23 +61,28 @@ Future<void> _tapDropZone(WidgetTester tester, String hint) async {
 }
 
 void main() {
-  testWidgets('renders label + hint and adds picked files as chips',
-      (tester) async {
-    final service =
-        _FakeFileSelectionService([_fakeFile('a.pdf'), _fakeFile('b.pdf')]);
+  testWidgets('renders label + hint and adds picked files as chips', (
+    tester,
+  ) async {
+    final service = _FakeFileSelectionService([
+      _fakeFile('a.pdf'),
+      _fakeFile('b.pdf'),
+    ]);
     var files = <PickedRequestFile>[];
 
     await tester.pumpWidget(
-      _host(StatefulBuilder(
-        builder: (context, setState) => MultiFileDropPicker(
-          label: 'Lab results / reports (PDF)',
-          hint: 'Drag & drop PDFs here, or click to browse.',
-          allowedExtensions: const ['pdf'],
-          files: files,
-          onChanged: (next) => setState(() => files = next),
-          fileSelectionService: service,
+      _host(
+        StatefulBuilder(
+          builder: (context, setState) => MultiFileDropPicker(
+            label: 'Lab results / reports (PDF)',
+            hint: 'Drag & drop PDFs here, or click to browse.',
+            allowedExtensions: const ['pdf'],
+            files: files,
+            onChanged: (next) => setState(() => files = next),
+            fileSelectionService: service,
+          ),
         ),
-      )),
+      ),
     );
 
     expect(find.text('Lab results / reports (PDF)'), findsOneWidget);
@@ -90,43 +97,50 @@ void main() {
     expect(find.text('b.pdf'), findsOneWidget);
   });
 
-  testWidgets('rejects files with a disallowed extension and shows the reason',
-      (tester) async {
-    final service = _FakeFileSelectionService([_fakeFile('notes.txt')]);
-    var changed = false;
+  testWidgets(
+    'rejects files with a disallowed extension and shows the reason',
+    (tester) async {
+      final service = _FakeFileSelectionService([_fakeFile('notes.txt')]);
+      var changed = false;
 
-    await tester.pumpWidget(
-      _host(MultiFileDropPicker(
-        label: 'Lab results',
-        hint: 'Drop here',
-        allowedExtensions: const ['pdf'],
-        files: const [],
-        onChanged: (_) => changed = true,
-        fileSelectionService: service,
-      )),
-    );
+      await tester.pumpWidget(
+        _host(
+          MultiFileDropPicker(
+            label: 'Lab results',
+            hint: 'Drop here',
+            allowedExtensions: const ['pdf'],
+            files: const [],
+            onChanged: (_) => changed = true,
+            fileSelectionService: service,
+          ),
+        ),
+      );
 
-    await _tapDropZone(tester, 'Drop here');
+      await _tapDropZone(tester, 'Drop here');
 
-    expect(changed, isFalse);
-    expect(find.text('notes.txt — not a PDF file'), findsOneWidget);
-  });
+      expect(changed, isFalse);
+      expect(find.text('notes.txt — not a PDF file'), findsOneWidget);
+    },
+  );
 
   testWidgets('rejects files above the size limit', (tester) async {
-    final service = _FakeFileSelectionService(
-        [_fakeFile('big.pdf', size: 2 * 1024 * 1024)]);
+    final service = _FakeFileSelectionService([
+      _fakeFile('big.pdf', size: 2 * 1024 * 1024),
+    ]);
     var changed = false;
 
     await tester.pumpWidget(
-      _host(MultiFileDropPicker(
-        label: 'Lab results',
-        hint: 'Drop here',
-        allowedExtensions: const ['pdf'],
-        maxSizeBytes: 1024 * 1024,
-        files: const [],
-        onChanged: (_) => changed = true,
-        fileSelectionService: service,
-      )),
+      _host(
+        MultiFileDropPicker(
+          label: 'Lab results',
+          hint: 'Drop here',
+          allowedExtensions: const ['pdf'],
+          maxSizeBytes: 1024 * 1024,
+          files: const [],
+          onChanged: (_) => changed = true,
+          fileSelectionService: service,
+        ),
+      ),
     );
 
     await _tapDropZone(tester, 'Drop here');
@@ -135,25 +149,28 @@ void main() {
     expect(find.text('big.pdf — larger than 1 MB'), findsOneWidget);
   });
 
-  testWidgets('single-file mode replaces the previous selection',
-      (tester) async {
+  testWidgets('single-file mode replaces the previous selection', (
+    tester,
+  ) async {
     final service = _FakeFileSelectionService([_fakeFile('new.png')]);
     var files = <PickedRequestFile>[
       PickedRequestFile(name: 'old.png', bytes: Uint8List(4)),
     ];
 
     await tester.pumpWidget(
-      _host(StatefulBuilder(
-        builder: (context, setState) => MultiFileDropPicker(
-          label: 'Picture',
-          hint: 'Drop here',
-          allowMultiple: false,
-          allowedExtensions: const ['png'],
-          files: files,
-          onChanged: (next) => setState(() => files = next),
-          fileSelectionService: service,
+      _host(
+        StatefulBuilder(
+          builder: (context, setState) => MultiFileDropPicker(
+            label: 'Picture',
+            hint: 'Drop here',
+            allowMultiple: false,
+            allowedExtensions: const ['png'],
+            files: files,
+            onChanged: (next) => setState(() => files = next),
+            fileSelectionService: service,
+          ),
         ),
-      )),
+      ),
     );
 
     await _tapDropZone(tester, 'Drop here');
@@ -168,16 +185,18 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      _host(StatefulBuilder(
-        builder: (context, setState) => MultiFileDropPicker(
-          label: 'Lab results',
-          hint: 'Drop here',
-          allowedExtensions: const ['pdf'],
-          files: files,
-          onChanged: (next) => setState(() => files = next),
-          fileSelectionService: _FakeFileSelectionService(const []),
+      _host(
+        StatefulBuilder(
+          builder: (context, setState) => MultiFileDropPicker(
+            label: 'Lab results',
+            hint: 'Drop here',
+            allowedExtensions: const ['pdf'],
+            files: files,
+            onChanged: (next) => setState(() => files = next),
+            fileSelectionService: _FakeFileSelectionService(const []),
+          ),
         ),
-      )),
+      ),
     );
 
     expect(find.byType(InputChip), findsOneWidget);

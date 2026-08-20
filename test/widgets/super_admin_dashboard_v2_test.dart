@@ -3,6 +3,7 @@
 // unbounded-width Flexible in the org-card metrics, and a coloured left border
 // combined with a borderRadius (legal in CSS, an assertion in Flutter). These
 // tests render the screen so neither can come back unnoticed.
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,12 +13,13 @@ import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/m
 import '../fixtures/ml_sample_data.dart';
 
 Widget _host(Widget child, double width) => MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: SizedBox(width: width, height: 900, child: child),
-        ),
-      ),
-    );
+  theme: AppTheme.darkTheme,
+  home: Scaffold(
+    body: Center(
+      child: SizedBox(width: width, height: 900, child: child),
+    ),
+  ),
+);
 
 /// The width the super-admin shell actually hands the content area on a 1920px
 /// window, measured against the real shell: 1660 minus the screen's own 24px
@@ -53,8 +55,7 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      await tester
-          .pumpWidget(_host(_sampleDashboard(), _contentWidth));
+      await tester.pumpWidget(_host(_sampleDashboard(), _contentWidth));
       await tester.pump();
 
       expect(tester.takeException(), isNull);
@@ -100,39 +101,46 @@ void main() {
       addTearDown(tester.view.reset);
 
       final vm = _emptyVm();
-      await tester.pumpWidget(_host(
-        MineLinkDashboardScreen(
-          orgAggregates: vm.orgAggregates,
-          pendingRequests: vm.pendingRequests,
-          registry: vm.registry,
-          recentOrgs: vm.recentOrgs,
+      await tester.pumpWidget(
+        _host(
+          MineLinkDashboardScreen(
+            orgAggregates: vm.orgAggregates,
+            pendingRequests: vm.pendingRequests,
+            registry: vm.registry,
+            recentOrgs: vm.recentOrgs,
+          ),
+          _contentWidth,
         ),
-        _contentWidth,
-      ));
+      );
       await tester.pump();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('No organizations of this type in the current window.'),
-          findsOneWidget);
+      expect(
+        find.text('No organizations of this type in the current window.'),
+        findsOneWidget,
+      );
     });
   });
 
-  testWidgets('table tab counts come from the rows, not the drop constants',
-      (tester) async {
+  testWidgets('table tab counts come from the rows, not the drop constants', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1920, 1080);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
     // Only the table is populated, so any count on screen comes from the tabs.
-    await tester.pumpWidget(_host(
-      MineLinkDashboardScreen(
-        orgAggregates: const [],
-        pendingRequests: const [],
-        registry: const [],
-        recentOrgs: MlSampleData.recentOrgs.take(2).toList(),
+    await tester.pumpWidget(
+      _host(
+        MineLinkDashboardScreen(
+          orgAggregates: const [],
+          pendingRequests: const [],
+          registry: const [],
+          recentOrgs: MlSampleData.recentOrgs.take(2).toList(),
+        ),
+        _contentWidth,
       ),
-      _contentWidth,
-    ));
+    );
     await tester.pump();
 
     // The drop hardcoded 24 / 11 / 7 / 6 regardless of the rows beneath.
@@ -197,21 +205,22 @@ void main() {
 /// ---------------------------------------------------------------------------
 void _fabricationTests() {
   group('no fabricated figures on the landing screen', () {
-    testWidgets('the month follows the clock, not the month it was written in',
-        (tester) async {
-      tester.view.physicalSize = const Size(1920, 1080);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
+    testWidgets(
+      'the month follows the clock, not the month it was written in',
+      (tester) async {
+        tester.view.physicalSize = const Size(1920, 1080);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(_host(
-        _sampleDashboard(asOf: DateTime(2027, 3, 9)),
-        _contentWidth,
-      ));
-      await tester.pump();
+        await tester.pumpWidget(
+          _host(_sampleDashboard(asOf: DateTime(2027, 3, 9)), _contentWidth),
+        );
+        await tester.pump();
 
-      expect(find.text('This month · Mar 2027'), findsOneWidget);
-      expect(find.textContaining('Jul 2026'), findsNothing);
-    });
+        expect(find.text('This month · Mar 2027'), findsOneWidget);
+        expect(find.textContaining('Jul 2026'), findsNothing);
+      },
+    );
 
     testWidgets('the 24h registry line names real counts, and says so when '
         'there were none', (tester) async {
@@ -219,36 +228,42 @@ void _fabricationTests() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(_host(
-        _sampleDashboard(newCompanies24h: 1, newUsers24h: 7),
-        _contentWidth,
-      ));
+      await tester.pumpWidget(
+        _host(
+          _sampleDashboard(newCompanies24h: 1, newUsers24h: 7),
+          _contentWidth,
+        ),
+      );
       await tester.pump();
       // Singular/plural is real work here: "+1 companies" reads as a bug to the
       // one person who would notice it was right.
       expect(find.text('Last 24h · +1 company, +7 users'), findsOneWidget);
 
-      await tester.pumpWidget(_host(
-        _sampleDashboard(newCompanies24h: 0, newUsers24h: 0),
-        _contentWidth,
-      ));
+      await tester.pumpWidget(
+        _host(
+          _sampleDashboard(newCompanies24h: 0, newUsers24h: 0),
+          _contentWidth,
+        ),
+      );
       await tester.pump();
       expect(find.text('Last 24h · no new registrations'), findsOneWidget);
       expect(find.textContaining('+2 companies'), findsNothing);
     });
 
-    testWidgets('the pending meta states the count and claims nothing about age',
-        (tester) async {
-      tester.view.physicalSize = const Size(1920, 1080);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
+    testWidgets(
+      'the pending meta states the count and claims nothing about age',
+      (tester) async {
+        tester.view.physicalSize = const Size(1920, 1080);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(_host(_sampleDashboard(), _contentWidth));
-      await tester.pump();
+        await tester.pumpWidget(_host(_sampleDashboard(), _contentWidth));
+        await tester.pump();
 
-      expect(find.textContaining('aging'), findsNothing);
-      expect(find.textContaining(RegExp(r'^\d+ open$')), findsOneWidget);
-    });
+        expect(find.textContaining('aging'), findsNothing);
+        expect(find.textContaining(RegExp(r'^\d+ open$')), findsOneWidget);
+      },
+    );
 
     testWidgets('the expired banner is an alert, so it counts — and stays away '
         'when there is nothing to alert about', (tester) async {
@@ -258,13 +273,15 @@ void _fabricationTests() {
 
       // Nothing expired: no standing amber alert.
       await tester.pumpWidget(
-          _host(_sampleDashboard(expiredCompanies: 0), _contentWidth));
+        _host(_sampleDashboard(expiredCompanies: 0), _contentWidth),
+      );
       await tester.pump();
       expect(find.text('Expired token requests'), findsNothing);
 
       // One expired: shown, counted, and singular.
       await tester.pumpWidget(
-          _host(_sampleDashboard(expiredCompanies: 1), _contentWidth));
+        _host(_sampleDashboard(expiredCompanies: 1), _contentWidth),
+      );
       await tester.pump();
       expect(find.text('Expired token requests'), findsOneWidget);
       expect(
@@ -274,7 +291,8 @@ void _fabricationTests() {
 
       // Five expired: plural, and the invented "oldest 5 days" is gone.
       await tester.pumpWidget(
-          _host(_sampleDashboard(expiredCompanies: 5), _contentWidth));
+        _host(_sampleDashboard(expiredCompanies: 5), _contentWidth),
+      );
       await tester.pump();
       expect(
         find.text('5 companies need approvals or action from the Admin panel.'),
@@ -287,8 +305,9 @@ void _fabricationTests() {
       expect(find.textContaining('days waiting'), findsNothing);
     });
 
-    testWidgets('a caller that knows nothing shows nothing, rather than zero',
-        (tester) async {
+    testWidgets('a caller that knows nothing shows nothing, rather than zero', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1920, 1080);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -309,14 +328,13 @@ MineLinkDashboardScreen _sampleDashboard({
   int? newUsers24h,
   int? expiredCompanies,
   DateTime? asOf,
-}) =>
-    MineLinkDashboardScreen(
-      orgAggregates: MlSampleData.orgAggregates,
-      pendingRequests: MlSampleData.pendingRequests,
-      registry: MlSampleData.registry,
-      recentOrgs: MlSampleData.recentOrgs,
-      newCompanies24h: newCompanies24h,
-      newUsers24h: newUsers24h,
-      expiredCompanies: expiredCompanies,
-      asOf: asOf,
-    );
+}) => MineLinkDashboardScreen(
+  orgAggregates: MlSampleData.orgAggregates,
+  pendingRequests: MlSampleData.pendingRequests,
+  registry: MlSampleData.registry,
+  recentOrgs: MlSampleData.recentOrgs,
+  newCompanies24h: newCompanies24h,
+  newUsers24h: newUsers24h,
+  expiredCompanies: expiredCompanies,
+  asOf: asOf,
+);

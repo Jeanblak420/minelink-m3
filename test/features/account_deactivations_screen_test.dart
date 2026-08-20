@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,11 +24,13 @@ class _RecordingRepo extends SuperAdminRepository {
   // exercised (only `reviewAccountDeactivationRequest` is overridden below),
   // so there is nothing to refresh in the first place.
   _RecordingRepo()
-      : super(SupabaseClient(
+    : super(
+        SupabaseClient(
           'https://example.supabase.co',
           'test-key',
           authOptions: const AuthClientOptions(autoRefreshToken: false),
-        ));
+        ),
+      );
 
   int approveCalls = 0;
   String? lastApprovedRequestId;
@@ -53,7 +56,10 @@ final String _longToken = List.generate(300, (i) => 'x').join();
 const String _longCompanyName =
     'Ekurhuleni Ferrochrome & Alloys Consolidated Mining Operations (Pty) Ltd';
 
-Widget _host(Widget child) => MaterialApp(home: Scaffold(body: child));
+Widget _host(Widget child) => MaterialApp(
+  theme: AppTheme.darkTheme,
+  home: Scaffold(body: child),
+);
 
 final List<AccountDeactivationRow> _populatedRows = <AccountDeactivationRow>[
   AccountDeactivationRow(
@@ -126,12 +132,15 @@ Future<void> _pumpAt(
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 
-  await tester.pumpWidget(MaterialApp(
-    home: MediaQuery(
-      data: MediaQueryData(textScaler: TextScaler.linear(scale)),
-      child: Scaffold(body: AccountDeactivationsScreen(rows: rows)),
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: AppTheme.darkTheme,
+      home: MediaQuery(
+        data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+        child: Scaffold(body: AccountDeactivationsScreen(rows: rows)),
+      ),
     ),
-  ));
+  );
   await tester.pumpAndSettle();
 }
 
@@ -156,15 +165,9 @@ void main() {
   // through the same width x scale matrix and asserts real content rendered.
   for (final width in <double>[360, 800, 1440]) {
     for (final scale in <double>[0.85, 1.0, 1.3]) {
-      testWidgets(
-          'renders a populated mixed-status queue without overflow at '
+      testWidgets('renders a populated mixed-status queue without overflow at '
           '${width}px / scale $scale', (tester) async {
-        await _pumpAt(
-          tester,
-          width: width,
-          scale: scale,
-          rows: _populatedRows,
-        );
+        await _pumpAt(tester, width: width, scale: scale, rows: _populatedRows);
 
         expect(tester.takeException(), isNull);
 
@@ -180,84 +183,137 @@ void main() {
     }
   }
 
-  testWidgets('renders blocker chips for an owner and an active trip',
-      (tester) async {
-    await tester.pumpWidget(_host(AccountDeactivationsScreen(rows: [
-      AccountDeactivationRow(
-        id: 'r1', userId: 'u1', displayName: 'Sipho Ndlovu',
-        email: 's@example.test', companyName: 'Iron Hills Mining',
-        role: 'driver', status: 'pending',
-        requestedAt: DateTime.utc(2026, 8, 19),
-        autoApplyAt: DateTime.utc(2026, 9, 18),
-        isCompanyOwner: true, activeTrips: 2,
+  testWidgets('renders blocker chips for an owner and an active trip', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _host(
+        AccountDeactivationsScreen(
+          rows: [
+            AccountDeactivationRow(
+              id: 'r1',
+              userId: 'u1',
+              displayName: 'Sipho Ndlovu',
+              email: 's@example.test',
+              companyName: 'Iron Hills Mining',
+              role: 'driver',
+              status: 'pending',
+              requestedAt: DateTime.utc(2026, 8, 19),
+              autoApplyAt: DateTime.utc(2026, 9, 18),
+              isCompanyOwner: true,
+              activeTrips: 2,
+            ),
+          ],
+        ),
       ),
-    ])));
+    );
     await tester.pumpAndSettle();
     expect(find.text('Company owner'), findsOneWidget);
     expect(find.text('2 active trips'), findsOneWidget);
   });
 
   testWidgets(
-      'an approved row for a company owner is blocked distinctly from an '
-      'ordinary approval', (tester) async {
-    await tester.pumpWidget(_host(AccountDeactivationsScreen(rows: [
-      AccountDeactivationRow(
-        id: 'stuck', userId: 'u-stuck', displayName: 'Owner Stuck',
-        email: 'o@example.test', companyName: 'Iron Hills Mining',
-        role: 'admin', status: 'approved',
-        requestedAt: DateTime.utc(2026, 8, 1),
-        autoApplyAt: DateTime.utc(2026, 8, 31),
-        isCompanyOwner: true, activeTrips: 0,
-      ),
-      AccountDeactivationRow(
-        id: 'ok', userId: 'u-ok', displayName: 'Ordinary Waiting',
-        email: 'w@example.test', companyName: 'Roadhaul Logistics',
-        role: 'driver', status: 'approved',
-        requestedAt: DateTime.utc(2026, 8, 2),
-        autoApplyAt: DateTime.utc(2026, 9, 1),
-        isCompanyOwner: false, activeTrips: 0,
-      ),
-    ])));
-    await tester.pumpAndSettle();
+    'an approved row for a company owner is blocked distinctly from an '
+    'ordinary approval',
+    (tester) async {
+      await tester.pumpWidget(
+        _host(
+          AccountDeactivationsScreen(
+            rows: [
+              AccountDeactivationRow(
+                id: 'stuck',
+                userId: 'u-stuck',
+                displayName: 'Owner Stuck',
+                email: 'o@example.test',
+                companyName: 'Iron Hills Mining',
+                role: 'admin',
+                status: 'approved',
+                requestedAt: DateTime.utc(2026, 8, 1),
+                autoApplyAt: DateTime.utc(2026, 8, 31),
+                isCompanyOwner: true,
+                activeTrips: 0,
+              ),
+              AccountDeactivationRow(
+                id: 'ok',
+                userId: 'u-ok',
+                displayName: 'Ordinary Waiting',
+                email: 'w@example.test',
+                companyName: 'Roadhaul Logistics',
+                role: 'driver',
+                status: 'approved',
+                requestedAt: DateTime.utc(2026, 8, 2),
+                autoApplyAt: DateTime.utc(2026, 9, 1),
+                isCompanyOwner: false,
+                activeTrips: 0,
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    // The stuck row gets its own chip -- not the same neutral treatment as
-    // an approved row simply waiting for tonight's cron run.
-    expect(find.text('Blocked — owns a company'), findsOneWidget);
-    // The ordinary approval shows no owner chip at all.
-    expect(find.text('Company owner'), findsNothing);
-  });
+      // The stuck row gets its own chip -- not the same neutral treatment as
+      // an approved row simply waiting for tonight's cron run.
+      expect(find.text('Blocked — owns a company'), findsOneWidget);
+      // The ordinary approval shows no owner chip at all.
+      expect(find.text('Company owner'), findsNothing);
+    },
+  );
 
   testWidgets('rejecting requires a note', (tester) async {
-    await tester.pumpWidget(_host(AccountDeactivationsScreen(rows: [
-      AccountDeactivationRow(
-        id: 'r1', userId: 'u1', displayName: 'Sipho Ndlovu',
-        email: 's@example.test', companyName: 'Iron Hills Mining',
-        role: 'driver', status: 'pending',
-        requestedAt: DateTime.utc(2026, 8, 19),
-        autoApplyAt: DateTime.utc(2026, 9, 18),
-        isCompanyOwner: false, activeTrips: 0,
+    await tester.pumpWidget(
+      _host(
+        AccountDeactivationsScreen(
+          rows: [
+            AccountDeactivationRow(
+              id: 'r1',
+              userId: 'u1',
+              displayName: 'Sipho Ndlovu',
+              email: 's@example.test',
+              companyName: 'Iron Hills Mining',
+              role: 'driver',
+              status: 'pending',
+              requestedAt: DateTime.utc(2026, 8, 19),
+              autoApplyAt: DateTime.utc(2026, 9, 18),
+              isCompanyOwner: false,
+              activeTrips: 0,
+            ),
+          ],
+        ),
       ),
-    ])));
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Reject'));
     await tester.pumpAndSettle();
     final button = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Reject request'));
+      find.widgetWithText(FilledButton, 'Reject request'),
+    );
     expect(button.onPressed, isNull, reason: 'empty note must disable Reject');
     expect(find.textContaining('A reason is required'), findsOneWidget);
   });
 
   testWidgets('typing a note enables Reject request', (tester) async {
-    await tester.pumpWidget(_host(AccountDeactivationsScreen(rows: [
-      AccountDeactivationRow(
-        id: 'r1', userId: 'u1', displayName: 'Sipho Ndlovu',
-        email: 's@example.test', companyName: 'Iron Hills Mining',
-        role: 'driver', status: 'pending',
-        requestedAt: DateTime.utc(2026, 8, 19),
-        autoApplyAt: DateTime.utc(2026, 9, 18),
-        isCompanyOwner: false, activeTrips: 0,
+    await tester.pumpWidget(
+      _host(
+        AccountDeactivationsScreen(
+          rows: [
+            AccountDeactivationRow(
+              id: 'r1',
+              userId: 'u1',
+              displayName: 'Sipho Ndlovu',
+              email: 's@example.test',
+              companyName: 'Iron Hills Mining',
+              role: 'driver',
+              status: 'pending',
+              requestedAt: DateTime.utc(2026, 8, 19),
+              autoApplyAt: DateTime.utc(2026, 9, 18),
+              isCompanyOwner: false,
+              activeTrips: 0,
+            ),
+          ],
+        ),
       ),
-    ])));
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Reject'));
     await tester.pumpAndSettle();
@@ -266,23 +322,36 @@ void main() {
     await tester.pumpAndSettle();
 
     final button = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Reject request'));
+      find.widgetWithText(FilledButton, 'Reject request'),
+    );
     expect(button.onPressed, isNotNull);
   });
 
-  testWidgets('a deactivated row offers Reactivate, a pending one does not',
-      (tester) async {
-    await tester.pumpWidget(_host(AccountDeactivationsScreen(rows: [
-      AccountDeactivationRow(
-        id: 'r1', userId: 'u1', displayName: 'Sipho Ndlovu',
-        email: 's@example.test', companyName: 'Iron Hills Mining',
-        role: 'driver', status: 'deactivated',
-        requestedAt: DateTime.utc(2026, 8, 19),
-        autoApplyAt: DateTime.utc(2026, 9, 18),
-        deactivatedAt: DateTime.utc(2026, 8, 20),
-        isCompanyOwner: false, activeTrips: 0,
+  testWidgets('a deactivated row offers Reactivate, a pending one does not', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _host(
+        AccountDeactivationsScreen(
+          rows: [
+            AccountDeactivationRow(
+              id: 'r1',
+              userId: 'u1',
+              displayName: 'Sipho Ndlovu',
+              email: 's@example.test',
+              companyName: 'Iron Hills Mining',
+              role: 'driver',
+              status: 'deactivated',
+              requestedAt: DateTime.utc(2026, 8, 19),
+              autoApplyAt: DateTime.utc(2026, 9, 18),
+              deactivatedAt: DateTime.utc(2026, 8, 20),
+              isCompanyOwner: false,
+              activeTrips: 0,
+            ),
+          ],
+        ),
       ),
-    ])));
+    );
     await tester.pumpAndSettle();
     // Reactivate is the control that makes the whole design honest -- if it
     // is not reachable, "reversible" is a claim nobody can act on.
@@ -290,16 +359,27 @@ void main() {
 
     // A pending row, by contrast, offers Approve/Reject but never Reactivate
     // -- there is nothing to reverse yet.
-    await tester.pumpWidget(_host(AccountDeactivationsScreen(rows: [
-      AccountDeactivationRow(
-        id: 'r2', userId: 'u2', displayName: 'Naledi Mokoena',
-        email: 'n@example.test', companyName: 'Atlas Buyer Group',
-        role: 'management', status: 'pending',
-        requestedAt: DateTime.utc(2026, 8, 19),
-        autoApplyAt: DateTime.utc(2026, 9, 18),
-        isCompanyOwner: false, activeTrips: 0,
+    await tester.pumpWidget(
+      _host(
+        AccountDeactivationsScreen(
+          rows: [
+            AccountDeactivationRow(
+              id: 'r2',
+              userId: 'u2',
+              displayName: 'Naledi Mokoena',
+              email: 'n@example.test',
+              companyName: 'Atlas Buyer Group',
+              role: 'management',
+              status: 'pending',
+              requestedAt: DateTime.utc(2026, 8, 19),
+              autoApplyAt: DateTime.utc(2026, 9, 18),
+              isCompanyOwner: false,
+              activeTrips: 0,
+            ),
+          ],
+        ),
       ),
-    ])));
+    );
     await tester.pumpAndSettle();
     expect(find.text('Reactivate'), findsNothing);
     expect(find.text('Approve'), findsOneWidget);
@@ -307,16 +387,27 @@ void main() {
   });
 
   testWidgets('a pending row shows the auto-apply clock', (tester) async {
-    await tester.pumpWidget(_host(AccountDeactivationsScreen(rows: [
-      AccountDeactivationRow(
-        id: 'r1', userId: 'u1', displayName: 'Sipho Ndlovu',
-        email: 's@example.test', companyName: 'Iron Hills Mining',
-        role: 'driver', status: 'pending',
-        requestedAt: DateTime.utc(2026, 8, 19),
-        autoApplyAt: DateTime.utc(2026, 9, 18),
-        isCompanyOwner: false, activeTrips: 0,
+    await tester.pumpWidget(
+      _host(
+        AccountDeactivationsScreen(
+          rows: [
+            AccountDeactivationRow(
+              id: 'r1',
+              userId: 'u1',
+              displayName: 'Sipho Ndlovu',
+              email: 's@example.test',
+              companyName: 'Iron Hills Mining',
+              role: 'driver',
+              status: 'pending',
+              requestedAt: DateTime.utc(2026, 8, 19),
+              autoApplyAt: DateTime.utc(2026, 9, 18),
+              isCompanyOwner: false,
+              activeTrips: 0,
+            ),
+          ],
+        ),
       ),
-    ])));
+    );
     await tester.pumpAndSettle();
     expect(find.textContaining('Auto-applies in'), findsOneWidget);
   });
@@ -330,106 +421,139 @@ void main() {
   // renders, and which is therefore deliberately NOT subject to this
   // default — see the class doc's second paragraph).
   testWidgets(
-      'the live queue defaults to everything except the terminal states',
-      (tester) async {
-    final rows = <AccountDeactivationRow>[
-      AccountDeactivationRow(
-        id: 'pending-1', userId: 'u1', displayName: 'Pending Person',
-        email: 'p@example.test', companyName: 'Iron Hills Mining',
-        role: 'driver', status: 'pending',
-        requestedAt: DateTime.utc(2026, 8, 19),
-        autoApplyAt: DateTime.utc(2026, 9, 18),
-        isCompanyOwner: false, activeTrips: 0,
-      ),
-      AccountDeactivationRow(
-        id: 'approved-stuck', userId: 'u2', displayName: 'Approved Stuck',
-        email: 'a@example.test', companyName: 'Roadhaul Logistics',
-        role: 'admin', status: 'approved',
-        requestedAt: DateTime.utc(2026, 8, 1),
-        autoApplyAt: DateTime.utc(2026, 8, 31),
-        isCompanyOwner: true, activeTrips: 0,
-      ),
-      AccountDeactivationRow(
-        id: 'deactivated-1', userId: 'u3', displayName: 'Already Gone',
-        email: 'd@example.test', companyName: 'Atlas Buyer Group',
-        role: 'management', status: 'deactivated',
-        requestedAt: DateTime.utc(2026, 7, 1),
-        autoApplyAt: DateTime.utc(2026, 7, 31),
-        deactivatedAt: DateTime.utc(2026, 7, 15),
-        isCompanyOwner: false, activeTrips: 0,
-      ),
-      AccountDeactivationRow(
-        id: 'rejected-1', userId: 'u4', displayName: 'Declined Person',
-        email: 'r@example.test', companyName: 'Atlas Buyer Group',
-        role: 'management', status: 'rejected',
-        requestedAt: DateTime.utc(2026, 6, 1),
-        autoApplyAt: DateTime.utc(2026, 7, 1),
-        isCompanyOwner: false, activeTrips: 0,
-      ),
-    ];
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          accountDeactivationRequestsProvider.overrideWith((ref) async => rows),
-        ],
-        child: const MaterialApp(
-          home: Scaffold(body: AccountDeactivationsScreen()),
+    'the live queue defaults to everything except the terminal states',
+    (tester) async {
+      final rows = <AccountDeactivationRow>[
+        AccountDeactivationRow(
+          id: 'pending-1',
+          userId: 'u1',
+          displayName: 'Pending Person',
+          email: 'p@example.test',
+          companyName: 'Iron Hills Mining',
+          role: 'driver',
+          status: 'pending',
+          requestedAt: DateTime.utc(2026, 8, 19),
+          autoApplyAt: DateTime.utc(2026, 9, 18),
+          isCompanyOwner: false,
+          activeTrips: 0,
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+        AccountDeactivationRow(
+          id: 'approved-stuck',
+          userId: 'u2',
+          displayName: 'Approved Stuck',
+          email: 'a@example.test',
+          companyName: 'Roadhaul Logistics',
+          role: 'admin',
+          status: 'approved',
+          requestedAt: DateTime.utc(2026, 8, 1),
+          autoApplyAt: DateTime.utc(2026, 8, 31),
+          isCompanyOwner: true,
+          activeTrips: 0,
+        ),
+        AccountDeactivationRow(
+          id: 'deactivated-1',
+          userId: 'u3',
+          displayName: 'Already Gone',
+          email: 'd@example.test',
+          companyName: 'Atlas Buyer Group',
+          role: 'management',
+          status: 'deactivated',
+          requestedAt: DateTime.utc(2026, 7, 1),
+          autoApplyAt: DateTime.utc(2026, 7, 31),
+          deactivatedAt: DateTime.utc(2026, 7, 15),
+          isCompanyOwner: false,
+          activeTrips: 0,
+        ),
+        AccountDeactivationRow(
+          id: 'rejected-1',
+          userId: 'u4',
+          displayName: 'Declined Person',
+          email: 'r@example.test',
+          companyName: 'Atlas Buyer Group',
+          role: 'management',
+          status: 'rejected',
+          requestedAt: DateTime.utc(2026, 6, 1),
+          autoApplyAt: DateTime.utc(2026, 7, 1),
+          isCompanyOwner: false,
+          activeTrips: 0,
+        ),
+      ];
 
-    expect(find.text('Pending Person'), findsOneWidget);
-    expect(find.text('Approved Stuck'), findsOneWidget);
-    expect(find.text('Already Gone'), findsNothing);
-    expect(find.text('Declined Person'), findsNothing);
-  });
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            accountDeactivationRequestsProvider.overrideWith(
+              (ref) async => rows,
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: Scaffold(body: AccountDeactivationsScreen()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pending Person'), findsOneWidget);
+      expect(find.text('Approved Stuck'), findsOneWidget);
+      expect(find.text('Already Gone'), findsNothing);
+      expect(find.text('Declined Person'), findsNothing);
+    },
+  );
 
   // Fix round 1 (coordinator + reviewer, 2026-08-19): Approve used to fire
   // immediately with zero friction while Reject asked for confirmation AND a
   // mandatory note -- the lower-consequence action was the guarded one.
 
   testWidgets(
-      'approve asks for confirmation naming the person, and does nothing '
-      'on cancel', (tester) async {
-    final repo = _RecordingRepo();
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [superAdminRepositoryProvider.overrideWithValue(repo)],
-        child: MaterialApp(
-          home: Scaffold(
-            body: AccountDeactivationsScreen(rows: [
-              AccountDeactivationRow(
-                id: 'r1', userId: 'u1', displayName: 'Sipho Ndlovu',
-                email: 's@example.test', companyName: 'Iron Hills Mining',
-                role: 'driver', status: 'pending',
-                requestedAt: DateTime.utc(2026, 8, 19),
-                autoApplyAt: DateTime.utc(2026, 9, 18),
-                isCompanyOwner: false, activeTrips: 0,
+    'approve asks for confirmation naming the person, and does nothing '
+    'on cancel',
+    (tester) async {
+      final repo = _RecordingRepo();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [superAdminRepositoryProvider.overrideWithValue(repo)],
+          child: MaterialApp(
+            theme: AppTheme.darkTheme,
+            home: Scaffold(
+              body: AccountDeactivationsScreen(
+                rows: [
+                  AccountDeactivationRow(
+                    id: 'r1',
+                    userId: 'u1',
+                    displayName: 'Sipho Ndlovu',
+                    email: 's@example.test',
+                    companyName: 'Iron Hills Mining',
+                    role: 'driver',
+                    status: 'pending',
+                    requestedAt: DateTime.utc(2026, 8, 19),
+                    autoApplyAt: DateTime.utc(2026, 9, 18),
+                    isCompanyOwner: false,
+                    activeTrips: 0,
+                  ),
+                ],
               ),
-            ]),
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Approve'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Approve'));
+      await tester.pumpAndSettle();
 
-    // Names the person -- the confirm exists to catch a misclick on the
-    // wrong row, and a generic "are you sure?" cannot do that.
-    expect(find.textContaining('Sipho Ndlovu'), findsWidgets);
-    expect(find.byType(AlertDialog), findsOneWidget);
-    expect(repo.approveCalls, 0,
-        reason: 'must not act until confirmed');
+      // Names the person -- the confirm exists to catch a misclick on the
+      // wrong row, and a generic "are you sure?" cannot do that.
+      expect(find.textContaining('Sipho Ndlovu'), findsWidgets);
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(repo.approveCalls, 0, reason: 'must not act until confirmed');
 
-    await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
-    expect(repo.approveCalls, 0, reason: 'Cancel must not call the RPC');
-    expect(find.byType(AlertDialog), findsNothing);
-  });
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(repo.approveCalls, 0, reason: 'Cancel must not call the RPC');
+      expect(find.byType(AlertDialog), findsNothing);
+    },
+  );
 
   testWidgets('confirming approve calls the review RPC', (tester) async {
     final repo = _RecordingRepo();
@@ -437,17 +561,25 @@ void main() {
       ProviderScope(
         overrides: [superAdminRepositoryProvider.overrideWithValue(repo)],
         child: MaterialApp(
+          theme: AppTheme.darkTheme,
           home: Scaffold(
-            body: AccountDeactivationsScreen(rows: [
-              AccountDeactivationRow(
-                id: 'r7', userId: 'u7', displayName: 'Thabo Khumalo',
-                email: 't@example.test', companyName: 'Roadhaul Logistics',
-                role: 'admin', status: 'pending',
-                requestedAt: DateTime.utc(2026, 8, 19),
-                autoApplyAt: DateTime.utc(2026, 9, 18),
-                isCompanyOwner: false, activeTrips: 0,
-              ),
-            ]),
+            body: AccountDeactivationsScreen(
+              rows: [
+                AccountDeactivationRow(
+                  id: 'r7',
+                  userId: 'u7',
+                  displayName: 'Thabo Khumalo',
+                  email: 't@example.test',
+                  companyName: 'Roadhaul Logistics',
+                  role: 'admin',
+                  status: 'pending',
+                  requestedAt: DateTime.utc(2026, 8, 19),
+                  autoApplyAt: DateTime.utc(2026, 9, 18),
+                  isCompanyOwner: false,
+                  activeTrips: 0,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -473,26 +605,33 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
   });
 
-  testWidgets(
-      'the approve dialog warns when the requester owns a company',
-      (tester) async {
+  testWidgets('the approve dialog warns when the requester owns a company', (
+    tester,
+  ) async {
     final repo = _RecordingRepo();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [superAdminRepositoryProvider.overrideWithValue(repo)],
         child: MaterialApp(
+          theme: AppTheme.darkTheme,
           home: Scaffold(
-            body: AccountDeactivationsScreen(rows: [
-              AccountDeactivationRow(
-                id: 'owner-row', userId: 'u-owner',
-                displayName: 'Owner Person',
-                email: 'o@example.test', companyName: 'Iron Hills Mining',
-                role: 'admin', status: 'pending',
-                requestedAt: DateTime.utc(2026, 8, 19),
-                autoApplyAt: DateTime.utc(2026, 9, 18),
-                isCompanyOwner: true, activeTrips: 0,
-              ),
-            ]),
+            body: AccountDeactivationsScreen(
+              rows: [
+                AccountDeactivationRow(
+                  id: 'owner-row',
+                  userId: 'u-owner',
+                  displayName: 'Owner Person',
+                  email: 'o@example.test',
+                  companyName: 'Iron Hills Mining',
+                  role: 'admin',
+                  status: 'pending',
+                  requestedAt: DateTime.utc(2026, 8, 19),
+                  autoApplyAt: DateTime.utc(2026, 9, 18),
+                  isCompanyOwner: true,
+                  activeTrips: 0,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -506,26 +645,33 @@ void main() {
     expect(find.textContaining('will skip this request'), findsOneWidget);
   });
 
-  testWidgets(
-      'the approve dialog shows no owner warning for a non-owner',
-      (tester) async {
+  testWidgets('the approve dialog shows no owner warning for a non-owner', (
+    tester,
+  ) async {
     final repo = _RecordingRepo();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [superAdminRepositoryProvider.overrideWithValue(repo)],
         child: MaterialApp(
+          theme: AppTheme.darkTheme,
           home: Scaffold(
-            body: AccountDeactivationsScreen(rows: [
-              AccountDeactivationRow(
-                id: 'plain-row', userId: 'u-plain',
-                displayName: 'Ordinary Person',
-                email: 'p@example.test', companyName: 'Roadhaul Logistics',
-                role: 'driver', status: 'pending',
-                requestedAt: DateTime.utc(2026, 8, 19),
-                autoApplyAt: DateTime.utc(2026, 9, 18),
-                isCompanyOwner: false, activeTrips: 0,
-              ),
-            ]),
+            body: AccountDeactivationsScreen(
+              rows: [
+                AccountDeactivationRow(
+                  id: 'plain-row',
+                  userId: 'u-plain',
+                  displayName: 'Ordinary Person',
+                  email: 'p@example.test',
+                  companyName: 'Roadhaul Logistics',
+                  role: 'driver',
+                  status: 'pending',
+                  requestedAt: DateTime.utc(2026, 8, 19),
+                  autoApplyAt: DateTime.utc(2026, 9, 18),
+                  isCompanyOwner: false,
+                  activeTrips: 0,
+                ),
+              ],
+            ),
           ),
         ),
       ),

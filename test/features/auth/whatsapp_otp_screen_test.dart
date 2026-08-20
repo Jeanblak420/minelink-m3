@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/auth/screens/whatsapp_otp_screen.dart';
@@ -18,9 +19,10 @@ void main() {
 
   testWidgets('shows a code field and a verify button', (tester) async {
     await tester.pumpWidget(
-      const ProviderScope(
+      ProviderScope(
         child: MaterialApp(
-          home: WhatsAppOtpScreen(whatsappNumber: '+27821234567'),
+          theme: AppTheme.darkTheme,
+          home: const WhatsAppOtpScreen(whatsappNumber: '+27821234567'),
         ),
       ),
     );
@@ -28,7 +30,6 @@ void main() {
 
     expect(find.text('Enter the code we sent on WhatsApp'), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget);
-    expect(find.widgetWithText(MlButton, 'Verify & continue'),
-        findsOneWidget);
+    expect(find.widgetWithText(MlButton, 'Verify & continue'), findsOneWidget);
   });
 }

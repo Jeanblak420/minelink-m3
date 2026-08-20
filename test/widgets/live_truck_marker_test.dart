@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -18,6 +19,7 @@ void main() {
   Future<Rect> openCard(WidgetTester tester, Alignment markerAt) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: AppTheme.darkTheme,
         home: Scaffold(
           body: Align(
             alignment: markerAt,
@@ -79,9 +81,7 @@ void main() {
     expect(card.top, greaterThanOrEqualTo(44), reason: 'should flip below');
   });
 
-  testWidgets('marker in a corner: card stays fully on-screen', (
-    tester,
-  ) async {
+  testWidgets('marker in a corner: card stays fully on-screen', (tester) async {
     for (final corner in [
       Alignment.topLeft,
       Alignment.topRight,

@@ -11,6 +11,7 @@
 // the test fallback font every glyph is one em wide, so a mono email at
 // fontSize 10.5 measures roughly double its real width and the card's own
 // max-width would report overflows that do not exist in the app.
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -182,6 +183,7 @@ void main() {
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.darkTheme,
           home: Scaffold(
             body: Align(
               alignment: Alignment.bottomLeft,
@@ -377,6 +379,7 @@ void main() {
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.darkTheme,
           home: Scaffold(
             body: Align(
               alignment: Alignment.bottomLeft,

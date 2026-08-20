@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,17 +10,20 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
-    await tester.pumpWidget(UncontrolledProviderScope(
-      container: container,
-      child: const MaterialApp(
-        home: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(56),
-            child: AppNavigationBackButton(),
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: Scaffold(
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(56),
+              child: AppNavigationBackButton(),
+            ),
           ),
         ),
       ),
-    ));
+    );
 
     expect(find.byIcon(Icons.arrow_back_rounded), findsNothing);
   });
@@ -28,24 +32,30 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
-    await tester.pumpWidget(UncontrolledProviderScope(
-      container: container,
-      child: const MaterialApp(
-        home: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(56),
-            child: AppNavigationBackButton(),
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: Scaffold(
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(56),
+              child: AppNavigationBackButton(),
+            ),
           ),
         ),
       ),
-    ));
+    );
 
     container
         .read(navHistoryProvider.notifier)
         .visit(const NavLocation(path: '/home', homeTabIndex: 0), isRoot: true);
     container
         .read(navHistoryProvider.notifier)
-        .visit(const NavLocation(path: '/home', homeTabIndex: 1), isRoot: false);
+        .visit(
+          const NavLocation(path: '/home', homeTabIndex: 1),
+          isRoot: false,
+        );
     await tester.pump();
 
     expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);

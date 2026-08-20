@@ -543,6 +543,47 @@ final guards = <Guard>[
     plantLine: 'final delta = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);',
   ),
   Guard(
+    id: 'test-renders-under-the-app-theme',
+    why: 'a bare `MaterialApp` in a test renders in stock Material\'s type '
+        'scale and stock Material\'s font family — a measurement of text the '
+        'app will never draw. That was survivable while every component '
+        'hard-coded its own TextStyle; it stopped being survivable the moment '
+        'they started taking type from the theme, which is the whole point of '
+        'one design system. TWENTY test files hosted this way, including the '
+        'console and portal layout sweeps, and it is why widening those sweeps '
+        'to phone widths surfaced anything at all: they had been measuring the '
+        'wrong metrics the whole time. Same family as the fallback-font trap '
+        'in CLAUDE.md §10.5 — green about a rendering nobody sees. Pass '
+        '`theme: AppTheme.darkTheme` (or lightTheme, or AppTheme.build).',
+    mode: Mode.block,
+    roots: ['test'],
+    extension: '.dart',
+    // `MaterialApp(` with no `theme:` before the next `MaterialApp(`.
+    //
+    // Three iterations to get right, and each failure is worth naming:
+    //
+    //  * "theme must be the NEXT token" — four false positives. `theme:` is
+    //    rarely the first named argument; `navigatorKey`,
+    //    `debugShowCheckedModeBanner` and a `builder` all commonly precede it.
+    //  * "theme within 400 characters" — one more false positive, on the file
+    //    that explains IN A COMMENT why it uses the real theme. The comment
+    //    ate the window.
+    //  * A plain wide window would then be satisfied by the NEXT
+    //    MaterialApp's theme, turning a false positive into a false negative
+    //    — the worse of the two, and the failure mode this file's own header
+    //    calls "green while blind".
+    //
+    // So: a generous window, bounded by the next constructor.
+    //
+    // spanLines because the formatter decides where the break falls.
+    spanLines: true,
+    pattern: RegExp(r'MaterialApp\((?!(?:(?!MaterialApp\()[\s\S]){0,900}?theme\s*:)'),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'some_test.dart',
+    plantLine: 'await tester.pumpWidget(MaterialApp(home: SizedBox()));',
+    plantWrapped: 'await tester.pumpWidget(MaterialApp(\n  home: SizedBox()));',
+  ),
+  Guard(
     id: 'no-row-around-a-header-that-has-an-actions-slot',
     why: 'wrapping MlPageHeader or MlSectionTitle in a Row to put a button '
         'beside it hands that button UNBOUNDED width (CLAUDE.md §10.4), and a '

@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_1/core/widgets/lazy_indexed_stack.dart';
@@ -21,16 +22,21 @@ class _FieldState extends State<_Field> {
 
 void main() {
   Widget host(int index) => MaterialApp(
-        home: Scaffold(
-          body: LazyIndexedStack(
-            index: index,
-            children: const [_Field(key: ValueKey('a')), _Field(key: ValueKey('b'))],
-          ),
-        ),
-      );
+    theme: AppTheme.darkTheme,
+    home: Scaffold(
+      body: LazyIndexedStack(
+        index: index,
+        children: const [
+          _Field(key: ValueKey('a')),
+          _Field(key: ValueKey('b')),
+        ],
+      ),
+    ),
+  );
 
-  testWidgets('preserves input of a visited child across index changes',
-      (tester) async {
+  testWidgets('preserves input of a visited child across index changes', (
+    tester,
+  ) async {
     await tester.pumpWidget(host(0));
     await tester.enterText(find.byType(TextField), 'half typed');
     await tester.pump();
@@ -49,19 +55,20 @@ void main() {
     expect(find.byKey(const ValueKey('b')), findsOneWidget);
   });
 
-  testWidgets('forgets a visited index after the children list shrinks',
-      (tester) async {
+  testWidgets('forgets a visited index after the children list shrinks', (
+    tester,
+  ) async {
     Widget hostN(int index, int count) => MaterialApp(
-          home: Scaffold(
-            body: LazyIndexedStack(
-              index: index,
-              children: [
-                for (var i = 0; i < count; i++)
-                  _Field(key: ValueKey('f$i')),
-              ],
-            ),
-          ),
-        );
+      theme: AppTheme.darkTheme,
+      home: Scaffold(
+        body: LazyIndexedStack(
+          index: index,
+          children: [
+            for (var i = 0; i < count; i++) _Field(key: ValueKey('f$i')),
+          ],
+        ),
+      ),
+    );
 
     await tester.pumpWidget(hostN(1, 2)); // visit index 1
     expect(find.byKey(const ValueKey('f1')), findsOneWidget);

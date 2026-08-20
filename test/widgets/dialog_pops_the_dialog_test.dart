@@ -31,6 +31,7 @@
 //
 // `tool/dialog_context_check.py` guards the source pattern across the tree;
 // this test guards the behaviour.
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,11 +39,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// route hosts a *nested* Navigator, which is where the "screen" lives.
 Widget _shellApp({required Widget Function(BuildContext) screen}) {
   return MaterialApp(
+    theme: AppTheme.darkTheme,
     home: Navigator(
       onGenerateRoute: (_) => MaterialPageRoute<void>(
-        builder: (innerContext) => Scaffold(
-          body: Builder(builder: screen),
-        ),
+        builder: (innerContext) => Scaffold(body: Builder(builder: screen)),
       ),
     ),
   );
@@ -52,29 +52,31 @@ void main() {
   testWidgets(
     'a dialog dismissed with the DIALOG context leaves the screen standing',
     (tester) async {
-      await tester.pumpWidget(_shellApp(
-        screen: (screenContext) => Column(
-          children: [
-            const Text('THE SCREEN'),
-            TextButton(
-              onPressed: () => showDialog<void>(
-                context: screenContext,
-                // The fix: keep the builder's own context and pop with it.
-                builder: (dialogContext) => AlertDialog(
-                  content: const Text('THE DIALOG'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(dialogContext),
-                      child: const Text('Cancel'),
-                    ),
-                  ],
+      await tester.pumpWidget(
+        _shellApp(
+          screen: (screenContext) => Column(
+            children: [
+              const Text('THE SCREEN'),
+              TextButton(
+                onPressed: () => showDialog<void>(
+                  context: screenContext,
+                  // The fix: keep the builder's own context and pop with it.
+                  builder: (dialogContext) => AlertDialog(
+                    content: const Text('THE DIALOG'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: const Text('Cancel'),
+                      ),
+                    ],
+                  ),
                 ),
+                child: const Text('open'),
               ),
-              child: const Text('open'),
-            ),
-          ],
+            ],
+          ),
         ),
-      ));
+      );
 
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
@@ -83,7 +85,11 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
 
-      expect(find.text('THE DIALOG'), findsNothing, reason: 'dialog must close');
+      expect(
+        find.text('THE DIALOG'),
+        findsNothing,
+        reason: 'dialog must close',
+      );
       expect(
         find.text('THE SCREEN'),
         findsOneWidget,
@@ -95,29 +101,31 @@ void main() {
   testWidgets(
     'popping with the SCREEN context destroys the screen — the defect itself',
     (tester) async {
-      await tester.pumpWidget(_shellApp(
-        screen: (screenContext) => Column(
-          children: [
-            const Text('THE SCREEN'),
-            TextButton(
-              onPressed: () => showDialog<void>(
-                context: screenContext,
-                // The defect: builder context discarded, pop uses the screen's.
-                builder: (_) => AlertDialog(
-                  content: const Text('THE DIALOG'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(screenContext),
-                      child: const Text('Cancel'),
-                    ),
-                  ],
+      await tester.pumpWidget(
+        _shellApp(
+          screen: (screenContext) => Column(
+            children: [
+              const Text('THE SCREEN'),
+              TextButton(
+                onPressed: () => showDialog<void>(
+                  context: screenContext,
+                  // The defect: builder context discarded, pop uses the screen's.
+                  builder: (_) => AlertDialog(
+                    content: const Text('THE DIALOG'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(screenContext),
+                        child: const Text('Cancel'),
+                      ),
+                    ],
+                  ),
                 ),
+                child: const Text('open'),
               ),
-              child: const Text('open'),
-            ),
-          ],
+            ],
+          ),
         ),
-      ));
+      );
 
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
@@ -130,10 +138,14 @@ void main() {
       expect(
         find.text('THE SCREEN'),
         findsNothing,
-        reason: 'popping with the screen context pops the SCREEN — this is the bug',
+        reason:
+            'popping with the screen context pops the SCREEN — this is the bug',
       );
-      expect(find.text('THE DIALOG'), findsOneWidget,
-          reason: 'and the dialog it was meant to close is still there');
+      expect(
+        find.text('THE DIALOG'),
+        findsOneWidget,
+        reason: 'and the dialog it was meant to close is still there',
+      );
     },
   );
 }

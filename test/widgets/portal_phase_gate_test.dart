@@ -18,6 +18,7 @@
 // stack, not the gate — and it is the *gate's* three-way switch that is the
 // claim. `app_router.dart` wires the real screen into the same widget.
 
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,17 +30,21 @@ const _navKey = Key('driver-navigation-screen');
 const _nav = SizedBox(key: _navKey, width: 10, height: 10);
 
 /// The pre-fix route builder: no gate at all.
-Widget _ungated() => const MaterialApp(home: _nav);
+Widget _ungated() => MaterialApp(theme: AppTheme.darkTheme, home: _nav);
 
 Widget _gated(PortalWorkspaceModel vm) => ProviderScope(
-      overrides: [portalWorkspaceProvider.overrideWith((ref) => vm)],
-      child: const MaterialApp(home: PortalPhaseGate(child: _nav)),
-    );
+  overrides: [portalWorkspaceProvider.overrideWith((ref) => vm)],
+  child: MaterialApp(
+    theme: AppTheme.darkTheme,
+    home: PortalPhaseGate(child: _nav),
+  ),
+);
 
 void main() {
   testWidgets('a READY workspace renders the navigation screen', (t) async {
-    await t.pumpWidget(_gated(
-        const PortalWorkspaceModel(phase: PortalWorkspacePhase.ready)));
+    await t.pumpWidget(
+      _gated(const PortalWorkspaceModel(phase: PortalWorkspacePhase.ready)),
+    );
     await t.pump();
     expect(find.byKey(_navKey), findsOneWidget);
   });
@@ -56,35 +61,52 @@ void main() {
       PortalWorkspacePhase.finalizingAccess,
       PortalWorkspacePhase.preparingNavigation,
     ]) {
-      await t.pumpWidget(_gated(PortalWorkspaceModel(
-        phase: phase,
-        title: 'Preparing your workspace',
-        message: 'Loading your company access…',
-      )));
+      await t.pumpWidget(
+        _gated(
+          PortalWorkspaceModel(
+            phase: phase,
+            title: 'Preparing your workspace',
+            message: 'Loading your company access…',
+          ),
+        ),
+      );
       await t.pump();
       expect(find.byKey(_navKey), findsNothing, reason: phase.name);
-      expect(find.text('Preparing your workspace'), findsOneWidget,
-          reason: phase.name);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget,
-          reason: phase.name);
+      expect(
+        find.text('Preparing your workspace'),
+        findsOneWidget,
+        reason: phase.name,
+      );
+      expect(
+        find.byType(CircularProgressIndicator),
+        findsOneWidget,
+        reason: phase.name,
+      );
     }
 
     // Red-first: the pre-fix builder rendered the map in every one of those.
     await t.pumpWidget(_ungated());
     await t.pump();
-    expect(find.byKey(_navKey), findsOneWidget,
-        reason: 'the pre-fix route had no phase gate; the map always drew');
+    expect(
+      find.byKey(_navKey),
+      findsOneWidget,
+      reason: 'the pre-fix route had no phase gate; the map always drew',
+    );
   });
 
   testWidgets('a failed workspace shows the failure, not a spinner', (t) async {
     // A spinner that never resolves is the worst of the three states: it
     // tells a driver on a haul road to keep waiting.
-    await t.pumpWidget(_gated(const PortalWorkspaceModel(
-      phase: PortalWorkspacePhase.loadingCompanyAccess,
-      retryAction: PortalRetryAction.companyProfile,
-      title: 'Could not load your company',
-      message: 'Check your connection and try again.',
-    )));
+    await t.pumpWidget(
+      _gated(
+        const PortalWorkspaceModel(
+          phase: PortalWorkspacePhase.loadingCompanyAccess,
+          retryAction: PortalRetryAction.companyProfile,
+          title: 'Could not load your company',
+          message: 'Check your connection and try again.',
+        ),
+      ),
+    );
     await t.pump();
     expect(find.byKey(_navKey), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
@@ -95,10 +117,14 @@ void main() {
   testWidgets('an empty message renders no empty paragraph', (t) async {
     // `PortalWorkspaceModel.message` defaults to ''. Rendering it anyway puts
     // an 8px gap and a zero-height Text under the title for no reason.
-    await t.pumpWidget(_gated(const PortalWorkspaceModel(
-      phase: PortalWorkspacePhase.preparingWorkspace,
-      title: 'Preparing your workspace',
-    )));
+    await t.pumpWidget(
+      _gated(
+        const PortalWorkspaceModel(
+          phase: PortalWorkspacePhase.preparingWorkspace,
+          title: 'Preparing your workspace',
+        ),
+      ),
+    );
     await t.pump();
     expect(find.text(''), findsNothing);
   });
