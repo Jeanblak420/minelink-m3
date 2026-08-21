@@ -42,6 +42,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:flutter_application_1/core/design/tokens/ml_auth_tokens.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_overview_tokens.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 /// WCAG relative luminance of an opaque colour.
@@ -185,6 +188,165 @@ void main() {
               'has no edge without its border.');
     });
   }
+
+  // ---- The console's SECOND token set ----
+  //
+  // `MlGlass` is a separate palette from `MlSemantic`, used by every
+  // `insights_v2` screen — the console dashboard, the transporters overview,
+  // the leaderboard, the targets screens. It resolves per brightness through
+  // `MlGlass.of(context)` and its light variant is documented as "provided so
+  // the screen doesn't break inside a light app", which is exactly the kind of
+  // second-class surface that goes unmeasured.
+  //
+  // Measured here for the same reason as the first set: a screen cannot have a
+  // colour fault of its own, only an inherited one.
+  for (final glass in [MlGlass.dark, MlGlass.light]) {
+    final name = glass.isDark ? 'glass dark' : 'glass light';
+    final grounds = <String, Color>{
+      'bg0': glass.bg0,
+      'panel': _composite(glass.panel, glass.bg0),
+      'panel2': _composite(glass.panel2, glass.bg0),
+    };
+
+    test('$name — every ink level is legible on every panel', () {
+      final pairs = <_Pair>[];
+      for (final g in grounds.entries) {
+        pairs.addAll([
+          _Pair('inkHi on ${g.key}', _composite(glass.inkHi, g.value), g.value,
+              bodyFloor),
+          _Pair('ink on ${g.key}', _composite(glass.ink, g.value), g.value,
+              bodyFloor),
+          _Pair('inkMid on ${g.key}', _composite(glass.inkMid, g.value),
+              g.value, bodyFloor),
+          // inkLo and inkXlo are the caption and the disabled/inactive row.
+          // AA-large is the floor: below it they are not quiet, they are gone.
+          _Pair('inkLo on ${g.key}', _composite(glass.inkLo, g.value), g.value,
+              largeFloor),
+          _Pair('inkXlo on ${g.key}', _composite(glass.inkXlo, g.value),
+              g.value, largeFloor),
+        ]);
+      }
+      _check(pairs);
+    });
+
+    test('$name — the status hues carry their meaning on every panel', () {
+      final pairs = <_Pair>[];
+      for (final g in grounds.entries) {
+        for (final hue in {
+          'accent': glass.accent,
+          'accent2': glass.accent2,
+          'accent3': glass.accent3,
+          'good': glass.good,
+          'warn': glass.warn,
+          'bad': glass.bad,
+          'violet': glass.violet,
+        }.entries) {
+          pairs.add(_Pair('${hue.key} on ${g.key}',
+              _composite(hue.value, g.value), g.value, largeFloor));
+        }
+      }
+      _check(pairs);
+    });
+
+    test('$name — panel edges are visible against what they sit on', () {
+      final ground = glass.bg0;
+      final panel = _composite(glass.panel, ground);
+      _check([
+        _Pair('line on panel', _composite(glass.line, panel), panel,
+            hairlineFloor),
+        _Pair('line2 on panel', _composite(glass.line2, panel), panel,
+            hairlineFloor),
+        _Pair('lineStrong on panel', _composite(glass.lineStrong, panel),
+            panel, hairlineFloor),
+      ]);
+    });
+  }
+
+  // ---- And the THIRD set ----
+  //
+  // `MlOv` is the transporters-overview palette. It carries an ink ladder
+  // identical to `MlGlass`'s, value for value, and nothing keeps the two in
+  // step — so a fix to one that missed the other would silently split them.
+  // Measuring both here is what keeps that honest.
+  for (final ov in [MlOv.dark, MlOv.light]) {
+    final name = ov.isDark ? 'overview dark' : 'overview light';
+
+    test('$name — every ink level is legible on the canvas', () {
+      _check([
+        _Pair('inkHi', _composite(ov.inkHi, ov.canvas), ov.canvas, bodyFloor),
+        _Pair('ink', _composite(ov.ink, ov.canvas), ov.canvas, bodyFloor),
+        _Pair('inkMid', _composite(ov.inkMid, ov.canvas), ov.canvas, bodyFloor),
+        _Pair('inkLo', _composite(ov.inkLo, ov.canvas), ov.canvas, largeFloor),
+        _Pair('inkXlo', _composite(ov.inkXlo, ov.canvas), ov.canvas,
+            largeFloor),
+      ]);
+    });
+
+    test('$name — the status hues carry their meaning on the canvas', () {
+      _check([
+        for (final hue in {
+          'acc': ov.acc,
+          'acc2': ov.acc2,
+          'acc3': ov.acc3,
+          'good': ov.good,
+          'warn': ov.warn,
+          'bad': ov.bad,
+          'violet': ov.violet,
+          'pink': ov.pink,
+        }.entries)
+          _Pair(hue.key, _composite(hue.value, ov.canvas), ov.canvas,
+              largeFloor),
+      ]);
+    });
+
+    test('$name — the ink ladder still matches MlGlass', () {
+      // Not a contrast rule: a duplication guard. Two token sets have carried
+      // the same five values since they were written, and the only thing that
+      // kept them equal was that nobody had changed either. One did change, on
+      // 2026-08-21, and this is what makes the next change reach both.
+      final g = ov.isDark ? MlGlass.dark : MlGlass.light;
+      expect([ov.inkHi, ov.ink, ov.inkMid, ov.inkLo, ov.inkXlo],
+          [g.inkHi, g.ink, g.inkMid, g.inkLo, g.inkXlo],
+          reason: 'MlOv and MlGlass have always shared one ink ladder. If they '
+              'are meant to diverge, say so here and delete this test.');
+    });
+  }
+
+  // ---- And the FOURTH: the sign-in palette ----
+  //
+  // `MlAuth` has no light variant, by design — the sign-in and password
+  // screens are a branded dark surface whichever theme the device asks for.
+  // That makes it the one palette a light-mode sweep would never have looked
+  // at, and it is the first thing every user of this product sees.
+  group('auth', () {
+    test('every ink level is legible on the sign-in ground', () {
+      _check([
+        for (final g in {'bg': MlAuth.bg, 'bg2': MlAuth.bg2}.entries) ...[
+          _Pair('inkHi on ${g.key}', _composite(MlAuth.inkHi, g.value),
+              g.value, bodyFloor),
+          _Pair('ink on ${g.key}', _composite(MlAuth.ink, g.value), g.value,
+              bodyFloor),
+          _Pair('inkMid on ${g.key}', _composite(MlAuth.inkMid, g.value),
+              g.value, bodyFloor),
+          _Pair('inkLo on ${g.key}', _composite(MlAuth.inkLo, g.value),
+              g.value, largeFloor),
+          _Pair('inkXlo on ${g.key}', _composite(MlAuth.inkXlo, g.value),
+              g.value, largeFloor),
+        ],
+      ]);
+    });
+
+    test('the panel edges are visible', () {
+      _check([
+        _Pair('line on bg2', _composite(MlAuth.line, MlAuth.bg2), MlAuth.bg2,
+            hairlineFloor),
+        _Pair('line2 on bg2', _composite(MlAuth.line2, MlAuth.bg2), MlAuth.bg2,
+            hairlineFloor),
+        _Pair('lineStrong on bg2', _composite(MlAuth.lineStrong, MlAuth.bg2),
+            MlAuth.bg2, hairlineFloor),
+      ]);
+    });
+  });
 }
 
 void _check(List<_Pair> pairs) {

@@ -129,8 +129,11 @@ class MlOv {
     inkHi: Color(0xFFEAF2FF),
     ink: Color(0xFFC7D2E4),
     inkMid: Color(0xFF8896AE),
-    inkLo: Color(0xFF5A6884),
-    inkXlo: Color(0xFF3D4A65),
+    // Raised 2026-08-21 to match `MlGlass`, and for the same measured reason:
+    // against this canvas the old pair came to 3.5:1 and 2.2:1, and `inkXlo`
+    // carries readable words rather than decoration.
+    inkLo: Color(0xFF6B7A9C),
+    inkXlo: Color(0xFF606E8C),
     acc: Color(0xFF22D3EE),
     acc2: Color(0xFF7DD3FC),
     acc3: Color(0xFF5EEAD4),
@@ -174,9 +177,13 @@ class MlOv {
     canvas: Color(0xFFEEF2F8),
     inkHi: Color(0xFF0B1526),
     ink: Color(0xFF33415A),
-    inkMid: Color(0xFF64748B),
-    inkLo: Color(0xFF94A3B8),
-    inkXlo: Color(0xFFB6C0CE),
+    // The light ladder's bottom three rungs measured 4.2 / 2.3 / 1.6:1 against
+    // this canvas. Same values as `MlGlass.light` now — these two token sets
+    // have always carried an identical ink ladder, and a fix to one that
+    // missed the other would have split them.
+    inkMid: Color(0xFF5A697F),
+    inkLo: Color(0xFF6F7E94),
+    inkXlo: Color(0xFF7C8AA0),
     acc: Color(0xFF0891B2),
     acc2: Color(0xFF0E7490),
     acc3: Color(0xFF0D9488),

@@ -27,7 +27,11 @@ class MlAuth {
   static const Color bg2 = Color(0xFF0A1220);
   static const Color panel = Color(0xFF0D1626);
 
-  static const Color line = Color(0x12FFFFFF); // ~7%
+  // 0x18 (~9%), raised from 0x12 on 2026-08-21. At ~7% white this measured
+  // 1.18:1 against the card it draws on — under the 1.25 floor
+  // `test/design/token_contrast_test.dart` sets for a hairline being visible
+  // at all. This is the sign-in screen; its card had no edge.
+  static const Color line = Color(0x18FFFFFF); // ~9%
 
   /// The two white tints this dark surface uses as *fills* rather than as
   /// rules: a ghost button's resting wash and an icon button's hover. Named at
@@ -82,7 +86,14 @@ class MlAuth {
   static const Color ink = Color(0xFFC3CFE2);
   static const Color inkMid = Color(0xFF8494AC);
   static const Color inkLo = Color(0xFF5D6C86);
-  static const Color inkXlo = Color(0xFF3B475E);
+  // Raised from #3B475E on 2026-08-21: 2.01:1 against the sign-in card, and
+  // this ink writes real overline labels, not only the disabled state of a
+  // button. 3.11:1 now — WCAG AA for large text, and still the quietest rung.
+  //
+  // `MlAuth` has no light variant by design, which is exactly why it needed
+  // measuring: a light-mode sweep would never have opened it, and it is the
+  // first surface every user of this product sees.
+  static const Color inkXlo = Color(0xFF556381);
 
   // -- brand & status ------------------------------------------------------
   static const Color gold = Color(0xFFF5B301);

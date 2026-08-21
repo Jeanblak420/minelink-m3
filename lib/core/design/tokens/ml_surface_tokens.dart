@@ -122,14 +122,24 @@ class MlGlass {
     bg2: Color(0xFF0F1A2E),
     panel: Color(0xFF0E1728),
     panel2: Color(0xFF131F35),
-    line: Color(0x0FFFFFFF),
+    // `line` was 0x0F white — 1.16:1 against the panel it draws on, which is
+    // below the 1.25 floor `test/design/token_contrast_test.dart` sets for a
+    // hairline being visible AT ALL. 0x18 is 1.30:1: still the quietest line
+    // in the set, and now a line.
+    line: Color(0x18FFFFFF),
     line2: Color(0x17FFFFFF),
     lineStrong: Color(0x24FFFFFF),
     inkHi: Color(0xFFEAF2FF),
     ink: Color(0xFFC7D2E4),
     inkMid: Color(0xFF8896AE),
-    inkLo: Color(0xFF5A6884),
-    inkXlo: Color(0xFF3D4A65),
+    // The bottom two rungs were raised on 2026-08-21. Against the lightest
+    // panel they measured 2.94:1 and **1.86:1**, and `inkXlo` is not
+    // decoration — it writes "3 more — narrow the search to see them" and the
+    // "—" that stands for a month with no actuals. They are 3.83:1 and 3.22:1
+    // now, which is WCAG AA for large text, and the ladder still reads as five
+    // distinct steps (14.6 / 10.8 / 5.5 / 3.8 / 3.2).
+    inkLo: Color(0xFF6B7A9C),
+    inkXlo: Color(0xFF606E8C),
     accent: Color(0xFF22D3EE),
     accent2: Color(0xFF7DD3FC),
     accent3: Color(0xFF5EEAD4),
@@ -150,14 +160,20 @@ class MlGlass {
     bg2: Color(0xFFFFFFFF),
     panel: Color(0xFFFFFFFF),
     panel2: Color(0xFFF3F6FA),
-    line: Color(0x140F172A),
-    line2: Color(0x1F0F172A),
-    lineStrong: Color(0x2E0F172A),
+    // Same fix as the dark set, and the light side was further out: 1.17:1 for
+    // the hairline, and an ink ladder whose bottom three rungs measured
+    // 4.24 / 2.28 / **1.64**:1 against the page. This variant is documented as
+    // "provided so the screen doesn't break inside a light app", and that is
+    // exactly how it went unmeasured — the console has two light renders out
+    // of 204.
+    line: Color(0x1F0F172A),
+    line2: Color(0x260F172A),
+    lineStrong: Color(0x330F172A),
     inkHi: Color(0xFF0B1526),
     ink: Color(0xFF33415A),
-    inkMid: Color(0xFF64748B),
-    inkLo: Color(0xFF94A3B8),
-    inkXlo: Color(0xFFB6C0CE),
+    inkMid: Color(0xFF5A697F),
+    inkLo: Color(0xFF6F7E94),
+    inkXlo: Color(0xFF7C8AA0),
     accent: Color(0xFF0891B2),
     accent2: Color(0xFF0E7490),
     accent3: Color(0xFF0D9488),
