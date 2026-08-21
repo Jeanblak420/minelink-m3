@@ -309,35 +309,40 @@ verified, not hoped.
   filename does nothing; tapping the pause control was the last action and its
   result was not read before the session was paused.
 
-**Where to resume — USE THE NAS SHARE, NOT THE HTTP SERVER.** Jean's
-instruction, 2026-08-22: put the APK on the NAS share folder and pull it onto
-the phone from there.
+**Where to resume — THE APK IS ALREADY ON THE NAS. Install from there, not
+over HTTP.** Jean's instruction, 2026-08-22.
 
 ```
-\\192.168.88.30\Shared\        ← the NAS. Copy the APK here, e.g. into
-                                 \\192.168.88.30\Shared\PhoneRemote\ or a
-                                 folder of its own, then open it on the phone
-                                 through its file manager / the share.
+\\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk    ← STAGED AND VERIFIED
+    217,272,400 bytes — byte-for-byte the size of
+    build/app/outputs/flutter-apk/app-debug.apk
 ```
 
-This is the better route and it removes three problems at once: no
-`serve_apk.ps1`, so **no elevated window and no firewall rule to open or
-remove**; no Chrome "can't be downloaded securely" prompt; and no 217 MB
-download that Chrome then refuses to finalise, which is exactly where the HTTP
-route stalled.
+**Verified at the end of the session:** the NAS answers ping, `\\192.168.88.30
+\Shared` lists (`Camera-211`, `CtrlBridge`, `CtrlBridge-Development`,
+`PhoneRemote`, …), and the copy landed at the exact source size. Jean confirmed
+it directly: *"the nas copy is good, and landed well, no problems there."*
 
-⚠️ **The share was NOT reachable from this session's shell** — both
-`\\192.168.88.30\Shared\...` via bash and via PowerShell returned "share not
-reachable", which is also why `check_versions.ps1` reported *"PUBLISHED to the
-phone: COULD NOT READ the update share"* (the staged CtrlBridge APK itself was
-fine: 2.7.1 build 20, SHA-256 verified). So **check the NAS is awake and
-mounted before relying on this route**, and if it is not, ask Jean.
+This route removes three problems at once: no `serve_apk.ps1`, so **no elevated
+window and no firewall rule to open or remove**; no Chrome "can't be downloaded
+securely" prompt; and no 217 MB download for Chrome to refuse to finalise,
+which is exactly where the HTTP route stalled.
 
-Discard the stalled Chrome download on the phone before re-installing, so there
-is no half-finalised 217 MB file sitting in his Downloads.
+⚠️ Earlier in the SAME session the share was **not** reachable from the shell —
+both bash and PowerShell returned "share not reachable", which is also why
+`check_versions.ps1` reported *"PUBLISHED to the phone: COULD NOT READ the
+update share"* (the staged CtrlBridge APK itself was fine: 2.7.1 build 20,
+SHA-256 verified). It came back when Jean woke the phone. **So if the share is
+missing, it is asleep, not gone — ask Jean rather than falling back to HTTP.**
 
-Then Play Protect — Jean has already turned Play Protect OFF, so that prompt
-may not appear at all. Then drive the sign-in and the driver flow.
+**The phone was still connected when this was written:** `SM-G780G at
+192.168.88.34  screen 1080x2400  sharing=True control=True`.
+
+So the whole remaining sequence is: open the share on the phone → open
+`minelink-m3.apk` → install. **Discard the stalled Chrome download first**, so
+there is no half-finalised 217 MB file left in his Downloads. Play Protect is
+already OFF, so that prompt may not appear. Then sign in and drive the driver
+flow.
 
 ⚠️ **The applicationId is `org.minelink.m3`**, deliberately different from the
 shipping app's `com.example.flutter_application_1`, so both install side by
@@ -619,10 +624,37 @@ depending on which `find` you run, because in a worktree `.git` is a FILE.)
 
 WHERE I LEFT OFF, EXACTLY
 
-The tree is CLEAN. 111 commits. Nothing is half-applied and nothing is
-uncommitted. The tip is "naming: the four routes the rail and the bar called
-different things, settled", and the whole gate below was run green against it,
-both builds included.
+The tree is CLEAN. 112 commits. Nothing is half-applied and nothing is
+uncommitted. The tip is "docs: the handoff for the session that took contrast
+to zero"; the last CODE commit under it is "naming: the four routes the rail
+and the bar called different things, settled", and the whole gate below was run
+green against that, both builds included.
+
+Green, at that commit, means exactly this — compare against it rather than
+guessing what "passing" looks like here:
+
+    flutter analyze                    no issues
+    flutter test                       2107 passed, 1 skipped
+    dart tool/release_guards.dart      39/39 PASS, 0 FAIL
+    py -3 tool/_sabotage.py            all sabotages caught
+    py -3 tool/unphotographed_screens  93 targets, 93 photographed, 0 not
+    py -3 tool/one_clock_check.py      0 sites off Africa/Johannesburg
+    docs/redesign/renders/             220 renders
+    render harness — RENDER NOTE       0   (and it FAILS the test)
+    render harness — FAILURE STATE     0
+    render harness — CUT OFF           6   (all deliberate, named in place)
+    render harness — LOW CONTRAST      0   ← was 1,812
+    flutter build web --release        builds
+    flutter build apk --debug          builds
+
+⚠️ NOTHING IS RUNNING. The previous handoff left a web server, a Chrome with
+remote debugging and an Android emulator up, and told you to walk into them.
+THAT IS NO LONGER TRUE — none of the three was started this session, so do not
+go looking for them. §5 of the handoff has the exact commands to bring each
+back. The emulator's installed `org.minelink.m3` is from the PREVIOUS session
+and predates every commit above; `adb install -r
+build/app/outputs/flutter-apk/app-debug.apk` refreshes it, and the APK on disk
+is current.
 
 TWO THINGS ARE MID-FLIGHT OUTSIDE THE REPO — start here:
 
@@ -643,18 +675,27 @@ TWO THINGS ARE MID-FLIGHT OUTSIDE THE REPO — start here:
      has not finalised it. Tapping the filename does nothing. The last action
      was tapping that pause control and its result was NOT read.
 
-     RESUME VIA THE NAS SHARE, NOT THE HTTP SERVER — Jean's instruction:
-     copy the APK to \\192.168.88.30\Shared\ (e.g. \Shared\PhoneRemote\ or a
-     folder of its own) and open it on the phone from there through its file
-     manager. That removes three problems at once: no serve_apk.ps1, so no
-     elevated window and no firewall rule; no Chrome "can't be downloaded
-     securely" prompt; and no 217 MB download for Chrome to refuse to
-     finalise, which is exactly where the HTTP route stalled.
+     THE APK IS ALREADY ON THE NAS — install from there, not over HTTP:
 
-     ⚠️ That share was NOT reachable from this session's shell — both bash and
-     PowerShell returned "share not reachable", which is also why
-     check_versions.ps1 said "PUBLISHED to the phone: COULD NOT READ the
-     update share". Check the NAS is awake first; ask Jean if it is not.
+         \\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk
+         217,272,400 bytes, the exact size of the source APK.
+
+     Verified at the end of the session: the NAS answers ping, \Shared lists
+     (Camera-211, CtrlBridge, CtrlBridge-Development, PhoneRemote, ...), and
+     the copy landed at the source size. Jean confirmed it: "the nas copy is
+     good, and landed well, no problems there." The phone was STILL CONNECTED
+     when this was written — SM-G780G at 192.168.88.34, sharing=True
+     control=True.
+
+     So the whole remaining sequence is: open the share on the phone → open
+     minelink-m3.apk → install. That removes three problems at once: no
+     serve_apk.ps1, so no elevated window and no firewall rule; no Chrome
+     "can't be downloaded securely" prompt; and no 217 MB download for Chrome
+     to refuse to finalise, which is exactly where the HTTP route stalled.
+
+     ⚠️ Earlier in the SAME session that share was NOT reachable from the
+     shell — it came back when Jean woke the phone. If it is missing it is
+     ASLEEP, not gone; ask Jean rather than falling back to HTTP.
 
      DISCARD the stalled Chrome download on the phone first, so there is no
      half-finalised 217 MB file left in his Downloads. Then install, then sign
