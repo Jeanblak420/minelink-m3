@@ -1,8 +1,8 @@
 # MineLink M3 — session handoff
 
-**Rewritten 2026-08-21 (second rewrite that day).** Everything below is
-verified state, not intention. It replaces the previous handoff of the same
-name; the parts of that one still true have been folded in.
+**Rewritten 2026-08-21 (third rewrite that day).** Everything below is verified
+state, not intention. It replaces the previous handoff of the same name; the
+parts of that one still true have been folded in.
 
 **This file lives at**
 `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md`
@@ -19,32 +19,39 @@ redesign work.**
 The work is **mid-Phase-4** and stopped at a clean, committed, fully green
 point. Nothing is half-applied and nothing is uncommitted.
 
-- **`git status` is empty. 65 commits.** The last four are the portal ones:
-  `portal: the buyer's own screens…`, `portal: the mine's tail…`,
-  `portal: the transporter's tail…` and `portal: the company profile was an
-  error card…`. Read them — each carries its own reasoning. No hash is written
-  down here, because a hash in a file the same commit changes is wrong the
-  moment it lands.
+- **`git status` is empty. 67 commits.** The tip is
+  `shared: the six screens nobody owned, and thirteen second app bars`. Read
+  it — it carries its own reasoning, at length. No hash is written down here,
+  because a hash in a file the same commit changes is wrong the moment it lands.
 - **The whole gate was run for real at the end of this session** (numbers in
   §2), including `flutter build web --release` and `flutter build apk --debug`.
 - **The original worktree was re-checked against its §0 baseline** immediately
   before the last commit and is **byte-for-byte untouched**.
-- **§4.1's PORTAL LIST IS FINISHED.** All fourteen screens it named are
-  photographed, and every one of them turned up a real defect.
-- **WHERE TO PICK UP: §4.1's *shared* list — chat / messages, notifications,
-  profile, account security, appearance & theme, employee register — then
-  §4.5's two fixture-less console screens, then §4.2's dialogs.** Phone width
-  first, because that is where nearly every remaining defect has been.
+- ⚠️ **One correction to that commit message:** it says *"Renders 118 → 137"*.
+  The real count is **135** (58 of them phone-width). The 58 is right; the
+  total is not. Recorded here rather than rewriting the commit.
+- **§4.1 IS FINISHED.** The console list, the portal list and the SHARED list
+  are all photographed. Every one of the six shared screens turned up a real
+  defect, and one of them turned up a shape repeating across twelve screens.
+- **WHERE TO PICK UP: §4.1's remaining list — run
+  `py -3 tool/unphotographed_screens.py`, which now keeps that inventory
+  instead of this file. 25 route-target screens have never been photographed.**
+  Then §4.5's two fixture-less console screens, then §4.2's dialogs. Phone
+  width first, because that is where nearly every remaining defect has been.
 - **Searches already finished — do NOT redo them:**
   1. `lib/` scanned twice for any other hand-rolled flex table with the
      compressing shape. **Both scans empty.**
   2. Every `FractionallySizedBox`, `MapOptions`, hand-rolled "x ago" formatter
      and `DateTime.now()`-fed relative time routed through one implementation,
      each held by a guard.
-  3. **New this session:** every `MaterialLocalizations.format*Date` /
-     `formatTimeOfDay` (21 sites), every hand-rolled absolute timestamp
-     (7 vocabularies), and every parenthesised plural `thing(s)` (22 sites).
-     All three are now held by guards, so a new one fails the build.
+  3. Every `MaterialLocalizations.format*Date` / `formatTimeOfDay` (21 sites),
+     every hand-rolled absolute timestamp (7 vocabularies), and every
+     parenthesised plural `thing(s)` (22 sites). All three held by guards.
+  4. **New this session:** every screen the two `ShellRoute`s mount, scanned
+     for an app bar of its own (13 found, all fixed, one exemption); every
+     private copy of the presence rule (4 found, all routed through
+     `MlPresence`); every `DateTime.now()` written to ISO through a local
+     variable (2 found, both fixed, the check now matches that shape).
 
 ---
 
@@ -53,7 +60,7 @@ point. Nothing is half-applied and nothing is uncommitted.
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **65 commits**, clean tree. |
+| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **67 commits**, clean tree. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
@@ -130,16 +137,16 @@ Every one of these was run at the end of the session, in this order:
 
 ```
 flutter analyze                                 no issues
-flutter test                                    1815 passed, 1 skipped
+flutter test                                    1845 passed, 1 skipped
 dart tool/release_guards.dart                   35/35 PASS, 0 FAIL
 dart tool/release_guards.dart --selftest        all guards bite
 py -3 tool/type_scale_codemod.py --selftest     OK
 py -3 tool/dropdown_width_check.py              passes
 py -3 tool/glyph_coverage_check.py              passes
 py -3 tool/one_clock_check.py                   0 sites off Africa/Johannesburg
-flutter build web --release                     builds (main.dart.js 7.86 MB)
+flutter build web --release                     builds
 flutter build apk --debug                       builds
-docs/redesign/renders/                          118 PNGs, 50 of them phone-width
+docs/redesign/renders/                          135 PNGs, 58 of them phone-width
 ```
 
 Layout is swept at **8 widths (1612 → 360px) × 6 text scales (0.85 → 2.0)**,
@@ -158,72 +165,69 @@ regenerate, **look at the PNG**, **measure it with PIL rather than squint**,
 fix the *shape* where the fault is structural, pin it with a test, and **prove
 the test bites** by removing the fix and watching it fail.
 
-**Renders went 25 → 118.** Every screen photographed turned up a real defect,
-and almost all of them share one property: **the fault was a layout that
-FITS.** An ellipsis, a word broken in half, a truncated label, a zero-height
-bar, a wire enum value and a mislabelled figure are all valid layouts. Nothing
-raises; no overflow sweep fails. Only a measurement of the painted result sees
-them.
+**Renders went 25 → 135.** Every screen photographed turned up a real defect,
+and almost all of them share one property: **the fault was a layout that FITS.**
+An ellipsis, a word broken in half, a truncated label, a zero-height bar, a wire
+enum value, an invisible avatar and a mislabelled figure are all valid layouts.
+Nothing raises; no overflow sweep fails. Only a measurement of the painted
+result sees them.
 
-### 3.1 The 2026-08-21 portal session, in one list
+### 3.1 The 2026-08-21 SHARED session, in one list
 
 | where | what the picture showed |
 |---|---|
-| buyer waybills | **every route heading was a tofu box** — `MlSectionTitle` draws in Fraunces and Fraunces has no `→`. Fraunces is missing SEVEN of the non-ASCII characters the product uses; the sans and the mono are missing none. `tool/glyph_coverage_check.py` had already listed all seven and could only call them advisory. |
-| the phone's bottom bar | **"Reconciliatio / n"** — a one-word label broken between two letters with the orphan on the bar's bottom edge. Three of them. |
-| buyer requests | the allocated-truck chips ran **156px** past a 412px phone — a `Row` inside a `Wrap`, §10.4 for the seventh time. |
-| buyer routes & mines | both linked mines captioned **"mineSupplier"**, and "4 route records" over two route cards (it counted the snapshot's TRANSACTIONS). |
-| buyer waybills | a transaction with no route grouped under a heading of **"— → —"**, counted as a route. |
-| truck locations ×3 | three trucks reporting 4 minutes, 21 minutes and NINE HOURS ago all printed **"15 Aug"**. |
-| trip detail | `Updated Aug 15, 2026 9:30 AM` — the READER'S LOCALE, and the DATE taken from the raw UTC instant while the TIME came from SAST. 21 locale sites; 7 vocabularies for a timestamp. |
-| mine locations | every anchor read **"Main Gate …" / "Weighbridge …"** — the name truncated back to the word the row already says. |
-| stockpile audit | every entry read "Loaded out · Order pile · Atlas Buyer Group · **Atlas Buyer Group**". |
-| tons out | a bare **`198`** on a screen called Tons out, rounded, disagreeing with its own table (197.70 t). And a **second app bar** under the shell's. |
-| transporter drivers | three stat tiles across a phone: **"Dri…", "On…", "Av…"**. And a status beside a plate reduced to **"D…"**. |
-| fuel & costs | the wrapped action group put the outlined button at the right of one line and the **primary at the left of the next**. |
-| compliance | **"12 day(s) overdue"**. Twenty-two parenthesised plurals across the product. |
-| own company | **a PostgrestException rendered as the screen** — and with it fixed, a second app bar, a wire org type, a FOURTH private org-type switch and an eighth date format. |
-| request transportation | the earliest bookable start date came off `DateTime.now()`. Two more business-day sites with it. |
+| messages, phone | a 340px sidebar in a `Row` left **71px** for the whole conversation — one CHARACTER per line, beside a 20px composer. No phone layout had ever existed. |
+| twelve screens | **thirteen second app bars.** Every `ShellRoute` leaf drawing `Scaffold(appBar:)` repeats the title the shell already drew. Notifications then added a third. |
+| the render harness | it handed `MlAppShell` the **company as the title and the section as the subtitle** — the reverse of `PortalShellLayout`. Every portal render showed a bar the product never draws. |
+| employee register | *"Last seen 11 min ago"* beside a dot reading **Offline** and a counter reading **AWAY 0**. One row, two clocks. |
+| account & security | the **only password-change UI in the product** rendered `SizedBox.shrink()` — in every test and every render there has ever been. |
+| chat header | four avatar treatments with **no circle and near-invisible ink**: "FO TM SR" as three grey smudges above two green dots. |
+| employee register | the `Ctrl K` chip's border ran the **entire search box**, so the hint and the magnifier had nowhere to be drawn. At every width. |
+| notifications ×2 | the meta line truncated **inside the timestamp** — "15 Aug 2026 …", "04:3…". |
+| messages list | four rows 14 minutes, 5 hours, a day and a MONTH old, all printing a bare `HH:mm`. |
+| profile | *"Owner name: operator"* — the mailbox half of the email as a person's name; `orgType.name`; "CEO First Na…"; and the one page in the product with a painted gradient ground. |
+| chat send path | **every chat message this app has ever sent** was stamped with a naive ISO string — stored two hours late, read back two hours late. |
+| register hero | the eyebrow cut at "DIRECTO…", and a four-cell stat strip giving each cell **60px** at 412. |
+| three phone frames | **clipping their own content** — measured at zero slack above the pinned bottom bar. |
 
 ### 3.2 The shapes that changed, rather than the instances
 
-- **`MlTokens.fontSerifFallback`** at all sixteen sites that name the serif
-  face, under any of its four local aliases. Held by
-  `serif-declares-its-fallback`, pinned on every editorial rung by
-  `one_type_scale_test.dart`.
-- **`MlTime.stamp` / `day` / `clock`** for an INSTANT and **`MlTime.calendarDay`
-  / `calendarStamp`** for a value already on the South African clock (a
-  Postgres `date`, a `showDatePicker` result, or a model that ran `MlTime.sast`
-  at parse time). Held by `one-vocabulary-for-a-timestamp` and
-  `a-date-is-not-the-readers-locale`.
-- **`OrgType.labelFor`** — the twin of `UserRole.labelFor`, taking four sites
-  with it including two private switches that disagreed about the spacing
-  around a slash.
-- **`mlCount` everywhere a count is shown**, held by
-  `no-parenthesised-plural`.
-- **`MlPageHeader`'s action group wraps to the RIGHT** (`WrapAlignment.end`),
-  inert when everything fits.
-- **`pumpForCapture` gained two frames** — the third time that schedule has
-  been one step short. It also fixed the company-link-picker thumb the previous
-  handoff recorded as unexplained.
-- **`truncated()` in `portal_tail_test.dart`** — `RenderParagraph.text
-  .toPlainText()` returns the WHOLE string whichever part was drawn, so "is
-  this name on screen" is not a question about truncation.
-  `didExceedMaxLines` is. Proved by reverting a fix and watching the naive
-  version of the test pass.
-- **`FixtureCompanyRepository`** — the seam for a screen that reads a
-  repository inside a `FutureBuilder` rather than watching a provider.
+- **`lib/core/presence/ml_presence.dart`** — one presence rule, on INSTANTS,
+  measured with `MlTime.instant()`. Replaced four private copies. Pinned by
+  `test/core/ml_presence_test.dart`.
+- **The chat models hold instants, not South African wall clocks** — which is
+  what let `_dateSeparatorLabel` and `_sameDay` run `MlTime.sast` a second time
+  and file a 22:30 message under tomorrow.
+- **`test/widgets/no_second_app_bar_under_the_shell_test.dart`** — reads the
+  router, takes the screen classes the two shells name, scans those CLASSES
+  (not their files), one printed exemption for a pushed page.
+- **`tool/one_clock_check.py` matches the split naive stamp** —
+  `final t = DateTime.now(); … t.toIso8601String()`. It found a second site the
+  moment it existed.
+- **`accountDeactivationServiceProvider`**, and `start()` on
+  `ChatMessagesNotifier` / `TypingUsersNotifier` — the fifth, sixth and seventh
+  seams for the same reason: a widget that constructs its own backend cannot be
+  photographed.
+- **`ChangePasswordSection` watches `accountEmailProvider`** rather than the
+  auth singleton its own screen had already stopped reading.
+- **`AvatarStack` / `AvatarList` / `ChatWidget` / `_Avatar`** all draw a real
+  well, and initials stopped indexing into an empty string.
+- **`tool/unphotographed_screens.py`** — the "which screens have never been
+  looked at" inventory, which used to be a hand-kept list in this file.
 
 ### 3.3 Earlier in Phase 4
 
-`heightFactor: 1` on every `FractionallySizedBox` · `MlTime.instant()` ·
-`MlTime.ago()`/`agoTag()` · `UserRole.labelFor` · `AuditLog.actionLabel` ·
-`mlMapBackground` · `mlTileProviderOverride` · `MlCard` always provides a
-`Material` · `TargetsSelectorField` · `shoot()` captures EVERY framework error
-· `MlColumn.minWidth` + `MlDataTable` honouring it · two-line `MlDataTable`
+`MlTokens.fontSerifFallback` · `MlTime.stamp/day/clock` + `calendarDay/Stamp` ·
+`OrgType.labelFor` · `mlCount` · `MlPageHeader`'s action group wrapping right ·
+`pumpForCapture` · `truncated()` via `didExceedMaxLines` ·
+`FixtureCompanyRepository` · `heightFactor: 1` on every `FractionallySizedBox` ·
+`MlTime.instant()` · `MlTime.ago()`/`agoTag()` · `UserRole.labelFor` ·
+`AuditLog.actionLabel` · `mlMapBackground` · `mlTileProviderOverride` ·
+`MlCard` always provides a `Material` · `TargetsSelectorField` · `shoot()`
+captures EVERY framework error · `MlColumn.minWidth` · two-line `MlDataTable`
 headers · the bottom bar computing its own height · `routingServiceProvider` ·
-`MlTime.debugClock` · `pumpForCapture` · `MlStatusBadge.humaniseStatus` ·
-`MlWideTable` · `TargetsBand`'s title row as a `Wrap`.
+`MlTime.debugClock` · `MlStatusBadge.humaniseStatus` · `MlWideTable` ·
+`TargetsBand`'s title row as a `Wrap`.
 
 ---
 
@@ -231,49 +235,71 @@ headers · the bottom bar computing its own height · `routingServiceProvider` �
 
 ### 4.1 Screens still without a picture
 
-**Console — FINISHED** except the two in §4.5.
+**Run the tool; do not trust a list in this file:**
 
-**Portal — FINISHED.** All fourteen of the previous handoff's list are
-photographed: buyer waybills, buyer requests, buyer routes & mines, mine
-locations, tons-out detail, trip detail, stockpile detail, stockpile audit, the
-three truck-location maps, transporter drivers, fuel costs, drop-off,
-compliance, own-company and request-transportation.
+```bash
+py -3 tool/unphotographed_screens.py
+```
 
-**SHARED — THIS IS WHERE TO CONTINUE, in this order:**
+As of this commit: **89 route-target screens, 64 named in the renders, 25 not.**
+Its own header states two honest limits — it is name-based, and a name in the
+render file is not the same as a picture of the screen. **Look at the PNG.**
 
-1. **chat / messages** — `lib/features/chat/screens/messages_screen.dart` and
-   `chat_screen.dart`. `communications_hub_screen.dart` is already
-   photographed; these two are not.
-2. **notifications** — `lib/features/notifications/screens/
-   notification_screen.dart` and `notification_management_screen.dart`.
-3. **profile** — `lib/features/profile/screens/profile_screen.dart`.
-4. **account security** — `lib/features/profile/screens/
-   account_security_screen.dart`.
-5. **appearance & theme** — `lib/features/portal/screens/
-   appearance_theme_screen.dart`.
-6. **employee register** — `lib/features/company/screens/
-   employee_register_screen.dart`.
+The 25, with `swept` meaning some test at least mentions the class (so its
+widths may already be covered, which is not the same as having been seen):
 
-The fixture pattern is established: add what the screen's providers need to
-`test/fixtures/portal_tail_fixtures.dart` (or a new `shared_tail_fixtures.dart`
-if the set is large), add the screen to the `the portal tail` group in
-`test/renders/redesign_renders_test.dart` at phone AND desktop width, then
-regenerate and LOOK.
+```
+   swept  ChatConnectionsScreen              swept  PortalTonsOutSearchScreen
+          CompanyDetailsScreen               swept  PortalTripsScreen
+          CompanyListScreen                  swept  RegisterCompanyScreen
+   swept  CompanySelectionScreen             swept  SuperAdminCompanyMirrorScreen
+   swept  DriverAppScreen                    swept  SuperAdminDashboardV2Screen
+   swept  DriverLimitRequestsScreen          swept  TransporterLeaderboardScreen
+          EmployeeGridScreen                 swept  TransporterRequestTrackingScreen
+   swept  ExpiredAccessScreen                       TransportersOverviewV2Screen
+   swept  ForgotPasswordScreen               swept  UserPreferencesScreen
+   swept  HomeTabBodyScreen                  swept  WhatsAppOtpScreen
+   swept  LiveTripMapScreen
+   swept  MandatoryPasswordChangeScreen
+   swept  MineSupplierBuyersDetailScreen
+   swept  PlatformAdminSettingsScreen
+   swept  PortalTonsOutScreen
+```
 
-**Watch for these three, because every batch so far has had at least one:**
+**Suggested order**, cheapest and highest-yield first:
 
-- a screen inside the portal `ShellRoute` that builds its own
-  `Scaffold(appBar:)` — that is a second bar under the shell's;
+1. **The four with no `swept` mark** — `CompanyListScreen`,
+   `CompanyDetailsScreen`, `EmployeeGridScreen`,
+   `TransportersOverviewV2Screen`. Nothing has ever rendered them at any width.
+   Three of them were edited this session (their app bars came off) and have
+   NOT been looked at since — that alone makes them the first stop.
+2. **`MineSupplierBuyersDetailScreen`, `PortalTonsOutScreen`,
+   `PortalTripsScreen`, `LiveTripMapScreen`, `DriverAppScreen`** — real
+   operational screens with real data shapes.
+3. **§4.5's two fixture-less console screens** (`SuperAdminCompanyMirrorScreen`,
+   `CompanyEmployeeRegisterScreen`).
+4. **The auth tail** — `ForgotPasswordScreen`, `WhatsAppOtpScreen`,
+   `MandatoryPasswordChangeScreen`, `CompanySelectionScreen`,
+   `ExpiredAccessScreen`. Small, but `login` is the one screen every user sees
+   and these are its neighbours.
+5. **§4.2's dialogs.**
+
+**Watch for these four, because every batch so far has had at least one:**
+
+- a screen inside a `ShellRoute` that builds its own `Scaffold(appBar:)` —
+  **now held by a test**, so this one should stay dead;
 - a screen that reads a SERVICE or a REPOSITORY directly rather than a
   provider, which no override reaches, and which therefore photographs an
   error card;
-- a wire enum value reaching a reader.
+- a wire enum value reaching a reader;
+- a `Row` handing a non-flex child unbounded width (CLAUDE.md §10.4 — this
+  phase has now hit that family **ten** times).
 
 ### 4.2 Dialogs and flows nothing has photographed
 
 `shoot()` takes an `act:` callback, so an interaction can happen before the
-picture is taken (used for opening a request, and for expanding the token
-history's group). Nothing yet photographs:
+picture is taken (used for opening a request, expanding the token history's
+group, and switching the Messages sidebar to People). Nothing yet photographs:
 
 - the **due-diligence gate** — preview → "are you sure" → the green tick → the
   transporter list → the final confirm. It needs an `approved` request and a
@@ -281,7 +307,8 @@ history's group). Nothing yet photographs:
 - the **Record Load sheet** (tare/gross, seal photos, wayslip).
 - the **hazard report sheet**, the **quality-cert dialog**, the **invoice
   capture dialog**, the **add-vehicle dialog**, the **waybill edit dialog**,
-  the **compliance document dialog**, the **log fuel / log cost dialogs**.
+  the **compliance document dialog**, the **log fuel / log cost dialogs**,
+  the **org-group dialog** (reachable from Messages' new header action).
 
 `test/test_helpers/dialog_sweep.dart` and `form_dialog_overflow_sweep_test.dart`
 already sweep dialogs for overflow; what is missing is pictures.
@@ -303,11 +330,15 @@ already sweep dialogs for overflow; what is missing is pictures.
 3. **`AuditLog.actionLabel` title-cases every word**, so `USER_ASSIGNED_TO_SEAT`
    reads "User Assigned To Seat" — English title case would lower-case "to".
    Noted, not changed.
-4. **NEW: `Recon`, `Requests` and `Docs`** are the phone bottom bar's short
-   forms for Reconciliation, Procurement and Compliance. "Recon" is the
-   product's own word (CLAUDE.md §4), "Requests" is where the tap actually
-   lands, and "Docs" describes what the compliance screen holds. Say the word
-   if any of the three should read differently.
+4. **`Recon`, `Requests` and `Docs`** are the phone bottom bar's short forms for
+   Reconciliation, Procurement and Compliance. "Recon" is the product's own word
+   (CLAUDE.md §4), "Requests" is where the tap actually lands, and "Docs"
+   describes what the compliance screen holds. Say the word if any of the three
+   should read differently.
+5. **NEW: the notification body "2 full load(s) ready …" is written by the
+   DATABASE**, not by Dart — `supabase/` is frozen in this project, so
+   `mlCount` cannot reach it. Every other parenthesised plural in the product
+   is gone; this one needs a migration in the shipping app to follow.
 
 ### 4.4 The 127 remaining hand-named typefaces
 
@@ -331,7 +362,9 @@ decision — but the ratchet is there so it can be revisited.
   private search index, live trip positions) that no fixture builds, so they
   would photograph an error state rather than a layout. **Adding those fixtures
   is a real remaining task**, and `FixtureCompanyRepository` in
-  `portal_tail_fixtures.dart` is now the pattern for the repository half of it.
+  `portal_tail_fixtures.dart` plus `FixtureMessagingService` /
+  `FixtureNotificationService` in `shared_tail_fixtures.dart` are the patterns
+  for the service half of it.
 - **The `dd MMM yyyy` date sites were deliberately NOT consolidated.** 18 of
   them, all agreeing with `MlTime.day()`'s own output character for character,
   and several formatting a value whose provenance has to be read before it can
@@ -339,10 +372,10 @@ decision — but the ratchet is there so it can be revisited.
   `one-vocabulary-for-a-timestamp` guard deliberately does not match a
   date-only pattern for that reason. Converting them is safe but must be done
   site by site, not by regex.
-- **The scrollbar-thumb note from the previous handoff is RESOLVED.** It was
-  the capture schedule, not the widget; `pumpForCapture` gained two frames and
-  `test/widgets/wide_table_scrollbar_test.dart` now measures the painted thumb
-  by running the painter over a recording canvas.
+- **The chat-model conversion changed which values are wall clocks.** The five
+  models in `messaging_models.dart` now hold INSTANTS. If another surface starts
+  reading one of those fields, it must go through `MlTime.clock/stamp/day` — not
+  `DateFormat` directly, which would print UTC.
 
 ### 4.6 Windows — blocked, and not this project's fault
 
@@ -366,13 +399,14 @@ Jean said to skip it. Moving the folder to a path without `!` is his call.
 cd "/c/Users/Somebody Someone/Music/SHOWME!/MineLink-M3"
 
 flutter analyze                                  # must be clean
-flutter test                                     # 1815 passing
+flutter test                                     # 1845 passing
 dart tool/release_guards.dart                    # 35/35
 dart tool/release_guards.dart --selftest         # every guard must BITE
 py -3 tool/type_scale_codemod.py --selftest
 py -3 tool/dropdown_width_check.py
 py -3 tool/glyph_coverage_check.py
 py -3 tool/one_clock_check.py
+py -3 tool/unphotographed_screens.py             # what still has no picture
 flutter test test/renders --update-goldens       # after any visual change
 flutter build web --release
 flutter build apk --debug
@@ -380,20 +414,24 @@ flutter build apk --debug
 
 ### Things that have already gone wrong here — do not repeat them
 
-- 🚨 **`git checkout -- <dir>` THREW AWAY UNCOMMITTED WORK.** Done this
-  session to undo a half-applied codemod; it also reverted three finished,
-  unrelated fixes in the same directory that had not been committed yet — the
-  mine-anchor row, the stockpile-audit dedup and the tons-out units. They had
-  to be reapplied from scratch. **Copy the files to the scratchpad first**, or
-  commit before running any codemod that might need undoing.
-- **A bash heredoc mangles `${...}`, backticks and backslashes even when
-  quoted.** It corrupted a Dart string, a Python regex and a test file this
-  session — three separate times, in three different ways. **Write multi-line
-  Python and commit messages to a FILE** and run `py -3 file.py` /
-  `git commit -F file`. For Dart edits prefer the Edit tool.
+- 🚨 **`git checkout -- <dir>` THREW AWAY UNCOMMITTED WORK.** It also reverted
+  three finished, unrelated fixes in the same directory. **Copy the files to
+  the scratchpad first**, or commit before running any codemod that might need
+  undoing. (To sabotage-test a fix, `cp file /tmp/x.bak` first and `cp` it
+  back — that restores the ORIGINAL verbatim, which a hand-retype does not.)
+- 🚨 **A BASH HEREDOC EATS BACKSLASHES EVEN WHEN QUOTED.** New this session and
+  it cost two failed patches: `cat > f.py <<'PYEOF'` turned `\\n` into `\n`, so
+  a Python literal that was meant to carry the two characters of a Dart `\n`
+  carried a real newline and the match silently found nothing. **Write any
+  script containing a backslash with the Write tool, not a heredoc.** There is
+  a line-ending-safe `sub_once`/`patch` helper worth recreating in the
+  scratchpad — join every multi-line literal on `\r?\n`.
 - **Several files in this repo have MIXED line endings.** A multi-line literal
   match silently finds nothing. Any codemod must join its lines with a
   `\r?\n` regex, not a bare `\n`.
+- 🚨 **`flutter analyze` output is not reliably indented.** Piping it through
+  `grep -E "^\s+(error|warning)"` reported **clean while a warning was
+  printed**. Use `| tail -4` and read "N issues found".
 - **`dart format` on a directory reformats files you did not touch.** It did
   131 files once and 106 another time. **The repo is not dart-format clean**,
   so formatting even a single file you edited churns it entirely. Emit
@@ -411,7 +449,7 @@ flutter build apk --debug
 - **Never `git stash`, `git checkout -- .`, or `git clean`** in the original
   worktree — other agent sessions write it (`CLAUDE.md` §10.1).
 - **A Windows console is cp1252** and cannot encode the characters these tools
-  talk about. Both Python checks force UTF-8 on stdout.
+  talk about. Every Python check forces UTF-8 on stdout.
 - **`find.text` cannot see a `TextSpan`.** Walk `RenderParagraph` and read
   `toPlainText()` — `console_tail_test.dart` and `portal_tail_test.dart` both
   have the helper.
@@ -429,15 +467,23 @@ flutter build apk --debug
   minutes**.
 - **A sabotage that does not restore the ORIGINAL code proves nothing.** Put
   the original expression back verbatim, not something near it.
-- **A phone render frame must be tall enough for the whole scroll.** Measure
-  it: render at a deliberately oversized frame, find the last row of painted
-  content with PIL, add the 142px the pinned bottom bar occupies.
+- 🚨 **A PHONE RENDER FRAME MUST BE TALL ENOUGH FOR THE WHOLE SCROLL, AND
+  "TALL ENOUGH" IS A MEASUREMENT.** Three of this session's frames were
+  clipping. Render at a deliberately oversized frame, find the last row of
+  painted content with PIL, and add the 142px the pinned bottom bar occupies.
+  **Zero slack means clipped, not "exactly right".**
 - **A whitelist is the wrong shape for "tell me what went wrong."** `shoot()`
   reports everything now.
 - 🚨 **A SCREEN THAT PHOTOGRAPHS AN ERROR CARD IS NOT A SCREEN PHOTOGRAPHED.**
   The company profile was written, the render was produced and the suite was
   green while the picture read `PostgrestException(message: , code: 400 …)`.
-  Look at every new PNG before counting it.
+  Look at every new PNG before counting it. It happened twice more this session
+  (the deactivate card, the company-locations section) — both times because a
+  widget constructed its own backend instead of reading a provider.
+- 🚨 **A RENDER HARNESS CAN LIE ABOUT THE CHROME.** For 118 renders the shell's
+  title and subtitle were the reverse of what `PortalShellLayout` builds. It
+  looked fine, and it made a duplicated title impossible to see. **When a
+  picture is the evidence, the frame around it is part of the claim.**
 
 ### Where the reasoning lives
 
@@ -447,7 +493,7 @@ flutter build apk --debug
   not been. Its "still open" list is current.
 - `docs/design-reference/` — the **pre-redesign** reference PNGs. **Do not
   regenerate them**; they are the before-image.
-- `docs/redesign/renders/` — 118 PNGs of the redesign.
+- `docs/redesign/renders/` — 135 PNGs of the redesign.
 - Every commit message carries its own reasoning.
 
 ---
@@ -458,11 +504,12 @@ flutter build apk --debug
 that keep mattering:
 
 - **§10.4** — a `Row` hands a non-flex child unbounded width. This phase has
-  hit it **eight separate times now**, plus its siblings: a `Wrap` laid out
+  hit it **ten separate times now**, plus its siblings: a `Wrap` laid out
   against unbounded width, two flex children splitting a row that should have
-  had one, three tables of `Expanded` columns with no minimum, and a `Wrap`
-  wrapping to the wrong edge. That family does not raise, and on a desktop it
-  looks perfect.
+  had one, three tables of `Expanded` columns with no minimum, a `Wrap`
+  wrapping to the wrong edge, and — new this session — an `Align` with no
+  `widthFactor` expanding to fill a whole search field. That family does not
+  raise, and on a desktop it usually looks perfect.
 - **§10.5** — a green test over an empty fixture, an error state, or a fallback
   font proves nothing. Report *screens proving something / N*.
 - **§7** — `flutter test` renders in a fallback font unless you load the real
@@ -470,6 +517,9 @@ that keep mattering:
 - **§7.1** — one clock, Africa/Johannesburg. `MlTime`, never `DateTime.now()`
   for anything a user reads as a date, a time, or a number bucketed by day.
   Four guards and `tool/one_clock_check.py` hold the places a unit test cannot.
+  **And a value's KIND matters as much as its zone**: `MlTime.sast()` returns a
+  wall clock, and measuring a duration with one is the bug `MlPresence` exists
+  to end.
 - **§10.6** — Dart bitwise operators are unsigned 32-bit on the web.
 - **§1** — the package is `flutter_application_1`. Do not rename it.
 
@@ -489,11 +539,12 @@ Continue the MineLink Material 3 redesign. Read both of these before doing
 anything else, in this order:
 
 1. C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
-   — the current handoff, rewritten 2026-08-21 (second rewrite that day). Start
-   at the section headed "WHERE THE LAST SESSION STOPPED — READ THIS FIRST",
-   then §0, §2, §4 and §5. It has the verified baseline of the untouched
-   original, what has been done across 65 commits, what is verified green, and
-   exactly what is left with the next targets named in priority order.
+   — THE CURRENT HANDOFF, rewritten 2026-08-21 (third rewrite that day). This
+   is the file that governs the work. Start at the section headed "WHERE THE
+   LAST SESSION STOPPED — READ THIS FIRST", then §0, §2, §4 and §5. It has the
+   verified baseline of the untouched original, what has been done across 67
+   commits, what is verified green, and exactly what is left with the next
+   targets named in priority order.
 2. C:\Users\Somebody Someone\Claude\HANDOFF.md
    — the older machine-wide handoff from 2026-08-08 (MCP servers, git position,
    decoy folders). Background only; the MineLink-M3 one above governs this work.
@@ -501,35 +552,48 @@ anything else, in this order:
 THE ONE RULE THAT MUST NOT BREAK: nothing whatsoever changes inside
 C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29. Its
 verified baseline is in §0 of the MineLink-M3 handoff — check it at the start
-and again at the end. All work happens in MineLink-M3, which is a separate git
-repo.
+and again at the end. All work happens in
+C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3, which is a separate git
+repo (branch `main`).
 
-WHERE TO PICK UP: the tree is clean and the gate is green. The last four
-commits are the portal ones — "portal: the buyer's own screens, and an arrow no
-font could draw", "portal: the mine's tail, and seven ways of saying when",
-"portal: the transporter's tail, and twenty-two counts nobody decided" and
-"portal: the company profile was an error card, and a fourth org-type switch".
-Read them; they carry their own reasoning.
+WHERE TO PICK UP: the tree is clean, 67 commits, and the whole gate is green.
+The tip commit is "shared: the six screens nobody owned, and thirteen second
+app bars" — read it, it carries its own reasoning at length. §4.1's console,
+portal AND shared lists are all finished; every screen photographed so far has
+turned up a real defect.
 
-§4.1's PORTAL LIST IS FINISHED — all fourteen screens are photographed and
-every one turned up a real defect. Continue at §4.1's SHARED list, in the order
-given: chat/messages, notifications, profile, account security, appearance &
-theme, employee register. Then §4.5's two fixture-less console screens (company
-mirror, company employee register). Then §4.2's dialogs — one screen at a time,
-phone width first, because that is where nearly every remaining defect has been.
+CONTINUE AT §4.1 of the handoff. Do not trust any list of screens in a file —
+run this, which now keeps that inventory:
 
-Do NOT re-run the three searches the handoff's opening section records as
+    py -3 tool/unphotographed_screens.py
+
+It reports 89 route-target screens, 64 with a render, 25 without. Work them in
+the order §4.1 gives:
+  1. the four with no `swept` mark — CompanyListScreen, CompanyDetailsScreen,
+     EmployeeGridScreen, TransportersOverviewV2Screen. Nothing has ever
+     rendered them at any width, and three of them had their app bars removed
+     in the last commit and have NOT been looked at since.
+  2. MineSupplierBuyersDetailScreen, PortalTonsOutScreen, PortalTripsScreen,
+     LiveTripMapScreen, DriverAppScreen.
+  3. §4.5's two fixture-less console screens (company mirror, company employee
+     register).
+  4. the auth tail — ForgotPasswordScreen, WhatsAppOtpScreen,
+     MandatoryPasswordChangeScreen, CompanySelectionScreen, ExpiredAccessScreen.
+  5. §4.2's dialogs — one screen at a time, phone width first, because that is
+     where nearly every remaining defect has been.
+
+Do NOT re-run the four searches the handoff's opening section records as
 already finished.
 
 THE METHOD, unchanged: fixtures, regenerate, LOOK at the PNG, MEASURE it with
 PIL rather than squint, fix the shape rather than the instance where the fault
 is structural, then pin it with a test and prove the test bites by removing the
-fix and watching it fail. Every screen photographed so far has turned up a real
-defect. Watch in particular for the three faults every batch has had: a screen
-inside the portal ShellRoute that builds its own Scaffold+AppBar (a second bar
-under the shell's), a screen that reads a service or repository directly so no
-provider override reaches it (it photographs an error card), and a wire enum
-value reaching a reader.
+fix and watching it fail. Watch in particular for the four faults every batch
+has had: a screen inside the portal ShellRoute that builds its own
+Scaffold+AppBar (now held by a test, so it should stay dead), a screen that
+reads a service or repository directly so no provider override reaches it (it
+photographs an error card), a wire enum value reaching a reader, and a Row
+handing a non-flex child unbounded width.
 
 HOW TO WORK: don't worry about me seeing anything, I'll want to see when
 everything is complete and done, so don't stop so much in between — please run
@@ -554,8 +618,16 @@ flutter build web --release
 flutter build apk --debug
 
 Read §5 of the MineLink-M3 handoff — the things that have already gone wrong in
-this repo — so you don't repeat them. Two of them are new and cost real time
-this session: `git checkout -- <dir>` threw away three finished uncommitted
-fixes, and `RenderParagraph.toPlainText()` cannot see a truncation, so a test
-asserting "this name is on screen" passed while the reader saw an ellipsis.
+this repo — so you don't repeat them. Four of them cost real time and are worth
+knowing before you touch anything: `git checkout -- <dir>` threw away three
+finished uncommitted fixes; a bash heredoc ate backslashes even when quoted and
+silently broke two codemods (write such scripts with the Write tool);
+`flutter analyze` output is not reliably indented so grepping it reported clean
+while a warning was printed (use `| tail -4`); and a phone render frame with
+zero slack above the bottom bar is CLIPPING, not "exactly right".
+
+When the work is done, rewrite
+C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md the same way
+this one was written — verified state only, with a fresh copy-paste block in
+§8 — and commit it.
 ```
