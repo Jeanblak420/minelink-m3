@@ -143,6 +143,54 @@ Future<List<LowContrastHit>> reportLowContrast(
   return hits;
 }
 
+/// How far off the ground-to-ink line a pixel may sit and still count as a
+/// rendering of that text, in RGB units.
+///
+/// Generous enough for a subpixel-hinted glyph edge, which is a blend of the
+/// two plus rounding, and for a ground that is a gradient rather than the one
+/// modal colour the report names. Far tighter than the distances a covering
+/// widget produces: the two measured cases sit 268 and 273 units off.
+const double _inkLineTolerance = 32;
+
+/// The part of [ro]'s box that survives every ancestor's paint clip, in
+/// global coordinates — or null when nothing of it does.
+///
+/// `localToGlobal` gives a paragraph's LAYOUT position, and a scrollable lays
+/// its children out well past the window it shows. Sampling those coordinates
+/// measures whatever is painted there instead, which is a different widget.
+///
+/// The relative ink test further down was written to catch exactly this, and
+/// it does not catch it alone: it asks whether any pixel is closer to the ink
+/// than to the ground, and a THIRD colour sitting between the two answers
+/// yes. That is not a corner case — it is what a covering widget normally
+/// looks like. The add-vehicle dialog's `Type / model` field is laid out under
+/// the sticky `Add Vehicle` button, so the button's near-black label supplied
+/// the pixels that "belong to" a mid-slate field label, and the report said
+/// `#94A3B8 on #22D3EE — 1.42:1` for a field that is not on the screen at all.
+/// Seven strings in those two renders, and the same shape elsewhere.
+///
+/// Asking the framework what it clipped is exact where sampling is a guess:
+/// a viewport reports its own bounds, so a child scrolled past them has no
+/// visible rect and never reaches the raster.
+Rect? _visiblePaintRect(RenderParagraph ro) {
+  var rect = Offset.zero & ro.size;
+  RenderObject child = ro;
+  var parent = ro.parent;
+  while (parent != null) {
+    rect = MatrixUtils.transformRect(child.getTransformTo(parent), rect);
+    final clip = parent.describeApproximatePaintClip(child);
+    if (clip != null) {
+      // `intersect` can return a negative-sized rect rather than an empty one.
+      final vis = rect.intersect(clip);
+      if (vis.width <= 0 || vis.height <= 0) return null;
+      rect = vis;
+    }
+    child = parent;
+    parent = parent.parent;
+  }
+  return rect;
+}
+
 LowContrastHit? _measure(
   RenderParagraph ro,
   String text,
@@ -152,11 +200,13 @@ LowContrastHit? _measure(
   double scaler,
   Element e,
 ) {
-  final origin = ro.localToGlobal(Offset.zero);
-  final left = origin.dx.floor();
-  final top = origin.dy.floor();
-  final right = (origin.dx + ro.size.width).ceil();
-  final bottom = (origin.dy + ro.size.height).ceil();
+  final visible = _visiblePaintRect(ro);
+  if (visible == null) return null;
+
+  final left = visible.left.floor();
+  final top = visible.top.floor();
+  final right = visible.right.ceil();
+  final bottom = visible.bottom.ceil();
 
   final x0 = math.max(0, left);
   final y0 = math.max(0, top);
@@ -194,18 +244,34 @@ LowContrastHit? _measure(
   if (rootColor != null) spanColors.add(rootColor);
   if (spanColors.isEmpty) return null;
 
-  bool nearInk(int c, int tol) {
-    for (final ink in spanColors) {
-      final dr = ((c >> 16) & 0xFF) - (ink.r * 255).round();
-      final dg = ((c >> 8) & 0xFF) - (ink.g * 255).round();
-      final db = (c & 0xFF) - (ink.b * 255).round();
+  /// The colour each span ACTUALLY paints once composited onto [over].
+  ///
+  /// A translucent ink never reaches the raster as its declared colour, so
+  /// this is what the exclusion below has to match against. It is the same
+  /// arithmetic the ratio uses further down, hoisted so both agree by
+  /// construction rather than by being written twice.
+  List<int> effectiveInks(int over) {
+    final out = <int>[];
+    for (final c in spanColors) {
+      final a = c.a;
+      if (a <= 0.02) continue;
+      final r = (c.r * 255).round() * a + ((over >> 16) & 0xFF) * (1 - a);
+      final g = (c.g * 255).round() * a + ((over >> 8) & 0xFF) * (1 - a);
+      final b = (c.b * 255).round() * a + (over & 0xFF) * (1 - a);
+      out.add((r.round() << 16) | (g.round() << 8) | b.round());
+    }
+    return out;
+  }
+
+  bool nearAny(int c, List<int> inks, int tol) {
+    for (final ink in inks) {
+      final dr = ((c >> 16) & 0xFF) - ((ink >> 16) & 0xFF);
+      final dg = ((c >> 8) & 0xFF) - ((ink >> 8) & 0xFF);
+      final db = (c & 0xFF) - (ink & 0xFF);
       if (dr.abs() <= tol && dg.abs() <= tol && db.abs() <= tol) return true;
     }
     return false;
   }
-
-  bool looksLikeInk(int c) => nearInk(c, 26);
-
 
   // THE GROUND IS THE MODAL COLOUR OF THE BOX, WITH THE INK EXCLUDED.
   //
@@ -219,26 +285,105 @@ LowContrastHit? _measure(
   // stack, a card on a card. Taken inside the paragraph's own box, it is the
   // ground under THAT text, so a gradient reports differently for each string
   // sitting on a different part of it.
-  final counts = <int, int>{};
-  var considered = 0;
-  for (var y = y0; y < y1; y += stride) {
-    for (var x = x0; x < x1; x += stride) {
-      final c = at(x, y);
-      if (looksLikeInk(c)) continue;
-      counts[c] = (counts[c] ?? 0) + 1;
-      considered++;
+  //
+  // ── WHY THIS RUNS TWICE ───────────────────────────────────────────────
+  //
+  // The exclusion needs the ink, and a TRANSLUCENT ink is not known until the
+  // ground is: `textFaint` is `onSurfaceVariant` at 62% alpha, so it reaches
+  // the raster as a colour that depends on what it landed on. Matching the
+  // DECLARED colour excludes nothing at all — `#94A3B8` at 62% on the card
+  // surface paints `#627084`, which is fifty units away in every channel.
+  //
+  // So the exclusion silently did not work for exactly the ink that most
+  // needed it — `textFaint` alone is 657 of the findings — and where the
+  // glyphs also filled their box the mode became the TEXT: a probe measured
+  // `ground=#627084` with `ink=#8190A4`, the ink composited onto itself and
+  // reported as a ratio between two shades of one string. That is the
+  // "measurement eating itself" above, returning by the one door left open.
+  //
+  // ⚠️ THIS FIX IS DEFENSIVE, AND THAT WAS MEASURED RATHER THAN ASSUMED.
+  //
+  // The hole is real but it is not reachable in this suite, because it needs
+  // the glyphs to be MOST of their own box and real fonts never get there. A
+  // survey of the densest cases available — 40px w800 at `height: 0.7` with
+  // negative tracking, a 32px bold figure in a tight chip, and a paragraph
+  // clipped to a 4-20px sliver landing on glyph stems — topped out at 45.7%:
+  //
+  //     14px regular body text          12.2%
+  //     18px w800 "+103%", height 1.0   27.6%
+  //     32px w800 "88", height 0.75     45.0%
+  //     40px w800 "MMM", tracking -4    45.7%   <- the worst found
+  //     clipped sliver, widths 4..20    28.0-40.0%
+  //
+  // Below 50% the background wins the mode whatever the exclusion matches, so
+  // re-running all 220 renders with and without this returned findings that
+  // are IDENTICAL — 1,798 either way, same inks, same grounds, same ratios.
+  //
+  // It is kept because it is correct and costs one extra pass over boxes that
+  // are a few hundred pixels each, and because the thing that makes it
+  // unreachable is a property of the FONTS, not of the report — a denser face,
+  // a tighter chip, or a test that forgets `loadRealFonts()` moves the number.
+  // It is NOT presented as load-bearing, and `tool/_sabotage.py` records that
+  // reverting it cannot be caught, rather than implying it can.
+  int modeExcluding(List<int> inks) {
+    final counts = <int, int>{};
+    var considered = 0;
+    for (var y = y0; y < y1; y += stride) {
+      for (var x = x0; x < x1; x += stride) {
+        final c = at(x, y);
+        if (inks.isNotEmpty && nearAny(c, inks, 26)) continue;
+        counts[c] = (counts[c] ?? 0) + 1;
+        considered++;
+      }
     }
+    if (considered < 16) return -1;
+    var mode = 0xFFFFFF;
+    var best = 0;
+    counts.forEach((c, n) {
+      if (n > best) {
+        best = n;
+        mode = c;
+      }
+    });
+    return mode;
   }
-  if (considered < 16) return null;
 
-  var ground = 0xFFFFFF;
-  var best = 0;
-  counts.forEach((c, n) {
-    if (n > best) {
-      best = n;
-      ground = c;
+  // Pass one takes the mode of the box's PERIMETER, not of the whole box.
+  //
+  // "Mode of the whole box" is the obvious first pass and it is wrong exactly
+  // when it matters: it assumes the glyphs are a minority of their own box,
+  // and for a tight chip or a large bold figure they are not. Then the
+  // provisional ground IS the ink, compositing onto it changes nothing, and
+  // pass two excludes a colour that is not there — the same self-eating
+  // measurement, one level deeper.
+  //
+  // A paragraph's perimeter is background by construction: the top and bottom
+  // rows are ascender and descender space, the left and right edges are side
+  // bearings. And where the box is a tight chip, the perimeter is the CHIP
+  // FILL, which is the correct ground there. One rule, right in both cases.
+  final ring = <int, int>{};
+  for (var x = x0; x < x1; x++) {
+    ring[at(x, y0)] = (ring[at(x, y0)] ?? 0) + 1;
+    ring[at(x, y1 - 1)] = (ring[at(x, y1 - 1)] ?? 0) + 1;
+  }
+  for (var y = y0; y < y1; y++) {
+    ring[at(x0, y)] = (ring[at(x0, y)] ?? 0) + 1;
+    ring[at(x1 - 1, y)] = (ring[at(x1 - 1, y)] ?? 0) + 1;
+  }
+  var provisional = 0xFFFFFF;
+  var ringBest = 0;
+  ring.forEach((c, n) {
+    if (n > ringBest) {
+      ringBest = n;
+      provisional = c;
     }
   });
+
+  // Pass two: now the ink is knowable, exclude it and take the mode of the
+  // whole box — which is what actually sits behind the glyphs, and is what
+  // sees a gradient or a sheen that the perimeter alone would miss.
+  final ground = modeExcluding(effectiveInks(provisional));
+  if (ground < 0) return null;
 
   final gl =
       _luminance((ground >> 16) & 0xFF, (ground >> 8) & 0xFF, ground & 0xFF);
@@ -246,21 +391,26 @@ LowContrastHit? _measure(
   // A translucent ink is composited onto that measured ground before the
   // ratio, because a 60%-alpha slate on a white card and the same slate on a
   // navy one are different colours to a reader.
+  //
+  // `effectiveInks` is the same arithmetic the exclusion above used — called
+  // rather than repeated, so the colour the report NAMES is always the colour
+  // it excluded from the ground. Written out separately the two were free to
+  // disagree, and a disagreement between them is invisible: both halves stay
+  // plausible and only the ratio comes out wrong.
   var worst = double.infinity;
   var worstColor = ground;
-  for (final c in spanColors) {
-    final a = c.a;
-    // Fully transparent ink is a deliberate blank — a spacer, a fade-out.
-    if (a <= 0.02) continue;
-    final r = ((c.r * 255).round() * a + ((ground >> 16) & 0xFF) * (1 - a));
-    final g = ((c.g * 255).round() * a + ((ground >> 8) & 0xFF) * (1 - a));
-    final b = ((c.b * 255).round() * a + (ground & 0xFF) * (1 - a));
-    final ratio = _ratio(_luminance(r.round(), g.round(), b.round()), gl);
+  for (final ink in effectiveInks(ground)) {
+    final ratio = _ratio(
+      _luminance((ink >> 16) & 0xFF, (ink >> 8) & 0xFF, ink & 0xFF),
+      gl,
+    );
     if (ratio < worst) {
       worst = ratio;
-      worstColor = (r.round() << 16) | (g.round() << 8) | b.round();
+      worstColor = ink;
     }
   }
+  // Every span was fully transparent — a deliberate blank, a spacer, a
+  // fade-out mid-animation.
   if (worst == double.infinity) return null;
 
   // ── IS THE TEXT EVEN ON SCREEN? ─────────────────────────────────────────
@@ -287,17 +437,40 @@ LowContrastHit? _measure(
   // tolerance of `#450A0A` — two dark colours are always near each other in
   // channel space.
   //
-  // What does work is a RELATIVE test: a pixel belongs to this text if it is
-  // closer to the ink than to the ground. Anti-aliased edges sit between the
-  // two and are excluded by construction; glyph cores are past the midpoint
-  // however faint the text is; and a box painted entirely in some third colour
-  // has nothing closer to the ink than to its own ground.
+  // A RELATIVE test was the first answer: a pixel belongs to this text if it
+  // is closer to the ink than to the ground. It is necessary and it is not
+  // sufficient, and the gap is not a corner case — it is what a covering
+  // widget normally looks like. A THIRD colour lying beyond the ink satisfies
+  // "closer to the ink than to the ground" easily: the hazard sheet's
+  // near-black `Report hazard` label is 98% of the way from the driver HUD's
+  // cyan ground towards its slate ink, so four HUD labels that the sheet
+  // completely covers were reported at 1.42:1, and a fifth at 1.20:1.
+  // [_visiblePaintRect] does not catch these — nothing is CLIPPED, an opaque
+  // route is simply painted on top.
+  //
+  // What is both necessary and sufficient is that the pixel lie ON the line
+  // from the ground to the ink. That is not a heuristic about this app: it is
+  // what anti-aliasing IS. A glyph edge is a blend of exactly those two
+  // colours, so it lands on that segment by construction, and a glyph core is
+  // the ink itself, at its far end. A colour that is neither — the covering
+  // label's near-black, 268 units off the segment — cannot be a rendering of
+  // this text at any coverage.
+  //
+  // So both halves are required: `t >= 0.5` (past the midpoint, the original
+  // relative test) AND within [_inkLineTolerance] of the segment.
   final ir = (worstColor >> 16) & 0xFF;
   final ig = (worstColor >> 8) & 0xFF;
   final ib = worstColor & 0xFF;
   final gr = (ground >> 16) & 0xFF;
   final gg = (ground >> 8) & 0xFF;
   final gb = ground & 0xFF;
+  final dr = ir - gr;
+  final dg = ig - gg;
+  final db = ib - gb;
+  final len2 = dr * dr + dg * dg + db * db;
+  // Ink and ground identical: there is no segment, and no ratio worth
+  // reporting either — the caller's own contrast check would read 1.00:1.
+  if (len2 == 0) return null;
   var inkPixels = 0;
   for (var y = y0; y < y1 && inkPixels < 3; y += stride) {
     for (var x = x0; x < x1 && inkPixels < 3; x += stride) {
@@ -305,9 +478,16 @@ LowContrastHit? _measure(
       final r = (c >> 16) & 0xFF;
       final g = (c >> 8) & 0xFF;
       final b = c & 0xFF;
-      final di = (r - ir) * (r - ir) + (g - ig) * (g - ig) + (b - ib) * (b - ib);
-      final dg2 = (r - gr) * (r - gr) + (g - gg) * (g - gg) + (b - gb) * (b - gb);
-      if (di < dg2) inkPixels++;
+      final t = ((r - gr) * dr + (g - gg) * dg + (b - gb) * db) / len2;
+      if (t < 0.5) continue;
+      // Clamped, so a pixel past the ink's own end is measured against the
+      // ink rather than against an extrapolation of the line.
+      final tc = t > 1.0 ? 1.0 : t;
+      final pr = gr + tc * dr;
+      final pg = gg + tc * dg;
+      final pb = gb + tc * db;
+      final off = (r - pr) * (r - pr) + (g - pg) * (g - pg) + (b - pb) * (b - pb);
+      if (off <= _inkLineTolerance * _inkLineTolerance) inkPixels++;
     }
   }
   if (inkPixels < 3) return null;
