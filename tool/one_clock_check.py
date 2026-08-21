@@ -47,6 +47,24 @@ NAIVE_STAMP = re.compile(r"DateTime\.now\(\)\s*\.\s*toIso8601String\(\)")
 # keeps it from matching an unrelated field of the same name further down.
 NAIVE_STAMP_VIA_LOCAL = re.compile(
     r"(?:final|var|late final)\s+(\w+)\s*=\s*DateTime\.now\(\)\s*;")
+# `DateTime.now()` INSIDE A DATE PICKER.
+#
+# The module docstring says a bare `DateTime.now()` is fine, and for a stamp or
+# a TTL it is. Inside `showDatePicker` it is not: every argument there is a
+# calendar day the user reads and then submits. On a laptop left on UTC the
+# picker pre-filled YESTERDAY between midnight and 02:00 SAST — which is night
+# shift, the hours the fuel log and the production log exist for.
+#
+# Found 2026-08-21 by photographing the Log-fuel dialog against a frozen clock:
+# the field read the REAL today, six days off the fixture beside it. Nine sites
+# across seven files, several of them mid-migration — `add_vehicle_form` had
+# `initialDate: MlTime.now()` and `firstDate: DateTime.now()` in the SAME call.
+#
+# The window is the picker's own argument list, matched by counting
+# parentheses, so a `DateTime.now()` further down the method is not caught.
+DATE_PICKER = re.compile(r"showDatePicker\s*\(")
+PICKER_NOW = re.compile(r"DateTime\.now\(\)")
+
 # `current_date` as a word, in SQL.
 CURRENT_DATE = re.compile(r"\bcurrent_date\b", re.I)
 
@@ -141,6 +159,21 @@ def scan_dart(root):
             for m in NAIVE_STAMP.finditer(code):
                 findings.append((rel, _line_of(raw, m.start()), "naive-stamp",
                                  "no offset: add .toUtc(), or MlTime.serverParam"))
+            for m in DATE_PICKER.finditer(code):
+                depth, j = 0, m.end() - 1
+                while j < len(code):
+                    if code[j] == "(":
+                        depth += 1
+                    elif code[j] == ")":
+                        depth -= 1
+                        if depth == 0:
+                            break
+                    j += 1
+                for n in PICKER_NOW.finditer(code[m.end():j]):
+                    findings.append(
+                        (rel, _line_of(raw, m.end() + n.start()), "picker-now",
+                         "a date picker's bounds are days a user reads and "
+                         "submits: use MlTime.now() / MlTime.today()"))
             for m in NAIVE_STAMP_VIA_LOCAL.finditer(code):
                 name = m.group(1)
                 window = "\n".join(code[m.end():].split("\n")[:60])
@@ -214,6 +247,17 @@ SELFTEST_DART = [
      "/// was `DateTime.now().toIso8601String()` before the ruling\nclass A {}", False),
     ("the corrected call",
      "class A { String f(DateTime d) => fmt.format(MlTime.sast(d)); }", False),
+    ("a date picker bounded by the device clock",
+     "class A { void f() { showDatePicker(\n"
+     "  context: c, initialDate: d, firstDate: DateTime(2020),\n"
+     "  lastDate: DateTime.now()); } }", True),
+    ("the same picker on the pit clock",
+     "class A { void f() { showDatePicker(\n"
+     "  context: c, initialDate: d, firstDate: DateTime(2020),\n"
+     "  lastDate: MlTime.now()); } }", False),
+    ("a DateTime.now() AFTER the picker call closes, which is not its bound",
+     "class A { void f() {\n  showDatePicker(context: c, initialDate: d);\n"
+     "  log(DateTime.now());\n} }", False),
 ]
 
 SELFTEST_SQL = [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -430,7 +431,7 @@ class _ComplianceDocDialogState extends ConsumerState<_ComplianceDocDialog> {
   }
 
   Future<void> _pickDate({required bool issued}) async {
-    final now = DateTime.now();
+    final now = MlTime.now();
     final initial = (issued ? _issued : _expires) ?? now;
     final picked = await showDatePicker(
       context: context,

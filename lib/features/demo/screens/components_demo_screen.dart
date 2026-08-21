@@ -212,7 +212,11 @@ class ComponentsDemoScreen extends ConsumerWidget {
                         textAlign: TextAlign.center,
                       ),
                       Text(
-                        company.orgType.name,
+                        // `.label`. `OrgType.labelFor`'s own doc already lists
+                        // "the components demo listed every company's type as
+                        // its wire value" among the sites it exists for — and
+                        // this one was still doing it.
+                        company.orgType.label,
                         style: TextStyle(color: MlTokens.slate600),
                         textAlign: TextAlign.center,
                       ),

@@ -3450,6 +3450,203 @@ void main() {
     });
   });
 
+  // ==========================================================================
+  // THE DIALOGS
+  // ==========================================================================
+  //
+  // §4.2 of the handoff: `test/test_helpers/dialog_sweep.dart` already sweeps
+  // these for overflow and for silent truncation at 8 widths x 6 text scales.
+  // What was missing is PICTURES — and every screen photographed in this phase
+  // has turned up something a sweep cannot see.
+  //
+  // Each one is opened the way a user opens it, by TAPPING ITS TRIGGER on the
+  // real host screen. That is slower to write than constructing the dialog
+  // directly and it proves one more thing: that the control which opens it is
+  // there, is enabled, and reaches this dialog.
+  group('the dialogs', () {
+    List<Override> tail() => [
+          ...companyScopeOverrides(),
+          ...portalCaptureOverrides(),
+          ...portalTailOverrides(),
+          ...sharedTailOverrides(),
+        ];
+
+    /// Taps the first widget whose text is [label], then settles.
+    ///
+    /// Returns without tapping when the trigger is absent, and the render then
+    /// photographs the screen rather than the dialog — which is why every one
+    /// of these is LOOKED AT rather than counted.
+    Future<void> Function(WidgetTester) tap(String label) =>
+        (WidgetTester tester) async {
+          final f = find.text(label);
+          if (f.evaluate().isEmpty) return;
+          await tester.ensureVisible(f.first);
+          await tester.pumpAndSettle();
+          await tester.tap(f.first, warnIfMissed: false);
+          await tester.pumpAndSettle();
+        };
+
+    Future<void> shootDialog(
+      WidgetTester tester,
+      Widget body,
+      String trigger,
+      Size size,
+      String name, {
+      required OrgType orgType,
+      required UserRole role,
+      required String title,
+      required String subtitle,
+      required String selectedRoute,
+      List<Override> extra = const [],
+    }) =>
+        shoot(
+          tester,
+          screen(
+            brightness: Brightness.dark,
+            child: body,
+            title: title,
+            subtitle: subtitle,
+            orgType: orgType,
+            role: role,
+            selectedRoute: selectedRoute,
+            extraOverrides: [...tail(), ...extra],
+          ),
+          size,
+          name,
+          act: tap(trigger),
+        );
+
+    testWidgets('log fuel — phone dark', (tester) async {
+      await shootDialog(
+        tester,
+        const FuelCostsScreen(),
+        'Log fuel',
+        const Size(412, 915),
+        'dialog-log-fuel-phone-dark',
+        orgType: OrgType.transporter,
+        role: UserRole.admin,
+        title: 'Fixture Haulage',
+        subtitle: 'Fuel & costs',
+        selectedRoute: '/portal/transporter/fuel',
+      );
+    });
+
+    testWidgets('log cost — phone dark', (tester) async {
+      await shootDialog(
+        tester,
+        const FuelCostsScreen(),
+        'Log cost',
+        const Size(412, 915),
+        'dialog-log-cost-phone-dark',
+        orgType: OrgType.transporter,
+        role: UserRole.admin,
+        title: 'Fixture Haulage',
+        subtitle: 'Fuel & costs',
+        selectedRoute: '/portal/transporter/fuel',
+      );
+    });
+
+    testWidgets('add document — phone dark', (tester) async {
+      await shootDialog(
+        tester,
+        const ComplianceScreen(),
+        'Add document',
+        const Size(412, 915),
+        'dialog-add-document-phone-dark',
+        orgType: OrgType.transporter,
+        role: UserRole.admin,
+        title: 'Fixture Haulage',
+        subtitle: 'Compliance',
+        selectedRoute: '/portal/transporter/compliance',
+      );
+    });
+
+    testWidgets('quality spec — phone dark', (tester) async {
+      await shootDialog(
+        tester,
+        const MineQualityScreen(),
+        'Edit spec',
+        const Size(412, 915),
+        'dialog-quality-spec-phone-dark',
+        orgType: OrgType.mineSupplier,
+        role: UserRole.admin,
+        title: 'Fixture Minerals',
+        subtitle: 'Quality',
+        selectedRoute: '/portal/mine/quality',
+      );
+    });
+
+    testWidgets('invoice capture — phone dark', (tester) async {
+      await shootDialog(
+        tester,
+        const BuyerLoadsValueScreen(),
+        'Invoice',
+        const Size(412, 915),
+        'dialog-invoice-capture-phone-dark',
+        orgType: OrgType.buyer,
+        role: UserRole.admin,
+        title: 'Fixture Metals',
+        subtitle: 'Loads & value',
+        selectedRoute: '/portal/buyer/loads-value',
+      );
+    });
+
+    testWidgets('record load — phone dark', (tester) async {
+      await shootDialog(
+        tester,
+        const LoadControllerScreen(),
+        'Record Load',
+        const Size(412, 915),
+        'dialog-record-load-phone-dark',
+        orgType: OrgType.mineSupplier,
+        role: UserRole.controllerWB,
+        title: 'Fixture Minerals',
+        subtitle: 'Load controller',
+        selectedRoute: '/portal/mine/weighbridge',
+      );
+    });
+
+    testWidgets('new chat group — phone dark', (tester) async {
+      await shootDialog(
+        tester,
+        const MessagesScreen(),
+        'New group',
+        const Size(412, 915),
+        'dialog-new-chat-group-phone-dark',
+        orgType: OrgType.transporter,
+        role: UserRole.admin,
+        title: 'Fixture Haulage',
+        subtitle: 'Messages',
+        selectedRoute: '/messages',
+      );
+    });
+
+    testWidgets('add vehicle — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const FleetManagementScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Fleet management',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter/fleet',
+          extraOverrides: tail(),
+        ),
+        const Size(412, 915),
+        'dialog-add-vehicle-phone-dark',
+        act: (tester) async {
+          // A FAB with a tooltip, not a labelled button.
+          final f = find.byTooltip('Add Vehicle');
+          if (f.evaluate().isEmpty) return;
+          await tester.tap(f.first, warnIfMissed: false);
+          await tester.pumpAndSettle();
+        },
+      );
+    });
+  });
+
   group('console', () {
     testWidgets('desktop dark — expanded rail', (tester) async {
       await shoot(

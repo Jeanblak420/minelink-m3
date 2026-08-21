@@ -243,7 +243,16 @@ class _MlButtonState extends State<MlButton> {
         Flexible(
           child: Text(
             widget.label,
-            maxLines: 1,
+            textAlign: TextAlign.center,
+            // TWO lines on a FULL-WIDTH button, one on a compact one.
+            //
+            // A compact button's label is a word or two and one line is right.
+            // An `expand: true` button is the page's primary action and its
+            // label is often a sentence — the weighbridge's reads "Save empty
+            // weight — truck goes to load", and at 412px it rendered as "Save
+            // empty weight — truck goes t…". A control that will not say what
+            // it does is worse than a taller control. Photographed 2026-08-21.
+            maxLines: widget.expand ? 2 : 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontFamily: MlTokens.fontSans,
@@ -278,7 +287,10 @@ class _MlButtonState extends State<MlButton> {
           border: side == BorderSide.none ? null : Border.fromBorderSide(side),
           boxShadow: shadow,
         ),
-        height: height,
+        // A MINIMUM, not a fixed height — CLAUDE.md §10.4. A two-line label
+        // on a full-width button needs about 42px of text in a 48px box, and
+        // a fixed height clips it rather than growing.
+        constraints: BoxConstraints(minHeight: height),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -286,7 +298,7 @@ class _MlButtonState extends State<MlButton> {
             onTap: widget.onPressed,
             child: Padding(
               padding: EdgeInsets.symmetric(
-                  horizontal: widget.compact ? 14 : 18),
+                  horizontal: widget.compact ? 14 : 18, vertical: 6),
               child: child,
             ),
           ),

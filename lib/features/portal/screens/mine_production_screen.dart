@@ -624,7 +624,12 @@ class _RecordProductionDialogState
   final _commodity = TextEditingController();
   final _pit = TextEditingController();
   final _notes = TextEditingController();
-  DateTime _date = DateTime.now();
+  // `MlTime.now()`, not the device clock. CLAUDE.md 7.1: never
+  // `DateTime.now()` for anything a user reads as a date. This value is
+  // a DATE the operator picks and submits, so on a laptop left on UTC it
+  // pre-filled YESTERDAY between midnight and 02:00 SAST -- which is
+  // night shift, the hours this screen exists for.
+  DateTime _date = MlTime.now();
   String? _pileId;
   bool _saving = false;
 
@@ -707,7 +712,7 @@ class _RecordProductionDialogState
                     context: context,
                     initialDate: _date,
                     firstDate: MlTime.now().subtract(const Duration(days: 365)),
-                    lastDate: DateTime.now(),
+                    lastDate: MlTime.now(),
                   );
                   if (picked != null && mounted) setState(() => _date = picked);
                 },

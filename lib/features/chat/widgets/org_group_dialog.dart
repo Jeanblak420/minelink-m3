@@ -147,11 +147,20 @@ class _OrgGroupDialogState extends ConsumerState<_OrgGroupDialog> {
                                 }),
                         title: Text(c.companyName),
                         subtitle: Text(
+                          // `.label`, not `.name`. `OrgType.name` is the ENUM'S
+                          // WIRE SPELLING — `mineSupplier`, in camelCase — and
+                          // both branches printed it straight at the reader:
+                          // every row of this picker was captioned with a
+                          // database value, and a full group told the user
+                          // "Already have a mineSupplier in this group".
+                          // Sixth site of that fault; `OrgType.label` has
+                          // existed for the other five. Photographed
+                          // 2026-08-21.
                           typeTaken
-                              ? 'Already have a ${c.orgType.name} in this group'
+                              ? 'Already have a ${c.orgType.label} in this group'
                               : full
                                   ? 'Group is full — three companies maximum'
-                                  : c.orgType.name,
+                                  : c.orgType.label,
                           style: context.mlText.bodySmall.copyWith(
                             color: disabled ? semantic.textFaint : semantic.textMuted,
                           ),

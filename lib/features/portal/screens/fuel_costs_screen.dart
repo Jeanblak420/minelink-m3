@@ -494,7 +494,12 @@ class _LogFuelDialogState extends ConsumerState<_LogFuelDialog> {
   final _cost = TextEditingController();
   final _odo = TextEditingController();
   final _station = TextEditingController();
-  DateTime _when = DateTime.now();
+  // `MlTime.now()`, not the device clock. CLAUDE.md 7.1: never
+  // `DateTime.now()` for anything a user reads as a date. This value is
+  // a DATE the operator picks and submits, so on a laptop left on UTC it
+  // pre-filled YESTERDAY between midnight and 02:00 SAST -- which is
+  // night shift, the hours this screen exists for.
+  DateTime _when = MlTime.now();
   bool _busy = false;
 
   @override
@@ -695,7 +700,7 @@ class _LogFuelDialogState extends ConsumerState<_LogFuelDialog> {
                 onTap: _busy
                     ? null
                     : () async {
-                        final now = DateTime.now();
+                        final now = MlTime.now();
                         final p = await showDatePicker(
                           context: context,
                           initialDate: _when,
@@ -756,7 +761,12 @@ class _LogCostDialogState extends ConsumerState<_LogCostDialog> {
   OperatingCostKind _kind = OperatingCostKind.tyre;
   final _cost = TextEditingController();
   final _desc = TextEditingController();
-  DateTime _when = DateTime.now();
+  // `MlTime.now()`, not the device clock. CLAUDE.md 7.1: never
+  // `DateTime.now()` for anything a user reads as a date. This value is
+  // a DATE the operator picks and submits, so on a laptop left on UTC it
+  // pre-filled YESTERDAY between midnight and 02:00 SAST -- which is
+  // night shift, the hours this screen exists for.
+  DateTime _when = MlTime.now();
   bool _busy = false;
 
   @override
@@ -862,7 +872,7 @@ class _LogCostDialogState extends ConsumerState<_LogCostDialog> {
                 onTap: _busy
                     ? null
                     : () async {
-                        final now = DateTime.now();
+                        final now = MlTime.now();
                         final p = await showDatePicker(
                           context: context,
                           initialDate: _when,

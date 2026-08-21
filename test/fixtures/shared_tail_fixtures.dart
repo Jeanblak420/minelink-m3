@@ -30,6 +30,7 @@ import 'package:flutter_application_1/features/employee/models/employee_model.da
 import 'package:flutter_application_1/features/notifications/models/notification_model.dart';
 import 'package:flutter_application_1/features/notifications/providers/notification_provider.dart';
 import 'package:flutter_application_1/features/notifications/services/notification_service.dart';
+import 'package:flutter_application_1/features/company/services/company_service.dart';
 import 'package:flutter_application_1/features/profile/models/account_deactivation_request.dart';
 import 'package:flutter_application_1/features/profile/services/account_deactivation_service.dart';
 import 'package:flutter_application_1/features/profile_setup/models/profile_setup.dart';
@@ -787,6 +788,14 @@ List<Override> sharedTailOverrides({
               unreadCount: kNotifications.where((n) => !n.isRead).length,
             ),
           )),
+
+      // --- the org-group dialog ---
+      //
+      // `New group` on the Messages header opens a dialog whose whole content
+      // is a picker over `companyDirectoryProvider`. Un-overridden it renders
+      // "Could not load the company list" — an error card where the design
+      // is, which CLAUDE.md §10.5 says is not the dialog photographed at all.
+      companyDirectoryProvider.overrideWith((ref) async => kJoinableCompanies),
 
       // --- the employee register ---
       companyRegisterProvider.overrideWith((ref, _) async => kRegisterMembers),

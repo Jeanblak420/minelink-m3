@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -554,7 +555,7 @@ class _FieldEditDialogState extends ConsumerState<_FieldEditDialog> {
 
   Future<void> _pickDate() async {
     final isDob = widget.item.itemKey == 'date_of_birth';
-    final now = DateTime.now();
+    final now = MlTime.now();
     final picked = await showDatePicker(
       context: context,
       initialDate: _date ?? (isDob ? DateTime(now.year - 30) : now),
@@ -708,7 +709,7 @@ class _DocumentDialogState extends ConsumerState<_DocumentDialog> {
   }
 
   Future<void> _pickDate({required bool expiry}) async {
-    final now = DateTime.now();
+    final now = MlTime.now();
     final picked = await showDatePicker(
       context: context,
       initialDate: expiry ? (_expiresAt ?? now) : (_issuedAt ?? now),

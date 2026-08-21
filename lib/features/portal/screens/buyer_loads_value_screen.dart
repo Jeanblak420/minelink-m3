@@ -499,7 +499,12 @@ class _InvoiceDialogState extends ConsumerState<_InvoiceDialog> {
   late final TextEditingController _amount;
   late final TextEditingController _tons;
   late final TextEditingController _notes;
-  DateTime _date = DateTime.now();
+  // `MlTime.now()`, not the device clock. CLAUDE.md 7.1: never
+  // `DateTime.now()` for anything a user reads as a date. This value is
+  // a DATE the operator picks and submits, so on a laptop left on UTC it
+  // pre-filled YESTERDAY between midnight and 02:00 SAST -- which is
+  // night shift, the hours this screen exists for.
+  DateTime _date = MlTime.now();
   bool _saving = false;
 
   @override
@@ -525,6 +530,32 @@ class _InvoiceDialogState extends ConsumerState<_InvoiceDialog> {
     _notes.dispose();
     super.dispose();
   }
+
+  Widget _amountField() => TextField(
+        controller: _amount,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+        ],
+        decoration: const InputDecoration(
+          labelText: 'Invoiced amount',
+          border: OutlineInputBorder(),
+          prefixText: 'R ',
+        ),
+      );
+
+  Widget _tonsField() => TextField(
+        controller: _tons,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+        ],
+        decoration: const InputDecoration(
+          labelText: 'Invoiced tons (optional)',
+          border: OutlineInputBorder(),
+          suffixText: 't',
+        ),
+      );
 
   Future<void> _save() async {
     final messenger = ScaffoldMessenger.of(context);
@@ -596,43 +627,34 @@ class _InvoiceDialogState extends ConsumerState<_InvoiceDialog> {
                 ),
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _amount,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      ],
-                      decoration: const InputDecoration(
-                        labelText: 'Invoiced amount',
-                        border: OutlineInputBorder(),
-                        prefixText: 'R ',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      controller: _tons,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      ],
-                      decoration: const InputDecoration(
-                        labelText: 'Invoiced tons (optional)',
-                        border: OutlineInputBorder(),
-                        suffixText: 't',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              // TWO FIELDS SIDE BY SIDE ONLY WHERE THEY FIT.
+              //
+              // At 412px each `Expanded` got ~130px and both floating labels
+              // were cut — "Invoiced am…" and "Invoiced ton…". A form field
+              // whose label does not say what it is asking for is worse than a
+              // taller form. Photographed 2026-08-21.
+              //
+              // 380 is the dialog's own content width at 412; below that they
+              // stack.
+              LayoutBuilder(builder: (context, c) {
+                if (c.maxWidth < 380) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _amountField(),
+                      const SizedBox(height: 12),
+                      _tonsField(),
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: _amountField()),
+                    const SizedBox(width: 10),
+                    Expanded(child: _tonsField()),
+                  ],
+                );
+              }),
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 icon: const Icon(Icons.event_outlined, size: 18),

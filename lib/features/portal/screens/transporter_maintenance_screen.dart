@@ -292,7 +292,7 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
                         onTap: () async {
                           final picked = await showDatePicker(
                             context: ctx,
-                            firstDate: DateTime.now(),
+                            firstDate: MlTime.now(),
                             lastDate:
                                 MlTime.now().add(const Duration(days: 365)),
                             initialDate:
@@ -550,8 +550,8 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
                       onTap: () async {
                         final picked = await showDatePicker(
                           context: ctx,
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now()
+                          firstDate: MlTime.now(),
+                          lastDate: MlTime.now()
                               .add(const Duration(days: 365 * 3)),
                           initialDate: dueDate ??
                               MlTime.now().add(const Duration(days: 30)),

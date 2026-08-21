@@ -93,7 +93,7 @@ class _AddVehicleFormState extends ConsumerState<AddVehicleForm> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _expiryDate ?? MlTime.now().add(const Duration(days: 365)),
-      firstDate: DateTime.now(),
+      firstDate: MlTime.now(),
       lastDate: MlTime.now().add(const Duration(days: 365 * 10)),
     );
 
