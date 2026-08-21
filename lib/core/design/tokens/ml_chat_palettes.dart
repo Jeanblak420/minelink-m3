@@ -74,7 +74,50 @@ class ChatPalette {
     required this.senderName,
     required this.bubbleSeparator,
   });
+
+  /// The ground a reply quote is drawn on, inside a bubble.
+  ///
+  /// **This exists because the obvious way round is backwards.** The quote
+  /// block used to fill with the bubble's own text colour at 14% and then
+  /// write that same colour on it — a ground moved TOWARDS its ink, which can
+  /// only ever cut the ratio. On Nord it turned a 4.03:1 bubble into a 3.17:1
+  /// quote heading and a 2.60:1 preview line, and it did the same on twelve
+  /// other palettes. It was invisible for as long as it existed because the
+  /// dock had no renders (see `test/design/chat_palette_contrast_test.dart`).
+  ///
+  /// Tinting AWAY from the ink instead gives the fix a property worth having:
+  /// separation can only increase, so a quote is legible on any palette whose
+  /// bubble is legible. That is one guarantee for eighteen palettes rather
+  /// than eighteen hand-checked pairs.
+  ///
+  /// The widget and the test both call this, so the two cannot drift.
+  Color quoteGround({required bool mine}) {
+    final bubble = mine ? outgoingBubble : incomingBubble;
+    final ink = mine ? outgoingText : incomingText;
+    final tint = ink.computeLuminance() > 0.5 ? Colors.black : Colors.white;
+    // `alphaBlend` keeps the BACKGROUND's alpha, and every bubble here is
+    // opaque, so the result is opaque too. CLAUDE.md §10.4 records the case
+    // where that was not true and the "fix" produced another translucent
+    // colour that looked solid in source.
+    return Color.alphaBlend(tint.withValues(alpha: 0.14), bubble);
+  }
+
+  /// The ink for a quote's sender line.
+  ///
+  /// On an incoming bubble this is [senderName] — the palette already owns a
+  /// token for "a person's name on this bubble" — rather than [accent], which
+  /// was being written on a ground tinted with accent and disappeared into it.
+  Color quoteNameInk({required bool mine}) =>
+      mine ? outgoingText : senderName;
+
+  /// The ink for a quote's preview line.
+  ///
+  /// Solid, never the ink at an alpha. Quiet is size and weight; an alpha on
+  /// an ink is a contrast cut wearing a hierarchy costume.
+  Color quotePreviewInk({required bool mine}) =>
+      mine ? outgoingText : incomingText;
 }
+
 
 /// The messenger palettes, in display order. Index 0 is the MineLink palette;
 /// the app-wide default is [defaultId] (Nord) — applied to any user who hasn't
@@ -111,7 +154,7 @@ abstract final class ChatThemes {
       bodySubtle: Color(0xFF8DA2BC), divider: Color(0xFF1E3149),
       tabSelectedBg: Color(0xFF0E1D30), accent: Color(0xFF2CC7E4),
       accentText: Color(0xFF04222B), incomingBubble: Color(0xFF152740),
-      incomingText: Color(0xFFEAF2FB), outgoingBubble: Color(0xFF0E86A8),
+      incomingText: Color(0xFFEAF2FB), outgoingBubble: Color(0xFF0D7FA0),
       outgoingText: Color(0xFFFFFFFF), senderName: Color(0xFF6FD8EC),
       bubbleSeparator: Color(0xFF2A4A66),
     ),
@@ -188,7 +231,7 @@ abstract final class ChatThemes {
       bodySubtle: Color(0xFFC9A6AE), divider: Color(0xFF552F38),
       tabSelectedBg: Color(0xFF2B141C), accent: Color(0xFFFF7043),
       accentText: Color(0xFF170A10), incomingBubble: Color(0xFF35192A),
-      incomingText: Color(0xFFFFEDED), outgoingBubble: Color(0xFFD84315),
+      incomingText: Color(0xFFFFEDED), outgoingBubble: Color(0xFFD34114),
       outgoingText: Color(0xFFFFFFFF), senderName: Color(0xFFFFB199),
       bubbleSeparator: Color(0xFF6B3F48),
     ),
@@ -219,9 +262,9 @@ abstract final class ChatThemes {
       header: Color(0xFFFDF5E6), headerText: Color(0xFF2A1E0A),
       body: Color(0xFFFFF9EE), bodyText: Color(0xFF2A1E0A),
       bodySubtle: Color(0xFF7A6240), divider: Color(0xFFECDCB6),
-      tabSelectedBg: Color(0xFFFFFAEB), accent: Color(0xFFB8860B),
+      tabSelectedBg: Color(0xFFFFFAEB), accent: Color(0xFF976E09),
       accentText: Color(0xFFFFFFFF), incomingBubble: Color(0xFFF6E9CB),
-      incomingText: Color(0xFF1E1605), outgoingBubble: Color(0xFFB8860B),
+      incomingText: Color(0xFF1E1605), outgoingBubble: Color(0xFF976E09),
       outgoingText: Color(0xFFFFFFFF), senderName: Color(0xFF8B5A00),
       bubbleSeparator: Color(0xFFE2CF9E),
     ),
@@ -265,7 +308,7 @@ abstract final class ChatThemes {
       bodySubtle: Color(0xFFB7C0CC), divider: Color(0xFF3F4757),
       tabSelectedBg: Color(0xFF3B4252), accent: Color(0xFF88C0D0),
       accentText: Color(0xFF242933), incomingBubble: Color(0xFF3B4252),
-      incomingText: Color(0xFFECEFF4), outgoingBubble: Color(0xFF5E81AC),
+      incomingText: Color(0xFFECEFF4), outgoingBubble: Color(0xFF57779F),
       outgoingText: Color(0xFFFFFFFF), senderName: Color(0xFFA3D5E1),
       bubbleSeparator: Color(0xFF4A5468),
     ),
@@ -315,6 +358,20 @@ abstract final class MlChatTone {
 
   /// The unread-messages separator rule and its label.
   static const unread = MlTokens.red500;
+
+  /// The unread-COUNT badge on a conversation row — a deeper red, because it
+  /// is the only one of these that has text written on it.
+  ///
+  /// [offline] and [unread] are a dot and a rule: shapes, where WCAG asks 3:1
+  /// for non-text. The badge is an 11px bold numeral in white, where the bar
+  /// is 4.5:1, and `red500` gives it **3.76:1**. It read as the same concept
+  /// so it was given the same colour — which is the exact substitution
+  /// `MlChatTone` was created to stop, one level down: not "three concepts
+  /// sharing a literal", but one concept used as a fill and as a ground.
+  ///
+  /// `red600` measures 5.64:1 against white. The dot and the rule keep
+  /// `red500`, so nothing that is not text changes appearance.
+  static const unreadBadge = MlTokens.red600;
 
   // ── Delivery ticks ─────────────────────────────────────────────────────
   // Two pairs, because a tick is drawn in two places against two different

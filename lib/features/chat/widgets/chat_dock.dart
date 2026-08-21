@@ -1314,9 +1314,12 @@ class _ConversationsList extends ConsumerWidget {
                                   constraints:
                                       const BoxConstraints(minWidth: 20),
                                   decoration: BoxDecoration(
-                                    // Red unread badge (matches the disc) — kept
-                                    // distinct from the blue "read" tick.
-                                    color: MlChatTone.offline,
+                                    // Red unread badge — kept distinct from the
+                                    // blue "read" tick. `unreadBadge`, not
+                                    // `offline`: this one carries a numeral,
+                                    // so it is measured as a ground for text
+                                    // rather than as a dot.
+                                    color: MlChatTone.unreadBadge,
                                     borderRadius: MlShape.pill,
                                   ),
                                   child: Text(
@@ -2535,16 +2538,19 @@ class _ReplyQuote extends StatelessWidget {
       bgColor = pal.tabSelectedBg;
       nameColor = pal.accent;
       textColor = pal.bodySubtle;
-    } else if (mine) {
-      barColor = pal.outgoingText.withValues(alpha: 0.6);
-      bgColor = pal.outgoingText.withValues(alpha: 0.14);
-      nameColor = pal.outgoingText;
-      textColor = pal.outgoingText.withValues(alpha: 0.8);
     } else {
-      barColor = pal.accent;
-      bgColor = pal.accent.withValues(alpha: 0.08);
-      nameColor = pal.accent;
-      textColor = pal.bodySubtle;
+      // Inside a bubble. Every value comes from the palette rather than from
+      // an alpha applied here — see [ChatPalette.quoteGround] for why the
+      // obvious way round (tint with the ink, then write the ink on it) cut
+      // the ratio on thirteen of the eighteen palettes and was invisible for
+      // as long as the dock had no renders.
+      //
+      // The bar is a 3px graphic, not text, so it keeps the accent on an
+      // incoming quote; WCAG's 4.5:1 governs glyphs.
+      barColor = mine ? pal.outgoingText : pal.accent;
+      bgColor = pal.quoteGround(mine: mine);
+      nameColor = pal.quoteNameInk(mine: mine);
+      textColor = pal.quotePreviewInk(mine: mine);
     }
 
     String preview = '';
@@ -3081,7 +3087,19 @@ class _BubbleRowState extends State<_BubbleRow> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(e.key, style: const TextStyle(fontSize: 12)),
+                        // The palette's ink, not the ambient theme's.
+                        //
+                        // With no colour this inherits `DefaultTextStyle`,
+                        // which belongs to the APP theme — while the chip
+                        // around it is painted from the CHAT palette, and the
+                        // two are chosen independently. A user on light app
+                        // theme with a dark chat palette got the app's dark
+                        // ink on the palette's dark chip: 1.78:1. Colour
+                        // emoji ignore the colour, which is exactly why this
+                        // survived — it only shows when the glyph falls back
+                        // to monochrome.
+                        Text(e.key,
+                            style: TextStyle(fontSize: 12, color: pal.bodyText)),
                         const SizedBox(width: 3),
                         Text('${e.value.length}',
                             style: context.mlText.labelSmall.copyWith(

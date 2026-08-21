@@ -62,6 +62,7 @@ import 'package:flutter_application_1/features/operations/screens/operations_hub
 import 'package:flutter_application_1/features/chat/screens/communications_hub_screen.dart';
 import 'package:flutter_application_1/features/chat/screens/messages_screen.dart';
 import 'package:flutter_application_1/features/chat/screens/chat_screen.dart';
+import 'package:flutter_application_1/features/chat/widgets/chat_dock.dart';
 import 'package:flutter_application_1/features/notifications/screens/notification_screen.dart';
 import 'package:flutter_application_1/features/notifications/screens/notification_management_screen.dart';
 import 'package:flutter_application_1/features/profile/screens/profile_screen.dart';
@@ -4180,6 +4181,129 @@ void main() {
         'screen-employee-register-desktop-dark',
         subtitle: 'Register',
         selectedRoute: '/portal/transporter/register',
+      );
+    });
+  });
+
+  // ==========================================================================
+  // THE CHAT DOCK — the surface every user actually touches
+  // ==========================================================================
+  //
+  // The coverage here was INVERTED, and this group is the correction.
+  //
+  // `MessagesScreen` has no rail entry at all and is reachable only when a
+  // licence token is expiring; it had four shots. `ChatScreen` has one entry,
+  // a card tap on the Communications hub; it had two. The dock is mounted on
+  // EVERY portal screen and EVERY console screen — it is the chat of this
+  // product — and it had NONE. Reactions, tap-to-scroll reply quotes and the
+  // unread separator exist nowhere else and had never been photographed.
+  //
+  // It had none for a structural reason rather than an oversight: the dock is
+  // mounted by `PortalShellLayout`, and this harness builds `MlAppShell`
+  // directly, so no render has ever had a dock in its tree. It has to be
+  // mounted deliberately, and it is opened the way a user opens it — by
+  // tapping the launcher disc and then a conversation — so these pictures also
+  // prove the launcher is there, is hittable, and reaches the thread.
+  group('the chat dock', () {
+    List<Override> dock() => [
+          ...companyScopeOverrides(),
+          ...sharedTailOverrides(),
+          ...chatDockOverrides(),
+        ];
+
+    /// Mounts a dock over an empty page, opens it, and optionally walks into a
+    /// conversation.
+    ///
+    /// The body underneath is deliberately plain: the subject is the panel,
+    /// and a dashboard behind it would only make the picture harder to read.
+    Future<void> shootDock(
+      WidgetTester tester,
+      Size size,
+      String name, {
+      Brightness brightness = Brightness.dark,
+      String? openConversation,
+      List<Override> extra = const [],
+    }) =>
+        shoot(
+          tester,
+          ProviderScope(
+            overrides: [...dock(), ...extra],
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.build(brightness),
+              home: const ChatDock(child: Scaffold(body: SizedBox.expand())),
+            ),
+          ),
+          size,
+          name,
+          act: (tester) async {
+            await tester.tap(find.byKey(const ValueKey('chat-dock-launcher')));
+            await pumpForCapture(tester);
+            if (openConversation != null) {
+              await tester.tap(find.text(openConversation).first);
+              await pumpForCapture(tester);
+            }
+          },
+        );
+
+    // ⚠️ THREE DELIBERATE CUT-OFFS live in this group, one per list render:
+    // the group conversation's preview, "Seal 4 on CK 84 RT GP would not close
+    // — swapped it." A conversation row shows one line of the last message and
+    // ellipsises the rest; that is what the row is for. It takes the whole-app
+    // CUT OFF count from 6 to 9, and all nine are this kind.
+    //
+    // What these renders found that was NOT deliberate is recorded in
+    // `test/design/chat_palette_contrast_test.dart`: thirteen of the eighteen
+    // palettes were painting text below 4.5:1, including every outgoing
+    // message on the DEFAULT palette, plus an unread badge at 3.76:1 and a
+    // reaction chip at 1.78:1. None of it was reachable before the dock had a
+    // picture.
+
+    // The conversations list — the dock's own landing view, with a group, a
+    // DM, an org group and an ended conversation in it.
+    testWidgets('dock — conversations, desktop dark', (tester) async {
+      await shootDock(tester, const Size(1600, 1000), 'dock-list-desktop-dark');
+    });
+
+    testWidgets('dock — conversations, phone dark', (tester) async {
+      await shootDock(tester, const Size(412, 915), 'dock-list-phone-dark');
+    });
+
+    testWidgets('dock — conversations, desktop light', (tester) async {
+      await shootDock(tester, const Size(1600, 1000), 'dock-list-desktop-light',
+          brightness: Brightness.light);
+    });
+
+    // The thread. This is the picture that did not exist: reply quotes over
+    // both grounds, an attachment, reactions, delivery ticks and the unread
+    // separator, none of which any other render has ever shown.
+    testWidgets('dock — thread, desktop dark', (tester) async {
+      await shootDock(tester, const Size(1600, 1000), 'dock-thread-desktop-dark',
+          openConversation: 'Thandi Mokoena');
+    });
+
+    testWidgets('dock — thread, phone dark', (tester) async {
+      await shootDock(tester, const Size(412, 915), 'dock-thread-phone-dark',
+          openConversation: 'Thandi Mokoena');
+    });
+
+    testWidgets('dock — thread, desktop light', (tester) async {
+      await shootDock(
+          tester, const Size(1600, 1000), 'dock-thread-desktop-light',
+          brightness: Brightness.light, openConversation: 'Thandi Mokoena');
+    });
+
+    // Someone typing. A live-only state that no still has ever caught, and the
+    // one the thread's own layout is most likely to be surprised by, because
+    // it appears BELOW the last bubble and pushes the composer.
+    testWidgets('dock — thread with someone typing, desktop dark',
+        (tester) async {
+      await shootDock(
+        tester,
+        const Size(1600, 1000),
+        'dock-thread-typing-desktop-dark',
+        openConversation: 'Thandi Mokoena',
+        extra: chatDockOverrides(typing: const {'Thandi Mokoena'}),
       );
     });
   });

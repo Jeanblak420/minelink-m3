@@ -56,22 +56,11 @@ class ChatMessagesNotifier extends StateNotifier<List<ChatMessage>> {
             response.map((json) => Map<String, dynamic>.from(json as Map)),
           );
 
-      final messages = resolvedMessages
-          .map(
-            (json) => ChatMessage(
-              id: json['id'],
-              content: json['content'],
-              senderId: json['sender_id'],
-              senderName: json['sender_name'],
-              senderAvatarUrl: json['sender_avatar_url'],
-              timestamp: DateTime.parse(json['timestamp']),
-              isRead: json['is_read'] ?? false,
-              fileUrl: json['file_url'],
-              fileType: json['file_type'],
-              fileName: json['file_name'],
-            ),
-          )
-          .toList();
+      // One named factory rather than a map literal here — see
+      // [ChatMessage.fromRow]. The literal that used to be at this spot had no
+      // line for `reply_to_id`, which is why every reply this screen sent
+      // arrived looking like an ordinary message.
+      final messages = resolvedMessages.map(ChatMessage.fromRow).toList();
 
       state = messages;
     } catch (e) {

@@ -119,7 +119,24 @@ final presenceLastSeenProvider = Provider<Map<String, DateTime>>(
 /// Per-room typing indicator via realtime broadcast. State is the set of OTHER
 /// users' display names currently typing (auto-expires ~4s after last signal).
 class TypingController extends StateNotifier<Set<String>> {
-  TypingController(this._roomId, this._uid) : super(const {}) {
+  TypingController(this._roomId, this._uid) : super(const {});
+
+  /// Opens the room's typing channel.
+  ///
+  /// **Deliberately not the constructor** — the sixth notifier in this tree
+  /// with the same seam, after `FleetNotifier`, `OperationsNotifier`,
+  /// `CommunicationsNotifier`, `TypingUsersNotifier` and
+  /// `ChatMessagesNotifier`, and for the same reason: a constructor that dials
+  /// out cannot be run without a network, so the dock's thread could not be
+  /// photographed.
+  ///
+  /// Note the asymmetry with [TypingInboxController], which needs no seam:
+  /// its `_init` returns before creating anything when there is no signed-in
+  /// user, and a render has none. This one opens `typing:<roomId>`
+  /// unconditionally, so against the harness's dummy instance it is a real
+  /// socket attempt that leaves a timer pending after the tree is disposed —
+  /// the "passes alone, fails in the suite" failure.
+  void start() {
     _init();
   }
 
@@ -198,7 +215,10 @@ class TypingController extends StateNotifier<Set<String>> {
 final typingProvider =
     StateNotifierProvider.family<TypingController, Set<String>, String>(
         (ref, roomId) {
-  return TypingController(roomId, SupabaseConfig.client.auth.currentUser?.id);
+  // `..start()` rather than the constructor doing it — see
+  // [TypingController.start]. The running app is unchanged.
+  return TypingController(roomId, SupabaseConfig.client.auth.currentUser?.id)
+    ..start();
 });
 
 /// Snapshot of everyone currently typing to me (across all rooms): the sender

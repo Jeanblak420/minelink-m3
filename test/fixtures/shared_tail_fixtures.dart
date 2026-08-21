@@ -23,6 +23,7 @@ import 'package:flutter_application_1/features/chat/models/chat_room_model.dart'
 import 'package:flutter_application_1/features/chat/models/messaging_models.dart';
 import 'package:flutter_application_1/features/chat/providers/chat_presence_provider.dart';
 import 'package:flutter_application_1/features/chat/providers/messaging_providers.dart';
+import 'package:flutter_application_1/features/chat/providers/support_providers.dart';
 import 'package:flutter_application_1/features/chat/screens/chat_screen.dart';
 import 'package:flutter_application_1/features/chat/services/messaging_service.dart';
 import 'package:flutter_application_1/features/company/services/employee_register_service.dart';
@@ -182,6 +183,43 @@ final Map<String, List<ChatMessage>> kRoomMessages = {
       deliveredAt: _ago(const Duration(hours: 2, minutes: 55)),
       readAt: _ago(const Duration(hours: 2, minutes: 54)),
     ),
+    // A reply on the INCOMING side, quoting a message that is on screen.
+    ChatMessage(
+      id: 'm-3b',
+      chatRoomId: 'room-dm-1',
+      content: 'Confirmed — 06:00, bay 2.',
+      senderId: 'user-thandi',
+      senderName: 'Thandi Mokoena',
+      timestamp: _ago(const Duration(hours: 2, minutes: 40)),
+      replyToId: 'm-1',
+    ),
+    // An attachment, so the quote below it has a file to preview rather than
+    // words. A quote block that has only ever been photographed over text has
+    // not been photographed at all — the attachment branch is a different
+    // string built a different way.
+    ChatMessage(
+      id: 'm-3c',
+      chatRoomId: 'room-dm-1',
+      content: '',
+      senderId: 'user-thandi',
+      senderName: 'Thandi Mokoena',
+      timestamp: _ago(const Duration(hours: 1, minutes: 30)),
+      fileUrl: 'https://example.invalid/tare-slip.pdf',
+      fileType: 'pdf',
+      fileName: 'tare-slip-CK84RTGP.pdf',
+    ),
+    // A reply on the OUTGOING side, quoting that attachment.
+    ChatMessage(
+      id: 'm-3d',
+      chatRoomId: 'room-dm-1',
+      content: 'Received, thank you — filed against the trip.',
+      senderId: kFixtureUserId,
+      senderName: 'Fixture Operator',
+      timestamp: _ago(const Duration(hours: 1, minutes: 20)),
+      deliveredAt: _ago(const Duration(hours: 1, minutes: 20)),
+      readAt: _ago(const Duration(hours: 1, minutes: 18)),
+      replyToId: 'm-3c',
+    ),
     ChatMessage(
       id: 'm-4',
       chatRoomId: 'room-dm-1',
@@ -235,7 +273,83 @@ class FixtureMessagingService extends MessagingService {
   @override
   Future<({String name, String? avatarUrl})> getMyIdentity() async =>
       (name: 'Fixture Operator', avatarUrl: null);
+
+  /// The thread itself.
+  ///
+  /// `Stream.value` rather than a controller left open: the real
+  /// [MessagingService.streamMessages] holds a Supabase realtime channel, and
+  /// a stream still open when the tree is disposed is the "passes alone, fails
+  /// in the suite" fault this file already documents for
+  /// [chatDeliveryProvider].
+  @override
+  Stream<List<ChatMessage>> streamMessages(String roomId) =>
+      Stream.value(kRoomMessages[roomId] ?? const []);
+
+  @override
+  Stream<List<ChatReaction>> reactionsStream(String roomId) =>
+      Stream.value(kRoomReactions[roomId] ?? const []);
 }
+
+/// A [TypingController] that holds a fixed answer and never opens a channel.
+///
+/// `start()` is the seam; overriding it to nothing is what keeps the realtime
+/// channel — and the timer it leaves behind — out of a render.
+class FixtureTypingController extends TypingController {
+  FixtureTypingController(String roomId, Set<String> seed)
+      : super(roomId, kFixtureUserId) {
+    state = seed;
+  }
+
+  @override
+  void start() {}
+}
+
+/// Everything the floating [ChatDock] reaches for, stubbed.
+///
+/// Separate from [sharedTailOverrides] because the dock is mounted by
+/// `PortalShellLayout`, which the render harness does not use — it builds
+/// `MlAppShell` directly. That is precisely why the dock had no renders: the
+/// surface every user actually touches was not in the tree any render built.
+/// A dock render has to mount it deliberately, and mounting it wakes a
+/// different set of providers than any screen does.
+List<Override> chatDockOverrides({
+  String typingRoomId = 'room-dm-1',
+  Set<String> typing = const {},
+}) =>
+    [
+      // The delivery marker opens a realtime channel AND arms a 60-second
+      // periodic sweep. It early-returns when nobody is signed in — but
+      // `FixtureMessagingService` reports a user, so stubbing the read half
+      // without this one turns the socket back on. A fixture that says MORE
+      // than the service it stands in for.
+      chatDeliveryProvider.overrideWithValue(null),
+      roomReactionsProvider.overrideWith(
+          (ref, roomId) => Stream.value(kRoomReactions[roomId] ?? const [])),
+      typingProvider.overrideWith(
+          (ref, roomId) => FixtureTypingController(
+              roomId, roomId == typingRoomId ? typing : const {})),
+      // The support half of the dock — its own FAB, its own service, all of it
+      // network-backed. Not the subject of these renders, but it is in the
+      // tree, so it answers rather than dials.
+      supportIsAdminProvider.overrideWith((ref) async => false),
+      myTicketsProvider.overrideWith((ref) async => const []),
+      allTicketsProvider.overrideWith((ref) async => const []),
+      supportNotificationsProvider.overrideWith((ref) async => const []),
+    ];
+
+/// Reactions, which exist on the dock's thread and NOWHERE else in the
+/// product. Two on one message and one on another: a single reaction renders
+/// one chip and says nothing about how a count is drawn.
+final Map<String, List<ChatReaction>> kRoomReactions = {
+  'room-dm-1': const [
+    ChatReaction(
+        id: 'r-1', messageId: 'm-2', userId: kFixtureUserId, emoji: '👍'),
+    ChatReaction(
+        id: 'r-2', messageId: 'm-2', userId: 'user-thandi', emoji: '👍'),
+    ChatReaction(
+        id: 'r-3', messageId: 'm-4', userId: kFixtureUserId, emoji: '✅'),
+  ],
+};
 
 /// The legacy per-room thread screen (`/chat/:id`), which takes its room and
 /// participants as constructor arguments rather than from a provider.
@@ -268,6 +382,11 @@ List<cw.ChatMessage> kLegacyChatMessages = [
     senderName: 'Sipho Radebe',
     timestamp: _ago(const Duration(hours: 5)),
   ),
+  // A reply, on the OUTGOING side — the quote is drawn on the accent fill,
+  // which is the harder of the two grounds and the one a mistake hides in.
+  // Without a `replyToId` anywhere in this fixture the chat-thread renders
+  // photograph a feature that is switched off, and would have gone on passing
+  // for exactly as long as the bug lasted.
   cw.ChatMessage(
     id: 'm-6',
     content: 'Understood. Two trucks moved to 05:00.',
@@ -275,6 +394,7 @@ List<cw.ChatMessage> kLegacyChatMessages = [
     senderName: 'Fixture Operator',
     timestamp: _ago(const Duration(hours: 4, minutes: 40)),
     isRead: true,
+    replyToId: 'm-5',
   ),
   cw.ChatMessage(
     id: 'm-7',
@@ -285,6 +405,17 @@ List<cw.ChatMessage> kLegacyChatMessages = [
     fileUrl: 'https://example.invalid/loading-plan.pdf',
     fileType: 'pdf',
     fileName: 'loading-plan-2026-08.pdf',
+  ),
+  // A reply to an ATTACHMENT, on the incoming side. The quote of a message
+  // with no words has to preview the file, or it renders as an empty bar that
+  // says nothing about what was answered.
+  cw.ChatMessage(
+    id: 'm-8',
+    content: 'Got it — the 05:00 slot works for both trucks.',
+    senderId: 'user-sipho',
+    senderName: 'Sipho Radebe',
+    timestamp: _ago(const Duration(hours: 3, minutes: 30)),
+    replyToId: 'm-7',
   ),
 ];
 

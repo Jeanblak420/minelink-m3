@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_motion.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
@@ -8,6 +11,31 @@ import 'package:flutter_application_1/features/chat/services/attachment_url.dart
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_chat_palettes.dart';
+
+/// A mention as the dock writes it into `chat_messages.content`.
+///
+/// Both chat surfaces read the same table, so a message composed in the dock
+/// — where mentions are a real feature — can appear in this thread. Rendered
+/// raw, its quote preview would read `@[Thandi Mokoena](user:8f2c…)`.
+final RegExp _kMentionToken = RegExp(r'@\[([^\]]+)\]\(user:([^)]+)\)');
+
+/// Replaces mention tokens with a plain `@Display`, as the dock does for its
+/// own list and reply previews.
+String _stripMentionTokens(String text) =>
+    text.replaceAllMapped(_kMentionToken, (m) => '@${m.group(1)}');
+
+/// [bubble], tinted 14% AWAY from [ink].
+///
+/// The counterpart of [ChatPalette.quoteGround] for the legacy thread, and the
+/// same guarantee: moving the ground away from the ink cannot reduce their
+/// contrast, so a quote drawn on this is at least as legible as the bubble it
+/// sits in. Tinting the other way — with the ink itself — is what produced a
+/// 3.17:1 quote heading in the dock and a 3.44:1 one here.
+Color _quoteGround(Color bubble, Color ink) => Color.alphaBlend(
+      (ink.computeLuminance() > 0.5 ? Colors.black : Colors.white)
+          .withValues(alpha: 0.14),
+      bubble,
+    );
 
 class ChatWidgetController {
   void Function(ChatMessage message)? _replyToMessage;
@@ -49,6 +77,21 @@ class ChatMessage {
   /// The name of the attached file
   final String? fileName;
 
+  /// The id of the message this one replies to, or null.
+  ///
+  /// This field is the reason a reply was invisible for the life of this
+  /// screen. The composer already captured a reply target, and
+  /// `ChatMessagesNotifier.sendMessage` already wrote `reply_to_id` to
+  /// `chat_messages` — but this model had nowhere to put the column on the way
+  /// back, so `_loadMessages` dropped it and the bubble had nothing to draw.
+  /// The write worked; nothing read it. A reply looked sent and then arrived
+  /// as an ordinary message, which is worse than not offering reply at all —
+  /// the sender believes the quote went with it.
+  ///
+  /// The dock's own [ChatMessage] (`messaging_models.dart`) has carried this
+  /// field all along; the two models disagreeing is what hid it.
+  final String? replyToId;
+
   ChatMessage({
     required this.id,
     required this.content,
@@ -60,7 +103,43 @@ class ChatMessage {
     this.fileUrl,
     this.fileType,
     this.fileName,
+    this.replyToId,
   });
+
+  /// Whether this message carries a file, matching the dock model's getter of
+  /// the same name so the two quote blocks can preview alike.
+  bool get hasAttachment => fileUrl != null && fileUrl!.isNotEmpty;
+
+  /// Builds a message from a `chat_messages` row.
+  ///
+  /// **A named factory rather than a map literal at the call site, because a
+  /// map literal at the call site is the bug this had.** `ChatScreen` wrote
+  /// `reply_to_id` on the way out and hand-built a `ChatMessage` on the way
+  /// in; the hand-built one simply had no line for that column, so replies
+  /// were written and never read for the life of the screen. Nothing threw —
+  /// `.select()` returned the column, and the mapping quietly dropped it.
+  ///
+  /// With one factory there is one place to add a column, and
+  /// `test/features/chat/chat_message_row_test.dart` reads `chat_messages`'
+  /// real column list and fails if any of them arrives here unmapped. That is
+  /// the guard the original code could not have: a missing field in a literal
+  /// looks exactly like a field that was never meant to be read.
+  ///
+  /// The dock's own model has had [ChatMessage.fromJson] all along. The two
+  /// surfaces disagreeing about how a row becomes a message is the root of it.
+  factory ChatMessage.fromRow(Map<String, dynamic> row) => ChatMessage(
+        id: row['id'] as String,
+        content: row['content'] as String? ?? '',
+        senderId: row['sender_id'] as String,
+        senderName: row['sender_name'] as String? ?? '',
+        senderAvatarUrl: row['sender_avatar_url'] as String?,
+        timestamp: DateTime.parse(row['timestamp'] as String),
+        isRead: (row['is_read'] as bool?) ?? false,
+        fileUrl: row['file_url'] as String?,
+        fileType: row['file_type'] as String?,
+        fileName: row['file_name'] as String?,
+        replyToId: row['reply_to_id'] as String?,
+      );
 }
 
 /// A widget that displays a chat interface
@@ -151,6 +230,39 @@ class _ChatWidgetState extends State<ChatWidget> {
   ChatMessage? _replyToMessage;
   bool _isTyping = false;
 
+  /// One key per rendered message, so a quote can scroll to its original.
+  ///
+  /// The same mechanism the dock uses (`chat_dock.dart` `_msgKeys` +
+  /// [Scrollable.ensureVisible]) rather than a second invention — two chat
+  /// surfaces in one product should not disagree about what tapping a quote
+  /// does.
+  final Map<String, GlobalKey> _msgKeys = {};
+
+  /// The id of the message currently flashed by a quote tap, if any.
+  ///
+  /// Landing on the original silently is not an answer — on a dense thread the
+  /// reader cannot tell which bubble was meant. It clears itself.
+  String? _highlightedId;
+  Timer? _highlightTimer;
+
+  GlobalKey _keyFor(String id) => _msgKeys.putIfAbsent(id, () => GlobalKey());
+
+  void _scrollToMessage(String id) {
+    final ctx = _msgKeys[id]?.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      duration: MlMotion.of(context, MlMotion.enter),
+      alignment: 0.3,
+      curve: Curves.easeOut,
+    );
+    _highlightTimer?.cancel();
+    setState(() => _highlightedId = id);
+    _highlightTimer = Timer(const Duration(milliseconds: 1400), () {
+      if (mounted) setState(() => _highlightedId = null);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -180,6 +292,9 @@ class _ChatWidgetState extends State<ChatWidget> {
   void dispose() {
     _isTyping = false;
     widget.controller?._replyToMessage = null;
+    // Before the controllers: the callback calls setState, and a timer that
+    // outlives the element fires into a disposed State.
+    _highlightTimer?.cancel();
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -240,6 +355,11 @@ class _ChatWidgetState extends State<ChatWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Built once per frame rather than once per bubble: resolving a quote by
+    // scanning `widget.messages` inside `itemBuilder` is O(n) per row, which
+    // on a long thread is O(n²) during a scroll.
+    final byId = {for (final m in widget.messages) m.id: m};
+
     return Column(
       children: [
         // Chat header
@@ -260,6 +380,17 @@ class _ChatWidgetState extends State<ChatWidget> {
                 final message = widget.messages[index];
                 final isCurrentUser = message.senderId == widget.currentUserId;
 
+                // The original this message answers, if it is still in the
+                // thread. `ChatScreen` loads the whole room rather than a
+                // window, so an in-room reply always resolves; a reply whose
+                // original was deleted resolves to null and the bubble simply
+                // renders without a quote. `reply_to_id` is `ON DELETE SET
+                // NULL` in Postgres, so that case is normally the column
+                // going null rather than a dangling id — this handles both.
+                final repliedTo = message.replyToId == null
+                    ? null
+                    : byId[message.replyToId];
+
                 // Group messages by sender
                 final isFirstInGroup =
                     index == 0 ||
@@ -268,12 +399,16 @@ class _ChatWidgetState extends State<ChatWidget> {
                     index == widget.messages.length - 1 ||
                     widget.messages[index + 1].senderId != message.senderId;
 
-                return _buildMessageItem(
-                  context,
-                  message,
-                  isCurrentUser,
-                  isFirstInGroup,
-                  isLastInGroup,
+                return KeyedSubtree(
+                  key: _keyFor(message.id),
+                  child: _buildMessageItem(
+                    context,
+                    message,
+                    isCurrentUser,
+                    isFirstInGroup,
+                    isLastInGroup,
+                    repliedTo,
+                  ),
                 );
               },
             ),
@@ -343,17 +478,30 @@ class _ChatWidgetState extends State<ChatWidget> {
     bool isCurrentUser,
     bool isFirstInGroup,
     bool isLastInGroup,
+    ChatMessage? repliedTo,
   ) {
     final semantic = MlSemantic.of(context);
+    final isHighlighted = _highlightedId == message.id;
 
     return GestureDetector(
       onLongPress: widget.onMessageLongPress != null
           ? () => widget.onMessageLongPress!(message)
           : null,
-      child: Padding(
+      // Flashed for a moment when a quote scrolls here, then cleared. Landing
+      // on the original without saying which one it is answers nothing on a
+      // dense thread — every bubble looks like the one you were sent to.
+      child: AnimatedContainer(
+        duration: MlMotion.of(context, MlMotion.enter),
+        curve: Curves.easeOut,
         padding: EdgeInsets.only(
           top: isFirstInGroup ? 8.0 : 2.0,
           bottom: isLastInGroup ? 8.0 : 2.0,
+        ),
+        decoration: BoxDecoration(
+          color: isHighlighted
+              ? MlTone.accent.well(Theme.of(context).brightness)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(MlTokens.rMd),
         ),
         child: Row(
           mainAxisAlignment: isCurrentUser
@@ -456,16 +604,16 @@ class _ChatWidgetState extends State<ChatWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // The quoted original, above the reply's own text.
+                        // Tapping it scrolls to the message it names.
+                        if (repliedTo != null) ...[
+                          _buildQuotedOriginal(repliedTo, isCurrentUser),
+                          const SizedBox(height: 6),
+                        ],
+
                         // Message text
                         if (message.content.isNotEmpty)
-                          Text(
-                            message.content,
-                            style: context.mlText.bodyLarge.copyWith(
-                              color: isCurrentUser
-                                  ? MlTokens.inkOnAccent
-                                  : semantic.textStrong,
-                            ),
-                          ),
+                          _buildMessageText(message.content, isCurrentUser),
 
                         // File attachment
                         if (message.fileUrl != null)
@@ -742,6 +890,182 @@ class _ChatWidgetState extends State<ChatWidget> {
           color: MlTokens.accentHover,
           fontWeight: FontWeight.w700,
           fontStyle: FontStyle.italic,
+        ),
+      ),
+    );
+  }
+
+  /// A message body, with any `@[Display](user:id)` mention tokens drawn as
+  /// chips instead of as their raw source.
+  ///
+  /// **Both chat surfaces read the same `chat_messages` table**, and the dock
+  /// — where @-mentioning is a real feature — writes mentions into `content`
+  /// in that form. This screen rendered `content` through a plain [Text], so a
+  /// message composed in the dock and opened here read
+  /// `Morning @[Thandi Mokoena](user:8f2c…) — 06:00?`. Machinery, shown to a
+  /// user, in the body of their message.
+  ///
+  /// The colours are deliberately NOT a new pair. The chip keeps the bubble's
+  /// own ink and marks itself with weight and a ground tinted AWAY from that
+  /// ink — the same rule as [_quoteGround] — so a mention is as legible as the
+  /// sentence it sits in, on either bubble, without inventing a hue that would
+  /// then need measuring on both.
+  Widget _buildMessageText(String content, bool isCurrentUser) {
+    final semantic = MlSemantic.of(context);
+    final ink =
+        isCurrentUser ? MlTokens.inkOnAccent : semantic.textStrong;
+    final base = context.mlText.bodyLarge.copyWith(color: ink);
+
+    final matches = _kMentionToken.allMatches(content).toList();
+    if (matches.isEmpty) return Text(content, style: base);
+
+    final chipBg = _quoteGround(
+      isCurrentUser ? MlTokens.accent : semantic.surfaceCard,
+      ink,
+    );
+
+    final spans = <InlineSpan>[];
+    var last = 0;
+    for (final m in matches) {
+      if (m.start > last) {
+        spans.add(TextSpan(text: content.substring(last, m.start)));
+      }
+      spans.add(WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 1),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+            decoration: BoxDecoration(
+              color: chipBg,
+              borderRadius: MlShape.radiusSmall,
+            ),
+            child: Text(
+              '@${m.group(1)}',
+              style: base.copyWith(fontWeight: FontWeight.w700, height: 1.2),
+            ),
+          ),
+        ),
+      ));
+      last = m.end;
+    }
+    if (last < content.length) {
+      spans.add(TextSpan(text: content.substring(last)));
+    }
+    return Text.rich(TextSpan(style: base, children: spans));
+  }
+
+  /// The quoted original, drawn inside the replying bubble.
+  ///
+  /// Deliberately the same vocabulary as [_buildReplyIndicator] — the bar, the
+  /// sender's name, one clamped line of preview — because they are the two
+  /// halves of one gesture: what you saw above the composer when you wrote the
+  /// reply is what the reader sees above the reply itself. They also share the
+  /// dock's shape (`chat_dock.dart` `_ReplyQuote`), so the product has one
+  /// idea of what a quote looks like rather than three.
+  ///
+  /// Colour: solid rungs on both sides, never an alpha on the ink. On the
+  /// outgoing bubble the ground is [MlTokens.accent] and the ink is
+  /// [MlTokens.inkOnAccent] — a very dark teal — so the quote's own ground
+  /// tints with `inkOnAccent`, which DARKENS the cyan and moves the dark ink
+  /// further from its ground rather than closer to it. Tinting with the ink's
+  /// opposite here would have quietly cut the contrast of every quoted line.
+  Widget _buildQuotedOriginal(ChatMessage original, bool isCurrentUser) {
+    final semantic = MlSemantic.of(context);
+
+    // The quote's ground is always the BUBBLE, tinted AWAY from that bubble's
+    // ink — never toward it, and never the accent well.
+    //
+    // The first version of this used `MlTone.accent.well()` with
+    // `accentHover` written on it, and the render reported it at 3.44:1: a
+    // cyan ink on a cyan-tinted ground, which is the same fault the dock's
+    // `_ReplyQuote` had (`ChatPalette.quoteGround`) and the same one §3.3
+    // records for `_TxnRow` and `_DispatchStatusChip`. Tinting away instead
+    // means separation can only increase, so a quote is legible wherever the
+    // bubble under it is legible — which both of these already are.
+    final Color barColor;
+    final Color bgColor;
+    final Color nameColor;
+    final Color previewColor;
+    if (isCurrentUser) {
+      barColor = MlTokens.inkOnAccent;
+      bgColor = _quoteGround(MlTokens.accent, MlTokens.inkOnAccent);
+      nameColor = MlTokens.inkOnAccent;
+      previewColor = MlTokens.inkOnAccent;
+    } else {
+      barColor = MlTokens.accent;
+      bgColor = _quoteGround(semantic.surfaceCard, semantic.textStrong);
+      nameColor = semantic.textStrong;
+      previewColor = semantic.textMuted;
+    }
+
+    // An attachment with no words is still an answerable message; quoting it
+    // as an empty box tells the reader nothing about what was replied to.
+    final String preview;
+    if (original.hasAttachment &&
+        (original.fileName?.trim().isNotEmpty ?? false)) {
+      preview = '📎 ${original.fileName!.trim()}';
+    } else {
+      final stripped = _stripMentionTokens(original.content.trim());
+      preview = stripped.length > 80
+          ? '${stripped.substring(0, 80)}…'
+          : stripped;
+    }
+
+    return Semantics(
+      button: true,
+      label: 'Replying to ${original.senderName}. Show the original message.',
+      child: GestureDetector(
+        onTap: () => _scrollToMessage(original.id),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: MlShape.radiusSmall,
+          ),
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                Container(
+                  width: 3,
+                  decoration: BoxDecoration(
+                    color: barColor,
+                    borderRadius: MlShape.radiusExtraSmall,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // `Expanded`, not `Flexible`: this is the only child that may
+                // grow, and an unflexed child in a `Row` is handed unbounded
+                // width, so `ellipsis` would never engage on a long quote.
+                // CLAUDE.md §10.4.
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        original.senderName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.mlText.labelMedium.copyWith(
+                          color: nameColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (preview.isNotEmpty)
+                        Text(
+                          preview,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.mlText.bodySmall
+                              .copyWith(color: previewColor),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
