@@ -8,6 +8,7 @@ import 'package:flutter_application_1/core/widgets/infinite_list.dart';
 import 'package:flutter_application_1/core/utils/image_provider_utils.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Provider for the company repository
 final companyRepositoryProvider = Provider<CompanyRepository>((ref) {
@@ -167,71 +168,75 @@ class CompanyDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(company.companyName)),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Company logo
-            Center(
-              child: CircleAvatar(
-                radius: 60,
-                backgroundColor: MlTone.accent.well(
-                  Theme.of(context).brightness,
-                ),
-                backgroundImage: imageProviderFromString(company.logoUrl),
-                child: company.logoUrl == null
-                    ? const Icon(Icons.business, size: 60, color: MlTokens.accent)
-                    : null,
+    // NO SCAFFOLD AND NO APP BAR — this screen is a leaf of the portal
+    // `ShellRoute` (`/portal/{org}/company` and `/companies/…/details` both
+    // are), so the shell has already drawn a top bar carrying the company's
+    // name. Its own `AppBar` put that name on the screen a second time,
+    // directly underneath. Photographed 2026-08-21, the same fault the
+    // tons-out register had.
+    return MlPageBody(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          MlPageHeader(
+            title: company.companyName,
+            // The org TYPE, in English. `company.orgType.name` is the enum's
+            // wire spelling — this meta line read "transporter" and
+            // "mineSupplier" on a company's own profile.
+            meta: company.orgType.label,
+          ),
+          const SizedBox(height: 16),
+          // Company logo
+          Center(
+            child: CircleAvatar(
+              radius: 60,
+              backgroundColor: MlTone.accent.well(
+                Theme.of(context).brightness,
               ),
+              backgroundImage: imageProviderFromString(company.logoUrl),
+              child: company.logoUrl == null
+                  ? const Icon(Icons.business, size: 60, color: MlTokens.accent)
+                  : null,
             ),
-            const SizedBox(height: 24),
+          ),
+          const SizedBox(height: 24),
 
-            // Company information
-            MlSectionTitle(
-              'Company Information',
-              icon: Icons.business_outlined,
-              // Not a count: this section is one company's record. Its org
-              // type is the fact that changes what every field below means,
-              // and it is the one thing not repeated as a labelled row.
-              meta: company.orgType.name,
-            ),
-            _buildInfoItem(context, 'Company Name', company.companyName),
-            // S8-11. The permanent, system-issued reference. Shown first
-            // because it is the thing to quote in a support call — and shown
-            // read-only because it is issued and immutable in the database
-            // (company_reg_ref_guard), not typed by anyone. Renders nothing
-            // for a company that predates the column rather than an empty row.
-            if (company.regRef != null)
-              _buildInfoItem(context, 'MineLink Reference', company.regRef!),
-            _buildInfoItem(context, 'WhatsApp Number', company.whatsappNumber),
+          // Company information
+          MlSectionTitle(
+            'Company Information',
+            icon: Icons.business_outlined,
+          ),
+          _buildInfoItem(context, 'Company Name', company.companyName),
+          // S8-11. The permanent, system-issued reference. Shown first
+          // because it is the thing to quote in a support call — and shown
+          // read-only because it is issued and immutable in the database
+          // (company_reg_ref_guard), not typed by anyone. Renders nothing
+          // for a company that predates the column rather than an empty row.
+          if (company.regRef != null)
+            _buildInfoItem(context, 'MineLink Reference', company.regRef!),
+          _buildInfoItem(context, 'WhatsApp Number', company.whatsappNumber),
+          // `OrgType.label`, not a fourth private switch. This file carried
+          // its own `_getOrgTypeLabel`, the organisation detail screen carried
+          // another, and the two did not even agree on the spacing around the
+          // slash.
+          _buildInfoItem(context, 'Organization Type', company.orgType.label),
+          if (company.ceoFirstName != null || company.ceoLastName != null)
             _buildInfoItem(
               context,
-              'Organization Type',
-              _getOrgTypeLabel(company.orgType),
+              'CEO',
+              '${company.ceoFirstName ?? ''} ${company.ceoLastName ?? ''}'
+                  .trim(),
             ),
-            if (company.ceoFirstName != null || company.ceoLastName != null)
-              _buildInfoItem(
-                context,
-                'CEO',
-                '${company.ceoFirstName ?? ''} ${company.ceoLastName ?? ''}'
-                    .trim(),
-              ),
+          // `MlTime.stamp`, not a hand-rolled `d/M/yyyy H:mm`. The old one was
+          // an eighth spelling of a moment in time, it printed the RAW
+          // instant with no conversion to the mine's clock, and it did not pad
+          // the hour — so a company created at 09:05 SAST read "7:5".
+          _buildInfoItem(context, 'Created At', MlTime.stamp(company.createdAt)),
+          if (company.updatedAt != null)
             _buildInfoItem(
-              context,
-              'Created At',
-              _formatDate(company.createdAt),
-            ),
-            if (company.updatedAt != null)
-              _buildInfoItem(
-                context,
-                'Last Updated',
-                _formatDate(company.updatedAt!),
-              ),
-          ],
-        ),
+                context, 'Last Updated', MlTime.stamp(company.updatedAt!)),
+          const SizedBox(height: 60),
+        ],
       ),
     );
   }
@@ -243,12 +248,21 @@ class CompanyDetailsScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Rides the text scaler. A flat 130px label column under a
+          // per-user type size squeezes the VALUE, which is the half a reader
+          // is here for — the same fault `MlColumn.minWidth` exists for.
           SizedBox(
-            width: 130,
-            child: Text(
-              label,
-              style: context.mlText.titleSmall.copyWith(
-                color: semantic.textMuted,
+            width: MediaQuery.textScalerOf(context).scale(130),
+            // A gutter, because a label that exactly fills its column touches
+            // the value: "WhatsApp Number+27000000000" with no space between
+            // them.
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Text(
+                label,
+                style: context.mlText.titleSmall.copyWith(
+                  color: semantic.textMuted,
+                ),
               ),
             ),
           ),
@@ -263,20 +277,5 @@ class CompanyDetailsScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _getOrgTypeLabel(OrgType orgType) {
-    switch (orgType) {
-      case OrgType.mineSupplier:
-        return 'Mine/Supplier';
-      case OrgType.buyer:
-        return 'Buyer';
-      case OrgType.transporter:
-        return 'Transporter';
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 }

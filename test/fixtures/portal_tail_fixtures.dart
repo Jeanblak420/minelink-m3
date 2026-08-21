@@ -17,6 +17,10 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/mcp/models/company_model.dart';
+import 'package:flutter_application_1/core/mcp/repositories/company_repository.dart';
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
+import 'package:flutter_application_1/features/company/screens/company_list_screen.dart';
 import 'package:flutter_application_1/features/portal/models/available_route.dart';
 import 'package:flutter_application_1/features/portal/models/compliance_document.dart';
 import 'package:flutter_application_1/features/portal/models/fuel_models.dart';
@@ -40,6 +44,7 @@ import 'package:flutter_application_1/features/portal/providers/request_provider
 import 'package:flutter_application_1/features/portal/services/logistics_service.dart';
 
 import 'portal_capture_fixtures.dart';
+import 'screen_fixtures.dart';
 
 DateTime _ago(Duration d) => kCaptureNow.subtract(d);
 
@@ -685,6 +690,48 @@ final List<VehicleCostBreakdown> kVehicleCosts = const [
 ];
 
 // ---------------------------------------------------------------------------
+// The company profile — read through a REPOSITORY, not a provider
+// ---------------------------------------------------------------------------
+
+/// `CompanyDetailsLoaderScreen` calls `repository.getById()` inside a
+/// `FutureBuilder` rather than watching an overridable data provider, so
+/// nothing in `companyScopeOverrides()` reaches it. Un-faked it photographed
+///
+///     Failed to load company:
+///     PostgrestException(message: , code: 400, details: , hint: null)
+///
+/// under a "Company" app bar — an error card standing in for the design, which
+/// is the one thing CLAUDE.md §10.5 says a render must never be.
+///
+/// The seam is the repository provider. Subclassing rather than implementing
+/// an interface, because `SupabaseRepository` has a wide surface and this
+/// screen calls exactly one method of it.
+class FixtureCompanyRepository extends CompanyRepository {
+  FixtureCompanyRepository(this.company);
+
+  final CompanyMCP company;
+
+  @override
+  Future<CompanyMCP> getById(String id) async => company;
+}
+
+CompanyMCP fixtureCompanyRecord({OrgType orgType = OrgType.transporter}) {
+  final base = fixtureCompany(orgType: orgType);
+  return CompanyMCP(
+    id: base.id,
+    userId: base.userId,
+    companyName: base.companyName,
+    whatsappNumber: base.whatsappNumber,
+    orgType: base.orgType,
+    createdAt: base.createdAt,
+    updatedAt: _ago(const Duration(days: 9)),
+    ceoFirstName: 'Thandi',
+    ceoLastName: 'Mokoena',
+    regRef: 'FXH001',
+  );
+}
+
+// ---------------------------------------------------------------------------
 // The override list
 // ---------------------------------------------------------------------------
 
@@ -716,4 +763,6 @@ List<Override> portalTailOverrides() => [
           .overrideWith((ref, _) async => kOperatingCosts),
       vehicleCostBreakdownProvider
           .overrideWith((ref, _) async => kVehicleCosts),
+      companyRepositoryProvider
+          .overrideWithValue(FixtureCompanyRepository(fixtureCompanyRecord())),
     ];
