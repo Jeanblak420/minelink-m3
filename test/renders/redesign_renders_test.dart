@@ -354,11 +354,43 @@ void main() {
     // ranking row, a long address in a table cell), and a render file that
     // fails on those teaches people to add exclusions rather than to look.
     // The list is the reading material; the judgement stays human.
-    final cut = <String>[];
+    // Keyed by string, valued by WHERE it was cut and how much room it had.
+    //
+    // The list on its own sent me hunting for "Roadhaul Logistics" through four
+    // renders of a screen that draws it in three different places. A width and
+    // the nearest few named ancestors turn "somewhere on this page" into a
+    // file to open.
+    final cut = <String, String>{};
     void visitCut(Element e) {
       final ro = e.renderObject;
-      if (ro is RenderParagraph && ro.didExceedMaxLines) {
-        cut.add(ro.text.toPlainText());
+      // `hasSize` first, and it is not defensive noise: a paragraph inside a
+      // subtree that was built but never laid out (a `LayoutBuilder` branch
+      // that lost, an offstage route) throws "RenderBox was not laid out" the
+      // moment it is asked, and the throw comes out of the RENDER, not out of
+      // the report.
+      if (ro is RenderParagraph &&
+          !ro.debugNeedsLayout &&
+          ro.hasSize &&
+          ro.didExceedMaxLines) {
+        // The ancestor trail, filtered to the names a person can grep for:
+        // the app's own widgets, not the forty framework wrappers between
+        // them.
+        final trail = <String>[];
+        e.visitAncestorElements((a) {
+          final n = a.widget.runtimeType.toString();
+          if (n.startsWith('Ml') ||
+              n.startsWith('_') ||
+              n.endsWith('Screen') ||
+              n.endsWith('Card') ||
+              n.endsWith('Table') ||
+              n.endsWith('Tile') ||
+              n.endsWith('Row')) {
+            if (trail.isEmpty || trail.last != n) trail.add(n);
+          }
+          return trail.length < 4;
+        });
+        cut[ro.text.toPlainText()] =
+            '${ro.size.width.toStringAsFixed(0)}px  ${trail.join(' < ')}';
       }
       e.visitChildren(visitCut);
     }
@@ -369,11 +401,13 @@ void main() {
     });
     if (cut.isNotEmpty) {
       // ignore: avoid_print
-      print('CUT OFF [$name] ${cut.toSet().length} string(s) at '
+      print('CUT OFF [$name] ${cut.length} string(s) at '
           '${size.width.toInt()}x${size.height.toInt()}:');
-      for (final c in cut.toSet()) {
+      for (final entry in cut.entries) {
         // ignore: avoid_print
-        print('  ~ $c');
+        print('  ~ ${entry.key}');
+        // ignore: avoid_print
+        print('      ${entry.value}');
       }
     }
 
@@ -834,7 +868,7 @@ void main() {
           selectedRoute: '/portal/transporter',
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 1900),
+        const Size(412, 1536),
         'screen-fleet-phone-dark',
       );
     });
@@ -870,7 +904,7 @@ void main() {
           selectedRoute: '/portal/driver',
           extraOverrides: [profileSetupOverride()],
         ),
-        const Size(412, 1100),
+        const Size(412, 1529),
         'screen-profile-setup-phone-dark',
       );
     });
@@ -1067,7 +1101,7 @@ void main() {
           selectedRoute: '/portal/mine/gate',
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 1600),
+        const Size(412, 2139),
         'screen-security-checkin-phone-dark',
       );
     });
@@ -1167,7 +1201,7 @@ void main() {
           body: const ReconTablesScreen(),
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 1700),
+        const Size(412, 2304),
         'screen-recon-tables-phone-dark',
       );
     });
@@ -1223,7 +1257,7 @@ void main() {
           selectedRoute: '/portal/buyer/reconciliations',
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 1700),
+        const Size(412, 4600),
         'screen-buyer-reconciliations-phone-dark',
       );
     });
@@ -1327,7 +1361,7 @@ void main() {
           selectedRoute: '/portal/transporter',
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 2400),
+        const Size(412, 2916),
         'dash-transporter-phone-dark',
       );
     });
@@ -1345,7 +1379,7 @@ void main() {
           selectedRoute: '/portal/mine',
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 2400),
+        const Size(412, 4200),
         'dash-mine-phone-dark',
       );
     });
@@ -1363,7 +1397,7 @@ void main() {
           selectedRoute: '/portal/buyer',
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 2400),
+        const Size(412, 2851),
         'dash-buyer-phone-light',
       );
     });
@@ -2123,7 +2157,7 @@ void main() {
           body: const TargetsPlatformScreen(),
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 4340),
+        const Size(412, 4407),
         'screen-targets-platform-phone-dark',
       );
     });
@@ -2180,7 +2214,7 @@ void main() {
         // finished. The number that works is taken from a deliberately
         // oversized frame: render at 6,200, find the last row of painted
         // content (4,391), add the 142px the pinned bottom bar occupies.
-        const Size(412, 4533),
+        const Size(412, 4589),
         'screen-targets-org-type-phone-dark',
       );
     });
@@ -2219,7 +2253,7 @@ void main() {
         // Same measurement as the org-type frame above: content ends at
         // 4,510 in a 6,200 frame, plus the 142px bottom bar. The company band
         // is the tallest of the three - a search field and five pills.
-        const Size(412, 4652),
+        const Size(412, 4741),
         'screen-targets-company-phone-dark',
       );
     });
@@ -2392,7 +2426,7 @@ void main() {
       await shootConsole(
           tester,
           const OrganizationDetailScreen(organizationId: 'o4'),
-          const Size(412, 2400),
+          const Size(412, 6600),
           'screen-organization-detail-phone-dark');
     });
 
@@ -2458,7 +2492,7 @@ void main() {
 
     testWidgets('platform dashboard v2 — phone dark', (tester) async {
       await shootConsole(tester, const SuperAdminDashboardV2Screen(),
-          const Size(412, 3200), 'screen-super-admin-dashboard-v2-phone-dark');
+          const Size(412, 5600), 'screen-super-admin-dashboard-v2-phone-dark');
     });
 
     testWidgets('transporter leaderboard — desktop dark', (tester) async {
@@ -2539,7 +2573,7 @@ void main() {
             body: const SuperAdminCompanyMirrorScreen(companyId: 'o4'),
             extraOverrides: [...tail(), ...companyMirrorOverrides()],
           ),
-          const Size(412, 2400),
+          const Size(412, 4800),
           'screen-company-mirror-phone-dark');
     });
   });

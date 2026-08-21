@@ -1061,11 +1061,19 @@ List<Override> portalTailOverrides() => [
       // through its default and handed a mine's BUYERS page a list of MINES.
       // The picture showed Iron Hills Mining and Selati Chrome Works as this
       // mine's customers, which is not a layout anybody would look at twice.
+      //
+      // An EMPTY filter means "every partner", not "the mines". The
+      // reconciliations screens ask with `orgFilter: ''` and use the answer as
+      // an id -> name map, so falling through to the mines meant every buyer
+      // and transporter id missed — and the cards read "Unknown company →
+      // Unknown company" and "Hauled by Unknown company". A fixture that says
+      // less than the service it stands in for photographs as a product fault.
       partnerCompaniesProvider.overrideWith((ref, args) async =>
           switch (args.orgFilter.toLowerCase()) {
             'buyer' => kBuyerPartners,
             'transporter' => kTransporterPartners,
-            _ => kMinePartners,
+            'minesupplier' || 'mine_supplier' || 'mine' => kMinePartners,
+            _ => [...kMinePartners, ...kBuyerPartners, ...kTransporterPartners],
           }),
       myAvailableRoutesProvider
           .overrideWith((ref, _) async => kMyAvailableRoutes),

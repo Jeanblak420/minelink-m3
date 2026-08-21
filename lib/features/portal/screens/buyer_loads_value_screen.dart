@@ -326,23 +326,25 @@ class _Body extends ConsumerWidget {
     );
   }
 
+  /// Plate and commodity — side by side when they fit, stacked when they do
+  /// not. Same fault, same fix as the reconciliation table: the column is
+  /// sized for the PLATE, so a `Row` left the commodity nothing.
   Widget _truckCell(BuildContext context, BuyerLoadValue r) {
-    return Row(
+    return Wrap(
+      spacing: 8,
+      runSpacing: 2,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         MlPlatePill(r.truckReg ?? '—', fontSize: 12),
-        if (r.commodity != null) ...[
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              r.commodity!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.mlText.bodySmall.copyWith(
-                color: MlSemantic.of(context).textMuted,
-              ),
+        if (r.commodity != null)
+          Text(
+            r.commodity!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.mlText.bodySmall.copyWith(
+              color: MlSemantic.of(context).textMuted,
             ),
           ),
-        ],
       ],
     );
   }

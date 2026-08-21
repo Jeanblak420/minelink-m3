@@ -563,7 +563,13 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
           const SizedBox(height: 2),
           Text(
             sub,
-            maxLines: 1,
+            // TWO lines. The sub-line here is a ROUTE — "Iron Hills Mining →
+            // Richards Bay" is 187px and this column is 146px even on a 1600px
+            // window, so at one line the ledger named the loading point and
+            // silently dropped where the load was going. Widening the column
+            // instead would push the table's scroll floor past 1500px and start
+            // the money columns scrolling on a desktop that fits them today.
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: context.mlText.labelSmall.copyWith(
               color: semantic.textFaint,

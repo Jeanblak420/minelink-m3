@@ -206,7 +206,13 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
                   Expanded(
                     child: Text(
                       _title,
-                      maxLines: 2,
+                      // THREE lines, matching `MlSectionTitle`. The longest
+                      // title here is "Mine/Supplier transportation requests"
+                      // and on a 412px phone, beside an icon well, a "1 new"
+                      // pill and a refresh button, two lines got as far as
+                      // "…transportation requ…". A page's own name is the last
+                      // string on it that should be cut.
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: context.mlText.editorialMedium.copyWith(
                         color: MlSemantic.of(context).textStrong,

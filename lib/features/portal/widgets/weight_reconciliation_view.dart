@@ -224,7 +224,9 @@ class WeightReconciliationView extends ConsumerWidget {
                       MlColumn('Delivered', flex: 2, align: TextAlign.right),
                       MlColumn('Variance', flex: 2, align: TextAlign.right),
                       MlColumn('POD', flex: 1, align: TextAlign.center),
-                      MlColumn('Dispute', flex: 2, align: TextAlign.center),
+                      // flex 3: this column holds a button labelled "Dispute", and at
+                      // flex 2 the label was drawn in 23px.
+                      MlColumn('Dispute', flex: 3, align: TextAlign.center),
                     ],
                     rows: [
                       for (final r in rows)
@@ -255,23 +257,29 @@ class WeightReconciliationView extends ConsumerWidget {
     );
   }
 
+  /// Plate and commodity — side by side when they fit, stacked when they do
+  /// not.
+  ///
+  /// A `Row` here left the commodity **6px** on a phone: the column declares
+  /// the width the PLATE needs and the pill takes all of it, so "Chrome" and
+  /// "Manganese" were drawn as an ellipsis on a reconciliation table whose
+  /// whole subject is which product went missing.
   Widget _truckCell(BuildContext context, TripReconciliation r) {
-    return Row(
+    return Wrap(
+      spacing: 8,
+      runSpacing: 2,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         MlPlatePill(r.truckReg ?? '—', fontSize: 12),
-        if (r.commodity != null) ...[
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              r.commodity!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.mlText.bodySmall.copyWith(
-                color: MlSemantic.of(context).textMuted,
-              ),
+        if (r.commodity != null)
+          Text(
+            r.commodity!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.mlText.bodySmall.copyWith(
+              color: MlSemantic.of(context).textMuted,
             ),
           ),
-        ],
       ],
     );
   }

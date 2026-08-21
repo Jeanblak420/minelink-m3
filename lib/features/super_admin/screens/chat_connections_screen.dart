@@ -377,22 +377,21 @@ class _RecommendationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          // Wrapped for the same reason as `_ConnectionCard` below: two
+          // `Flexible`s share a row equally, so the longer company name is cut
+          // to the shorter one's width even when the row has space to spare.
+          Wrap(
+            spacing: 8,
+            runSpacing: 2,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Flexible(
-                child: CompanyNameLink(companyId: pair.companyIdA, name: aName),
+              CompanyNameLink(companyId: pair.companyIdA, name: aName),
+              Icon(
+                Icons.sync_alt_rounded,
+                size: 16,
+                color: semantic.textFaint,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Icon(
-                  Icons.sync_alt_rounded,
-                  size: 16,
-                  color: semantic.textFaint,
-                ),
-              ),
-              Flexible(
-                child: CompanyNameLink(companyId: pair.companyIdB, name: bName),
-              ),
+              CompanyNameLink(companyId: pair.companyIdB, name: bName),
             ],
           ),
           const SizedBox(height: 6),
@@ -461,64 +460,86 @@ class _ConnectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(MlTokens.rXl),
         border: Border.all(color: semantic.borderCard),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: CompanyNameLink(companyId: aId, name: aName),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Icon(
-                        Icons.sync_alt_rounded,
-                        size: 16,
-                        color: semantic.textFaint,
-                      ),
-                    ),
-                    Flexible(
-                      child: CompanyNameLink(companyId: bId, name: bName),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$aType  ·  $bType'
-                  '${when != null ? '  ·  ${revoked ? 'Revoked' : 'Linked'} ${MlTime.stamp(when)}' : ''}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.mlText.bodyMedium.copyWith(
+      child: Builder(
+        builder: (context) {
+          // The two company names, side by side when they fit and wrapped when
+          // they do not. Two `Flexible`s in a Row split whatever is left
+          // EQUALLY: on a 412px phone the badge and the Revoke button took
+          // 254px of the card, and each half of "Iron Hills Mining ⇄ Atlas
+          // Buyer Group" was drawn in 43px — "Iron…" ⇄ "Atla…". A chat link is
+          // between two named companies; if it cannot say which two, the row
+          // says nothing at all.
+          final identity = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: 8,
+                runSpacing: 2,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  CompanyNameLink(companyId: aId, name: aName),
+                  Icon(
+                    Icons.sync_alt_rounded,
+                    size: 16,
                     color: semantic.textFaint,
                   ),
+                  CompanyNameLink(companyId: bId, name: bName),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '$aType  ·  $bType'
+                '${when != null ? '  ·  ${revoked ? 'Revoked' : 'Linked'} ${MlTime.stamp(when)}' : ''}',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: context.mlText.bodyMedium.copyWith(
+                  color: semantic.textFaint,
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          MlStatusBadge(
+              ),
+            ],
+          );
+          final badge = MlStatusBadge(
             label: revoked ? 'Revoked' : 'Connected',
             tone: revoked ? MlTone.error : MlTone.done,
-          ),
-          const SizedBox(width: 10),
-          if (revoked)
-            MlButton.primary(
-              label: 'Grant again',
-              icon: Icons.link_rounded,
-              compact: true,
-              onPressed: busy ? null : onAction,
-            )
-          else
-            MlButton.danger(
-              label: 'Revoke',
-              icon: Icons.link_off_rounded,
-              compact: true,
-              onPressed: busy ? null : onAction,
-            ),
-        ],
+          );
+          final action = revoked
+              ? MlButton.primary(
+                  label: 'Grant again',
+                  icon: Icons.link_rounded,
+                  compact: true,
+                  onPressed: busy ? null : onAction,
+                )
+              : MlButton.danger(
+                  label: 'Revoke',
+                  icon: Icons.link_off_rounded,
+                  compact: true,
+                  onPressed: busy ? null : onAction,
+                );
+
+          return LayoutBuilder(
+            builder: (context, c) {
+              if (c.maxWidth < 560) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    identity,
+                    const SizedBox(height: 12),
+                    Wrap(spacing: 10, runSpacing: 8, children: [badge, action]),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: identity),
+                  const SizedBox(width: 12),
+                  badge,
+                  const SizedBox(width: 10),
+                  action,
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }

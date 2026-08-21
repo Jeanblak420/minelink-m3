@@ -1170,7 +1170,10 @@ class _PartyChip extends StatelessWidget {
           Flexible(
             child: Text(
               n,
-              maxLines: 1,
+              // TWO lines: "Roadhaul Logistics" is 125px and this cell is
+              // 124px on a 1600px desktop — one pixel, and the hover tooltip
+              // was the only way to read a company's name.
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: context.mlText.bodyMedium.copyWith(
                 color: semantic.textBody,
@@ -1199,18 +1202,23 @@ class _RouteCell extends StatelessWidget {
         child: _endpointPill(context, row.commodity ?? '—'),
       );
     }
-    return Row(
+    // A Wrap, not a Row. Two `Flexible` pills in a Row split the column
+    // EQUALLY whatever they hold, so on a 1600px window each end of the route
+    // had 73px and read "Iron Hills M…" → "Richards …". Wrapped, each pill
+    // takes the width its own name needs and the second drops to a new line
+    // when the pair no longer fits.
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Flexible(child: _endpointPill(context, row.loadingPoint ?? '—')),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: Icon(
-            Icons.arrow_right_alt_rounded,
-            size: 16,
-            color: semantic.textFaint,
-          ),
+        _endpointPill(context, row.loadingPoint ?? '—'),
+        Icon(
+          Icons.arrow_right_alt_rounded,
+          size: 16,
+          color: semantic.textFaint,
         ),
-        Flexible(child: _endpointPill(context, row.offloadingPoint ?? '—')),
+        _endpointPill(context, row.offloadingPoint ?? '—'),
       ],
     );
   }

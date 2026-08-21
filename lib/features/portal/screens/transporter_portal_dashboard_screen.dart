@@ -523,7 +523,11 @@ class _TransporterPortalDashboardScreenState
       child: MlDataTable(
         columns: const [
           MlColumn('Date'),
-          MlColumn('Truck'),
+          // The truck column carries a South African plate. Without this the
+          // six columns split the 560px scroll floor evenly, the truck cell
+          // got ~81px, and "JD 22 PL MP" was drawn as "JD 22 PL…" on a phone
+          // — the identifier the whole row is about.
+          MlColumn('Truck', minWidth: kPlateColumnMinWidth),
           MlColumn('Source'),
           MlColumn('Customer'),
           MlColumn('Net', align: TextAlign.right),

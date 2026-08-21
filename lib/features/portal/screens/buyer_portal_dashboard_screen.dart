@@ -486,7 +486,10 @@ class _BuyerPortalDashboardScreenState
       child: MlDataTable(
         columns: const [
           MlColumn('Date'),
-          MlColumn('Truck'),
+          // The truck column carries a plate. Six columns sharing the 560px
+          // scroll floor left it 79px, so "JD 22 PL MP" and "CK 84 RT GP" were
+          // both cut on the buyer's own dashboard.
+          MlColumn('Truck', minWidth: kPlateColumnMinWidth),
           MlColumn('Source'),
           MlColumn('Product'),
           MlColumn('Delivered', align: TextAlign.right),

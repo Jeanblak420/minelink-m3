@@ -224,7 +224,10 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
                       MlDataTable(
                         columns: const [
                           MlColumn('Truck Reg', flex: 3, minWidth: kPlateColumnMinWidth),
-                          MlColumn('Client', flex: 3),
+                          // flex 4: the client is a company name — "Atlas Buyer Group"
+                          // is 118px and a flex-3 column here is 120px, which it
+                          // missed by two.
+                          MlColumn('Client', flex: 4),
                           MlColumn('Material', flex: 3),
                           MlColumn('Tons', flex: 2, align: TextAlign.right),
                           MlColumn('Status', flex: 3, align: TextAlign.right),

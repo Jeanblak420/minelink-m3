@@ -302,33 +302,57 @@ class _OrgCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 18),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    // Flexible, not a bare child: a Row hands non-flex children
-                    // unbounded width, and MlStat ellipsises its value through
-                    // a Flexible — which asserts under an unbounded parent.
-                    // Loose fit keeps the spaceBetween look.
-                    children: agg.metrics
-                        .map((m) => Flexible(
-                            child: MlStat(
-                                tokens: t,
-                                label: m.key,
-                                value: m.value,
-                                valueSize: 15)))
-                        .toList(),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                MlSparkline(
-                    data: agg.spark,
-                    color: agg.sparkColor,
-                    width: 84,
-                    height: 30),
-              ],
+            LayoutBuilder(
+              builder: (context, c) {
+                final stats = [
+                  for (final m in agg.metrics)
+                    MlStat(
+                        tokens: t,
+                        label: m.key,
+                        value: m.value,
+                        valueSize: 15),
+                ];
+                // Three figures and an 84px sparkline do not fit in a card
+                // narrower than this. At 760px the console draws these two-up,
+                // each card is ~305px, and the three stats were left ~58px
+                // each — so the TONS figure, which is the largest number on
+                // the platform's front page, read "55,34…". A cut NUMBER is
+                // not a truncation, it is a wrong number.
+                //
+                // The sparkline is the part that goes. It carries a shape,
+                // the figures carry the values, and the values win.
+                if (c.maxWidth < 360) {
+                  return Wrap(
+                    spacing: 20,
+                    runSpacing: 10,
+                    children: stats,
+                  );
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        // Flexible, not a bare child: a Row hands non-flex
+                        // children unbounded width, and MlStat ellipsises its
+                        // value through a Flexible — which asserts under an
+                        // unbounded parent. Loose fit keeps the spaceBetween
+                        // look.
+                        children: [
+                          for (final st in stats) Flexible(child: st),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    MlSparkline(
+                        data: agg.spark,
+                        color: agg.sparkColor,
+                        width: 84,
+                        height: 30),
+                  ],
+                );
+              },
             ),
           ],
         ),

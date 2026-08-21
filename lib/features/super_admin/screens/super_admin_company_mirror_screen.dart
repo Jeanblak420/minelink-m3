@@ -1633,9 +1633,9 @@ class _DashboardBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Container(
+          Builder(
+            builder: (context) {
+              final icon = Container(
                 width: 48,
                 height: 48,
                 alignment: Alignment.center,
@@ -1645,36 +1645,68 @@ class _DashboardBody extends StatelessWidget {
                   border: Border.all(color: MlControlRoom.blue.withValues(alpha: 0.4)),
                 ),
                 child: Icon(Icons.map_outlined, color: MlControlRoom.blue, size: 24),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Fleet activity map',
-                      style: context.mlText.titleMedium.copyWith(
-                        color: MlControlRoom.textStrong,
-                        fontWeight: FontWeight.w800,
-                      ),
+              );
+              final words = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Fleet activity map',
+                    style: context.mlText.titleMedium.copyWith(
+                      color: MlControlRoom.textStrong,
+                      fontWeight: FontWeight.w800,
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Live GPS positions for every vehicle on this '
-                      'organization\'s active trips.',
-                      style: context.mlText.bodySmall.copyWith(
-                        color: MlControlRoom.textMuted,
-                      ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Live GPS positions for every vehicle on this '
+                    'organization\'s active trips.',
+                    style: context.mlText.bodySmall.copyWith(
+                      color: MlControlRoom.textMuted,
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              FilledButton.tonal(
+                  ),
+                ],
+              );
+              final button = FilledButton.tonal(
                 onPressed: () => _openLiveMapTab(context),
                 child: const Text('Open live map'),
-              ),
-            ],
+              );
+              // Below 420px the button and the words cannot share a row. On a
+              // 412px phone this card is ~360px wide, and "Open live map" is a
+              // fixed ~140px of it — which left the sentence 135px to say
+              // "Live GPS positions for every vehicle on this organization's
+              // active trips" in four cramped lines, with the title wrapping
+              // too. Stacked, both get the full width.
+              return LayoutBuilder(
+                builder: (context, c) {
+                  if (c.maxWidth >= 420) {
+                    return Row(
+                      children: [
+                        icon,
+                        const SizedBox(width: 14),
+                        Expanded(child: words),
+                        const SizedBox(width: 12),
+                        button,
+                      ],
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          icon,
+                          const SizedBox(width: 14),
+                          Expanded(child: words),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      button,
+                    ],
+                  );
+                },
+              );
+            },
           ),
           const SizedBox(height: 14),
           _MirrorLiveMapPreview(

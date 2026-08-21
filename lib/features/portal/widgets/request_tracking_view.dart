@@ -98,10 +98,10 @@ class RequestTrackingView extends ConsumerWidget {
                       for (final r in rows)
                         [
                           _text(context, r.typeLabel),
-                          _text(context, r.routeLabel, strong: true),
-                          _text(context, r.requesterName ?? '—'),
-                          _text(context, r.supplierName ?? '—'),
-                          _text(context, r.transporterNames ?? '—'),
+                          _text(context, r.routeLabel, strong: true, lines: 2),
+                          _text(context, r.requesterName ?? '—', lines: 2),
+                          _text(context, r.supplierName ?? '—', lines: 2),
+                          _text(context, r.transporterNames ?? '—', lines: 2),
                           _mono(
                             context,
                             r.tripsTotal == 0
@@ -149,10 +149,19 @@ class RequestTrackingView extends ConsumerWidget {
     );
   }
 
-  Widget _text(BuildContext context, String text, {bool strong = false}) =>
+  /// A cell of words.
+  ///
+  /// [lines] is 2 for the columns that hold a ROUTE or a LIST — "Iron Hills
+  /// Mining → Richards Bay" is 201px in a 191px column and "Northline Carriers,
+  /// Vaal Bulk Movers" is 230px in a 140px one, on a 1600px desktop. Widening
+  /// them is not available: this table already pins itself to 1200px and
+  /// scrolls, and the columns it would take the width from are the trip counts
+  /// and the tonnage.
+  Widget _text(BuildContext context, String text,
+          {bool strong = false, int lines = 1}) =>
       Text(
         text,
-        maxLines: 1,
+        maxLines: lines,
         overflow: TextOverflow.ellipsis,
         style: context.mlText.titleSmall.copyWith(
           color: strong ? MlSemantic.of(context).textStrong : MlSemantic.of(context).textBody,

@@ -174,7 +174,11 @@ class LoadQualityTable extends ConsumerWidget {
                   MlDataTable(
                     columns: [
                       const MlColumn('Truck', flex: 3, minWidth: kPlateColumnMinWidth),
-                      const MlColumn('Product', flex: 2),
+                      // flex 3: "Manganese" is 75px at bodyMedium and a flex-2 column of
+                      // this table is 76px wide on a phone, so the longest
+                      // commodity name the platform hauls sat one pixel inside
+                      // its cell and was cut anyway.
+                      const MlColumn('Product', flex: 3),
                       const MlColumn('Net', flex: 2, align: TextAlign.right),
                       const MlColumn('Cr₂O₃', flex: 2, align: TextAlign.right),
                       const MlColumn(
@@ -189,7 +193,11 @@ class LoadQualityTable extends ConsumerWidget {
                         align: TextAlign.right,
                       ),
                       const MlColumn('Cert', flex: 1, align: TextAlign.center),
-                      if (canEdit) const MlColumn('', flex: 2),
+                      // flex 3: this column holds a compact ghost button whose label is
+                      // "Attach" or "Edit" beside a 16px icon. At flex 2 it was
+                      // 76px and both labels were cut — a button that cannot
+                      // say what it does.
+                      if (canEdit) const MlColumn('', flex: 3),
                     ],
                     rows: [
                       for (final r in rows)
@@ -248,25 +256,37 @@ class LoadQualityTable extends ConsumerWidget {
     );
   }
 
+  /// Plate and waybill reference — side by side when they fit, stacked when
+  /// they do not.
+  ///
+  /// This was a `Row`. The column declares `kPlateColumnMinWidth` (120px),
+  /// which is what the PLATE needs — so the pill took its 106px, the reference
+  /// beside it was left **6px**, and `TRP-000123` was drawn as an ellipsis.
+  /// Photographed on `screen-recon-tables-phone-dark` and
+  /// `screen-buyer-reconciliations-phone-dark` 2026-08-21; the waybill number
+  /// is the one field on that row a person looks up by.
+  ///
+  /// A `Wrap`, not a wider minimum: raising the column's minimum to fit both
+  /// would push this eight-column table's scroll floor past 1100px and start it
+  /// scrolling on a desktop that has room for it today.
   Widget _truckCell(BuildContext context, LoadQualityRow r) {
-    return Row(
+    return Wrap(
+      spacing: 8,
+      runSpacing: 2,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         MlPlatePill(r.truckReg ?? '—', fontSize: 12),
-        if (r.reference != null) ...[
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              r.reference!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.mlText.code(
-                color: MlSemantic.of(context).textMuted,
-                size: 12,
-                weight: FontWeight.w400,
-              ),
+        if (r.reference != null)
+          Text(
+            r.reference!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.mlText.code(
+              color: MlSemantic.of(context).textMuted,
+              size: 12,
+              weight: FontWeight.w400,
             ),
           ),
-        ],
       ],
     );
   }

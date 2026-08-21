@@ -323,19 +323,25 @@ class _FilterBar extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               SizedBox(
-                // 300, not 240. The hint is 34 characters at 14px — about
-                // 238px — plus an 18px prefix icon and the field's own
-                // padding, so a 240px box cut the field's own instructions to
-                // "Search reg, transporter, customer…" with the tail missing.
-                // Measured 2026-08-21 at BOTH 1600 and 412: a fixed width
-                // around text does not care how wide the window is.
-                width: 300,
+                // 340, and the icon's box shrunk to fit it.
+                //
+                // This was 240, then 300, and the hint was still cut at BOTH
+                // 1600 and 412 — a fixed width around text does not care how
+                // wide the window is, and neither did my two guesses at it.
+                // The part that kept being missed: `prefixIcon` is given a
+                // 48x48 minimum whatever size the icon inside it is, so an
+                // 18px magnifier was eating 48px and the 34-character hint
+                // was left ~230px of a 300px box. Constraining the icon to
+                // 34px returns 14px, and 340 gives the text ~282px.
+                width: 340,
                 child: TextField(
                   controller: searchController,
                   onChanged: (v) => onChanged(filter.copyWith(search: v)),
                   decoration: InputDecoration(
                     isDense: true,
                     prefixIcon: const Icon(Icons.search, size: 18),
+                    prefixIconConstraints:
+                        const BoxConstraints(minWidth: 34, minHeight: 34),
                     hintText: 'Search reg, transporter, customer…',
                     border: const OutlineInputBorder(),
                   ),
@@ -432,7 +438,13 @@ class _DropdownFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 200,
+      // 240. A dropdown lays its ITEMS out to size itself, so the options are
+      // real laid-out text even while the menu is shut — which is how
+      // "Roadhaul Logistics" (143px at the dropdown's 16px style) was caught
+      // being cut in a 140px box on all four tons-out renders, desktop
+      // included. Nobody would have seen it until they opened the menu to
+      // choose that transporter.
+      width: 240,
       child: DropdownButtonFormField<String?>(
         initialValue: value,
         isExpanded: true,

@@ -591,48 +591,55 @@ class _OrganizationManagementScreenState
             // Token expiry
             Expanded(
               flex: 13,
-              child: Row(
+              // A Wrap, so the date drops BELOW the countdown rather than
+              // competing with it for a 66px cell.
+              //
+              // Both were `Flexible` in a Row, which shares the space evenly —
+              // fine on a desktop, and on a 412px phone it left the countdown
+              // 66px for "107d 22h left" (95px) and "Expired · 01 Aug". The
+              // expiry column is the one a platform admin scans this register
+              // for; neither half of it can be the half that gets cut.
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 2,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: exp.dot.colors(Theme.of(context).brightness).fg,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      exp.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.mlText.code(
-                        color: exp.expired ? MlTokens.red600 : s.textBody,
-                        size: 13,
-                        weight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  if (exp.date != null) ...[
-                    const SizedBox(width: 8),
-                    // Flexible too, and for the OTHER reason: unflexed, this
-                    // date claimed its natural width first and left the status
-                    // label beside it with nothing, so the label's ellipsis
-                    // ate the word while the date sat there in full. Both
-                    // shrink now, and the status — the part that says whether
-                    // the token has expired — is the one that keeps its space.
-                    Flexible(
-                      child: Text(
-                        exp.date!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.mlText.bodySmall.copyWith(
-                          color: s.textFaint,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color:
+                              exp.dot.colors(Theme.of(context).brightness).fg,
+                          shape: BoxShape.circle,
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          exp.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.mlText.code(
+                            color: exp.expired ? MlTokens.red600 : s.textBody,
+                            size: 13,
+                            weight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (exp.date != null)
+                    Text(
+                      exp.date!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.mlText.bodySmall.copyWith(
+                        color: s.textFaint,
+                      ),
                     ),
-                  ],
                 ],
               ),
             ),
