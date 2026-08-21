@@ -3782,6 +3782,24 @@ void main() {
       );
     });
 
+    // The quality CERTIFICATE, which is a different dialog from the spec
+    // above: the spec is the contract the route is judged against, the
+    // certificate is one delivered load's lab result and the penalty it earns.
+    testWidgets('quality certificate — phone dark', (tester) async {
+      await shootDialog(
+        tester,
+        const MineQualityScreen(),
+        'Attach',
+        const Size(412, 915),
+        'dialog-quality-cert-phone-dark',
+        orgType: OrgType.mineSupplier,
+        role: UserRole.admin,
+        title: 'Fixture Minerals',
+        subtitle: 'Quality',
+        selectedRoute: '/portal/mine/quality',
+      );
+    });
+
     testWidgets('invoice capture — phone dark', (tester) async {
       await shootDialog(
         tester,
