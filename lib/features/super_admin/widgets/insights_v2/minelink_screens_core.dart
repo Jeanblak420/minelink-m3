@@ -535,10 +535,68 @@ class MlSectionHead extends StatelessWidget {
       // only honest option: it is a real sentence and a real action, so
       // neither ellipsis nor omission would do.
       //
-      // Scale-aware, because the squeeze is text as much as width -- this
-      // header is fine at 1024px and overflows at 1024px x 1.6.
-      final scale = MediaQuery.textScalerOf(context).scale(11.5) / 11.5;
-      final stacked = (meta != null || link != null) && c.maxWidth < 420 * scale;
+      // WHEN TO STACK IS MEASURED, NOT GUESSED.
+      //
+      // This was `c.maxWidth < 420 * scale`, and 420 is a number somebody
+      // chose. It is wrong for any title longer than that constant assumed:
+      // driven in a browser at a ~500px viewport on 2026-08-21, the console's
+      // first band read **"Live operations by organization ty…"**. 500 minus
+      // the page gutters is 468 of content, 468 is not below 420, so the
+      // header did not stack — and the trailing block is unflexed, so the
+      // title's `Flexible` gave way and ellipsised a heading.
+      //
+      // At 412 it was fine, which is the tell: the fault lives in a BAND
+      // (roughly 420 to 560 of content) rather than at the small end, so
+      // sweeping narrower and narrower never reaches it.
+      //
+      // A `TextPainter` answers the actual question — does the title fit
+      // beside the trailing block? — and answers it for every title, at every
+      // text scale, instead of for one imagined title at 420. The scale comes
+      // in through the painter's own `textScaler`, so the separate `scale`
+      // fudge is gone with the constant.
+      final scaler = MediaQuery.textScalerOf(context);
+      double widthOf(String s, TextStyle style) {
+        final tp = TextPainter(
+          text: TextSpan(text: s, style: style),
+          textDirection: TextDirection.ltr,
+          textScaler: scaler,
+          maxLines: 1,
+        )..layout();
+        return tp.width;
+      }
+
+      final titleStyle = TextStyle(
+        fontFamily: MlGlass.display,
+        fontFamilyFallback: MlGlass.displayFallback,
+        fontSize: size,
+        fontWeight: FontWeight.w400,
+        letterSpacing: -0.2,
+        color: t.inkHi,
+      );
+      final metaStyle = context.mlText.labelSmall.copyWith(
+        color: t.inkLo,
+        fontWeight: FontWeight.w400,
+      );
+      final linkStyle = context.mlText.labelMedium.copyWith(color: t.accent2);
+
+      // The trailing column is as wide as its widest line.
+      final trailingWidth = [
+        if (meta != null) widthOf(meta!, metaStyle),
+        if (link != null) widthOf('$link →', linkStyle),
+      ].fold<double>(0, (a, b) => a > b ? a : b);
+
+      // A badge cannot be measured — it is an arbitrary widget — so it is
+      // allowed for generously. Over-estimating stacks the header slightly
+      // early, which costs a line; under-estimating cuts a heading, which is
+      // the fault being fixed.
+      const badgeAllowance = 72.0;
+      final needed = widthOf(title, titleStyle) +
+          (badge != null ? badgeAllowance : 0) +
+          16 +
+          trailingWidth;
+
+      final stacked =
+          (meta != null || link != null) && needed > c.maxWidth;
 
       final titleBlock = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -547,17 +605,22 @@ class MlSectionHead extends StatelessWidget {
               Row(
                 children: [
                   Flexible(
+                    // THE SAME style object the measurement above used. Two
+                    // copies of a TextStyle is how a measurement stops
+                    // describing the thing it measured.
                     child: Text(
                       title,
+                      // TWO lines, explicitly.
+                      //
+                      // It was inheriting a single line, so once the header
+                      // had stacked and given the title the whole row, a
+                      // title still too long for one line was ellipsised
+                      // anyway: "Live operations by organization type" on a
+                      // 412px phone at text scale 1.3. Stacking buys the
+                      // width; this is what lets the title use it.
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: MlGlass.display,
-                        fontFamilyFallback: MlGlass.displayFallback,
-                        fontSize: size,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: -0.2,
-                        color: t.inkHi,
-                      ),
+                      style: titleStyle,
                     ),
                   ),
                   if (badge != null) ...[
@@ -582,21 +645,14 @@ class MlSectionHead extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (meta != null)
-                Text(meta!,
-                    style: context.mlText.labelSmall.copyWith(
-                      color: t.inkLo,
-                      fontWeight: FontWeight.w400,
-                    )),
+                Text(meta!, style: metaStyle),
               if (link != null) ...[
                 if (meta != null) const SizedBox(height: 3),
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: onLink,
-                    child: Text('$link →',
-                        style: context.mlText.labelMedium.copyWith(
-                          color: t.accent2,
-                        )),
+                    child: Text('$link →', style: linkStyle),
                   ),
                 ),
               ],
