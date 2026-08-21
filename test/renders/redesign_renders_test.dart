@@ -46,6 +46,10 @@ import 'package:flutter_application_1/features/employee/screens/employee_profile
 import 'package:flutter_application_1/features/company/screens/company_list_screen.dart';
 import 'package:flutter_application_1/features/employee/screens/employee_grid_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/portal_tons_out_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/portal_tons_out_search_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_request_tracking_screen.dart';
+import 'package:flutter_application_1/features/home/screens/home_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/super_admin_company_mirror_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/portal_trips_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/live_trip_map_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/mine_supplier_buyers_detail_screen.dart';
@@ -2264,6 +2268,33 @@ void main() {
       await shootConsole(tester, const UserPreferencesScreen(),
           const Size(412, 1900), 'screen-user-preferences-phone-dark');
     });
+
+    // THE COMPANY MIRROR — a platform admin looking at one company's workspace
+    // read-only. §4.5 listed it as one of two console screens with no fixtures
+    // at all; the other (the employee register) has since been photographed.
+    testWidgets('company mirror — desktop dark', (tester) async {
+      await shoot(
+          tester,
+          console(
+            brightness: Brightness.dark,
+            body: const SuperAdminCompanyMirrorScreen(companyId: 'o4'),
+            extraOverrides: [...tail(), ...companyMirrorOverrides()],
+          ),
+          const Size(1600, 1800),
+          'screen-company-mirror-desktop-dark');
+    });
+
+    testWidgets('company mirror — phone dark', (tester) async {
+      await shoot(
+          tester,
+          console(
+            brightness: Brightness.dark,
+            body: const SuperAdminCompanyMirrorScreen(companyId: 'o4'),
+            extraOverrides: [...tail(), ...companyMirrorOverrides()],
+          ),
+          const Size(412, 2400),
+          'screen-company-mirror-phone-dark');
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -2295,6 +2326,7 @@ void main() {
       UserRole role = UserRole.admin,
       Brightness brightness = Brightness.dark,
       Future<void> Function(WidgetTester tester)? act,
+      List<Override> extra = const [],
     }) =>
         shoot(
           tester,
@@ -2306,7 +2338,7 @@ void main() {
             orgType: orgType,
             role: role,
             selectedRoute: selectedRoute,
-            extraOverrides: tail(),
+            extraOverrides: [...tail(), ...extra],
           ),
           size,
           name,
@@ -2777,6 +2809,99 @@ void main() {
         ),
         const Size(1600, 1800),
         'screen-request-transportation-desktop-dark',
+      );
+    });
+
+
+    // --- The last four portal leaves ---------------------------------------
+
+    testWidgets('search loads — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const PortalTonsOutSearchScreen(),
+        const Size(1600, 1400),
+        'screen-tons-out-search-desktop-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Search loads',
+        selectedRoute: '/portal/mine/tons-out-search',
+      );
+    });
+
+    testWidgets('search loads — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const PortalTonsOutSearchScreen(),
+        const Size(412, 1900),
+        'screen-tons-out-search-phone-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Search loads',
+        selectedRoute: '/portal/mine/tons-out-search',
+      );
+    });
+
+    testWidgets('transporter request tracking — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const TransporterRequestTrackingScreen(),
+        const Size(1600, 1200),
+        'screen-transporter-request-tracking-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Request tracking',
+        selectedRoute: '/portal/transporter/request-tracking',
+      );
+    });
+
+    testWidgets('transporter request tracking — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const TransporterRequestTrackingScreen(),
+        const Size(412, 1500),
+        'screen-transporter-request-tracking-phone-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Request tracking',
+        selectedRoute: '/portal/transporter/request-tracking',
+      );
+    });
+
+    // The deep-link loader for `/companies/:orgType/:id/details`, which
+    // resolves the company by id when nothing was passed in `extra`. Its own
+    // picture, because the tool that keeps this inventory could not see it
+    // either — `builder:` returns two different screens there.
+    testWidgets('company details, deep-linked — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const CompanyDetailsLoaderScreen(companyId: 'co-roadhaul'),
+        const Size(1600, 1000),
+        'screen-company-details-loader-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Companies',
+        selectedRoute: '/portal/transporter',
+      );
+    });
+
+    // `/home` — the portal's tab host. It is a `LazyIndexedStack` and nothing
+    // else, so what this picture PROVES is narrow and worth saying: that the
+    // tab bodies mount, and that the page sits on the shell's canvas rather
+    // than painting a ground of its own (it used to paint
+    // `scaffoldBackgroundColor`, one step lighter). The tab BODIES are the
+    // fixture's labelled placeholders — the real ones are the dashboards, and
+    // they have their own renders.
+    testWidgets('home tab host — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const HomeTabBodyScreen(),
+        const Size(1600, 900),
+        'screen-home-tab-host-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Dashboard',
+        selectedRoute: '/home',
+        extra: [portalWorkspaceOverride()],
       );
     });
 

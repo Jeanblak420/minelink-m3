@@ -326,9 +326,28 @@ class SuperAdminCompanyMirrorScreen extends ConsumerStatefulWidget {
 
 class _SuperAdminCompanyMirrorScreenState
     extends ConsumerState<SuperAdminCompanyMirrorScreen> {
+  /// The notifier, CAPTURED while `ref` is still usable.
+  ///
+  /// `dispose()` used to call `ref.read(...)` to get it, and Riverpod refuses
+  /// that outright: `dispose` runs from `Element.unmount`, by which point
+  /// `ConsumerStatefulElement` throws *"Bad state: Cannot use `ref` after the
+  /// widget was disposed"*. The old comment beside it shows the author had
+  /// already met the problem once and deferred the MUTATION — but the
+  /// `ref.read` that fetches the notifier is itself the forbidden call, so
+  /// leaving the mirror threw every single time.
+  ///
+  /// It is not a cosmetic throw. The reset never ran, so `mirrorCompanyId`
+  /// stayed pointing at the mirrored company after the admin navigated away —
+  /// and `companyAccessProvider` watches it, so an admin who looked at a
+  /// suspended customer kept seeing that customer's restriction notice over
+  /// their own console. Found 2026-08-21, the first time this screen was
+  /// rendered by anything.
+  StateController<String?>? _mirrorId;
+
   @override
   void initState() {
     super.initState();
+    _mirrorId = ref.read(mirrorCompanyIdProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // The frame callback can fire after a fast navigate-away has already
       // disposed this screen — using ref then throws.
@@ -339,10 +358,20 @@ class _SuperAdminCompanyMirrorScreenState
 
   @override
   void dispose() {
-    // Defer the reset — mutating a provider synchronously while the tree is
-    // mid-navigation rebuild throws ("cannot use ref after disposed").
-    final notifier = ref.read(mirrorCompanyIdProvider.notifier);
-    Future.microtask(() => notifier.state = null);
+    // Still DEFERRED: mutating a provider synchronously while the tree is
+    // mid-navigation rebuild throws for a different reason.
+    final notifier = _mirrorId;
+    if (notifier != null) {
+      Future.microtask(() {
+        // The container can outlive this screen or not; either way a disposed
+        // notifier must not be written.
+        try {
+          notifier.state = null;
+        } catch (_) {
+          // Already gone with its container — nothing to reset.
+        }
+      });
+    }
     super.dispose();
   }
 
@@ -369,8 +398,18 @@ class _SuperAdminCompanyMirrorScreenState
         final company = Company.fromJson(raw);
         final baseTabs = PortalNavigation.companyTabs(company.orgType);
         final tabs = [
+          // "Snapshot", not "Dashboard".
+          //
+          // `companyTabs` already opens with a tab called Dashboard for a
+          // buyer and for a transporter, so the mirror's own summary made the
+          // tab strip read `Dashboard · Dashboard · Routes & Mines · …` —
+          // two adjacent tabs with the same name showing different things.
+          // Photographed 2026-08-21. They are genuinely different views: this
+          // one is the PLATFORM's read of the company (its own heading says
+          // "Operational snapshot"), the next is the company's own dashboard
+          // as its staff see it, and the mirror exists to show both.
           PortalTabItem(
-            'Dashboard',
+            'Snapshot',
             Icons.grid_view_rounded,
             _MirrorDashboardTab(company: company),
           ),
@@ -595,19 +634,52 @@ class _HeroHeader extends StatelessWidget {
           borderRadius: BorderRadius.circular(MlControlRoom.rCard),
           border: Border.all(color: MlControlRoom.borderCard),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 6),
-              child: AppNavigationBackButton(),
-            ),
-            const SizedBox(width: 4),
-            Expanded(child: identity),
-            const SizedBox(width: 16),
-            actions,
-          ],
-        ),
+        // BELOW 900 THE ACTIONS GO UNDER THE TITLE, they do not sit beside it.
+        //
+        // `actions` is a `Wrap`, and a `Wrap` in a `Row` is laid out against
+        // UNBOUNDED width (CLAUDE.md §10.4) — so it claimed its natural 300px
+        // search box plus a pill plus a button, and the `Expanded` identity
+        // got what was left. At 412px that was 28px: the company name rendered
+        // ONE CHARACTER PER LINE down the side of the card, under an eyebrow
+        // reading O-R-G-A-N-I-Z-A-T-I-O-N vertically, beside 323px of
+        // yellow-and-black overflow stripes. Photographed 2026-08-21, the
+        // first time this screen was rendered at any width.
+        //
+        // `narrow` is the flag this method already computes for the title's
+        // font size; it decides the arrangement too now.
+        child: narrow
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 6),
+                        child: AppNavigationBackButton(),
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(child: identity),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  actions,
+                ],
+              )
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(top: 6),
+                    child: AppNavigationBackButton(),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(child: identity),
+                  const SizedBox(width: 16),
+                  actions,
+                ],
+              ),
       ),
     );
   }

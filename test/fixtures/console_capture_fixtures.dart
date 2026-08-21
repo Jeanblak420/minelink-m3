@@ -241,6 +241,10 @@ Map<String, dynamic> _org(
 }) =>
     {
       'id': id,
+      // The owner. Real `companies` rows have one, and the company mirror
+      // builds a whole `Company` out of this map — without it the screen
+      // crashed on `Company.fromJson`.
+      'user_id': 'u-owner-$id',
       'company_name': name,
       'org_type': type,
       'status': status,

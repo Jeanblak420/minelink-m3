@@ -126,10 +126,15 @@ void main() {
       }
     }
 
-    // `Scaffold(` without a background of its own, and any `surfaceApp` ground.
+    // `Scaffold(` without a background of its own, and any page-ground paint.
+    //
+    // THREE disguises, all found in the wild: a `Scaffold`; a
+    // `ColoredBox(color: MlSemantic.surfaceApp)`; and a `Container(color:
+    // Theme.of(context).scaffoldBackgroundColor)`, which is what `/home` did
+    // — painting the shell's own base back over the canvas the shell painted.
     final scaffoldRe = RegExp(r'\bScaffold\(');
-    final groundRe = RegExp(r'ColoredBox\(');
-    final surfaceAppRe = RegExp(r'\.surfaceApp\b');
+    final groundRe = RegExp(r'(ColoredBox|Container)\(');
+    final surfaceAppRe = RegExp(r'\.surfaceApp|scaffoldBackgroundColor');
     final okBackground = RegExp(
         r'backgroundColor:\s*(Colors\.transparent|mlWorkspaceGround\()');
 
@@ -149,8 +154,8 @@ void main() {
             continue;
           }
           final isScaffold = scaffoldRe.hasMatch(line);
-          // A `ColoredBox` only counts when `surfaceApp` is its colour: a card
-          // or a well painting a tone is not a page ground.
+          // A `ColoredBox` or `Container` only counts when a PAGE ground is
+          // its colour: a card or a well painting a tone is not one.
           final isGround = groundRe.hasMatch(line) &&
               lines
                   .sublist(i, i + 3 > lines.length ? lines.length : i + 3)
@@ -163,7 +168,7 @@ void main() {
           if (isScaffold && okBackground.hasMatch(after)) continue;
 
           final window = lines.sublist(i > 4 ? i - 4 : 0, i).join('\n');
-          final what = isScaffold ? 'Scaffold' : 'ColoredBox(surfaceApp)';
+          final what = isScaffold ? 'Scaffold' : 'page-ground paint';
           final where =
               '$screen — $what — ${found.file}:${found.firstLine + i}';
           if (window.contains(_exemptMarker)) {

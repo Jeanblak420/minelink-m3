@@ -26,6 +26,7 @@ import 'package:flutter_application_1/features/portal/models/trip_status.dart';
 import 'package:flutter_application_1/features/portal/providers/live_tracking_provider.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/account_deactivation_row.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/audit_log.dart';
+import 'package:flutter_application_1/features/super_admin/data/models/company_monthly_ops_stats.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/crash_report_row.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/organization_seat.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/serial_token.dart';
@@ -880,6 +881,47 @@ final List<DriverLimitRequest> kDriverLimitRequests = [
     decidedAt: _ago(const Duration(days: 17)),
   ),
 ];
+
+/// The company mirror, keyed to ONE organisation from the registry.
+///
+/// The mirror looks its subject up in `monthlyInsightsBundleProvider` BY
+/// COMPANY ID, and the two console fixtures use different id namespaces on
+/// purpose — the registry is `o1`..`o5`, the insight bundle is `co-t-1`..`4`.
+/// So the mirror found no stats, and its "Operational snapshot" read
+/// Employees 0 · Trips 0 · Tons 0.0t · Fleet 0 directly above a seven-day
+/// chart drawing real bars and a timeline listing five real loads. One screen
+/// contradicting itself, and none of it a product fault.
+///
+/// This re-keys one company in the bundle to the organisation being mirrored,
+/// so the whole page describes the same company.
+List<Override> companyMirrorOverrides({String companyId = 'o4'}) => [
+      monthlyInsightsBundleProvider.overrideWith((ref, _) async {
+        final base = kTransporterInsights;
+        final first = base.companies.first;
+        return MonthlyInsightsBundle(
+          aggregate: base.aggregate,
+          companies: [
+            CompanyMonthlyOpsStats(
+              companyId: companyId,
+              companyName: first.companyName,
+              orgType: first.orgType,
+              fleetVehicles: first.fleetVehicles,
+              drivers: first.drivers,
+              employees: first.employees,
+              routesDistinct: first.routesDistinct,
+              trips: first.trips,
+              loadsCount: first.loadsCount,
+              tonsMoved: first.tonsMoved,
+              completedWaybills: first.completedWaybills,
+              pendingWaybills: first.pendingWaybills,
+              onTimeTrips: first.onTimeTrips,
+              dueTrips: first.dueTrips,
+            ),
+            ...base.companies.skip(1),
+          ],
+        );
+      }),
+    ];
 
 /// The console screens that had no fixtures at all until 2026-08-21.
 ///

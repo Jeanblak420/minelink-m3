@@ -22,12 +22,15 @@ class HomeTabBodyScreen extends ConsumerWidget {
 
     final selected = idx.clamp(0, tabs.length - 1);
 
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: LazyIndexedStack(
-        index: selected,
-        children: [for (final t in tabs) t.screen],
-      ),
+    // NO GROUND OF ITS OWN. `/home` is a leaf of the portal `ShellRoute`,
+    // whose workspace canvas has already painted the page — and
+    // `scaffoldBackgroundColor` is `#0A1424`, one step lighter than the
+    // canvas's `#060B15`. Same fault as the 29 screens fixed on 2026-08-21,
+    // in a third disguise: not a `Scaffold`, not a `ColoredBox(surfaceApp)`,
+    // but a `Container` painting the shell's own base colour back over it.
+    return LazyIndexedStack(
+      index: selected,
+      children: [for (final t in tabs) t.screen],
     );
   }
 }
