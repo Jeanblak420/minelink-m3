@@ -32,6 +32,9 @@ import 'package:flutter_application_1/features/portal/models/tons_out_entry.dart
 import 'package:flutter_application_1/features/portal/models/logistics_models.dart';
 import 'package:flutter_application_1/features/portal/models/trip_waypoint.dart';
 import 'package:flutter_application_1/features/portal/models/company_location.dart';
+import 'package:flutter_application_1/features/portal/models/company_access.dart';
+import 'package:flutter_application_1/features/portal/providers/company_access_provider.dart'
+    show companyAccessProvider;
 import 'package:flutter_application_1/features/portal/models/live_trip_position.dart';
 import 'package:flutter_application_1/features/portal/models/trip_status.dart';
 import 'package:flutter_application_1/features/portal/providers/live_tracking_provider.dart';
@@ -900,6 +903,32 @@ CompanyMCP fixtureCompanyRecord({OrgType orgType = OrgType.transporter}) {
     regRef: 'FXH001',
   );
 }
+
+// ---------------------------------------------------------------------------
+// A company whose licence has lapsed
+// ---------------------------------------------------------------------------
+
+/// The state `/expired-access` exists to explain.
+///
+/// Note there are TWO `companyAccessProvider`s in this app with different
+/// types — `features/company/…` holds a `CompanyAccessContext` (the roster and
+/// permissions) and `features/portal/…` a `CompanyAccess` (whether the licence
+/// is live). `companyScopeOverrides` supplies the first; without the second
+/// `companyAccessOf` falls back to `CompanyAccess.unrestricted`, so the one
+/// screen dedicated to a lapsed licence photographs the everything-is-fine
+/// variant.
+List<Override> expiredCompanyOverride() => [
+      companyAccessProvider.overrideWith((ref) async => CompanyAccess(
+            isActive: false,
+            isPlatformAdmin: false,
+            companyId: 'FIXTURE-company',
+            companyName: 'Fixture Haulage (Pty) Ltd',
+            orgType: 'transporter',
+            status: 'expired',
+            tokenExpiresAt: _ago(const Duration(days: 12)),
+            daysSinceExpiry: 12,
+          )),
+    ];
 
 // ---------------------------------------------------------------------------
 // The live map, from ONE company's side

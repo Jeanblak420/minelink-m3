@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/auth/services/logout_service.dart';
 import 'package:flutter_application_1/features/portal/providers/company_access_provider.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -48,13 +49,20 @@ class ExpiredAccessScreen extends ConsumerWidget {
             // The licence date is the whole subject of this screen, so the
             // meta carries it rather than a count. Null when there is no
             // token on file — "Expires —" would read as a date that exists.
-            meta: access.tokenExpiresAt == null
+            meta: access.tokenExpiresLabel == null
                 ? null
                 : '${access.isRestricted ? 'Expired' : 'Expires'} '
-                    '${access.tokenExpiresAt!.toIso8601String().split('T').first}',
+                    '${access.tokenExpiresLabel}',
+            // `OrgType.labelFor`, not the raw column. `companies.org_type`
+            // stores `transporter` / `mineSupplier` / `buyer`, and this line
+            // printed it verbatim: "For Fixture Haulage (Pty) Ltd.
+            // (transporter)" — a wire value in a sentence, with the full stop
+            // stranded before the parenthetical. Fifth site of the same fault.
             description: name == null
                 ? null
-                : 'For $name.${access.orgType == null ? '' : ' (${access.orgType})'}',
+                : access.orgType == null
+                    ? 'For $name.'
+                    : 'For $name — ${OrgType.labelFor(access.orgType)}.',
           ),
 
           if (!access.isRestricted)

@@ -91,7 +91,7 @@ class _CompanySelectionScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select Your Company'),
+        title: const Text('Select your company'),
         automaticallyImplyLeading: false,
       ),
       body: state.isLoading
@@ -110,7 +110,7 @@ class _CompanySelectionScreenState
   Widget _buildEmptyState() {
     return MlEmptyState(
       icon: Icons.business_outlined,
-      title: 'No Companies Found',
+      title: 'No companies found',
       message: 'Please try again later or contact support.',
       action: MlButton.outline(
         label: 'Refresh',

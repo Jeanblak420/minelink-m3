@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
+import 'package:flutter_application_1/features/company/models/company_directory_entry.dart';
 import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 import 'package:flutter_application_1/features/auth/services/auth_service.dart';
 import 'package:flutter_application_1/features/auth/services/device_verification_store.dart';
@@ -167,6 +168,16 @@ class FixtureEmployeeNotifier extends EmployeeNotifier {
     if (_pinned) return;
     super.state = value;
   }
+
+  /// A no-op, because the real one calls the network.
+  ///
+  /// `CompanySelectionScreen` fires this from a post-frame callback, and
+  /// `listCompanyDirectory()` against the dummy Supabase instance a render
+  /// harness uses is a real socket attempt whose retry outlives the widget
+  /// tree. Pinning `state` stops the RESULT reaching the fixture; it does not
+  /// stop the CALL. Measured 2026-08-21: the render hung past two minutes.
+  @override
+  Future<void> loadAvailableCompanies() async {}
 }
 
 /// An [AuthStateNotifier] whose state cannot be cleared.
@@ -269,6 +280,7 @@ Override companyOverride({
 Override employeeOverride({
   UserRole role = UserRole.admin,
   OrgType orgType = OrgType.transporter,
+  bool withDirectory = false,
 }) {
   return employeeProvider.overrideWith((ref) => FixtureEmployeeNotifier(
         ref.watch(employeeServiceProvider),
@@ -277,9 +289,50 @@ Override employeeOverride({
         fixture: EmployeeState(
           employee: fixtureEmployee(role: role),
           company: fixtureCompany(orgType: orgType),
+          availableCompanies:
+              withDirectory ? kJoinableCompanies : const [],
         ),
       ));
 }
+
+/// What `/company-selection` lists — the companies an unlinked user may join.
+///
+/// Empty by default, because every other screen that reads `employeeProvider`
+/// has a company already and a stray directory would be noise. The selection
+/// screen asks for it: without it, the one screen whose whole design IS this
+/// list photographs its "No companies found" empty state, which CLAUDE.md
+/// §10.5 says is not the screen photographed at all.
+///
+/// One of each org type and one name long enough to make the row decide what
+/// to do about it.
+///
+/// **No `logoUrl`.** A URL that does not resolve is a tempting fixture — it is
+/// the state a broken logo is really in — but the render harness precaches
+/// every image, and a network fetch to an unreachable host does not fail fast:
+/// it hangs, and takes the whole render FILE down with it after two minutes.
+/// Measured 2026-08-21.
+const List<CompanyDirectoryEntry> kJoinableCompanies = [
+  CompanyDirectoryEntry(
+    id: 'co-transporter',
+    companyName: 'Fixture Haulage (Pty) Ltd',
+    orgType: OrgType.transporter,
+  ),
+  CompanyDirectoryEntry(
+    id: 'co-mine',
+    companyName: 'Iron Hills Mining',
+    orgType: OrgType.mineSupplier,
+  ),
+  CompanyDirectoryEntry(
+    id: 'co-buyer',
+    companyName: 'Atlas Buyer Group',
+    orgType: OrgType.buyer,
+  ),
+  CompanyDirectoryEntry(
+    id: 'co-longname',
+    companyName: 'Highveld Bulk Commodity Carriers & Logistics',
+    orgType: OrgType.transporter,
+  ),
+];
 
 /// `companyAccessProvider` is a plain `Provider`, so it can simply be handed a
 /// value.

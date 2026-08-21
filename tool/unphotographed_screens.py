@@ -53,14 +53,27 @@ def main():
                                      newline='').read())
     swept_in = '\n'.join(tests)
 
-    # The FIRST screen class named after each `builder:` — the thing that route
-    # actually builds, rather than every type mentioned nearby.
+    # EVERY screen class a `builder:` can return, not just the first one.
+    #
+    # It used to take the first match in a 900-character window, and that is
+    # wrong for any builder with a branch. `/reset-password` returns
+    # `ForgotPasswordScreen` when the URL carries no token and
+    # `ResetPasswordScreen` when it does — so the first match was the fallback,
+    # the real screen was invisible here, and the one page a customer lands on
+    # from a password-reset email counted as covered. Found 2026-08-21 while
+    # photographing that screen's neighbours.
+    #
+    # The window now ends at the next route rather than at a character count,
+    # so a long builder cannot leak into the one after it.
+    starts = [m.end() for m in
+              re.finditer(r'builder:\s*\(context,\s*state\)\s*(=>|\{)', router)]
+    bounds = [m.start() for m in re.finditer(r'\bGoRoute\(', router)]
     targets = set()
-    for m in re.finditer(r'builder:\s*\(context,\s*state\)\s*(=>|\{)', router):
-        tail = router[m.end():m.end() + 900]
-        found = re.search(r'\b([A-Z][A-Za-z0-9_]*Screen)\b', tail)
-        if found:
-            targets.add(found.group(1))
+    for pos in starts:
+        nxt = next((b for b in bounds if b > pos), len(router))
+        for name in re.findall(r'\b([A-Z][A-Za-z0-9_]*Screen)\b',
+                               router[pos:nxt]):
+            targets.add(name)
 
     photographed = set(re.findall(r'\b([A-Z][A-Za-z0-9_]*Screen)\b', renders))
     missing = sorted(targets - photographed)

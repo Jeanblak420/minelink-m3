@@ -35,6 +35,12 @@ import 'package:flutter_map/flutter_map.dart' show NetworkTileProvider;
 import 'package:flutter_application_1/core/widgets/user_identity_flyout.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/auth/screens/login_screen.dart';
+import 'package:flutter_application_1/features/auth/screens/forgot_password_screen.dart';
+import 'package:flutter_application_1/features/auth/screens/reset_password_screen.dart';
+import 'package:flutter_application_1/features/auth/screens/whatsapp_otp_screen.dart';
+import 'package:flutter_application_1/features/auth/screens/mandatory_password_change_screen.dart';
+import 'package:flutter_application_1/features/employee/screens/company_selection_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/expired_access_screen.dart';
 import 'package:flutter_application_1/features/company/screens/company_employees_screen.dart';
 import 'package:flutter_application_1/features/employee/screens/employee_profile_screen.dart';
 import 'package:flutter_application_1/features/company/screens/company_list_screen.dart';
@@ -399,6 +405,18 @@ void main() {
         ),
       );
 
+  /// One of login's neighbours, bare — these four are TOP-LEVEL routes, not
+  /// leaves of either shell, so there is no rail and no top bar around them.
+  Widget bareAuth(Widget child, {List<Override> overrides = const []}) =>
+      ProviderScope(
+        overrides: overrides,
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.build(Brightness.dark),
+          home: child,
+        ),
+      );
+
   group('auth', () {
     testWidgets('login desktop dark', (tester) async {
       await shoot(tester, login(Brightness.dark), const Size(1440, 1000),
@@ -407,6 +425,84 @@ void main() {
     testWidgets('login phone dark', (tester) async {
       await shoot(tester, login(Brightness.dark), const Size(412, 915),
           'login-phone-dark');
+    });
+
+    // LOGIN'S NEIGHBOURS.
+    //
+    // Every one of these is reached by somebody who is already stuck — locked
+    // out, mid-recovery, or holding a password they were told to change — and
+    // none of them had ever been rendered at any width.
+
+    testWidgets('forgot password — phone dark', (tester) async {
+      await shoot(tester, bareAuth(const ForgotPasswordScreen()),
+          const Size(412, 915), 'screen-forgot-password-phone-dark');
+    });
+
+    testWidgets('forgot password — desktop dark', (tester) async {
+      await shoot(tester, bareAuth(const ForgotPasswordScreen()),
+          const Size(1440, 900), 'screen-forgot-password-desktop-dark');
+    });
+
+    testWidgets('whatsapp otp — phone dark', (tester) async {
+      await shoot(
+          tester,
+          bareAuth(const WhatsAppOtpScreen(whatsappNumber: '+27 82 000 0001')),
+          const Size(412, 915),
+          'screen-whatsapp-otp-phone-dark');
+    });
+
+    testWidgets('mandatory password change — phone dark', (tester) async {
+      await shoot(tester, bareAuth(const MandatoryPasswordChangeScreen()),
+          const Size(412, 915), 'screen-mandatory-password-change-phone-dark');
+    });
+
+    // THE PAGE A CUSTOMER LANDS ON FROM A PASSWORD-RESET EMAIL.
+    //
+    // It had never been rendered and no test mentioned it, and it was
+    // invisible to `tool/unphotographed_screens.py` too: `/reset-password`
+    // returns `ForgotPasswordScreen` when the URL carries no token, and the
+    // tool took the first screen class it found after `builder:`. The tool
+    // reads the whole builder now.
+    testWidgets('reset password — phone dark', (tester) async {
+      await shoot(
+          tester,
+          bareAuth(const ResetPasswordScreen(resetToken: 'FIXTURE-token')),
+          const Size(412, 915),
+          'screen-reset-password-phone-dark');
+    });
+
+    testWidgets('reset password — desktop dark', (tester) async {
+      await shoot(
+          tester,
+          bareAuth(const ResetPasswordScreen(resetToken: 'FIXTURE-token')),
+          const Size(1440, 900),
+          'screen-reset-password-desktop-dark');
+    });
+
+    testWidgets('company selection — phone dark', (tester) async {
+      await shoot(
+          tester,
+          bareAuth(const CompanySelectionScreen(), overrides: [
+            authOverride(),
+            // `withDirectory` — WITHOUT it this photographs "No companies
+            // found", and a screen whose whole design is a list of companies
+            // is not photographed by a picture of it having none.
+            employeeOverride(withDirectory: true),
+          ]),
+          const Size(412, 915),
+          'screen-company-selection-phone-dark');
+    });
+
+    // The empty state as well, which is a real state: an account whose
+    // WhatsApp number is on no company's roster.
+    testWidgets('company selection, nothing to join — phone dark',
+        (tester) async {
+      await shoot(
+          tester,
+          bareAuth(const CompanySelectionScreen(),
+              overrides: companyScopeOverrides()),
+          const Size(412, 915),
+          'screen-company-selection-empty-phone-dark');
     });
   });
 
@@ -2611,6 +2707,62 @@ void main() {
     // never been rendered at any width by anything. Three of them had their
     // own `Scaffold(appBar:)` removed in the previous commit on the strength
     // of reading the router, with no picture taken afterwards.
+
+    // The licence pages. `/expired-access` is a leaf of the portal shell and
+    // is where "What does this mean?" leads from the notice bar — the one
+    // screen dedicated to explaining a lapsed token, and it had no picture in
+    // either of its two states.
+    testWidgets('expired access, lapsed — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const ExpiredAccessScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Access expired',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+          extraOverrides: [...tail(), ...expiredCompanyOverride()],
+        ),
+        const Size(1600, 1000),
+        'screen-expired-access-desktop-dark',
+      );
+    });
+
+    testWidgets('expired access, lapsed — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const ExpiredAccessScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Access expired',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+          extraOverrides: [...tail(), ...expiredCompanyOverride()],
+        ),
+        const Size(412, 1400),
+        'screen-expired-access-phone-dark',
+      );
+    });
+
+    // …and the same page for a company whose licence is fine, which is what
+    // anybody who taps through out of curiosity gets.
+    testWidgets('expired access, in good standing — desktop dark',
+        (tester) async {
+      await shootPortal(
+        tester,
+        const ExpiredAccessScreen(),
+        const Size(1600, 1000),
+        'screen-expired-access-ok-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Access expired',
+        selectedRoute: '/portal/transporter',
+      );
+    });
 
     testWidgets('company registry — desktop dark', (tester) async {
       await shootPortal(

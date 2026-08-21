@@ -71,7 +71,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthShell(
-      title: _emailSent ? 'Check Your Email' : 'Forgot Password?',
+      // SENTENCE case, like every other screen a signed-out user sees.
+      //
+      // Login says "Welcome back" / "Sign in" / "Sign in with WhatsApp code";
+      // the OTP screen says "Enter the code we sent on WhatsApp" / "Verify &
+      // continue"; the mandatory change says "Set a new password" /
+      // "Continue". Only the two `AuthShell` screens were in Title Case —
+      // "Forgot Password?", "Check Your Email", "Send Reset Instructions",
+      // "Return to Login", "Create New Password", "Go to Login" — which is a
+      // different product's voice on the two pages somebody reaches when they
+      // are already locked out.
+      title: _emailSent ? 'Check your email' : 'Forgot your password?',
       subtitle: _emailSent
           ? 'We sent a secure reset link to your email address.'
           : 'Enter the email address linked to your account and we’ll send you password reset instructions.',
@@ -123,7 +133,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 ),
               ),
             MlButton.primary(
-              label: _isLoading ? 'Sending…' : 'Send Reset Instructions',
+              label: _isLoading ? 'Sending…' : 'Send reset instructions',
               expand: true,
               onPressed: _isLoading ? null : _submit,
             ),
@@ -157,7 +167,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 24),
         MlButton.primary(
-          label: 'Return to Login',
+          label: 'Back to sign in',
           expand: true,
           onPressed: () => AppRouter.router.go('/login'),
         ),

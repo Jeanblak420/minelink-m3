@@ -117,6 +117,17 @@ class CompanyAccess {
     return 'Unavailable while your access is limited.';
   }
 
+  /// The licence date as this product says it, or null when there is no token
+  /// on file.
+  ///
+  /// Public because the expired-access SCREEN prints the same date, and it was
+  /// printing `tokenExpiresAt!.toIso8601String().split('T').first` — so one
+  /// page carried "Expired 2026-08-15" in its meta line and "Your token
+  /// expired on 15 August 2026" in the paragraph underneath it. A machine date
+  /// and a written one, for the same day, six lines apart.
+  String? get tokenExpiresLabel =>
+      tokenExpiresAt == null ? null : _formatDate(tokenExpiresAt!);
+
   /// `2026-04-23` → `23 April 2026`. Local formatting rather than `intl` so the
   /// model stays dependency-free and usable from a test without a locale.
   static String _formatDate(DateTime d) {

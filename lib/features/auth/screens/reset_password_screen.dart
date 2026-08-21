@@ -109,7 +109,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthShell(
-      title: _resetSuccess ? 'Password Updated' : 'Create New Password',
+      title: _resetSuccess ? 'Password updated' : 'Create a new password',
       subtitle: _resetSuccess
           ? 'Your password has been reset. You can sign in again now.'
           : 'Choose a strong password for your account.',
@@ -129,7 +129,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             TextFormField(
               controller: _passwordController,
               decoration: InputDecoration(
-                labelText: 'New Password',
+                labelText: 'New password',
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -150,7 +150,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             TextFormField(
               controller: _confirmPasswordController,
               decoration: InputDecoration(
-                labelText: 'Confirm New Password',
+                labelText: 'Confirm new password',
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -203,7 +203,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 ),
               ),
             MlButton.primary(
-              label: _isLoading ? 'Resetting…' : 'Reset Password',
+              label: _isLoading ? 'Resetting…' : 'Reset password',
               expand: true,
               onPressed: _isLoading ? null : _submit,
             ),
@@ -231,7 +231,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
         ),
         const SizedBox(height: 24),
         MlButton.primary(
-          label: 'Go to Login',
+          label: 'Back to sign in',
           expand: true,
           onPressed: () => AppRouter.router.go('/login'),
         ),
