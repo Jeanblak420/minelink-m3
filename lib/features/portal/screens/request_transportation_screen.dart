@@ -245,8 +245,16 @@ class _RequestTransportationScreenState
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+        // TOP-LEFT, not top-centre.
+        //
+        // The AppBar's title sits at the left edge of the page, and this form
+        // sat centred in a 1600px window — a heading over nothing with its
+        // form 440px to the right of it. Every other form page in this
+        // product left-aligns its column: the register-a-company page, the
+        // company profile, the whole portal through `MlPageBody`. Photographed
+        // 2026-08-21 on `screen-request-transportation-desktop-dark`.
         child: Align(
-          alignment: Alignment.topCenter,
+          alignment: Alignment.topLeft,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
             child: Form(

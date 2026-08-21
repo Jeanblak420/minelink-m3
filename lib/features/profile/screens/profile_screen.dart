@@ -467,14 +467,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 CircleAvatar(
                   radius: 60,
-                  backgroundColor: Colors.transparent,
+                  // A WELL, not `Colors.transparent`.
+                  //
+                  // With no logo set, a transparent avatar behind a grey
+                  // building glyph is not an empty avatar — it is a naked icon
+                  // floating in the middle of the page with a cyan camera
+                  // badge stuck to it, and it reads as a broken image.
+                  // Photographed 2026-08-21 on
+                  // `screen-profile-desktop-dark`. The tinted circle is the
+                  // same well every other empty identity in this product uses.
+                  backgroundColor: MlTone.accent.well(
+                    Theme.of(context).brightness,
+                  ),
                   backgroundImage: _getCompanyImageProvider(company),
                   child:
                       company.logoUrl == null &&
                           _imageFile == null &&
                           _webImageBytes == null
                       ? Icon(Icons.business,
-                          size: 60, color: MlSemantic.of(context).textFaint)
+                          size: 52, color: MlTokens.accent)
                       : null,
                 ),
                 Positioned(
@@ -738,14 +749,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 CircleAvatar(
                   radius: 60,
-                  backgroundColor: Colors.transparent,
+                  // The person's half of the same control — see the company
+                  // logo above for why a transparent avatar behind a grey
+                  // glyph reads as a broken image rather than as an empty one.
+                  backgroundColor: MlTone.accent.well(
+                    Theme.of(context).brightness,
+                  ),
                   backgroundImage: _getEmployeeImageProvider(employee),
                   child:
                       employee.profilePhotoUrl == null &&
                           _imageFile == null &&
                           _webImageBytes == null
-                      ? Icon(Icons.person,
-                          size: 60, color: MlSemantic.of(context).textFaint)
+                      ? Icon(Icons.person, size: 52, color: MlTokens.accent)
                       : null,
                 ),
                 Positioned(
