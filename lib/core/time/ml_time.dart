@@ -219,6 +219,25 @@ abstract final class MlTime {
   /// [stamp] without the time — `15 Aug 2026`.
   static String day(DateTime instant) => _dayMonthYear.format(sast(instant));
 
+  /// A compact day for a LIST — `15 Aug`, or `10 Feb 2025` when the date is
+  /// not in the current South African year.
+  ///
+  /// The year is the part that cannot be dropped unconditionally. A mine's
+  /// "Recent waybills" card printed `dd MMM` for every row, and its last two
+  /// rows read "28 Jan" then "10 Feb" — correctly sorted, because the second
+  /// is 2025, and completely unreadable as such. A list that can span a year
+  /// boundary has to say when it does.
+  ///
+  /// [asOf] is for tests and for a caller that has already resolved "now";
+  /// it defaults to the product's clock, never the device's.
+  static String listDay(DateTime instant, {DateTime? asOf}) {
+    final local = sast(instant);
+    final today = asOf == null ? now() : sast(asOf);
+    return local.year == today.year
+        ? _dayMonth.format(local)
+        : _dayMonthYear.format(local);
+  }
+
   /// [stamp] without the date — `09:30`. For a column whose rows are already
   /// grouped by day.
   static String clock(DateTime instant) => _clock.format(sast(instant));

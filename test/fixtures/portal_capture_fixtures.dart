@@ -881,12 +881,26 @@ final List<TripEarning> kTripEarnings = [
     updatedAt: _ago(const Duration(hours: 5)),
     reference: 'TRP-000123',
     truckReg: 'CK 84 RT GP',
+    // The ids the earnings rollups group by. Without them both trips fell
+    // into ONE bucket keyed '—' on the By-vehicle panel (two trucks shown as
+    // one vehicle) and into TWO buckets keyed by trip id on By-route (one lane
+    // shown as two routes with one trip each).
+    vehicleId: 'veh-1',
+    routeId: 'rt-0042',
     commodity: 'Chrome',
     customerName: 'Atlas Buyer Group',
     sourceName: 'Iron Hills Mining',
     netTons: 36.22,
     ratePerTon: 410,
     revenue: 14850.20,
+    // A real P&L, not three zeroes and a null. The earnings screen showed
+    // "R14,850 / R0 / —" — a revenue, a zero cost and no net, which is a row
+    // whose own arithmetic the reader can do and the screen cannot.
+    // `list_transporter_trip_pnl` returns all four; the fixture returned one.
+    directCost: 4120.00,
+    allocatedCost: 1860.50,
+    totalCost: 5980.50,
+    net: 8869.70,
     status: 'completed',
   ),
   TripEarning(
@@ -895,12 +909,18 @@ final List<TripEarning> kTripEarnings = [
     updatedAt: _ago(const Duration(hours: 2)),
     reference: 'TRP-000124',
     truckReg: 'JD 22 PL MP',
+    vehicleId: 'veh-2',
+    routeId: 'rt-0042',
     commodity: 'Chrome',
     customerName: 'Atlas Buyer Group',
     sourceName: 'Iron Hills Mining',
     netTons: 34.90,
     ratePerTon: 410,
     revenue: 14309.00,
+    directCost: 3980.00,
+    allocatedCost: 1792.30,
+    totalCost: 5772.30,
+    net: 8536.70,
     status: 'completed',
   ),
 ];
@@ -1042,6 +1062,22 @@ final List<ReconDispute> kDisputes = [
     updatedAt: _ago(const Duration(hours: 3)),
     claimedTons: 0.42,
     reference: 'TRP-000123',
+    // The parties, the weights and the person who raised it.
+    //
+    // Without them the card photographed as "— → —", "Variance —" and
+    // "By —" — three em-dashes where a mine, a buyer, a figure and a name
+    // belong, on the screen whose entire job is to say who disagrees with whom
+    // about how much. `ReconDispute` carries all of it; the fixture simply
+    // did not fill any of it in, and an honest-looking blank reads as a
+    // product fault rather than a missing fixture.
+    truckReg: 'CK 84 RT GP',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Atlas Buyer Group',
+    transporterName: 'Roadhaul Logistics',
+    mineNetTons: 36.22,
+    deliveredTons: 35.80,
+    variance: -0.42,
+    raisedByName: 'Thandi Mokoena',
   ),
 ];
 

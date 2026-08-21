@@ -173,8 +173,18 @@ class _EarningsBody extends StatelessWidget {
       final rid = t.routeId ?? t.tripId;
       final agg = byRoute.putIfAbsent(
         rid,
+        // SOURCE → CUSTOMER, not commodity → customer.
+        //
+        // This column is headed ROUTE, and a route in MineLink is a lane
+        // between two places (CLAUDE.md §4: loading point → offloading point,
+        // SOURCE and CUSTOMER in the recon table). Labelling it by commodity
+        // made two genuinely different routes render as the same string:
+        // photographed 2026-08-21, this table showed "Chrome → Atlas Buyer
+        // Group" twice, once for each of two separate routes, with no way to
+        // tell which earned what.
         () => _RouteAgg(
-          label: '${t.commodity ?? 'Load'} → ${t.customerName ?? '—'}',
+          label: '${t.sourceName ?? '—'} → ${t.customerName ?? '—'}',
+          commodity: t.commodity,
         ),
       );
       agg.trips++;
@@ -312,7 +322,7 @@ class _EarningsBody extends StatelessWidget {
             rows: [
               for (final r in routeRows)
                 [
-                  _text(context, r.label),
+                  _laneCell(context, r),
                   _mono(context, '${r.trips}'),
                   _mono(context, EarningsScreen._tons(r.tons)),
                   _mono(context, money(r.revenue)),
@@ -404,7 +414,22 @@ class _EarningsBody extends StatelessWidget {
                       _mono(context, EarningsScreen._tons(t.netTons ?? 0)),
                       _mono(context, money(t.revenue)),
                       _mono(context, money(t.totalCost), muted: true),
-                      _mono(context, money(t.net), strong: true),
+                      // `net`, or the subtraction the row is already showing.
+                      //
+                      // `net` is revenue − total cost and the server computes
+                      // it, but a row that prints a revenue AND a cost and
+                      // then a dash for their difference is unreadable: the
+                      // reader can do the arithmetic and the screen cannot.
+                      // The fallback only fires when the revenue is known, so
+                      // a genuinely unknown trip still says so.
+                      _mono(
+                        context,
+                        money(t.net ??
+                            (t.revenue == null
+                                ? null
+                                : t.revenue! - t.totalCost)),
+                        strong: true,
+                      ),
                     ],
                 ],
               ),
@@ -419,6 +444,37 @@ class _EarningsBody extends StatelessWidget {
     alignment: Alignment.centerLeft,
     child: MlPlatePill(reg, fontSize: 12),
   );
+
+  /// A lane and what travels it: "Iron Hills Mining → Atlas Buyer Group" over
+  /// "Chrome".
+  Widget _laneCell(BuildContext context, _RouteAgg r) {
+    final semantic = MlSemantic.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          r.label,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: context.mlText.bodyMedium.copyWith(
+            color: semantic.textBody,
+          ),
+        ),
+        if (r.commodity != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            r.commodity!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.mlText.bodySmall.copyWith(
+              color: semantic.textFaint,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 
   Widget _text(BuildContext context, String s) => Text(
     s,
@@ -456,11 +512,15 @@ class _VehAgg {
 }
 
 class _RouteAgg {
+  /// The LANE — "Iron Hills Mining → Atlas Buyer Group".
   final String label;
+
+  /// What travels it. A separate line, not part of the lane's name.
+  final String? commodity;
   int trips = 0;
   double tons = 0;
   double revenue = 0;
-  _RouteAgg({required this.label});
+  _RouteAgg({required this.label, this.commodity});
 }
 
 class _SectionCard extends StatelessWidget {

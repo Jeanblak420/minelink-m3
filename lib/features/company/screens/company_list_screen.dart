@@ -176,35 +176,83 @@ class CompanyDetailsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          MlPageHeader(
-            title: company.companyName,
-            // The org TYPE, in English. `company.orgType.name` is the enum's
-            // wire spelling — this meta line read "transporter" and
-            // "mineSupplier" on a company's own profile.
-            meta: company.orgType.label,
-          ),
-          const SizedBox(height: 16),
-          // Company logo
-          Center(
-            child: CircleAvatar(
-              radius: 60,
-              backgroundColor: MlTone.accent.well(
-                Theme.of(context).brightness,
+          // NO `MlPageHeader` — the identity row below IS the header.
+          //
+          // The shell's top bar already carries the company's name (see the
+          // note above about the removed AppBar), so a page header, an
+          // identity row and a "Company Name" row would have printed it four
+          // times on one screen. The org TYPE it used to carry moved into the
+          // identity row's sub-line, beside the MineLink reference.
+          //
+          // The logo BESIDE the identity, and the details inside a card.
+          //
+          // This was a 120px `Center`ed avatar floating alone in the middle of
+          // a 1,000px column, with a left-aligned label/value list under it and
+          // no card around anything. On a desktop it read as a circle in a
+          // no-man's-land: photographed 2026-08-21 on
+          // `screen-company-details-desktop-dark`, and it is the one screen in
+          // the set that never got the redesign's card vocabulary.
+          //
+          // An identity row is what every other detail screen in this product
+          // uses — the organization detail page, the company mirror, the
+          // employee profile.
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 34,
+                backgroundColor: MlTone.accent.well(
+                  Theme.of(context).brightness,
+                ),
+                backgroundImage: imageProviderFromString(company.logoUrl),
+                child: company.logoUrl == null
+                    ? const Icon(Icons.business,
+                        size: 32, color: MlTokens.accent)
+                    : null,
               ),
-              backgroundImage: imageProviderFromString(company.logoUrl),
-              child: company.logoUrl == null
-                  ? const Icon(Icons.business, size: 60, color: MlTokens.accent)
-                  : null,
-            ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      company.companyName,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.mlText.titleLarge.copyWith(
+                        color: MlSemantic.of(context).textStrong,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      company.regRef == null
+                          ? company.orgType.label
+                          : '${company.orgType.label}  ·  ${company.regRef}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.mlText.bodyMedium.copyWith(
+                        color: MlSemantic.of(context).textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           // Company information
           MlSectionTitle(
             'Company Information',
             icon: Icons.business_outlined,
           ),
-          _buildInfoItem(context, 'Company Name', company.companyName),
+          MlCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildInfoItem(context, 'Company Name', company.companyName),
           // S8-11. The permanent, system-issued reference. Shown first
           // because it is the thing to quote in a support call — and shown
           // read-only because it is issued and immutable in the database
@@ -229,10 +277,14 @@ class CompanyDetailsScreen extends StatelessWidget {
           // an eighth spelling of a moment in time, it printed the RAW
           // instant with no conversion to the mine's clock, and it did not pad
           // the hour — so a company created at 09:05 SAST read "7:5".
-          _buildInfoItem(context, 'Created At', MlTime.stamp(company.createdAt)),
-          if (company.updatedAt != null)
-            _buildInfoItem(
-                context, 'Last Updated', MlTime.stamp(company.updatedAt!)),
+                _buildInfoItem(
+                    context, 'Created At', MlTime.stamp(company.createdAt)),
+                if (company.updatedAt != null)
+                  _buildInfoItem(
+                      context, 'Last Updated', MlTime.stamp(company.updatedAt!)),
+              ],
+            ),
+          ),
           const SizedBox(height: 60),
         ],
       ),

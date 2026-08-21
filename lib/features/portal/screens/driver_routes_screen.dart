@@ -697,11 +697,6 @@ class _RecentTripsCard extends ConsumerWidget {
     required this.requestFor,
   });
 
-  static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ];
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final semantic = MlSemantic.of(context);
@@ -736,10 +731,13 @@ class _RecentTripsCard extends ConsumerWidget {
       {required bool divided, String? podPhotoPath}) {
     final semantic = MlSemantic.of(context);
     final req = requestFor(t);
-    final d = MlTime.sast(t.updatedAt);
-    final date = '${d.day} ${_months[d.month - 1]} ${d.year}';
-    final time =
-        '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+    // `MlTime.day` and `MlTime.clock`, not a private month table and a
+    // hand-padded clock. This was the fourth copy of the same date formatter
+    // in `lib/`, and the only one of the four that kept the year — so the
+    // driver's history and the three dashboards spelled the same moment two
+    // different ways.
+    final date = MlTime.day(t.updatedAt);
+    final time = MlTime.clock(t.updatedAt);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: divided

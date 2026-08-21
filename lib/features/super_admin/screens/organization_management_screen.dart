@@ -762,17 +762,34 @@ class _OrganizationManagementScreenState
         child: Container(
           constraints: const BoxConstraints(minWidth: 34),
           height: 34,
-          alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
             borderRadius: MlShape.radiusMedium,
             border: Border.all(color: selected ? accent : s.borderCard),
           ),
-          child: Text(
-            '$p',
-            style: context.mlText.titleSmall.copyWith(
-              color: selected ? MlTokens.inkOnFill : s.textBody,
-              fontWeight: FontWeight.w700,
+          // `Align(widthFactor: 1)`, NOT `Container(alignment:)`.
+          //
+          // A Container given an alignment lays its child out inside an
+          // `Align`, and an `Align` with no `widthFactor` takes the largest
+          // size its constraints allow. This one sits in a `Wrap`, which hands
+          // every child the WHOLE footer as its maximum — so the selected page
+          // button was drawn as a 1,200px cyan bar across the register with a
+          // "1" in the middle of it, and the two chevrons wrapped onto lines of
+          // their own above and below it.
+          //
+          // Photographed 2026-08-21 on `screen-organizations-desktop-light`.
+          // It was in the dark render too, at every width, for as long as the
+          // pager has existed — a picture nobody had read.
+          child: Align(
+            alignment: Alignment.center,
+            widthFactor: 1,
+            heightFactor: 1,
+            child: Text(
+              '$p',
+              style: context.mlText.titleSmall.copyWith(
+                color: selected ? MlTokens.inkOnFill : s.textBody,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),

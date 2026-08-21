@@ -433,6 +433,25 @@ void main() {
     );
   }
 
+  /// Every portal fixture there is: the tail set first, the capture set on top.
+  ///
+  /// Both lists exist and neither is a superset. A render that passed only
+  /// `portalCaptureOverrides()` left every provider that lives in the tail set
+  /// UNOVERRIDDEN — reaching a real Supabase client, failing, and photographing
+  /// a zero or an "Unknown company" as though the product had produced it.
+  /// Three reconciliation renders read "Unknown company → Unknown company" that
+  /// way, and the earnings screen printed "Costs R0" beside two trips that had
+  /// costs.
+  ///
+  /// ORDER MATTERS AND THIS ORDER IS DELIBERATE: where both lists override the
+  /// same provider the LAST one wins, so the capture set — the one these
+  /// renders were built against — keeps its value, and the tail set only fills
+  /// what nothing else was answering.
+  List<Override> allPortalOverrides() => [
+        ...portalTailOverrides(),
+        ...portalCaptureOverrides(),
+      ];
+
   /// A portal shell for one org type and role.
   ///
   /// The BODY is deliberately an empty-state placeholder rather than a real
@@ -786,7 +805,7 @@ void main() {
           // `vehicleDriversProvider` reject, every truck renders "Unassigned"
           // and the on-route/in-maintenance treatments — the derived states
           // CLAUDE.md §4 describes — are absent from the picture entirely.
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1400),
         'screen-fleet-desktop-dark',
@@ -809,7 +828,7 @@ void main() {
           // `vehicleDriversProvider` reject, every truck renders "Unassigned"
           // and the on-route/in-maintenance treatments — the derived states
           // CLAUDE.md §4 describes — are absent from the picture entirely.
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1400),
         'screen-fleet-desktop-light',
@@ -905,7 +924,7 @@ void main() {
           orgType: OrgType.transporter,
           role: UserRole.admin,
           selectedRoute: '/portal/transporter',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 1536),
         'screen-fleet-phone-dark',
@@ -968,7 +987,7 @@ void main() {
           orgType: OrgType.mineSupplier,
           role: UserRole.admin,
           selectedRoute: '/portal/mine/production',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 2000),
         'screen-mine-production-desktop-dark',
@@ -986,7 +1005,7 @@ void main() {
           orgType: OrgType.mineSupplier,
           role: UserRole.admin,
           selectedRoute: '/portal/mine/quality',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1500),
         'screen-mine-quality-desktop-dark',
@@ -1006,7 +1025,7 @@ void main() {
           orgType: OrgType.mineSupplier,
           role: UserRole.supervisorForeman,
           selectedRoute: '/portal/mine/stockpiles',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1600),
         'screen-supervisor-stockpiles-desktop-dark',
@@ -1025,7 +1044,7 @@ void main() {
           orgType: OrgType.transporter,
           role: UserRole.admin,
           selectedRoute: '/portal/transporter/routes',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1500),
         'screen-transporter-routes-desktop-dark',
@@ -1043,7 +1062,7 @@ void main() {
           orgType: OrgType.transporter,
           role: UserRole.admin,
           selectedRoute: '/portal/transporter/maintenance',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1600),
         'screen-transporter-maintenance-desktop-dark',
@@ -1061,7 +1080,7 @@ void main() {
           orgType: OrgType.transporter,
           role: UserRole.admin,
           selectedRoute: '/portal/transporter/earnings',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1900),
         'screen-earnings-desktop-dark',
@@ -1081,7 +1100,7 @@ void main() {
           orgType: OrgType.buyer,
           role: UserRole.admin,
           selectedRoute: '/portal/buyer/loads-value',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1700),
         'screen-buyer-loads-value-desktop-light',
@@ -1099,7 +1118,7 @@ void main() {
           orgType: OrgType.transporter,
           role: UserRole.admin,
           selectedRoute: '/portal/transporter/trucks',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 1044),
         'screen-trucks-on-route-phone-dark',
@@ -1138,7 +1157,7 @@ void main() {
           orgType: OrgType.mineSupplier,
           role: UserRole.security,
           selectedRoute: '/portal/mine/gate',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 2151),
         'screen-security-checkin-phone-dark',
@@ -1160,7 +1179,7 @@ void main() {
           orgType: OrgType.mineSupplier,
           role: UserRole.security,
           selectedRoute: '/portal/mine/gate',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1400, 1600),
         'screen-security-checkin-desktop-dark',
@@ -1178,7 +1197,7 @@ void main() {
           orgType: OrgType.mineSupplier,
           role: UserRole.controllerWB,
           selectedRoute: '/portal/mine/weighbridge',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1500),
         'screen-load-controller-desktop-dark',
@@ -1196,7 +1215,7 @@ void main() {
           orgType: OrgType.mineSupplier,
           role: UserRole.controllerWB,
           selectedRoute: '/portal/mine/weighbridge',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1500),
         'screen-load-controller-desktop-light',
@@ -1214,7 +1233,7 @@ void main() {
           orgType: OrgType.mineSupplier,
           role: UserRole.controllerWB,
           selectedRoute: '/portal/mine/weighbridge',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 1681),
         'screen-load-controller-phone-dark',
@@ -1243,7 +1262,7 @@ void main() {
         console(
           brightness: Brightness.dark,
           body: const ReconTablesScreen(),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1700),
         'screen-recon-tables-desktop-dark',
@@ -1256,7 +1275,7 @@ void main() {
         console(
           brightness: Brightness.light,
           body: const ReconTablesScreen(),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1700),
         'screen-recon-tables-desktop-light',
@@ -1269,7 +1288,7 @@ void main() {
         console(
           brightness: Brightness.dark,
           body: const ReconTablesScreen(),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 2327),
         'screen-recon-tables-phone-dark',
@@ -1290,7 +1309,7 @@ void main() {
           // The TAIL overrides too: the reconciliation screens read
           // `partnerCompaniesProvider` to turn party ids into names, and
           // without it every card read "Unknown company".
-          extraOverrides: [...portalCaptureOverrides(), ...portalTailOverrides()],
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1700),
         'screen-mine-reconciliations-desktop-dark',
@@ -1313,7 +1332,7 @@ void main() {
           // The TAIL overrides too: the reconciliation screens read
           // `partnerCompaniesProvider` to turn party ids into names, and
           // without it every card read "Unknown company".
-          extraOverrides: [...portalCaptureOverrides(), ...portalTailOverrides()],
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1500),
         'screen-transporter-reconciliations-desktop-light',
@@ -1334,7 +1353,7 @@ void main() {
           // The TAIL overrides too: the reconciliation screens read
           // `partnerCompaniesProvider` to turn party ids into names, and
           // without it every card read "Unknown company".
-          extraOverrides: [...portalCaptureOverrides(), ...portalTailOverrides()],
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 4322),
         'screen-buyer-reconciliations-phone-dark',
@@ -1375,7 +1394,7 @@ void main() {
           orgType: OrgType.transporter,
           role: UserRole.admin,
           selectedRoute: '/portal/transporter',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1900),
         'dash-transporter-desktop-dark',
@@ -1393,7 +1412,7 @@ void main() {
           orgType: OrgType.mineSupplier,
           role: UserRole.admin,
           selectedRoute: '/portal/mine',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1900),
         'dash-mine-desktop-dark',
@@ -1414,7 +1433,7 @@ void main() {
           orgType: OrgType.buyer,
           role: UserRole.admin,
           selectedRoute: '/portal/buyer',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1900),
         'dash-buyer-desktop-light',
@@ -1438,7 +1457,7 @@ void main() {
           orgType: OrgType.transporter,
           role: UserRole.admin,
           selectedRoute: '/portal/transporter',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 2916),
         'dash-transporter-phone-dark',
@@ -1456,7 +1475,7 @@ void main() {
           orgType: OrgType.mineSupplier,
           role: UserRole.admin,
           selectedRoute: '/portal/mine',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 3259),
         'dash-mine-phone-dark',
@@ -1474,7 +1493,7 @@ void main() {
           orgType: OrgType.buyer,
           role: UserRole.admin,
           selectedRoute: '/portal/buyer',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 2851),
         'dash-buyer-phone-light',
@@ -1494,7 +1513,7 @@ void main() {
           orgType: OrgType.transporter,
           role: UserRole.driver,
           selectedRoute: '/portal/driver',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 1078),
         'dash-driver-trip-phone-dark',
@@ -1512,7 +1531,7 @@ void main() {
           orgType: OrgType.transporter,
           role: UserRole.driver,
           selectedRoute: '/portal/driver',
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 1078),
         'dash-driver-trip-phone-light',
@@ -1984,7 +2003,7 @@ void main() {
           brightness: Brightness.dark,
           body: const RequestReviewScreen(
               requestType: 'transportation', origin: 'mine'),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1700),
         'screen-requests-mine-transport-desktop-dark',
@@ -1998,7 +2017,7 @@ void main() {
           brightness: Brightness.dark,
           body: const RequestReviewScreen(
               requestType: 'transportation', origin: 'buyer'),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1700),
         'screen-requests-buyer-transport-desktop-dark',
@@ -2011,7 +2030,7 @@ void main() {
         console(
           brightness: Brightness.dark,
           body: const RequestReviewScreen(requestType: 'product'),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1500),
         'screen-requests-product-desktop-dark',
@@ -2027,7 +2046,7 @@ void main() {
         console(
           brightness: Brightness.dark,
           body: const RequestReviewScreen(requestType: 'buyer'),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1500),
         'screen-requests-buyers-desktop-dark',
@@ -2050,7 +2069,7 @@ void main() {
           brightness: Brightness.dark,
           body: const RequestReviewScreen(
               requestType: 'transportation', origin: 'buyer'),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 2000),
         'screen-request-detail-desktop-dark',
@@ -2238,7 +2257,7 @@ void main() {
           brightness: Brightness.dark,
           body: const RequestReviewScreen(
               requestType: 'transportation', origin: 'mine'),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 915),
         'screen-requests-mine-transport-phone-dark',
@@ -2264,7 +2283,7 @@ void main() {
         console(
           brightness: Brightness.dark,
           body: const TargetsPlatformScreen(),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1900),
         'screen-targets-platform-desktop-dark',
@@ -2277,7 +2296,7 @@ void main() {
         console(
           brightness: Brightness.light,
           body: const TargetsPlatformScreen(),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1900),
         'screen-targets-platform-desktop-light',
@@ -2294,7 +2313,7 @@ void main() {
         console(
           brightness: Brightness.dark,
           body: const TargetsPlatformScreen(),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 4407),
         'screen-targets-platform-phone-dark',
@@ -2442,7 +2461,7 @@ void main() {
         console(
           brightness: Brightness.dark,
           body: const DisputeInboxScreen(),
-          extraOverrides: portalCaptureOverrides(),
+          extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1400),
         'screen-disputes-desktop-dark',

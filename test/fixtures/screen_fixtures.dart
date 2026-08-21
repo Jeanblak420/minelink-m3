@@ -40,7 +40,14 @@ import 'package:flutter_application_1/features/profile/providers/account_email_p
 import 'package:flutter_application_1/features/profile_setup/models/profile_setup.dart';
 import 'package:flutter_application_1/features/profile_setup/providers/profile_setup_provider.dart';
 
-final DateTime _fixtureDate = DateTime.utc(2020, 1, 1);
+/// The date this fixture company and its people were registered.
+///
+/// 2024, not 2020-01-01. It is DISPLAYED — the company profile's "Created At"
+/// row shows it in a card, and a platform whose today is August 2026 showing a
+/// company created "01 Jan 2020 · 02:00" reads as an epoch default rather than
+/// a registration. A believable date costs nothing and stops the picture
+/// lying.
+final DateTime _fixtureDate = DateTime.utc(2024, 3, 18, 7, 40);
 
 /// A transporter by default, because that org type unlocks the most tabs and
 /// therefore the widest layouts — the ones most likely to overflow.
@@ -754,7 +761,15 @@ Override communicationsOverride() {
             id: 'FIXTURE-broadcast-1',
             event: 'company_broadcast',
             createdBy: 'FIXTURE-user',
-            timestamp: _fixtureDate,
+            // A real recent date, not `_fixtureDate`.
+            //
+            // `_fixtureDate` is 2020-01-01, which is fine for a row nobody
+            // reads a date off — and these are ANNOUNCEMENTS, whose date is
+            // half of what they say. The communications hub photographed two
+            // live notices both stamped "01 Jan 2020 · 02:00" beside a product
+            // whose today is August 2026, which reads as a defect in the
+            // product rather than a placeholder in a fixture.
+            timestamp: DateTime.utc(2026, 8, 14, 16, 12),
             payload: const {
               'title': 'Weighbridge offline 06:00–08:00 Saturday',
               'message': 'Calibration. Hold loads at the gate; Security will '
@@ -766,7 +781,7 @@ Override communicationsOverride() {
             id: 'FIXTURE-broadcast-2',
             event: 'company_broadcast',
             createdBy: 'FIXTURE-user',
-            timestamp: _fixtureDate,
+            timestamp: DateTime.utc(2026, 8, 11, 6, 45),
             payload: const {
               'title': 'New seal supplier from Monday',
               'message': 'Same serial format. Report any seal that will not '

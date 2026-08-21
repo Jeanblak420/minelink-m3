@@ -659,13 +659,13 @@ class _MineSupplierPortalDashboardScreenState
       ? v.toStringAsFixed(0)
       : v.toStringAsFixed(v == v.roundToDouble() ? 0 : 1);
 
-  static String _date(DateTime d) {
-    final local = MlTime.sast(d);
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${local.day.toString().padLeft(2, '0')} '
-        '${months[local.month - 1]}';
-  }
+  /// `MlTime.listDay`, not a private month table.
+  ///
+  /// This was one of FOUR identical copies of a hand-rolled `dd MMM` — and all
+  /// four dropped the YEAR. The mine's "Recent waybills" card ended
+  /// "28 Jan" then "10 Feb", which is correctly sorted (the second is 2025) and
+  /// reads as a sorting fault. `listDay` prints the year exactly when the date
+  /// is not in the current South African one, the same rule `MlTime.ago`
+  /// already used.
+  static String _date(DateTime d) => MlTime.listDay(d);
 }

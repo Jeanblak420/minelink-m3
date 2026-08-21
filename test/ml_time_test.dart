@@ -296,5 +296,30 @@ void main() {
       final wallClock = MlTime.sast(DateTime.utc(2026, 8, 16, 21, 30));
       expect(MlTime.calendarStamp(wallClock), '16 Aug 2026 · 23:30');
     });
+
+    group('listDay', () {
+      final asOf = DateTime.utc(2026, 8, 15, 9, 30);
+
+      test('drops the year inside the current one', () {
+        expect(MlTime.listDay(DateTime.utc(2026, 1, 28, 5, 55), asOf: asOf),
+            '28 Jan');
+      });
+
+      test('KEEPS the year outside it', () {
+        // The whole point. A mine's "Recent waybills" card ended "28 Jan"
+        // then "10 Feb" — correctly sorted, because the second is 2025, and
+        // unreadable as such. Remove the year branch and this row reads
+        // "10 Feb", one line under "28 Jan", in a list sorted newest first.
+        expect(MlTime.listDay(DateTime.utc(2025, 2, 10, 8, 5), asOf: asOf),
+            '10 Feb 2025');
+      });
+
+      test('the year boundary is decided on the SOUTH AFRICAN clock', () {
+        // 31 Dec 2025 22:30 UTC is 1 Jan 2026 00:30 in Johannesburg. Read as
+        // UTC this is last year and would carry a year it does not need.
+        expect(MlTime.listDay(DateTime.utc(2025, 12, 31, 22, 30), asOf: asOf),
+            '01 Jan');
+      });
+    });
   });
 }
