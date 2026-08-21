@@ -136,7 +136,12 @@ class MlChrome extends ThemeExtension<MlChrome> {
     railLabel: Color(0xFFA5B5CB),
     railLabelSelected: Color(0xFFF2F8FF),
     railDivider: Color(0x1F94A3B8),
-    railSectionLabel: Color(0xFF63758F),
+    // 4.05:1 on `railTop`, in 88 renders — every section heading in the
+    // console's rail ("OPERATIONS", "INSIGHTS", "ADMIN"). 11px, so the bar is
+    // 4.5. #7385A0 is 5.07:1 against the same navy, still a step below
+    // `railLabel` (#A5B5CB, 8.5:1), which is the distinction it exists to
+    // draw.
+    railSectionLabel: Color(0xFF7385A0),
     canvasBase: Color(0xFF0A1424),
     canvasDot: Color(0x14FFFFFF),
     topBarSurface: Color(0xFF0D1829),

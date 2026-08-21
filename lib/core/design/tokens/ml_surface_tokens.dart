@@ -131,15 +131,38 @@ class MlGlass {
     lineStrong: Color(0x24FFFFFF),
     inkHi: Color(0xFFEAF2FF),
     ink: Color(0xFFC7D2E4),
-    inkMid: Color(0xFF8896AE),
-    // The bottom two rungs were raised on 2026-08-21. Against the lightest
-    // panel they measured 2.94:1 and **1.86:1**, and `inkXlo` is not
-    // decoration — it writes "3 more — narrow the search to see them" and the
-    // "—" that stands for a month with no actuals. They are 3.83:1 and 3.22:1
-    // now, which is WCAG AA for large text, and the ladder still reads as five
-    // distinct steps (14.6 / 10.8 / 5.5 / 3.8 / 3.2).
-    inkLo: Color(0xFF6B7A9C),
-    inkXlo: Color(0xFF606E8C),
+    // ── THE BOTTOM THREE RUNGS, RESPACED 2026-08-21 (second pass) ─────────
+    //
+    // They were raised once already, to 3.83:1 and 3.22:1, on the grounds
+    // that this is "WCAG AA for large text". It is not the right bar: these
+    // rungs write 9-13px labels — "Seats used", "of 5 on this company",
+    // "PLANNED" — and AA asks **4.5:1** of anything under 24px. Measured on
+    // the pixels rather than on the token pair, `inkLo` was 416 low-contrast
+    // strings and `inkXlo` 59.
+    //
+    // Raising only the bottom two does not work, and the arithmetic is what
+    // decides it rather than taste. On the lightest ground these are actually
+    // measured against, reaching 4.5:1 needs `inkLo` at #8693AE and `inkXlo`
+    // at #8893A9 — two colours no reader can tell apart, sitting on top of an
+    // `inkMid` of #8896AE that is the SAME COLOUR AGAIN. Below the legibility
+    // floor there was room for one rung and the ladder was asking for three.
+    //
+    // So `inkMid` moves up to open the space, and all three are respaced
+    // across the range that is left. Five distinct steps, none of them under
+    // 4.5:1 on any ground in the product (worst column, `#1C2C46`):
+    //
+    //             was            now      on #131F35   worst
+    //     inkHi   #EAF2FF        —          14.62      12.44
+    //     ink     #C7D2E4        —          10.80       9.19
+    //     inkMid  #8896AE   -> #A7B3C6       7.77       6.61
+    //     inkLo   #6B7A9C   -> #93A0B5       6.22       5.30
+    //     inkXlo  #606E8C   -> #8695AC       5.42       4.61
+    //
+    // The hue is untouched — every value is the old one moved along its own
+    // line toward white, so the set still reads as one slate family.
+    inkMid: Color(0xFFA7B3C6),
+    inkLo: Color(0xFF93A0B5),
+    inkXlo: Color(0xFF8695AC),
     accent: Color(0xFF22D3EE),
     accent2: Color(0xFF7DD3FC),
     accent3: Color(0xFF5EEAD4),
@@ -171,9 +194,17 @@ class MlGlass {
     lineStrong: Color(0x330F172A),
     inkHi: Color(0xFF0B1526),
     ink: Color(0xFF33415A),
-    inkMid: Color(0xFF5A697F),
-    inkLo: Color(0xFF6F7E94),
-    inkXlo: Color(0xFF7C8AA0),
+    // Same respacing as the dark set, same reason, mirrored: the bottom three
+    // were 4.97 / 3.67 / 3.12:1 against the page, which is 134 low-contrast
+    // strings. Moved along their own line toward black instead of white.
+    //
+    //             was            now      on #FFFFFF   worst (#E2EAF1)
+    //     inkMid  #5A697F   -> #455368       7.81        6.42
+    //     inkLo   #6F7E94   -> #525F76       6.45        5.30
+    //     inkXlo  #7C8AA0   -> #5C6980       5.54        4.56
+    inkMid: Color(0xFF455368),
+    inkLo: Color(0xFF525F76),
+    inkXlo: Color(0xFF5C6980),
     accent: Color(0xFF0891B2),
     accent2: Color(0xFF0E7490),
     accent3: Color(0xFF0D9488),

@@ -148,12 +148,19 @@ class MlOv {
     canvas: Color(0xFF0A1120),
     inkHi: Color(0xFFEAF2FF),
     ink: Color(0xFFC7D2E4),
-    inkMid: Color(0xFF8896AE),
-    // Raised 2026-08-21 to match `MlGlass`, and for the same measured reason:
-    // against this canvas the old pair came to 3.5:1 and 2.2:1, and `inkXlo`
-    // carries readable words rather than decoration.
-    inkLo: Color(0xFF6B7A9C),
-    inkXlo: Color(0xFF606E8C),
+    // Respaced 2026-08-21 (second pass) in lockstep with `MlGlass.dark` —
+    // see the table there for the reasoning and the measured ratios. The two
+    // sets have always carried an identical ink ladder, and
+    // `test/design/ink_ladder_test.dart` now fails if they drift apart, which
+    // is cheaper than the comment that used to ask for it.
+    //
+    // The first pass stopped at AA-for-LARGE-text (3.0). These rungs write
+    // 9-13px labels, so the bar is 4.5, and reaching it needed the middle
+    // rung to move as well: below the floor there was room for one step and
+    // the ladder wanted three.
+    inkMid: Color(0xFFA7B3C6),
+    inkLo: Color(0xFF93A0B5),
+    inkXlo: Color(0xFF8695AC),
     acc: Color(0xFF22D3EE),
     acc2: Color(0xFF7DD3FC),
     acc3: Color(0xFF5EEAD4),
@@ -201,13 +208,11 @@ class MlOv {
     canvas: Color(0xFFEEF2F8),
     inkHi: Color(0xFF0B1526),
     ink: Color(0xFF33415A),
-    // The light ladder's bottom three rungs measured 4.2 / 2.3 / 1.6:1 against
-    // this canvas. Same values as `MlGlass.light` now — these two token sets
-    // have always carried an identical ink ladder, and a fix to one that
-    // missed the other would have split them.
-    inkMid: Color(0xFF5A697F),
-    inkLo: Color(0xFF6F7E94),
-    inkXlo: Color(0xFF7C8AA0),
+    // Same values as `MlGlass.light`, respaced with it — the pairing is
+    // pinned by `test/design/ink_ladder_test.dart` rather than by this note.
+    inkMid: Color(0xFF455368),
+    inkLo: Color(0xFF525F76),
+    inkXlo: Color(0xFF5C6980),
     acc: Color(0xFF0891B2),
     acc2: Color(0xFF0E7490),
     acc3: Color(0xFF0D9488),

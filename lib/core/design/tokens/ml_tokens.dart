@@ -601,7 +601,31 @@ class MlSemantic {
       textStrong: scheme.onSurface,
       textBody: scheme.onSurface.withValues(alpha: 0.86),
       textMuted: scheme.onSurfaceVariant,
-      textFaint: scheme.onSurfaceVariant.withValues(alpha: 0.62),
+      // NOT `onSurfaceVariant` at an alpha. It was 0.62, and that single
+      // expression was **916 of the 1,798 low-contrast strings** — half of
+      // every faint string in the product, in both brightnesses.
+      //
+      // An alpha cannot be the mechanism here, and the arithmetic says so
+      // rather than a preference: 62% of the muted slate lands at 3.34-3.54:1
+      // on every dark surface in the ladder and 2.85-2.99:1 on every light
+      // one, against the 4.5:1 WCAG asks of text below 24px — and these are
+      // 9-13px labels. Solving for the alpha that WOULD reach 4.5 gives 0.87
+      // dark and 0.83 light, at which point "faint" is indistinguishable from
+      // `textMuted` and the token has stopped meaning anything.
+      //
+      // So it is its own colour, picked to clear 4.5:1 on every ground the
+      // report measured it on — 19 dark, 13 light, the brightest being
+      // `surfaceContainerHighest`:
+      //
+      //     dark  #8B99AE   4.85:1 on #1C2C46 … 6.81:1 on #060B15
+      //     light #5A6678   5.18:1 on #EEF2F8 … 5.82:1 on #FFFFFF
+      //
+      // The step down from `textMuted` is deliberately small, because there
+      // is not room for a large one: muted is only 5.47:1 at its worst, and
+      // the floor is 4.5. Below "muted" the hierarchy is carried by SIZE and
+      // WEIGHT, not by more colour steps — a fifth shade of slate that nobody
+      // can read is not a rung.
+      textFaint: light ? const Color(0xFF5A6678) : const Color(0xFF8B99AE),
       // `borderSubtle`, `borderCard` and `divider` were three separate
       // near-identical greys (#E2E8F0 / #E7EDF3 / #E9EEF4). Nothing ever
       // depended on the difference — it is below the threshold at which a
