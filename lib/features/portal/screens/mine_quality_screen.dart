@@ -158,7 +158,11 @@ class _RouteSpecTile extends ConsumerWidget {
                     if (spec.offloadingPoint != null)
                       '→ ${spec.offloadingPoint!}',
                   ].join(' '),
-                  maxLines: 1,
+                  // TWO lines: commodity AND destination, in a 97px column on
+                  // a phone. At one line "Chrome → Richards Bay" lost the
+                  // destination, which is the half that distinguishes one of
+                  // this mine's route specs from another.
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.mlText.bodySmall.copyWith(
                     color: semantic.textMuted,

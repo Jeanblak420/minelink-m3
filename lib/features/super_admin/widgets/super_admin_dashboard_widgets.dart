@@ -292,7 +292,15 @@ class SaOrgTypeCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           sublabel,
-                          maxLines: 1,
+                          // TWO lines. This caption is the sentence that says
+                          // what the figure above it counts — "At the agreed
+                          // rate, after quality penalty" is 269px in a tile
+                          // that is 269px, so the buyer's Payable figure lost
+                          // the words "quality penalty" and read as a plain
+                          // total. It is also where an empty tile explains
+                          // ITSELF (`emptyReason`), which is the one line that
+                          // must not be cut.
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontFamily: kConsoleSans,
@@ -512,7 +520,12 @@ class SaStatTile extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           sublabel,
-                          maxLines: 1,
+                          // TWO lines, for the same reason as the other stat
+                          // tile in this file: this caption says what the
+                          // figure counts, and on the buyer's DESKTOP
+                          // dashboard "At the agreed rate, after quality
+                          // penalty" is 269px in a 269px tile.
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: context.mlText.code(
                             color: s.textFaint,

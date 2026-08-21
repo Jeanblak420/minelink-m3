@@ -424,7 +424,12 @@ class _KpiTile extends StatelessWidget {
         children: [
           Text(
             kpi.label.toUpperCase(),
-            maxLines: 1,
+            // TWO lines. "AVG PER ACTIVE HAULER" is 142px letter-spaced and
+            // the tile is 137px on a phone — five pixels, and the caption that
+            // says what the figure below it MEANS was cut to "AVG PER ACTIVE
+            // HAULE…". A number with a broken caption is a number nobody can
+            // use.
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: t.s(
               size: 10,
@@ -1117,7 +1122,10 @@ class _BodyRow extends StatelessWidget {
         children: [
           Text(
             row.name,
-            maxLines: 1,
+            // TWO lines: this is the transporter's name in the leaderboard OF
+            // transporters — "Roadhaul Logistics" is 135px at 14/w600 and the
+            // name column is 131px on a phone.
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: t.s(
               size: 14,

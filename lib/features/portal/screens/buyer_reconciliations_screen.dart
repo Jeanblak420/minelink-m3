@@ -310,14 +310,17 @@ class _ReconCard extends ConsumerWidget {
                       Text(
                         '${_party(recon.supplierCompanyId)} → '
                         '${_party(recon.buyerCompanyId)}',
-                        maxLines: 1,
+                        // TWO lines: mine AND buyer, the two parties this
+                        // reconciliation is BETWEEN, in a 143px card header on
+                        // a phone.
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Hauled by ${_party(recon.transporterCompanyId)}',
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context)
                             .textTheme

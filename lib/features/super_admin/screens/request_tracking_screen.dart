@@ -31,7 +31,11 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
   static const _pageSize = 25;
 
   /// Below this the table scrolls horizontally instead of squashing columns.
-  static const _tableMinWidth = 1040.0;
+  // 1140, not 1040. At 1040 the twenty-two flex units were 40px each, which
+  // left the TYPE cell 46px for the word "Transport" beside its icon and the
+  // UPDATED cell 80px for "15 Aug 2026" — a label and a date, both cut, on the
+  // register a platform admin reads to see where a request has got to.
+  static const _tableMinWidth = 1140.0;
 
   _TrackFilter _filter = _TrackFilter.all;
   _SortField _sortField = _SortField.updated;
@@ -293,7 +297,10 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
                           Text(
                             'Every request on the platform, followed to '
                             'completion.',
-                            maxLines: 1,
+                            // TWO lines: it is a sentence, and on a phone it
+                            // had 282px of the 320 it needs, so the screen's
+                            // own description ended at "followed to".
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: context.mlText.bodySmall.copyWith(
                               color: semantic.textMuted,
@@ -384,13 +391,13 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
 
   // ---- Table --------------------------------------------------------------
 
-  static const _colType = 2;
+  static const _colType = 3;
   static const _colRoute = 5;
   static const _colParty = 3;
   static const _colTrips = 2;
   static const _colTons = 2;
   static const _statusWidth = 128.0;
-  static const _colUpdated = 2;
+  static const _colUpdated = 3;
 
   Widget _table(BuildContext context, List<RequestTrackingRow> rows) {
     final semantic = MlSemantic.of(context);
@@ -1170,10 +1177,12 @@ class _PartyChip extends StatelessWidget {
           Flexible(
             child: Text(
               n,
-              // TWO lines: "Roadhaul Logistics" is 125px and this cell is
-              // 124px on a 1600px desktop — one pixel, and the hover tooltip
-              // was the only way to read a company's name.
-              maxLines: 2,
+              // THREE lines. Two was enough for one company name, and this
+              // cell also carries the TRANSPORTERS column, which is a
+              // comma-joined list: "Northline Carriers, Vaal Bulk Movers" is
+              // 231px against 111px on a desktop and 94px on a phone, so two
+              // lines still lost the second haulier.
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: context.mlText.bodyMedium.copyWith(
                 color: semantic.textBody,

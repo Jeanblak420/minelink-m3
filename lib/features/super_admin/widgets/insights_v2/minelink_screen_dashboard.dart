@@ -983,38 +983,64 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              MlWell(
+          LayoutBuilder(
+            builder: (context, c) {
+              final words = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Recently active organizations',
+                      style: context.mlText.editorialMedium.copyWith(
+                        color: t.inkHi,
+                        fontWeight: FontWeight.w400,
+                      )),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Live token expiry — companies under 7 days are '
+                    'flagged for upgrade.',
+                    style: context.mlText.bodySmall.copyWith(color: t.inkMid),
+                  ),
+                ],
+              );
+              final well = MlWell(
                   icon: Icons.monitor_heart_outlined,
                   color: t.good,
                   size: 38,
-                  iconSize: 18),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                  iconSize: 18);
+              final manage = _ManageAll(
+                  tokens: t, onTap: () => widget.onNavigate?.call('orgs'));
+              // Below 460px the "Manage all" button and the words cannot share
+              // a row: on a 412px phone the button's ~140px left the heading
+              // "Recently active / organizations" over two lines and its
+              // sentence over four, in a 150px column.
+              if (c.maxWidth < 460) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Recently active organizations',
-                        style: context.mlText.editorialMedium.copyWith(
-                          color: t.inkHi,
-                          fontWeight: FontWeight.w400,
-                        )),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Live token expiry — companies under 7 days are '
-                      'flagged for upgrade.',
-                      style: context.mlText.bodySmall.copyWith(color: t.inkMid),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        well,
+                        const SizedBox(width: 13),
+                        Expanded(child: words),
+                      ],
                     ),
+                    const SizedBox(height: 12),
+                    Align(alignment: Alignment.centerLeft, child: manage),
                   ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              _ManageAll(
-                  tokens: t, onTap: () => widget.onNavigate?.call('orgs')),
-            ],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  well,
+                  const SizedBox(width: 13),
+                  Expanded(child: words),
+                  const SizedBox(width: 12),
+                  manage,
+                ],
+              );
+            },
           ),
           const SizedBox(height: 16),
           Row(
@@ -1210,6 +1236,10 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(r.name,
+                          // TWO lines: the company NAME is what this row is,
+                          // and the longest on the platform is 333px against
+                          // 226px here.
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: context.mlText.titleSmall.copyWith(
                             color: t.inkHi,
@@ -1404,6 +1434,10 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(r.name,
+                            // TWO lines: the company NAME is what this row is,
+                            // and the longest on the platform is 333px against
+                            // 226px here.
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: context.mlText.titleSmall.copyWith(
                               color: t.inkHi,

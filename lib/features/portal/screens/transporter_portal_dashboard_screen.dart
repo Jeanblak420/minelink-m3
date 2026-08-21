@@ -528,8 +528,11 @@ class _TransporterPortalDashboardScreenState
           // got ~81px, and "JD 22 PL MP" was drawn as "JD 22 PL…" on a phone
           // — the identifier the whole row is about.
           MlColumn('Truck', minWidth: kPlateColumnMinWidth),
-          MlColumn('Source'),
-          MlColumn('Customer'),
+          // flex 2 each: these are COMPANY names. "Atlas Buyer Group" is
+          // 118px and a flex-1 column of this six-column table is 120px on a
+          // phone, which it missed by two pixels.
+          MlColumn('Source', flex: 2),
+          MlColumn('Customer', flex: 2),
           MlColumn('Net', align: TextAlign.right),
           MlColumn('Revenue', align: TextAlign.right),
         ],

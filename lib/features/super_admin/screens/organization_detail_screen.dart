@@ -165,7 +165,12 @@ class _OrganizationDetailScreenState extends ConsumerState<OrganizationDetailScr
                       color: MlSemantic.of(context).textStrong,
                       fontWeight: FontWeight.w800,
                     ),
-                    maxLines: 1,
+                    // TWO lines. This is the page's own title and it is a
+                    // company NAME: between a back arrow and the actions it
+                    // had 308px on a phone, so the screen a platform admin
+                    // opens to act on one company was headed
+                    // "Consolidated Mineral Offtake & Logi…".
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),

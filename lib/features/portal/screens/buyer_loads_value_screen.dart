@@ -273,14 +273,25 @@ class _Body extends ConsumerWidget {
               MlDataTable(
                 columns: const [
                   MlColumn('Truck', flex: 3, minWidth: kPlateColumnMinWidth),
-                  MlColumn('Source', flex: 2),
+                  // 124: "Iron Hills Mining" is 105px and "Atlas Buyer Group"
+                  // 118px at this table's body size, and 96 cut the first of
+                  // them.
+                  MlColumn('Source', flex: 2, minWidth: 124),
                   MlColumn('Delivered', flex: 2, align: TextAlign.right),
-                  MlColumn('Rate', flex: 2, align: TextAlign.right),
-                  MlColumn('Value', flex: 2, align: TextAlign.right),
-                  MlColumn('Invoice', flex: 3),
-                  MlColumn('Variance', flex: 2, align: TextAlign.right),
+                  // The four money columns declare what their FIGURES need.
+                  // A flex weight cannot know how big a number is: at flex 2
+                  // this table gave each of them 76px on a phone, and
+                  // "R40,920.00", "R41,880.00" and "R1,200.00/t" were all cut
+                  // — on the screen a buyer opens to check what a load cost.
+                  MlColumn('Rate', flex: 2, align: TextAlign.right, minWidth: 88),
+                  MlColumn('Value', flex: 2, align: TextAlign.right, minWidth: 92),
+                  MlColumn('Invoice', flex: 3, minWidth: 92),
+                  MlColumn('Variance',
+                      flex: 2, align: TextAlign.right, minWidth: 92),
                   MlColumn('POD', flex: 1, align: TextAlign.center),
-                  MlColumn('', flex: 2),
+                  // Holds a compact ghost button reading "Invoice" or "Edit",
+                  // which had 23px at flex 2.
+                  MlColumn('', flex: 3, minWidth: 96),
                 ],
                 rows: [
                   for (final r in rows)

@@ -502,7 +502,13 @@ class _OrganizationManagementScreenState
                       children: [
                         Text(
                           name,
-                          maxLines: 1,
+                          // THREE lines. This is the company's NAME, in the
+                          // register of companies — the one column of this row
+                          // that identifies which company it is. The longest
+                          // real name on the platform is 49 characters (333px)
+                          // and this cell is 146px on a phone, which two lines
+                          // still could not hold.
+                          maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: context.mlText.titleSmall.copyWith(
                             color: s.textStrong,

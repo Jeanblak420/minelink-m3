@@ -482,6 +482,12 @@ class _RequestCard extends StatelessWidget {
                             // the same person.
                             '${row.companyName ?? 'No company'} · '
                             '${UserRole.labelFor(row.role, fallback: 'Unknown role')}',
+                            // TWO lines. Company AND role, and the role is the
+                            // half at the end — so a long company name pushed
+                            // the very thing that says what this person can do
+                            // off the card ("…Logistics Holdings · Admin" cut
+                            // at 295px).
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: context.mlText.bodyMedium.copyWith(
                               color: semantic.textMuted,

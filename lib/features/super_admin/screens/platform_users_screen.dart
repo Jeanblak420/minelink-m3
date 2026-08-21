@@ -372,6 +372,12 @@ class _UserRow extends StatelessWidget {
                     style: context.mlText.bodySmall.copyWith(
                       color: semantic.textMuted,
                     ),
+                    // TWO lines: this is the user's ROLE and their EMAIL, and
+                    // an email is the address a platform admin copies out of
+                    // this list. On a phone
+                    // "Admin · johannes.oosthuizen@consolidatedmineralofftake.co.za"
+                    // had 278px and lost the domain.
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],

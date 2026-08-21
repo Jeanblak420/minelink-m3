@@ -321,6 +321,11 @@ class _ChatWidgetState extends State<ChatWidget> {
                   color: semantic.textStrong,
                   fontWeight: FontWeight.w800,
                 ),
+                // TWO lines: a room between two companies is named for both,
+                // and "Roadhaul Logistics ↔ Iron Hills Mining" (247px) had
+                // 238px on a phone — so the header of the thread you are IN
+                // could not say who it was with.
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             )

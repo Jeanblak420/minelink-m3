@@ -26,7 +26,16 @@ class CompanyNameLink extends StatelessWidget {
     );
     return InkWell(
       onTap: () => context.go('/super-admin/organization/$companyId'),
-      child: Text(name, overflow: TextOverflow.ellipsis, style: base),
+      // TWO lines. This is a company's NAME and it is the link's own label —
+      // "Consolidated Mineral Offtake & Logistics Holdings" is 333px and the
+      // cards that carry these give it 157px on a phone, so at one line the
+      // reader could not tell which company they were about to open.
+      child: Text(
+        name,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: base,
+      ),
     );
   }
 }

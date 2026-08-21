@@ -218,8 +218,11 @@ class WeightReconciliationView extends ConsumerWidget {
                   MlDataTable(
                     columns: const [
                       MlColumn('Truck', flex: 3, minWidth: kPlateColumnMinWidth),
-                      MlColumn('Source', flex: 3),
-                      MlColumn('Customer', flex: 3),
+                      // 124 is what a company name needs at this table's body
+                      // size ("Atlas Buyer Group" is 118px, and flex-3 here
+                      // came to 120 on a phone).
+                      MlColumn('Source', flex: 3, minWidth: 124),
+                      MlColumn('Customer', flex: 3, minWidth: 124),
                       MlColumn('Mine net', flex: 2, align: TextAlign.right),
                       MlColumn('Delivered', flex: 2, align: TextAlign.right),
                       MlColumn('Variance', flex: 2, align: TextAlign.right),

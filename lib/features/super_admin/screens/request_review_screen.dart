@@ -428,7 +428,17 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
                         _ =>
                           '${r.loadingPoint ?? '—'} → ${r.offloadingPoint ?? '—'}',
                       },
-                      maxLines: 1,
+                      // TWO lines: for a transport request this line IS the
+                      // route, and in a 127px queue row on a phone
+                      // "Iron Hills Mining → Maputo" lost its destination —
+                      // in the inbox where an admin decides whether to
+                      // approve it.
+                      //
+                      // The status chip beside it wraps below on a phone (see
+                      // the LayoutBuilder under this Column); at one line and
+                      // with the chip on the same row, two of the four titles
+                      // in this queue were still cut.
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: context.mlText.titleMedium.copyWith(
                         color: s.textStrong,
@@ -442,12 +452,27 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
                         color: s.textMuted,
                       ),
                     ),
+                    // Where the chip lands on a phone — see the note beside
+                    // the chevron.
+                    if (MediaQuery.sizeOf(context).width < 520) ...[
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: _StatusChip(status: r.status),
+                      ),
+                    ],
                   ],
                 ),
               ),
               const SizedBox(width: 8),
-              _StatusChip(status: r.status),
-              const SizedBox(width: 6),
+              // The chip goes UNDER the title on a phone. On a 412px screen
+              // the icon well, the chip and the chevron take 268px of the row
+              // between them, which left "Sable Ridge Chrome → Richards Bay"
+              // 144px — cut even over two lines.
+              if (MediaQuery.sizeOf(context).width >= 520) ...[
+                _StatusChip(status: r.status),
+                const SizedBox(width: 6),
+              ],
               Icon(Icons.chevron_right, size: 20, color: s.textFaint),
             ],
           ),

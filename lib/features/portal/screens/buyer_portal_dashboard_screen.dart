@@ -490,7 +490,7 @@ class _BuyerPortalDashboardScreenState
           // scroll floor left it 79px, so "JD 22 PL MP" and "CK 84 RT GP" were
           // both cut on the buyer's own dashboard.
           MlColumn('Truck', minWidth: kPlateColumnMinWidth),
-          MlColumn('Source'),
+          MlColumn('Source', flex: 2),
           MlColumn('Product'),
           MlColumn('Delivered', align: TextAlign.right),
           MlColumn('Payable', align: TextAlign.right),

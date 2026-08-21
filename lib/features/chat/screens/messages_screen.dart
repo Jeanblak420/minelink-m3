@@ -269,7 +269,13 @@ class _ConversationTile extends StatelessWidget {
                       Expanded(
                         child: Text(
                           conversation.name,
-                          maxLines: 1,
+                          // TWO lines. A conversation between two companies is
+                          // NAMED for both of them — "Roadhaul Logistics ↔
+                          // Iron Hills Mining" is 246px in a 246px row — so at
+                          // one line the list said who a thread was with and
+                          // not who it was between. The message PREVIEW below
+                          // stays one line: a preview is meant to be a glance.
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: context.mlText.titleSmall.copyWith(
                             color: semantic.textStrong,
@@ -377,6 +383,7 @@ class _ContactTile extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _Avatar(name: contact.displayName, isSuperAdmin: contact.isSuperAdmin),
             const SizedBox(width: 12),
@@ -384,14 +391,41 @@ class _ContactTile extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    contact.displayName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.mlText.titleSmall.copyWith(
-                      color: semantic.textStrong,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  // The name and the "Renew to message" badge in one Wrap.
+                  //
+                  // The badge was a sibling of this whole column, so it took
+                  // its ~140px off the top of a 320px people pane and left the
+                  // name 108px — "Refilwe Sekhukhune-…" over two lines, still
+                  // cut. Wrapped, the badge drops under the name when the pane
+                  // is narrow and sits beside it when it is not.
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        contact.displayName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.mlText.titleSmall.copyWith(
+                          color: semantic.textStrong,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (contact.isBlocked)
+                        // Warn, not error, when the cause is an expired token:
+                        // that is a billing state the user can fix, and the
+                        // label says how.
+                        Tooltip(
+                          message: contact.blockedTooltip,
+                          child: MlStatusBadge(
+                            label: contact.blockedLabel,
+                            tone: contact.isBlockedByExpiry
+                                ? MlTone.warn
+                                : MlTone.error,
+                          ),
+                        ),
+                    ],
                   ),
                   if (contact.companyName != null)
                     Text(
@@ -405,16 +439,6 @@ class _ContactTile extends ConsumerWidget {
                 ],
               ),
             ),
-            if (contact.isBlocked)
-              // Warn, not error, when the cause is an expired token: that is a
-              // billing state the user can fix, and the label says how.
-              Tooltip(
-                message: contact.blockedTooltip,
-                child: MlStatusBadge(
-                  label: contact.blockedLabel,
-                  tone: contact.isBlockedByExpiry ? MlTone.warn : MlTone.error,
-                ),
-              ),
           ],
         ),
       ),
@@ -612,7 +636,10 @@ class _ConvHeader extends ConsumerWidget {
               children: [
                 Text(
                   room.name,
-                  maxLines: 1,
+                  // TWO lines: a DM's room name is the other PERSON — the
+                  // desktop thread header cut "Refilwe Sekhukhune-Modiselle"
+                  // at 108px — and a company room is named for both companies.
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.mlText.titleMedium.copyWith(
                     color: semantic.textStrong,

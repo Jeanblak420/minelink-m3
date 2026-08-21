@@ -174,9 +174,9 @@ class RouteMarketplaceScreen extends ConsumerWidget {
                     for (final r in rows)
                       [
                         _mono(context, r.routeNumber),
-                        _cell(context, r.routeLabel, strong: true),
-                        _cell(context, r.commodity ?? '—'),
-                        _cell(context, r.transporterName ?? '—'),
+                        _cell(context, r.routeLabel, strong: true, lines: 2),
+                        _cell(context, r.commodity ?? '—', lines: 2),
+                        _cell(context, r.transporterName ?? '—', lines: 2),
                         _cell(context, _dateFmt.format(MlTime.sast(r.acceptedAt))),
                         _mono(context, '${r.tripsTotal}'),
                         _mono(context, '${r.tripsCompleted}'),
@@ -193,11 +193,17 @@ class RouteMarketplaceScreen extends ConsumerWidget {
     );
   }
 
-  Widget _cell(BuildContext context, String text, {bool strong = false}) {
+  /// A cell of words. [lines] is 2 where the value is a ROUTE — an endpoint
+  /// pair like "Iron Hills Mining, Steelpoort → Richards Bay Dry Bulk
+  /// Terminal" is 400px and this table's widest column is 274px on a 1600px
+  /// window, so at one line the marketplace named where a route STARTS and
+  /// dropped where it goes.
+  Widget _cell(BuildContext context, String text,
+      {bool strong = false, int lines = 1}) {
     final semantic = MlSemantic.of(context);
     return Text(
       text,
-      maxLines: 1,
+      maxLines: lines,
       overflow: TextOverflow.ellipsis,
       style: context.mlText.titleSmall.copyWith(
         color: strong ? semantic.textStrong : semantic.textBody,

@@ -262,7 +262,11 @@ class _RequestCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    maxLines: 1,
+                    // TWO lines: for a transport request the title IS the
+                    // route — "Iron Hills Mining → Richards Bay" is 230px at
+                    // 16px and this card gives it 175px between a type pill
+                    // and a status badge.
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontWeight: FontWeight.w800,

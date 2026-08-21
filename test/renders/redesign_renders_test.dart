@@ -350,10 +350,26 @@ void main() {
     // this", so the harness can ask it of EVERY render at once.
     //
     // REPORTED, NOT FAILED, for the same reason the framework errors above
-    // are: some truncations are deliberate (a company name in a compact
-    // ranking row, a long address in a table cell), and a render file that
-    // fails on those teaches people to add exclusions rather than to look.
-    // The list is the reading material; the judgement stays human.
+    // are: some truncations are deliberate, and a render file that fails on
+    // those teaches people to add exclusions rather than to look. The list is
+    // the reading material; the judgement stays human.
+    //
+    // The report started at 137 strings and 122 survived the first pass at it.
+    // Working the list with the widths above brought it to SIX, and those six
+    // are deliberate:
+    //
+    //   * three CRASH-REPORT messages on `screen-crash-reports-phone-dark`.
+    //     An exception string has no bounded length — one of them is a
+    //     `PlatformException(channel-error, …, null, null)` — and the card is
+    //     a preview that opens onto the full text and the stack.
+    //   * three MESSAGE PREVIEWS on `screen-messages-desktop-dark`. A preview
+    //     line is meant to be a glance at a message you open to read; the
+    //     conversation NAME above it is the part that had to survive, and it
+    //     takes two lines now.
+    //
+    // Everything else was a fault, and most of them were invisible in the
+    // picture: a 6px table cell reads as an empty column, not as a cut
+    // waybill number.
     // Keyed by string, valued by WHERE it was cut and how much room it had.
     //
     // The list on its own sent me hunting for "Roadhaul Logistics" through four
@@ -1217,7 +1233,10 @@ void main() {
           orgType: OrgType.mineSupplier,
           role: UserRole.admin,
           selectedRoute: '/portal/mine/reconciliations',
-          extraOverrides: portalCaptureOverrides(),
+          // The TAIL overrides too: the reconciliation screens read
+          // `partnerCompaniesProvider` to turn party ids into names, and
+          // without it every card read "Unknown company".
+          extraOverrides: [...portalCaptureOverrides(), ...portalTailOverrides()],
         ),
         const Size(1600, 1700),
         'screen-mine-reconciliations-desktop-dark',
@@ -1237,7 +1256,10 @@ void main() {
           orgType: OrgType.transporter,
           role: UserRole.admin,
           selectedRoute: '/portal/transporter/reconciliations',
-          extraOverrides: portalCaptureOverrides(),
+          // The TAIL overrides too: the reconciliation screens read
+          // `partnerCompaniesProvider` to turn party ids into names, and
+          // without it every card read "Unknown company".
+          extraOverrides: [...portalCaptureOverrides(), ...portalTailOverrides()],
         ),
         const Size(1600, 1500),
         'screen-transporter-reconciliations-desktop-light',
@@ -1255,7 +1277,10 @@ void main() {
           orgType: OrgType.buyer,
           role: UserRole.admin,
           selectedRoute: '/portal/buyer/reconciliations',
-          extraOverrides: portalCaptureOverrides(),
+          // The TAIL overrides too: the reconciliation screens read
+          // `partnerCompaniesProvider` to turn party ids into names, and
+          // without it every card read "Unknown company".
+          extraOverrides: [...portalCaptureOverrides(), ...portalTailOverrides()],
         ),
         const Size(412, 4600),
         'screen-buyer-reconciliations-phone-dark',

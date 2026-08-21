@@ -254,7 +254,12 @@ class _AuditLogCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             log.organizationName!,
-                            maxLines: 1,
+                            // TWO lines: the audit trail's whole job is to say
+                            // WHO did what to WHICH company, and at one line
+                            // the longest company on the platform read
+                            // "Consolidated Mineral Offtake & Logistics Hol…"
+                            // in a 285px card.
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: context.mlText.bodySmall.copyWith(
                               color: semantic.textMuted,

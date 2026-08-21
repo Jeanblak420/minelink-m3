@@ -375,6 +375,10 @@ class _CompanyRow extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(name,
+                    // TWO lines: this row IS the choice — the admin picks the
+                    // two companies to link by reading these names, and at
+                    // 304px the longest was cut.
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: context.mlText.titleSmall.copyWith(
                       color: semantic.textStrong,

@@ -686,7 +686,13 @@ class _PendingGateConfirmationsState
                               child: Text(
                                 '${c.confirmationType.label} · '
                                 '${c.driverConfirmed ? 'driver confirmed' : 'waiting for driver'}',
-                                maxLines: 1,
+                                // TWO lines. This says WHICH confirmation and
+                                // WHETHER the driver has agreed to it — at one
+                                // line, in 159px, "Gate arrival · driver
+                                // confirmed" lost the half that says the
+                                // driver confirmed, on the gate screen where
+                                // that is the question being asked.
+                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: context.mlText.bodySmall.copyWith(
                                   color: semantic.textMuted,

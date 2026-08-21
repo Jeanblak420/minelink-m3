@@ -462,7 +462,13 @@ class TargetsScopePill extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    maxLines: 1,
+                    // TWO lines. The `Flexible` above stopped the pill
+                    // OVERFLOWING; it did not stop the name being cut, and the
+                    // label of a picker is the only thing that says which
+                    // company you are about to set a twelve-month target for.
+                    // "Consolidated Mineral Offtake & Logistics Holdings" is
+                    // 333px against 278.
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: context.mlText.labelMedium.copyWith(
                       color: selected ? t.accent2 : t.inkMid,

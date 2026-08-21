@@ -148,23 +148,27 @@ class _QualityCertDialogState extends ConsumerState<_QualityCertDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              // A Wrap: the plate takes its own width first and this line —
+              // waybill, commodity and tonnage, which is how the load being
+              // certified is identified — takes what is left, which on a phone
+              // was 170px of the 205 it needs.
+              Wrap(
+                spacing: 8,
+                runSpacing: 2,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   MlPlatePill(r.truckReg ?? '—', fontSize: 12),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      [
-                        if (r.reference != null) r.reference!,
-                        if (r.commodity != null) r.commodity!,
-                        if (r.netTons != null)
-                          '${r.netTons!.toStringAsFixed(2)} t',
-                      ].join(' · '),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.mlText.bodyMedium.copyWith(
-                        color: semantic.textMuted,
-                      ),
+                  Text(
+                    [
+                      if (r.reference != null) r.reference!,
+                      if (r.commodity != null) r.commodity!,
+                      if (r.netTons != null)
+                        '${r.netTons!.toStringAsFixed(2)} t',
+                    ].join(' · '),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: semantic.textMuted,
                     ),
                   ),
                 ],
