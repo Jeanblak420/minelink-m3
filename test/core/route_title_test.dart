@@ -141,7 +141,12 @@ void main() {
     const aliases = <String, String>{
       '/portal/mine/security': 'Security',
       '/portal/mine/gate': 'Gate control',
-      '/portal/mine/weighbridge': 'Weighbridge',
+      // "Load controller" since 2026-08-21, not "Weighbridge" — the rail's own
+      // label for this destination, and the bar's old one was the word the
+      // SAME role's OTHER rail item uses ("Weighbridge records"). Deliberate,
+      // recorded in `every_portal_route_is_named_test.dart` along with the
+      // fourteen other routes where the two vocabularies differ.
+      '/portal/mine/weighbridge': 'Load controller',
       '/portal/mine/stockpiles': 'Stockpiles',
       '/portal/mine/minerals': 'Operations Hub',
       '/portal/mine/loads': 'Operations Hub',

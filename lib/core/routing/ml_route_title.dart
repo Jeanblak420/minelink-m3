@@ -380,7 +380,15 @@ String _portalTitle(Uri uri, MlPortalTabs tabs) {
     return switch (segment) {
       'security' => 'Security',
       'gate' => 'Gate control',
-      'weighbridge' => 'Weighbridge',
+      // "Load controller", which is what the rail calls it, NOT "Weighbridge".
+      //
+      // Driven as a mine owner in a browser on 2026-08-21: the rail said Load
+      // controller, the bar said Weighbridge, and the page under both was
+      // headed "Mine Control". Three names for one destination — and the bar's
+      // was the worst of the three, because "Weighbridge records" is the SAME
+      // role's OTHER rail item. The bar was not vague, it named the
+      // neighbour.
+      'weighbridge' => 'Load controller',
       'stockpiles' => 'Stockpiles',
       'minerals' || 'loads' || 'transactions' => 'Operations Hub',
       // `/portal/mine/operations` is one screen the rail names three ways by
