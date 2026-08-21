@@ -390,6 +390,35 @@ class _DashboardHeader extends StatelessWidget {
   }
 }
 
+/// The hero, reachable by a test.
+///
+/// A seam rather than a refactor: the card is one of very few places in this
+/// product where two strings can contradict each other in a single row, and it
+/// did — see `driver_hero_does_not_contradict_itself_test.dart`. Building the
+/// whole driver dashboard to assert on two words would mean stubbing every
+/// provider behind it, which is how a check ends up proving something about a
+/// fixture instead of about the card.
+@visibleForTesting
+class DriverActiveTripHeroForTest extends StatelessWidget {
+  const DriverActiveTripHeroForTest({
+    super.key,
+    required this.plate,
+    required this.route,
+    required this.statusLabel,
+  });
+
+  final String plate;
+  final String route;
+  final String statusLabel;
+
+  @override
+  Widget build(BuildContext context) => _ActiveTripHero(
+        plate: plate,
+        route: route,
+        statusLabel: statusLabel,
+      );
+}
+
 /// Cyan→navy promo hero for the driver's current trip (approved design
 /// gradient — the one sanctioned raw-colour exception).
 class _ActiveTripHero extends StatelessWidget {
@@ -449,7 +478,20 @@ class _ActiveTripHero extends StatelessWidget {
                     decoration: const BoxDecoration(
                         color: MlTokens.cyan250, shape: BoxShape.circle)),
                 const SizedBox(width: 6),
-                const Text('ACTIVE TRIP',
+                // "CURRENT TRIP", not "ACTIVE TRIP".
+                //
+                // The pill on the right of this same row carries the live
+                // state, and when there is no trip it reads NO ACTIVE TRIP.
+                // Beside a fixed eyebrow saying ACTIVE TRIP that is a card
+                // contradicting itself in one line — photographed on an
+                // Android emulator on 2026-08-21, driver signed in, no trip
+                // assigned:
+                //
+                //     ● ACTIVE TRIP                    [ NO ACTIVE TRIP ]
+                //
+                // The eyebrow names the SLOT and has to stay true whatever is
+                // in it; the pill says what is in it.
+                const Text('CURRENT TRIP',
                     style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,

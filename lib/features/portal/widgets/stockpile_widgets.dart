@@ -73,9 +73,18 @@ class StockpileCard extends StatelessWidget {
           const SizedBox(height: 4),
           AnimatedTons(
             value: pile.tons,
+            // ` t` in both branches. A capped pile read "45 / 120 t" and an
+            // uncapped one beside it read "60 tons" — the same quantity, the
+            // same screen, the same row of cards, two units. Photographed on
+            // the mine's Supervisor screen against live data, 2026-08-21.
+            //
+            // `t` is what the rest of the product prints beside a figure —
+            // every stat card, every recon total, the waybill. "tons" is the
+            // word, and it belongs in prose, which is where "Add tons" below
+            // keeps it.
             suffix: pile.maxCapTons != null
                 ? ' / ${pile.maxCapTons!.toStringAsFixed(0)} t'
-                : ' tons',
+                : ' t',
             style: MlType.figure(
                 color: scheme.onSurface, size: MlTokens.fsH1),
           ),

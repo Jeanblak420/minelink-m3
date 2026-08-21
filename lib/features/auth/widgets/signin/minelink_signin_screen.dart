@@ -342,7 +342,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
                         )
                       : Column(
                           children: [
-                            _compactHeader(),
+                            _compactHeader(context),
                             Expanded(child: _authSide(context)),
                           ],
                         ),
@@ -365,8 +365,28 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
     );
   }
 
-  Widget _compactHeader() => Container(
-        padding: const EdgeInsets.fromLTRB(22, 20, 22, 20),
+  /// The phone header. **It has to clear the status bar itself.**
+  ///
+  /// This screen is its own `Scaffold` body with no `SafeArea` and no app bar,
+  /// so nothing above it reserves the system inset — and on a real Android
+  /// device the top 24-48dp of the window is under the clock and the status
+  /// icons. Run on the emulator for the first time on 2026-08-21 (Android 14,
+  /// 1080x2400 @ 420dpi, the same 412dp viewport as Jean's SM-G780G): the
+  /// chain mark sat ON the "5:02", the "M" of MineLink was behind a
+  /// notification dot, and the wordmark ran under the wifi and battery icons.
+  ///
+  /// It is the first screen of the product and it had never been seen on a
+  /// device. No render could show it either — `flutter_test` reports a
+  /// MediaQuery padding of zero, so there is no status bar to collide with.
+  ///
+  /// `MediaQuery.paddingOf(context).top` rather than wrapping in `SafeArea`:
+  /// the header paints a full-bleed gradient with a hairline under it, and a
+  /// `SafeArea` would push the GRADIENT down too and leave a bare strip of
+  /// scaffold above it. Padding keeps the paint edge-to-edge and moves only
+  /// the content.
+  Widget _compactHeader(BuildContext context) => Container(
+        padding: EdgeInsets.fromLTRB(
+            22, 20 + MediaQuery.paddingOf(context).top, 22, 20),
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
