@@ -239,11 +239,18 @@ class OvCardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Text(
               label.toUpperCase(),
-              maxLines: 1,
+              // TWO lines. A card's own title is the last thing that should
+              // be cut, and "FLEET DISTRIBUTION" beside a "48 total" pill in a
+              // 320px card rendered as "FLEET DISTRIB…" on the buyer and
+              // mine insights boards — measured 2026-08-21. Uppercase with
+              // letter-spacing is a wide setting; one line is not always
+              // enough for it.
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: tokens.eyebrow,
             ),

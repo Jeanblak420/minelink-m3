@@ -161,7 +161,15 @@ class MlSectionTitle extends StatelessWidget {
                 // identically under `maxLines: 2`. Only the headings that were
                 // losing words gain a line, and every one of them is inside a
                 // scrolling page.
-                maxLines: 2,
+                //
+                // THREE from 2026-08-21, for the same reason one became two.
+                // Two was still not enough for the longest heading in the
+                // product next to a trailing action: the mine/supplier request
+                // inbox reads "Mine/Supplier transportation requests", and on a
+                // 412px phone beside a "1 new" pill and a refresh button it
+                // rendered "Mine/Supplier transportation requ…". Found by the
+                // render harness's own cut-off report.
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 // Fraunces, matching MlSectionHead on the reference screens.
                 // The weight drops from w800 to w400 with it: the serif's

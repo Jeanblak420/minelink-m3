@@ -870,7 +870,12 @@ class _EmployeeRegisterScreenState
               cursorColor: _p.blue,
               decoration: InputDecoration(
                 isDense: true,
-                hintText: 'Search by name, role, or employee ID…',
+                // Shortened rather than widened: this field shares its row
+                // with a `Ctrl K` chip on a 412px phone, so there is nowhere
+                // for it to grow. The long form was cut anyway, and a hint
+                // that lists three things and then stops mid-list is worse
+                // than a shorter one that finishes.
+                hintText: 'Search name, role or ID…',
                 hintStyle: context.mlText.bodyMedium.copyWith(
                   color: _p.textMuted,
                 ),

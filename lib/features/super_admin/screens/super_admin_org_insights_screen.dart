@@ -259,7 +259,10 @@ class _SuperAdminOrgInsightsScreenState
 
   Text _panelLabel(String text) => Text(
     text.toUpperCase(),
-    maxLines: 1,
+    // TWO lines. Uppercase with letter-spacing is a wide setting, and four of
+    // these share a card at 414px: "WAYBILLS DONE" and "WAYBILLS OPEN" had no
+    // room to be two words each and ran into the label beside them.
+    maxLines: 2,
     overflow: TextOverflow.ellipsis,
     style: context.mlText.overline.copyWith(color: MlControlRoom.textMuted),
   );
@@ -499,7 +502,11 @@ class _SuperAdminOrgInsightsScreenState
                               Expanded(
                                 child: Text(
                                   slices[i].name,
-                                  maxLines: 1,
+                                  // TWO lines. This is the company NAME
+                                  // beside its share, and the legend is the
+                                  // only thing that says which colour is
+                                  // whose: "Roadhaul Logisti..." at 1600px.
+                                  maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: context.mlText.bodyMedium.copyWith(
                                     color: MlControlRoom.textBody,
@@ -585,7 +592,7 @@ class _SuperAdminOrgInsightsScreenState
           _panelLabel(label),
           const SizedBox(height: 8),
           RichText(
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             text: TextSpan(
               children: [
@@ -645,7 +652,13 @@ class _SuperAdminOrgInsightsScreenState
               children: [
                 Text(
                   label.toUpperCase(),
-                  maxLines: 1,
+                  // TWO lines each. Three of these share a card that is 414px
+                  // wide on the buyer and mine boards, so each gets ~138 — and
+                  // "FORECAST AUG" over "283 t +319.2%" rendered as
+                  // "FORECAST AU…" over "283 t +319…". A label that does not
+                  // name its figure and a figure that does not finish are two
+                  // halves of the same tile saying nothing.
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.mlText.overline.copyWith(
                     color: MlControlRoom.textMuted,
@@ -653,7 +666,7 @@ class _SuperAdminOrgInsightsScreenState
                 ),
                 const SizedBox(height: 4),
                 RichText(
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
                     children: [
@@ -733,7 +746,11 @@ class _SuperAdminOrgInsightsScreenState
         // Mock: scope, period and the month-on-month delta all read as one
         // line under the figure — the delta is the only coloured run.
         RichText(
-          maxLines: 1,
+          // TWO lines. Three facts joined by wide middots — the scope, the
+          // period and the month-on-month delta — and at 1600px the card is
+          // 462 wide, so the line read "Combined organizations · Au…": the
+          // period truncated and the delta gone entirely.
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
           text: TextSpan(
             style: context.mlText.bodyMedium.copyWith(
@@ -743,7 +760,9 @@ class _SuperAdminOrgInsightsScreenState
               TextSpan(text: focus?.companyName ?? 'Combined organizations'),
               const TextSpan(text: '   ·   '),
               TextSpan(
-                text: '${DateFormat('MMM yyyy').format(DateTime.now())} · MTD',
+                // `MlTime.now()`. This is a MONTH a reader acts on, and
+                // CLAUDE.md §7.1 keeps the device's opinion out of those.
+                text: '${DateFormat('MMM yyyy').format(MlTime.now())} · MTD',
               ),
               if (tonsDelta != null) ...[
                 const TextSpan(text: '   ·   '),
@@ -853,7 +872,7 @@ class _SuperAdminOrgInsightsScreenState
                   stripCell(
                     Icons.timeline_rounded,
                     MlControlRoom.violet,
-                    'Forecast ${DateFormat('MMM').format(DateTime.now())}',
+                    'Forecast ${DateFormat('MMM').format(MlTime.now())}',
                     forecast == null ? '—' : _tonsInt.format(forecast),
                     unit: forecast == null ? null : ' t',
                     tail: forecastDelta == null
@@ -871,6 +890,11 @@ class _SuperAdminOrgInsightsScreenState
               const SizedBox(height: 18),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                // A GAP. Four `Expanded` cells with nothing between them
+                // printed "WAYBILLS DONE WAYBILLS OPEN RELIABILITY" as one
+                // run of words — three labels touching, with no way to tell
+                // where one ended. Measured 2026-08-21.
+                spacing: 14,
                 children: [
                   miniStat('Trips', _int.format(tripsN)),
                   miniStat('Waybills done', _int.format(wbDone)),

@@ -323,7 +323,13 @@ class _FilterBar extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               SizedBox(
-                width: 240,
+                // 300, not 240. The hint is 34 characters at 14px — about
+                // 238px — plus an 18px prefix icon and the field's own
+                // padding, so a 240px box cut the field's own instructions to
+                // "Search reg, transporter, customer…" with the tail missing.
+                // Measured 2026-08-21 at BOTH 1600 and 412: a fixed width
+                // around text does not care how wide the window is.
+                width: 300,
                 child: TextField(
                   controller: searchController,
                   onChanged: (v) => onChanged(filter.copyWith(search: v)),

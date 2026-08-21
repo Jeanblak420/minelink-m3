@@ -122,7 +122,12 @@ class _LegendRow extends StatelessWidget {
         Expanded(
           child: Text(
             slice.label,
-            maxLines: 1,
+            // TWO lines. This is a company NAME beside its share of the
+            // fleet, and the legend is the only thing that says which colour
+            // is whose — "Roadhaul Logisti…" on the buyer and mine insights
+            // boards, where the card is narrower than on the transporters
+            // one. Measured 2026-08-21.
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: t.s(size: 12, color: t.ink),
           ),

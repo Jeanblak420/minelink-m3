@@ -199,7 +199,15 @@ class FleetVehicleTable extends StatelessWidget {
               ),
               const DataColumn(
                 label: SizedBox(
-                  width: 80,
+                  // A REGISTRATION, so it needs a registration's width.
+                  //
+                  // 80 cut `CK 85 RT GP` to `CK 85 RT …` at 1600px, in a table
+                  // that already scrolls horizontally and had empty space to
+                  // the right of it. A plate is the row's identity and the
+                  // whole reason the column exists; `kPlateColumnMinWidth` is
+                  // the measured figure and was named precisely so this stops
+                  // being guessed per table.
+                  width: kPlateColumnMinWidth,
                   child: Text(
                     '1st Trailer',
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -208,7 +216,7 @@ class FleetVehicleTable extends StatelessWidget {
               ),
               const DataColumn(
                 label: SizedBox(
-                  width: 80,
+                  width: kPlateColumnMinWidth,
                   child: Text(
                     '2nd Trailer',
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -352,7 +360,7 @@ class FleetVehicleTable extends StatelessWidget {
                   ),
                   DataCell(
                     SizedBox(
-                      width: 80,
+                      width: kPlateColumnMinWidth,
                       child: Text(
                         vehicle.firstTrailerRegs ?? '-',
                         overflow: TextOverflow.ellipsis,
@@ -361,7 +369,7 @@ class FleetVehicleTable extends StatelessWidget {
                   ),
                   DataCell(
                     SizedBox(
-                      width: 80,
+                      width: kPlateColumnMinWidth,
                       child: Text(
                         vehicle.secondTrailerRegs ?? '-',
                         overflow: TextOverflow.ellipsis,
