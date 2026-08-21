@@ -122,13 +122,11 @@ class _MineSupplierBuyersDetailScreenState
     final stockpiles =
         ref.watch(stockpilesProvider(companyId)).valueOrNull ?? const [];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Buyers'),
-        backgroundColor: MlSemantic.of(context).surfaceApp,
-        foregroundColor: MlSemantic.of(context).textStrong,
-      ),
-      body: logistics.when(
+    // NO `Scaffold(appBar:)` — `/portal/mine/buyers` is a leaf of the portal
+    // `ShellRoute`, whose top bar already reads "Buyers".
+    return ColoredBox(
+      color: MlSemantic.of(context).surfaceApp,
+      child: logistics.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => MlLoadFailure(
             subject: 'your buyers',

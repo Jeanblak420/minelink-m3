@@ -36,6 +36,7 @@ import 'package:flutter_application_1/features/portal/screens/compliance_screen.
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/presence/ml_presence.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// URL segment for an org's portal routes.
@@ -45,9 +46,9 @@ String portalOrgSegment(OrgType org) => switch (org) {
       OrgType.transporter => 'transporter',
     };
 
-enum _Presence { online, away, offline }
+/// One rule, shared — see `core/presence/ml_presence.dart`.
+typedef _Presence = MlPresence;
 
-const _awayWindow = Duration(minutes: 30);
 
 // Fixed status hues, identical in both themes (matches the mock's C.green &c).
 const _green = MlTokens.green500;
@@ -112,23 +113,19 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
   String _hm(DateTime t) =>
       '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
-  DateTime? _bestLastSeen(EmployeeProfileBundle b) {
-    final live = ref
-        .read(presenceLastSeenProvider)[b.person.employee.userId];
-    final db = b.person.lastSeenAt;
-    if (live == null) return db;
-    if (db == null) return live;
-    return live.isAfter(db) ? live : db;
-  }
+  DateTime? _bestLastSeen(EmployeeProfileBundle b) => mlLastSeen(
+        dbLastSeen: b.person.lastSeenAt,
+        liveLastSeen:
+            ref.read(presenceLastSeenProvider)[b.person.employee.userId],
+      );
 
-  _Presence _presenceOf(EmployeeProfileBundle b, Set<String> online) {
-    if (online.contains(b.person.employee.userId)) return _Presence.online;
-    final seen = _bestLastSeen(b);
-    if (seen != null && DateTime.now().difference(seen) <= _awayWindow) {
-      return _Presence.away;
-    }
-    return _Presence.offline;
-  }
+  _Presence _presenceOf(EmployeeProfileBundle b, Set<String> online) =>
+      mlPresenceOf(
+        online: online.contains(b.person.employee.userId),
+        dbLastSeen: b.person.lastSeenAt,
+        liveLastSeen:
+            ref.read(presenceLastSeenProvider)[b.person.employee.userId],
+      );
 
   void _close() {
     final nav = Navigator.of(context);
@@ -230,6 +227,9 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
   void _pushCompliance() {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => Scaffold(
+        // shell-app-bar-exempt: a PUSHED page. It covers the shell's body with
+        // a route nothing else names, so this bar is the only thing that says
+        // what the page is and the only way back off it.
         appBar: AppBar(title: const Text('Compliance documents')),
         body: const ComplianceScreen(),
       ),
@@ -945,7 +945,10 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
 
   Widget _shiftCard(
       MlSemantic s, EmployeeProfileBundle b, _Presence presence) {
-    final now = DateTime.now();
+    // The shift runs 05:00-17:00 AT THE MINE, so the day and the hour are
+    // South African ones (CLAUDE.md 7.1). Off the device's clock a night-shift
+    // supervisor two zones away saw a progress bar for somebody else's day.
+    final now = MlTime.now();
     final start = DateTime(now.year, now.month, now.day, 5);
     final end = DateTime(now.year, now.month, now.day, 17);
     final total = end.difference(start).inMinutes;

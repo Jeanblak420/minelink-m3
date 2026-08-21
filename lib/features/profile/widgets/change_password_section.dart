@@ -1,21 +1,38 @@
-import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/validators.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/features/profile/providers/account_email_provider.dart';
 
 /// Voluntary password change for any signed-in user with an email + password identity.
 ///
 /// Verifies the current password via [signInWithPassword], then applies [updateUser].
-class ChangePasswordSection extends StatefulWidget {
+///
+/// ## It watches [accountEmailProvider], and that is the whole point
+///
+/// This widget decides whether to exist at all from the account's email — no
+/// email, no password identity, nothing to change. It used to read that from
+/// `SupabaseConfig.client.auth.currentUser` **inside its own `build`**, which
+/// is the exact call `accountEmailProvider` was created to remove from
+/// `AccountSecurityScreen`. The screen was fixed and the section it delegates
+/// to was not, so the two disagreed about the same question from two different
+/// sources — and because a global singleton cannot be overridden, THE ONLY
+/// PASSWORD-CHANGE UI IN THE PRODUCT rendered `SizedBox.shrink()` in every
+/// test and every render that has ever existed. Photographed 2026-08-21: the
+/// account-security page opened on a signature card, and nobody could tell
+/// from the picture that a card was missing.
+class ChangePasswordSection extends ConsumerStatefulWidget {
   const ChangePasswordSection({super.key});
 
   @override
-  State<ChangePasswordSection> createState() => _ChangePasswordSectionState();
+  ConsumerState<ChangePasswordSection> createState() =>
+      _ChangePasswordSectionState();
 }
 
-class _ChangePasswordSectionState extends State<ChangePasswordSection> {
+class _ChangePasswordSectionState extends ConsumerState<ChangePasswordSection> {
   final _formKey = GlobalKey<FormState>();
   final _current = TextEditingController();
   final _next = TextEditingController();
@@ -48,8 +65,8 @@ class _ChangePasswordSectionState extends State<ChangePasswordSection> {
       return;
     }
 
-    final email = SupabaseConfig.client.auth.currentUser?.email?.trim();
-    if (email == null || email.isEmpty) {
+    final email = ref.read(accountEmailProvider);
+    if (email == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No email address on this session — password change is unavailable.')),
       );
@@ -95,40 +112,32 @@ class _ChangePasswordSectionState extends State<ChangePasswordSection> {
 
   @override
   Widget build(BuildContext context) {
-    final email = SupabaseConfig.client.auth.currentUser?.email?.trim();
-    if (email == null || email.isEmpty) {
+    final email = ref.watch(accountEmailProvider);
+    if (email == null) {
       return const SizedBox.shrink();
     }
 
-    final cs = Theme.of(context).colorScheme;
-
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: MlShape.radiusLarge,
-        side: BorderSide(color: cs.outlineVariant.withAlpha(180)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
+    // `MlCard` + `MlSectionTitle`, like the two cards it sits between.
+    //
+    // It was a Material `Card` with a hand-built icon-and-`titleMedium` row, so
+    // on the account & security page the password card had a different
+    // background, a different border and a heading in a different TYPEFACE from
+    // the Signature and Deactivate cards directly under it — three cards, two
+    // design languages. Nobody had seen that, because until the same day this
+    // widget never rendered at all (see the class comment).
+    return MlCard(
+      padding: const EdgeInsets.all(20),
+      child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Icon(Icons.lock_outline_rounded, color: cs.primary),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Change password',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'For $email — enter your current password, then choose a new one.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+              MlSectionTitle(
+                'Change password',
+                icon: Icons.lock_outline_rounded,
+                subtitle: 'For $email — enter your current password, then '
+                    'choose a new one.',
+                margin: EdgeInsets.zero,
               ),
               const SizedBox(height: 20),
               TextFormField(
@@ -198,7 +207,6 @@ class _ChangePasswordSectionState extends State<ChangePasswordSection> {
             ],
           ),
         ),
-      ),
     );
   }
 }

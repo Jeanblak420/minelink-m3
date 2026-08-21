@@ -28,9 +28,11 @@ class ProfileSetupScreen extends ConsumerWidget {
     final semantic = MlSemantic.of(context);
     final async = ref.watch(myProfileSetupProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Account setup')),
-      body: async.when(
+    // NO `Scaffold(appBar:)` — `/account-setup` is a leaf of the portal
+    // `ShellRoute`, whose top bar already reads "Account setup".
+    return ColoredBox(
+      color: semantic.surfaceApp,
+      child: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => MlEmptyState(
           icon: Icons.error_outline_rounded,

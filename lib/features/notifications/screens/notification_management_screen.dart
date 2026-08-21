@@ -11,18 +11,22 @@ import 'package:flutter_application_1/features/employee/providers/employee_provi
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
+/// The persistent notification history.
+///
+/// **No app bar of its own, and no flag for one** — see [NotificationScreen],
+/// which lost the same `showAppBar` for the same reason. Both routes that
+/// mount this screen are leaves of a `ShellRoute` whose top bar already carries
+/// [title]; the screen's own bar repeated it directly underneath.
 class NotificationManagementScreen extends ConsumerStatefulWidget {
   final String title;
   final UserRole? filterRole;
   final bool isFromAdminTab;
-  final bool showAppBar;
 
   const NotificationManagementScreen({
     super.key,
     required this.title,
     this.filterRole,
     this.isFromAdminTab = false,
-    this.showAppBar = true,
   });
 
   @override
@@ -67,25 +71,33 @@ class _NotificationManagementScreenState
     final notificationState = ref.watch(notificationProvider);
     final authState = ref.watch(authStateProvider);
 
-    return Scaffold(
-      appBar: widget.showAppBar
-          ? AppBar(
-              title: Text(widget.title),
-              actions: [
-                if (widget.isFromAdminTab)
-                  IconButton(
-                    icon: const Icon(Icons.info_outline),
-                    onPressed: () {
-                      _showInfoDialog(context);
-                    },
-                    tooltip: 'About Notifications',
-                  ),
-              ],
-            )
-          : null,
-      body: Column(
+    final semantic = MlSemantic.of(context);
+    final rows = notificationState.managementNotifications;
+
+    return ColoredBox(
+      color: semantic.surfaceApp,
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 22, 24, 0),
+            child: MlPageHeader(
+              title: widget.title,
+              description: 'Every notification kept for your role — a '
+                  'persistent record, unlike the bell, which can be cleared.',
+              meta: mlCount(rows.length, 'notification'),
+              padding: EdgeInsets.zero,
+              actions: [
+                if (widget.isFromAdminTab)
+                  MlButton.ghost(
+                    label: 'About',
+                    icon: Icons.info_outline,
+                    compact: true,
+                    onPressed: () => _showInfoDialog(context),
+                  ),
+              ],
+            ),
+          ),
           // Info banner explaining the distinction from bell icon (Step 5)
           if (widget.isFromAdminTab) _buildInfoBanner(context),
           // Main content
@@ -97,12 +109,12 @@ class _NotificationManagementScreenState
                       size: 50,
                     ),
                   )
-                : notificationState.managementNotifications.isEmpty
+                : rows.isEmpty
                 ? _buildEmptyState()
                 : _buildNotificationList(
                     context,
                     ref,
-                    notificationState.managementNotifications,
+                    rows,
                     authState.userType?.isCompany == true,
                   ),
           ),

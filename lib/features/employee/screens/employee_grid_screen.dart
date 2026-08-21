@@ -34,9 +34,23 @@ class EmployeeGridScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: Text('$companyName Employees')),
-      body: _buildEmployeeGrid(context, ref),
+    // NO `Scaffold(appBar:)` — `/employees/:companyId` is a leaf of the portal
+    // `ShellRoute`, whose top bar already names the company.
+    return ColoredBox(
+      color: MlSemantic.of(context).surfaceApp,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+            child: MlPageHeader(
+              title: '$companyName Employees',
+              description: 'Everyone registered under this company.',
+            ),
+          ),
+          Expanded(child: _buildEmployeeGrid(context, ref)),
+        ],
+      ),
     );
   }
 

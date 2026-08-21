@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -91,11 +92,18 @@ class _HostileFakeService implements AccountDeactivationService {
 ///
 /// 20 other test files still host this way — recorded in
 /// `docs/redesign/VERIFICATION.md` rather than fixed in passing.
-Widget _host(Widget child, {double scale = 1.0}) => MaterialApp(
-      theme: AppTheme.darkTheme,
-      home: MediaQuery(
-        data: MediaQueryData(textScaler: TextScaler.linear(scale)),
-        child: Scaffold(body: SingleChildScrollView(child: child)),
+/// A `ProviderScope`, because the card resolves its service through
+/// `accountDeactivationServiceProvider` now — see that provider for why it had
+/// to stop constructing one itself. These tests still pass a fake through the
+/// `service:` argument, which takes precedence, so what they assert is
+/// unchanged.
+Widget _host(Widget child, {double scale = 1.0}) => ProviderScope(
+      child: MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: MediaQuery(
+          data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+          child: Scaffold(body: SingleChildScrollView(child: child)),
+        ),
       ),
     );
 

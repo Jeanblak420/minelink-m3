@@ -28,16 +28,18 @@ class FleetManagementScreen extends ConsumerWidget {
       employeeState,
     );
 
+    // NO `Scaffold(appBar:)` anywhere below — every route that reaches this
+    // screen is a leaf of the portal `ShellRoute`, whose top bar already
+    // carries the section name, so its own bar printed "Fleet Management" a
+    // second time directly underneath. Photographed 2026-08-21.
     if (!isAuthorized) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Fleet Management')),
-        body: const Center(
-          child: Text(
-            'You are not authorized to access the Fleet Management system.\n'
-            'Only Transporter companies with Admin or Management roles can access this feature.',
-            textAlign: TextAlign.center,
-          ),
-        ),
+      return const MlEmptyState(
+        icon: Icons.lock_outline_rounded,
+        title: 'Fleet Management',
+        message:
+            'You are not authorized to access the Fleet Management system. '
+            'Only Transporter companies with Admin or Management roles can '
+            'access this feature.',
       );
     }
 
@@ -45,9 +47,10 @@ class FleetManagementScreen extends ConsumerWidget {
     final String? companyId = _getCompanyId(companyState, employeeState);
 
     if (companyId == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Fleet Management')),
-        body: const Center(child: Text('Company information not available.')),
+      return const MlEmptyState(
+        icon: Icons.domain_disabled_outlined,
+        title: 'Fleet Management',
+        message: 'Company information not available.',
       );
     }
 
@@ -55,19 +58,33 @@ class FleetManagementScreen extends ConsumerWidget {
     final fleetProviderInstance = ref.watch(fleetProvider(companyId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fleet Management'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ref.read(fleetProvider(companyId).notifier).loadFleetVehicles();
-            },
-            tooltip: 'Refresh',
+      backgroundColor: MlSemantic.of(context).surfaceApp,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+            child: MlPageHeader(
+              title: 'Fleet Management',
+              description: 'Every vehicle registered to this company, and '
+                  'whether it is available, on route or in maintenance.',
+              actions: [
+                MlButton.ghost(
+                  label: 'Refresh',
+                  icon: Icons.refresh,
+                  compact: true,
+                  onPressed: () => ref
+                      .read(fleetProvider(companyId).notifier)
+                      .loadFleetVehicles(),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _buildBody(context, ref, fleetProviderInstance, companyId),
           ),
         ],
       ),
-      body: _buildBody(context, ref, fleetProviderInstance, companyId),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddVehicleDialog(context, ref, companyId),
         tooltip: 'Add Vehicle',

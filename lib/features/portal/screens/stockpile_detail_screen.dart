@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_entry.dart';
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
@@ -10,8 +11,6 @@ import 'package:flutter_application_1/features/portal/widgets/premium_overview_w
 import 'package:flutter_application_1/features/portal/widgets/stockpile_docs_dialog.dart';
 import 'package:flutter_application_1/features/portal/widgets/stockpile_widgets.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
-import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
-import 'package:flutter_application_1/core/design/components/ml_tile_grid.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 
 /// Premium drill-down for the overview "Stockpile levels" tile: one card per
@@ -60,22 +59,13 @@ class StockpileDetailScreen extends ConsumerWidget {
         ref.watch(stockpilesProvider(companyId)).valueOrNull ?? const [];
     final totalBalance = stockpiles.fold<double>(0, (a, s) => a + s.tons);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Stockpile levels'),
-        backgroundColor: MlSemantic.of(context).surfaceApp,
-        foregroundColor: MlSemantic.of(context).textStrong,
-        actions: [
-          IconButton(
-            tooltip: 'Audit trail',
-            icon: const Icon(Icons.history_rounded),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const StockpileAuditScreen()),
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
+    // NO `Scaffold(appBar:)` — `/portal/{org}/stockpiles` is a leaf of the
+    // portal `ShellRoute`, whose top bar already reads "Stockpiles". The
+    // "Audit trail" action moved into the page header, which is where every
+    // other portal screen keeps its screen-level actions.
+    return ColoredBox(
+      color: MlSemantic.of(context).surfaceApp,
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         child: Align(
           alignment: Alignment.topCenter,
@@ -84,6 +74,22 @@ class StockpileDetailScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                MlPageHeader(
+                  title: 'Stockpile levels',
+                  description: 'What is standing on the ground at this mine, '
+                      'per order pile, and how much of each order it fills.',
+                  actions: [
+                    MlButton.ghost(
+                      label: 'Audit trail',
+                      icon: Icons.history_rounded,
+                      compact: true,
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => const StockpileAuditScreen()),
+                      ),
+                    ),
+                  ],
+                ),
                 // The label is Flexible and the figure is not, deliberately.
                 // A Row gives non-flex children unbounded width, so a Text's
                 // ellipsis never engages (CLAUDE.md §10.4) — this overflowed by

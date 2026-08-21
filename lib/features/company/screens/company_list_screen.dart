@@ -35,9 +35,24 @@ class CompanyListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: _buildCompanyList(context, ref),
+    // NO `Scaffold(appBar:)` — `/companies/:orgType` is a leaf of the portal
+    // `ShellRoute`, whose top bar already carries this same title.
+    return ColoredBox(
+      color: MlSemantic.of(context).surfaceApp,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+            child: MlPageHeader(
+              title: title,
+              description: 'Every company of this type registered on the '
+                  'platform.',
+            ),
+          ),
+          Expanded(child: _buildCompanyList(context, ref)),
+        ],
+      ),
     );
   }
 
@@ -139,19 +154,12 @@ class CompanyDetailsLoaderScreen extends ConsumerWidget {
           );
         }
         if (snapshot.hasError || !snapshot.hasData) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Company')),
-            body: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  snapshot.hasError
-                      ? 'Failed to load company:\n${snapshot.error}'
-                      : 'Company not found',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
+          return MlEmptyState(
+            icon: Icons.domain_disabled_outlined,
+            title: 'Company',
+            message: snapshot.hasError
+                ? 'Failed to load company: ${snapshot.error}'
+                : 'Company not found',
           );
         }
         return CompanyDetailsScreen(company: snapshot.data!);

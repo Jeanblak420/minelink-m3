@@ -32,6 +32,7 @@ import 'package:flutter_application_1/features/chat/services/chat_sound_service.
 import 'package:flutter_application_1/core/design/tokens/ml_chat_palettes.dart';
 import 'package:flutter_application_1/features/chat/widgets/live_chat_icon.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/presence/ml_presence.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
 final _log = LoggerFactory.getLogger('ChatDock');
@@ -1198,8 +1199,7 @@ class _ConversationsList extends ConsumerWidget {
                               ),
                               if (c.lastMessageTimestamp != null)
                                 Text(
-                                  DateFormat('HH:mm')
-                                      .format(c.lastMessageTimestamp!),
+                                  MlTime.agoTag(c.lastMessageTimestamp!),
                                   style: context.mlText.code(
                                     color: (hasUnread || hovering) ? pal.accent : pal.bodySubtle,
                                     size: 11,
@@ -2143,7 +2143,11 @@ class _PresenceText extends ConsumerWidget {
     }
     final live =
         userId != null ? ref.watch(presenceLastSeenProvider)[userId] : null;
-    final last = live ?? dbLastSeen;
+    // `mlLastSeen`, not `live ?? dbLastSeen`: the live channel only ever holds
+    // the stamp for THIS session, so a contact whose database heartbeat is
+    // newer than the moment they dropped off the channel was being reported as
+    // last seen when they left the tab.
+    final last = mlLastSeen(dbLastSeen: dbLastSeen, liveLastSeen: live);
     final label = last != null ? 'Last seen ${_relativeTime(last)}' : 'Offline';
     return Text(label,
         maxLines: 1,
@@ -2698,7 +2702,7 @@ class _Bubble extends StatelessWidget {
                   const SizedBox(width: 4),
                 ],
                 Text(
-                  DateFormat('HH:mm').format(message.timestamp),
+                  MlTime.clock(message.timestamp),
                   style: context.mlText.labelSmall.copyWith(
                     color: fg.withValues(alpha: 0.75),
                     fontWeight: FontWeight.w500,

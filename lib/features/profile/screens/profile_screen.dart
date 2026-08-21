@@ -17,6 +17,7 @@ import 'package:flutter_application_1/core/utils/platform_utils.dart';
 import 'package:flutter_application_1/core/utils/image_provider_utils.dart';
 import 'package:flutter_application_1/features/employee/widgets/document_upload_widget.dart';
 import 'package:flutter_application_1/core/legal/legal_documents.dart';
+import 'package:flutter_application_1/features/profile/providers/account_email_provider.dart';
 import 'package:flutter_application_1/features/profile/widgets/change_password_section.dart';
 import 'package:flutter_application_1/features/profile/widgets/company_token_requests_panel.dart';
 import 'package:flutter_application_1/features/profile/widgets/deactivate_account_card.dart';
@@ -282,79 +283,78 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ? 'Update company identity, leadership details, and brand assets.'
         : 'Keep your personal details, documents, and account information current.';
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color.alphaBlend(
-                Theme.of(context).colorScheme.primary.withAlpha(24),
-                Theme.of(context).scaffoldBackgroundColor,
+    // NO `Scaffold(appBar:)`, and no page gradient.
+    //
+    // Every route that mounts this screen — `/profile` and the three
+    // `/portal/{org}/profile` — is a leaf of the portal `ShellRoute`, whose top
+    // bar already reads "Profile". Its own bar put the word on screen twice.
+    //
+    // The gradient went with it. It was the only page in the product with a
+    // painted ground: a diagonal primary→tertiary wash over
+    // `scaffoldBackgroundColor`, so opening Profile from any other portal
+    // screen changed the colour of the canvas underneath the same rail. The
+    // workspace's ground is `surfaceApp`, once, for every page on it.
+    return ColoredBox(
+      color: MlSemantic.of(context).surfaceApp,
+      child: SafeArea(
+        top: false,
+        child: MlPageBody(
+          maxWidth: 940,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MlPageHeader(
+                title: 'Profile',
+                description: subtitle,
+                meta: authState.userType?.isCompany == true
+                    ? 'Company workspace'
+                    : 'Employee workspace',
               ),
-              Theme.of(context).scaffoldBackgroundColor,
-              Color.alphaBlend(
-                Theme.of(context).colorScheme.tertiary.withAlpha(16),
-                Theme.of(context).scaffoldBackgroundColor,
-              ),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 940),
+              MlCard(
+                hero: true,
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    MlCard(
-                      hero: true,
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              MlStatusBadge(
-                                label: authState.userType?.isCompany == true
-                                    ? 'Company workspace'
-                                    : 'Employee workspace',
-                                tone: MlTone.accent,
-                              ),
-                              const MlStatusBadge(
-                                label: 'Live profile',
-                                tone: MlTone.done,
-                                dot: true,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            title,
-                            style: Theme.of(context).textTheme.headlineSmall
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          MlCard.heroTitleRule(),
-                          Text(
-                            subtitle,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(color: MlSemantic.of(context).textMuted),
-                          ),
-                        ],
-                      ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        MlStatusBadge(
+                          label: authState.userType?.isCompany == true
+                              ? 'Company workspace'
+                              : 'Employee workspace',
+                          tone: MlTone.accent,
+                        ),
+                        const MlStatusBadge(
+                          label: 'Live profile',
+                          tone: MlTone.done,
+                          dot: true,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 14),
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w800),
+                    ),
+                    // NO SECOND COPY of the page header's sentence. The header
+                    // above already says what this page is for; the hero card
+                    // says WHOSE it is. Printing `subtitle` in both put the
+                    // same sentence on screen twice, a hundred pixels apart.
+                    MlCard.heroTitleRule(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
                     const _AccountSetupLinkCard(),
                     const SizedBox(height: 18),
-                    if ((authState.user?.email ?? '').trim().isNotEmpty) ...[
+                    // `ChangePasswordSection` asks `accountEmailProvider` the
+                    // same question and hides itself when the answer is no, so
+                    // this gate is not a second opinion — it is only here to
+                    // drop the 18px gap with it.
+                    if (ref.watch(accountEmailProvider) != null) ...[
                       const ChangePasswordSection(),
                       const SizedBox(height: 18),
                     ],
@@ -384,10 +384,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     // carries the other copy for the super-admin surface.
                     const SizedBox(height: 18),
                     const DeactivateAccountCard(),
-                  ],
-                ),
-              ),
-            ),
+            ],
           ),
         ),
       ),
@@ -405,9 +402,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Rides the text scaler, and keeps a gutter. Same two faults, and the
+          // same fix, as the company registry's info rows: a flat column under
+          // a per-user type size squeezes the VALUE — the half a reader is here
+          // for — and a label that exactly fills its column touches it.
           SizedBox(
-            width: 152,
-            child: Text(label, style: TextStyle(color: variant)),
+            width: MediaQuery.textScalerOf(context).scale(152),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Text(label, style: TextStyle(color: variant)),
+            ),
           ),
           Expanded(
             child: Text(
@@ -501,7 +505,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               // The org type and the fact that some of this is issued rather
               // than entered — the company reference and the org type are
               // both system-owned and cannot be edited here (S8-11).
-              meta: '${company.orgType.name} · reference is read-only',
+              // `.label`, not `.name`. `.name` is the WIRE spelling, so a
+              // mine's own profile captioned its company information
+              // "mineSupplier" and a haulier's "transporter" — the fifth
+              // private reading of that enum found in this phase, and the
+              // reason `OrgType.label` exists.
+              meta: '${company.orgType.label} · reference is read-only',
               margin: EdgeInsets.zero),
           const SizedBox(height: 16),
           TextFormField(
@@ -564,11 +573,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               final resolvedEmail =
                   (email != null && email.isNotEmpty) ? email : authEmail ?? '—';
               final dn = (snapshot.data?['display_name'] as String?)?.trim();
-              final resolvedName = (dn != null && dn.isNotEmpty)
-                  ? dn
-                  : (resolvedEmail.contains('@')
-                      ? resolvedEmail.split('@').first
-                      : '—');
+              // A DASH when nobody has given a name, not the mailbox half of
+              // the email. `operator@fixture.co.za` rendered as an owner named
+              // "operator" — a lowercase machine handle presented as a
+              // person's name, in a read-only field labelled "Owner name",
+              // with the email itself on the very next row. Same family as the
+              // `0%`-where-a-dash-belongs on org insights: a placeholder
+              // nobody chose that reads as a fact somebody entered.
+              final resolvedName = (dn != null && dn.isNotEmpty) ? dn : '—';
               final contact = company.whatsappNumber.trim().isNotEmpty
                   ? company.whatsappNumber.trim()
                   : '—';
@@ -627,46 +639,60 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _ceoFirstNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'CEO First Name',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter CEO first name';
-                    }
-                    return null;
-                  },
-                  // Add attributes for browser autofill
-                  autofillHints: const [AutofillHints.givenName],
+          // STACKED ON A PHONE.
+          //
+          // Two `Expanded` fields each carrying a 48px prefix icon and 24px of
+          // content padding leave ~106px for the label at 412px, so both read
+          // "CEO First Na…" / "CEO Last Na…" — a form asking for something it
+          // no longer names. Side by side above 520, one above the other below
+          // it.
+          LayoutBuilder(
+            builder: (context, c) {
+              final first = TextFormField(
+                controller: _ceoFirstNameController,
+                decoration: const InputDecoration(
+                  labelText: 'CEO First Name',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.person),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextFormField(
-                  controller: _ceoLastNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'CEO Last Name',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.person),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter CEO last name';
-                    }
-                    return null;
-                  },
-                  // Add attributes for browser autofill
-                  autofillHints: const [AutofillHints.familyName],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter CEO first name';
+                  }
+                  return null;
+                },
+                // Add attributes for browser autofill
+                autofillHints: const [AutofillHints.givenName],
+              );
+              final last = TextFormField(
+                controller: _ceoLastNameController,
+                decoration: const InputDecoration(
+                  labelText: 'CEO Last Name',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.person),
                 ),
-              ),
-            ],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter CEO last name';
+                  }
+                  return null;
+                },
+                // Add attributes for browser autofill
+                autofillHints: const [AutofillHints.familyName],
+              );
+              if (c.maxWidth < 520) {
+                return Column(
+                  children: [first, const SizedBox(height: 16), last],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: first),
+                  const SizedBox(width: 16),
+                  Expanded(child: last),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 24),
           SizedBox(

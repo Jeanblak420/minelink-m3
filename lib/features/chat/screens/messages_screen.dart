@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/features/chat/models/messaging_models.dart';
 import 'package:flutter_application_1/features/chat/providers/messaging_providers.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -35,47 +35,95 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
     return role == 'owner' || role == 'management' || role == 'admin';
   }
 
+  /// Below this the two panes cannot both fit and the screen becomes one pane
+  /// at a time — the list, or the open conversation with a back arrow.
+  ///
+  /// 340 (sidebar) + 1 (divider) leaves 71px of a 412px phone for the whole
+  /// conversation, and 71px is not a narrow thread: it is one CHARACTER per
+  /// line. Photographed 2026-08-21 — "The interlink is at the weighbridge now"
+  /// rendered as a vertical column of single letters beside a 20px composer.
+  /// The doc comment above this class has said "desktop two-pane" since it was
+  /// written; nothing ever told the screen what to do when it was not on one.
+  ///
+  /// 760 rather than [AppBreakpoints.sidebarBreakpoint] (900): the panes need
+  /// 340 + a thread wide enough for the 460px bubble cap, and at 760 the thread
+  /// gets 419. Above the shell's own 900 the rail is also on screen, so the
+  /// figure that matters is the workspace width this screen is handed, not the
+  /// window's.
+  static const double _twoPaneFrom = 760;
+
   @override
   Widget build(BuildContext context) {
     final semantic = MlSemantic.of(context);
-    return Scaffold(
-      backgroundColor: semantic.surfaceApp,
-      appBar: AppBar(
-        title: const Text('Messages'),
-        titleTextStyle: context.mlText.titleLarge.copyWith(
-          color: semantic.textStrong,
-          fontWeight: FontWeight.w800,
-        ),
-        actions: [
-          // S8-3 / P10-08. Only an owner, management or admin may commit their
-          // company to a group, and `create_org_group` refuses anyone else —
-          // so the action is shown to exactly those roles rather than offered
-          // and then refused.
-          if (_canStartGroup(ref))
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: TextButton.icon(
-                onPressed: () => showOrgGroupDialog(context),
-                icon: const Icon(Icons.groups_2_outlined, size: 18),
-                label: const Text('New group'),
-              ),
-            ),
-        ],
-      ),
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            width: 340,
-            child: _Sidebar(
-              tab: _sidebarTab,
-              onTab: (t) => setState(() => _sidebarTab = t),
-            ),
+    final room = ref.watch(activeRoomProvider);
+
+    // NO `Scaffold(appBar:)`. Every route that mounts this screen is a leaf of
+    // the portal `ShellRoute`, which has already drawn a top bar reading
+    // "Messages" — so its own bar put the same word on the screen a second
+    // time, directly underneath. Same fault as the tons-out register and the
+    // company profile before it.
+    final header = MlPageHeader(
+      title: 'Messages',
+      description: 'Conversations with your own team, with MineLink, and with '
+          'the companies you are connected to.',
+      actions: [
+        // S8-3 / P10-08. Only an owner, management or admin may commit their
+        // company to a group, and `create_org_group` refuses anyone else —
+        // so the action is shown to exactly those roles rather than offered
+        // and then refused.
+        if (_canStartGroup(ref))
+          MlButton.outline(
+            label: 'New group',
+            icon: Icons.groups_2_outlined,
+            compact: true,
+            onPressed: () => showOrgGroupDialog(context),
           ),
-          Container(width: 1, color: semantic.divider),
-          const Expanded(child: _ConversationPane()),
-        ],
-      ),
+      ],
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final twoPane = constraints.maxWidth >= _twoPaneFrom;
+        final sidebar = _Sidebar(
+          tab: _sidebarTab,
+          onTab: (t) => setState(() => _sidebarTab = t),
+        );
+
+        return ColoredBox(
+          color: semantic.surfaceApp,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    twoPane ? MlTokens.contentPadding : 16, 20, 16, 0),
+                child: header,
+              ),
+              Expanded(
+                child: twoPane
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(width: 340, child: sidebar),
+                          Container(width: 1, color: semantic.divider),
+                          const Expanded(child: _ConversationPane()),
+                        ],
+                      )
+                    // One pane at a time. The list until something is picked,
+                    // then the thread — with a back arrow, because on a phone
+                    // there is nothing else on screen to return to it.
+                    : room == null
+                        ? sidebar
+                        : _ConversationPane(
+                            onBack: () => ref
+                                .read(activeRoomProvider.notifier)
+                                .state = null,
+                          ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -234,7 +282,13 @@ class _ConversationTile extends StatelessWidget {
                       ),
                       if (time != null)
                         Text(
-                          DateFormat('HH:mm').format(time),
+                          // `agoTag`, not a bare clock. Four rows whose
+                          // last messages were 14 minutes, 5 hours, a day and
+                          // a MONTH old all printed a plain `HH:mm`, so a
+                          // conversation nobody had touched since July read
+                          // "09:30" — the same fault the truck-location list
+                          // had, one screen over.
+                          MlTime.agoTag(time),
                           style: context.mlText.code(
                             color: semantic.textFaint,
                             size: 11,
@@ -375,7 +429,11 @@ class _ContactTile extends ConsumerWidget {
 // CONVERSATION PANE
 // ===========================================================================
 class _ConversationPane extends ConsumerStatefulWidget {
-  const _ConversationPane();
+  const _ConversationPane({this.onBack});
+
+  /// Non-null only in the one-pane (phone) layout, where the conversation list
+  /// is not on screen beside the thread.
+  final VoidCallback? onBack;
 
   @override
   ConsumerState<_ConversationPane> createState() => _ConversationPaneState();
@@ -471,7 +529,7 @@ class _ConversationPaneState extends ConsumerState<_ConversationPane> {
 
     return Column(
       children: [
-        _ConvHeader(room: room),
+        _ConvHeader(room: room, onBack: widget.onBack),
         Container(height: 1, color: semantic.divider),
         Expanded(
           child: messages.when(
@@ -523,7 +581,8 @@ class _ConversationPaneState extends ConsumerState<_ConversationPane> {
 
 class _ConvHeader extends ConsumerWidget {
   final ChatConversation room;
-  const _ConvHeader({required this.room});
+  final VoidCallback? onBack;
+  const _ConvHeader({required this.room, this.onBack});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -537,10 +596,16 @@ class _ConvHeader extends ConsumerWidget {
         ref.watch(authStateProvider).userType == UserType.company;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      padding: EdgeInsets.fromLTRB(onBack == null ? 24 : 4, 14, 16, 14),
       color: semantic.surfaceCard,
       child: Row(
         children: [
+          if (onBack != null)
+            IconButton(
+              onPressed: onBack,
+              tooltip: 'Back to conversations',
+              icon: const Icon(Icons.arrow_back_rounded),
+            ),
           _Avatar(name: room.name, isGroup: room.type != ChatRoomType.dm),
           const SizedBox(width: 12),
           Expanded(
@@ -693,7 +758,7 @@ class _MessageBubble extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  DateFormat('HH:mm').format(message.timestamp),
+                  MlTime.clock(message.timestamp),
                   style: context.mlText.code(
                     color: mine ? MlTokens.inkOnFill70 : semantic.textFaint,
                     size: 10,
@@ -845,7 +910,20 @@ class _Avatar extends StatelessWidget {
     final initials = name.trim().isEmpty
         ? '?'
         : name.trim().split(RegExp(r'\s+')).take(2).map((e) => e[0]).join().toUpperCase();
-    final color = isSuperAdmin ? MlTokens.navy800 : MlTokens.accent;
+    // THE PLATFORM ACCOUNT'S AVATAR WAS INVISIBLE IN THE DARK THEME.
+    //
+    // It drew `MlTokens.navy800` initials on a `navy800` well at 14% opacity —
+    // the sidebar navy, on a navy surface. Photographed 2026-08-21: the
+    // MineLink Support row in the People list has a name, a company line, and
+    // a circle with nothing readable in it. The theme's default IS dark
+    // (CLAUDE.md 2), so this was the normal case, not the edge one.
+    //
+    // `MlTone.neutral` instead: a slate that resolves per brightness, so the
+    // platform account still reads as a different KIND of contact from a
+    // colleague without picking a colour that only works in one theme.
+    final color = isSuperAdmin
+        ? MlTone.neutral.colors(Theme.of(context).brightness).fg
+        : MlTokens.accent;
     return Container(
       width: 40,
       height: 40,

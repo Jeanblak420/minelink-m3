@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:flutter_application_1/core/config/supabase_config.dart';
@@ -58,7 +60,7 @@ class PresenceController extends StateNotifier<Presence> {
         }
       }
       // Anyone who was online and now isn't → stamp last-seen NOW (instant).
-      final now = DateTime.now();
+      final now = MlTime.instant();
       for (final was in state.online) {
         if (!ids.contains(was)) _lastSeen[was] = now;
       }
@@ -141,7 +143,7 @@ class TypingController extends StateNotifier<Set<String>> {
           if (_lastSeen.remove(name) != null) _recompute();
           return;
         }
-        _lastSeen[name] = DateTime.now();
+        _lastSeen[name] = MlTime.instant();
         _recompute();
       },
     );
@@ -152,7 +154,7 @@ class TypingController extends StateNotifier<Set<String>> {
   }
 
   void _recompute() {
-    final now = DateTime.now();
+    final now = MlTime.instant();
     // Short window: typing pings are throttled to ~1.5s, so 3s covers a missed
     // keystroke without the indicator lingering after someone stops.
     _lastSeen.removeWhere(
@@ -241,7 +243,7 @@ class TypingInboxController extends StateNotifier<TypingInbox> {
           _recompute();
           return;
         }
-        _typers[from] = DateTime.now();
+        _typers[from] = MlTime.instant();
         final room = payload['room_id'];
         if (room is String && room.isNotEmpty) _typerRooms[from] = room;
         _recompute();
@@ -254,7 +256,7 @@ class TypingInboxController extends StateNotifier<TypingInbox> {
   }
 
   void _recompute() {
-    final now = DateTime.now();
+    final now = MlTime.instant();
     _typers.removeWhere(
         (k, v) => now.difference(v) > const Duration(seconds: 3));
     _typerRooms.removeWhere((k, _) => !_typers.containsKey(k));

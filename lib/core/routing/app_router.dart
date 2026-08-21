@@ -1604,7 +1604,7 @@ class AppRouter {
           ),
           GoRoute(
             path: '/super-admin/notifications',
-            builder: (context, state) => const NotificationScreen(showAppBar: false),
+            builder: (context, state) => const NotificationScreen(),
           ),
           GoRoute(
             path: '/super-admin/notifications/manage',
@@ -1614,7 +1614,6 @@ class AppRouter {
                 title: args.title,
                 filterRole: args.filterRole,
                 isFromAdminTab: args.isFromAdminTab,
-                showAppBar: false,
               );
             },
           ),

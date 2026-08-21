@@ -195,6 +195,25 @@ class FixtureAuthStateNotifier extends AuthStateNotifier {
   }
 }
 
+/// An [AuthStateNotifier] with NO session, for handing to a notifier whose
+/// constructor's auth listener would otherwise dial out.
+///
+/// `NotificationNotifier` is the case this exists for: its listener runs with
+/// `fireImmediately: true`, and on a signed-in state it loads from the network
+/// and then opens a realtime channel — unconditionally, from a private method
+/// there is no seam in. A channel opened against the render harness's dummy
+/// Supabase instance leaves a connect timer that outlives the widget tree and
+/// fails the golden AFTER it has been written.
+///
+/// The `user == null` branch is the one that returns before doing either. The
+/// state such a notifier would have loaded is supplied to it directly instead,
+/// so nothing is being hidden — only the dialling.
+AuthStateNotifier signedOutAuthNotifier(Ref ref) => FixtureAuthStateNotifier(
+      ref.watch(authServiceProvider),
+      ref.watch(deviceVerificationStoreProvider),
+      fixture: AuthState(),
+    );
+
 /// A signed-in gotrue [supabase.User].
 ///
 /// `operations_hub` and `communications_hub` both short-circuit to a spinner
@@ -285,14 +304,18 @@ Override companyAccessOverride({
 /// The tab bodies are placeholders rather than the real screens: those have
 /// their own sweeps, and nesting them here would mean this fixture's failures
 /// were really theirs.
-Override portalWorkspaceOverride() {
+/// [isMineSupplier] is a parameter because the appearance screen's two premium
+/// theme sections are mine/supplier-only — a transporter photographs one card
+/// of three and the whole `MineThemeDirection` picker is absent.
+Override portalWorkspaceOverride({bool isMineSupplier = false}) {
   return portalWorkspaceProvider.overrideWithValue(
-    const PortalWorkspaceModel(
+    PortalWorkspaceModel(
       phase: PortalWorkspacePhase.ready,
+      isMineSupplier: isMineSupplier,
       workspaceName: 'Fixture Haulage (Pty) Ltd',
       operatorName: 'Fixture Operator',
       roleLabel: 'Admin',
-      tabs: [
+      tabs: const [
         PortalTabItem('Overview', Icons.dashboard_outlined,
             Center(child: Text('Overview tab body'))),
         PortalTabItem('Earnings', Icons.payments_outlined,

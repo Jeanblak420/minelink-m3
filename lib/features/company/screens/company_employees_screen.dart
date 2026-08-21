@@ -49,34 +49,49 @@ class _CompanyEmployeesScreenState
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    // NO `Scaffold(appBar:)` — this screen is a leaf of the portal
+    // `ShellRoute`, whose top bar already carries the section name, so its own
+    // bar put "Company Employees" on screen twice.
     if (!access.canManageEmployees) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Company Employees')),
-        body: _buildRestrictedState(context),
-      );
+      return _buildRestrictedState(context);
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Company Employees'),
-        actions: [
-          IconButton(
-            tooltip: 'Add User',
-            onPressed: () => _showCreateUserDialog(context, company.orgType),
-            icon: const Icon(Icons.person_add_alt_1),
+    return ColoredBox(
+      color: MlSemantic.of(context).surfaceApp,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+            child: MlPageHeader(
+              title: 'Company Employees',
+              description: 'Everyone with a login under this company.',
+              meta: mlCount(state.employees.length, 'user'),
+              actions: [
+                MlButton.primary(
+                  label: 'Add user',
+                  icon: Icons.person_add_alt_1,
+                  compact: true,
+                  onPressed: () =>
+                      _showCreateUserDialog(context, company.orgType),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: state.isLoading
+                ? Center(
+                    child: LoadingAnimationWidget.staggeredDotsWave(
+                      color: MlTokens.accent,
+                      size: 50,
+                    ),
+                  )
+                : state.employees.isEmpty
+                    ? _buildEmptyState(context, company.orgType)
+                    : _buildEmployeeList(state.employees, company.orgType),
           ),
         ],
       ),
-      body: state.isLoading
-          ? Center(
-              child: LoadingAnimationWidget.staggeredDotsWave(
-                color: MlTokens.accent,
-                size: 50,
-              ),
-            )
-          : state.employees.isEmpty
-          ? _buildEmptyState(context, company.orgType)
-          : _buildEmployeeList(state.employees, company.orgType),
     );
   }
 

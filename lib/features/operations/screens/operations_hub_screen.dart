@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/widgets/m3_dropdown_field.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
@@ -48,15 +49,15 @@ class OperationsHubScreen extends ConsumerWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    // NO `Scaffold(appBar:)` — `/operations` is a leaf of the portal
+    // `ShellRoute`, whose top bar already carries the section name, so its own
+    // bar printed "Operations Hub" a second time directly underneath.
     if (access == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Operations Hub')),
-        body: const _OperationsEmptyState(
-          icon: Icons.factory_outlined,
-          title: 'Operations are not available yet',
-          message:
-              'Link to a company or finish loading your company profile to unlock the live operations workspace.',
-        ),
+      return const _OperationsEmptyState(
+        icon: Icons.factory_outlined,
+        title: 'Operations are not available yet',
+        message:
+            'Link to a company or finish loading your company profile to unlock the live operations workspace.',
       );
     }
 
@@ -86,24 +87,31 @@ class OperationsHubScreen extends ConsumerWidget {
       initialIndex: initialIndex,
       child: Scaffold(
         primary: observedCompany == null,
-        appBar: AppBar(
-          title: const Text('Operations Hub'),
-          actions: [
-            IconButton(
-              tooltip: 'Refresh live data',
-              onPressed: operationsState.isLoading
-                  ? null
-                  : () => operationsNotifier.refresh(),
-              icon: const Icon(Icons.refresh),
-            ),
-          ],
-        ),
+        backgroundColor: MlSemantic.of(context).surfaceApp,
         body: Column(
           // See the same note on the communications hub: a Column centres its
           // children and sizes each to its own content, so this hero card
           // floated mid-page while the tabs and the list below ran full width.
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+              child: MlPageHeader(
+                title: 'Operations Hub',
+                description: 'The live working day — minerals, transactions, '
+                    'the weighbridge, loads, security and the gate.',
+                actions: [
+                  MlButton.ghost(
+                    label: 'Refresh',
+                    icon: Icons.refresh,
+                    compact: true,
+                    onPressed: operationsState.isLoading
+                        ? null
+                        : () => operationsNotifier.refresh(),
+                  ),
+                ],
+              ),
+            ),
             _OperationsSummaryHeader(access: access, state: operationsState),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),

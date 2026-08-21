@@ -20,10 +20,19 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 enum _NotifFilter { all, unread, priority }
 
+/// The bell's inbox.
+///
+/// **It draws no app bar of its own, and there is no flag for one.** There used
+/// to be a `showAppBar` that defaulted to true, which the console turned off;
+/// but EVERY route that mounts this screen is a leaf of one of the two
+/// `ShellRoute`s, and both shells have already drawn a top bar carrying the
+/// section name. So the flag's default was never right for anybody — the
+/// portal's four `/notifications` routes all rendered a second bar reading
+/// "Notifications" directly beneath a first one reading "Notifications", with
+/// the page's own "Recent alerts and updates" heading under both. Three titles
+/// in the first 200px. Photographed 2026-08-21.
 class NotificationScreen extends ConsumerStatefulWidget {
-  final bool showAppBar;
-
-  const NotificationScreen({super.key, this.showAppBar = true});
+  const NotificationScreen({super.key});
 
   @override
   ConsumerState<NotificationScreen> createState() => _NotificationScreenState();
@@ -64,9 +73,9 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
         .where((n) => n.importance != NotificationImportance.normal)
         .length;
 
-    return Scaffold(
-      appBar: widget.showAppBar ? AppBar(title: const Text('Notifications')) : null,
-      body: Column(
+    return ColoredBox(
+      color: semantic.surfaceApp,
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
@@ -74,68 +83,43 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 14,
-                  runSpacing: 12,
-                  children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Recent alerts and updates',
-                          style: context.mlText.titleLarge.copyWith(
-                            color: semantic.textStrong,
-                            fontWeight: FontWeight.w800,
+                MlPageHeader(
+                  title: 'Notifications',
+                  description: 'Recent alerts and updates for you and your '
+                      'company.',
+                  meta: '$unread unread · ${notifications.length} total',
+                  padding: EdgeInsets.zero,
+                  actions: [
+                    if (notifications.isNotEmpty)
+                      MlButton.outline(
+                        label: 'Mark all read',
+                        icon: Icons.done_all,
+                        compact: true,
+                        onPressed: () => ref
+                            .read(notificationProvider.notifier)
+                            .markAllAsRead(),
+                      ),
+                    if (notifications.isNotEmpty)
+                      MlButton.ghost(
+                        label: 'Clear all',
+                        icon: Icons.clear_all,
+                        compact: true,
+                        onPressed: () =>
+                            _showClearConfirmationDialog(context, ref),
+                      ),
+                    MlButton.ghost(
+                      label: 'View all',
+                      icon: Icons.view_list_outlined,
+                      compact: true,
+                      onPressed: () {
+                        context.go(
+                          NotificationsManageRoute.location(
+                            title: 'All Notifications',
+                            filterRole: _getUserRole(),
+                            useSuperAdminShell: inSuperAdminShell,
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '$unread unread · ${notifications.length} total',
-                          style: context.mlText.bodyMedium.copyWith(
-                            color: semantic.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        if (notifications.isNotEmpty)
-                          MlButton.outline(
-                            label: 'Mark all read',
-                            icon: Icons.done_all,
-                            compact: true,
-                            onPressed: () => ref
-                                .read(notificationProvider.notifier)
-                                .markAllAsRead(),
-                          ),
-                        if (notifications.isNotEmpty)
-                          MlButton.ghost(
-                            label: 'Clear all',
-                            icon: Icons.clear_all,
-                            compact: true,
-                            onPressed: () =>
-                                _showClearConfirmationDialog(context, ref),
-                          ),
-                        MlButton.ghost(
-                          label: 'View all',
-                          icon: Icons.view_list_outlined,
-                          compact: true,
-                          onPressed: () {
-                            context.go(
-                              NotificationsManageRoute.location(
-                                title: 'All Notifications',
-                                filterRole: _getUserRole(),
-                                useSuperAdminShell: inSuperAdminShell,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ],
                 ),

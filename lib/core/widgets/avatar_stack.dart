@@ -32,6 +32,65 @@ class AvatarUser {
   });
 }
 
+
+/// The avatar itself — a real WELL, not bare initials on the page.
+///
+/// It was `CircleAvatar(backgroundColor: Colors.transparent)` with the
+/// initials in `MlTokens.slate800`, and both halves of that are wrong at once:
+/// there is no circle behind an avatar with no photo, and slate-800 on the
+/// dark theme's card measures barely above the background it is painted on. In
+/// this product almost nobody has uploaded a photo, so almost every avatar in
+/// the chat header rendered as a grey smudge. Photographed 2026-08-21 on the
+/// chat thread, where "FO TM SR" was three illegible marks above two green
+/// dots that were the only visible part of the control.
+///
+/// Same treatment as `_Avatar` in the Messages screen: an accent tint at 14%
+/// with accent-coloured initials, so it reads in both themes.
+Widget _initialsAvatar(BuildContext context, AvatarUser user, double size) {
+  final hasPhoto = (user.avatarUrl ?? '').isNotEmpty;
+  return Container(
+    width: size,
+    height: size,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: hasPhoto ? null : MlTokens.accent.withValues(alpha: 0.14),
+      image: hasPhoto
+          ? DecorationImage(
+              image: imageProviderFromString(user.avatarUrl)!,
+              fit: BoxFit.cover,
+            )
+          : null,
+    ),
+    child: hasPhoto
+        ? null
+        : Text(
+            _initialsOf(user.name),
+            style: TextStyle(
+              color: MlTokens.accent,
+              fontWeight: FontWeight.w800,
+              fontSize: size / 3,
+            ),
+          ),
+  );
+}
+
+/// Initials, without indexing into an empty string.
+///
+/// `name.split(' ')` on `"Thandi "` yields `['Thandi', '']`, and the old
+/// version then read `parts[1][0]` — a RangeError on a trailing space in a
+/// display name, which is a thing a person types.
+String _initialsOf(String name) {
+  final parts = name
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((p) => p.isNotEmpty)
+      .toList();
+  if (parts.isEmpty) return '?';
+  if (parts.length == 1) return parts.first[0].toUpperCase();
+  return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+}
+
 /// A widget that displays a stack of avatars with presence indicators
 class AvatarStack extends StatelessWidget {
   /// The list of users to display
@@ -128,21 +187,7 @@ class AvatarStack extends StatelessWidget {
       onTap: onAvatarTap != null ? () => onAvatarTap!(user) : null,
       child: Stack(
         children: [
-          CircleAvatar(
-            radius: avatarSize / 2,
-            backgroundColor: Colors.transparent,
-            backgroundImage: imageProviderFromString(user.avatarUrl),
-            child: user.avatarUrl == null
-                ? Text(
-                    _getInitials(user.name),
-                    style: TextStyle(
-                      color: MlTokens.slate800,
-                      fontWeight: FontWeight.bold,
-                      fontSize: avatarSize / 3,
-                    ),
-                  )
-                : null,
-          ),
+          _initialsAvatar(context, user, avatarSize),
           if (showOnlineIndicator && user.isOnline)
             Positioned(
               right: 0,
@@ -186,16 +231,6 @@ class AvatarStack extends StatelessWidget {
     );
   }
 
-  String _getInitials(String name) {
-    final parts = name.split(' ');
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    } else if (parts.length == 1 && parts[0].isNotEmpty) {
-      return parts[0][0].toUpperCase();
-    } else {
-      return '?';
-    }
-  }
 }
 
 /// A widget that displays a horizontal list of avatars with presence indicators
@@ -252,21 +287,7 @@ class AvatarList extends StatelessWidget {
               children: [
                 Stack(
                   children: [
-                    CircleAvatar(
-                      radius: avatarSize / 2,
-                      backgroundColor: Colors.transparent,
-                      backgroundImage: imageProviderFromString(user.avatarUrl),
-                      child: user.avatarUrl == null
-                          ? Text(
-                              _getInitials(user.name),
-                              style: TextStyle(
-                                color: MlTokens.slate800,
-                                fontWeight: FontWeight.bold,
-                                fontSize: avatarSize / 3,
-                              ),
-                            )
-                          : null,
-                    ),
+                    _initialsAvatar(context, user, avatarSize),
                     if (showOnlineIndicator && user.isOnline)
                       Positioned(
                         right: 0,
@@ -303,14 +324,4 @@ class AvatarList extends StatelessWidget {
     );
   }
 
-  String _getInitials(String name) {
-    final parts = name.split(' ');
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    } else if (parts.length == 1 && parts[0].isNotEmpty) {
-      return parts[0][0].toUpperCase();
-    } else {
-      return '?';
-    }
-  }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:flutter_application_1/core/config/supabase_config.dart';
@@ -108,3 +109,17 @@ class SupabaseAccountDeactivationService implements AccountDeactivationService {
     }
   }
 }
+
+/// The seam.
+///
+/// `DeactivateAccountCard` constructed [SupabaseAccountDeactivationService]
+/// itself, with a `service:` constructor argument that only its own unit test
+/// ever passed. So on every screen that actually mounts it -- the profile and
+/// account & security, i.e. every user in the product -- nothing could hand it
+/// a different answer, and both screens photographed a red card reading
+/// **"Could not load your deactivation status"**. That is CLAUDE.md 10.5 for
+/// the third time in this phase: a picture of an error state is not a picture
+/// of the design. The `service:` argument still wins where it is passed.
+final accountDeactivationServiceProvider =
+    Provider<AccountDeactivationService>(
+        (ref) => SupabaseAccountDeactivationService());

@@ -66,9 +66,13 @@ class EmployeeRegisterService {
         if (r['user_id'] != null)
           r['user_id'] as String: MemberPresence(
             userId: r['user_id'] as String,
+            // An INSTANT, not a South African wall clock. Every reader
+            // of this field measures an AGE with it (`MlPresence`,
+            // `MlTime.ago`), and a wall clock's epoch value depends on the
+            // reader's own device offset — see `core/presence/ml_presence.dart`.
             lastSeenAt: r['last_seen_at'] == null
                 ? null
-                : MlTime.sast(DateTime.parse(r['last_seen_at'] as String)),
+                : DateTime.parse(r['last_seen_at'] as String).toUtc(),
             hasSignature: r['has_signature'] == true,
           ),
     };

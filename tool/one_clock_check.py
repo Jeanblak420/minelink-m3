@@ -33,6 +33,20 @@ import tempfile
 TO_LOCAL = re.compile(r"\.toLocal\(\)")
 # A naive write stamp: `.now()` straight to ISO with no `.toUtc()` between.
 NAIVE_STAMP = re.compile(r"DateTime\.now\(\)\s*\.\s*toIso8601String\(\)")
+# The same stamp WITH A LOCAL VARIABLE IN BETWEEN.
+#
+# `final timestamp = DateTime.now();` ... `'timestamp': timestamp.toIso8601String()`
+# is the identical fault, and NAIVE_STAMP cannot see it because the two halves
+# are lines apart. Found 2026-08-21 in `chat_screen.dart`, on BOTH of its insert
+# paths: every chat message this app has ever sent was written as a naive
+# string, which Postgres reads in the session zone -- stored two hours late and
+# read back two hours late, on the one surface where when a thing was said is
+# most of what it means.
+#
+# Scoped to a local binding, the same file, and a 60-line window, which is what
+# keeps it from matching an unrelated field of the same name further down.
+NAIVE_STAMP_VIA_LOCAL = re.compile(
+    r"(?:final|var|late final)\s+(\w+)\s*=\s*DateTime\.now\(\)\s*;")
 # `current_date` as a word, in SQL.
 CURRENT_DATE = re.compile(r"\bcurrent_date\b", re.I)
 
@@ -127,6 +141,15 @@ def scan_dart(root):
             for m in NAIVE_STAMP.finditer(code):
                 findings.append((rel, _line_of(raw, m.start()), "naive-stamp",
                                  "no offset: add .toUtc(), or MlTime.serverParam"))
+            for m in NAIVE_STAMP_VIA_LOCAL.finditer(code):
+                name = m.group(1)
+                window = "\n".join(code[m.end():].split("\n")[:60])
+                if re.search(r"\b%s\s*\.\s*toIso8601String\(\)" % re.escape(name),
+                             window):
+                    findings.append(
+                        (rel, _line_of(raw, m.start()), "naive-stamp",
+                         "`%s` is device-local and is written as ISO with no "
+                         "offset: use MlTime.instant()" % name))
     return findings
 
 
@@ -170,6 +193,18 @@ SELFTEST_DART = [
      "class A { var m = {'at': DateTime.now().toIso8601String()}; }", True),
     ("the same stamp as a real instant",
      "class A { var m = {'at': DateTime.now().toUtc().toIso8601String()}; }", False),
+    ("a naive stamp with a local variable in between",
+     "class A { void f() {\n  final t = DateTime.now();\n"
+     "  db.insert({'at': t.toIso8601String()});\n} }", True),
+    ("the same, corrected",
+     "class A { void f() {\n  final t = MlTime.instant();\n"
+     "  db.insert({'at': t.toIso8601String()});\n} }", False),
+    ("a local DateTime.now() used only for elapsed time",
+     "class A { void f() {\n  final t = DateTime.now();\n"
+     "  if (t.difference(x) > gap) ping();\n} }", False),
+    ("a local too far away to be the same statement",
+     "class A { void f() {\n  final t = DateTime.now();\n" + ("  x();\n" * 70) +
+     "  db.insert({'at': t.toIso8601String()});\n} }", False),
     ("elapsed time, which is not a day decision",
      "class A { var d = DateTime.now().difference(x); }", False),
     ("the word inside a comment",

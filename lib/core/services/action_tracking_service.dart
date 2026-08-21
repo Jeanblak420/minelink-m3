@@ -7,6 +7,7 @@ import 'package:flutter_application_1/features/company/services/company_service.
 import 'package:flutter_application_1/features/employee/models/employee_model.dart';
 import 'package:flutter_application_1/features/auth/models/app_user.dart';
 import 'package:flutter_application_1/core/utils/logger.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Service for tracking user actions and automatically creating notifications
 class ActionTrackingService {
@@ -50,9 +51,15 @@ class ActionTrackingService {
         targetUserId: targetUserId,
       );
 
-      // Create a timestamp for all notifications
-      final now = DateTime.now();
-      final formattedTimestamp = now.toIso8601String();
+      // Create a timestamp for all notifications.
+      //
+      // `MlTime.instant()`, so the ISO string carries an offset. A device-local
+      // DateTime writes a NAIVE string, which Postgres reads in the session
+      // zone -- the stamp every audit notification carries in its metadata was
+      // two hours out on every SAST device. Found by the split-form rule added
+      // to `tool/one_clock_check.py` the same day the chat's send path was
+      // fixed for exactly this.
+      final formattedTimestamp = MlTime.instant().toIso8601String();
 
       // Get the user's full name or email
       final actionedByName = actionedBy.fullName.isNotEmpty

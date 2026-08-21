@@ -18,6 +18,7 @@ import 'package:flutter_application_1/core/design/components/ml_components.dart'
 import 'package:flutter_application_1/features/profile_setup/models/profile_setup.dart';
 import 'package:flutter_application_1/features/profile_setup/providers/profile_setup_provider.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/presence/ml_presence.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// The register's palette, resolved from the design tokens (P7-28).
@@ -68,11 +69,10 @@ class _Pal {
   double get rTile => MlTokens.rMd;
 }
 
-/// How recently someone must have been seen (while not in the live presence
-/// set) to count as "Away" rather than "Offline".
-const _awayWindow = Duration(minutes: 30);
-
-enum _Presence { online, away, offline }
+/// The register's presence vocabulary is the product's — see
+/// `core/presence/ml_presence.dart`, which records what four private copies of
+/// it cost.
+typedef _Presence = MlPresence;
 
 /// Role buckets, in display order. A member lands in the first bucket that
 /// contains their role; unknown/absent roles fall through to "Other".
@@ -228,21 +228,15 @@ class _EmployeeRegisterScreenState
     RegisterMember m,
     Set<String> online,
     DateTime? liveStamp,
-  ) {
-    if (online.contains(m.employee.userId)) return _Presence.online;
-    final seen = _bestLastSeen(m, liveStamp);
-    if (seen != null && DateTime.now().difference(seen) <= _awayWindow) {
-      return _Presence.away;
-    }
-    return _Presence.offline;
-  }
+  ) =>
+      mlPresenceOf(
+        online: online.contains(m.employee.userId),
+        dbLastSeen: m.lastSeenAt,
+        liveLastSeen: liveStamp,
+      );
 
-  DateTime? _bestLastSeen(RegisterMember m, DateTime? liveStamp) {
-    final db = m.lastSeenAt;
-    if (liveStamp == null) return db;
-    if (db == null) return liveStamp;
-    return liveStamp.isAfter(db) ? liveStamp : db;
-  }
+  DateTime? _bestLastSeen(RegisterMember m, DateTime? liveStamp) =>
+      mlLastSeen(dbLastSeen: m.lastSeenAt, liveLastSeen: liveStamp);
 
   String get _syncedLabel {
     final t = _loadedAt;
@@ -295,7 +289,12 @@ class _EmployeeRegisterScreenState
             ),
           ),
           data: (members) {
-            _loadedAt ??= DateTime.now();
+            // `MlTime.instant()`, because `_syncedLabel` measures the age
+            // with `MlTime.ago` — and because a render freezes the clock
+            // through `MlTime.debugClock`, which `DateTime.now()` does not
+            // reach. The register printed "Synced just now" beside rows whose
+            // own last-seen line was measured six days later.
+            _loadedAt ??= MlTime.instant();
             final byPresence = <_Presence, int>{};
             for (final m in members) {
               final p = _presenceOf(m, online, liveStamps[m.employee.userId]);
@@ -532,10 +531,16 @@ class _EmployeeRegisterScreenState
           children: [
             Container(width: 26, height: 2, color: _p.blue),
             const SizedBox(width: 10),
-            Flexible(
+            // IT WRAPS RATHER THAN TRUNCATING.
+            //
+            // At 412px the eyebrow read "FIXTURE HAULAGE (PTY) LTD · DIRECTO…"
+            // — the one word that says what the page IS, cut in half, while
+            // the company name it made room for appears twice more below and
+            // once in the shell's own bar. An eyebrow on two lines costs 18px;
+            // an eyebrow missing its noun costs the reader the label.
+            Expanded(
               child: Text(
                 '${company.companyName.toUpperCase()} · DIRECTORY',
-                overflow: TextOverflow.ellipsis,
                 style: context.mlText.titleSmall.copyWith(
                   color: _p.blue,
                   fontWeight: FontWeight.w800,
@@ -728,6 +733,34 @@ class _EmployeeRegisterScreenState
           color: _p.borderCard,
         );
 
+    final cells = <Widget>[
+      cell(
+        'Total staff',
+        '$total',
+        sub: 'Across $roleCount role${roleCount == 1 ? '' : 's'}',
+      ),
+      cell(
+        'Online now',
+        '${byPresence[_Presence.online] ?? 0}',
+        dotColor: _p.green,
+        sub: 'Online (active)',
+        delta: deltaChip(delta(_Presence.online), goodWhenUp: true),
+      ),
+      cell(
+        'Away',
+        '${byPresence[_Presence.away] ?? 0}',
+        dotColor: _p.amber,
+        sub: 'Away (idle)',
+        delta: deltaChip(delta(_Presence.away), goodWhenUp: false),
+      ),
+      cell(
+        'Offline',
+        '${byPresence[_Presence.offline] ?? 0}',
+        dotColor: _p.red,
+        sub: 'Offline',
+      ),
+    ];
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -735,38 +768,47 @@ class _EmployeeRegisterScreenState
         borderRadius: BorderRadius.circular(_p.rCard),
         border: Border.all(color: _p.borderCard),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          cell(
-            'Total staff',
-            '$total',
-            sub: 'Across $roleCount role${roleCount == 1 ? '' : 's'}',
-          ),
-          divider(),
-          cell(
-            'Online now',
-            '${byPresence[_Presence.online] ?? 0}',
-            dotColor: _p.green,
-            sub: 'Online (active)',
-            delta: deltaChip(delta(_Presence.online), goodWhenUp: true),
-          ),
-          divider(),
-          cell(
-            'Away',
-            '${byPresence[_Presence.away] ?? 0}',
-            dotColor: _p.amber,
-            sub: 'Away (idle)',
-            delta: deltaChip(delta(_Presence.away), goodWhenUp: false),
-          ),
-          divider(),
-          cell(
-            'Offline',
-            '${byPresence[_Presence.offline] ?? 0}',
-            dotColor: _p.red,
-            sub: 'Offline',
-          ),
-        ],
+      // TWO ACROSS ON A PHONE, four above 620.
+      //
+      // Four `Expanded` cells plus three 33px dividers leave SIXTY pixels each
+      // at 412px, and 60px has to hold a 38px numeral, an overline label and a
+      // caption. So "ONLINE NOW" sat over "Online (activ…" and "Away (idle)"
+      // broke across two lines. Exactly the fault the transporter's Drivers
+      // tiles had — a `Row` of `Expanded` with no minimum — and the same fix.
+      child: LayoutBuilder(
+        builder: (context, c) {
+          if (c.maxWidth >= 620) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                cells[0],
+                divider(),
+                cells[1],
+                divider(),
+                cells[2],
+                divider(),
+                cells[3],
+              ],
+            );
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [cells[0], divider(), cells[1]],
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                child: Container(height: 1, color: _p.borderCard),
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [cells[2], divider(), cells[3]],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -833,23 +875,43 @@ class _EmployeeRegisterScreenState
                   color: _p.textMuted,
                 ),
                 prefixIcon: Icon(Icons.search, size: 18, color: _p.textMuted),
+                // THE `Ctrl K` CHIP WAS THE WHOLE FIELD.
+                //
+                // `suffixIconConstraints: BoxConstraints(minWidth: 0,
+                // minHeight: 0)` removes the minimum and leaves the MAXIMUM at
+                // infinity, which `InputDecorator` then loosens to the field's
+                // own width — and a `Container` carrying an `alignment` and no
+                // width expands to fill whatever it is given (CLAUDE.md 10.4,
+                // the `Align`-without-a-widthFactor family). So the chip's
+                // border ran the full width of the search box with "Ctrl K"
+                // floating in the middle of it, and the hint — "Search by name,
+                // role, or employee ID…" — and the search icon had nowhere to
+                // be drawn. At EVERY width: the desktop register photographed
+                // the same empty box.
+                //
+                // `Align(widthFactor: 1, heightFactor: 1)` is the repo's own
+                // idiom for "shrink to the child".
                 suffixIcon: Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 7),
-                    decoration: BoxDecoration(
-                      color: _p.surfaceCard,
-                      borderRadius: BorderRadius.circular(MlTokens.rXs),
-                      border: Border.all(color: _p.borderCard),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Ctrl K',
-                      style: context.mlText.code(
-                        color: _p.textMuted,
-                        size: 10,
-                        weight: FontWeight.w400,
+                  child: Align(
+                    widthFactor: 1,
+                    heightFactor: 1,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: _p.surfaceCard,
+                        borderRadius: BorderRadius.circular(MlTokens.rXs),
+                        border: Border.all(color: _p.borderCard),
+                      ),
+                      child: Text(
+                        'Ctrl K',
+                        style: context.mlText.code(
+                          color: _p.textMuted,
+                          size: 10,
+                          weight: FontWeight.w400,
+                        ),
                       ),
                     ),
                   ),

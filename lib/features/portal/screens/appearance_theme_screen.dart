@@ -21,39 +21,33 @@ class AppearanceThemeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final semantic = MlSemantic.of(context);
     final themeMode = ref.watch(themeModeProvider);
     final appearance = ref.watch(mineAppearanceProvider);
     // Premium dashboard themes are mine/supplier-only.
     final isMineSupplier =
         ref.watch(portalWorkspaceProvider).isMineSupplier;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 22, 24, 40),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 860),
-          child: Column(
+    // `MlPageBody` + `MlPageHeader`, like every other portal page.
+    //
+    // The title was a hand-rolled `titleLarge` in the SANS at w800, so this was
+    // the one settings page whose heading was in a different typeface from the
+    // thirty-six the header component exists for — and its 24px gutter was flat
+    // rather than the responsive one every other page gets on a phone.
+    return MlPageBody(
+      maxWidth: 860,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const MlPageHeader(
+            title: 'Appearance & theme',
+            description:
+                'Personalise how MineLink looks. Light or dark applies '
+                'everywhere; the dashboard theme and density apply to your '
+                'Mine / Supplier dashboard.',
+          ),
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Appearance & theme',
-                style: context.mlText.titleLarge.copyWith(
-                  color: semantic.textStrong,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Personalise how MineLink looks. Light or dark applies everywhere; '
-                'the dashboard theme and density apply to your Mine / Supplier '
-                'dashboard.',
-                style: context.mlText.bodyMedium.copyWith(
-                  color: semantic.textMuted,
-                ),
-              ),
-              const SizedBox(height: 24),
-
               // ---- Light / Dark / System ----
               _SectionCard(
                 title: 'Colour mode',
@@ -137,7 +131,7 @@ class AppearanceThemeScreen extends ConsumerWidget {
               ],
             ],
           ),
-        ),
+        ],
       ),
     );
   }

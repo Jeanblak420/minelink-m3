@@ -5,7 +5,7 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/widgets/avatar_stack.dart';
 import 'package:flutter_application_1/features/chat/services/attachment_url.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_chat_palettes.dart';
 
@@ -110,6 +110,16 @@ class ChatWidget extends StatefulWidget {
   /// Optional controller for driving reply state from a parent widget
   final ChatWidgetController? controller;
 
+  /// Trailing controls for the header row — the thread's own actions.
+  ///
+  /// This exists so a host does not have to draw a SECOND bar to hold them.
+  /// `ChatScreen` did: it wrapped this widget in `Scaffold(appBar: AppBar(...))`
+  /// carrying the room name and an info button, while this widget drew the
+  /// room name again immediately underneath — and the whole thing sits inside
+  /// the portal `ShellRoute`, whose own top bar carries the room name too.
+  /// Three bars and the same name twice in the first 200px of a phone.
+  final List<Widget> headerActions;
+
   const ChatWidget({
     super.key,
     required this.messages,
@@ -127,6 +137,7 @@ class ChatWidget extends StatefulWidget {
     this.typingUsers = const [],
     this.onTypingChanged,
     this.controller,
+    this.headerActions = const [],
   });
 
   @override
@@ -233,6 +244,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       children: [
         // Chat header
         if (widget.title != null ||
+            widget.headerActions.isNotEmpty ||
             (widget.participants != null && widget.showAvatarsInHeader))
           _buildChatHeader(),
 
@@ -311,7 +323,10 @@ class _ChatWidgetState extends State<ChatWidget> {
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
-            ),
+            )
+          else
+            const Spacer(),
+          ...widget.headerActions,
         ],
       ),
     );
@@ -324,7 +339,6 @@ class _ChatWidgetState extends State<ChatWidget> {
     bool isFirstInGroup,
     bool isLastInGroup,
   ) {
-    final scheme = Theme.of(context).colorScheme;
     final semantic = MlSemantic.of(context);
 
     return GestureDetector(
@@ -346,20 +360,37 @@ class _ChatWidgetState extends State<ChatWidget> {
             if (!isCurrentUser && isLastInGroup)
               Padding(
                 padding: const EdgeInsets.only(right: 8.0),
-                child: CircleAvatar(
-                  radius: 16,
-                  backgroundColor: Colors.transparent,
-                  backgroundImage: message.senderAvatarUrl != null
-                      ? CachedNetworkImageProvider(message.senderAvatarUrl!)
-                      : null,
+                // A WELL, not a bare letter. `backgroundColor:
+                // Colors.transparent` drew no circle at all, so every sender
+                // without a photo — which is nearly everyone — appeared as a
+                // single grey character floating in the gutter beside their
+                // bubble. Same fault, same day, as `AvatarStack` and the
+                // Messages screen's platform-account avatar.
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: message.senderAvatarUrl == null
+                        ? MlTokens.accent.withValues(alpha: 0.14)
+                        : null,
+                    image: message.senderAvatarUrl != null
+                        ? DecorationImage(
+                            image: CachedNetworkImageProvider(
+                                message.senderAvatarUrl!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
                   child: message.senderAvatarUrl == null
                       ? Text(
-                          message.senderName.isNotEmpty
-                              ? message.senderName[0].toUpperCase()
+                          message.senderName.trim().isNotEmpty
+                              ? message.senderName.trim()[0].toUpperCase()
                               : '?',
-                          style: TextStyle(
-                            color: scheme.onSurfaceVariant,
-                            fontWeight: FontWeight.bold,
+                          style: const TextStyle(
+                            color: MlTokens.accent,
+                            fontWeight: FontWeight.w800,
                           ),
                         )
                       : null,
@@ -369,8 +400,17 @@ class _ChatWidgetState extends State<ChatWidget> {
               const SizedBox(width: 40),
 
             // Message content
+            //
+            // CAPPED AT 460, the same measure as the Messages screen's bubble.
+            // Un-capped, a `Flexible` in a full-width row let one sentence run
+            // the whole workspace: "Understood. Two trucks moved to 05:00."
+            // was 1,300px wide on a desktop, which is not a chat bubble, it is
+            // a banner. Two chat surfaces in one product cannot disagree about
+            // how wide a message is.
             Flexible(
-              child: Column(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 460),
+                child: Column(
                 crossAxisAlignment: isCurrentUser
                     ? CrossAxisAlignment.end
                     : CrossAxisAlignment.start,
@@ -436,7 +476,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                             children: [
                               if (widget.showMessageTimestamp)
                                 Text(
-                                  DateFormat.Hm().format(message.timestamp),
+                                  MlTime.clock(message.timestamp),
                                   style: context.mlText.code(
                                     color: isCurrentUser ? MlTokens.overlayLight.withValues(alpha: 0.68) : semantic.textFaint,
                                     size: 11,
@@ -460,6 +500,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                     ),
                   ),
                 ],
+                ),
               ),
             ),
           ],

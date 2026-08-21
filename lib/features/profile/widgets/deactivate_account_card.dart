@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
@@ -24,22 +25,25 @@ import 'package:flutter_application_1/features/profile/services/account_deactiva
 /// password) → `pending` (under review, cancellable) → `approved` (scheduled,
 /// no longer cancellable — an admin has acted) → `rejected` (the admin's
 /// note; a fresh request is still allowed).
-class DeactivateAccountCard extends StatefulWidget {
+class DeactivateAccountCard extends ConsumerStatefulWidget {
   const DeactivateAccountCard({super.key, this.service});
 
-  /// Injected for tests. Defaults to the real Supabase-backed service,
-  /// constructed lazily so this default is never touched unless actually
-  /// needed (CLAUDE.md §6 — screens/widgets go through a service, not
-  /// `SupabaseConfig.client` directly, for DB/RPC access).
+  /// Injected directly by this widget's own unit test. Everything else — and
+  /// every render — reaches it through [accountDeactivationServiceProvider],
+  /// which is the seam that was missing: this used to construct
+  /// `SupabaseAccountDeactivationService()` itself, so no override could reach
+  /// it and both screens carrying the card photographed an error card in its
+  /// place.
   final AccountDeactivationService? service;
 
   @override
-  State<DeactivateAccountCard> createState() => _DeactivateAccountCardState();
+  ConsumerState<DeactivateAccountCard> createState() =>
+      _DeactivateAccountCardState();
 }
 
-class _DeactivateAccountCardState extends State<DeactivateAccountCard> {
+class _DeactivateAccountCardState extends ConsumerState<DeactivateAccountCard> {
   late final AccountDeactivationService _service =
-      widget.service ?? SupabaseAccountDeactivationService();
+      widget.service ?? ref.read(accountDeactivationServiceProvider);
   static final _log = LoggerFactory.getLogger('DeactivateAccountCard');
 
   bool _loading = true;

@@ -266,6 +266,12 @@ List<Map<String, dynamic>> _rows(dynamic r) => [
 DateTime? _ts(dynamic v) =>
     v == null ? null : MlTime.sastOrNull(DateTime.tryParse(v.toString()));
 
+/// The raw moment, for anything that measures a DURATION rather than printing
+/// a date. [_ts] returns a South African wall clock, which is right for a
+/// column a reader reads and wrong for arithmetic.
+DateTime? _instant(dynamic v) =>
+    v == null ? null : DateTime.tryParse(v.toString())?.toUtc();
+
 DateTime _dayStart([DateTime? of]) {
   // A day at the mine, whether `of` is a server instant or absent.
   final n = of == null ? MlTime.now() : MlTime.sast(of);
@@ -353,8 +359,11 @@ class EmployeeProfileService {
                 e.startsWith('wa-'));
         whatsappOnly = e == null || e.isEmpty || synthetic;
         email = whatsappOnly ? null : e;
-        lastSeenAt = _ts(m['last_seen_at']);
-        lastLoginAt = _ts(m['last_login_at']);
+        // INSTANTS, not wall clocks: both are rendered through
+        // `MlTime.ago`, which measures a duration — see
+        // `core/presence/ml_presence.dart` for what mixing the two cost.
+        lastSeenAt = _instant(m['last_seen_at']);
+        lastLoginAt = _instant(m['last_login_at']);
       }
     } catch (e) {
       // Best-effort section: a failed source drops this one card,

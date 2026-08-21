@@ -40,6 +40,14 @@ import 'package:flutter_application_1/features/employee/screens/employee_profile
 import 'package:flutter_application_1/features/fleet/screens/fleet_management_screen.dart';
 import 'package:flutter_application_1/features/operations/screens/operations_hub_screen.dart';
 import 'package:flutter_application_1/features/chat/screens/communications_hub_screen.dart';
+import 'package:flutter_application_1/features/chat/screens/messages_screen.dart';
+import 'package:flutter_application_1/features/chat/screens/chat_screen.dart';
+import 'package:flutter_application_1/features/notifications/screens/notification_screen.dart';
+import 'package:flutter_application_1/features/notifications/screens/notification_management_screen.dart';
+import 'package:flutter_application_1/features/profile/screens/profile_screen.dart';
+import 'package:flutter_application_1/features/profile/screens/account_security_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/appearance_theme_screen.dart';
+import 'package:flutter_application_1/features/company/screens/employee_register_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_portal_dashboard_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_loads_value_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_waybills_screen.dart';
@@ -106,6 +114,7 @@ import '../fixtures/ml_sample_data.dart';
 import '../fixtures/nav_fixtures.dart';
 import '../fixtures/portal_capture_fixtures.dart';
 import '../fixtures/portal_tail_fixtures.dart';
+import '../fixtures/shared_tail_fixtures.dart';
 import '../fixtures/screen_fixtures.dart';
 import '../test_helpers/fake_geolocator.dart';
 import '../test_helpers/fake_path_provider.dart';
@@ -408,6 +417,22 @@ void main() {
   /// timestamp — so nothing in these images can be mistaken for a real
   /// company's figures. What is real is every pixel of layout, type, colour
   /// and shape.
+  /// [title] is the WORKSPACE (the company) and [subtitle] is the SECTION.
+  ///
+  /// THE TWO ARE COMPOSED HERE, NOT PASSED STRAIGHT THROUGH, because the real
+  /// shell is the other way round. `PortalShellLayout` builds its top bar as
+  ///
+  ///     title:    sectionTitle                       // "Messages"
+  ///     subtitle: '$workspaceName · $operator · $role'
+  ///
+  /// and this helper used to hand `MlAppShell` the workspace as the title and
+  /// the section as the subtitle — so every portal render showed a bar the
+  /// product never draws, with the two lines swapped. That matters beyond
+  /// tidiness: judging "is this screen's own app bar a duplicate of the
+  /// shell's?" from a picture requires the picture to show the shell's real
+  /// title, and it did not. Found 2026-08-21 while photographing the shared
+  /// tail, where five screens turned out to be repeating the section name the
+  /// bar above them was already carrying.
   Widget screen({
     required Brightness brightness,
     required Widget child,
@@ -431,8 +456,8 @@ void main() {
           tree: portalNavTree(orgType: orgType, role: role),
           selectedRoute: selectedRoute,
           onNavigate: (_) {},
-          title: title,
-          subtitle: subtitle,
+          title: subtitle,
+          subtitle: '$title · Fixture Operator · ${role.label}',
           expanded: railExpanded,
           onExpandedChanged: (_) {},
           badgeCounts: const {
@@ -2421,6 +2446,285 @@ void main() {
         ),
         const Size(1600, 1800),
         'screen-request-transportation-desktop-dark',
+      );
+    });
+  });
+
+  // ==========================================================================
+  // THE SHARED TAIL
+  // ==========================================================================
+  //
+  // The screens every org type and every role reaches through the same route:
+  // messages, the chat thread, notifications, the notification manager, the
+  // profile, account security, appearance, and the employee register. Nothing
+  // had ever photographed any of them, which is how eight of them came to sit
+  // inside the portal `ShellRoute` building their own `Scaffold(appBar:)`.
+  group('the shared tail', () {
+    // `portalTailOverrides` too, for the one provider the profile reaches into
+    // from outside its own feature: `CompanyLocationsSection` reads
+    // `companyLocationsProvider`, and without it the profile photographs a red
+    // "Could not load your saved locations" in the middle of the page.
+    List<Override> shared() => [
+          ...portalCaptureOverrides(),
+          ...portalTailOverrides(),
+          ...sharedTailOverrides(),
+        ];
+
+    Future<void> shootShared(
+      WidgetTester tester,
+      Widget body,
+      Size size,
+      String name, {
+      OrgType orgType = OrgType.transporter,
+      String title = 'Fixture Haulage',
+      required String subtitle,
+      required String selectedRoute,
+      UserRole role = UserRole.admin,
+      Brightness brightness = Brightness.dark,
+      List<Override> extra = const [],
+      Future<void> Function(WidgetTester tester)? act,
+    }) =>
+        shoot(
+          tester,
+          screen(
+            brightness: brightness,
+            child: body,
+            title: title,
+            subtitle: subtitle,
+            orgType: orgType,
+            role: role,
+            selectedRoute: selectedRoute,
+            extraOverrides: [...shared(), ...extra],
+          ),
+          size,
+          name,
+          act: act,
+        );
+
+    // --- messages ---------------------------------------------------------
+
+    testWidgets('messages — desktop dark', (tester) async {
+      await shootShared(
+        tester,
+        const MessagesScreen(),
+        const Size(1600, 1000),
+        'screen-messages-desktop-dark',
+        subtitle: 'Messages',
+        selectedRoute: '/messages',
+      );
+    });
+
+    testWidgets('messages — phone dark', (tester) async {
+      await shootShared(
+        tester,
+        const MessagesScreen(),
+        const Size(412, 915),
+        'screen-messages-phone-dark',
+        subtitle: 'Messages',
+        selectedRoute: '/messages',
+      );
+    });
+
+    // The contacts half of the sidebar, which is a different list with
+    // different grouping and the only place the blocked-contact pill appears.
+    testWidgets('messages — people tab, desktop dark', (tester) async {
+      await shootShared(
+        tester,
+        const MessagesScreen(),
+        const Size(1600, 1000),
+        'screen-messages-people-desktop-dark',
+        subtitle: 'Messages',
+        selectedRoute: '/messages',
+        act: (tester) async {
+          await tester.tap(find.text('People'));
+          await tester.pump();
+        },
+      );
+    });
+
+    // --- the chat thread ---------------------------------------------------
+
+    testWidgets('chat thread — desktop dark', (tester) async {
+      await shootShared(
+        tester,
+        ChatScreen(
+          chatRoom: fixtureChatScreenArgs().chatRoom,
+          currentUserId: fixtureChatScreenArgs().currentUserId,
+          currentUserName: fixtureChatScreenArgs().currentUserName,
+          participants: fixtureChatScreenArgs().participants,
+        ),
+        const Size(1600, 1000),
+        'screen-chat-thread-desktop-dark',
+        subtitle: 'Chat',
+        selectedRoute: '/communications',
+      );
+    });
+
+    testWidgets('chat thread — phone dark', (tester) async {
+      await shootShared(
+        tester,
+        ChatScreen(
+          chatRoom: fixtureChatScreenArgs().chatRoom,
+          currentUserId: fixtureChatScreenArgs().currentUserId,
+          currentUserName: fixtureChatScreenArgs().currentUserName,
+          participants: fixtureChatScreenArgs().participants,
+        ),
+        const Size(412, 915),
+        'screen-chat-thread-phone-dark',
+        subtitle: 'Chat',
+        selectedRoute: '/communications',
+      );
+    });
+
+    // --- notifications -----------------------------------------------------
+
+    testWidgets('notifications — phone dark', (tester) async {
+      await shootShared(
+        tester,
+        const NotificationScreen(),
+        const Size(412, 1600),
+        'screen-notifications-phone-dark',
+        subtitle: 'Notifications',
+        selectedRoute: '/notifications',
+      );
+    });
+
+    testWidgets('notifications — desktop dark', (tester) async {
+      await shootShared(
+        tester,
+        const NotificationScreen(),
+        const Size(1600, 1400),
+        'screen-notifications-desktop-dark',
+        subtitle: 'Notifications',
+        selectedRoute: '/notifications',
+      );
+    });
+
+    testWidgets('notification manager — desktop dark', (tester) async {
+      await shootShared(
+        tester,
+        const NotificationManagementScreen(title: 'All Notifications'),
+        const Size(1600, 1400),
+        'screen-notification-manager-desktop-dark',
+        subtitle: 'All notifications',
+        selectedRoute: '/notifications',
+      );
+    });
+
+    testWidgets('notification manager — phone dark', (tester) async {
+      await shootShared(
+        tester,
+        const NotificationManagementScreen(title: 'All Notifications'),
+        const Size(412, 1600),
+        'screen-notification-manager-phone-dark',
+        subtitle: 'All notifications',
+        selectedRoute: '/notifications',
+      );
+    });
+
+    // --- the profile -------------------------------------------------------
+
+    testWidgets('profile — phone dark', (tester) async {
+      await shootShared(
+        tester,
+        const ProfileScreen(),
+        const Size(412, 4000),
+        'screen-profile-phone-dark',
+        subtitle: 'Profile',
+        selectedRoute: '/profile',
+      );
+    });
+
+    testWidgets('profile — desktop dark', (tester) async {
+      await shootShared(
+        tester,
+        const ProfileScreen(),
+        const Size(1600, 2600),
+        'screen-profile-desktop-dark',
+        subtitle: 'Profile',
+        selectedRoute: '/profile',
+      );
+    });
+
+    // --- account security --------------------------------------------------
+
+    testWidgets('account security — phone dark', (tester) async {
+      await shootShared(
+        tester,
+        const AccountSecurityScreen(),
+        const Size(412, 1500),
+        'screen-account-security-phone-dark',
+        subtitle: 'Account & security',
+        selectedRoute: '/account-security',
+      );
+    });
+
+    testWidgets('account security — desktop dark', (tester) async {
+      await shootShared(
+        tester,
+        const AccountSecurityScreen(),
+        const Size(1600, 1200),
+        'screen-account-security-desktop-dark',
+        subtitle: 'Account & security',
+        selectedRoute: '/account-security',
+      );
+    });
+
+    // --- appearance & theme ------------------------------------------------
+    //
+    // A MINE, because the two premium-theme sections are mine/supplier-only and
+    // a transporter photographs one card of the three.
+
+    testWidgets('appearance — phone dark', (tester) async {
+      await shootShared(
+        tester,
+        const AppearanceThemeScreen(),
+        const Size(412, 1500),
+        'screen-appearance-phone-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Chrome Mine',
+        subtitle: 'Appearance & theme',
+        selectedRoute: '/appearance',
+        extra: [portalWorkspaceOverride(isMineSupplier: true)],
+      );
+    });
+
+    testWidgets('appearance — desktop light', (tester) async {
+      await shootShared(
+        tester,
+        const AppearanceThemeScreen(),
+        const Size(1600, 1200),
+        'screen-appearance-desktop-light',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Chrome Mine',
+        subtitle: 'Appearance & theme',
+        selectedRoute: '/appearance',
+        brightness: Brightness.light,
+        extra: [portalWorkspaceOverride(isMineSupplier: true)],
+      );
+    });
+
+    // --- the employee register ---------------------------------------------
+
+    testWidgets('employee register — phone dark', (tester) async {
+      await shootShared(
+        tester,
+        const PortalEmployeeRegisterScreen(),
+        const Size(412, 3950),
+        'screen-employee-register-phone-dark',
+        subtitle: 'Register',
+        selectedRoute: '/portal/transporter/register',
+      );
+    });
+
+    testWidgets('employee register — desktop dark', (tester) async {
+      await shootShared(
+        tester,
+        const PortalEmployeeRegisterScreen(),
+        const Size(1600, 2600),
+        'screen-employee-register-desktop-dark',
+        subtitle: 'Register',
+        selectedRoute: '/portal/transporter/register',
       );
     });
   });

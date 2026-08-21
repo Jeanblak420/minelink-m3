@@ -10,12 +10,15 @@ import 'package:flutter_application_1/features/chat/models/chat_room_model.dart'
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Provider for the current chat messages
 final chatMessagesProvider = StateNotifierProvider.autoDispose
     .family<ChatMessagesNotifier, List<ChatMessage>, String>(
-      (ref, chatRoomId) => ChatMessagesNotifier(chatRoomId),
+      // `..start()` rather than the constructor doing it — see
+      // [ChatMessagesNotifier.start]. The running app is unchanged.
+      (ref, chatRoomId) => ChatMessagesNotifier(chatRoomId)..start(),
     );
 
 /// Notifier for chat messages
@@ -25,7 +28,18 @@ class ChatMessagesNotifier extends StateNotifier<List<ChatMessage>> {
   final _storageAssetService = StorageAssetService();
   RealtimeChannel? _channel;
 
-  ChatMessagesNotifier(this.chatRoomId) : super([]) {
+  ChatMessagesNotifier(this.chatRoomId) : super([]);
+
+  /// Begins the first read and subscribes to changes.
+  ///
+  /// **Deliberately not the constructor** — the fifth notifier in this tree
+  /// with the same seam, after `FleetNotifier`, `OperationsNotifier`,
+  /// `CommunicationsNotifier` and `TypingUsersNotifier`, and for the same
+  /// reason: a constructor that dials out cannot be run without a network, so
+  /// this screen could not be photographed. `_loadMessages()` issues a query
+  /// and `_subscribeToMessages()` opens a channel; against an unreachable host
+  /// both leave a connect timer that outlives the widget tree.
+  void start() {
     _loadMessages();
     _subscribeToMessages();
   }
@@ -93,7 +107,14 @@ class ChatMessagesNotifier extends StateNotifier<List<ChatMessage>> {
   }) async {
     try {
       final messageId = const Uuid().v4();
-      final timestamp = DateTime.now();
+      // `MlTime.instant()`, not `DateTime.now()`. `toIso8601String()` on a
+      // device-local DateTime emits a NAIVE string with no offset, which
+      // Postgres reads in the session zone — so a message sent at 14:00
+      // SAST was stored as 14:00Z and read back two hours later than it
+      // was sent. `tool/one_clock_check.py` matches the two calls written
+      // adjacently; here they were a variable apart, which is why it did
+      // not fire. It matches this shape now too.
+      final timestamp = MlTime.instant();
       final senderAvatarReference = _storageAssetService.toStorableReference(
         senderAvatarUrl,
         bucketQualified: true,
@@ -126,7 +147,14 @@ class ChatMessagesNotifier extends StateNotifier<List<ChatMessage>> {
   ) async {
     try {
       final messageId = const Uuid().v4();
-      final timestamp = DateTime.now();
+      // `MlTime.instant()`, not `DateTime.now()`. `toIso8601String()` on a
+      // device-local DateTime emits a NAIVE string with no offset, which
+      // Postgres reads in the session zone — so a message sent at 14:00
+      // SAST was stored as 14:00Z and read back two hours later than it
+      // was sent. `tool/one_clock_check.py` matches the two calls written
+      // adjacently; here they were a variable apart, which is why it did
+      // not fire. It matches this shape now too.
+      final timestamp = MlTime.instant();
       final senderAvatarReference = _storageAssetService.toStorableReference(
         senderAvatarUrl,
         bucketQualified: true,
@@ -228,7 +256,9 @@ class ChatMessagesNotifier extends StateNotifier<List<ChatMessage>> {
 /// Provider for the typing users in a chat room
 final typingUsersProvider = StateNotifierProvider.autoDispose
     .family<TypingUsersNotifier, List<String>, String>(
-      (ref, chatRoomId) => TypingUsersNotifier(chatRoomId),
+      // `..start()` rather than the constructor doing it — see
+      // [TypingUsersNotifier.start]. The running app is unchanged.
+      (ref, chatRoomId) => TypingUsersNotifier(chatRoomId)..start(),
     );
 
 /// Notifier for typing users
@@ -237,7 +267,14 @@ class TypingUsersNotifier extends StateNotifier<List<String>> {
   final _supabase = SupabaseConfig.client;
   RealtimeChannel? _presenceChannel;
 
-  TypingUsersNotifier(this.chatRoomId) : super([]) {
+  TypingUsersNotifier(this.chatRoomId) : super([]);
+
+  /// Opens the presence channel. Not the constructor, for the same reason
+  /// [ChatMessagesNotifier.start] is not: a channel opened against an
+  /// unreachable host leaves a connect timer behind, and this notifier is read
+  /// from `ChatScreen.initState`, so nothing could render the screen without
+  /// one.
+  void start() {
     _subscribeToPresence();
   }
 
@@ -366,17 +403,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       });
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.chatRoom.name),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: _showChatInfo,
-          ),
-        ],
-      ),
-      body: Column(
+    // NO `Scaffold(appBar:)`.
+    //
+    // `/chat/:chatRoomId` is a leaf of the portal `ShellRoute`, which draws a
+    // top bar carrying the room's name — and `ChatWidget` draws a header
+    // carrying the room's name as well. The bar this used to add made three
+    // bars, with the same name printed twice, one directly under the other and
+    // both truncated on a phone. The info button moved into the widget's own
+    // header, which is what `headerActions` is for.
+    return ColoredBox(
+      color: MlSemantic.of(context).surfaceApp,
+      child: Column(
         // Stretch, or the conditional file-upload panel above the message
         // list is centred and sized to its own content while the list below
         // it — an Expanded — runs full width. A Column centres by default.
@@ -475,6 +512,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               participants: widget.participants,
               showAvatarsInHeader: true,
               typingUsers: typingUsers,
+              headerActions: [
+                IconButton(
+                  icon: const Icon(Icons.info_outline),
+                  tooltip: 'About this conversation',
+                  onPressed: _showChatInfo,
+                ),
+              ],
             ),
           ),
         ],

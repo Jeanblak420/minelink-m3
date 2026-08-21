@@ -2,7 +2,6 @@
 /// Backed by chat_rooms / chat_messages / org_connections / get_chat_contacts.
 library;
 
-import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Which contact group a [ChatContact] belongs to (drives section headers).
 enum ContactGroupKind { myCompany, mineLink, connected, organization, unknown }
@@ -126,7 +125,7 @@ class ChatContact {
         blockReason: j['block_reason'] as String?,
         role: j['role'] as String?,
         lastSeenAt: j['last_seen_at'] != null
-            ? MlTime.sastOrNull(DateTime.tryParse(j['last_seen_at'] as String))
+            ? DateTime.tryParse(j['last_seen_at'] as String)?.toUtc()
             : null,
       );
 }
@@ -203,13 +202,13 @@ class ChatMessage {
       senderId: j['sender_id'] as String,
       senderName: j['sender_name'] as String? ?? '',
       senderAvatarUrl: j['sender_avatar_url'] as String?,
-      timestamp: MlTime.sast(DateTime.parse(j['timestamp'] as String)),
+      timestamp: DateTime.parse(j['timestamp'] as String).toUtc(),
       isRead: (j['is_read'] as bool?) ?? false,
       deliveredAt: j['delivered_at'] != null
-          ? MlTime.sast(DateTime.parse(j['delivered_at'] as String))
+          ? DateTime.parse(j['delivered_at'] as String).toUtc()
           : null,
       readAt: j['read_at'] != null
-          ? MlTime.sast(DateTime.parse(j['read_at'] as String))
+          ? DateTime.parse(j['read_at'] as String).toUtc()
           : null,
       replyToId: j['reply_to_id'] as String?,
       fileUrl: j['file_url'] as String?,
@@ -323,21 +322,21 @@ class ChatConversation {
         companyAId: j['company_a_id'] as String?,
         companyBId: j['company_b_id'] as String?,
         createdBy: j['created_by'] as String?,
-        createdAt: MlTime.sast(DateTime.parse(j['created_at'] as String)),
+        createdAt: DateTime.parse(j['created_at'] as String).toUtc(),
         lastMessageContent: j['last_message_content'] as String?,
         lastMessageTimestamp: j['last_message_timestamp'] != null
-            ? MlTime.sast(DateTime.parse(j['last_message_timestamp'] as String))
+            ? DateTime.parse(j['last_message_timestamp'] as String).toUtc()
             : null,
         lastMessageSenderId: j['last_message_sender_id'] as String?,
         unreadCount: (j['unread_count'] as num?)?.toInt() ?? 0,
         lastMessageReadAt: j['last_message_read_at'] != null
-            ? MlTime.sast(DateTime.parse(j['last_message_read_at'] as String))
+            ? DateTime.parse(j['last_message_read_at'] as String).toUtc()
             : null,
         lastMessageDeliveredAt: j['last_message_delivered_at'] != null
-            ? MlTime.sast(DateTime.parse(j['last_message_delivered_at'] as String))
+            ? DateTime.parse(j['last_message_delivered_at'] as String).toUtc()
             : null,
         endedAt: j['ended_at'] != null
-            ? MlTime.sast(DateTime.parse(j['ended_at'] as String))
+            ? DateTime.parse(j['ended_at'] as String).toUtc()
             : null,
       );
 }
@@ -390,10 +389,10 @@ class OrgConnection {
         companyHighId: j['company_high_id'] as String,
         status: j['status'] as String? ?? 'granted',
         grantedAt: j['granted_at'] != null
-            ? MlTime.sast(DateTime.parse(j['granted_at'] as String))
+            ? DateTime.parse(j['granted_at'] as String).toUtc()
             : null,
         revokedAt: j['revoked_at'] != null
-            ? MlTime.sast(DateTime.parse(j['revoked_at'] as String))
+            ? DateTime.parse(j['revoked_at'] as String).toUtc()
             : null,
       );
 }

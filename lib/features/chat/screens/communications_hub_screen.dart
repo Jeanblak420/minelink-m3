@@ -37,17 +37,14 @@ class CommunicationsHubScreen extends ConsumerWidget {
     }
 
     if (access == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Communications Hub')),
-        body: const Center(
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text(
-              'A linked company profile is required before live announcements and chat become available.',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
+      // No `Scaffold(appBar:)`. `/communications` is a leaf of the portal
+      // `ShellRoute`, which has already drawn a top bar carrying the section
+      // name — a second one beneath it repeats the same words.
+      return const MlEmptyState(
+        icon: Icons.forum_outlined,
+        title: 'Communications Hub',
+        message: 'A linked company profile is required before live '
+            'announcements and chat become available.',
       );
     }
 
@@ -60,18 +57,9 @@ class CommunicationsHubScreen extends ConsumerWidget {
 
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Communications Hub'),
-          actions: [
-            IconButton(
-              onPressed: state.isLoading ? null : () => notifier.refresh(),
-              icon: const Icon(Icons.refresh),
-              tooltip: 'Refresh live data',
-            ),
-          ],
-        ),
-        body: Column(
+      child: ColoredBox(
+        color: MlSemantic.of(context).surfaceApp,
+        child: Column(
           // A Column CENTRES its children and sizes each to its own content
           // unless told otherwise, so the hero card floated in the middle of
           // the page at whatever width its chips happened to need, while the
@@ -85,6 +73,22 @@ class CommunicationsHubScreen extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+              child: MlPageHeader(
+                title: 'Communications Hub',
+                description: 'Company announcements and team conversations.',
+                actions: [
+                  MlButton.ghost(
+                    label: 'Refresh',
+                    icon: Icons.refresh,
+                    compact: true,
+                    onPressed:
+                        state.isLoading ? null : () => notifier.refresh(),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
               child: MlCard(
                 hero: true,
                 child: Column(

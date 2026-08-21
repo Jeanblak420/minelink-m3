@@ -154,8 +154,14 @@ class NotificationCard extends ConsumerWidget {
                       color: semantic.textFaint,
                     ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  // IT WRAPS. It used to be `maxLines: 1` + ellipsis, and on a
+                  // 412px phone that cut the line inside the TIMESTAMP: rows
+                  // reading "15 Aug 2026 ..." and, worse, "... 04:3...". A
+                  // truncated time is not a shorter time, it is a wrong one --
+                  // and the byline it was making room for ("by Thandi
+                  // Mokoena") was lost anyway. Three facts on two lines beat
+                  // one and a half on one. Photographed 2026-08-21 on both the
+                  // bell inbox and the notification manager.
                 ),
               ],
             ),
