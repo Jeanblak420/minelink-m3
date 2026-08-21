@@ -177,7 +177,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
           ),
         ),
         children: [
-          mlOsmTileLayer(),
+          mlOsmTiles(context),
           if (navRoute.length >= 2)
             // Mirror of the driver's actual navigation route.
             PolylineLayer(

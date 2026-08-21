@@ -49,7 +49,7 @@ class _DriverLimitRequestsScreenState
           SnackBar(
             content: Text(
               approve
-                  ? '${r.registration} may now carry up to ${r.requestedLimit} drivers.'
+                  ? '${r.registration} may now carry up to ${mlCount(r.requestedLimit, 'driver')}.'
                   : 'Request for ${r.registration} declined.',
             ),
           ),
@@ -188,7 +188,7 @@ class _RequestCard extends StatelessWidget {
             ),
           ),
           Text(
-            '${r.currentLimit} → ${r.requestedLimit} drivers',
+            '${r.currentLimit} → ${mlCount(r.requestedLimit, 'driver')}',
             style: TextStyle(
               fontFamily: MlTokens.fontMono,
               fontWeight: FontWeight.w700,

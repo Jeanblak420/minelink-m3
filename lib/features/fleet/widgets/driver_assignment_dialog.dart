@@ -7,6 +7,7 @@ import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_model.
 import 'package:flutter_application_1/features/fleet/models/vehicle_driver.dart';
 import 'package:flutter_application_1/features/fleet/providers/fleet_provider.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/utils/ml_count.dart';
 
 /// Manage the drivers riding one truck (CLAUDE.md §4 driver-per-truck rule):
 /// up to `fleet_vehicles.max_drivers` (default 2) drivers per vehicle, each
@@ -140,7 +141,7 @@ class _DriverAssignmentDialogState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${assigned.length}/$maxDrivers drivers assigned '
+                    '${assigned.length}/${mlCount(maxDrivers, 'driver')} assigned '
                     '(default 2 for long-distance; max 5).',
                     style: context.mlText.bodyMedium.copyWith(
                       color: scheme.onSurfaceVariant,
@@ -243,7 +244,7 @@ class _DriverAssignmentDialogState
                                       for (var n = maxDrivers + 1; n <= 5; n++)
                                         DropdownMenuItem(
                                           value: n,
-                                          child: Text('$n drivers',
+                                          child: Text(mlCount(n, 'driver'),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis),
                                         ),

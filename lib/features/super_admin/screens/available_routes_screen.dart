@@ -786,8 +786,8 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
                                 'Mine: ${r.supplierName}',
                               if (r.buyerName != null)
                                 'Requester: ${r.buyerName}',
-                              if (r.numTrucks != null) '${r.numTrucks} trucks',
-                              if (r.tons != null) '${r.tons} tons',
+                              if (r.numTrucks != null) mlCountText(r.numTrucks, 'truck'),
+                              if (r.tons != null) mlCountText(r.tons, 'ton'),
                               if (r.paymentTerms != null) r.paymentTerms!,
                             ].join(' · '),
                             style: context.mlText.bodyMedium.copyWith(

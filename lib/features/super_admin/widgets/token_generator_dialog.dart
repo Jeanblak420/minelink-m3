@@ -8,6 +8,7 @@ import 'package:flutter_application_1/core/utils/dialog_utils.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/features/super_admin/utils/edge_function_errors.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
+import 'package:flutter_application_1/core/utils/ml_count.dart';
 
 class TokenGeneratorDialog extends ConsumerStatefulWidget {
   final String organizationId;
@@ -141,8 +142,8 @@ class _TokenGeneratorDialogState extends ConsumerState<TokenGeneratorDialog> {
             Text('You are about to generate a serial token for:', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const SizedBox(height: 12),
             _ReviewRow(label: 'Organization', value: widget.organizationName),
-            _ReviewRow(label: 'Valid Days', value: '$days days'),
-            _ReviewRow(label: 'Seat Limit', value: '$seats seats'),
+            _ReviewRow(label: 'Valid Days', value: mlCountText(days, 'day')),
+            _ReviewRow(label: 'Seat Limit', value: mlCountText(seats, 'seat')),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(10),

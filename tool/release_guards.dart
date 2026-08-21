@@ -197,6 +197,51 @@ final guards = <Guard>[
     plantLine: 'const c = Colors.red;',
   ),
   Guard(
+    id: 'count-without-plural-agreement',
+    why: 'a figure interpolated straight in front of a hard-coded plural noun '
+        'prints "1 trucks" the moment the figure is one. Read on the live '
+        'console on 2026-08-21 — the mine transport queue said "1 trucks" on '
+        'two of its three requests — and it was 25 call sites across 16 '
+        'files: trucks, drivers, tons, loads, days, companies, routes, trips. '
+        'It survived the earlier `thing(s)` sweep because it does not contain '
+        'the tell: `(s)` is greppable, `\${n} trucks` is ordinary '
+        'interpolation. Use mlCount(n, singular) for an int, or '
+        'mlCountText(value, singular) for the free-text String? fields a '
+        'requester typed. Both live in core/design/components/ml_meta.dart.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // An interpolation immediately followed by one of the nouns this product
+    // counts. BOTH interpolation forms: `${expr} days` and the brace-less
+    // `$days days`. Matching only the braced one would have left the loophole
+    // open, and the obvious way to satisfy this guard by hand — lift the value
+    // into a local and drop the braces — is exactly the edit that walks
+    // through it.
+    //
+    // Deliberately a closed list of nouns rather than `\w+s`: "MineLink
+    // Technologies", "operations" and every other word ending in s would
+    // match, and a guard that cries wolf is one people learn to exempt.
+    pattern: RegExp(
+      r'(\$\{[^{}]*\}|\$[A-Za-z_][A-Za-z0-9_]*)\s+'
+      r'(trucks|tons|loads|drivers|days|routes|trips'
+      r'|employees|vehicles|seats|rows|files|photos|companies|requests)\b',
+    ),
+    // Comments, because both helpers' doc comments quote the very shape they
+    // replace — and because a codemod that edits prose has already rewritten
+    // the doc explaining a rule into something that no longer said it.
+    //
+    // `.label` is a CATEGORY name, not a count: "Mine/Supplier companies" is
+    // the org type followed by a noun, and there is no figure to agree with.
+    exempt: RegExp(r"^\s*(//|///|\*|/\*)|\.label\}\s"),
+    // `\s` before the noun, and a formatter is free to break a long
+    // interpolation across it.
+    spanLines: true,
+    plantFile: 'planted.dart',
+    plantLine: "const s = 'From X · \${r.numSlots} trucks · done';",
+    plantWrapped: "const s = 'From X · \${r.numSlots}\n"
+        "    trucks · done';",
+  ),
+  Guard(
     id: 'no-device-clock-in-copy',
     why: 'after CLAUDE.md §7.1 every date this product decides is an '
         'Africa/Johannesburg one, so copy telling a user that a date, a month '

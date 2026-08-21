@@ -1285,7 +1285,7 @@ class _TripsCell extends StatelessWidget {
     final fillColor = MlTone.transit.colors(Theme.of(context).brightness).fg;
     final frac = (row.tripsCompleted / row.tripsTotal).clamp(0.0, 1.0);
     return Tooltip(
-      message: '${row.tripsCompleted} of ${row.tripsTotal} trips completed',
+      message: '${row.tripsCompleted} of ${mlCount(row.tripsTotal, 'trip')} completed',
       waitDuration: const Duration(milliseconds: 350),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,

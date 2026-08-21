@@ -9,6 +9,7 @@ import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
+import 'package:flutter_application_1/core/design/components/ml_meta.dart';
 
 /// A screen that demonstrates the new UI components
 class ComponentsDemoScreen extends ConsumerWidget {
@@ -118,7 +119,7 @@ class ComponentsDemoScreen extends ConsumerWidget {
       folderPath: 'uploads',
       onUploadComplete: (fileUrls) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Uploaded ${fileUrls.length} files')),
+          SnackBar(content: Text('Uploaded ${mlCount(fileUrls.length, 'file')}')),
         );
       },
       onError: (error) {

@@ -1019,7 +1019,7 @@ class _DriverNavigationScreenState
         },
       ),
       children: [
-        mlOsmTileLayer(),
+        mlOsmTiles(context),
         if (_route != null)
           PolylineLayer(polylines: [
             // Driven part, dimmed.

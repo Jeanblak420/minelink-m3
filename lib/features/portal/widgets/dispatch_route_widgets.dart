@@ -63,7 +63,7 @@ class DispatchRouteCard extends StatelessWidget {
     final r = route.request;
     final chips = <String>[
       if (r.commodity != null) r.commodity!,
-      if (r.numSlots != null) '${r.numSlots} trucks',
+      if (r.numSlots != null) mlCountText(r.numSlots, 'truck'),
       if (r.distance != null) r.distance!,
       if (r.rate != null) r.rate!,
     ];
@@ -641,7 +641,7 @@ class _AssignTrucksDialogState extends ConsumerState<_AssignTrucksDialog> {
               }),
       title: Text(s.registration),
       subtitle: Text(
-        '${s.driversLabel} · ${s.driverCount}/${s.maxDrivers} drivers',
+        '${s.driversLabel} · ${s.driverCount}/${mlCount(s.maxDrivers, 'driver')}',
       ),
     );
   }

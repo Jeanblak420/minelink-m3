@@ -291,7 +291,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                       ),
                     ),
                     children: [
-                      mlOsmTileLayer(),
+                      mlOsmTiles(context),
                       // Always present, empty when there is no pin. Adding and
                       // removing a layer reshuffles FlutterMap's unkeyed child
                       // list, which is churn the tile layer has no reason to

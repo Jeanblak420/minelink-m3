@@ -24,6 +24,7 @@ import 'minelink_target_dial.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
+import 'package:flutter_application_1/core/design/components/ml_meta.dart';
 
 enum MlTargetsTab { shortTerm, longTerm }
 
@@ -348,7 +349,7 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
                   ? 'One dial per horizon. All six must be set before the '
                       'cycle can be locked.'
                   : 'These six were locked in and reopen in '
-                      '${d.daysUntilCycleReopens} days. Until then they are a '
+                      '${mlCount(d.daysUntilCycleReopens, 'day')}. Until then they are a '
                       'fixed commitment — that is what makes the growth '
                       'measurable.',
             ),
@@ -365,7 +366,7 @@ class _MineLinkTargetsScreenState extends State<MineLinkTargetsScreen> {
                   editable: editable,
                   note: reached
                       ? null
-                      : 'checkpoint in ${z.days - d.elapsedCycleDays} days',
+                      : 'checkpoint in ${mlCount(z.days - d.elapsedCycleDays, 'day')}',
                   lockedNote:
                       'Locked for ${d.daysUntilCycleReopens} more days',
                   errorText: widget.errorFor?.call('h:${z.key}'),
@@ -700,7 +701,7 @@ class _CycleCard extends StatelessWidget {
                     : done
                         ? 'This cycle has run its full 12 months. You can now '
                             'set the next one.'
-                        : 'Targets reopen in ${data.daysUntilCycleReopens} days, '
+                        : 'Targets reopen in ${mlCount(data.daysUntilCycleReopens, 'day')}, '
                             'once the full 12-month cycle has run.',
                 style: context.mlText.bodySmall.copyWith(
                   color: t.inkMid,

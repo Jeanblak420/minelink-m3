@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/features/super_admin/data/models/serial_token.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/core/utils/ml_count.dart';
 
 /// Prefer the newest active token when multiple exist.
 SerialToken? pickActiveSerialToken(List<SerialToken> tokens) {
@@ -119,7 +120,7 @@ class TokenAccessDetailsSection extends StatelessWidget {
         ),
         _InfoRow(
           label: 'Token Lifetime',
-          value: lifetime != null ? '$lifetime days' : '—',
+          value: lifetime != null ? mlCount(lifetime, 'day') : '—',
         ),
         _InfoRow(
           label: 'Token Expiration',

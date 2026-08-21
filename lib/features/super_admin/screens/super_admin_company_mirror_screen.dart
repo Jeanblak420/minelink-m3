@@ -1228,7 +1228,7 @@ class _DashboardBody extends StatelessWidget {
                   Icons.swap_horiz_rounded,
                   'Trips this month',
                   _int.format(s?.trips ?? 0),
-                  '${_int.format(s?.loadsCount ?? 0)} loads captured',
+                  '${mlCountText(_int.format(s?.loadsCount ?? 0), 'load')} captured',
                   tripsTarget,
                 ),
                 kpi(
@@ -1242,7 +1242,7 @@ class _DashboardBody extends StatelessWidget {
                   Icons.local_shipping_outlined,
                   'Fleet',
                   _int.format(s?.fleetVehicles ?? 0),
-                  '${_int.format(s?.drivers ?? 0)} drivers registered',
+                  '${mlCountText(_int.format(s?.drivers ?? 0), 'driver')} registered',
                   fleetTarget,
                 ),
               ];
@@ -2044,7 +2044,7 @@ class _MirrorLiveMapPreview extends ConsumerWidget {
                       ),
                     ),
                     children: [
-                      mlOsmTileLayer(),
+                      mlOsmTiles(context),
                       MarkerLayer(
                         markers: [
                           for (final t in withFix)

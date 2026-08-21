@@ -53,7 +53,7 @@ class VehiclePositionsMap extends StatelessWidget {
           ),
         ),
         children: [
-          mlOsmTileLayer(),
+          mlOsmTiles(context),
           // Fleet markers cluster into count bubbles when trucks crowd the
           // same area; the highlighted truck stays outside the cluster so it
           // is always individually visible.

@@ -1172,7 +1172,7 @@ class _TokensTabState extends ConsumerState<_TokensTab> {
                                       ),
                                     ),
                                     DataCell(Text(formatAccessTimestamp(t.issuedAt))),
-                                    DataCell(Text('${t.validDays} days')),
+                                    DataCell(Text(mlCount(t.validDays, 'day'))),
                                     DataCell(Text(formatAccessTimestamp(t.expiresAt))),
                                     DataCell(
                                       Text(
@@ -1315,7 +1315,7 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
                 remaining > 0
                     ? 'Currently ${seat.occupiedByName ?? 'unassigned'}. '
                         '$remaining of ${allowance['limit'] ?? 2} reassignments '
-                        'left in the next ${allowance['period_days'] ?? 30} days.'
+                        'left in the next ${mlCount(allowance['period_days'] ?? 30, 'day')}.'
                     : 'This company has used all ${allowance['limit'] ?? 2} '
                         'reassignments for the current '
                         '${allowance['period_days'] ?? 30}-day window.',

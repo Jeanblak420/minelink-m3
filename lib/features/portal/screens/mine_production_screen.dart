@@ -129,7 +129,7 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
               windowDays: _days,
               onExport: () => ReconExporter.pickFormatAndExport(
                 context,
-                title: 'Production vs dispatch — last $_days days',
+                title: 'Production vs dispatch — last ${mlCount(_days, 'day')}',
                 filenameBase: 'production_vs_dispatch',
                 headers: const [
                   'DATE',
@@ -428,7 +428,7 @@ class _ReportSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               MlSectionTitle(
-                'Daily — last $windowDays days',
+                'Daily — last ${mlCount(windowDays, 'day')}',
                 meta:
                     '${mined.toStringAsFixed(2)} t mined · '
                     '${dispatched.toStringAsFixed(2)} t dispatched',

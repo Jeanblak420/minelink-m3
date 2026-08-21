@@ -509,7 +509,7 @@ class ReconExporter {
               pw.SizedBox(height: 4),
               pw.Text(
                 'Generated: ${MlTime.stamp(MlTime.instant())}'
-                '  |  Page ${p + 1} of $pages  |  ${rows.length} rows',
+                '  |  Page ${p + 1} of $pages  |  ${mlCount(rows.length, 'row')}',
                 style: pw.TextStyle(
                   font: font,
                   fontSize: 9,

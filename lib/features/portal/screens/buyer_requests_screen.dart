@@ -282,7 +282,7 @@ class _RequestCard extends StatelessWidget {
               [
                 if (r.requestType == 'transportation' && r.commodity != null)
                   r.commodity,
-                if (r.tonsAvailable != null) '${r.tonsAvailable} tons',
+                if (r.tonsAvailable != null) mlCountText(r.tonsAvailable, 'ton'),
                 if (r.requestType == 'product' && r.offloadingPoint != null)
                   '→ ${r.offloadingPoint}',
                 if (r.paymentTerms != null) r.paymentTerms,

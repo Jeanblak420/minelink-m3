@@ -37,6 +37,7 @@ library;
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:intl/intl.dart' show DateFormat;
+import 'package:flutter_application_1/core/utils/ml_count.dart';
 
 /// South Africa's offset from UTC. Fixed, and no daylight saving.
 const Duration kSastOffset = Duration(hours: 2);
@@ -161,7 +162,11 @@ abstract final class MlTime {
     if (d.inMinutes < 60) return '${d.inMinutes} min ago';
     if (d.inHours < 24) return '${d.inHours} h ago';
     if (d.inDays == 1) return 'yesterday';
-    if (d.inDays < 7) return '${d.inDays} days ago';
+    // `mlCount`, even though the branch above already returned for
+    // `== 1`: the `count-without-plural-agreement` guard cannot see a
+    // guard clause, and a site that is only correct because of the line
+    // above it is one edit away from not being.
+    if (d.inDays < 7) return '${mlCount(d.inDays, 'day')} ago';
     final on = sast(at);
     final now = sast(asOf ?? MlTime.instant());
     return on.year == now.year

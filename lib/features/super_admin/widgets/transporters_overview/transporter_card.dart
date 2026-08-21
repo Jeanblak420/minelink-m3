@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'charts.dart';
 import 'overview_models.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_overview_tokens.dart';
+import 'package:flutter_application_1/core/design/components/ml_meta.dart';
 import 'primitives.dart';
 
 /// One row in the "Top transporters" list.
@@ -137,10 +138,10 @@ class _Identity extends StatelessWidget {
               _DotList(
                 tokens: t,
                 parts: [
-                  '${row.employees} employees',
-                  '${row.drivers} drivers',
+                  mlCount(row.employees, 'employee'),
+                  mlCount(row.drivers, 'driver'),
                   '${row.fleet} fleet',
-                  '${row.routes} routes',
+                  mlCount(row.routes, 'route'),
                   // "never active", not "last active never".
                   row.lastActive == null
                       ? 'never active'

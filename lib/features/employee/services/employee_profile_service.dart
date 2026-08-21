@@ -20,6 +20,7 @@ import 'package:flutter_application_1/features/employee/models/employee_model.da
 import 'package:flutter_application_1/features/portal/models/compliance_document.dart';
 import 'package:flutter_application_1/features/portal/services/compliance_service.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/core/design/components/ml_meta.dart';
 
 /// P0-11 / S1-7: this file held 32 of the tree's 38 empty `catch (_) {}`
 /// blocks. Every one guards an OPTIONAL enrichment — one metric card, one
@@ -1351,7 +1352,7 @@ class EmployeeProfileService {
           flags.add(ProfileFlag(
             title: '${d.displayTitle} renewal window',
             body:
-                '${d.displayTitle} expires in ${days ?? '—'} days. Keep the '
+                '${d.displayTitle} expires in ${mlCountText(days ?? '—', 'day')}. Keep the '
                 'renewed copy current in Documents before the window closes.',
             metaLine: 'Opened by System · live compliance check',
             tone: ProfileTone.amber,

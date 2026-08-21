@@ -114,7 +114,7 @@ class _TonsOutDetailScreenState extends State<TonsOutDetailScreen> {
           Row(
             children: [
               Text(
-                '${rows.length} of ${widget.entries.length} loads',
+                '${rows.length} of ${mlCount(widget.entries.length, 'load')}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: scheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,

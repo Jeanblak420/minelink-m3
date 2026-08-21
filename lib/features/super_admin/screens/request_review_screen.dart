@@ -373,11 +373,29 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
       // admin queue joined the requester through the wrong foreign key, and
       // nothing on screen said anything was missing.
       'From ${r.requesterCompany?.name ?? 'an unidentified company'}',
-      if (r.tonsAvailable != null) '${r.tonsAvailable} tons',
+      if (r.tonsAvailable != null) mlCountText(r.tonsAvailable, 'ton'),
       if (!_isRoutes && r.offloadingPoint != null) '→ ${r.offloadingPoint}',
-      if (r.numSlots != null) '${r.numSlots} trucks',
-      if (r.distance != null) r.distance,
-      if (r.rate != null) r.rate,
+      // "1 trucks" read on the live queue on 2026-08-21, on two of the three
+      // mine requests. `numSlots` is free text (`String?`), so it is parsed
+      // rather than compared to '1' — " 1" and "01" are both a single truck.
+      if (r.numSlots != null)
+        '${r.numSlots} '
+            'truck${int.tryParse(r.numSlots!.trim()) == 1 ? '' : 's'}',
+      // LABELLED, because both of these are free text the requester typed and
+      // the units are only there if they happened to type them.
+      //
+      // On the same queue, one request read `... · 640 km · R 700 / ton · ...`
+      // and the one above it read `... · 640 · 820 · ...` — two bare numbers
+      // in a row, with nothing on screen to say that 820 was Rands per ton.
+      // Same fields, same screen, different records. The detail panel under
+      // this list has always labelled them `Distance` and `Rate` (`_kv`); the
+      // summary line is where an admin actually triages, and it did not.
+      //
+      // The label is what makes the figure readable whatever was typed. It
+      // does NOT invent a unit — guessing that a bare 820 is Rands would be
+      // making up data about a price.
+      if (r.distance != null) 'Distance ${r.distance}',
+      if (r.rate != null) 'Rate ${r.rate}',
       if (r.paymentTerms != null) r.paymentTerms,
       if (_isRoutes && r.commodity != null) r.commodity,
     ].whereType<String>().join(' · ');

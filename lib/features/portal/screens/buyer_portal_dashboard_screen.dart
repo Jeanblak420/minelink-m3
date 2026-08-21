@@ -422,7 +422,7 @@ class _BuyerPortalDashboardScreenState
                 style: context.mlText.figure(color: s.textStrong, size: 30),
               ),
               Text(
-                '$invoiced / ${delivered.length} loads',
+                '$invoiced / ${mlCount(delivered.length, 'load')}',
                 style: context.mlText.code(
                   color: s.textMuted,
                   size: 11,

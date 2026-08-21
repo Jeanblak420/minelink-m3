@@ -419,7 +419,7 @@ class _UnassignedDriverTileState extends ConsumerState<_UnassignedDriverTile> {
                 leading: MlPlatePill(t.registration, fontSize: 12),
                 title: Text(t.driversLabel,
                     maxLines: 1, overflow: TextOverflow.ellipsis),
-                subtitle: Text('${t.driverCount}/${t.maxDrivers} drivers'
+                subtitle: Text('${t.driverCount}/${mlCount(t.maxDrivers, 'driver')}'
                     '${t.onRoute ? ' · on route now' : ''}'),
               ),
             ),
