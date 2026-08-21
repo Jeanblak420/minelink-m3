@@ -29,6 +29,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/features/super_admin/screens/targets_platform_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/targets_org_type_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/targets_company_screen.dart';
+import 'package:flutter_application_1/features/super_admin/widgets/targets/targets_chrome.dart';
 
 import '../../fixtures/console_capture_fixtures.dart';
 import '../../fixtures/portal_capture_fixtures.dart';
@@ -57,7 +60,11 @@ void main() {
   /// `expect` raised while its own handler is displaced:
   /// *"A test overrode FlutterError.onError but either failed to return it to
   /// its original state…"*, which times the whole file out at ten minutes.
-  Future<List<String>> pumpBoard(WidgetTester tester, double width) async {
+  Future<List<String>> pumpBoard(
+    WidgetTester tester,
+    double width, {
+    Widget board = const TargetsPlatformScreen(),
+  }) async {
     final overflows = <String>[];
     final previous = FlutterError.onError;
     FlutterError.onError = (details) {
@@ -81,7 +88,7 @@ void main() {
       ],
       child: MaterialApp(
         theme: AppTheme.darkTheme,
-        home: const Scaffold(body: TargetsPlatformScreen()),
+        home: Scaffold(body: board),
       ),
     ));
     await tester.pump();
@@ -131,6 +138,85 @@ void main() {
       expect(isTruncated(tester, 'Aug 2026'), isFalse);
     });
   }
+
+  // -------------------------------------------------------------------------
+  // THE OTHER TWO SCOPES, photographed for the first time 2026-08-21.
+  //
+  // The platform board is the one scope with NO selector, so everything below
+  // is a fault the platform board could not have. All three were found in the
+  // pictures and none of them failed anything.
+  // -------------------------------------------------------------------------
+
+  /// The longest real organisation name in the registry fixture. It is both a
+  /// pill in the by-company picker and the band's own title, which is what
+  /// makes it the right string to test with.
+  const longCompany = 'Consolidated Mineral Offtake & Logistics Holdings';
+
+  for (final width in const [360.0, 412.0]) {
+    testWidgets('the by-company picker stays inside the panel at '
+        '${width.toInt()}px', (tester) async {
+      final overflows = await pumpBoard(tester, width,
+          board: const TargetsCompanyScreen(companyId: 'o4'));
+      expect(overflows, isEmpty,
+          reason: 'the company picker overflows ${overflows.length} time(s). '
+              'A `TargetsScopePill` lays its label Column out unflexed inside '
+              'a Row, so the Row hands it UNBOUNDED width and a long '
+              'organisation name runs straight off the end of the Wrap — '
+              'CLAUDE.md §10.4. Measured at 412px: 37px over.');
+    });
+
+    testWidgets('and the board still names the company at ${width.toInt()}px',
+        (tester) async {
+      await pumpBoard(tester, width,
+          board: const TargetsCompanyScreen(companyId: 'o4'));
+      expect(isTruncated(tester, '$longCompany targets'), isFalse,
+          reason: 'the by-company title is cut. `overflow: ellipsis` with no '
+              '`maxLines` truncates a paragraph to ONE line, so this read '
+              '"Consolidated Mineral Offta…" — losing the rest of the name '
+              'AND the word "targets", on the only screen where either '
+              'appears. It has to wrap, with no line cap: two lines is enough '
+              'at 412px and not at 360.');
+      // Wrapping, not shrinking: a title squeezed onto one line by a smaller
+      // face would pass the check above and be just as unreadable.
+      expect(
+        tester.getRect(find.text('$longCompany targets')).height,
+        greaterThan(40),
+        reason: 'the title is on one line at ${width.toInt()}px, which this '
+            'name cannot fit onto.',
+      );
+    });
+
+    testWidgets('the org-type switch puts its label above the pills at '
+        '${width.toInt()}px', (tester) async {
+      final overflows = await pumpBoard(tester, width,
+          board:
+              const TargetsOrgTypeScreen(orgType: TargetOrgType.transporter));
+      expect(overflows, isEmpty, reason: 'the org-type switch overflows.');
+
+      // The label sits ABOVE the pills, not beside them: `Row[label, gap,
+      // Expanded(Wrap)]` leaves 266px for three pills at 412, so they stack
+      // three deep and the vertically-centred label floats in dead space.
+      final label = tester.getRect(find.text('ORG TYPE'));
+      final firstPill = tester.getRect(find.text('Mines / Suppliers'));
+      expect(label.bottom, lessThanOrEqualTo(firstPill.top),
+          reason: 'ORG TYPE is still beside the pills at ${width.toInt()}px. '
+              '`TargetsSelectorField` stacks below 560px.');
+      expect(label.left, lessThan(60),
+          reason: 'the stacked label should start at the panel edge.');
+    });
+  }
+
+  testWidgets('and the org-type switch stays a ROW on a console', (tester) async {
+    await pumpBoard(tester, 1600,
+        board: const TargetsOrgTypeScreen(orgType: TargetOrgType.transporter));
+    final label = tester.getRect(find.text('ORG TYPE'));
+    final firstPill = tester.getRect(find.text('Mines / Suppliers'));
+    expect(label.bottom, greaterThan(firstPill.top),
+        reason: 'the label dropped onto its own line at 1600px, where three '
+            'pills and a caption fit on one comfortably. Stacking everywhere '
+            'is not the fix; stacking when the row stops working is.');
+    expect(find.byType(TargetsSelectorField), findsOneWidget);
+  });
 
   testWidgets('and it does NOT scroll on a console-width window',
       (tester) async {

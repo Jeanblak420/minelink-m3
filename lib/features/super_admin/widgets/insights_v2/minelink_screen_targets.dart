@@ -1705,6 +1705,9 @@ class _CycleArchive extends StatelessWidget {
                         child: FractionallySizedBox(
                           alignment: Alignment.centerLeft,
                           widthFactor: a.clamp(0.0, 1.0),
+                          // Stated, not inferred — see the guard
+                          // `fractional-fill-declares-its-height`.
+                          heightFactor: 1,
                           child: ColoredBox(color: color),
                         ),
                       ),
@@ -1754,9 +1757,27 @@ class _AttBar extends StatelessWidget {
               ),
             ),
           ),
+          // `heightFactor: 1` is what makes this bar EXIST.
+          //
+          // A `Stack`'s non-positioned children are laid out with LOOSE
+          // constraints, and a `FractionallySizedBox` that declares only a
+          // `widthFactor` passes its parent's height range straight through —
+          // so the inner `DecoratedBox`, which has no child, took
+          // `constraints.smallest` and came out **6px wide by 0px tall**. The
+          // track painted (it is `Positioned.fill`, which is tight) and the
+          // 100% tick painted (a `Container` expands under loose constraints),
+          // so every attainment bar in the product rendered as an empty rail
+          // with a notch: the one element whose whole job is to show the
+          // number was the one element missing. Measured out of
+          // `screen-targets-org-type-desktop-dark.png` on 2026-08-21 — the row
+          // for Sep 2025 reads 82%, and the 315px rail was one flat colour end
+          // to end.
+          //
+          // Inherited from the shipping app, not introduced here.
           FractionallySizedBox(
             alignment: Alignment.centerLeft,
             widthFactor: (attainment / cap).clamp(0.0, 1.0),
+            heightFactor: 1,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: outcome == MlTargetOutcome.close

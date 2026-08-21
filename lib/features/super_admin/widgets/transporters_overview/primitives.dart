@@ -283,6 +283,9 @@ class OvMeter extends StatelessWidget {
           child: FractionallySizedBox(
             alignment: Alignment.centerLeft,
             widthFactor: fraction.isFinite ? fraction.clamp(0.0, 1.0) : 0.0,
+            // Stated, not inferred — see the guard
+            // `fractional-fill-declares-its-height`.
+            heightFactor: 1,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: gradient,

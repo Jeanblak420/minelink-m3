@@ -106,59 +106,47 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          children: [
-            Text(
-              'COMPANY',
-              style: TextStyle(
-                fontFamily: MlGlass.sans,
-                fontSize: 9,
-                letterSpacing: 1.1,
-                fontWeight: FontWeight.w700,
-                color: t.inkLo,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: SizedBox(
-                height: 32,
-                child: TextField(
-                  controller: _search,
-                  onChanged: (v) => setState(() => _query = v),
-                  style: context.mlText.bodySmall.copyWith(color: t.inkHi),
-                  cursorColor: t.accent,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: loading
-                        ? 'Loading organizations…'
-                        : 'Search ${companies.length} organizations',
-                    hintStyle: context.mlText.bodySmall.copyWith(color: t.inkLo),
-                    prefixIcon:
-                        Icon(Icons.search_rounded, size: 15, color: t.inkLo),
-                    prefixIconConstraints:
-                        const BoxConstraints(minWidth: 32, minHeight: 32),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                    filled: true,
-                    fillColor: t.inkHi.withValues(alpha: 0.04),
-                    border: OutlineInputBorder(
-                      borderRadius: MlShape.radiusSmall,
-                      borderSide: BorderSide(color: t.line2),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: MlShape.radiusSmall,
-                      borderSide: BorderSide(color: t.line2),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: MlShape.radiusSmall,
-                      borderSide:
-                          BorderSide(color: t.accent.withValues(alpha: 0.65)),
-                    ),
-                  ),
+        // The same label-beside-or-above control the org-type switch uses, so
+        // the two scope screens read as one control at every width.
+        TargetsSelectorField(
+          label: 'COMPANY',
+          child: SizedBox(
+            height: 32,
+            child: TextField(
+              controller: _search,
+              onChanged: (v) => setState(() => _query = v),
+              style: context.mlText.bodySmall.copyWith(color: t.inkHi),
+              cursorColor: t.accent,
+              decoration: InputDecoration(
+                isDense: true,
+                hintText: loading
+                    ? 'Loading organizations…'
+                    : 'Search ${companies.length} organizations',
+                hintStyle: context.mlText.bodySmall.copyWith(color: t.inkLo),
+                prefixIcon:
+                    Icon(Icons.search_rounded, size: 15, color: t.inkLo),
+                prefixIconConstraints:
+                    const BoxConstraints(minWidth: 32, minHeight: 32),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                filled: true,
+                fillColor: t.inkHi.withValues(alpha: 0.04),
+                border: OutlineInputBorder(
+                  borderRadius: MlShape.radiusSmall,
+                  borderSide: BorderSide(color: t.line2),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: MlShape.radiusSmall,
+                  borderSide: BorderSide(color: t.line2),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: MlShape.radiusSmall,
+                  borderSide:
+                      BorderSide(color: t.accent.withValues(alpha: 0.65)),
                 ),
               ),
             ),
-          ],
+          ),
         ),
         if (shown.isNotEmpty) ...[
           const SizedBox(height: 12),

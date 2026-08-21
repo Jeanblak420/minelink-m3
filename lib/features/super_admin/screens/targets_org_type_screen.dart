@@ -80,38 +80,24 @@ class TargetsOrgTypeScreen extends ConsumerWidget {
           icon: orgType.icon,
           scopeLabel: 'BY ORG TYPE',
           headline: data == null ? null : TargetsHeadline.of(data),
-          selector: Row(
-            children: [
-              Text(
-                'ORG TYPE',
-                style: TextStyle(
-                  fontFamily: MlGlass.sans,
-                  fontSize: 9,
-                  letterSpacing: 1.1,
-                  fontWeight: FontWeight.w700,
-                  color: t.inkLo,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final o in TargetOrgType.values)
-                      TargetsScopePill(
-                        label: o.label,
-                        sublabel: o.lens.toUpperCase(),
-                        icon: o.icon,
-                        selected: o == orgType,
-                        // A path segment rather than screen state: an admin
-                        // comparing the three wants to link somebody to one.
-                        onTap: () => context.go('$basePath/${o.wire}'),
-                      ),
-                  ],
-                ),
-              ),
-            ],
+          selector: TargetsSelectorField(
+            label: 'ORG TYPE',
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final o in TargetOrgType.values)
+                  TargetsScopePill(
+                    label: o.label,
+                    sublabel: o.lens.toUpperCase(),
+                    icon: o.icon,
+                    selected: o == orgType,
+                    // A path segment rather than screen state: an admin
+                    // comparing the three wants to link somebody to one.
+                    onTap: () => context.go('$basePath/${o.wire}'),
+                  ),
+              ],
+            ),
           ),
         ),
         // Keyed so switching type tears the workspace down rather than

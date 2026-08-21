@@ -789,7 +789,17 @@ class _OrganizationManagementScreenState
     }
     final exp = DateTime.tryParse(iso);
     if (exp == null) return const _ExpiryInfo('—', false, MlTone.neutral, null);
-    final now = DateTime.now();
+    // `MlTime.instant()`, not `DateTime.now()`. This countdown is bucketed by
+    // day (`diff.inDays`, and `< 7` decides whether the dot goes amber), which
+    // CLAUDE.md §7.1 puts squarely under the one-clock rule. It also has to be
+    // reproducible: read off the device clock, the registry's golden said
+    // `102d 09h left` when it was written and `102d 08h left` an hour later,
+    // and the whole render suite failed for the next person to run it.
+    //
+    // `instant()` and not `now()` — `now()` is a WALL CLOCK flagged non-UTC,
+    // so subtracting it from a server timestamp is off by the reader's own
+    // offset everywhere except South Africa.
+    final now = MlTime.instant();
     final date = DateFormat("d MMM ''yy").format(MlTime.sast(exp));
     final diff = exp.difference(now);
     if (diff.isNegative) {

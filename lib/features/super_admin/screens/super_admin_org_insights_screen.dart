@@ -1634,6 +1634,13 @@ class _SuperAdminOrgInsightsScreenState
                   if (pct != null)
                     FractionallySizedBox(
                       widthFactor: (pct / 100).clamp(0.0, 1.0),
+                      // A `Stack` lays its non-positioned children out loose,
+                      // so the fill states its own height rather than relying
+                      // on the parent to tighten one. This used to be carried
+                      // by a `SizedBox.expand()` inside the `DecoratedBox`,
+                      // which worked by accident of the same mechanism and
+                      // said nothing about why it was there.
+                      heightFactor: 1,
                       // Design meter: the fill warms from teal into brand cyan
                       // across its own length.
                       child: DecoratedBox(
@@ -1642,7 +1649,6 @@ class _SuperAdminOrgInsightsScreenState
                             colors: [MlControlRoom.teal, MlControlRoom.cyan],
                           ),
                         ),
-                        child: const SizedBox.expand(),
                       ),
                     ),
                 ],

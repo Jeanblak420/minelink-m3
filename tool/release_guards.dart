@@ -543,6 +543,54 @@ final guards = <Guard>[
     plantLine: 'final delta = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);',
   ),
   Guard(
+    id: 'fractional-fill-declares-its-height',
+    why: 'a `FractionallySizedBox` that declares only a `widthFactor` passes '
+        'its parent\'s HEIGHT RANGE straight through, so under loose '
+        'constraints a childless `DecoratedBox`/`ColoredBox` inside it takes '
+        '`constraints.smallest` and comes out **0px tall**. A `Stack` lays its '
+        'non-positioned children out loose, and so does an `Align` — which is '
+        'exactly where the two broken ones lived.\n'
+        '\n'
+        'Measured out of `screen-targets-org-type-desktop-dark.png` on '
+        '2026-08-21: every attainment bar in the targets board — All months, '
+        'the horizon ladder and the target history — painted its track and its '
+        '100%% tick and NOTHING ELSE. The row for Sep 2025 reads 82%%, and its '
+        '315px rail was one flat colour end to end. The request-tracking '
+        'screen\'s completed-trips meter was the same. Two meters that could '
+        'never draw a measurement, in a product whose whole subject is '
+        'measurements.\n'
+        '\n'
+        'It fails NOTHING. No overflow, no exception, no failing golden — a '
+        'zero-height box is a valid layout, and four other meters in the tree '
+        'were correct only because their parent happened to be a '
+        '`Container(height:)` that tightened the constraint for them. That '
+        'accident is what this guard removes: every fill states its own '
+        'height, so the rule holds wherever the widget is moved to.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // Reach the call's `child:` without passing a `heightFactor:` on the way.
+    // The second lookahead stops a nested `FractionallySizedBox` from lending
+    // its factor to the outer one.
+    pattern: RegExp(
+      r'FractionallySizedBox\('
+      r'(?:(?!heightFactor)(?!FractionallySizedBox)[\s\S]){0,300}?'
+      r'child:',
+    ),
+    // The formatter decides where the arguments break, and the pattern has to
+    // cross those breaks to be worth anything.
+    spanLines: true,
+    plantFile: 'meter.dart',
+    plantLine:
+        'Align(child: FractionallySizedBox(widthFactor: f, child: ColoredBox(color: c)));',
+    plantWrapped: 'Align(\n'
+        '  child: FractionallySizedBox(\n'
+        '    widthFactor: f,\n'
+        '    child: ColoredBox(color: c),\n'
+        '  ),\n'
+        ');',
+  ),
+  Guard(
     id: 'driver-eta-is-not-the-device-clock',
     why: 'the arrival time in the driver\'s HUD came from `DateTime.now()`, '
         'which is the DEVICE\'s opinion of the hour. CLAUDE.md §7.1 makes '

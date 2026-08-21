@@ -1299,10 +1299,16 @@ class _TripsCell extends StatelessWidget {
                 color: semantic.surfaceSunken,
                 borderRadius: MlShape.radiusExtraSmall,
               ),
+              // `Align` loosens the constraints it hands down, so the fill
+              // needs `heightFactor: 1` or the childless `DecoratedBox` inside
+              // it takes `constraints.smallest` and comes out 0px tall — a
+              // completed-trips meter that never draws a completed trip. Same
+              // fault as the targets attainment bar, found the same day.
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: FractionallySizedBox(
                   widthFactor: frac,
+                  heightFactor: 1,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: fillColor,

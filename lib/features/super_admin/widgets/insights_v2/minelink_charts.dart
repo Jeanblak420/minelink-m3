@@ -923,6 +923,11 @@ class MlMeter extends StatelessWidget {
         child: FractionallySizedBox(
           alignment: Alignment.centerLeft,
           widthFactor: value.clamp(0.0, 1.0),
+          // A no-op here — the `Container(height:)` above already hands down a
+          // tight height — and stated anyway, because the two meters that did
+          // NOT state it were both invisible. See the guard
+          // `fractional-fill-declares-its-height`.
+          heightFactor: 1,
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(radius),

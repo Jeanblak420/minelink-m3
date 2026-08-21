@@ -60,6 +60,8 @@ import 'package:flutter_application_1/features/super_admin/screens/request_revie
 import 'package:flutter_application_1/features/super_admin/screens/dispute_inbox_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/organization_management_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/targets_platform_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/targets_org_type_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/targets_company_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/token_requests_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/margin_ledger_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/super_admin_org_insights_screen.dart';
@@ -1550,6 +1552,102 @@ void main() {
         ),
         const Size(412, 4340),
         'screen-targets-platform-phone-dark',
+      );
+    });
+
+    // The other two target SCOPES.
+    //
+    // The platform board is the one that had a picture, and it is the one
+    // scope with NO selector. The org-type screen adds a three-pill switch and
+    // the company screen adds a search field plus up to twelve company pills —
+    // which is precisely why `TargetsPage`'s half-viewport cap exists: the
+    // band on those two is a paragraph, a selector AND a four-figure stats row,
+    // and it was the org-type one that crossed the line first.
+    //
+    // The company pills carry a real organisation name, so
+    // `consoleCaptureOverrides()` is installed alongside the portal ones —
+    // without `organizationsProvider` the picker renders "Search 0
+    // organizations" and no pills at all, which is a picture of an empty
+    // registry rather than of this screen.
+    testWidgets('targets — org type, desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const TargetsOrgTypeScreen(orgType: TargetOrgType.transporter),
+          extraOverrides: [
+            ...consoleCaptureOverrides(),
+            ...portalCaptureOverrides(),
+          ],
+        ),
+        const Size(1600, 1900),
+        'screen-targets-org-type-desktop-dark',
+      );
+    });
+
+    testWidgets('targets — org type, phone dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const TargetsOrgTypeScreen(orgType: TargetOrgType.transporter),
+          extraOverrides: [
+            ...consoleCaptureOverrides(),
+            ...portalCaptureOverrides(),
+          ],
+        ),
+        // 4,533 rather than the platform board's 4,340. The whole screen is
+        // one scroll and this board's band carries a three-pill selector the
+        // platform one does not, so it starts lower and ends lower.
+        //
+        // MEASURED, not reasoned about. The first attempt added the band's
+        // extra height (56px, from the scroll extent in a bare Scaffold) and
+        // came out 173px short, which put the last four months of the target
+        // history under the bottom bar - a picture of a screen that looks
+        // finished. The number that works is taken from a deliberately
+        // oversized frame: render at 6,200, find the last row of painted
+        // content (4,391), add the 142px the pinned bottom bar occupies.
+        const Size(412, 4533),
+        'screen-targets-org-type-phone-dark',
+      );
+    });
+
+    // A company SELECTED, not the picker's empty state. `o4` is
+    // "Consolidated Mineral Offtake & Logistics Holdings" — the longest name
+    // in the registry, and the one the console sweep has used since Phase 2 to
+    // find rigid layouts. It is both the band's title and one of the pills.
+    testWidgets('targets — company, desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const TargetsCompanyScreen(companyId: 'o4'),
+          extraOverrides: [
+            ...consoleCaptureOverrides(),
+            ...portalCaptureOverrides(),
+          ],
+        ),
+        const Size(1600, 1900),
+        'screen-targets-company-desktop-dark',
+      );
+    });
+
+    testWidgets('targets — company, phone dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const TargetsCompanyScreen(companyId: 'o4'),
+          extraOverrides: [
+            ...consoleCaptureOverrides(),
+            ...portalCaptureOverrides(),
+          ],
+        ),
+        // Same measurement as the org-type frame above: content ends at
+        // 4,510 in a 6,200 frame, plus the 142px bottom bar. The company band
+        // is the tallest of the three - a search field and five pills.
+        const Size(412, 4652),
+        'screen-targets-company-phone-dark',
       );
     });
 

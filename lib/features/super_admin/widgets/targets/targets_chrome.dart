@@ -163,11 +163,35 @@ class TargetsBand extends StatelessWidget {
                   runSpacing: 7,
                   children: [
                     // A `Wrap` gives a horizontal child `maxWidth` equal to its
-                    // own, so this still ellipsises when a single company name
+                    // own, so this is still bounded when a single company name
                     // is longer than the whole band.
+                    //
+                    // IT WRAPS. No `maxLines`, no ellipsis — deliberately.
+                    //
+                    // It used to carry `overflow: ellipsis` and nothing else,
+                    // and `ui.ParagraphStyle` truncates to a SINGLE line when
+                    // an ellipsis is set and no line limit is. So the
+                    // by-company board rendered
+                    //
+                    //     Consolidated Mineral Offta…
+                    //
+                    // at 412px, losing the rest of a real registry name AND
+                    // the word "targets". Photographed 2026-08-21. Two
+                    // organisations sharing their first three words are then
+                    // indistinguishable on the screen that sets their
+                    // twelve-month commitments, and this title is the only
+                    // place either name appears — the subtitle is the same
+                    // sentence for every company.
+                    //
+                    // `maxLines: 2` was tried and is not enough: at 360px the
+                    // same name needs three. Any line cap is a number that is
+                    // right for the names somebody happened to test with, so
+                    // there is no cap. Height is the cheap sacrifice here —
+                    // the band sits in a scroll view and `TargetsPage` caps it
+                    // at half the viewport, so a long name costs a line, not a
+                    // screen.
                     Text(
                       title,
-                      overflow: TextOverflow.ellipsis,
                       style: context.mlText.editorialMedium.copyWith(
                         color: t.inkHi,
                       ),
@@ -308,6 +332,72 @@ class TargetsBand extends StatelessWidget {
       );
 }
 
+/// The label beside a scope selector, which becomes the label ABOVE it once
+/// the control needs more room than a phone can spare.
+///
+/// Both selectors used to hand-roll `Row[label, gap, Expanded(control)]`. At
+/// 412px that leaves the org-type switch 266px for three pills, so they stack
+/// into three rows — and the label, vertically centred against them, ends up
+/// floating in the middle of a column of dead space with nothing aligned to it.
+/// Photographed 2026-08-21. Nothing overflows; it is simply a layout that has
+/// stopped meaning anything.
+///
+/// Below [stackBelow] the label takes its own line and the control gets the
+/// full width. 560 is what the org-type switch needs to keep its three pills on
+/// one line — 3 × ~150px, two 8px gaps, the label and its 14px gutter — so the
+/// break happens exactly when the row stops working rather than at a width
+/// picked to look tidy.
+class TargetsSelectorField extends StatelessWidget {
+  const TargetsSelectorField({
+    super.key,
+    required this.label,
+    required this.child,
+    this.stackBelow = 560,
+  });
+
+  final String label;
+  final Widget child;
+  final double stackBelow;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = MlGlass.of(context);
+    final caption = Text(
+      label,
+      style: TextStyle(
+        fontFamily: MlGlass.sans,
+        fontSize: 9,
+        letterSpacing: 1.1,
+        fontWeight: FontWeight.w700,
+        color: t.inkLo,
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, box) {
+        if (box.maxWidth < stackBelow) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Align(alignment: Alignment.centerLeft, child: caption),
+              const SizedBox(height: 10),
+              child,
+            ],
+          );
+        }
+        return Row(
+          children: [
+            caption,
+            const SizedBox(width: 14),
+            Expanded(child: child),
+          ],
+        );
+      },
+    );
+  }
+}
+
 /// A pill in a scope selector — used by the org-type switch and the company
 /// picker so the two read as the same control.
 class TargetsScopePill extends StatelessWidget {
@@ -352,29 +442,48 @@ class TargetsScopePill extends StatelessWidget {
                   size: 14, color: selected ? t.accent2 : t.inkMid),
               const SizedBox(width: 8),
             ],
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: context.mlText.labelMedium.copyWith(
-                    color: selected ? t.accent2 : t.inkMid,
-                  ),
-                ),
-                if (sublabel != null) ...[
-                  const SizedBox(height: 2),
+            // `Flexible`, and both labels ellipsise.
+            //
+            // CLAUDE.md §10.4: a `Row` lays a non-flex child out against
+            // UNBOUNDED width, so this Column took whatever the longest
+            // organisation name came to and the pill ran off the end of its
+            // own `Wrap`. Measured at 412px on 2026-08-21 — "Consolidated
+            // Mineral Offtake & Logistics Holdings", a real name already in
+            // the registry fixture, put the by-company picker **37px** past
+            // the panel.
+            //
+            // A `Wrap` bounds each child to its own maxWidth, so the flex has
+            // something to divide and the pill shrinks to the row instead of
+            // spilling out of it.
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Text(
-                    sublabel!,
-                    style: TextStyle(
-                      fontFamily: MlGlass.sans,
-                      fontSize: 9,
-                      letterSpacing: 0.5,
-                      color: t.inkXlo,
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.mlText.labelMedium.copyWith(
+                      color: selected ? t.accent2 : t.inkMid,
                     ),
                   ),
+                  if (sublabel != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      sublabel!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: MlGlass.sans,
+                        fontSize: 9,
+                        letterSpacing: 0.5,
+                        color: t.inkXlo,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ],
         ),

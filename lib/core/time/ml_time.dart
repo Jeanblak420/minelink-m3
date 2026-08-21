@@ -83,6 +83,22 @@ abstract final class MlTime {
   /// Now, on the South African wall clock.
   static DateTime now() => sast(debugClock?.call() ?? DateTime.now());
 
+  /// Now, as the real **instant** in UTC — for measuring a DURATION, never for
+  /// display.
+  ///
+  /// [now] is a wall clock flagged non-UTC, so its `millisecondsSinceEpoch`
+  /// depends on the reader's device offset. Subtracting a server timestamp from
+  /// it is therefore wrong everywhere except South Africa, which is the one
+  /// place nobody would notice. Anything that computes "how long is left" wants
+  /// this instead.
+  ///
+  /// It honours [debugClock], which is the other half of why it exists: the
+  /// organisations registry printed a token countdown straight off
+  /// `DateTime.now()`, so its golden read `102d 09h left` in the morning and
+  /// `102d 08h left` an hour later. A render that cannot be reproduced is not
+  /// evidence of anything, and it fails the suite for whoever runs it next.
+  static DateTime instant() => (debugClock?.call() ?? DateTime.now()).toUtc();
+
   /// Midnight today, South African. The start of every "today" in the product.
   static DateTime today() => startOfDay(now());
 
