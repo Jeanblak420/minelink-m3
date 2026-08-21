@@ -165,7 +165,7 @@ class LoadQualityTable extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '$certified of ${rows.length} load(s) certified',
+                    '$certified of ${mlCount(rows.length, 'load')} certified',
                     style: context.mlText.titleSmall.copyWith(
                       color: semantic.textMuted,
                     ),

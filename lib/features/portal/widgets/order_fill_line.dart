@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
 import 'package:flutter_application_1/features/portal/providers/order_stockpile_provider.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
+import 'package:flutter_application_1/core/design/components/ml_meta.dart';
 
 /// Compact, read-only view of the mine's stockpile fill for an order, shown to
 /// the buyer (on their request) and the transporter (on their dispatched
@@ -74,9 +75,10 @@ class OrderFillLine extends ConsumerWidget {
               const SizedBox(height: 6),
               Text(
                 complete
-                    ? 'Order complete · $loads full load(s) ready to collect'
+                    ? 'Order complete · ${mlCount(loads, 'full load')} '
+                        'ready to collect'
                     : loads > 0
-                        ? '$loads full load(s) ready to collect'
+                        ? '${mlCount(loads, 'full load')} ready to collect'
                         : 'Being loaded — no full load ready yet',
                 style: textTheme.bodySmall?.copyWith(
                   color: complete ? MlTokens.green600 : scheme.onSurfaceVariant,

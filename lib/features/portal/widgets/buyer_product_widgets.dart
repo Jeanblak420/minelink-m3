@@ -9,6 +9,7 @@ import 'package:flutter_application_1/features/portal/utils/buyer_products.dart'
 import 'package:flutter_application_1/features/portal/utils/portal_dashboard_navigation.dart';
 import 'package:flutter_application_1/features/portal/widgets/premium_overview_widgets.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/core/design/components/ml_meta.dart';
 
 /// A "My products" tile for the buyer dashboard (§7.1).
 class BuyerProductTile extends StatelessWidget {
@@ -39,8 +40,9 @@ class BuyerProductTile extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '${product.trips.length} trip(s) · ${product.loads} load(s) · '
-            '${product.supplierIds.length} source(s)',
+            '${mlCount(product.trips.length, 'trip')} · '
+            '${mlCount(product.loads, 'load')} · '
+            '${mlCount(product.supplierIds.length, 'source')}',
             style: Theme.of(context)
                 .textTheme
                 .bodySmall

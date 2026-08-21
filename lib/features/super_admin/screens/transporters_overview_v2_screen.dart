@@ -15,6 +15,7 @@ import 'package:flutter_application_1/core/design/tokens/ml_overview_tokens.dart
 import 'package:flutter_application_1/features/super_admin/widgets/transporters_overview/transporters_overview_body.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/core/design/components/ml_meta.dart';
 
 /// Transporters overview — the layout from the 2026-08-09 "Replacing old views
 /// and screens" drop, fed from live data instead of the drop's sample dataset.
@@ -509,7 +510,8 @@ abstract final class TransportersOverviewMapper {
         tone: OvTone.warn,
         icon: Icons.local_shipping_outlined,
         title: '${c.companyName} has run no trips',
-        body: '${c.fleetVehicles} vehicle(s) on file, no movement recorded.',
+        body: '${mlCount(c.fleetVehicles, 'vehicle')} on file, no movement '
+            'recorded.',
         age: monthName,
       ));
     }

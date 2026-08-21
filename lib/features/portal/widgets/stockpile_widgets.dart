@@ -6,6 +6,7 @@ import 'package:flutter_application_1/features/portal/models/stockpile_entry.dar
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
 import 'package:flutter_application_1/features/portal/widgets/premium_overview_widgets.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
+import 'package:flutter_application_1/core/design/components/ml_meta.dart';
 
 /// Units available when capturing a stockpile mineral. Only "Ton" for now;
 /// more will be added later.
@@ -144,10 +145,11 @@ class _StockpileFillBar extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           full
-              ? 'Order complete · ${cap.toStringAsFixed(0)} t · $loads load(s) ready'
+              ? 'Order complete · ${cap.toStringAsFixed(0)} t · '
+                  '${mlCount(loads, 'load')} ready'
               : '${(frac * 100).round()}% of order · '
                   '${(pile.remainingToCap ?? 0).toStringAsFixed(0)} t to go · '
-                  '$loads load(s) ready',
+                  '${mlCount(loads, 'load')} ready',
           style: textTheme.bodySmall?.copyWith(
             color: full ? MlTokens.green600 : scheme.onSurfaceVariant,
             fontWeight: FontWeight.w600,

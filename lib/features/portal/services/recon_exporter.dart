@@ -15,6 +15,7 @@ import 'package:flutter_application_1/core/utils/file_save.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/core/design/components/ml_meta.dart';
 
 /// Reconciliation export formats (CLAUDE.md §4: Excel + CSV + PDF).
 enum ReconExportFormat { csv, excel, pdf }
@@ -170,7 +171,7 @@ class ReconExporter {
       if (title != null) buf.writeln(_esc(title));
       buf.writeln(
         _esc('Generated ${MlTime.stamp(MlTime.instant())}'
-            '  ·  ${rows.length} row(s)'),
+            '  ·  ${mlCount(rows.length, 'row')}'),
       );
       buf.writeln();
       if (filters.isNotEmpty) {
@@ -318,7 +319,7 @@ class ReconExporter {
       row,
       TextCellValue(
         'Generated ${MlTime.stamp(MlTime.instant())}'
-        '  ·  ${rows.length} row(s)',
+        '  ·  ${mlCount(rows.length, 'row')}',
       ),
       CellStyle(
         italic: true,

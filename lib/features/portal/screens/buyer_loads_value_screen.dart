@@ -240,7 +240,8 @@ class _Body extends ConsumerWidget {
         if (unpriced > 0) ...[
           const SizedBox(height: 10),
           Text(
-            '$unpriced load(s) have no rate yet — pricing is set when the '
+            '${mlCount(unpriced, 'load')} ${unpriced == 1 ? 'has' : 'have'} '
+            'no rate yet — pricing is set when the '
             'MineLink admin links the order.',
             style: context.mlText.bodyMedium.copyWith(color: semantic.textMuted),
           ),

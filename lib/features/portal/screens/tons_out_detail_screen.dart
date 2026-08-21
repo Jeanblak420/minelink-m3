@@ -5,9 +5,8 @@ import 'package:flutter_application_1/features/portal/portal_colors.dart';
 import 'package:flutter_application_1/features/portal/widgets/premium_overview_widgets.dart';
 import 'package:flutter_application_1/features/portal/utils/tons_out_filter.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
-import 'package:flutter_application_1/core/design/components/ml_wide_table.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 /// Premium drill-down for the overview "Tons out" tile: rolling-window summary
 /// boxes plus a fully filterable / sortable dispatch table.
@@ -69,65 +68,77 @@ class _TonsOutDetailScreenState extends State<TonsOutDetailScreen> {
     final rows = TonsOutQuery.apply(widget.entries, _filter);
     final summary = TonsOutQuery.summarise(rows, now: MlTime.now());
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tons out'),
-        backgroundColor: MlSemantic.of(context).surfaceApp,
-        foregroundColor: MlSemantic.of(context).textStrong,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _SummaryStrip(summary: summary),
-            const SizedBox(height: 20),
-            _FilterBar(
-              entries: widget.entries,
-              filter: _filter,
-              searchController: _searchController,
-              massFloor: _massFloor,
-              massCeil: _massCeil,
-              massRange: _massRange,
-              onChanged: _update,
-              onMassRangeChanged: (r) => setState(() {
-                _massRange = r;
-                _filter = _filter.copyWith(
-                  minMass: r.start <= _massFloor ? null : r.start,
-                  maxMass: r.end >= _massCeil ? null : r.end,
-                );
-              }),
-              onClear: _clear,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Text(
-                  '${rows.length} of ${widget.entries.length} loads',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
+    // NO SCAFFOLD, AND NO APP BAR.
+    //
+    // This screen is reached through `PortalTonsOutSearchScreen`, which sits
+    // on a portal `ShellRoute` — so the shell has already drawn a top bar
+    // carrying the company's name, and a second `AppBar` reading "Tons out"
+    // landed directly underneath it. Two bars and two titles, in the first
+    // 150px of a phone, which is the scarcest space in the product.
+    // Photographed 2026-08-21, the first render of this screen.
+    //
+    // `MlPageBody` + `MlPageHeader` is what every other portal screen uses,
+    // and it also gives the page the meta line and the sentence of
+    // description a bare `AppBar` had nowhere to put.
+    return MlPageBody(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          MlPageHeader(
+            title: 'Tons out',
+            meta: mlCount(widget.entries.length, 'load'),
+            description: 'Every load dispatched, searchable by truck, '
+                'transporter, product, customer, date and net mass.',
+          ),
+          const SizedBox(height: 4),
+          _SummaryStrip(summary: summary),
+          const SizedBox(height: 20),
+          _FilterBar(
+            entries: widget.entries,
+            filter: _filter,
+            searchController: _searchController,
+            massFloor: _massFloor,
+            massCeil: _massCeil,
+            massRange: _massRange,
+            onChanged: _update,
+            onMassRangeChanged: (r) => setState(() {
+              _massRange = r;
+              _filter = _filter.copyWith(
+                minMass: r.start <= _massFloor ? null : r.start,
+                maxMass: r.end >= _massCeil ? null : r.end,
+              );
+            }),
+            onClear: _clear,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Text(
+                '${rows.length} of ${widget.entries.length} loads',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const Spacer(),
+              if (_filter.hasActiveFilters)
+                TextButton.icon(
+                  onPressed: _clear,
+                  icon: const Icon(Icons.filter_alt_off_outlined, size: 18),
+                  label: const Text('Clear filters'),
                 ),
-                const Spacer(),
-                if (_filter.hasActiveFilters)
-                  TextButton.icon(
-                    onPressed: _clear,
-                    icon: const Icon(Icons.filter_alt_off_outlined, size: 18),
-                    label: const Text('Clear filters'),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            _ResultsTable(
-              rows: rows,
-              filter: _filter,
-              onSort: _onSort,
-              dateFmt: _dateFmt,
-              massFmt: _massFmt,
-            ),
-          ],
-        ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _ResultsTable(
+            rows: rows,
+            filter: _filter,
+            onSort: _onSort,
+            dateFmt: _dateFmt,
+            massFmt: _massFmt,
+          ),
+          const SizedBox(height: 60),
+        ],
       ),
     );
   }

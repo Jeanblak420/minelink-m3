@@ -485,7 +485,7 @@ class _MineSupplierPortalDashboardScreenState
     return PortalDashboardSection(
       title: 'Stockpile cover',
       subtitle: 'How full the capped order piles are.',
-      meta: stockpiles == null ? null : '${stockpiles.length} pile(s)',
+      meta: stockpiles == null ? null : mlCount(stockpiles.length, 'pile'),
       viewRoute: '/portal/mine/stockpiles',
       child: MlCard(child: SizedBox(height: 232, child: body)),
     );

@@ -544,7 +544,7 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
         .map((t) => t.name)
         .toList();
     final namesLabel = names.isEmpty
-        ? '${transporters.length} transporter(s)'
+        ? mlCount(transporters.length, 'transporter')
         : names.join(', ');
 
     final allMines = ref.read(mineCompaniesProvider(null)).value ?? const [];
@@ -1006,7 +1006,8 @@ class _DetailPanel extends ConsumerWidget {
 
           if (linked) ...[
             Text(
-              'This request has been linked — dispatched to the selected transporter(s).',
+              'This request has been linked — dispatched to the selected '
+              'transporters.',
               style: const TextStyle(
                 fontFamily: MlTokens.fontSans,
                 color: MlTokens.accentHover,
@@ -1614,7 +1615,7 @@ class _DispatchStep extends ConsumerWidget {
         const SizedBox(height: 8),
         _PricingFields(onChanged: onPricingChanged),
         const Divider(height: 28),
-        Text('3 · Dispatch to transporter(s)', style: _stepStyle(context)),
+        Text('3 · Dispatch to transporters', style: _stepStyle(context)),
         const SizedBox(height: 8),
         transporters.when(
           loading: () => const Padding(
@@ -1728,7 +1729,7 @@ class _SelectedPartiesSummary extends StatelessWidget {
                   .map((t) => t.name)
                   .toList();
               return selected.isEmpty
-                  ? 'Unknown transporter(s)'
+                  ? 'Unknown transporters'
                   : selected.join(', ');
             },
           );
@@ -1779,7 +1780,7 @@ class _SelectedPartiesSummary extends StatelessWidget {
           const SizedBox(height: 10),
           buildRow('Mine', supplierText),
           const SizedBox(height: 8),
-          buildRow('Transporter(s)', transporterText),
+          buildRow('Transporters', transporterText),
         ],
       ),
     );

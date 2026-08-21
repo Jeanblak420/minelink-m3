@@ -2074,8 +2074,11 @@ String _ordinalSuffix(int day) {
 /// "14th Jan 2026" for anything older.
 String _dateSeparatorLabel(DateTime dt) {
   final d = MlTime.sast(dt);
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
+  // `MlTime.today()`, because the line above already converted. The
+  // separator compared a South African wall clock against the DEVICE's
+  // day, so "Today" and "Yesterday" were decided in two different
+  // zones and a message could sit under the wrong one.
+  final today = MlTime.today();
   final that = DateTime(d.year, d.month, d.day);
   final diff = today.difference(that).inDays;
   if (diff == 0) return 'Today';

@@ -295,7 +295,7 @@ void showBuyerInvoice(BuildContext context, String buyerName,
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${waybills.length} load(s) · '
+                  Text('${mlCount(waybills.length, 'load')} · '
                       '${fmt.format(total)} t total'),
                   const Divider(),
                   Flexible(

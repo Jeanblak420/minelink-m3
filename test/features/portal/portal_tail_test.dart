@@ -39,6 +39,9 @@ import 'package:flutter_application_1/features/portal/screens/mine_locations_scr
 import 'package:flutter_application_1/features/portal/screens/portal_trip_detail_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/stockpile_audit_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/tons_out_detail_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_drivers_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/fuel_costs_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/compliance_screen.dart';
 
 import '../../fixtures/portal_capture_fixtures.dart';
 import '../../fixtures/portal_tail_fixtures.dart';
@@ -342,6 +345,63 @@ void main() {
     expect(lines.any((l) => l.contains('Truck registration')), isFalse,
         reason: 'the plate is the hero at the top of this screen; the fact '
             'table repeated it as its second row.');
+  });
+
+  // --------------------------------------------------- the transporter's
+
+  testWidgets('the Drivers stat tiles keep their labels on a phone',
+      (tester) async {
+    await pump(tester, const TransporterDriversScreen(), height: 1700);
+    final cut = truncated(tester)
+        .where((l) =>
+            l == 'Drivers' || l == 'On route' || l == 'Available' ||
+            l == 'Driver on route')
+        .toList();
+    expect(cut, isEmpty,
+        reason: 'three `Expanded` tiles in a `Row` give each 120px at 412px, '
+            'and 86 of that is the icon well and the padding — so the labels '
+            'read "Dri…", "On…" and "Av…" beside their figures, and the '
+            'status beside a plate read "D…":\n  ${cut.join('\n  ')}');
+  });
+
+  testWidgets('and the fuel screen keeps its two actions on one edge',
+      (tester) async {
+    await pump(tester, const FuelCostsScreen(), height: 2600);
+    final logCost = tester.getRect(find.text('Log cost').first);
+    final logFuel = tester.getRect(find.text('Log fuel').first);
+    // They wrap onto two lines at 412px — that is fine and expected. What is
+    // not fine is one at the right edge and the other at the left, which is
+    // what a `Wrap` defaulting to `WrapAlignment.start` did.
+    expect(logFuel.right, closeTo(logCost.right, 2),
+        reason: 'the wrapped action does not share a right edge with the one '
+            'above it: "Log cost" ends at ${logCost.right} and "Log fuel" at '
+            '${logFuel.right}.');
+  });
+
+  testWidgets('compliance counts days in English', (tester) async {
+    await pump(tester, const ComplianceScreen(), height: 2100);
+    final lines = painted(tester);
+    final lazy = lines.where((l) => l.contains('(s)')).toList();
+    expect(lazy, isEmpty,
+        reason: 'a parenthesised plural is a count nobody decided:\n'
+            '  ${lazy.join('\n  ')}');
+    expect(lines.any((l) => l.contains('12 days overdue')), isTrue,
+        reason: 'the expired licence disc does not read "12 days overdue".\n'
+            'Painted: ${lines.take(20).join(' | ')}');
+    expect(lines.any((l) => l.contains('in 19 days')), isTrue,
+        reason: 'the expiring PrDP does not read "in 19 days".');
+  });
+
+  testWidgets('tons out does not put a second app bar under the shell\'s',
+      (tester) async {
+    await pump(tester, TonsOutDetailScreen(entries: kTonsOut), height: 2300);
+    expect(find.byType(AppBar), findsNothing,
+        reason: 'this screen sits on a portal ShellRoute, so the shell has '
+            'already drawn a top bar — its own `AppBar` landed directly under '
+            'it, two bars and two titles deep into the scarcest 150px on a '
+            'phone.');
+    expect(painted(tester).any((l) => l == 'Tons out'), isTrue,
+        reason: 'the page lost its title along with the app bar.');
   });
 
   // -------------------------------------------------------------- requests

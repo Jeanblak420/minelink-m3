@@ -12,6 +12,7 @@ import 'package:flutter_application_1/features/portal/utils/portal_company_resol
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Buyer "Request Transportation" form + revise-and-resubmit (§7.5).
 ///
@@ -138,10 +139,13 @@ class _RequestTransportationScreenState
 
   /// Earliest selectable start date: two days after today — today and
   /// tomorrow are always locked (per Jean, 2026-07-12).
-  DateTime get _earliest {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month, now.day).add(const Duration(days: 2));
-  }
+  ///
+  /// `MlTime.today()`, not `DateTime.now()`. This is a BUSINESS DAY: it
+  /// decides which dates the picker will accept and what is written to
+  /// `starting_date`, which is exactly what CLAUDE.md §7.1 is about. On a
+  /// handset west of SAST the device's day is behind the mine's for part of
+  /// every evening, and the earliest bookable start slid a day with it.
+  DateTime get _earliest => MlTime.today().add(const Duration(days: 2));
 
   RequestDraft _draft() => RequestDraft(
     paymentTerms: _paymentTerms,

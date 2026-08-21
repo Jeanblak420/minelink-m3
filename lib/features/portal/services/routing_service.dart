@@ -35,7 +35,7 @@ class RoutingService {
       if (valhalla != null) return valhalla;
       if (avoidLocations.isNotEmpty) {
         _log.w('Valhalla unavailable — OSRM fallback, '
-            '${avoidLocations.length} avoid zone(s) not applied');
+            '${avoidLocations.length} avoid zones not applied');
       }
       return await _fetchOsrm(c, from, to);
     } finally {

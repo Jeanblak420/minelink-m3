@@ -114,28 +114,51 @@ class _TransporterDriversScreenState
             ],
           ),
           const SizedBox(height: 16),
-          Row(children: [
-            Expanded(
-                child: _Stat(
-                    value: '$total',
-                    label: 'Drivers',
-                    tone: MlTone.neutral,
-                    icon: Icons.badge_outlined)),
-            const SizedBox(width: 12),
-            Expanded(
-                child: _Stat(
-                    value: '$onRoute',
-                    label: 'On route',
-                    tone: MlTone.transit,
-                    icon: Icons.local_shipping_outlined)),
-            const SizedBox(width: 12),
-            Expanded(
-                child: _Stat(
-                    value: '${assigned.length - onRoute + unassigned.length}',
-                    label: 'Available',
-                    tone: MlTone.done,
-                    icon: Icons.how_to_reg_outlined)),
-          ]),
+          // TWO ACROSS ON A PHONE, three on anything wider.
+          //
+          // A `Row` of three `Expanded` tiles gives each 120px at 412px,
+          // and 86 of that is the icon well, the gap and the card padding
+          // — so all three labels ellipsised to "Dri…", "On…" and
+          // "Av…" beside their figures. Nothing overflowed; a truncated
+          // label is a valid layout (photographed 2026-08-21, first render
+          // of this screen).
+          //
+          // 620 is where three tiles still hold "Available" beside its
+          // well, and 380 is where two do. Same arrangement the tons-out
+          // summary strip already uses.
+          LayoutBuilder(builder: (context, c) {
+            const gap = 12.0;
+            final cols = c.maxWidth >= 620 ? 3 : (c.maxWidth >= 380 ? 2 : 1);
+            final w = (c.maxWidth - gap * (cols - 1)) / cols;
+            return Wrap(
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                SizedBox(
+                    width: w,
+                    child: _Stat(
+                        value: '$total',
+                        label: 'Drivers',
+                        tone: MlTone.neutral,
+                        icon: Icons.badge_outlined)),
+                SizedBox(
+                    width: w,
+                    child: _Stat(
+                        value: '$onRoute',
+                        label: 'On route',
+                        tone: MlTone.transit,
+                        icon: Icons.local_shipping_outlined)),
+                SizedBox(
+                    width: w,
+                    child: _Stat(
+                        value:
+                            '${assigned.length - onRoute + unassigned.length}',
+                        label: 'Available',
+                        tone: MlTone.done,
+                        icon: Icons.how_to_reg_outlined)),
+              ],
+            );
+          }),
           const SizedBox(height: 22),
           MlSectionTitle('On a truck',
               icon: Icons.link_rounded, meta: mlCount(assigned.length, 'driver')),
@@ -314,14 +337,23 @@ class _AssignedDriverTileState extends ConsumerState<_AssignedDriverTile> {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.w700)),
-      subtitle: Row(children: [
-        MlPlatePill(d.registration, fontSize: 11),
-        const SizedBox(width: 8),
-        Flexible(
-          child: MlStatusBadge.forStatus(
+      // A `Wrap`, not a `Row` with a `Flexible` badge.
+      //
+      // The subtitle gets about 226px once the ListTile has taken its
+      // leading well and its Remove button, and a plate pill is 110 of
+      // that — so "Driver on route" shrank to **"D…"**. A status that
+      // has been reduced to one letter is not a status. The badge drops
+      // under the plate instead when the line runs out.
+      subtitle: Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          MlPlatePill(d.registration, fontSize: 11),
+          MlStatusBadge.forStatus(
               d.onRoute ? 'Driver on route' : 'Available'),
-        ),
-      ]),
+        ],
+      ),
       trailing: _busy
           ? const SizedBox(
               width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))

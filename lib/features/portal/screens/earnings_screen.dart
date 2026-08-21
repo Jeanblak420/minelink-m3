@@ -238,8 +238,10 @@ class _EarningsBody extends StatelessWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  '$unpriced delivered trip(s) have no rate set yet, so their '
-                  'revenue is not counted. They show as "—" below.',
+                  '${mlCount(unpriced, 'delivered trip')} '
+                  '${unpriced == 1 ? 'has' : 'have'} no rate set yet, so '
+                  '${unpriced == 1 ? 'its' : 'their'} revenue is not counted. '
+                  '${unpriced == 1 ? 'It shows' : 'They show'} as "—" below.',
                   style: context.mlText.bodyMedium.copyWith(
                     color: MlSemantic.of(context).textMuted,
                   ),

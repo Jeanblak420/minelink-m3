@@ -50,6 +50,12 @@ import 'package:flutter_application_1/features/portal/screens/mine_locations_scr
 import 'package:flutter_application_1/features/portal/screens/stockpile_detail_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/stockpile_audit_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/tons_out_detail_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_drivers_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/fuel_costs_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/compliance_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/drop_off_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/portal_own_company_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/request_transportation_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/portal_trip_detail_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/mine_supplier_truck_locations_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/transporter_truck_locations_screen.dart';
@@ -2244,6 +2250,177 @@ void main() {
         title: 'Fixture Metals',
         subtitle: 'Trip',
         selectedRoute: '/portal/buyer/trips',
+      );
+    });
+
+    // --- The transporter's own tail ---------------------------------------
+
+    testWidgets('transporter drivers — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const TransporterDriversScreen(),
+        const Size(412, 1700),
+        'screen-transporter-drivers-phone-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Drivers',
+        selectedRoute: '/portal/transporter/drivers',
+      );
+    });
+
+    testWidgets('transporter drivers — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const TransporterDriversScreen(),
+        const Size(1600, 1300),
+        'screen-transporter-drivers-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Drivers',
+        selectedRoute: '/portal/transporter/drivers',
+      );
+    });
+
+    testWidgets('fuel & operating costs — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const FuelCostsScreen(),
+        const Size(412, 2600),
+        'screen-fuel-costs-phone-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Fuel & costs',
+        selectedRoute: '/portal/transporter/fuel',
+      );
+    });
+
+    testWidgets('fuel & operating costs — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const FuelCostsScreen(),
+        const Size(1600, 1900),
+        'screen-fuel-costs-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Fuel & costs',
+        selectedRoute: '/portal/transporter/fuel',
+      );
+    });
+
+    testWidgets('compliance — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const ComplianceScreen(),
+        const Size(412, 2100),
+        'screen-compliance-phone-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Compliance',
+        selectedRoute: '/portal/transporter/compliance',
+      );
+    });
+
+    testWidgets('compliance — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const ComplianceScreen(),
+        const Size(1600, 1500),
+        'screen-compliance-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Compliance',
+        selectedRoute: '/portal/transporter/compliance',
+      );
+    });
+
+    // INSIDE THE SHELL, and that is not a stylistic choice.
+    //
+    // `/portal/transporter/drop-off/:tripId` is a leaf of the portal
+    // `ShellRoute`, so `PortalShellLayout` supplies the `Scaffold` — and this
+    // screen has no `Material` of its own. Rendered bare as `home:` the first
+    // time, its page title came out in Flutter's *"fallback style; consider
+    // putting your text in a Material"* — yellow, double-underlined, on an
+    // unpainted background. That was the HARNESS being wrong about where the
+    // screen lives, not the screen; a picture taken outside a screen's real
+    // chrome is a picture of something the product never shows.
+    testWidgets('drop-off — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const DropOffScreen(tripId: 't-2'),
+        const Size(412, 1100),
+        'screen-drop-off-phone-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Drop-off',
+        selectedRoute: '/portal/transporter/trips',
+      );
+    });
+
+    testWidgets('own company — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const PortalOwnCompanyScreen(),
+        const Size(1600, 1500),
+        'screen-own-company-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Company profile',
+        selectedRoute: '/portal/transporter/company',
+      );
+    });
+
+    testWidgets('own company — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const PortalOwnCompanyScreen(),
+        const Size(412, 1900),
+        'screen-own-company-phone-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Company profile',
+        selectedRoute: '/portal/transporter/company',
+      );
+    });
+
+    // The request form itself, PREFILLED from an assigned available route —
+    // which is the state §4 describes ("assigned routes pre-fill the Request
+    // Route form"), and the only one that photographs a filled form rather
+    // than a page of empty fields.
+    testWidgets('request transportation — phone dark', (tester) async {
+      await shoot(
+        tester,
+        ProviderScope(
+          overrides: [
+            ...companyScopeOverrides(orgType: OrgType.buyer),
+            ...tail(),
+          ],
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.build(Brightness.dark),
+            home: RequestTransportationScreen(prefill: kMyAvailableRoutes.first),
+          ),
+        ),
+        const Size(412, 2400),
+        'screen-request-transportation-phone-dark',
+      );
+    });
+
+    testWidgets('request transportation — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        ProviderScope(
+          overrides: [
+            ...companyScopeOverrides(orgType: OrgType.buyer),
+            ...tail(),
+          ],
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.build(Brightness.dark),
+            home: RequestTransportationScreen(prefill: kMyAvailableRoutes.first),
+          ),
+        ),
+        const Size(1600, 1800),
+        'screen-request-transportation-desktop-dark',
       );
     });
   });

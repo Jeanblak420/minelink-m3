@@ -475,7 +475,7 @@ class _TransporterPortalDashboardScreenState
     return PortalDashboardSection(
       title: 'Fleet state',
       subtitle: 'On route, available and in for service.',
-      meta: fleet == null ? null : '${fleet.length} vehicle(s)',
+      meta: fleet == null ? null : mlCount(fleet.length, 'vehicle'),
       viewRoute: '/portal/transporter/fleet',
       child: MlCard(child: SizedBox(height: 232, child: body)),
     );

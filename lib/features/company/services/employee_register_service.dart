@@ -139,10 +139,12 @@ class EmployeeRegisterService {
     required OrgType orgType,
   }) async {
     final byGroup = <String, RegisterKpi>{};
-    final now = DateTime.now();
-    final dayIso = DateTime(now.year, now.month, now.day)
-        .toUtc()
-        .toIso8601String();
+    // The start of TODAY AT THE MINE, as the instant a `timestamptz`
+    // filter wants. It was the device's local midnight re-flagged as
+    // UTC — so a register opened at 01:00 SAST counted from 23:00 the
+    // previous day, and one opened in London counted from two hours
+    // into the mine's morning (CLAUDE.md §7.1).
+    final dayIso = MlTime.serverParam(MlTime.today());
 
     switch (orgType) {
       case OrgType.transporter:

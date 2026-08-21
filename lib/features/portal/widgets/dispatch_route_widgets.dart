@@ -16,6 +16,7 @@ import 'package:flutter_application_1/features/portal/widgets/premium_overview_w
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/core/design/components/ml_meta.dart';
 
 /// Per-route delivery metrics derived from the trips created off a dispatch.
 class RouteMetrics {
@@ -394,7 +395,8 @@ class _RouteDetailSheet extends ConsumerWidget {
       if (navigator.canPop()) navigator.pop();
       messenger.showSnackBar(SnackBar(
           content: Text(
-              'Route accepted — ${assigned.length} trip(s) created and scheduled.')));
+              'Route accepted — ${mlCount(assigned.length, 'trip')} created '
+              'and scheduled.')));
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('Could not accept route. ${friendlyError(e)}')));
     }
@@ -584,7 +586,7 @@ class _AssignTrucksDialogState extends ConsumerState<_AssignTrucksDialog> {
               children: [
                 Text(
                   required != null
-                      ? 'This route needs $required truck(s). '
+                      ? 'This route needs ${mlCount(required, 'truck')}. '
                           '${_selected.length}/$required selected.'
                       : 'Tick the available trucks to commit '
                           '(${_selected.length} selected).',
@@ -613,7 +615,7 @@ class _AssignTrucksDialogState extends ConsumerState<_AssignTrucksDialog> {
           onPressed: _selected.isEmpty
               ? null
               : () => Navigator.of(context).pop(_selected.toList()),
-          child: Text('Accept ${_selected.length} truck(s)'),
+          child: Text('Accept ${mlCount(_selected.length, 'truck')}'),
         ),
       ],
     );

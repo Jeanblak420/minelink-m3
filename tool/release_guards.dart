@@ -618,6 +618,46 @@ final guards = <Guard>[
     plantLine: "String ago(Duration d) => '\${d.inMinutes}m ago';",
   ),
   Guard(
+    id: 'no-parenthesised-plural',
+    why: 'a "thing(s)" in a user-facing string. There were TWENTY-TWO — '
+        '`load(s)`, `trip(s)`, `truck(s)`, `pile(s)`, `vehicle(s)`, `day(s)`, '
+        '`source(s)`, `row(s)`, `transporter(s)` — across the buyer\'s money '
+        'screen, the transporter\'s earnings, both dashboards, the dispatch '
+        'flow, the stockpile cards, the recon exports and the compliance '
+        'register.\n'
+        '\n'
+        '`mlCount` has existed for exactly this since S5-22, and its own header '
+        'already says why: "1 loads" is the tell that a count was pasted in '
+        'rather than written. "1 load(s)" is the tell that nobody decided. '
+        'Photographed 2026-08-21 on the compliance register, where a licence '
+        'disc read "12 day(s) overdue" beside a permit reading '
+        '"in 19 day(s)" — neither of which needed the parenthesis.\n'
+        '\n'
+        'Use `mlCount(n, \'load\')`, which is re-exported by `MlPageHeader` and '
+        '`MlSectionTitle` so it is already in scope wherever a header is. '
+        'Where the count drives a VERB, move the verb with it. Where there was '
+        'no count at all the parenthesis was only a hedge in a label — write '
+        'the plural.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // A lower-case word ending `(s)` inside a string. Anchored on the letter
+    // before the bracket so `set.add(s)`, `contains(s)` and `RegExp(...(s)...)`
+    // do not match — those are a call, not a plural.
+    //
+    // Scanned line by line rather than across the file: a `(s)` in one string
+    // and a `(` in another must not be joined into a match.
+    //
+    // The string body may contain no PARENTHESES either. Without that, the
+    // closing quote of `RegExp(r'message: ([^,]+)')` opened a match that ran
+    // on into `.firstMatch(s)` later on the same line, and three regexes were
+    // reported as lazy plurals.
+    pattern: RegExp(r"'[^'()]*[a-z]\(s\)"),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'count.dart',
+    plantLine: "Text('\$n load(s) ready');",
+  ),
+  Guard(
     id: 'a-date-is-not-the-readers-locale',
     why: '`MaterialLocalizations.formatShortDate` / `formatFullDate` / '
         '`formatMediumDate` / `formatTimeOfDay` render in the READER\'S '

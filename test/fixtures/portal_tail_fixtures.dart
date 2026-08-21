@@ -18,14 +18,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_application_1/features/portal/models/available_route.dart';
+import 'package:flutter_application_1/features/portal/models/compliance_document.dart';
+import 'package:flutter_application_1/features/portal/models/fuel_models.dart';
 import 'package:flutter_application_1/features/portal/models/mine_location.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_transaction.dart';
 import 'package:flutter_application_1/features/portal/models/tons_out_entry.dart';
+import 'package:flutter_application_1/features/portal/models/trip_waypoint.dart';
 import 'package:flutter_application_1/features/portal/models/company_location.dart';
 import 'package:flutter_application_1/features/portal/models/transportation_request.dart';
 import 'package:flutter_application_1/features/portal/providers/company_location_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/lifecycle_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/mine_location_provider.dart';
+import 'package:flutter_application_1/features/portal/providers/trip_waypoint_provider.dart';
+import 'package:flutter_application_1/features/portal/services/compliance_service.dart';
+import 'package:flutter_application_1/features/portal/services/fuel_service.dart';
 import 'package:flutter_application_1/features/portal/providers/stockpile_ledger_provider.dart'
     show StockpileLedgerState;
 import 'package:flutter_application_1/features/portal/providers/logistics_provider.dart';
@@ -375,6 +381,310 @@ final List<TonsOutEntry> kTonsOut = [
 ];
 
 // ---------------------------------------------------------------------------
+// Trip waypoints — the mine-nav sequence, and the drop-off at the end of it
+// ---------------------------------------------------------------------------
+
+/// The `auto_generate_trip_waypoints` sequence for `t-2`: MG → WB → LP → WB →
+/// MG → drop-off, 1..6.
+///
+/// The first four are completed and the last two are not, so the screen shows
+/// both states; the DROP-OFF has no coordinate at all, which is the state the
+/// drop-off screen exists to get out of and the only one worth photographing
+/// it in.
+final List<TripWaypoint> kTripWaypoints = [
+  TripWaypoint(
+    id: 'wp-1',
+    tripId: 't-2',
+    sequenceOrder: 1,
+    locationType: WaypointType.mainGate,
+    name: 'Main Gate — R37 entrance',
+    latitude: -25.8721,
+    longitude: 29.2334,
+    address: 'R37, Burgersfort, Limpopo',
+    isCompleted: true,
+    completedAt: _ago(const Duration(hours: 7)),
+  ),
+  TripWaypoint(
+    id: 'wp-2',
+    tripId: 't-2',
+    sequenceOrder: 2,
+    locationType: WaypointType.weighbridge,
+    name: 'Weighbridge (tare)',
+    latitude: -25.8750,
+    longitude: 29.2361,
+    isCompleted: true,
+    completedAt: _ago(const Duration(hours: 6, minutes: 40)),
+  ),
+  TripWaypoint(
+    id: 'wp-3',
+    tripId: 't-2',
+    sequenceOrder: 3,
+    locationType: WaypointType.loadingPoint,
+    name: 'North Pit loading bay',
+    latitude: -25.8809,
+    longitude: 29.2417,
+    isCompleted: true,
+    completedAt: _ago(const Duration(hours: 5, minutes: 30)),
+  ),
+  TripWaypoint(
+    id: 'wp-4',
+    tripId: 't-2',
+    sequenceOrder: 4,
+    locationType: WaypointType.weighbridge,
+    name: 'Weighbridge (gross)',
+    latitude: -25.8750,
+    longitude: 29.2361,
+    isCompleted: true,
+    completedAt: _ago(const Duration(hours: 5)),
+  ),
+  TripWaypoint(
+    id: 'wp-5',
+    tripId: 't-2',
+    sequenceOrder: 5,
+    locationType: WaypointType.mainGate,
+    name: 'Main Gate — R37 entrance',
+    latitude: -25.8721,
+    longitude: 29.2334,
+  ),
+  // No coordinate: `hasCoordinates` false, and the transporter has to set it.
+  TripWaypoint(
+    id: 'wp-6',
+    tripId: 't-2',
+    sequenceOrder: 6,
+    locationType: WaypointType.dropOff,
+    name: 'Drop-off',
+    address: 'Richards Bay — bay not confirmed',
+  ),
+];
+
+// ---------------------------------------------------------------------------
+// Compliance — the documents a transporter is chased for
+// ---------------------------------------------------------------------------
+
+/// One of each STATUS, because the screen is a traffic light and a fixture in
+/// one colour photographs one colour: expired, expiring, valid, and one with
+/// no expiry date at all. One of each OWNER TYPE too — a vehicle, a driver and
+/// the company — because the list groups by owner.
+final List<ComplianceDocument> kComplianceDocs = [
+  ComplianceDocument(
+    id: 'cd-1',
+    companyId: 'FIXTURE-company',
+    ownerType: ComplianceOwnerType.vehicle,
+    ownerId: 'veh-1',
+    ownerName: 'CK 84 RT GP',
+    docType: 'license_disc',
+    docNumber: 'LD-4471902',
+    issuedAt: _ago(const Duration(days: 380)),
+    expiresAt: _ago(const Duration(days: 12)),
+    daysToExpiry: -12,
+    status: ComplianceStatus.expired,
+    createdAt: _ago(const Duration(days: 380)),
+    updatedAt: _ago(const Duration(days: 12)),
+  ),
+  ComplianceDocument(
+    id: 'cd-2',
+    companyId: 'FIXTURE-company',
+    ownerType: ComplianceOwnerType.employee,
+    ownerId: 'emp-1',
+    ownerName: 'S. Nkosi',
+    docType: 'prdp',
+    title: 'Professional driving permit',
+    docNumber: 'PRDP-882301',
+    issuedAt: _ago(const Duration(days: 700)),
+    expiresAt: kCaptureNow.add(const Duration(days: 19)),
+    daysToExpiry: 19,
+    status: ComplianceStatus.expiring,
+    createdAt: _ago(const Duration(days: 700)),
+    updatedAt: _ago(const Duration(days: 30)),
+  ),
+  ComplianceDocument(
+    id: 'cd-3',
+    companyId: 'FIXTURE-company',
+    ownerType: ComplianceOwnerType.company,
+    ownerId: 'FIXTURE-company',
+    ownerName: 'Fixture Haulage',
+    docType: 'git_insurance',
+    docNumber: 'GIT-2026-114',
+    issuedAt: _ago(const Duration(days: 60)),
+    expiresAt: kCaptureNow.add(const Duration(days: 305)),
+    daysToExpiry: 305,
+    filePath: 'FIXTURE-company/compliance/git-2026.pdf',
+    status: ComplianceStatus.valid,
+    createdAt: _ago(const Duration(days: 60)),
+    updatedAt: _ago(const Duration(days: 60)),
+  ),
+  // No expiry at all — a permanent record. Renders differently from a real
+  // "expires in 0 days", and that difference is the point.
+  ComplianceDocument(
+    id: 'cd-4',
+    companyId: 'FIXTURE-company',
+    ownerType: ComplianceOwnerType.company,
+    ownerId: 'FIXTURE-company',
+    ownerName: 'Fixture Haulage',
+    docType: 'company_registration',
+    docNumber: '2019/442190/07',
+    issuedAt: _ago(const Duration(days: 2100)),
+    status: ComplianceStatus.noExpiry,
+    createdAt: _ago(const Duration(days: 2100)),
+    updatedAt: _ago(const Duration(days: 2100)),
+  ),
+];
+
+// ---------------------------------------------------------------------------
+// Fuel and operating costs
+// ---------------------------------------------------------------------------
+
+/// Five fills across three trucks. One has NO odometer and no station, which
+/// is what a fill captured in a hurry at a roadside pump looks like — and the
+/// row whose litres-per-100km cannot be computed.
+final List<FuelEntry> kFuelEntries = [
+  FuelEntry(
+    id: 'fu-1',
+    vehicleId: 'veh-1',
+    reg: 'CK 84 RT GP',
+    tripId: 't-1',
+    litres: 412.5,
+    costZar: 9487.50,
+    odometerKm: 418302,
+    station: 'Engen Ultra City, Middelburg',
+    filledAt: _ago(const Duration(days: 1, hours: 3)),
+  ),
+  FuelEntry(
+    id: 'fu-2',
+    vehicleId: 'veh-2',
+    reg: 'JD 22 PL MP',
+    tripId: 't-2',
+    litres: 388.0,
+    costZar: 8924.00,
+    odometerKm: 302114,
+    station: 'Shell, Steelpoort',
+    filledAt: _ago(const Duration(days: 2, hours: 5)),
+  ),
+  FuelEntry(
+    id: 'fu-3',
+    vehicleId: 'veh-3',
+    reg: 'BX 09 LM NW',
+    litres: 205.0,
+    costZar: 4715.00,
+    filledAt: _ago(const Duration(days: 4)),
+  ),
+  FuelEntry(
+    id: 'fu-4',
+    vehicleId: 'veh-1',
+    reg: 'CK 84 RT GP',
+    litres: 401.2,
+    costZar: 9227.60,
+    odometerKm: 417120,
+    station: 'Engen Ultra City, Middelburg',
+    filledAt: _ago(const Duration(days: 6)),
+  ),
+  FuelEntry(
+    id: 'fu-5',
+    vehicleId: 'veh-2',
+    reg: 'JD 22 PL MP',
+    litres: 372.4,
+    costZar: 8565.20,
+    odometerKm: 300880,
+    station: 'Sasol, Burgersfort',
+    filledAt: _ago(const Duration(days: 8)),
+  ),
+];
+
+/// One of every kind, including a fine — the row nobody puts in a demo.
+final List<OperatingCost> kOperatingCosts = [
+  OperatingCost(
+    id: 'oc-1',
+    vehicleId: 'veh-1',
+    reg: 'CK 84 RT GP',
+    kind: OperatingCostKind.tyre,
+    costZar: 14200,
+    incurredAt: _ago(const Duration(days: 3)),
+    description: 'Two steer tyres',
+  ),
+  OperatingCost(
+    id: 'oc-2',
+    vehicleId: 'veh-2',
+    reg: 'JD 22 PL MP',
+    kind: OperatingCostKind.toll,
+    costZar: 812.50,
+    incurredAt: _ago(const Duration(days: 2)),
+    description: 'N4 Middelburg – Emalahleni',
+  ),
+  OperatingCost(
+    id: 'oc-3',
+    vehicleId: 'veh-3',
+    reg: 'BX 09 LM NW',
+    kind: OperatingCostKind.fine,
+    costZar: 1500,
+    incurredAt: _ago(const Duration(days: 9)),
+    description: 'Overload — 1.2 t on the drive axle',
+  ),
+  OperatingCost(
+    id: 'oc-4',
+    vehicleId: 'veh-1',
+    reg: 'CK 84 RT GP',
+    kind: OperatingCostKind.cleaning,
+    costZar: 350,
+    incurredAt: _ago(const Duration(days: 5)),
+  ),
+];
+
+/// The per-vehicle rollup. `veh-4` is in maintenance and has burned nothing —
+/// the row whose cost-per-km cannot be computed, and which must not read as a
+/// zero-rand truck.
+final List<VehicleCostBreakdown> kVehicleCosts = const [
+  VehicleCostBreakdown(
+    vehicleId: 'veh-1',
+    reg: 'CK 84 RT GP',
+    maintenanceCost: 8400,
+    fuelCost: 18715.10,
+    fuelLitres: 813.7,
+    tyreCost: 14200,
+    tollCost: 0,
+    otherCost: 350,
+    distanceKm: 2410,
+    lPer100km: 33.8,
+    costPerKm: 17.29,
+  ),
+  VehicleCostBreakdown(
+    vehicleId: 'veh-2',
+    reg: 'JD 22 PL MP',
+    maintenanceCost: 0,
+    fuelCost: 17489.20,
+    fuelLitres: 760.4,
+    tyreCost: 0,
+    tollCost: 812.50,
+    otherCost: 0,
+    distanceKm: 2234,
+    lPer100km: 34.0,
+    costPerKm: 8.19,
+  ),
+  VehicleCostBreakdown(
+    vehicleId: 'veh-3',
+    reg: 'BX 09 LM NW',
+    maintenanceCost: 2600,
+    fuelCost: 4715,
+    fuelLitres: 205,
+    tyreCost: 0,
+    tollCost: 0,
+    otherCost: 1500,
+    distanceKm: 612,
+    lPer100km: 33.5,
+    costPerKm: 14.08,
+  ),
+  VehicleCostBreakdown(
+    vehicleId: 'veh-4',
+    reg: 'TN 55 QQ GP',
+    maintenanceCost: 21400,
+    fuelCost: 0,
+    fuelLitres: 0,
+    tyreCost: 0,
+    tollCost: 0,
+    otherCost: 0,
+  ),
+];
+
+// ---------------------------------------------------------------------------
 // The override list
 // ---------------------------------------------------------------------------
 
@@ -398,4 +708,12 @@ List<Override> portalTailOverrides() => [
       mineLocationsProvider.overrideWith((ref, _) async => kMineAnchors),
       stockpileLedgerDbProvider
           .overrideWith((ref, _) async => kStockpileLedgerState),
+      tripWaypointsProvider.overrideWith((ref, _) async => kTripWaypoints),
+      complianceDocumentsProvider
+          .overrideWith((ref, _) async => kComplianceDocs),
+      fuelEntriesProvider.overrideWith((ref, _) async => kFuelEntries),
+      operatingCostsProvider
+          .overrideWith((ref, _) async => kOperatingCosts),
+      vehicleCostBreakdownProvider
+          .overrideWith((ref, _) async => kVehicleCosts),
     ];

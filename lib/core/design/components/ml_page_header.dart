@@ -102,6 +102,22 @@ class MlPageHeader extends StatelessWidget {
                 children: [
                   titleText,
                   Wrap(
+                    // WRAPPED ACTIONS STAY ON THE RIGHT.
+                    //
+                    // The default is `start`, and a `Wrap` that has to wrap
+                    // fills the width it was given — so the first run sat at
+                    // the right edge (via the outer `spaceBetween`) and the
+                    // second run began at the LEFT one. On the fuel screen at
+                    // 412px that put the outlined "Log cost" at the right of
+                    // one line and the primary "Log fuel" at the left of the
+                    // next: two buttons of one group, diagonally opposite,
+                    // reading as two unrelated controls. Photographed
+                    // 2026-08-21.
+                    //
+                    // Inert when everything fits: a `Wrap` in a single run
+                    // shrink-wraps, so `end` has no free space to work in and
+                    // the outer `spaceBetween` still does the positioning.
+                    alignment: WrapAlignment.end,
                     spacing: 10,
                     runSpacing: 8,
                     crossAxisAlignment: WrapCrossAlignment.center,

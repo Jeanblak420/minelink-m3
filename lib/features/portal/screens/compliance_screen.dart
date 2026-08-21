@@ -217,9 +217,9 @@ class _DocCard extends ConsumerWidget {
     final base = dateFmt.format(d.expiresAt!);
     final days = d.daysToExpiry;
     if (days == null) return base;
-    if (days < 0) return '$base · ${-days} day(s) overdue';
+    if (days < 0) return '$base · ${mlCount(-days, 'day')} overdue';
     if (days == 0) return '$base · today';
-    return '$base · in $days day(s)';
+    return '$base · in ${mlCount(days, 'day')}';
   }
 
   Future<void> _openFile(BuildContext context, WidgetRef ref) async {

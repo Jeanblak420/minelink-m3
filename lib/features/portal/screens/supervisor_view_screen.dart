@@ -52,7 +52,7 @@ class _SupervisorViewScreenState extends ConsumerState<SupervisorViewScreen> {
         final loads = (newBalance / 30).floor();
         _snack('${tons.toStringAsFixed(2)} t added to ${pile.name} — '
             'now ${newBalance.toStringAsFixed(0)} t'
-            '${loads > 0 ? ' · $loads load(s) ready to collect' : ''}.');
+            '${loads > 0 ? ' · ${mlCount(loads, 'load')} ready to collect' : ''}.');
       }
     } catch (e) {
       // The RPC raises a readable message (e.g. order-cap exceeded); surface it.
