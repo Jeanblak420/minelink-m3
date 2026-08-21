@@ -299,6 +299,27 @@ void main() {
       ]);
     });
 
+    test('$name — the podium ink reads on the podium', () {
+      // The winner's card is an ACCENT gradient, not the canvas — the one
+      // surface in this palette that a widget builds for itself. Measured off
+      // the light render: the gradient composites to #57B2C8, and the dark
+      // render's equivalent is a dark teal panel. Both are approximated here
+      // by the strongest accent stop over the card base, which is the
+      // conservative direction: the real ground is lighter in light mode and
+      // darker in dark, so a pass here is a pass there.
+      final podium = _composite(
+          ov.acc.withValues(alpha: ov.isDark ? 0.14 : 0.62),
+          _composite(ov.glassBase, ov.canvas));
+      _check([
+        _Pair('inkOnAccent on the podium',
+            _composite(ov.inkOnAccent, podium), podium, largeFloor),
+        _Pair('inkOnAccentMuted on the podium',
+            _composite(ov.inkOnAccentMuted, podium), podium, largeFloor),
+        _Pair('inkHi on the podium', _composite(ov.inkHi, podium), podium,
+            largeFloor),
+      ]);
+    });
+
     test('$name — the ink ladder still matches MlGlass', () {
       // Not a contrast rule: a duplication guard. Two token sets have carried
       // the same five values since they were written, and the only thing that

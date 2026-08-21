@@ -793,6 +793,29 @@ void main() {
       );
     });
 
+    testWidgets('fleet management — desktop light', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.light,
+          child: const FleetManagementScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Fleet',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+          // The capture fixtures, so the register shows the THREE fleet states
+          // this screen exists for. Without them `fleetStatusProvider` and
+          // `vehicleDriversProvider` reject, every truck renders "Unassigned"
+          // and the on-route/in-maintenance treatments — the derived states
+          // CLAUDE.md §4 describes — are absent from the picture entirely.
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1400),
+        'screen-fleet-desktop-light',
+      );
+    });
+
     testWidgets('operations hub — desktop dark', (tester) async {
       await shoot(
         tester,
@@ -1162,6 +1185,24 @@ void main() {
       );
     });
 
+    testWidgets('load controller — desktop light', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.light,
+          child: const LoadControllerScreen(),
+          title: 'Fixture Chrome Mine',
+          subtitle: 'Weighbridge',
+          orgType: OrgType.mineSupplier,
+          role: UserRole.controllerWB,
+          selectedRoute: '/portal/mine/weighbridge',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1500),
+        'screen-load-controller-desktop-light',
+      );
+    });
+
     testWidgets('load controller — phone dark', (tester) async {
       await shoot(
         tester,
@@ -1206,6 +1247,19 @@ void main() {
         ),
         const Size(1600, 1700),
         'screen-recon-tables-desktop-dark',
+      );
+    });
+
+    testWidgets('recon tables — console, desktop light', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.light,
+          body: const ReconTablesScreen(),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1700),
+        'screen-recon-tables-desktop-light',
       );
     });
 
@@ -1444,6 +1498,24 @@ void main() {
         ),
         const Size(412, 1078),
         'dash-driver-trip-phone-dark',
+      );
+    });
+
+    testWidgets('driver trip — phone light', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.light,
+          child: const DriverRoutesScreen(),
+          title: 'Fixture Haulage',
+          subtitle: 'Trip',
+          orgType: OrgType.transporter,
+          role: UserRole.driver,
+          selectedRoute: '/portal/driver',
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(412, 1078),
+        'dash-driver-trip-phone-light',
       );
     });
   });
@@ -1789,6 +1861,19 @@ void main() {
       );
     });
 
+    testWidgets('margin ledger — desktop light', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.light,
+          body: const MarginLedgerScreen(),
+          extraOverrides: consoleCaptureOverrides(),
+        ),
+        const Size(1600, 1500),
+        'screen-margin-ledger-desktop-light',
+      );
+    });
+
     testWidgets('margin ledger — phone dark', (tester) async {
       await shoot(
         tester,
@@ -1841,6 +1926,22 @@ void main() {
         ),
         const Size(1600, 2000),
         'screen-transporters-overview-v2-desktop-dark',
+      );
+    });
+
+    testWidgets('transporters overview v2 — desktop light', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.light,
+          body: const TransportersOverviewV2Screen(),
+          extraOverrides: [
+            ...consoleCaptureOverrides(),
+            ...portalCaptureOverrides(),
+          ],
+        ),
+        const Size(1600, 2000),
+        'screen-transporters-overview-v2-desktop-light',
       );
     });
 
@@ -2170,6 +2271,19 @@ void main() {
       );
     });
 
+    testWidgets('targets — platform, desktop light', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.light,
+          body: const TargetsPlatformScreen(),
+          extraOverrides: portalCaptureOverrides(),
+        ),
+        const Size(1600, 1900),
+        'screen-targets-platform-desktop-light',
+      );
+    });
+
     // The targets board on a phone. Its "All months" list is the one remaining
     // hand-rolled flex table in `lib/` — four `Expanded` columns, no
     // `MlWideTable` — and the registry beside it was blank at this width for
@@ -2296,6 +2410,19 @@ void main() {
       );
     });
 
+    testWidgets('organizations — desktop light', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.light,
+          body: const OrganizationManagementScreen(),
+          extraOverrides: consoleCaptureOverrides(),
+        ),
+        const Size(1600, 1500),
+        'screen-organizations-desktop-light',
+      );
+    });
+
     testWidgets('token requests — desktop dark', (tester) async {
       await shoot(
         tester,
@@ -2354,16 +2481,23 @@ void main() {
           ...consoleLastOverrides(),
         ];
 
+    /// A console screen, dark by default.
+    ///
+    /// [brightness] exists because this helper made a light render impossible
+    /// to ask for: it hard-coded dark, and everything that went through it —
+    /// the platform dashboard, the leaderboard, request tracking, the live
+    /// map, crash reports — had no light picture at all.
     Future<void> shootConsole(
       WidgetTester tester,
       Widget body,
       Size size,
-      String name,
-    ) =>
+      String name, {
+      Brightness brightness = Brightness.dark,
+    }) =>
         shoot(
           tester,
           console(
-            brightness: Brightness.dark,
+            brightness: brightness,
             body: body,
             extraOverrides: tail(),
           ),
@@ -2374,6 +2508,12 @@ void main() {
     testWidgets('request tracking — desktop dark', (tester) async {
       await shootConsole(tester, const RequestTrackingScreen(),
           const Size(1600, 1500), 'screen-request-tracking-desktop-dark');
+    });
+
+    testWidgets('request tracking — desktop light', (tester) async {
+      await shootConsole(tester, const RequestTrackingScreen(),
+          const Size(1600, 1500), 'screen-request-tracking-desktop-light',
+          brightness: Brightness.light);
     });
 
     testWidgets('request tracking — phone dark', (tester) async {
@@ -2480,6 +2620,12 @@ void main() {
           const Size(412, 915), 'screen-crash-reports-phone-dark');
     });
 
+    testWidgets('crash reports — desktop light', (tester) async {
+      await shootConsole(tester, const CrashReportsScreen(),
+          const Size(1600, 1500), 'screen-crash-reports-desktop-light',
+          brightness: Brightness.light);
+    });
+
     testWidgets('account deactivations — desktop dark', (tester) async {
       await shootConsole(tester, const AccountDeactivationsScreen(),
           const Size(1600, 1400), 'screen-account-deactivations-desktop-dark');
@@ -2496,6 +2642,11 @@ void main() {
     testWidgets('live map — desktop dark', (tester) async {
       await shootConsole(tester, const LiveMapScreen(), const Size(1600, 1300),
           'screen-live-map-desktop-dark');
+    });
+
+    testWidgets('live map — desktop light', (tester) async {
+      await shootConsole(tester, const LiveMapScreen(), const Size(1600, 1300),
+          'screen-live-map-desktop-light', brightness: Brightness.light);
     });
 
     testWidgets('live map — phone dark', (tester) async {
@@ -2515,6 +2666,12 @@ void main() {
           const Size(1600, 2000), 'screen-super-admin-dashboard-v2-desktop-dark');
     });
 
+    testWidgets('platform dashboard v2 — desktop light', (tester) async {
+      await shootConsole(tester, const SuperAdminDashboardV2Screen(),
+          const Size(1600, 2000), 'screen-super-admin-dashboard-v2-desktop-light',
+          brightness: Brightness.light);
+    });
+
     testWidgets('platform dashboard v2 — phone dark', (tester) async {
       await shootConsole(tester, const SuperAdminDashboardV2Screen(),
           const Size(412, 4695), 'screen-super-admin-dashboard-v2-phone-dark');
@@ -2523,6 +2680,12 @@ void main() {
     testWidgets('transporter leaderboard — desktop dark', (tester) async {
       await shootConsole(tester, const TransporterLeaderboardScreen(),
           const Size(1600, 1400), 'screen-transporter-leaderboard-desktop-dark');
+    });
+
+    testWidgets('transporter leaderboard — desktop light', (tester) async {
+      await shootConsole(tester, const TransporterLeaderboardScreen(),
+          const Size(1600, 1400), 'screen-transporter-leaderboard-desktop-light',
+          brightness: Brightness.light);
     });
 
     testWidgets('transporter leaderboard — phone dark', (tester) async {

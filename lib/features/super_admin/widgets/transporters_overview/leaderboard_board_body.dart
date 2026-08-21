@@ -623,7 +623,9 @@ class _LeaderCard extends StatelessWidget {
                       style: t.s(
                         size: 11,
                         weight: FontWeight.w600,
-                        color: t.acc2,
+                        // `inkOnAccent`, not `acc2`: this card's ground is an
+                        // accent gradient, not the canvas.
+                        color: t.inkOnAccent,
                         letterSpacing: 1.76,
                       ),
                     ),
@@ -647,13 +649,13 @@ class _LeaderCard extends StatelessWidget {
                           style: t.m(
                             size: 28,
                             weight: FontWeight.w500,
-                            color: t.acc2,
+                            color: t.inkOnAccent,
                           ),
                           children: [
                             TextSpan(text: entry.tons),
                             TextSpan(
                               text: ' t',
-                              style: t.m(size: 13, color: t.inkMid),
+                              style: t.m(size: 13, color: t.inkOnAccentMuted),
                             ),
                           ],
                         ),
@@ -675,7 +677,7 @@ class _LeaderCard extends StatelessWidget {
                       ].join(' '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: t.m(size: 11, color: t.inkMid),
+                      style: t.m(size: 11, color: t.inkOnAccentMuted),
                     ),
                   ],
                 ),

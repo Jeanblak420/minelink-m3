@@ -75,6 +75,8 @@ class MlOv {
     required this.avatarInner,
     required this.calloutFill,
     required this.trophyInk,
+    required this.inkOnAccent,
+    required this.inkOnAccentMuted,
     required this.cardShadow,
     required this.accentCardShadow,
   });
@@ -118,6 +120,24 @@ class MlOv {
   /// The glyph punched out of the teal→cyan trophy chip and rank-1 badge.
   final Color trophyInk;
 
+  /// Ink for text drawn ON an accent surface — the winner's podium card, whose
+  /// ground is an accent gradient rather than the canvas.
+  ///
+  /// It exists because the podium painted `acc2` and `inkMid` on that
+  /// gradient. On the dark canvas that is a light cyan on a dark teal and it
+  /// reads; in light mode it is a mid teal on a mid teal, and "RANK 01",
+  /// "4,382.6 t" and "65.4% of network · 128 trips" all measured **2.2:1** —
+  /// the three lines the card exists to say. Found 2026-08-21 by rendering the
+  /// leaderboard in light for the first time.
+  ///
+  /// A token audit cannot find this one: both colours are legible on the
+  /// surfaces the palette knows about. Only a gradient the widget builds
+  /// itself puts them together.
+  final Color inkOnAccent;
+
+  /// The quieter half of [inkOnAccent] — the share line under the meter.
+  final Color inkOnAccentMuted;
+
   final List<BoxShadow> cardShadow;
   final List<BoxShadow> accentCardShadow;
 
@@ -151,6 +171,10 @@ class MlOv {
     avatarInner: Color(0xFF0E1728),
     calloutFill: Color(0xEB060B15),
     trophyInk: Color(0xFF062A33),
+    // Dark: the podium's ground is a dark teal panel, so the accent inks the
+    // rest of the console uses are already the right ones.
+    inkOnAccent: Color(0xFF7DD3FC),
+    inkOnAccentMuted: Color(0xFF8896AE),
     cardShadow: [
       BoxShadow(
         color: Color(0xCC000000),
@@ -201,6 +225,10 @@ class MlOv {
     avatarInner: Color(0xFFF3F6FA),
     calloutFill: Color(0xF7FFFFFF),
     trophyInk: Color(0xFFFFFFFF),
+    // Light: the podium's ground composites to a mid teal (#57B2C8 measured
+    // off the render), which needs DARK ink. 5.6:1 and 5.0:1.
+    inkOnAccent: Color(0xFF06333D),
+    inkOnAccentMuted: Color(0xFF0B3A46),
     cardShadow: [
       BoxShadow(
         color: Color(0x1A0F172A),
