@@ -51,7 +51,7 @@ class ProfileSignatureCard extends ConsumerWidget {
             error: (e, _) => _SignaturePreviewFrame(
               child: Center(
                 child: Text('Could not load signature. ${friendlyError(e)}',
-                    style: TextStyle(color: semantic.textFaint)),
+                    style: TextStyle(color: MlTokens.inkOnPaperFaint)),
               ),
             ),
             data: (url) => _SignaturePreviewFrame(
@@ -60,7 +60,7 @@ class ProfileSignatureCard extends ConsumerWidget {
                       child: Text(
                         'No signature yet.',
                         style: TextStyle(
-                            color: semantic.textFaint,
+                            color: MlTokens.inkOnPaperFaint,
                             fontWeight: FontWeight.w600),
                       ),
                     )
@@ -71,7 +71,7 @@ class ProfileSignatureCard extends ConsumerWidget {
                         fit: BoxFit.contain,
                         errorBuilder: (_, __, ___) => Center(
                           child: Text('Signature unavailable',
-                              style: TextStyle(color: semantic.textFaint)),
+                              style: TextStyle(color: MlTokens.inkOnPaperFaint)),
                         ),
                       ),
                     ),

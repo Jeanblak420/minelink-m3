@@ -1209,26 +1209,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
             // ---- identity ----
             Row(
               children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: r.avatarColors,
-                    ),
-                    borderRadius: MlShape.radiusMedium,
-                  ),
-                  child: Text(r.initials,
-                      style: const TextStyle(
-                        fontFamily: MlGlass.mono,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: MlTokens.inkOnFill,
-                      )),
-                ),
+                _OrgAvatar(colors: r.avatarColors, initials: r.initials),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -1407,26 +1388,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
               flex: 32,
               child: Row(
                 children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: r.avatarColors,
-                      ),
-                      borderRadius: MlShape.radiusMedium,
-                    ),
-                    child: Text(r.initials,
-                        style: const TextStyle(
-                          fontFamily: MlGlass.mono,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: MlTokens.inkOnFill,
-                        )),
-                  ),
+                  _OrgAvatar(colors: r.avatarColors, initials: r.initials),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -1599,6 +1561,57 @@ class _ManageAllState extends State<_ManageAll> {
                   style: context.mlText.labelMedium.copyWith(color: t.accent2)),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The organisation avatar: an org's initials on its own two-stop gradient.
+///
+/// Extracted because the console had this block twice, byte for byte, and
+/// both copies drew the initials in WHITE. `MlConsolePalettes.avatarRamp` is
+/// six MID-SATURATION brand gradients, and mid-saturation is exactly where
+/// "white on a colour" stops working: white reached 4.5:1 on NONE of the six,
+/// bottoming out at 1.89:1 on the amber. `MlTokens.inkOnFills` measures both
+/// candidate inks against BOTH stops and takes the better one, which for
+/// every ramp in this set is the near-black.
+///
+/// Two copies of a fault is a shape, not two bugs — a third call site added
+/// later would have been white again.
+class _OrgAvatar extends StatelessWidget {
+  const _OrgAvatar({required this.colors, required this.initials});
+
+  final List<Color> colors;
+  final String initials;
+
+  /// The console draws this at one size. Kept as constants rather than as
+  /// parameters nothing passes - an unused knob is a claim about flexibility
+  /// that no call site is making.
+  static const double _size = 36;
+  static const double _fontSize = 12;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: _size,
+      height: _size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: colors,
+        ),
+        borderRadius: MlShape.radiusMedium,
+      ),
+      child: Text(
+        initials,
+        style: TextStyle(
+          fontFamily: MlGlass.mono,
+          fontSize: _fontSize,
+          fontWeight: FontWeight.w700,
+          color: MlTokens.inkOnFills(colors),
         ),
       ),
     );

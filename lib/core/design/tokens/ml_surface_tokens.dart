@@ -208,9 +208,15 @@ class MlGlass {
     accent: Color(0xFF0891B2),
     accent2: Color(0xFF0E7490),
     accent3: Color(0xFF0D9488),
-    good: Color(0xFF059669),
+    // `good` and `bad` are used as INK as often as they are used as a fill -
+    // the targets month table writes its "107%" in `good`, the expiry badge
+    // writes "EXPIRED" in `bad` - and at #059669 / #DC2626 those measured
+    // 3.77:1 and 3.95:1 on the surfaces they land on. Deepened to 4.64:1 and
+    // 4.62:1. `warn` already cleared at #B45309 (5.02:1 on white) and is
+    // unchanged; moving it too would have been symmetry rather than a fix.
+    good: Color(0xFF047C57),
     warn: Color(0xFFB45309),
-    bad: Color(0xFFDC2626),
+    bad: Color(0xFFC82323),
     violet: Color(0xFF7C3AED),
     glassTop: Color(0xCCFFFFFF),
     glassBottom: Color(0x99FFFFFF),

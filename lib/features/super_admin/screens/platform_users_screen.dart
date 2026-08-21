@@ -332,15 +332,21 @@ class _UserRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
+            // The well is brightness-aware and the ink was not: a fixed
+            // `accentHover` (cyan600) on a well that flips with the theme
+            // measured 3.44:1 on the dark tint. `MlTone` carries BOTH halves
+            // of the pair, so taking the fg from the same call as the well is
+            // the only way they cannot disagree.
             CircleAvatar(
               radius: 18,
               backgroundColor: MlTone.accent.well(Theme.of(context).brightness),
               child: Text(
                 _initials(first, last),
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: MlTokens.fontSans,
                   fontWeight: FontWeight.w700,
-                  color: MlTokens.accentHover,
+                  color:
+                      MlTone.accent.colors(Theme.of(context).brightness).fg,
                   fontSize: 13,
                 ),
               ),

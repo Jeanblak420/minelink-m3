@@ -107,7 +107,15 @@ class MlChrome extends ThemeExtension<MlChrome> {
     railLabel: Color(0xFFB8C6DA),
     railLabelSelected: Color(0xFFF2F8FF),
     railDivider: Color(0x1F94A3B8),
-    railSectionLabel: Color(0xFF6E8099),
+    // The light theme's rail is the SAME navy as the dark one — the console's
+    // chrome does not invert — so this needs the same correction as
+    // `MlChrome.dark.railSectionLabel` and for the same reason: 4.24:1 at
+    // 11px, in 17 renders. #75879E is 4.64:1 on the gradient's top stop.
+    //
+    // Fixing only the dark one is exactly the mistake available here, and I
+    // made it first: the two values differ, so a search for the dark hex does
+    // not find this line.
+    railSectionLabel: Color(0xFF75879E),
     canvasBase: MlTokens.slate50,
     canvasDot: Color(0x14475569),
     topBarSurface: Color(0xFFFFFFFF),

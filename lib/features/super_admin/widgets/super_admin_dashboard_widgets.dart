@@ -552,30 +552,43 @@ class _Delta extends StatelessWidget {
   final SaDeltaTone tone;
   const _Delta({required this.delta, required this.tone});
 
-  static const _green = MlTokens.green600;
-  static const _orange = MlTokens.orange600;
+  // Brightness-aware, not two fixed light-mode hues.
+  //
+  // These were `green600` and `orange600` — values tuned for ink on PAPER —
+  // written onto a console that is dark for most admins. Both directions were
+  // wrong at once: `#16A34A` measured 3.24:1 as ink on the light dashboard,
+  // and when `green600` was deepened to fix it as a BUTTON FILL the dark side
+  // went to 3.71:1. One token cannot be both the fill under white ink and the
+  // ink on a dark card; `MlTone` is the pair that already knows the
+  // difference, and it carries the lifecycle meaning too.
+  //
+  // Caught by the LOW CONTRAST ratchet on the very commit that deepened
+  // `green600`, which is the ratchet doing exactly its job.
 
   @override
   Widget build(BuildContext context) {
     final s = MlSemantic.of(context);
+    final brightness = Theme.of(context).brightness;
+    final green = MlTone.done.colors(brightness).fg;
+    final orange = MlTone.warn.colors(brightness).fg;
     late final Color c;
     var tri = false, dot = false, suffix = false;
     switch (tone) {
       case SaDeltaTone.up:
-        c = _green;
+        c = green;
         tri = true;
         suffix = true;
         break;
       case SaDeltaTone.warn:
-        c = _orange;
+        c = orange;
         tri = true;
         suffix = true;
         break;
       case SaDeltaTone.good:
-        c = _green;
+        c = green;
         break;
       case SaDeltaTone.live:
-        c = _green;
+        c = green;
         dot = true;
         break;
       case SaDeltaTone.flat:

@@ -214,7 +214,14 @@ class _TxnRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final isOut = txn.type == StockpileTxnType.deduction;
-    final color = isOut ? MlTokens.red700 : MlTokens.green800;
+    // `MlTokens.red700` / `green800` were LIGHT-mode hues, used whatever the
+    // theme was. On the dark stockpile ledger that put `-36.22 t` at 3.28:1
+    // and `+64.62 t` at 3.60:1 — the tonnage, which is the only number on the
+    // row anyone came to read. `MlTone` is the brightness-aware pair, and it
+    // carries the lifecycle meaning too: out is an error tone, in is done.
+    final tone = (isOut ? MlTone.error : MlTone.done)
+        .colors(Theme.of(context).brightness);
+    final color = tone.fg;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Row(

@@ -215,8 +215,18 @@ class _MlButtonState extends State<MlButton> {
         shadow = MlTokens.shadowXs;
       case _MlButtonKind.outline:
         bg = Colors.transparent;
-        fg = MlTokens.accentHover;
-        side = const BorderSide(color: MlTokens.accent);
+        // Was a FIXED `accentHover` (cyan600) on whatever surface the button
+        // landed on: 3.68:1 on a white card, and every "Export" on the recon
+        // tables, the buyer's loads, the production report and the quality
+        // table is one of these. `accentInk` is the same decision resolved
+        // per brightness — cyan700 on light (5.17:1), cyan400 on dark — and
+        // it existed already; this call site simply reached past it.
+        fg = semantic.accentInk;
+        // The border moves with the ink for the same reason. A fixed
+        // `MlTokens.accent` is the LIGHT cyan, which on a white card is a
+        // 1.61:1 hairline — under the 3:1 WCAG asks of a UI boundary a person
+        // has to be able to find.
+        side = BorderSide(color: semantic.accentInk);
       case _MlButtonKind.ghost:
         bg = Colors.transparent;
         fg = semantic.textMuted;

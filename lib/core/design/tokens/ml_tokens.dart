@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_scheme.dart';
@@ -114,6 +116,60 @@ abstract final class MlTokens {
   /// `console_palette_tokens.dart` and across the chat palette table.
   static const inkOnAccent = Color(0xFF04222B);
 
+  /// WCAG relative luminance. Not `Color.computeLuminance` — same formula,
+  /// but having it here lets [inkOnFills] state its rule as a ratio rather
+  /// than as a threshold somebody has to trust.
+  static double _luminance(Color c) {
+    double ch(double v) =>
+        v <= 0.03928 ? v / 12.92 : math.pow((v + 0.055) / 1.055, 2.4).toDouble();
+    return 0.2126 * ch(c.r) + 0.7152 * ch(c.g) + 0.0722 * ch(c.b);
+  }
+
+  static double _contrast(Color a, Color b) {
+    final la = _luminance(a), lb = _luminance(b);
+    return ((la > lb ? la : lb) + 0.05) / ((la > lb ? lb : la) + 0.05);
+  }
+
+  /// The ink that reads best on [fill] — [inkOnFill] or [inkOnAccent],
+  /// whichever measures higher.
+  static Color inkOn(Color fill) => inkOnFills([fill]);
+
+  /// The ink that reads best across ALL of [fills] — for a gradient, where
+  /// one stop can be comfortable and the other not.
+  ///
+  /// Picked by measuring both candidates rather than by a luminance
+  /// threshold. A threshold is a guess at where the crossover is; the ratio
+  /// IS the crossover, it costs two multiplications, and it cannot be wrong
+  /// for an unusual hue the way a single number can.
+  ///
+  /// This exists because the console's organisation avatars drew white
+  /// initials on every stop of [MlConsolePalettes.avatarRamp], and near-black
+  /// wins on **every one of them** — not marginally:
+  ///
+  ///     fill       white   inkOnAccent
+  ///     #F8AF18    1.89       8.78
+  ///     #2BCA80    2.13       7.77
+  ///     #FA8630    2.47       6.71
+  ///     #17BAEB    2.27       7.30
+  ///     #CF64D6    3.26       5.08
+  ///     #847CF8    3.38       4.90
+  ///
+  /// White reached 4.5:1 on NONE of them. Those ramps are mid-saturation
+  /// brand colours, and mid-saturation is exactly where "white on a colour"
+  /// stops working — 32 low-contrast strings in six renders, worst 1.89:1.
+  static Color inkOnFills(List<Color> fills) {
+    if (fills.isEmpty) return inkOnFill;
+    var white = double.infinity;
+    var dark = double.infinity;
+    for (final f in fills) {
+      final w = _contrast(inkOnFill, f);
+      final d = _contrast(inkOnAccent, f);
+      if (w < white) white = w;
+      if (d < dark) dark = d;
+    }
+    return white >= dark ? inkOnFill : inkOnAccent;
+  }
+
   // ---- Status hues ----
   static const blue50 = Color(0xFFEFF6FF);
   static const blue600 = Color(0xFF2563EB);
@@ -124,7 +180,19 @@ abstract final class MlTokens {
   /// Brighter than [green600] because it is almost always a small mark on a
   /// dark chrome rather than text on paper. Counted 12 sites at S5-19.
   static const green500 = Color(0xFF22C55E);
-  static const green600 = Color(0xFF16A34A); // confirm / arrived
+  /// Confirm / arrived. Deepened from #16A34A on 2026-08-21.
+  ///
+  /// This is the "go" green, and its whole job is to be a FILL under white
+  /// ink — `MlButton.go` is `Mark Arrived`, `Navigate`, `Upload POD`. At
+  /// #16A34A white measured **3.30:1** on the lighter stop and 4.22:1 on the
+  /// gradient's middle, and near-black is no better (3.92:1): the old value
+  /// sat in the band where a mid-green carries neither ink.
+  ///
+  /// #12873E takes white to 4.60:1 on the lighter stop and 5.02:1 on the
+  /// darker one, so the whole gradient clears AA. Deepening also helps the
+  /// other direction — this token is used as ink on light chrome (the chat
+  /// dock's presence line, the online dot) and every one of those improves.
+  static const green600 = Color(0xFF12873E);
   static const green700 = Color(0xFF15803D);
   static const orange50 = Color(0xFFFFEDD5);
   static const orange500 = Color(0xFFF97316); // mark departed / logout
@@ -136,7 +204,15 @@ abstract final class MlTokens {
   /// 14 sites before S5-19 named them.
   static const red400 = Color(0xFFF87171);
   static const red500 = Color(0xFFEF4444);
-  static const red600 = Color(0xFFDC2626);
+  /// Deepened from #DC2626 on 2026-08-21.
+  ///
+  /// This is the light half of `MlTone.error`, and a tone's whole job is to
+  /// be legible on its OWN tint: `#DC2626` on `red50` measured **3.95:1**,
+  /// the only pair in the light tone set under 4.5 (the other six are
+  /// 4.51-6.92). It writes "EXPIRED", "DECLINED", "FAILED" — the badges a
+  /// reader most needs to catch. #C82323 is 4.62:1 on the same tint, and it
+  /// is also a better fill: white on it improves from 4.83:1 to 5.32:1.
+  static const red600 = Color(0xFFC82323);
   // Violet completes the hue set the design reference uses for org types.
   // Taken from MlOv.violet so the console and the portal cannot drift.
   static const violet50 = Color(0xFFF3E8FF);
@@ -163,7 +239,13 @@ abstract final class MlTokens {
 
   /// The driver hero card's gradient — a lit cyan falling into [navy700] — and
   /// the pale cyan pip drawn on it.
-  static const cyan650 = Color(0xFF0AA6C7);
+  ///
+  /// Deepened from #0AA6C7 on 2026-08-21. This gradient carries WHITE text —
+  /// "CURRENT TRIP", the truck plate, the route line — and at #0AA6C7 even
+  /// FULL white measured 4.06:1 on its lit end, so there was no ink that
+  /// worked: the card's own brand colour was the fault. #087E98 takes white
+  /// to 4.72:1 and is still unmistakably the same lit cyan falling into navy.
+  static const cyan650 = Color(0xFF087E98);
   static const cyan250 = Color(0xFF7EE0F2);
 
   /// [navy700] at 28% and 33%: the shadow a card casts on the portal's navy.
@@ -193,6 +275,16 @@ abstract final class MlTokens {
   /// NET MASS cell carries on it, which is why neither is a slate.
   static const waybillPaper = Color(0xFFF7EFCD);
   static const waybillMassTint = Color(0xFFF6C19A);
+
+  /// The quiet ink ON [waybillPaper].
+  ///
+  /// Paper does not flip with the theme, so its ink must not either. The
+  /// signature card wrote "No signature yet." in `MlSemantic.textFaint`, which
+  /// in dark mode is a light slate: **2.50:1** on cream. This is the LIGHT
+  /// faint ink, named rather than reached for, so the next thing drawn on the
+  /// slip does not have to rediscover that the surface is theme-independent.
+  /// 5.04:1 on the stock.
+  static const inkOnPaperFaint = Color(0xFF5A6678);
 
   /// Signature ink. Near-black rather than [slate950]: a signature is drawn as
   /// a physical mark and a blue-tinted one looks like a stamp.

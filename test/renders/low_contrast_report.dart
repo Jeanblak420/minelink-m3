@@ -111,7 +111,7 @@ Future<List<LowContrastHit>> reportLowContrast(
           (r >= 0xE000 && r <= 0xF8FF) ||
           (r >= 0xF0000 && r <= 0xFFFFD) ||
           (r >= 0x100000 && r <= 0x10FFFD));
-      if (text.isNotEmpty && !isIcon) {
+      if (text.isNotEmpty && !isIcon && !_behindAModal(e)) {
         final hit = _measure(ro, text, at, iw, ih, scaler, e);
         if (hit != null && seen.add('${hit.text}|${hit.where}')) hits.add(hit);
       }
@@ -141,6 +141,28 @@ Future<List<LowContrastHit>> reportLowContrast(
     }
   }
   return hits;
+}
+
+/// Is [e] on a route that a modal has been pushed on top of?
+///
+/// A scrim dims the page behind a dialog on purpose, and it dims the ink and
+/// the ground TOGETHER, which compresses the ratio between them: the chat
+/// composer's `Send` button is a 10.43:1 pairing that measures 2.53:1 once
+/// the "New organisation group" dialog is over it. The measurement is right
+/// and the finding is not — WCAG 1.4.3 is about text a reader is meant to
+/// read, and this text is inert behind a barrier that eats its taps.
+///
+/// It is the fifth distinct way a paragraph can be laid out and not be a
+/// finding, and neither of the other guards reaches it: nothing is CLIPPED,
+/// so [_visiblePaintRect] passes it, and the scrim moves ink and ground along
+/// nearly the same line, so the ink-line test passes it too. The route is
+/// what actually knows.
+///
+/// 17 strings across six renders, all of them a primary action or a chat
+/// message on the screen a dialog was opened over.
+bool _behindAModal(Element e) {
+  final route = ModalRoute.of(e);
+  return route != null && !route.isCurrent;
 }
 
 /// How far off the ground-to-ink line a pixel may sit and still count as a

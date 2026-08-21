@@ -14,6 +14,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_auth_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_overview_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
@@ -106,6 +107,24 @@ void main() {
       'inkXlo': MlGlass.light.inkXlo,
     }, _lightGrounds);
 
+    // The sign-in screen. It has NO light variant by design, which is exactly
+    // why it goes unmeasured - a light-mode sweep never opens it - and it is
+    // the first surface every user of this product sees. The field well
+    // (#12374A) is the ground the first pass missed: it is lighter than the
+    // card, and the label over every input sits on it.
+    checkLadder('MlAuth', {
+      'inkHi': MlAuth.inkHi,
+      'ink': MlAuth.ink,
+      'inkMid': MlAuth.inkMid,
+      'inkLo': MlAuth.inkLo,
+      'inkXlo': MlAuth.inkXlo,
+    }, const [
+      Color(0xFF020408), // the page
+      Color(0xFF0A121F), // the card
+      Color(0xFF0B1220),
+      Color(0xFF12374A), // the field well - the worst case
+    ]);
+
     test('MlSemantic.textFaint, both brightnesses', () {
       for (final (brightness, grounds) in [
         (Brightness.dark, _darkGrounds),
@@ -124,11 +143,60 @@ void main() {
       }
     });
 
-    test('MlChrome.railSectionLabel on the rail it is painted on', () {
-      final r = contrast(MlChrome.dark.railSectionLabel, MlChrome.dark.railTop);
-      expect(r, greaterThanOrEqualTo(_bodyAA),
-          reason: 'the console rail section headings are 11px');
-    });
+    // BOTH chrome variants, because the light one is not the dark one
+    // inverted — the console's rail stays navy in light mode — and the two
+    // section-label values differ, so a search for the dark hex does not find
+    // the light line. That is how the first pass fixed one and left 17
+    // strings behind in the other.
+    for (final (name, chrome) in [
+      ('dark', MlChrome.dark),
+      ('light', MlChrome.light),
+    ]) {
+      test('MlChrome.$name.railSectionLabel on the rail it is painted on', () {
+        // The rail is a gradient; its TOP stop is the lighter end and so the
+        // harder one for text sitting on it.
+        for (final ground in [chrome.railTop, chrome.railBottom]) {
+          final r = contrast(chrome.railSectionLabel, ground);
+          expect(r, greaterThanOrEqualTo(_bodyAA),
+              reason: 'the console rail section headings are 11px, and this '
+                  'is ${r.toStringAsFixed(2)}:1');
+        }
+      });
+
+      test('MlChrome.$name.railLabel and railIcon', () {
+        for (final ground in [chrome.railTop, chrome.railBottom]) {
+          expect(contrast(chrome.railLabel, ground),
+              greaterThanOrEqualTo(_bodyAA),
+              reason: 'a rail destination label must be readable');
+          expect(contrast(chrome.railIcon, ground), greaterThanOrEqualTo(3.0),
+              reason: 'an icon is a graphic, so the bar is 3:1');
+        }
+      });
+    }
+  });
+
+  // A tone's whole job is to be legible on its OWN tint. `MlTone` hands out
+  // the pair from one call, so the two halves cannot disagree - unless a
+  // value drifts, which is what this catches. `error` was the one that had:
+  // #DC2626 on #FEE2E2 is 3.95:1, and it writes EXPIRED / DECLINED / FAILED.
+  group('every MlTone reads on its own well', () {
+    for (final tone in MlTone.values) {
+      for (final brightness in Brightness.values) {
+        test('$tone in $brightness', () {
+          final c = tone.colors(brightness);
+          // `bg` is often translucent, so composite it onto the surface it
+          // would sit on before measuring - a 20%-alpha red on navy is not
+          // the red the token names.
+          final surface = MlScheme.of(brightness).surfaceContainer;
+          final well = Color.alphaBlend(c.bg, surface);
+          final r = contrast(c.fg, well);
+          expect(r, greaterThanOrEqualTo(_bodyAA),
+              reason: '$tone in $brightness is ${r.toStringAsFixed(2)}:1 - a '
+                  'status badge is 11-12px, so the bar is 4.5. Both halves '
+                  'come from one call, so fix the TOKEN, not the call site.');
+        });
+      }
+    }
   });
 
   group('the ladder still reads as distinct steps', () {

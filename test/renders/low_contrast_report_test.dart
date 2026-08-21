@@ -10,8 +10,12 @@
 // Every test below builds a scene whose right answer is known by
 // construction, so a regression shows up as a wrong number rather than as a
 // plausible-looking finding on a screen nobody re-checks.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 
 import '../test_helpers/real_fonts.dart';
 import 'low_contrast_report.dart';
@@ -389,6 +393,81 @@ void main() {
 
       expect(hits.map((h) => h.text), contains('Report hazard'));
       expect(hits.where((h) => h.text == 'Time left'), isEmpty);
+    });
+  });
+
+  // ── A page a MODAL has been opened over is not a finding ───────────────
+  //
+  // A scrim dims the ink and the ground together, which compresses the ratio
+  // between them: the chat composer's `Send` is a 10.43:1 pairing that
+  // measures 2.53:1 once a dialog is over it. Neither other guard reaches
+  // this - nothing is clipped, and the scrim moves ink and ground along
+  // nearly the same line so the distance rule passes them.
+  group('a page with a dialog open over it', () {
+    testWidgets('is not reported, and the DIALOG still is', (tester) async {
+      final key = GlobalKey();
+      const size = Size(400, 400);
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      // The boundary wraps the whole APP, not the Scaffold: a dialog renders
+      // in the Navigator's Overlay, which is above the Scaffold, so a
+      // boundary inside the page captures a raster the dialog is not in - and
+      // then the report samples the page's pixels for the dialog's text and
+      // reports nothing. Measured: that is what the first version did.
+      await tester.pumpWidget(RepaintBoundary(
+        key: key,
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          // The app's real theme, not stock Material's - the
+          // `test-renders-under-the-app-theme` guard, and it is right even
+          // here: this test names its own colours and font family, but a
+          // bare MaterialApp would still hand the Dialog stock Material's
+          // surface tint, which is part of the ground being measured.
+          theme: AppTheme.build(Brightness.dark),
+          home: Scaffold(
+            backgroundColor: _cardSurface,
+            // A pairing that is comfortably legible unscrimmed - so if it is
+            // reported, it is ONLY because the scrim dimmed it.
+            body: Center(
+              child: ColoredBox(
+                color: const Color(0xFF22D3EE),
+                child: _text(const Color(0xFF020617), text: 'Send'),
+              ),
+            ),
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      final before = await reportLowContrast(tester, key, 'unit', size);
+      expect(before.where((h) => h.text == 'Send'), isEmpty,
+          reason: 'unscrimmed, navy on the accent is 10.4:1');
+
+      // Now open a dialog over it.
+      final ctx = tester.element(find.byType(Scaffold));
+      unawaited(showDialog<void>(
+        context: ctx,
+        builder: (_) => Dialog(
+          backgroundColor: _cardSurface,
+          child: SizedBox(
+            width: 200,
+            height: 120,
+            child: Center(child: _text(_faintOnCard, text: 'Group name')),
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      final after = await reportLowContrast(tester, key, 'unit', size);
+      expect(after.where((h) => h.text == 'Send'), isEmpty,
+          reason: 'the scrim crushed it to ~2.5:1, but it is inert behind a '
+              'barrier and WCAG 1.4.3 is about text a reader is meant to read');
+      expect(after.map((h) => h.text), contains('Group name'),
+          reason: 'the DIALOG is the current route and must still be measured '
+              '- otherwise this guard has gone blind to modal screens, which '
+              'is a large part of the product');
     });
   });
 

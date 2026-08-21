@@ -496,7 +496,17 @@ class _ActiveTripHero extends StatelessWidget {
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.8,
-                        color: MlTokens.inkOnFill70)),
+                        // FULL white, not `inkOnFill70`.
+                        //
+                        // That token is documented for "the driver card's
+                        // navy gradient", and this is the CYAN end of it. On
+                        // a saturated cyan there is no room for a quieter
+                        // white at all: solving for the alpha that reaches
+                        // 4.5:1 gives 0.965, which is white. So the eyebrow
+                        // is white and stays quieter by being 11px, w800 and
+                        // tracked out beside a 12px pill - size and weight,
+                        // the same answer `textFaint` reached.
+                        color: MlTokens.inkOnFill)),
                 const Spacer(),
                 Container(
                   padding:
@@ -544,7 +554,9 @@ class _ActiveTripHero extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                              fontSize: 13, color: MlTokens.inkOnFill70)),
+                              // Same as the eyebrow above: the cyan end of
+                              // this gradient has no room for a 70% white.
+                              fontSize: 13, color: MlTokens.inkOnFill)),
                     ],
                   ),
                 ),

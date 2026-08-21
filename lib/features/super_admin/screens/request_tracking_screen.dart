@@ -983,7 +983,23 @@ class _PagerButton extends StatelessWidget {
           child: Text(
             label,
             style: context.mlText.labelMedium.copyWith(
-              color: active ? semantic.textStrong : enabled ? semantic.textMuted : semantic.textFaint.withValues(alpha: 0.55),
+              // `textFaint` with no EXTRA alpha on top of it.
+              //
+              // It was `textFaint.withValues(alpha: 0.55)`, which measured
+              // 2.71:1 dark and 2.32:1 light — a "Prev" nobody can read on
+              // page 1, which is precisely when it is disabled and precisely
+              // the moment it is telling you something. WCAG exempts an
+              // inactive control from the 4.5 bar, and that is not a licence
+              // to make it invisible; `textFaint` alone is 5.89:1 and still
+              // reads a clear step quieter than the enabled `textMuted`.
+              //
+              // Stacking an alpha on a faint ink is the same mistake the
+              // token itself was carrying — see `MlSemantic.textFaint`.
+              color: active
+                  ? semantic.textStrong
+                  : enabled
+                      ? semantic.textMuted
+                      : semantic.textFaint,
               fontWeight: FontWeight.w700,
             ),
           ),

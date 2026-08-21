@@ -25,7 +25,12 @@ SABOTAGES = {
         "      if (off <= _inkLineTolerance * _inkLineTolerance) inkPixels++;",
         "      if (off >= 0) inkPixels++;",
     ),
-    # 3. NOT IN THE DEFAULT SET, AND THE REASON IS THE POINT.
+    # 3. The modal guard: measure the page a dialog was opened over.
+    "modal": (
+        "      if (text.isNotEmpty && !isIcon && !_behindAModal(e)) {",
+        "      if (text.isNotEmpty && !isIcon) {",
+    ),
+    # 4. NOT IN THE DEFAULT SET, AND THE REASON IS THE POINT.
     #
     #    This puts the ground computation back EXACTLY as it shipped: exclude
     #    by the DECLARED colour, ignoring alpha, so a translucent ink is never

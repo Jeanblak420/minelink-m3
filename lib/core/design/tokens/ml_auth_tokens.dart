@@ -84,16 +84,31 @@ class MlAuth {
   // -- ink -----------------------------------------------------------------
   static const Color inkHi = Color(0xFFF2F6FC);
   static const Color ink = Color(0xFFC3CFE2);
-  static const Color inkMid = Color(0xFF8494AC);
-  static const Color inkLo = Color(0xFF5D6C86);
-  // Raised from #3B475E on 2026-08-21: 2.01:1 against the sign-in card, and
-  // this ink writes real overline labels, not only the disabled state of a
-  // button. 3.11:1 now — WCAG AA for large text, and still the quietest rung.
+  // ── THE BOTTOM THREE RUNGS, RESPACED 2026-08-21 (second pass) ──────────
+  //
+  // `inkXlo` was raised once already, from #3B475E to #556381, and stopped at
+  // "WCAG AA for large text" (3.11:1). That is the wrong bar and the note
+  // written at the time said why without following it through: this ink
+  // writes real **overline labels** at 11px, and AA asks 4.5:1 of anything
+  // under 24px.
+  //
+  // The sign-in screen also has a ground the first pass did not measure — the
+  // FIELD WELL at #12374A — and against that one even `inkMid` failed at
+  // 4.08:1, which is the label over every input on the screen ("EMAIL OR
+  // WHATSAPP NUMBER", "PASSWORD"). So all three move, spaced across what is
+  // left above the floor:
+  //
+  //             was            now      on #0A121F   worst (#12374A)
+  //     inkMid  #8494AC   -> #B3BECF       9.99         6.69
+  //     inkLo   #5D6C86   -> #9DAABF       7.98         5.35
+  //     inkXlo  #556381   -> #91A0B5       7.06         4.73
   //
   // `MlAuth` has no light variant by design, which is exactly why it needed
   // measuring: a light-mode sweep would never have opened it, and it is the
   // first surface every user of this product sees.
-  static const Color inkXlo = Color(0xFF556381);
+  static const Color inkMid = Color(0xFFB3BECF);
+  static const Color inkLo = Color(0xFF9DAABF);
+  static const Color inkXlo = Color(0xFF91A0B5);
 
   // -- brand & status ------------------------------------------------------
   static const Color gold = Color(0xFFF5B301);
