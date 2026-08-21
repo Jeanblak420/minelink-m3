@@ -1497,8 +1497,14 @@ class _TargetHistory extends StatelessWidget {
           Expanded(
             flex: 16,
             child: Text(
+              // A GENUINE ZERO TAKES NO SIGN. Green for on-target is right —
+              // hitting the number exactly is not a miss — but `+0 t` claims a
+              // surplus that is not there, and it is the one variance a reader
+              // is most likely to look twice at.
               m.target > 0
-                  ? '${variance >= 0 ? '+' : '−'}${mlTons(variance.abs())} t'
+                  ? variance == 0
+                      ? '0 t'
+                      : '${variance > 0 ? '+' : '−'}${mlTons(variance.abs())} t'
                   : '—',
               style: context.mlText.code(
                 color: variance >= 0 ? t.good : t.bad,

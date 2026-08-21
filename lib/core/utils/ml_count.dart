@@ -44,3 +44,48 @@ String mlCountText(Object? value, String singular, [String? plural]) {
       num.tryParse(text) == 1 ? singular : (plural ?? '${singular}s');
   return text.isEmpty ? word : '$text $word';
 }
+
+/// Rewrites `N thing(s)` into `N thing` or `N things`, in text this app did
+/// not write.
+///
+/// ## Why the client repairs a server string
+///
+/// Every parenthesised plural in this product's own copy is gone. One is left,
+/// and the app does not own it: `stockpile_add_tons` composes the collect
+/// alert in Postgres and stores the finished sentence on the row —
+///
+///     Stockpile ready to collect — 2 full load(s) ready
+///
+/// — so the fix that reaches the source is a migration, and `supabase/` is
+/// frozen in this fork (`docs/redesign/DESIGN.md`). The choice is between
+/// shipping "load(s)" to a reader and repairing it where it arrives.
+///
+/// It is applied at the model boundary, in `NotificationModel.fromJson`, so
+/// every surface that shows a notification gets the same sentence: the inbox,
+/// the bell, the management screen, and any future one. Repairing it at each
+/// render site is how a product ends up with three of them.
+///
+/// **This is a patch over a defect that still exists in the database.** When
+/// the shipping app takes a migration for it, delete this and the call in
+/// `fromJson`; `notification_plural_test.dart` pins the behaviour until then.
+///
+/// Deliberately narrow: a DIGIT, then **at most two** intervening words, then
+/// the word carrying a literal `(s)`. Two, because the real string is
+/// "2 full load(s)" — the figure is not adjacent to the noun it counts — and
+/// bounded, so a match cannot reach across a sentence to a digit that has
+/// nothing to do with it.
+///
+/// It will not touch "(s)" with no figure in front of it, and it does not try
+/// to guess an irregular plural; the only cases the database produces are
+/// regular.
+String mlRepairParentheticalPlural(String text) {
+  if (!text.contains('(s)')) return text;
+  return text.replaceAllMapped(
+    RegExp(r'(\d+)((?:\s+[A-Za-z]+){0,2}\s+)([A-Za-z]+)\(s\)'),
+    (m) {
+      final n = num.tryParse(m[1]!);
+      final word = m[3]!;
+      return '${m[1]}${m[2]}$word${n == 1 ? '' : 's'}';
+    },
+  );
+}

@@ -405,12 +405,9 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
   Widget _table(BuildContext context, List<MarginLedgerEntry> visible) {
     final semantic = MlSemantic.of(context);
     final totalTons = visible.fold(0.0, (s, e) => s + e.tonsMoved);
-    final totalAgreed = visible.fold(0.0, (s, e) => s + e.agreedPricePerTon);
-    final totalCut = visible.fold(0.0, (s, e) => s + e.adminMarginPerTon);
-    final totalTransporter = visible.fold(
-      0.0,
-      (s, e) => s + e.transporterPricePerTon,
-    );
+    // The three per-ton sums that used to be here are gone, not unused: see
+    // the TOTALS row below for why adding a column of RATES produces a figure
+    // nobody can act on. Only the two real totals are computed.
     final totalEarned = visible.fold(0.0, (s, e) => s + e.marginEarned);
     final currencies = visible.map((e) => e.currency).toSet();
     final totCur = currencies.length == 1 ? currencies.first : 'ZAR';
@@ -490,9 +487,28 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
                 tone: e.tonsMoved <= 0 ? null : MlTone.done,
               ),
             ],
-          // TOTALS — every column summed over the rows in view (respects the
-          // mine filter). Per-ton sums are the plain column totals requested;
-          // "margin earned" is the genuinely meaningful money total.
+          // TOTALS — over the rows in view, respecting the mine filter.
+          //
+          // THE THREE PER-TON COLUMNS ARE A DASH, and that is the point of
+          // this row rather than an omission from it. Agreed/ton, your cut/ton
+          // and transporter/ton are RATES: adding them produced
+          // `R 520 + R 638 + R 495 = R 1,653.00`, printed in the same weight
+          // and the same money format as the real money beside it, and there
+          // is nothing a person can do with that number. It is not what any of
+          // those three routes charges, it is not an average, and it is not a
+          // total of anything that exists.
+          //
+          // The export never carried them — `exportRows` emits per-row data
+          // and no totals line at all — so the screen and its own export
+          // disagreed about a figure the screen printed in bold.
+          //
+          // A dash rather than a tonnage-weighted average, deliberately: this
+          // row is labelled TOTALS, and an average under a TOTALS heading is a
+          // second wrong answer rather than a fix for the first. The per-route
+          // rates are all in the rows above. If a weighted average is wanted it
+          // belongs in its own labelled row.
+          //
+          // Tons moved and margin earned ARE totals and stay.
           [
             _cell2(
               context,
@@ -505,14 +521,9 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
             const SizedBox.shrink(),
             const SizedBox.shrink(),
             _mono(context, '${_tonsFmt.format(totalTons)} t', strong: true),
-            _mono(context, _money(totalAgreed, totCur), strong: true),
-            _mono(
-              context,
-              _money(totalCut, totCur),
-              tone: MlTone.done,
-              strong: true,
-            ),
-            _mono(context, _money(totalTransporter, totCur), strong: true),
+            _mono(context, '—', strong: true),
+            _mono(context, '—', strong: true),
+            _mono(context, '—', strong: true),
             _mono(
               context,
               _money(totalEarned, totCur),

@@ -227,7 +227,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expectNoWireVocabulary(tester, 'the token history');
-    expect(find.text('Token Generated'), findsWidgets,
+    // Sentence case since 2026-08-21, not title case. This assertion's job is
+    // the one in the test's name — English rather than `TOKEN_GENERATED` — and
+    // both forms satisfy it; the capitalisation changed because title-casing
+    // every word also capitalised "To" and "Of" elsewhere in the same table
+    // ("User Assigned To Seat"). See `AuditLog.labelForAction`.
+    expect(find.text('Token generated'), findsWidgets,
         reason: 'the action type is being printed raw again.');
     // `org o1` was the subtitle. A database key is not a fact about a company.
     for (final line in painted(tester)) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
+import 'package:flutter_application_1/core/utils/ml_count.dart';
 
 enum NotificationType {
   employeeRequest,
@@ -247,7 +248,11 @@ class AppNotification {
       companyId: json['company_id'],
       employeeId: json['employee_id'],
       title: json['title'],
-      message: json['message'],
+      // Repaired on the way in, not at each render site. The collect alert is
+      // composed in Postgres and stored finished — "2 full load(s) ready" —
+      // and `supabase/` is frozen in this fork, so this is the boundary where
+      // the app can fix it once for every surface that shows a notification.
+      message: mlRepairParentheticalPlural(json['message'] as String? ?? ''),
       type: NotificationType.fromString(json['type']),
       isRead: json['is_read'] ?? false,
       createdAt: DateTime.parse(json['created_at']),

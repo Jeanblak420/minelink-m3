@@ -50,11 +50,22 @@ class AuditLog {
 
   /// [actionLabel] for a bare action-type string — the filter chips label one
   /// without having a row to hand.
-  static String labelForAction(String actionType) => actionType
-      .split('_')
-      .where((w) => w.isNotEmpty)
-      .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
-      .join(' ');
+  /// SENTENCE case, not title case.
+  ///
+  /// Title-casing every word turned `USER_ASSIGNED_TO_SEAT` into "User
+  /// Assigned To Seat" — a headline where the row wants a sentence, and it
+  /// capitalises "To" and "Of", which no style does. Only the first word is
+  /// lifted, so the same string reads "User assigned to seat".
+  static String labelForAction(String actionType) {
+    final words = actionType
+        .split('_')
+        .where((w) => w.isNotEmpty)
+        .map((w) => w.toLowerCase())
+        .toList();
+    if (words.isEmpty) return '';
+    words[0] = words.first[0].toUpperCase() + words.first.substring(1);
+    return words.join(' ');
+  }
 
   factory AuditLog.fromJson(Map<String, dynamic> json) {
     return AuditLog(
