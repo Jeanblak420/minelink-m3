@@ -11,6 +11,27 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_motion.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
+/// The height the compact bottom navigation bar occupies, above the safe area.
+///
+/// Material 3's default for `NavigationBar`, which is what this app gets: the
+/// theme deliberately sets **no** height (see the note in `app_theme.dart`) so
+/// a label that has to wrap is not clipped, and a null height falls through to
+/// the M3 default rather than to something that grows.
+///
+/// It is named here because something OUTSIDE the `Scaffold` needs it. The
+/// Scaffold reserves the bar for its own body automatically, so nothing inside
+/// has to know — but the chat dock wraps the whole shell, and without this it
+/// parked its launcher **on top of the bar**: measured on a 412x915 phone
+/// viewport in a browser, the disc covered 68% of the width of the fifth
+/// destination, which is "More" and is the only way to the drawer. No render
+/// showed it because the render harness does not mount the dock.
+///
+/// `test/widgets/bottom_bar_reserve_test.dart` measures a real `NavigationBar`
+/// under this app's theme and fails if this number stops being the truth —
+/// which is what would happen the moment somebody sets a height in the theme
+/// again.
+const double kMlBottomNavHeight = 80.0;
+
 /// **One shell, every audience, every platform.**
 ///
 /// The shipping app had two: `SuperAdminShellLayout` (2,031 lines) and

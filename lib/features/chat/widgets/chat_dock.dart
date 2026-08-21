@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/shell/ml_app_shell.dart';
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
@@ -141,7 +143,33 @@ class _ChatDockState extends ConsumerState<ChatDock>
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final area = Size(constraints.maxWidth, constraints.maxHeight);
+        final full = Size(constraints.maxWidth, constraints.maxHeight);
+
+        // KEEP OFF THE BOTTOM NAVIGATION BAR.
+        //
+        // This dock wraps the whole shell, so its area is the whole window —
+        // including the compact bottom bar, which the `Scaffold` reserves for
+        // its own body but knows nothing about out here. The launcher's
+        // default position is "22 from the bottom of my area", and on a phone
+        // that is 22 from the bottom of the SCREEN: measured on a 412x915
+        // viewport in a browser, the 66px disc sat at y 835..890 inside a bar
+        // occupying y 831..914 and covered **68% of the width of the fifth
+        // destination**. That destination is "More", and it is the only route
+        // from the bottom bar to the rest of the navigation.
+        //
+        // No picture could have shown it: `redesign_renders_test.dart` builds
+        // `MlAppShell` directly and never mounts a dock, so the FAB is absent
+        // from all 100 phone renders.
+        //
+        // The reserve is the bar's own height plus the window's bottom safe
+        // area — the same two numbers the Scaffold subtracts — and it applies
+        // to the CLAMP as well as the default, because a disc dragged under
+        // the bar is a disc that cannot be tapped.
+        final reserved = MlWindowClass.forWidth(full.width).usesBottomNav
+            ? kMlBottomNavHeight + MediaQuery.viewPaddingOf(context).bottom
+            : 0.0;
+        final area = Size(full.width, math.max(0, full.height - reserved));
+
         final defaultFab =
             Offset(area.width - _fabSize - 22, area.height - _fabSize - 22);
         final defaultSize = Size(
@@ -262,6 +290,11 @@ class _ChatDockState extends ConsumerState<ChatDock>
               AnimatedBuilder(
                 animation: Listenable.merge([_anim, _fabPos]),
                 child: _DraggableFab(
+                  // Keyed so a test can measure where the launcher actually
+                  // landed. It sat ON the bottom navigation bar until
+                  // 2026-08-21, and the only reason that was ever noticed is
+                  // that somebody opened the app on a phone-sized viewport.
+                  key: const ValueKey('chat-dock-launcher'),
                   size: _fabSize,
                   cursorTracking: cursorTracking,
                   isTyping: someoneTyping,
@@ -312,6 +345,7 @@ class _DraggableFab extends StatefulWidget {
   final VoidCallback onTap;
   final ValueChanged<Offset> onDrag;
   const _DraggableFab({
+    super.key,
     required this.size,
     required this.cursorTracking,
     required this.isTyping,
