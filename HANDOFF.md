@@ -498,77 +498,141 @@ that keep mattering:
 
 ---
 
-## 7. The message to start the next session with
+## 7. Exactly where the last session stopped
 
-Jean pastes this into a fresh chat. It is kept here so it cannot be lost with a
-conversation. The copy-paste block is §8.
+Nothing was in flight. The tree is clean, the last commit is
+`docs: the handoff, for a phase whose lists are empty and whose checks are not`,
+and the whole gate in §2 was run against that commit.
+
+**The last piece of work finished was the picture sweep** — reading the render
+set end to end in contact sheets and fixing what it showed. It is complete for
+the desktop set and the phone set; the last things fixed were the load
+controller's photo field, the company mirror's two squeezed headers, the
+profile-setup fixture's self-contradicting expiry dates, and the chat
+composer's wording.
+
+**Nothing is half-applied.** The one change that was made and then withdrawn is
+recorded in §5's last bullet: the fuel screen's header alignment, reverted
+because a test already pinned the correct behaviour with its reasoning.
+
+**Pick up at §4.1** — real hardware. Then §4.2, then the decisions in §4.3.
+
+Jean pastes the block below into a fresh chat. It is kept here so it cannot be
+lost with a conversation.
 
 ---
 
 ## 8. COPY-PASTE MESSAGE FOR THE NEXT CHAT
 
-```
-Continue the MineLink Material 3 redesign. Read both of these before doing
-anything else, in this order:
+Everything the next session needs is inside this block. Paste it whole.
 
-1. C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
-   — THE CURRENT HANDOFF, rewritten 2026-08-21 (fifth rewrite that day). This
-   is the file that governs the work. Start at the section headed "WHERE THE
-   LAST SESSION STOPPED — READ THIS FIRST", then §0, §2, §4 and §5.
-2. C:\Users\Somebody Someone\Claude\HANDOFF.md
-   — the older machine-wide handoff from 2026-08-08 (MCP servers, git position,
-   decoy folders). Background only; the MineLink-M3 one above governs this work.
+```
+Continue the MineLink Material 3 redesign, exactly where the last session left
+off. Read these TWO handoff files before doing anything else, in this order:
+
+1. THE CURRENT HANDOFF — this is the file that governs the work:
+   C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
+   Rewritten 2026-08-21 (fifth rewrite that day). Read it in this order:
+   the section headed "WHERE THE LAST SESSION STOPPED — READ THIS FIRST",
+   then §0 (where you are + the one rule), §2 (verified state), §7 (exactly
+   where I stopped), §4 (what is NOT done — pick up here) and §5 (things that
+   have already gone wrong in this repo).
+
+2. THE OLDER MACHINE-WIDE HANDOFF — background only, do not work from it:
+   C:\Users\Somebody Someone\Claude\HANDOFF.md
+   Dated 2026-08-08. MCP servers, git position, the decoy folders, the phone
+   tooling. The MineLink-M3 one above governs this redesign work.
+
+THE PATHS THAT MATTER
+
+  Work happens here (its own git repo, branch `main`):
+    C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
+
+  NEVER TOUCHED, for any reason:
+    C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29
 
 THE ONE RULE THAT MUST NOT BREAK: nothing whatsoever changes inside
-C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29. Its
-verified baseline is in §0 of the MineLink-M3 handoff — check it at the start
-and again at the end. All work happens in
-C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3, which is a separate git
-repo (branch `main`).
+worktree-2026-05-05T11-53-29. Its verified baseline is in §0 of the MineLink-M3
+handoff — check it at the START of the session and again at the END. (HEAD
+df451d0, exactly three pre-existing modified files, two worktree entries,
+nothing modified today. Note the file-count footnote in §0: 14163 or 14164
+depending on which `find` you run, because in a worktree `.git` is a FILE.)
 
-WHERE TO PICK UP: the tree is clean, 91 commits, and the whole gate is green.
-Every route-target screen, every dialog and the due-diligence gate have
-pictures (93/93/0). The harness now reports, on every render, every string it
-had to CUT OFF (137 → 6, and the 6 are deliberate), every FAILURE STATE (zero
-across 218 renders) and every framework error (zero). The colour layer is
-measured against WCAG AA in four palettes and both themes.
+WHERE I LEFT OFF, EXACTLY
 
-So the work left is, in this order:
+The tree is CLEAN. 91 commits. Nothing is half-applied and nothing is
+uncommitted. The tip is "docs: the handoff, for a phase whose lists are empty
+and whose checks are not", and the whole gate below was run green against it,
+builds included.
 
-  1. REAL HARDWARE — the biggest remaining gap by far. Nothing has ever run on
-     a handset or been driven in a browser against the live database as a
-     signed-in user; every claim in the handoff is about a headless render.
-     `flutter build apk --debug` succeeds, so there is something to install,
-     and my phone can be driven — use the `driving-jeans-phone` skill in the
-     global CLAUDE.md, it has the commands and the rules. (§4.1)
+The last work finished was READING THE RENDER SET end to end in contact sheets
+and fixing what it showed — desktop first, then phone. The final fixes were the
+load controller's photo field, the company mirror's two squeezed headers, the
+profile-setup fixture's self-contradicting expiry dates, and the chat
+composer's wording. One change was made and then REVERTED (the fuel screen's
+header alignment) because a test already pinned the correct behaviour — that is
+recorded in §5's last bullet so you do not redo it.
 
-  2. LIGHT MODE SHAPE — 22 renders of 218 are light. The colour layer is
+WHAT IS ALREADY DONE — do not redo any of it
+
+  * §4.1 and §4.2 of the old plan are FINISHED. 93 of 93 route-target screens
+    have a picture, and so does every dialog plus the five-step due-diligence
+    gate. `py -3 tool/unphotographed_screens.py` reports 93/93/0.
+  * The render harness now reports THREE things on every render, and each was
+    added after the fault it finds had slipped past a session that was looking:
+      - CUT OFF: every truncated string, with its width and the widgets around
+        it. Was 137. Now 6, and those 6 are deliberate and documented in place.
+      - FAILURE STATE: any render photographing an error card. Zero across all
+        218 renders, and the check is sabotage-proven.
+      - RENDER NOTE: framework errors. Zero.
+    READ THE RENDER RUN'S OUTPUT, not just its exit code — none of the three
+    fails the build, on purpose.
+  * Every phone frame is measured, not guessed. Five were clipping and 63 had
+    up to 1,260px of dead ground; all 100 now fit.
+  * The COLOUR layer is measured against WCAG AA in four palettes and both
+    themes (test/design/token_contrast_test.dart, 24 tests). That found every
+    light-mode border at 1.13–1.18:1 (the cards had no edges), the console's
+    ink ladder bottoming out at 1.64:1, and the sign-in screen's at 2.01:1.
+  * Eight searches are recorded as finished in the handoff's opening section.
+    DO NOT RE-RUN THEM.
+
+WHAT IS LEFT — start here, in this order
+
+  1. REAL HARDWARE (§4.1). The biggest remaining gap in the whole project.
+     Nothing has EVER run on a handset, and nothing has been driven in a
+     browser against the live database as a signed-in user — every claim in
+     the handoff is a claim about a headless render or a unit test.
+     `flutter build apk --debug` succeeds, so there is an artifact to install,
+     and my phone can be driven: invoke the `driving-jeans-phone` skill in the
+     global CLAUDE.md FIRST — it has the commands, the APK-install route and
+     the privacy rules. What only a device can settle: touch targets under a
+     real thumb, the foreground service during a drive, real GPS, the map
+     tiles (blank in every render), keyboard insets over the forms, and
+     whether the type scale reads at arm's length in daylight.
+
+  2. LIGHT-MODE SHAPE (§4.2). 22 renders of 218 are light. The colour layer is
      measured now, so what is left is a widget that assumes a dark ground in a
-     way a token audit cannot see: the leaderboard's winner card drew its rank
-     and its tonnage at 2.2:1 on a gradient it builds itself, and only a
+     way a token audit cannot see — the leaderboard's winner card drew its
+     rank and its tonnage at 2.2:1 on a gradient it builds itself, and only a
      picture found it. `shootConsole` takes a `brightness`, so a light twin is
-     one line. (§4.2)
+     one line.
 
-  3. THE SIX DECISIONS IN §4.3 that are waiting on me — including the margin
-     ledger's meaningless TOTALS row and the two chat implementations.
-
-Do NOT re-run the eight searches the handoff's opening section records as
-already finished.
+  3. THE SIX DECISIONS WAITING ON ME (§4.3) — including the margin ledger's
+     meaningless TOTALS row and the two separate chat implementations.
 
 THE METHOD, unchanged: fixtures, regenerate, LOOK at the PNG, MEASURE it with
-PIL rather than squint, fix the shape rather than the instance where the fault
+PIL rather than squint, fix the SHAPE rather than the instance where the fault
 is structural, then pin it with a test and prove the test bites by removing the
-fix and watching it fail. Read the render run's OUTPUT too, not just its exit
-code.
+fix and watching it fail.
 
 Watch for the faults every batch has had: a screen inside a ShellRoute that
 builds its own Scaffold+AppBar; a screen that reads a service directly so no
-override reaches it; a FIXTURE that says less than the service it stands in for,
-or that sets two derived fields independently and prints an impossibility; an
-override list that does not reach the screen; a wire enum value reaching a
-reader; and a Row handing a non-flex child unbounded width — including its
-commonest form, two Flexible children (or a Flexible and a Spacer) splitting a
-row when only one of them is long.
+provider override reaches it; a FIXTURE that says less than the service it
+stands in for, or that sets two derived fields independently and prints an
+impossibility; an override list that does not reach the screen; a wire enum
+value reaching a reader; and a Row handing a non-flex child unbounded width —
+including its commonest form by far, two Flexible children (or a Flexible and
+a Spacer, which IS an Expanded) splitting a row when only one of them is long.
 
 HOW TO WORK: don't worry about me seeing anything, I'll want to see when
 everything is complete and done, so don't stop so much in between — please run
@@ -577,7 +641,8 @@ sorted please. Correct yourself where you make mistakes and fix the mistakes,
 and make sure you don't implement anything with gaps in them — make sure it's
 full and proper like the original.
 
-OPTIONAL: if the Windows build gives trouble, just carry on with web and mobile.
+OPTIONAL: if the Windows build gives trouble, just carry on with web and
+mobile.
 
 BEFORE CLAIMING ANYTHING IS DONE, all of these must be green:
 
@@ -594,19 +659,26 @@ flutter build apk --debug
 
 Read §5 of the MineLink-M3 handoff — the things that have already gone wrong in
 this repo — so you don't repeat them. The ones that have cost real time more
-than once: `git checkout -- <dir>` threw away three finished uncommitted fixes;
-a bash heredoc has eaten backslashes and broken a patch in three separate
-sessions (write such scripts with the Write tool); `flutter analyze` output is
-not reliably indented so grepping it reported clean while a warning printed
-(use `| tail -4`); a long && chain ending in a git commit heredoc times out at
-two minutes (write the message to a file, commit with -F); a phone render frame
-with zero slack above the bottom bar is CLIPPING, and when you measure that
-slack you must ignore the right-hand edge because the FAB is pinned there; and
-a check you have not sabotaged is a check you do not have — the first version
-of the failure-state report missed the very card that motivated it.
+than once:
+  * `git checkout -- <dir>` threw away three finished uncommitted fixes.
+  * A bash heredoc eats backslashes even when quoted, and has broken a patch in
+    THREE separate sessions — write such scripts with the Write tool.
+  * `flutter analyze` output is not reliably indented, so grepping it reported
+    clean while a warning was printed — use `| tail -4`.
+  * A long && chain ending in a git commit heredoc times out at two minutes —
+    write the message to a file and commit with -F as its own command.
+  * A phone render frame with zero slack above the bottom bar is CLIPPING, not
+    "exactly right"; and when you measure that slack you must ignore the
+    right-hand edge, because the FAB is pinned there and the measurement never
+    converges otherwise.
+  * A check you have not sabotaged is a check you do not have — the first
+    version of the failure-state report missed the very card that motivated it.
+  * Check whether a test already pins the behaviour you are about to "fix".
 
-When the work is done, rewrite
+WHEN THE WORK IS DONE: rewrite
 C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md the same way
-this one was written — verified state only, with a fresh copy-paste block in
-§8 — and commit it.
+this one was written — verified state only, nothing aspirational, with a fresh
+self-contained copy-paste block in §8 that carries BOTH handoff paths, the
+project root, the untouchable worktree path, exactly where you stopped, what is
+done, what is left, and this same HOW TO WORK paragraph — and commit it.
 ```
