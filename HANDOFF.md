@@ -1,87 +1,71 @@
 # MineLink M3 — session handoff
 
-**Rewritten 2026-08-21 (fifth rewrite that day).** Everything below is verified
-state, not intention. It replaces the previous handoff of the same name; the
-parts of that one still true have been folded in.
+**Rewritten 2026-08-21, at the end of the browser-and-device session.**
+Everything below is verified state, not intention. It replaces the previous
+handoff of the same name; the parts of that one still true have been folded in.
 
 **This file lives at**
 `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md`
 
 The older, machine-wide handoff is at
 `C:\Users\Somebody Someone\Claude\HANDOFF.md` — MCP servers, git position,
-decoy folders, dated 2026-08-08. **Background only; this file governs the
-redesign work.**
+decoy folders, the phone tooling, dated 2026-08-08. **Background only; this
+file governs the redesign work.**
 
 ---
 
-## WHERE THE LAST SESSION STOPPED — READ THIS FIRST
+## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The work is **mid-Phase-4** and stopped at a clean, committed, fully green
-point. Nothing is half-applied and nothing is uncommitted.
+The tree is **clean**, **103 commits**, nothing half-applied and nothing
+uncommitted. The whole gate in §2 was run green against the tip, builds
+included. The tip is
+`tests: thirteen files were asserting on arithmetic that changes with the date`.
 
-- **`git status` is empty. 91 commits** (this file's commit included). No hash
-  is written down, because a hash in a file the same commit changes is wrong
-  the moment it lands.
-- **The whole gate was run for real at the end of this session** (numbers in
-  §2), including `flutter build web --release` and `flutter build apk --debug`.
-- **The original worktree was re-checked against its §0 baseline** and is
-  **untouched** — HEAD `df451d0`, the three pre-existing modified files, two
-  worktree entries, and **nothing on disk modified today**.
+**The original worktree was re-checked against its §0 baseline at the start and
+at the end of the session and is untouched** — HEAD `df451d0`, the same three
+pre-existing modified files, 14163 files under the `-prune` form, two worktree
+entries, and **nothing on disk modified today**.
 
-**The two lists this phase worked from are both empty and have been for two
-sessions**: 93 of 93 route-target screens photographed, every dialog and the
-five-step due-diligence gate too. What replaced them is a different kind of
-work, and it is worth understanding before picking anything up.
+### What changed about this project this session
 
-### The three things the harness now reports on every render
+The previous handoff's §4.1 said: *"Nothing has ever run on a handset, and
+nothing has been driven in a browser against the live database as a signed-in
+user. Every claim in this file is a claim about a headless render or a unit
+test."*
 
-A person forgets to look. These do not, and each was added after the fault it
-finds had already slipped through a session that was looking.
+**Both halves of that are now false**, and closing them is what this session
+was. The redesign was:
 
-1. **`CUT OFF`** — every string the layout had to truncate, with the
-   paragraph's own width and the nearest named widgets around it. Found **137**.
-   Now **6**, and the 6 are deliberate (three crash-report exception strings,
-   three chat message previews), documented in the render file itself.
-2. **`FAILURE STATE`** — any render showing `MlLoadFailure`,
-   `PortalCompanyRequired`, or text carrying the product's failure vocabulary.
-   **Zero across all 218 renders**, and the check is sabotage-proven.
-3. **`RENDER NOTE`** — framework errors, captured and reported rather than
-   thrown. Zero.
+- **driven in a real browser** (Chrome, remote-debugging, real fonts, real
+  engine) against the **live Supabase project**, signed in as the platform
+  admin `jean@cyberhouse.co.za`, then as the mine owner
+  `ironhills.owner@mineralguide.com` — console, insights, targets, margin
+  ledger, recon tables, live map, request inboxes, preferences, and the mine
+  portal; desktop 1600px, the ~500px band, and a true emulated 412px phone;
+- **run on Android**, on the `minelink_test` AVD (Android 14, 1080x2400 @
+  420dpi — 412dp logical, the same panel as Jean's SM-G780G), built, installed,
+  signed in from the device's own keyboard as `roadhaul.driver`, through the
+  driver dashboard and Trip tab.
 
-**Read the render run's output, not just its exit code.** All three print and
-none of them fail the build, deliberately: a render file that fails on a
-deliberate truncation teaches people to add exclusions rather than to look.
+**Twenty-one faults were found and fixed**, every one of them invisible to the
+218 renders and the 2,055 tests that were green before. They are listed in §3.
 
-### And the colour layer is measured now, not looked at
+### The one thing a render can never do, and what replaced it
 
-`test/design/token_contrast_test.dart` measures **every colour pair the
-product can put text on, in both brightnesses**, against WCAG AA — 24 tests
-over four palettes (`MlSemantic`/`MlTone`, `MlGlass`, `MlOv`, `MlAuth`), with
-alpha backgrounds composited onto the surface they are really painted on.
+A render is a picture of a widget tree under `flutter_test`, where the fonts
+are loaded but **the HTTP stack answers 400, MediaQuery padding is zero, there
+is no status bar, no system keyboard, and the data is a fixture**. Four whole
+classes of fault live in that gap, and this session hit all four:
 
-This one **fails** rather than reports: there is no case where an unreadable
-status pill is the intent.
-
-**Searches already finished — do NOT redo them:**
-
-1. `lib/` scanned twice for any other hand-rolled flex table with the
-   compressing shape. **Both scans empty.**
-2. Every `FractionallySizedBox`, `MapOptions`, hand-rolled "x ago" formatter
-   and `DateTime.now()`-fed relative time routed through one implementation,
-   each held by a guard.
-3. Every `MaterialLocalizations.format*Date` / `formatTimeOfDay` (21 sites),
-   every hand-rolled absolute timestamp (7 vocabularies), and every
-   parenthesised plural `thing(s)` (22 sites). All three held by guards.
-4. Every screen the two `ShellRoute`s mount, scanned for an app bar of its own
-   (13 found); every private copy of the presence rule (4); every
-   `DateTime.now()` written to ISO through a local variable (2).
-5. Every rendered screen scanned for CUT text and for FAILURE states, at every
-   width and both themes, **by the harness, on every run**.
-6. Every phone frame measured for clipping and for dead space. All 100 fit.
-7. Every hand-rolled `dd MMM` month table in `lib/` (4 found, all dropped the
-   year, all routed through `MlTime.listDay`).
-8. Every `Container(alignment:)` with no width cap (29 found; one was the
-   fault, the rest are legitimate fills).
+1. **What the app really paints behind text** — the leaderboard gradient at
+   2.2:1 that the token audit could not see. Now measured, on every render, off
+   the pixels: §3, `LOW CONTRAST`.
+2. **What the app really puts in its chrome** — the render harness was passing
+   `title:` and `subtitle:` by hand, so 100 pictures showed a top bar the
+   product does not have. It resolves them through `mlRouteTitle` now, exactly
+   as the app does.
+3. **What real data looks like** — fixture strings are short. Live ones cut.
+4. **What a device adds** — a status bar, a keyboard, a navigation bar.
 
 ---
 
@@ -90,7 +74,7 @@ status pill is the intent.
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **91 commits**, clean tree. |
+| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **103 commits**, clean tree. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
@@ -109,8 +93,6 @@ git status        exactly 3 modified files, all pre-existing:
 git worktree list only the main repo + that worktree (no third entry)
 ```
 
-Check it with:
-
 ```bash
 cd "/c/Users/Somebody Someone/Music/SHOWME!/worktree-2026-05-05T11-53-29"
 git status --porcelain --untracked-files=all
@@ -124,11 +106,10 @@ find . -type f -newermt "<today>" -not -path "./.git/*" | wc -l    # must be 0
 a new file.** `find . -type f -not -path "./.git/*"` returns **14164** because
 in a WORKTREE `.git` is a *file*, not a directory, so that pattern does not
 exclude it. The `-prune` form above returns **14163**. Both describe the same
-untouched tree; the baseline is quoted against the `-prune` form.
+untouched tree.
 
 Every command in this project must run with its working directory inside
-`MineLink-M3`. The two trees share no git state — `MineLink-M3` is a plain
-repo, not a worktree.
+`MineLink-M3`. The two trees share no git state.
 
 ---
 
@@ -145,7 +126,7 @@ Later instructions, which still stand:
 
 - **Windows is optional.** *"if u struggle with the windows build then just
   continue with web and mobile please"* — Windows is blocked by two
-  pre-existing faults (§4.6); web and Android both build.
+  pre-existing faults (§5.4); web and Android both build.
 - **Work long, don't stop to check in.** *"don't worry about me seeing
   anything, I'll want to see when everything is complete and done, so don't
   stop so much in between — please run the task for as long as possible so
@@ -154,7 +135,7 @@ Later instructions, which still stand:
   implement anything with gaps in them — make sure it's full and proper like
   the original."*
 
-Four decisions settled before any code, recorded in `docs/redesign/DESIGN.md`:
+Four decisions settled before any code, in `docs/redesign/DESIGN.md`:
 
 | Question | Answer |
 |---|---|
@@ -163,8 +144,7 @@ Four decisions settled before any code, recorded in `docs/redesign/DESIGN.md`:
 | What order? | Foundation → the screens that matter → the tail. |
 | What happens when a button writes? | **It writes.** Jean chose no guard. |
 
-**`supabase/` is frozen.** No migration is created, applied or pushed from this
-project.
+**`supabase/` is frozen.** No migration is created, applied or pushed here.
 
 ---
 
@@ -174,8 +154,8 @@ Every one of these was run at the end of the session, in this order:
 
 ```
 flutter analyze                                 no issues
-flutter test                                    1972 passed, 1 skipped
-dart tool/release_guards.dart                   35/35 PASS, 0 FAIL
+flutter test                                    2055 passed, 1 skipped
+dart tool/release_guards.dart                   39/39 PASS, 0 FAIL
 dart tool/release_guards.dart --selftest        all guards bite
 py -3 tool/type_scale_codemod.py --selftest     OK
 py -3 tool/dropdown_width_check.py              passes
@@ -187,6 +167,8 @@ flutter build apk --debug                       builds
 docs/redesign/renders/                          218 PNGs · 100 phone · 22 light
 render harness — CUT OFF                        6 strings, all deliberate
 render harness — FAILURE STATE                  0
+render harness — RENDER NOTE                    0   (and it FAILS now, see §3)
+render harness — LOW CONTRAST                   1812, baselined per render
 test/design/token_contrast_test.dart            24 tests, 4 palettes, both themes
 ```
 
@@ -195,167 +177,240 @@ and again **with real rows in every table** at 360/800/1280 by 1.0/1.3.
 
 ---
 
-## 3. What Phase 4 has done
+## 3. What this session did
 
-Full reasoning is in each commit message and in `docs/redesign/DESIGN.md` §10.
-`git log` is a real record — read it rather than trusting this summary.
+Full reasoning is in each commit message — `git log` is a real record, and
+these eleven commits are long on purpose. Read them rather than trusting this
+summary.
 
-### 3.1 The 2026-08-21 sessions, in one list
+### 3.1 The instruments that were themselves wrong
 
-- **§4.1 finished** — 93/93 route-target screens, across five sessions.
-- **§4.2 finished** — ten dialogs plus the five-step due-diligence gate.
-- **137 truncated strings → 6.** A cell **6px** wide holding a waybill number;
-  `55,34…` for the TONS figure on the console's front page; `R40,920.00` in
-  76px; buttons reading `Dis…`; a dropdown's options cut in a menu nobody had
-  opened; `Iron Hills Mining → Richards Bay` cut on a **1600px desktop** in six
-  places; company names, person names, and every card that names two parties.
-- **Every phone frame measured.** 5 were clipping, 63 had up to 1,260px of
-  dead ground. All 100 now sit between 30 and 200px of slack, or are exactly
-  915 — the real phone viewport.
-- **The colour layer measured** in four palettes and both themes. In light
-  mode every border and divider was **1.13–1.18:1** — the cards had no edges.
-  The console's own ink ladder bottomed out at **1.64:1**, and the sign-in
-  screen's at 2.01:1.
-- **The leaderboard's winner card**, rendered in light for the first time, drew
-  its rank, its tonnage and its share line at **2.2:1** — a mid teal on a mid
-  teal. That one is invisible to a token audit: both colours are fine on the
-  surfaces the palette knows about, and only a gradient the widget builds
-  itself puts them together.
-- **A render that photographed an error card** for four sessions inside the
-  93/93.
-- **Eight faults found by reading the pictures**, including a page button
-  drawn as a 1,200px bar, a waybill list that read as mis-sorted, a "route"
-  that was a commodity, a net that was a dash beside its own two operands, and
-  the one screen that never got the redesign's card vocabulary.
+Three checks turned out to be measuring something other than what they claimed.
+All three were found by something failing that had no business failing.
 
-### 3.2 The shapes, rather than the instances
+- **`RENDER NOTE` was documented as zero across 218 renders. It was not.** The
+  company mirror threw **21 framework errors on every desktop render** — a
+  `LayoutBuilder` inside `IntrinsicHeight`, immediately under a comment on its
+  own method saying a LayoutBuilder cannot go there. It was missed because
+  every reading of that output had been piped through `tail`, and that render
+  is not last. Both LayoutBuilders now reflow off the width already passed
+  down, and **RENDER NOTE FAILS the test** from here on: a truncation can be
+  deliberate, a framework error cannot.
+- **The render harness was writing its own chrome.** Every console render was
+  built with `selectedRoute: '/super-admin'`, `title: 'Global Admin'`,
+  `subtitle: 'Platform overview'` — none of which the app produces. A hundred
+  pictures showed a top bar the product does not have and lit the *Dashboard*
+  rail item on the audit log, the margin ledger and the crash reports alike.
+  `console()` now looks the body's class up in `app_router.dart` and resolves
+  the chrome through `mlRouteTitle`. It paid immediately: the first honest run
+  reported the phone console title cut at 180px.
+- **Thirteen test files were asserting on arithmetic that changes with the
+  date.** `kCaptureNow` is a fixed instant and the fixtures date every row
+  relative to it, while the product measures rolling windows from
+  `MlTime.now()`. `recon_table_legibility_test.dart` asserted `103.22 t` and
+  went off on 2026-08-21 with nothing changed but the calendar.
+  `freezeCaptureClock()` and the `capture-fixture-without-a-frozen-clock` guard
+  close it.
 
-Five rules did nearly all of the layout work:
+### 3.2 The new instrument: contrast measured off the pixels
 
-1. **A `Wrap` where two `Flexible`s were splitting a row.** Two flex children
-   share free space EQUALLY whatever they hold, so the longer of two names is
-   cut to the shorter one's width even when the row has room to spare. **A
-   `Spacer` is an `Expanded(flex: 1)`** and counts as the second one — that is
-   how a breadcrumb got 122px of a 1600px header.
-2. **A second line where the value is an IDENTITY rather than a preview.** A
-   company, a route, a person, a waybill number, a caption that says what a
-   figure means. A message preview and an exception string are not.
-3. **A declared `MlColumn.minWidth` where the figure is the point of the
-   screen.** `MlDataTable` widens its scroll floor until every column that
-   declared a minimum gets it, so the table SCROLLS rather than eats the
-   number.
-4. **`Align(widthFactor: 1)`, never `Container(alignment:)`,** for anything
-   meant to hug its content. A Container given an alignment lays its child out
-   in an `Align`, and an `Align` with no `widthFactor` takes the largest size
-   its constraints allow.
-5. **Stack the row below a threshold** when a header carries words AND
-   controls. Six 36px buttons and a pill do not fit beside a breadcrumb at
-   412px, and nothing in the box model will make them.
+`test/renders/low_contrast_report.dart` measures **every laid-out paragraph in
+every render**: the ink from the resolved style, **the ground from the pixels
+behind it**, against WCAG AA with the threshold picked from the paragraph's
+real size and weight. Reading the ground back from the raster is what makes
+gradients, sheens, alpha stacks, cards-on-cards and images all just work — none
+of them has to be modelled, because they have already happened.
 
-And one measuring habit: **`test/renders/measure_strings_test.dart`** lays a
-string out in the real font and prints what it measures (`ML_RULER=1`). It
-exists because one search field was widened twice on arithmetic and cut both
-times.
+`token_contrast_test.dart` states its own limit as a claim — *"a screen cannot
+have a light-mode colour fault of its own; it can only inherit one from a token
+pair"* — and the leaderboard's winner card disproved it. This is §4.2's gap,
+closed.
 
-### 3.3 Earlier in Phase 4
+**1,812 strings across 189 renders, baselined per render so it can only
+shrink.** Three earlier versions of it were wrong in instructive ways, and the
+commit message records each; the short version is that **ink must not be
+measured from a raster** (at 9px a stroke never reaches its declared colour)
+and **a pixel belongs to this text only if it is closer to the ink than to the
+ground** (or a paragraph scrolled out of view reports against whatever is
+painted where it would have been).
 
-- **One page ground** — 83 dark pages on `#060B15`, 7 light on `#EEF2F8`, held
-  by `one_page_ground_under_the_shell_test.dart`.
-- **Two structural shell faults** — a canvas that stopped short of a phone
-  screen, and an `AnimatedSwitcher` `Stack` needing `StackFit.passthrough`.
-  Between them, 23 seams and 18 two-tone pages.
-- **One clock** — `MlTime` everywhere, four guards and `one_clock_check.py`.
+### 3.3 The twenty-one faults, by where they were hiding
+
+**Only a browser could show these**
+
+1. **The rail brand was a smudge in every render since the first.**
+   `MineLinkLogo(height: 28)` is the full stacked lockup: at 28px the wordmark
+   draws **6.53px** and the "TECHNOLOGIES" strapline **1.89px**, and the mark
+   came out smaller than the 34px avatar at the foot of the same rail. Now the
+   mark plus a real text wordmark under `MlChrome.wordmarkStart/End` — two
+   tokens that were defined, lerped, and used by no widget at all.
+2. **The target-pace caption was painted into the plot with no ground.** Live
+   data put the series through it: `TARGET · 32 T/DAY` read as
+   `T RGET 32 T/DAY`. Two sites.
+3. **The console header claimed the month came from your laptop** —
+   "This month (device calendar)" over a window that is `MlTime.now()`.
+4. **The product's primary action was not a button.** The sign-in card's live
+   accessibility tree had `StaticText "Sign in"` between two real buttons.
+   Three faults behind it: a disabled button vanished instead of announcing as
+   disabled; neither button carried `isButton` even when enabled (the browser
+   was inferring a role from the tap handler); and neither took keyboard focus.
+5. **21 of 38 console routes fell off the title ladder**, 29 off the subtitle
+   one — and `/super-admin/requests/transportation-buyer` was titled
+   **"Requested buyers"**, the name of a different inbox in the same rail group.
+6. **The map ignored the theme.** Every tile host serves a light basemap; the
+   console's live map was a bright beige rectangle in a navy console. Filtered
+   now — invert composed with a 180° hue rotation, so parks stay green and
+   water stays blue, and only the tiles, never the markers.
+7. **"1 trucks"** — 32 call sites across 20 files interpolating a figure in
+   front of a hard-coded plural. `mlCount` already existed with a doc comment
+   saying *"1 loads is the tell"*; nothing used it.
+8. **Two figures with no units** on the request queue: `640 · 820` where the
+   row above read `640 km · R 700 / ton`.
+9. **The chat launcher sat on the "More" tab** — 68% of the fifth destination's
+   width, on every phone screen.
+10. **A heading cut in a band no sweep reaches.** `MlSectionHead` stacked below
+    a guessed `420`; at 452 (what a 500px viewport really leaves) it did not
+    stack and ellipsised **"Live operations by organization ty…"**. At 412 it
+    was fine — which is why sweeping narrower never found it.
+11. **White on the brand cyan, 1.81:1, in 18 renders**, and the same pair
+    inverted for every waybill link in light mode.
+12. **The portal top bar said the company's name twice** — every company that
+    has not finished its setup form, i.e. every company on its first day.
+13. **"The stockpile balances could not be read"** while they were being read.
+14. **The rail and the top bar disagreed on 15 destinations**; one of them,
+    `/portal/mine/weighbridge`, named the neighbour.
+15. **"60 tons" beside "45 / 120 t"** in one row of cards.
+
+**Only a device could show these**
+
+16. **The sign-in screen was drawn under the status bar.** The chain mark sat
+    on the clock; the "M" of MineLink was behind a notification dot.
+    `flutter_test` reports a MediaQuery padding of zero, so all 240 renders are
+    taken on a device with no status bar.
+17. **The driver's hero card contradicted itself in one row** —
+    `● ACTIVE TRIP` beside `[ NO ACTIVE TRIP ]`.
+18. **The driver's Recent Trips cut its route label** to
+    "Iron Hills Mining - pri…".
+
+**Decisions §4.3 had been holding, taken**
+
+19. The margin ledger's TOTALS row summed three columns of **rates** —
+    `R 520 + R 638 + R 495 = R 1,653.00` — while its own export carried no
+    totals at all. A dash, not a weighted average: the row is labelled TOTALS.
+20. A variance of exactly zero read **"+0 t"**.
+21. `AuditLog.actionLabel` title-cased every word — **"User Assigned To Seat"**.
+    Sentence case now. And the database's `"2 full load(s) ready"` is repaired
+    at `NotificationModel.fromJson`, because `supabase/` is frozen here and the
+    only alternative was shipping `load(s)` to a reader.
+
+### 3.4 Six new guards
+
+`release_guards.dart` is **39** now, all biting:
+
+| id | what it stops |
+|---|---|
+| `brand-lockup-drawn-too-small` | the stacked lockup below its own default height |
+| `no-device-clock-in-copy` | copy telling a user a date comes from their device |
+| `count-without-plural-agreement` | `${n} trucks` — **both** interpolation forms |
+| `capture-fixture-without-a-frozen-clock` | a test reading the real clock against fixed fixtures |
+
+Plus the `LOW CONTRAST` ratchet and the `RENDER NOTE` failure inside the render
+harness itself.
 
 ---
 
 ## 4. What is NOT done — PICK UP HERE
 
-### 4.1 Real hardware. This is the biggest remaining gap in the project.
+### 4.1 A real handset. Still open, and it needs Jean.
 
-**Nothing has ever run on a handset, and nothing has been driven in a browser
-against the live database as a signed-in user.** Every claim in this file is a
-claim about a headless render or a unit test.
+The emulator settles layout, insets, touch, the keyboard and the real Android
+text stack. **It does not settle physical GPS reception, the foreground service
+surviving a real drive, or battery behaviour**, and it is not iOS.
 
-Jean's phone can be driven — the `driving-jeans-phone` skill in the global
-`CLAUDE.md` has the commands, the APK-install route and the privacy rules.
-`flutter build apk --debug` succeeds today, so there is an artifact to install.
+Jean's phone did not answer on either attempt this session:
 
-What only a device can settle: touch targets under a real thumb, the
-foreground-service behaviour during a drive, real GPS, the map tiles (blank in
-every render — `flutter_test` answers every HTTP request with a 400), keyboard
-insets over the forms, and whether the type scale reads at arm's length in
-daylight.
+```
+cd C:\PhoneRemote\tool
+py -3 phone_agent.py status
+→ (no phone at a known address - broadcasting)
+→ !! No phone answered. On the phone: CtrlBridge > Let my PC control this
+     phone > Host mode on. Both devices must be on the same Wi-Fi.
+```
 
-### 4.2 Light mode has 22 renders out of 218
+Three things only Jean can do: turn **Host mode** on, approve the **UAC**
+prompt that `serve_apk.ps1` raises to open the port, and take the **Play
+Protect** decision (*More details → Install without scanning*).
 
-Up from nine, and the colour layer underneath is now measured in both
-brightnesses — so what remains is **shape**, not hue: a widget that assumes a
-dark ground in a way the token audit cannot see. The leaderboard's winner card
-was exactly that and it took a picture to find.
+The artifact is built and current at
+`build/app/outputs/flutter-apk/app-debug.apk`. **Do not stage it as
+`C:\PhoneRemote\dist\CtrlBridge.apk`** — that file is Jean's live CtrlBridge
+build and `check_versions.ps1` verifies it against the published manifest.
 
-Thirteen light twins were added, one per widget family. `shootConsole` takes a
-`brightness` now, so a console screen's light twin is one line.
+**The applicationId is `org.minelink.m3`, deliberately different from the
+shipping app's `com.example.flutter_application_1`**, so both install side by
+side. Read that twice before concluding which app you are looking at: the first
+launch this session was the shipping app's July build, and it looked plausible.
 
-### 4.3 Decisions waiting on Jean
+⚠️ **I uninstalled `com.example.flutter_application_1` from the emulator** while
+working that out. That was the shipping app's July build. Reinstallable from
+the shipping tree with `flutter build apk --debug`; nothing else on the
+emulator was touched and the phone was never reached.
 
-1. **The margin ledger's TOTALS row sums the three per-ton RATE columns** —
-   R 520 + R 638 + R 495 = "R 1,653.00" — a figure with no meaning, printed in
-   the same style as the money beside it. The Excel/CSV/PDF export already
-   omits them, so the screen and its own export disagree. Left alone because it
-   reads as a deliberate instruction. Say the word and it becomes a dash or a
-   tonnage-weighted average.
-2. **The targets history renders a variance of exactly zero as `+0 t`, in
-   green.** Green for on-target is right; the `+` on a genuine zero is not.
-3. **`AuditLog.actionLabel` title-cases every word**, so
-   `USER_ASSIGNED_TO_SEAT` reads "User Assigned To Seat".
-4. **`Recon`, `Requests` and `Docs`** are the phone bottom bar's short forms
-   for Reconciliation, Procurement and Compliance.
-5. **The notification body "2 full load(s) ready …" is written by the
-   DATABASE**, and `supabase/` is frozen here. Every other parenthesised plural
-   in the product is gone; this one needs a migration in the shipping app.
-6. **NEW: there are two chat surfaces.** `messages_screen.dart` and
-   `chat_screen.dart` both render a full thread, with different composers and
-   different chrome. Their wording is aligned now, but they are still two
-   implementations of one thing. Merging them is a refactor, not a redesign
-   pass — say the word.
+### 4.2 Light mode — the colour layer is closed, the SHAPE is measured
+
+Both halves of §4.2 as it was written are now instrumented rather than
+eyeballed: the colour layer by `token_contrast_test.dart` (pairs) and the
+painted layer by the new `LOW CONTRAST` report (grounds). 22 of 218 renders are
+still light, but the report runs on all 240 renders in both brightnesses, so a
+light-mode fault no longer needs its own picture to be found.
+
+**What is left is the 1,812.** They are real and they are ranked — group them
+by `(ink, ground)` pair and the concentration is small. Two pairs were worth 47
+strings and were fixed this session. The next ones down are avatar initials in
+white on mid-saturation generated colours (`#FFFFFF` on `#F8AF18` at 1.89:1,
+and its neighbours), and `#7C8AA0` at 9–13px on near-white.
+
+### 4.3 Two decisions still Jean's
+
+1. **The phone bottom bar's short forms** — `Recon`, `Requests`, `Docs`. Kept:
+   a five-destination bar at 412px is what it is, and the full names are in the
+   drawer.
+2. **Two chat surfaces.** `messages_screen.dart` and `chat_screen.dart` both
+   render a full thread. Their wording and now their inks agree; merging them
+   is a refactor, not a redesign pass.
+
+And **fifteen portal routes where the rail and the bar use different words** —
+recorded with both strings in `every_portal_route_is_named_test.dart`. Four are
+worth a second look because the bar is not shorter, it is a different word:
+`fleet` (Vehicles / Fleet management), `drivers` (Drivers / Driver — singular),
+`trucks-on-route` (capitalisation), `trip` (My routes / Trip).
 
 ### 4.4 The 127 remaining hand-named typefaces
 
-Held by the `typeface-named-by-hand` ratchet, which can only shrink. Three
-different things; `DESIGN.md` §9 measures each. **Not** a gap — a decision.
+Held by the `typeface-named-by-hand` ratchet, which can only shrink. `DESIGN.md`
+§9 measures each. **Not** a gap — a decision.
 
 ### 4.5 Known limitations, stated rather than hidden
 
-- **The map tiles are blank in every render.** The route line, the puck, the
-  pins, the banner and the HUD are all real; the tiles need a device. The map
-  GROUND is theme-correct.
 - **The `dd MMM yyyy` date sites were deliberately NOT consolidated.** 18 of
-  them, all agreeing with `MlTime.day()` character for character, several
-  formatting a value whose provenance must be read before converting (instant
-  vs already-converted wall clock). The `one-vocabulary-for-a-timestamp` guard
-  deliberately does not match a date-only pattern for that reason.
-- **The chat models hold INSTANTS.** If another surface starts reading one of
-  those fields it must go through `MlTime.clock/stamp/day`, not `DateFormat`.
+  them, all agreeing with `MlTime.day()` character for character.
+- **The chat models hold INSTANTS.** A new surface reading one must go through
+  `MlTime.clock/stamp/day`.
 - **Six strings are still cut, on purpose** — three crash-report exception
   messages and three chat message previews. The render file says so in place.
 - **Some fixtures are deliberately EMPTY.** The operations hub's ledgers are
-  the documented example: "a fixture where every tab is full hides the empty
-  states, and an empty state is a design that has to be looked at like any
-  other". Do not "fix" those by filling them.
+  the documented example. Do not "fix" those by filling them.
+- **The map tiles are real now in a browser and on a device**, and blank in
+  renders — `flutter_test` answers every HTTP request with 400. The tile
+  FILTER is asserted structurally instead.
 
 ### 4.6 Windows — blocked, and not this project's fault
 
-Two independent pre-existing faults, both recorded with exact errors in
-`docs/redesign/VERIFICATION.md`:
-
-1. The Flutter tool **refuses the path outright** because of the `!` in
-   `SHOWME!`. The canonical shipping tree is under the same folder, so it
-   cannot have been built from there either.
-2. From a clean path it reaches CMake, which fails on two consecutive clean
-   runs extracting `firebase_cpp_sdk_windows_12.7.0.zip` for `firebase_core`.
-   Same dependency, same version, in the shipping app.
-
-Jean said to skip it. Moving the folder to a path without `!` is his call.
+Two independent pre-existing faults, with exact errors in
+`docs/redesign/VERIFICATION.md`: the Flutter tool refuses the path outright
+because of the `!` in `SHOWME!`, and from a clean path CMake fails extracting
+`firebase_cpp_sdk_windows_12.7.0.zip` for `firebase_core`. Same dependency, same
+version, in the shipping app. Jean said to skip it.
 
 ---
 
@@ -365,14 +420,14 @@ Jean said to skip it. Moving the folder to a path without `!` is his call.
 cd "/c/Users/Somebody Someone/Music/SHOWME!/MineLink-M3"
 
 flutter analyze                                  # must be clean
-flutter test                                     # 1972 passing, 1 skipped
-dart tool/release_guards.dart                    # 35/35
+flutter test                                     # 2055 passing, 1 skipped
+dart tool/release_guards.dart                    # 39/39
 dart tool/release_guards.dart --selftest         # every guard must BITE
 py -3 tool/type_scale_codemod.py --selftest
 py -3 tool/dropdown_width_check.py
 py -3 tool/glyph_coverage_check.py
 py -3 tool/one_clock_check.py
-py -3 tool/unphotographed_screens.py             # what still has no picture
+py -3 tool/unphotographed_screens.py
 flutter test test/design/token_contrast_test.dart
 flutter test test/renders --update-goldens       # after any visual change
 ML_RULER=1 flutter test test/renders/measure_strings_test.dart
@@ -380,92 +435,98 @@ flutter build web --release
 flutter build apk --debug
 ```
 
+### Driving the built app in a browser — the setup that worked
+
+```bash
+flutter build web --release          # config/supabase.live.json is a bundled
+                                     # ASSET, so a plain build reaches live
+cd build/web && py -3 -m http.server 8123 --bind 127.0.0.1
+"/c/Program Files/Google/Chrome/Application/chrome.exe" \
+  --remote-debugging-port=9222 \
+  --user-data-dir="<scratch>/ml-m3-chrome" \
+  --no-first-run --no-default-browser-check "http://127.0.0.1:8123/"
+```
+
+Then drive it with the devtools MCP. Three things that cost time:
+
+- **Flutter web publishes no accessibility tree until you ask.** Click the
+  hidden placeholder — `document.querySelector('flt-semantics-placeholder')
+  .click()` — and the whole semantic tree appears. It is the best instrument
+  in the browser: it is how the `StaticText "Sign in"` fault was found.
+- **`fill` on two different fields writes both into one.** Flutter web routes
+  all text through one hidden input. Click the field, then `type_text` with
+  `submitKey: "Tab"`.
+- **Chrome will not resize below ~500px.** Use CDP emulation
+  (`412x915x1,mobile,touch`) for a true phone viewport. The ~500px band is
+  worth testing in its own right — one fault lived only there.
+
+### Driving it on Android
+
+```bash
+flutter emulators --launch minelink_test
+export PATH="$PATH:$LOCALAPPDATA/Android/Sdk/platform-tools"
+adb install -r build/app/outputs/flutter-apk/app-debug.apk
+adb shell monkey -p org.minelink.m3 -c android.intent.category.LAUNCHER 1
+adb exec-out screencap -p > shot.png
+```
+
+`adb shell input text` mangles `!` and turns `%s` into a space. Quote it for
+the DEVICE shell — `adb shell "input text 'MineralGuide123!'"` — and clear a
+field with `input keyevent 123` (End) then ~45 backspaces before retyping;
+half-cleared fields silently accumulate.
+
+### Live accounts
+
+`active user accounts.txt` in the repo root. `jean@cyberhouse.co.za` /
+`BuRG3rJ3@n1995@#` is the platform admin; `ironhills.owner@mineralguide.com`
+and `roadhaul.driver@mineralguide.com` / `MineralGuide123!` are the seeded set.
+
+⚠️ **The console stores theme and accent PER ADMIN.** Switching Jean's mode to
+Light for the light-mode audit writes to his account. It was switched back to
+Dark and his Amber accent was left untouched — check that it still is.
+
 ### Things that have already gone wrong here — do not repeat them
 
-- 🚨 **`git checkout -- <dir>` THREW AWAY UNCOMMITTED WORK**, including three
-  finished, unrelated fixes in the same directory. Copy to the scratchpad
-  first, or commit before running any codemod that might need undoing. (To
-  sabotage-test a fix, `cp file /tmp/x.bak` first and `cp` it back — that
-  restores the ORIGINAL verbatim, which a hand-retype does not.)
-- 🚨 **A BASH HEREDOC EATS BACKSLASHES EVEN WHEN QUOTED.** It has now broken a
-  patch in THREE separate sessions: `\\n` became a real newline inside a Dart
-  string, and `\'` inside a Python literal became `'` and killed the parse.
-  **Write any script containing a backslash with the Write tool**, or use
-  Edit for the edit itself.
-- **Several files have MIXED line endings.** Read and write with `newline=''`
-  and translate your own literals with `if '\r\n' in s`.
-- 🚨 **`flutter analyze` output is not reliably indented.** Grepping it
-  reported **clean while a warning was printed**. Use `| tail -4`.
-- 🚨 **A LONG `&&` CHAIN ENDING IN `git commit -F <heredoc>` TIMES OUT** at the
-  Bash tool's two minutes. Write the message to a file and commit with `-F` as
-  its own command.
-- **`dart format` on a directory reformats files you did not touch** (131 once,
-  106 another time). The repo is not dart-format clean. Emit correctly
-  formatted code instead.
-- **A codemod must not edit prose.** One rewrote the doc comment *explaining* a
-  rule into something that no longer said it.
+- 🚨 **`git checkout -- <dir>` THREW AWAY UNCOMMITTED WORK.** Copy to the
+  scratchpad first, or commit before any codemod that might need undoing.
+- 🚨 **A BASH HEREDOC EATS BACKSLASHES EVEN WHEN QUOTED**, and a Python string
+  inside one eats them again. It broke a patch in FOUR separate sessions now —
+  the fourth wrote a real newline into a `text.rfind("\n")` and a `\$` into a
+  Dart interpolation, which is valid Dart that prints the literal `${...}`.
+  **Write any script containing a backslash with the Write tool.**
+- 🚨 **`flutter analyze` output is not reliably indented.** Use `| tail -4`.
+- 🚨 **NEVER READ A LONG TEST RUN THROUGH `tail`.** `RENDER NOTE` was
+  documented as zero for the whole project because of this. Redirect to a file
+  and grep the file.
+- 🚨 **A LONG `&&` CHAIN ENDING IN `git commit -F <heredoc>` TIMES OUT.** Write
+  the message to a file and commit with `-F` as its own command.
+- **`dart format` on a directory reformats files you did not touch.**
 - **Read AND write with `newline=''` AND `encoding='utf-8'` in Python.**
-  Universal newlines turned a 340-line change into 5,342 insertions, and
-  cp1252 will round-trip this repo's `—` and `✅` into mojibake.
-- **A failing golden comparison can mask a failing test.** Delete the golden
-  and re-run to see the real error.
-- **Never `git stash`, `git checkout -- .`, or `git clean`** in the original
-  worktree — other agent sessions write it (`CLAUDE.md` §10.1).
-- **`find.text` cannot see a `TextSpan`.** Walk `RenderParagraph` and read
-  `toPlainText()`.
-- 🚨 **AND `toPlainText()` CANNOT SEE A TRUNCATION.** It returns the whole
-  string whichever part of it was drawn. Use `RenderParagraph.didExceedMaxLines`
-  — which is what the harness's cut-off report is built on.
-- **Ask a `RenderParagraph` anything only after checking `hasSize` and
-  `!debugNeedsLayout`.** A paragraph in a subtree that was built but never laid
-  out throws "RenderBox was not laid out", and the throw comes out of the
-  RENDER rather than out of the report.
+- **A codemod must not edit prose.** Skip comment lines and the helper's own
+  doc comment — both were nearly rewritten this session, and the skips are
+  recorded in the codemod rather than remembered.
+- **`find.text` cannot see a `TextSpan`**, and **`toPlainText()` CANNOT SEE A
+  TRUNCATION** — use `RenderParagraph.didExceedMaxLines`.
 - **A render that passes alone and fails in the suite is a CLOCK, an image
-  cache, or a REAL SOCKET.** The employee profile's realtime provider opened
-  postgres_changes channels on the live client: green alone, "A Timer is still
-  pending even after the widget tree was disposed" in the suite. A screen
-  fixture has to stub the LIVE half as well as the read half.
-- **Restore `FlutterError.onError` INSIDE the helper, never in an
-  `addTearDown`** — the binding asserts and times the file out at ten minutes.
-- **A sabotage that does not restore the ORIGINAL code proves nothing.**
-- 🚨 **A PHONE RENDER FRAME MUST BE TALL ENOUGH FOR THE WHOLE SCROLL, AND
-  "TALL ENOUGH" IS A MEASUREMENT.** Zero slack means clipped.
-- 🚨 **AND WHEN YOU MEASURE IT, IGNORE THE RIGHT-HAND EDGE.** A phone's FAB is
-  PINNED to the viewport and sits on the right, so a full-width measurement
-  reports "content reaches the bottom bar" at ANY height and never converges.
-  Measure over `x in [20, 200]`. A frame exactly 915 tall is the real phone
-  viewport and is correct.
-- 🚨 **A SCREEN THAT PHOTOGRAPHS AN ERROR CARD IS NOT A SCREEN PHOTOGRAPHED.**
-  The harness reports these now — but the FIRST version of that check, matching
-  widget names, missed the very card that motivated it, because that screen
-  hand-built its own error state instead of using `MlLoadFailure`. **A check
-  you have not sabotaged is a check you do not have.**
-- 🚨 **A FIXTURE THAT SAYS LESS THAN THE SERVICE IT STANDS IN FOR PHOTOGRAPHS
-  AS A PRODUCT FAULT.** `partnerCompaniesProvider`'s override fell through an
-  EMPTY `orgFilter` to the mines, and three renders read "Unknown company →
-  Unknown company". Read the service's default case before writing the fixture.
-- 🚨 **AND A FIXTURE THAT SETS TWO DERIVED FIELDS INDEPENDENTLY CAN PRINT AN
-  IMPOSSIBILITY.** A profile-setup card read "Expires 01 Mar 2020 · In 12
-  days". The server computes one from the other.
-- 🚨 **AN OVERRIDE LIST THAT DOES NOT REACH THE SCREEN IS THE SAME FAULT.**
-  Forty renders passed `portalCaptureOverrides()` alone and left every provider
-  in the TAIL set live. They all go through `allPortalOverrides()` now — tail
-  first, capture last, so the capture set keeps its values and the tail only
-  fills what nothing was answering.
-- 🚨 **A RENDER HARNESS CAN LIE ABOUT THE CHROME.** For 118 renders the shell's
-  title and subtitle were the reverse of what `PortalShellLayout` builds. When
-  a picture is the evidence, the frame around it is part of the claim.
-- **Check whether a test already pins the behaviour you are about to "fix".**
-  The fuel screen's two header actions look diagonally opposed in a contact
-  sheet; they are not, `WrapAlignment.end` is why, and `portal_tail_test` says
-  so with the reasoning attached. That change was made and reverted.
+  cache, or a REAL SOCKET.** And a fixture that says MORE than the service it
+  stands in for turns the socket back ON: stubbing the chat dock's read half
+  while `FixtureMessagingService` supplied a user id re-opened the realtime
+  channel.
+- 🚨 **A CHECK YOU HAVE NOT SABOTAGED IS A CHECK YOU DO NOT HAVE**, and
+  **sabotage the RIGHT half**. Reverting the section-header measurement left
+  its sweep green, because a second change in the same commit (`maxLines: 2`)
+  masked it. Two changes went in together and each hid the other's regression.
+- **Check whether a test already pins the behaviour you are about to "fix"**
+  (the fuel screen's header alignment — made and reverted).
+- **Assert on the right AXIS.** `meta.top` vs `title.bottom` looked like the
+  obvious test for "did the header stack" and proved nothing, because the title
+  block also holds a subtitle. It passed against the very constant it was
+  written to catch.
 
 ### Where the reasoning lives
 
-- `docs/redesign/DESIGN.md` — decisions and what each cost. §8 Phase 2, **§9
-  the type work, §10 the Phase 4 record**.
-- `docs/redesign/VERIFICATION.md` — what was actually executed, and what has
-  not been.
+- `docs/redesign/DESIGN.md` — decisions and what each cost.
+- `docs/redesign/VERIFICATION.md` — what was executed, and what has not been.
 - `docs/design-reference/` — the **pre-redesign** reference PNGs. **Do not
   regenerate them**; they are the before-image.
 - `docs/redesign/renders/` — 218 PNGs of the redesign.
@@ -475,50 +536,41 @@ flutter build apk --debug
 
 ## 6. The project's own rules still apply
 
-`CLAUDE.md` in this repo is the fork's copy of the shipping app's. The ones
-that keep mattering:
+`CLAUDE.md` in this repo is the fork's copy of the shipping app's:
 
-- **§10.4** — a `Row` hands a non-flex child unbounded width. This phase has
-  hit that family a dozen times, and its commonest form by far is **two
-  `Flexible` children (or a `Flexible` and a `Spacer`) splitting a row when
-  only one of them is long**. It does not raise, and on a desktop it usually
-  looks perfect.
+- **§10.4** — a `Row` hands a non-flex child unbounded width; its commonest
+  form is two `Flexible` children (or a `Flexible` and a `Spacer`) splitting a
+  row when only one is long.
 - **§10.5** — a green test over an empty fixture, an error state, or a fallback
-  font proves nothing. Report *screens proving something / N*.
+  font proves nothing.
 - **§7** — `flutter test` renders in a fallback font unless you load the real
-  ones. An overflow figure that looks like `characters × fontSize` is the test
-  font, not a layout fault.
-- **§7.1** — one clock, Africa/Johannesburg. `MlTime`, never `DateTime.now()`
-  for anything a user reads as a date, a time, or a number bucketed by day.
-  **And a value's KIND matters as much as its zone**: `MlTime.sast()` returns a
-  wall clock, and measuring a duration with one is the bug `MlPresence` exists
-  to end.
+  ones.
+- **§7.1** — one clock, Africa/Johannesburg. `MlTime`, never `DateTime.now()`.
 - **§10.6** — Dart bitwise operators are unsigned 32-bit on the web.
-- **§1** — the package is `flutter_application_1`. Do not rename it.
+- **§1** — the package is `flutter_application_1`. Do not rename it. (The
+  Android *applicationId* is `org.minelink.m3`; those are different things.)
 
 ---
 
-## 7. Exactly where the last session stopped
+## 7. Exactly where this session stopped
 
-Nothing was in flight. The tree is clean, the last commit is
-`docs: the handoff, for a phase whose lists are empty and whose checks are not`,
-and the whole gate in §2 was run against that commit.
+Nothing was in flight. The tree is clean at
+`tests: thirteen files were asserting on arithmetic that changes with the date`,
+and the whole gate in §2 was run against that commit — `flutter build web
+--release` and `flutter build apk --debug` included.
 
-**The last piece of work finished was the picture sweep** — reading the render
-set end to end in contact sheets and fixing what it showed. It is complete for
-the desktop set and the phone set; the last things fixed were the load
-controller's photo field, the company mirror's two squeezed headers, the
-profile-setup fixture's self-contradicting expiry dates, and the chat
-composer's wording.
+The last piece of work finished was **the latent-flake sweep**: thirteen test
+files that pump a capture fixture were reading the real clock, one of them went
+off today, and all thirteen now call `freezeCaptureClock()` with a guard
+holding the line.
 
-**Nothing is half-applied.** The one change that was made and then withdrawn is
-recorded in §5's last bullet: the fuel screen's header alignment, reverted
-because a test already pinned the correct behaviour with its reasoning.
+The local web server on `127.0.0.1:8123`, the debugging Chrome profile in the
+scratchpad, and the `minelink_test` emulator were all still running when the
+session ended. None of them is state this project depends on.
 
-**Pick up at §4.1** — real hardware. Then §4.2, then the decisions in §4.3.
-
-Jean pastes the block below into a fresh chat. It is kept here so it cannot be
-lost with a conversation.
+**Pick up at §4.2** — the 1,812 low-contrast strings, ranked by `(ink, ground)`
+pair, starting with the avatar initials. **§4.1** needs Jean to turn Host mode
+on before a handset is possible.
 
 ---
 
@@ -532,11 +584,11 @@ off. Read these TWO handoff files before doing anything else, in this order:
 
 1. THE CURRENT HANDOFF — this is the file that governs the work:
    C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
-   Rewritten 2026-08-21 (fifth rewrite that day). Read it in this order:
-   the section headed "WHERE THE LAST SESSION STOPPED — READ THIS FIRST",
-   then §0 (where you are + the one rule), §2 (verified state), §7 (exactly
-   where I stopped), §4 (what is NOT done — pick up here) and §5 (things that
-   have already gone wrong in this repo).
+   Rewritten 2026-08-21 at the end of the browser-and-device session. Read it
+   in this order: "WHERE THIS SESSION STOPPED — READ THIS FIRST", then §0
+   (where you are + the one rule), §2 (verified state), §3 (what was done and
+   why it was invisible before), §7 (exactly where I stopped), §4 (what is NOT
+   done — pick up here) and §5 (things that have already gone wrong here).
 
 2. THE OLDER MACHINE-WIDE HANDOFF — background only, do not work from it:
    C:\Users\Somebody Someone\Claude\HANDOFF.md
@@ -560,65 +612,75 @@ depending on which `find` you run, because in a worktree `.git` is a FILE.)
 
 WHERE I LEFT OFF, EXACTLY
 
-The tree is CLEAN. 91 commits. Nothing is half-applied and nothing is
-uncommitted. The tip is "docs: the handoff, for a phase whose lists are empty
-and whose checks are not", and the whole gate below was run green against it,
-builds included.
+The tree is CLEAN. 103 commits. Nothing is half-applied and nothing is
+uncommitted. The tip is "tests: thirteen files were asserting on arithmetic
+that changes with the date", and the whole gate below was run green against it,
+both builds included.
 
-The last work finished was READING THE RENDER SET end to end in contact sheets
-and fixing what it showed — desktop first, then phone. The final fixes were the
-load controller's photo field, the company mirror's two squeezed headers, the
-profile-setup fixture's self-contradicting expiry dates, and the chat
-composer's wording. One change was made and then REVERTED (the fuel screen's
-header alignment) because a test already pinned the correct behaviour — that is
-recorded in §5's last bullet so you do not redo it.
+The last work finished was a LATENT-FLAKE SWEEP: thirteen test files pump a
+capture fixture stamped from a FIXED instant (kCaptureNow) while reading the
+REAL clock, so they assert on arithmetic that changes with the calendar. One of
+them went off on 2026-08-21 with nothing changed but the date. All thirteen now
+call freezeCaptureClock(), and the `capture-fixture-without-a-frozen-clock`
+guard holds the line.
 
 WHAT IS ALREADY DONE — do not redo any of it
 
-  * §4.1 and §4.2 of the old plan are FINISHED. 93 of 93 route-target screens
-    have a picture, and so does every dialog plus the five-step due-diligence
-    gate. `py -3 tool/unphotographed_screens.py` reports 93/93/0.
-  * The render harness now reports THREE things on every render, and each was
-    added after the fault it finds had slipped past a session that was looking:
-      - CUT OFF: every truncated string, with its width and the widgets around
-        it. Was 137. Now 6, and those 6 are deliberate and documented in place.
-      - FAILURE STATE: any render photographing an error card. Zero across all
-        218 renders, and the check is sabotage-proven.
-      - RENDER NOTE: framework errors. Zero.
-    READ THE RENDER RUN'S OUTPUT, not just its exit code — none of the three
-    fails the build, on purpose.
-  * Every phone frame is measured, not guessed. Five were clipping and 63 had
-    up to 1,260px of dead ground; all 100 now fit.
-  * The COLOUR layer is measured against WCAG AA in four palettes and both
-    themes (test/design/token_contrast_test.dart, 24 tests). That found every
-    light-mode border at 1.13–1.18:1 (the cards had no edges), the console's
-    ink ladder bottoming out at 1.64:1, and the sign-in screen's at 2.01:1.
-  * Eight searches are recorded as finished in the handoff's opening section.
-    DO NOT RE-RUN THEM.
+  * THE REDESIGN HAS NOW BEEN DRIVEN FOR REAL, which the previous handoff said
+    had never happened. In a real browser (Chrome + remote debugging) against
+    the LIVE Supabase project, signed in as the platform admin and then as a
+    mine owner — console, insights, targets, margin ledger, recon tables, live
+    map, request inboxes, preferences and the mine portal, at 1600px, in the
+    ~500px band, and at a true emulated 412px. AND on Android, on the
+    `minelink_test` AVD (Android 14, 1080x2400 @ 420dpi = the same 412dp panel
+    as Jean's SM-G780G), built, installed, signed in from the device keyboard
+    as the driver, through the driver dashboard and Trip tab.
+  * 21 FAULTS FOUND AND FIXED, every one invisible to the 218 renders and the
+    2,055 tests that were green before. §3.3 lists them all. Headlines: the
+    rail brand was drawing a 6.5px wordmark; the product's primary action was
+    not a button; 21 of 38 console routes had no title; the map ignored the
+    theme; "1 trucks" in 32 places; the chat launcher sat on the "More" tab;
+    and on the device, the sign-in screen was drawn UNDER the status bar.
+  * THREE CHECKS WERE THEMSELVES WRONG and are fixed: RENDER NOTE was
+    documented as zero and was actually 21 framework errors per desktop render
+    (missed because the output had always been read through `tail`); the render
+    harness was passing the top bar's title and the rail's selection by HAND,
+    so 100 pictures showed chrome the app does not produce; and the thirteen
+    date-dependent test files above.
+  * A NEW INSTRUMENT closes §4.2: contrast measured off the PIXELS — ink from
+    the resolved style, GROUND from the raster behind the text — on every
+    paragraph of every render, in both themes. It sees gradients, sheens and
+    alpha stacks that a token-pair audit cannot. 1,812 strings, baselined per
+    render so it can only shrink.
+  * SIX new release guards; the suite is 39/39 and every one bites.
+  * FOUR of the six §4.3 decisions taken (margin-ledger TOTALS, "+0 t", the
+    title-cased audit action, the database's "load(s)").
 
 WHAT IS LEFT — start here, in this order
 
-  1. REAL HARDWARE (§4.1). The biggest remaining gap in the whole project.
-     Nothing has EVER run on a handset, and nothing has been driven in a
-     browser against the live database as a signed-in user — every claim in
-     the handoff is a claim about a headless render or a unit test.
-     `flutter build apk --debug` succeeds, so there is an artifact to install,
-     and my phone can be driven: invoke the `driving-jeans-phone` skill in the
-     global CLAUDE.md FIRST — it has the commands, the APK-install route and
-     the privacy rules. What only a device can settle: touch targets under a
-     real thumb, the foreground service during a drive, real GPS, the map
-     tiles (blank in every render), keyboard insets over the forms, and
-     whether the type scale reads at arm's length in daylight.
+  1. THE 1,812 LOW-CONTRAST STRINGS (§4.2). Ranked and concentrated: group the
+     report by (ink, ground) pair and the list is short. Two pairs were worth
+     47 strings and are already done. Next down are avatar initials in white on
+     mid-saturation generated colours (#FFFFFF on #F8AF18 = 1.89:1) and
+     #7C8AA0 at 9-13px on near-white. Lower the per-render baseline as you go
+     so the gains are held.
 
-  2. LIGHT-MODE SHAPE (§4.2). 22 renders of 218 are light. The colour layer is
-     measured now, so what is left is a widget that assumes a dark ground in a
-     way a token audit cannot see — the leaderboard's winner card drew its
-     rank and its tonnage at 2.2:1 on a gradient it builds itself, and only a
-     picture found it. `shootConsole` takes a `brightness`, so a light twin is
-     one line.
+  2. A REAL HANDSET (§4.1) — still open and it NEEDS JEAN. The emulator settles
+     layout, insets, touch and the keyboard; it does NOT settle physical GPS,
+     the foreground service surviving a real drive, or battery. Jean's phone
+     did not answer this session: CtrlBridge Host mode is off. Three things
+     only he can do — turn Host mode on, approve the UAC prompt, and take the
+     Play Protect decision. If he has turned it on, invoke the
+     `driving-jeans-phone` skill FIRST. The APK is built and current at
+     build/app/outputs/flutter-apk/app-debug.apk. DO NOT stage it as
+     C:\PhoneRemote\dist\CtrlBridge.apk — that is his live CtrlBridge build.
+     The applicationId is `org.minelink.m3`, deliberately different from the
+     shipping app's `com.example.flutter_application_1`; read that twice before
+     concluding which app you are looking at.
 
-  3. THE SIX DECISIONS WAITING ON ME (§4.3) — including the margin ledger's
-     meaningless TOTALS row and the two separate chat implementations.
+  3. THE REMAINING §4.3 DECISIONS — the two chat implementations, and the
+     fifteen portal routes where the rail and the top bar use different words
+     (recorded with both strings in every_portal_route_is_named_test.dart).
 
 THE METHOD, unchanged: fixtures, regenerate, LOOK at the PNG, MEASURE it with
 PIL rather than squint, fix the SHAPE rather than the instance where the fault
@@ -660,19 +722,21 @@ flutter build apk --debug
 Read §5 of the MineLink-M3 handoff — the things that have already gone wrong in
 this repo — so you don't repeat them. The ones that have cost real time more
 than once:
+  * NEVER read a long test run through `tail`. RENDER NOTE was documented as
+    zero for the whole project because of exactly that. Redirect to a file and
+    grep the file.
   * `git checkout -- <dir>` threw away three finished uncommitted fixes.
-  * A bash heredoc eats backslashes even when quoted, and has broken a patch in
-    THREE separate sessions — write such scripts with the Write tool.
-  * `flutter analyze` output is not reliably indented, so grepping it reported
-    clean while a warning was printed — use `| tail -4`.
+  * A bash heredoc eats backslashes even when quoted, and a Python string
+    inside one eats them again — it has broken a patch in FOUR sessions now.
+    Write such scripts with the Write tool.
+  * `flutter analyze` output is not reliably indented — use `| tail -4`.
   * A long && chain ending in a git commit heredoc times out at two minutes —
     write the message to a file and commit with -F as its own command.
-  * A phone render frame with zero slack above the bottom bar is CLIPPING, not
-    "exactly right"; and when you measure that slack you must ignore the
-    right-hand edge, because the FAB is pinned there and the measurement never
-    converges otherwise.
-  * A check you have not sabotaged is a check you do not have — the first
-    version of the failure-state report missed the very card that motivated it.
+  * A check you have not sabotaged is a check you do not have — AND sabotage
+    the right half: reverting one of two changes in the same commit left a
+    sweep green because the other masked it.
+  * Assert on the right AXIS. "meta.top vs title.bottom" looked like the
+    obvious test for whether a header stacked and proved nothing.
   * Check whether a test already pins the behaviour you are about to "fix".
 
 WHEN THE WORK IS DONE: rewrite
