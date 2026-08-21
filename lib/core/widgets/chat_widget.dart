@@ -485,7 +485,19 @@ class _ChatWidgetState extends State<ChatWidget> {
                                 Text(
                                   MlTime.clock(message.timestamp),
                                   style: context.mlText.code(
-                                    color: isCurrentUser ? MlTokens.overlayLight.withValues(alpha: 0.68) : semantic.textFaint,
+                                    // `inkOnAccent`, not white at 68%.
+                                    //
+                                    // An outgoing bubble is the brand cyan,
+                                    // and white on it is 1.81:1 before any
+                                    // alpha; at 68% the timestamp measured
+                                    // **1.46:1**. `overlayLight` is white as
+                                    // a translucent LAYER - a sheen, a scrim
+                                    // - and it was being used as ink, which
+                                    // is the distinction the token file draws
+                                    // in its own doc comment.
+                                    color: isCurrentUser
+                                        ? MlTokens.inkOnAccent
+                                        : semantic.textFaint,
                                     size: 11,
                                     weight: FontWeight.w400,
                                   ),

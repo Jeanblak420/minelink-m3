@@ -629,7 +629,18 @@ class _OrganizationManagementScreenState
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: context.mlText.code(
-                            color: exp.expired ? MlTokens.red600 : s.textBody,
+                            // The SAME tone call the dot eight lines above
+                            // makes. It was a fixed `MlTokens.red600` - the
+                            // light half of `MlTone.error` - so the dot
+                            // resolved per brightness and the label beside it
+                            // did not, one line apart in one widget:
+                            // "Expired - 01 Aug" measured 3.02:1 on the dark
+                            // console.
+                            color: exp.expired
+                                ? exp.dot
+                                    .colors(Theme.of(context).brightness)
+                                    .fg
+                                : s.textBody,
                             size: 13,
                             weight: FontWeight.w700,
                           ),

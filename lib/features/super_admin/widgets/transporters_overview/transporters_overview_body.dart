@@ -298,7 +298,18 @@ class _FilterChip extends StatelessWidget {
                   '$count',
                   style: t.m(
                     size: 11,
-                    color: t.acc2.withValues(alpha: 0.6),
+                    // `acc2` with NO alpha, and `inkLo` when the chip is not
+                    // selected.
+                    //
+                    // At 60% the count read 4.36:1 on the dark chip and
+                    // **2.65:1** on the light one - and this figure is the
+                    // only thing on the chip that says how many rows the
+                    // filter will leave. The alpha was there to make it
+                    // quieter than the label beside it; it is quieter by
+                    // being 11px against 12px and unbolded, which is the
+                    // same answer every other quiet-by-alpha site in this
+                    // product ended up at.
+                    color: active ? t.acc2 : t.inkLo,
                   ),
                 ),
               ],

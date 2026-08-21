@@ -25,7 +25,32 @@ SABOTAGES = {
         "      if (off <= _inkLineTolerance * _inkLineTolerance) inkPixels++;",
         "      if (off >= 0) inkPixels++;",
     ),
-    # 3. The modal guard: measure the page a dialog was opened over.
+    # 3. NOT IN THE DEFAULT SET. It WAS load-bearing, and the palette moved
+    #    out from under it.
+    #
+    #    The halo exclusion: let an anti-aliased blend count as the ground.
+    #    A glyph's halo is a blend, so it can sit ~150 units from both the ink
+    #    and the ground and survive a "near the ink" test - and in a tight box
+    #    over a GRADIENT fill it does not have to outnumber the fill, only the
+    #    fill's most common single shade. The transporters overview's rank
+    #    badge did exactly that: 11 white pixels, ~20 of teal split four ways,
+    #    8 of one halo colour, and the halo won. The report said
+    #    `#FFFFFF on #8CB7BB - 2.19:1` for white on a teal that is 5.9:1.
+    #
+    #    Adding this removed that finding from the real render, which is how
+    #    it was verified. It is unreachable NOW because the same session then
+    #    deepened the light accent the badge is filled with, and no box in the
+    #    current palette produces a halo that wins a mode vote any more.
+    #
+    #    A synthetic scene did not reproduce it either - two attempts, one
+    #    with a flat fill and one with a gradient - so no test pretends to
+    #    catch it. Run `py -3 tool/_sabotage.py halo` after any palette change
+    #    that puts light ink back on a mid-saturation fill.
+    "halo": (
+        "      modeExcluding(effectiveInks(provisional), blendedWith: provisional);",
+        "      modeExcluding(effectiveInks(provisional));",
+    ),
+    # 4. The modal guard: measure the page a dialog was opened over.
     "modal": (
         "      if (text.isNotEmpty && !isIcon && !_behindAModal(e)) {",
         "      if (text.isNotEmpty && !isIcon) {",
@@ -88,7 +113,12 @@ def run(name):
 
 
 if __name__ == "__main__":
-    names = sys.argv[1:] or [n for n in SABOTAGES if n != "ground"]
+    # `ground` and `halo` are excluded from the default run, each with its
+    # reason recorded above. Both are correct fixes that nothing can currently
+    # catch, and saying so is the point - a sabotage list that quietly omits
+    # what it cannot catch is the same lie as a test that never fails.
+    default = [n for n in SABOTAGES if n not in ("ground", "halo")]
+    names = sys.argv[1:] or default
     print("Sabotaging low_contrast_report.dart, one fix at a time:")
     results = [run(n) for n in names]
     ok = all(results)

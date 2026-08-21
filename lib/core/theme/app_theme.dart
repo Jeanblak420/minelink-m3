@@ -211,6 +211,22 @@ class AppTheme {
           shape: MlShape.control,
           textStyle: text.labelLarge,
           padding: const EdgeInsets.symmetric(horizontal: 24),
+          // A DISABLED label that can still be read.
+          //
+          // Material's defaults are `onSurface` at 38% on a container of the
+          // same colour at 12%, which composites to #767E8C on #2C3649:
+          // **2.97:1**. That is Material's number, not this app's, and it is
+          // how "Continue" on the due-diligence gate and "Create and invite"
+          // in the new-group dialog came out — the two buttons that say what
+          // the form is FOR while you are still filling it in.
+          //
+          // WCAG exempts an inactive control from the 4.5 bar, and this
+          // product has taken the same line everywhere else it came up (the
+          // sign-in veil, the pager, the driver hero): exempt is not a
+          // licence to be unreadable. `onSurfaceVariant` is 5.72:1 on that
+          // container and still reads as clearly off — the FILL is what says
+          // disabled, and the fill is unchanged.
+          disabledForegroundColor: scheme.onSurfaceVariant,
         ),
       ),
 

@@ -1532,8 +1532,18 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
                                       _EmployeeThumb(
                                         imageUrl: s.employeeProfilePhotoUrl,
                                         fallbackLetter: seatTitle.isNotEmpty ? seatTitle[0] : '?',
-                                        highlight: MlTokens.green600.withValues(alpha: 0.12),
-                                        fg: MlTokens.green800,
+                                        // The last paper-ink site. `green800`
+                                        // is documented as an ink for a dense
+                                        // table on WHITE, and this thumb is
+                                        // drawn on the console, which is dark
+                                        // for most admins. `MlTone.done`
+                                        // carries the well and its foreground
+                                        // as one pair.
+                                        highlight: MlTone.done
+                                            .well(Theme.of(context).brightness),
+                                        fg: MlTone.done
+                                            .colors(Theme.of(context).brightness)
+                                            .fg,
                                       ),
                                       const SizedBox(width: 14),
                                       Expanded(

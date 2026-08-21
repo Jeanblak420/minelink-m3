@@ -231,11 +231,22 @@ abstract final class MlTokens {
   static const emerald400 = Color(0xFF34D399);
   static const emerald500 = Color(0xFF10B981);
 
-  /// The deep in/out pair used by stockpile and dispatch ledgers: tons IN is
-  /// [green800], tons OUT is [red700]. Darker than the `MlTone` pair because
-  /// these are figures in a dense table, not status chips.
-  static const green800 = Color(0xFF2E7D32);
-  static const red700 = Color(0xFFC62828);
+  // `green800` (#2E7D32) and `red700` (#C62828) were DELETED on 2026-08-21.
+  //
+  // They were "the deep in/out pair used by stockpile and dispatch ledgers:
+  // tons IN is green800, tons OUT is red700 — darker than the `MlTone` pair
+  // because these are figures in a dense table, not status chips." That
+  // reasoning is sound for a table on PAPER and this product's tables are
+  // navy: `-36.22 t` measured 3.28:1 on the stockpile ledger, `+64.62 t`
+  // 3.60:1, and `Accepted` 2.91:1 on the dispatch chip. Every use was a
+  // fixed light-mode hue on a dark surface.
+  //
+  // All four call sites now take `MlTone.done` / `MlTone.error`, which
+  // resolve per brightness AND carry the lifecycle meaning. That left these
+  // two with no uses at all, and a token whose only documented purpose is a
+  // use that measures under AA is not a token to keep for later — it is the
+  // trap the next dense table falls into. Deleted rather than deprecated, so
+  // the compiler is the guard.
 
   /// The driver hero card's gradient — a lit cyan falling into [navy700] — and
   /// the pale cyan pip drawn on it.
@@ -508,8 +519,16 @@ enum MlTone {
             ? const MlToneColors(Color(0xFFF0715A), Color(0x33DC2626))
             : const MlToneColors(MlTokens.red600, MlTokens.red50);
       case MlTone.neutral:
+        // #AAB6C7 in dark, not `slate400`.
+        //
+        // `neutral` is the tone with no hue to carry it, so it is the one
+        // that goes faint first. The employee grid's "NO ROLE" badge - the
+        // one badge that says a person cannot do anything yet - measured
+        // 3.77:1 on the card it sits on, which is bluer and lighter than the
+        // `surfaceContainer` a token-pair audit would check it against.
+        // 4.70:1 there now, 8.30 on the plain card.
         return dark
-            ? const MlToneColors(MlTokens.slate400, Color(0x2994A3B8))
+            ? const MlToneColors(Color(0xFFAAB6C7), Color(0x2994A3B8))
             : const MlToneColors(MlTokens.slate600, MlTokens.slate100);
       case MlTone.accent:
         return dark

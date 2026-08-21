@@ -139,7 +139,11 @@ abstract final class MlScheme {
     primary: MlTokens.cyan400,
     onPrimary: MlTokens.inkOnAccent,
     primaryContainer: MlTokens.cyan700,
-    onPrimaryContainer: MlTokens.cyan100,
+    // `cyan50`, not `cyan100`. This pair fills the console's extended FAB -
+    // "Generate Token" - and cyan100 on cyan700 is 4.37:1, a hair under. 4.83
+    // at cyan50, and it is still the palest cyan in the ramp rather than a
+    // white that would lose the tint.
+    onPrimaryContainer: MlTokens.cyan50,
 
     secondary: MlTokens.sidebarActiveBlue,
     onSecondary: Color(0xFF062040),

@@ -484,7 +484,14 @@ class TargetsScopePill extends StatelessWidget {
                         fontFamily: MlGlass.sans,
                         fontSize: 9,
                         letterSpacing: 0.5,
-                        color: t.inkXlo,
+                        // `inkLo`, not `inkXlo`, on a SELECTED pill.
+                        //
+                        // The quietest rung is right on the pill's ordinary
+                        // ground and a hair under on the selected one, whose
+                        // accent wash lifts it to #113346: 4.36:1. One rung
+                        // up is 5.31:1 there, and the sublabel is still a
+                        // step below the label above it.
+                        color: selected ? t.inkLo : t.inkXlo,
                       ),
                     ),
                   ],

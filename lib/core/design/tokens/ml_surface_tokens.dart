@@ -218,7 +218,7 @@ class MlGlass {
     // (worst column below is #C2DBE6 / #E5D9D2):
     //
     //           was        now      on white   worst
-    //     accent #0891B2 -> #05637A    6.84      4.74
+    //     accent #0891B2 -> #055C72    7.55      4.81
     //     accent2#0E7490 -> #0E5A80    7.52      5.22
     //     accent3#0D9488 -> #09665E    6.83      4.74
     //     good  #047C57 -> #036B4B    6.55      4.54
@@ -230,7 +230,7 @@ class MlGlass {
     // darkened - solving both to the same target had landed them on #05637A
     // and #0C637C, which is one colour twice and would have collapsed two
     // series in every chart.
-    accent: Color(0xFF05637A),
+    accent: Color(0xFF055C72),
     accent2: Color(0xFF0E5A80),
     accent3: Color(0xFF09665E),
     good: Color(0xFF036B4B),

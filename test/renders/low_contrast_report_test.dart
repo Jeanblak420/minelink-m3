@@ -197,6 +197,55 @@ void main() {
           reason: 'the same declared colour paints two different colours');
     });
 
+    testWidgets('is not confused by its own anti-aliased halo in a tight box',
+        (tester) async {
+      // A rank badge: one glyph in a box barely bigger than the glyph. The
+      // halo is a BLEND, so it sits ~150 units from both the ink and the
+      // ground and survives a "near the ink" exclusion - and in a box this
+      // tight it can then outnumber the fill and win the vote.
+      //
+      // Measured on the real one before this was fixed: 11 white pixels, ~20
+      // of the teal fill, 8 of the halo #8CB7BB - and the report said
+      // `#FFFFFF on #8CB7BB, 2.19:1` for white on a teal that is 5.86:1.
+      final hits = await _run(
+        tester,
+        ColoredBox(
+          color: const Color(0xFFEEF2F8),
+          child: Center(
+            child: Container(
+              width: 24,
+              height: 24,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                // A GRADIENT fill, because that is the mechanism.
+                //
+                // The halo does not have to outnumber the fill - it has to
+                // outnumber the fill's most common SINGLE colour. A gradient
+                // spreads its pixels across many near-identical shades, so
+                // the real badge's box held ~20 fill pixels split four ways
+                // (#086568, #086569, #07656B, #07646B - five each) against 8
+                // of one halo colour, and the halo won the vote outright.
+                //
+                // A flat fill does NOT reproduce it, which is worth knowing:
+                // the first version of this test used one and stayed green
+                // with the exclusion removed.
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF07646B), Color(0xFF096A64)],
+                ),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: _text(const Color(0xFFFFFFFF), text: '1', size: 11),
+            ),
+          ),
+        ),
+      );
+
+      expect(hits, isEmpty,
+          reason: 'white on this teal is ~5.9:1 and must not be reported. If '
+              'this fails, read the ground it names: a halo colour there '
+              'means the blend is being counted as the surface.');
+    });
+
     testWidgets('never measures the ink against itself', (tester) async {
       // The self-eating measurement, in the shape that produced it: a tight
       // box where the glyphs are most of the pixels. Whatever it reports, the

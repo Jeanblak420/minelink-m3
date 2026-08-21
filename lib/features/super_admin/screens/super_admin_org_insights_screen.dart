@@ -1177,7 +1177,29 @@ class _SuperAdminOrgInsightsScreenState
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
           decoration: BoxDecoration(
-            color: lead ? MlControlRoom.cyan.withValues(alpha: 0.06) : MlControlRoom.surfaceTileAlt,
+            // OPAQUE, and that is the whole fix.
+            //
+            // The leader row draws a cyan glow at 50% with a 24px blur and a
+            // -10 spread, and `BoxDecoration` paints its shadow BEFORE its
+            // fill - so a 6%-alpha fill let the glow through and the row
+            // composited to a flat mid teal (#157588). On it, "01" measured
+            // 2.02:1 and "4,382.6 t" 3.20:1: the rank and the tonnage, on the
+            // row that exists to name the leader.
+            //
+            // Same fault as the leaderboard's winner card, in a second place.
+            // `alphaBlend` states the SAME tint the 6% was asking for, as a
+            // colour the glow cannot come through.
+            color: lead
+                ? Color.alphaBlend(
+                    MlControlRoom.cyan.withValues(alpha: 0.06),
+                    // The CARD, not `surfaceTileAlt` — that is white at 2%,
+                    // so blending onto it produces another 2%-alpha colour
+                    // and blocks nothing. `Color.alphaBlend` keeps the
+                    // BACKGROUND's alpha, which is the trap: the result looks
+                    // like a solid colour in source and is not one.
+                    MlControlRoom.surfaceCard,
+                  )
+                : MlControlRoom.surfaceTileAlt,
             borderRadius: MlShape.radiusMedium,
             border: Border.all(
               color: lead ? MlControlRoom.cyan.withValues(alpha: 0.4) : MlControlRoom.tileBorder,

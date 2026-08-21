@@ -347,13 +347,63 @@ LowContrastHit? _measure(
   // a tighter chip, or a test that forgets `loadRealFonts()` moves the number.
   // It is NOT presented as load-bearing, and `tool/_sabotage.py` records that
   // reverting it cannot be caught, rather than implying it can.
-  int modeExcluding(List<int> inks) {
+  /// Is [c] a rendering of this text - the ink itself, or an ANTI-ALIASED
+  /// blend of it with [from]?
+  ///
+  /// The `nearAny` test alone is not enough, and the shortfall is worst
+  /// exactly where the box is tight. A glyph's halo is a blend, so it can sit
+  /// anywhere between the two colours and be 150 units from either: in the
+  /// transporters overview a rank badge's `1` is 8x12px, and its box held 11
+  /// white pixels, ~20 of the teal fill and 8 of the halo `#8CB7BB` - the
+  /// white was excluded, the halo was not, and the halo won the vote. The
+  /// report then said `#FFFFFF on #8CB7BB - 2.19:1` for white on a deep teal
+  /// that actually measures 5.9:1.
+  ///
+  /// Same rule as the ink-line test further down, and for the same reason:
+  /// anti-aliasing IS a blend of exactly these two colours, so its output
+  /// lands on the segment between them by construction.
+  bool isRenderingOf(int c, int from, List<int> inks) {
+    if (nearAny(c, inks, 26)) return true;
+    final gr = (from >> 16) & 0xFF;
+    final gg = (from >> 8) & 0xFF;
+    final gb = from & 0xFF;
+    final r = (c >> 16) & 0xFF;
+    final g = (c >> 8) & 0xFF;
+    final b = c & 0xFF;
+    for (final ink in inks) {
+      final dr = ((ink >> 16) & 0xFF) - gr;
+      final dg = ((ink >> 8) & 0xFF) - gg;
+      final db = (ink & 0xFF) - gb;
+      final len2 = dr * dr + dg * dg + db * db;
+      if (len2 == 0) continue;
+      final t = ((r - gr) * dr + (g - gg) * dg + (b - gb) * db) / len2;
+      // Only the part of the segment that is meaningfully INKED. Below this
+      // a pixel is the ground with a whisper of ink on it, and excluding
+      // those would eat the ground itself.
+      if (t < 0.35 || t > 1.15) continue;
+      final tc = t > 1.0 ? 1.0 : t;
+      final pr = gr + tc * dr;
+      final pg = gg + tc * dg;
+      final pb = gb + tc * db;
+      final off =
+          (r - pr) * (r - pr) + (g - pg) * (g - pg) + (b - pb) * (b - pb);
+      if (off <= _inkLineTolerance * _inkLineTolerance) return true;
+    }
+    return false;
+  }
+
+  int modeExcluding(List<int> inks, {int? blendedWith}) {
     final counts = <int, int>{};
     var considered = 0;
     for (var y = y0; y < y1; y += stride) {
       for (var x = x0; x < x1; x += stride) {
         final c = at(x, y);
-        if (inks.isNotEmpty && nearAny(c, inks, 26)) continue;
+        if (inks.isNotEmpty) {
+          final skip = blendedWith == null
+              ? nearAny(c, inks, 26)
+              : isRenderingOf(c, blendedWith, inks);
+          if (skip) continue;
+        }
         counts[c] = (counts[c] ?? 0) + 1;
         considered++;
       }
@@ -404,7 +454,8 @@ LowContrastHit? _measure(
   // Pass two: now the ink is knowable, exclude it and take the mode of the
   // whole box — which is what actually sits behind the glyphs, and is what
   // sees a gradient or a sheen that the perimeter alone would miss.
-  final ground = modeExcluding(effectiveInks(provisional));
+  final ground =
+      modeExcluding(effectiveInks(provisional), blendedWith: provisional);
   if (ground < 0) return null;
 
   final gl =
@@ -555,28 +606,31 @@ LowContrastHit? _measure(
 // The ratchet
 // ===========================================================================
 
-/// Per-render hit counts recorded when the report was first trustworthy.
+/// Per-render allowances. **It is empty, and that is the point.**
 ///
-/// 1,859 strings across 190 renders, and they are real — the instrument was
-/// checked against the pictures before this file was written, twice in each
-/// direction: findings it named were cropped and looked at, and the ones it
-/// named wrongly were tracked down to a cause and fixed rather than excluded.
+/// This started as a ratchet holding 1,859 strings across 190 renders,
+/// recorded per render so it could only shrink — a baseline, not a target,
+/// because a check that fails until somebody clears 1,859 of anything is a
+/// check people turn off.
 ///
-/// **It is a baseline, not a target.** Clearing 1,859 of anything is not a
-/// commit, and a check that fails until somebody does that is a check people
-/// turn off. Recorded per render so it can only shrink, exactly as
-/// `release_guards.dart` ratchets and for the same reason.
+/// It shrank to nothing. The route was not 1,859 edits: it was measuring what
+/// each finding was PAINTED BY rather than what it looked like, which
+/// collapsed 233 (ink, ground) pairs into a handful of decisions. Six token
+/// values were 86% of it; `textFaint` alone — `onSurfaceVariant` at 62% alpha
+/// — was 916.
 ///
-/// The concentration is the useful part. Two token pairs account for a large
-/// share of it, and both are one decision each:
+/// An empty map means every render is allowed ZERO, because
+/// [expectNoNewLowContrast] reads a missing entry as 0. So this is no longer
+/// a ratchet, it is a floor: any string under WCAG AA on any render, in
+/// either brightness, fails the suite and names its ink, its measured ground
+/// and where to crop the picture.
 ///
-///   * `#FFFFFF` on `#22D3EE` — **1.81:1, in 18 renders.** White on the brand
-///     accent: selected chips, filled buttons, count badges. The accent is a
-///     LIGHT cyan, and white on it was never going to read. The product
-///     already has the right ink for this — `MlAuth.onAccent` `#04202A` — and
-///     the sign-in button uses it.
-///   * `#22D3EE` on `#FFFFFF` — **1.81:1**, the same pair inverted: the accent
-///     used as link text on a light card, e.g. every waybill number.
+/// **If you are here because it failed, do not add an entry.** The number
+/// this file can hold is zero, and the failure message tells you which token
+/// to change; `tool/attribute_low_contrast.py` will tell you which one it is
+/// if the pair is not obvious, and `tool/contrast_calc.py solve-tint` will
+/// derive the replacement instead of you nudging a hex until it goes quiet.
+/// An entry here is the one edit that makes the check stop meaning anything.
 final Map<String, int> _baseline = () {
   final f = File('test/renders/low_contrast_baseline.json');
   if (!f.existsSync()) return <String, int>{};

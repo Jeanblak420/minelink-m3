@@ -152,15 +152,20 @@ class _DispatchStatusChip extends StatelessWidget {
   const _DispatchStatusChip({required this.status});
   @override
   Widget build(BuildContext context) {
+    // Brightness-aware. `green800` and `red700` are PAPER inks - the token
+    // file says so on their own declaration - and this chip is drawn on the
+    // dark portal, where "Accepted" measured 2.91:1. `MlTone` is the pair
+    // that resolves per theme and carries the lifecycle meaning too.
+    final brightness = Theme.of(context).brightness;
     late final Color c;
     late final String label;
     switch (status) {
       case DispatchStatus.accepted:
-        c = MlTokens.green800;
+        c = MlTone.done.colors(brightness).fg;
         label = 'Accepted';
         break;
       case DispatchStatus.declined:
-        c = MlTokens.red700;
+        c = MlTone.error.colors(brightness).fg;
         label = 'Declined';
         break;
       case DispatchStatus.dispatched:
