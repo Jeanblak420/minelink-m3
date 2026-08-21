@@ -371,6 +371,65 @@ void main() {
     // Everything else was a fault, and most of them were invisible in the
     // picture: a 6px table cell reads as an empty column, not as a cut
     // waybill number.
+    // AND EVERY FAILURE STATE STILL ON THE SCREEN.
+    //
+    // "A SCREEN THAT PHOTOGRAPHS AN ERROR CARD IS NOT A SCREEN PHOTOGRAPHED"
+    // has been in the handoff's §5 since the company profile did it, and it
+    // happened again anyway: `screen-employee-profile-desktop-dark` read
+    // "Could not load profile · The server refused the request" for four
+    // sessions and was counted in the 93/93 the whole time. Nobody opened it.
+    //
+    // A person forgets to look. This does not. `MlLoadFailure` is the ONE
+    // widget every read failure in this product renders through — that is what
+    // it was extracted for — so finding it in the tree is finding the fault.
+    // `PortalCompanyRequired` is the other one: a screen that could not
+    // resolve a company and is asking the viewer to pick one.
+    //
+    // Reported rather than failed, like the cut list: a render may legitimately
+    // BE a failure state (`screen-expired-access-desktop-dark` is one on
+    // purpose). The list is what makes the accidental ones visible.
+    // BY WIDGET **AND** BY TEXT.
+    //
+    // The widget check alone was written first and did not catch the case it
+    // was written for: the employee profile hand-built its own error card
+    // rather than using `MlLoadFailure`, so the tree contained no widget with
+    // that name. Proven by sabotage — removing the fixture and watching the
+    // report stay silent — which is the only reason this second half exists.
+    //
+    // The phrases are the ones the product's failure vocabulary actually uses,
+    // plus the two exception class names that must never reach a person.
+    const failureText = [
+      'Could not load',
+      'could not be read',
+      'refused the request',
+      'PostgrestException',
+      'AuthException',
+      'Something went wrong',
+    ];
+    final failures = <String>{};
+    void visitFail(Element e) {
+      final n = e.widget.runtimeType.toString();
+      if (n == 'MlLoadFailure' || n == 'PortalCompanyRequired') failures.add(n);
+      final ro = e.renderObject;
+      if (ro is RenderParagraph && !ro.debugNeedsLayout && ro.hasSize) {
+        final t = ro.text.toPlainText();
+        for (final phrase in failureText) {
+          if (t.contains(phrase)) failures.add('"$t"');
+        }
+      }
+      e.visitChildren(visitFail);
+    }
+
+    tester.allElements.first.visitAncestorElements((a) {
+      visitFail(a);
+      return false;
+    });
+    if (failures.isNotEmpty) {
+      // ignore: avoid_print
+      print('FAILURE STATE [$name] ${failures.join(', ')} — is this render '
+          'meant to be a failure, or is a provider unstubbed?');
+    }
+
     // Keyed by string, valued by WHERE it was cut and how much room it had.
     //
     // The list on its own sent me hunting for "Roadhaul Logistics" through four

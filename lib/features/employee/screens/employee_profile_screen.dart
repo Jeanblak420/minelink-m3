@@ -35,7 +35,6 @@ import 'package:flutter_application_1/features/employee/services/employee_profil
 import 'package:flutter_application_1/features/employee/services/employee_profile_service.dart';
 import 'package:flutter_application_1/features/portal/screens/compliance_screen.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
-import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/presence/ml_presence.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
@@ -284,22 +283,21 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
         backgroundColor: Colors.transparent,
         body: bundleAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
+          // `MlLoadFailure`, not a hand-built copy of it.
+          //
+          // This was the 17th read failure in the product and the only one
+          // still spelling itself out — a bare `Text`, a `friendlyError` and a
+          // `TextButton` labelled "Retry" where every other screen says "Try
+          // again". Being the odd one out had a second cost: the render
+          // harness's failure-state report looks for `MlLoadFailure`, and it
+          // could not see this one — the very card that motivated the report.
           error: (e, _) => Center(
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text('Could not load profile',
-                  style: TextStyle(color: semantic.textStrong)),
-              const SizedBox(height: 8),
-              Text(friendlyError(e),
-                  textAlign: TextAlign.center,
-                  style: context.mlText.bodySmall.copyWith(
-                    color: semantic.textMuted,
-                  )),
-              const SizedBox(height: 12),
-              TextButton(
-                  onPressed: () => ref
-                      .invalidate(employeeProfileBundleProvider(_employeeId)),
-                  child: const Text('Retry')),
-            ]),
+            child: MlLoadFailure(
+              subject: 'this profile',
+              error: e,
+              onRetry: () =>
+                  ref.invalidate(employeeProfileBundleProvider(_employeeId)),
+            ),
           ),
           data: (b) => _body(context, semantic, b),
         ),
