@@ -564,9 +564,33 @@ files that pump a capture fixture were reading the real clock, one of them went
 off today, and all thirteen now call `freezeCaptureClock()` with a guard
 holding the line.
 
-The local web server on `127.0.0.1:8123`, the debugging Chrome profile in the
-scratchpad, and the `minelink_test` emulator were all still running when the
-session ended. None of them is state this project depends on.
+### The rig is still up — walk into it, do not rebuild it
+
+All three pieces were left running deliberately, so the next session can start
+driving in one command instead of twenty minutes of setup. Verified up at the
+moment this was written:
+
+| what | where | state |
+|---|---|---|
+| Web server | `http://127.0.0.1:8123` → `build/web` | HTTP 200 |
+| Chrome, remote debugging | port `9222`, profile in the scratchpad | on `#/portal/mine/stockpiles` |
+| Android emulator | `emulator-5554` (`minelink_test`) | `org.minelink.m3` installed |
+
+- **The served `build/web` is CURRENT** — newer than every file in `lib/`, so
+  it carries every fix in this handoff. Confirm before trusting it:
+  `find lib -name "*.dart" -newer build/web/flutter_bootstrap.js` must print
+  nothing.
+- **The browser is signed in** as `ironhills.owner@mineralguide.com` (the mine
+  portal). Re-enable the accessibility tree after any reload —
+  `document.querySelector('flt-semantics-placeholder').click()`.
+- **The emulator is signed in** as `roadhaul.driver@mineralguide.com`, but its
+  INSTALLED build predates the last two lib commits (the driver hero's eyebrow
+  and the Recent Trips route label). `adb install -r
+  build/app/outputs/flutter-apk/app-debug.apk` refreshes it; the APK on disk is
+  current.
+
+None of this is state the project depends on — if a piece is gone, §5 has the
+exact commands to bring it back.
 
 **Pick up at §4.2** — the 1,812 low-contrast strings, ranked by `(ink, ground)`
 pair, starting with the avatar initials. **§4.1** needs Jean to turn Host mode
@@ -623,6 +647,36 @@ REAL clock, so they assert on arithmetic that changes with the calendar. One of
 them went off on 2026-08-21 with nothing changed but the date. All thirteen now
 call freezeCaptureClock(), and the `capture-fixture-without-a-frozen-clock`
 guard holds the line.
+
+THE RIG IS STILL RUNNING — WALK INTO IT, DON'T REBUILD IT
+
+I left all three pieces up on purpose so you can start driving immediately
+instead of spending twenty minutes on setup:
+
+  * THE WEB SERVER is up on http://127.0.0.1:8123 serving build/web. That build
+    is CURRENT — newer than every file in lib/, so it carries every fix in the
+    handoff. Confirm with:
+      find lib -name "*.dart" -newer build/web/flutter_bootstrap.js
+    (prints nothing = current). If you change lib/, rebuild with
+    `flutter build web --release`; the server picks it up with no restart.
+
+  * THE BROWSER is open — Chrome with remote debugging on port 9222, its own
+    profile in the scratchpad, currently on #/portal/mine/stockpiles and SIGNED
+    IN as ironhills.owner@mineralguide.com. Drive it with the devtools MCP.
+    After any reload you must re-enable Flutter's accessibility tree with
+    document.querySelector('flt-semantics-placeholder').click() — that tree is
+    the single best instrument in the browser and is how the "Sign in" button
+    fault was found.
+
+  * THE ANDROID EMULATOR is running (emulator-5554, the minelink_test AVD) with
+    org.minelink.m3 installed and SIGNED IN as roadhaul.driver@mineralguide.com.
+    Its installed build predates the last two lib commits, so refresh it first:
+      adb install -r build/app/outputs/flutter-apk/app-debug.apk
+    (the APK on disk is current). adb lives at
+    %LOCALAPPDATA%\Android\Sdk\platform-tools.
+
+None of this is state the project depends on — §5 of the handoff has the exact
+commands to bring any of it back if it has gone away by the time you start.
 
 WHAT IS ALREADY DONE — do not redo any of it
 
