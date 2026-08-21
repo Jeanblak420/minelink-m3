@@ -489,7 +489,11 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
       // that are per-user actions moved into the identity flyout at the foot
       // of the rail, which is where the console has always kept them.
       title: sectionTitle,
-      subtitle: '${vm.workspaceName} · ${vm.operatorName} · ${vm.roleLabel}',
+      subtitle: portalShellSubtitle(
+        workspaceName: vm.workspaceName,
+        operatorName: vm.operatorName,
+        roleLabel: vm.roleLabel,
+      ),
       leading: const AppNavigationBackButton(),
       onBrandTap: () {
         ref.read(portalTabIndexProvider.notifier).state = 0;

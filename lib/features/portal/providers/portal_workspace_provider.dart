@@ -101,6 +101,40 @@ String portalOwnerName(dynamic company) {
   return value.isEmpty ? company.companyName : value;
 }
 
+/// The top bar's second line: workspace, operator, role — **without saying the
+/// same thing twice**.
+///
+/// [portalOwnerName] falls back to the company's own name when no CEO name has
+/// been captured, which is right where it is used as an identity, and wrong
+/// here: driven in a browser as `ironhills.owner` on 2026-08-21 the portal's
+/// top bar read
+///
+///     Iron Hills Mining · Iron Hills Mining · Mine/Supplier
+///
+/// "CEO / owner name" is one of the six items that company's setup card is
+/// still asking for, so this is not an edge case — it is what EVERY company
+/// sees until somebody finishes the form, which is to say every company on its
+/// first day.
+///
+/// De-duplicated case-insensitively and on trimmed text, because "Iron Hills
+/// Mining" and "Iron Hills Mining " are the same name to a reader. Empty parts
+/// are dropped rather than printed as a stray separator.
+String portalShellSubtitle({
+  required String workspaceName,
+  required String operatorName,
+  required String roleLabel,
+}) {
+  final parts = <String>[];
+  final seen = <String>{};
+  for (final part in [workspaceName, operatorName, roleLabel]) {
+    final text = part.trim();
+    if (text.isEmpty) continue;
+    if (!seen.add(text.toLowerCase())) continue;
+    parts.add(text);
+  }
+  return parts.join(' · ');
+}
+
 String portalFormatEmployeeStatus(String? status) {
   switch (status) {
     case 'pending_company':

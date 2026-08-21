@@ -107,8 +107,19 @@ class _MineSupplierPortalDashboardScreenState
     final tons = current.fold<double>(0, (a, b) => a + b);
     final priorTons = previous.fold<double>(0, (a, b) => a + b);
 
-    final stockpiles =
-        ref.watch(stockpilesProvider(companyId)).valueOrNull;
+    // The AsyncValue is kept here too, for the same reason the three below it
+    // are: `valueOrNull` collapses "still reading" and "could not read" into
+    // one null, and the stockpile band turned that null into
+    //
+    //     Stockpiles unavailable — The stockpile balances could not be read.
+    //
+    // Driven in a browser as `ironhills.owner` on 2026-08-21, that is what a
+    // mine owner sees while the read is still in flight: a stated failure, in
+    // the card that answers "is there product on the ground", on a page whose
+    // other cards have already filled in. The comment below already named the
+    // trap; this line was the one still in it.
+    final stockpilesAsync = ref.watch(stockpilesProvider(companyId));
+    final stockpiles = stockpilesAsync.valueOrNull;
     // The AsyncValue is kept, not just its value: the action queue has to tell
     // "still reading" from "could not read", and `valueOrNull` collapses both
     // to null. See `PortalQueueItem.loading`.
@@ -232,7 +243,8 @@ class _MineSupplierPortalDashboardScreenState
               // disagreeing, with the clamp hiding which was wrong.
               final ring = _stockpileBand(
                   context, stockpiles, cappedBalance, capacity,
-                  totalOnGround: balance);
+                  totalOnGround: balance,
+                  loading: stockpilesAsync.isLoading);
               if (c.maxWidth < 980) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -419,12 +431,22 @@ class _MineSupplierPortalDashboardScreenState
     double? balance,
     double? capacity, {
     double? totalOnGround,
+    bool loading = false,
   }) {
     final s = MlSemantic.of(context);
     final brightness = Theme.of(context).brightness;
 
     Widget body;
-    if (stockpiles == null) {
+    if (stockpiles == null && loading) {
+      // STILL READING is not COULD NOT READ. Saying the second while the first
+      // is true tells a mine owner their stockpile figures are broken, on a
+      // page where every other card is already filling in around it.
+      body = const MlEmptyState(
+        icon: Icons.inventory_2_outlined,
+        title: 'Reading stockpiles…',
+        message: 'Balances are on their way.',
+      );
+    } else if (stockpiles == null) {
       body = const MlEmptyState(
         icon: Icons.inventory_2_outlined,
         title: 'Stockpiles unavailable',
