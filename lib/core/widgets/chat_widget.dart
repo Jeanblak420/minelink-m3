@@ -461,7 +461,9 @@ class _ChatWidgetState extends State<ChatWidget> {
                           Text(
                             message.content,
                             style: context.mlText.bodyLarge.copyWith(
-                              color: isCurrentUser ? MlTokens.inkOnFill : semantic.textStrong,
+                              color: isCurrentUser
+                                  ? MlTokens.inkOnAccent
+                                  : semantic.textStrong,
                             ),
                           ),
 
@@ -495,7 +497,8 @@ class _ChatWidgetState extends State<ChatWidget> {
                                   size: 15,
                                   color: message.isRead
                                       ? MlChatTone.linkOnDark
-                                      : MlTokens.inkOnFill70,
+                                      : MlTokens.inkOnAccent
+                                          .withValues(alpha: 0.72),
                                 ),
                               ],
                             ],
@@ -554,7 +557,7 @@ class _ChatWidgetState extends State<ChatWidget> {
     required bool spinner,
   }) {
     final semantic = MlSemantic.of(context);
-    final fg = mine ? MlTokens.inkOnFill : semantic.textFaint;
+    final fg = mine ? MlTokens.inkOnAccent : semantic.textFaint;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -636,7 +639,7 @@ class _ChatWidgetState extends State<ChatWidget> {
       );
     } else {
       // Generic file attachment
-      final chipFg = mine ? MlTokens.inkOnFill : MlTokens.accentHover;
+      final chipFg = mine ? MlTokens.inkOnAccent : MlTokens.accentHover;
       return InkWell(
         onTap: () => _openAttachment(signedUrl),
         borderRadius: BorderRadius.circular(MlTokens.rSm),

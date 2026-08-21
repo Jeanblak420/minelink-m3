@@ -195,7 +195,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
             Text(
               label,
               style: context.mlText.titleSmall.copyWith(
-                color: selected ? MlTokens.inkOnFill : semantic.textBody,
+                color: selected ? MlTokens.inkOnAccent : semantic.textBody,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -204,14 +204,14 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               decoration: BoxDecoration(
                 color: selected
-                    ? MlTokens.inkOnFill.withValues(alpha: 0.22)
+                    ? MlTokens.inkOnAccent.withValues(alpha: 0.22)
                     : semantic.surfaceSunken,
                 borderRadius: BorderRadius.circular(MlTokens.rPill),
               ),
               child: Text(
                 '$count',
                 style: context.mlText.code(
-                  color: selected ? MlTokens.inkOnFill : semantic.textMuted,
+                  color: selected ? MlTokens.inkOnAccent : semantic.textMuted,
                   size: 12,
                   weight: FontWeight.w600,
                 ),

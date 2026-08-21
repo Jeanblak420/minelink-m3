@@ -606,7 +606,7 @@ class _HeroHeader extends StatelessWidget {
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: MlTokens.accent,
-              foregroundColor: MlTokens.inkOnFill,
+              foregroundColor: MlTokens.inkOnAccent,
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: MlShape.pill,

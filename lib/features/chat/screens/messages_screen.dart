@@ -181,7 +181,7 @@ class _SegTabs extends StatelessWidget {
             child: Text(
               label,
               style: context.mlText.titleSmall.copyWith(
-                color: active ? MlTokens.inkOnFill : semantic.textMuted,
+                color: active ? MlTokens.inkOnAccent : semantic.textMuted,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -784,7 +784,9 @@ class _MessageBubble extends StatelessWidget {
                 Text(
                   MlTime.clock(message.timestamp),
                   style: context.mlText.code(
-                    color: mine ? MlTokens.inkOnFill70 : semantic.textFaint,
+                    color: mine
+                        ? MlTokens.inkOnAccent.withValues(alpha: 0.72)
+                        : semantic.textFaint,
                     size: 10,
                     weight: FontWeight.w400,
                   ),
@@ -799,8 +801,8 @@ class _MessageBubble extends StatelessWidget {
                             : Icons.done_rounded),
                     size: 14,
                     color: message.readAt != null
-                        ? MlTokens.inkOnFill
-                        : MlTokens.inkOnFill70,
+                        ? MlTokens.inkOnAccent
+                        : MlTokens.inkOnAccent.withValues(alpha: 0.72),
                   ),
                 ],
               ],

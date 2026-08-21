@@ -787,7 +787,7 @@ class _OrganizationManagementScreenState
             child: Text(
               '$p',
               style: context.mlText.titleSmall.copyWith(
-                color: selected ? MlTokens.inkOnFill : s.textBody,
+                color: selected ? MlTokens.inkOnAccent : s.textBody,
                 fontWeight: FontWeight.w700,
               ),
             ),

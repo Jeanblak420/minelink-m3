@@ -801,7 +801,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                   label: Text('Message  ${e.firstName}'),
                   style: FilledButton.styleFrom(
                     backgroundColor: _cta,
-                    foregroundColor: MlTokens.inkOnFill,
+                    foregroundColor: MlTokens.inkOnAccent,
                     textStyle: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

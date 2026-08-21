@@ -712,9 +712,14 @@ class _ExcelReconTable extends StatelessWidget {
           fontSize: 13,
           fontWeight: FontWeight.w700,
           height: 1.25,
-          color: MlTokens.accent,
+          // `semantic.accentInk`, not `MlTokens.accent`. The accent is the
+          // FILL — the value that goes behind `inkOnAccent` — and using it as
+          // ink is `#22D3EE` on white, **1.81:1**. Every waybill number in
+          // this table was a link nobody could read in light mode, measured
+          // 2026-08-21 on `screen-recon-tables-desktop-light`.
+          color: semantic.accentInk,
           decoration: TextDecoration.underline,
-          decorationColor: MlTokens.accent,
+          decorationColor: semantic.accentInk,
           fontFeatures: const [FontFeature.tabularFigures()],
         ),
       ),

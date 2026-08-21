@@ -489,6 +489,22 @@ class MlSemantic {
   final Color borderAccent;
   final Color divider;
 
+  /// The brand accent used **as ink**, on a themed surface.
+  ///
+  /// `MlTokens.accent` is the accent as a FILL — the value that goes behind
+  /// `inkOnAccent`. Reaching for it as a text colour is only right on a dark
+  /// ground, and on a light one it is `#22D3EE` on white: **1.81:1**. Measured
+  /// on 2026-08-21 on the recon tables, where every waybill number is a link
+  /// and every one of them was unreadable in light mode.
+  ///
+  /// This is `scheme.primary`, which the scheme already resolves per
+  /// brightness for exactly this reason — cyan700 on light (5.1:1 on white),
+  /// cyan400 on dark. Its own ramp comments say so: "reference accent, light
+  /// surfaces" and "reference accent, dark surfaces". The value existed; the
+  /// NAME for using it as ink did not, so call sites reached past it to the
+  /// fill.
+  final Color accentInk;
+
   const MlSemantic._({
     required this.surfaceApp,
     required this.surfaceCard,
@@ -503,6 +519,7 @@ class MlSemantic {
     required this.borderStrong,
     required this.borderAccent,
     required this.divider,
+    required this.accentInk,
   });
 
   /// Build a custom semantic palette (used by the mine premium themes to skin
@@ -521,6 +538,11 @@ class MlSemantic {
     required Color borderStrong,
     required Color borderAccent,
     required Color divider,
+    /// Optional: a custom palette that has no accent ink of its own falls back
+    /// to the border's hue. The mine premium themes are the only callers and
+    /// none of them draws accent-coloured text today; when one does, it should
+    /// pass its own rather than inherit a 72%-alpha border colour.
+    Color? accentInk,
   }) : this._(
           surfaceApp: surfaceApp,
           surfaceCard: surfaceCard,
@@ -535,6 +557,7 @@ class MlSemantic {
           borderStrong: borderStrong,
           borderAccent: borderAccent,
           divider: divider,
+          accentInk: accentInk ?? borderAccent,
         );
 
   /// Derives the whole semantic palette from a Material 3 [ColorScheme].
@@ -593,6 +616,7 @@ class MlSemantic {
       // 5.4:1. The hue is unchanged; only how much of it lands.
       borderAccent: scheme.primary.withValues(alpha: 0.72),
       divider: scheme.outlineVariant,
+      accentInk: scheme.primary,
     );
     _cachedScheme = scheme;
     _cached = built;

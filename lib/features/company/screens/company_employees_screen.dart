@@ -604,7 +604,7 @@ class _CompanyEmployeesScreenState
           overflow: TextOverflow.fade,
           softWrap: false,
           style: context.mlText.titleSmall.copyWith(
-            color: isSelected ? MlTokens.inkOnFill : semantic.textBody,
+            color: isSelected ? MlTokens.inkOnAccent : semantic.textBody,
             fontWeight: FontWeight.w700,
           ),
         ),

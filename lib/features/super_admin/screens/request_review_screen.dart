@@ -862,7 +862,7 @@ class _FilterTab extends StatelessWidget {
               Text(
                 label,
                 style: context.mlText.titleSmall.copyWith(
-                  color: selected ? MlTokens.inkOnFill : s.textBody,
+                  color: selected ? MlTokens.inkOnAccent : s.textBody,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -878,7 +878,7 @@ class _FilterTab extends StatelessWidget {
                 child: Text(
                   '$count',
                   style: context.mlText.code(
-                    color: selected ? MlTokens.inkOnFill : s.textMuted,
+                    color: selected ? MlTokens.inkOnAccent : s.textMuted,
                     size: 12,
                     weight: FontWeight.w400,
                   ),
