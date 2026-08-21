@@ -27,9 +27,11 @@ import 'package:flutter_application_1/features/portal/screens/security_checkin_s
 import '../../fixtures/portal_capture_fixtures.dart';
 import '../../fixtures/screen_fixtures.dart';
 import '../../test_helpers/real_fonts.dart';
+import '../../test_helpers/frozen_clock.dart';
 
 void main() {
   setUpAll(() async {
+    freezeCaptureClock();
     // Without the real fonts every glyph is one em wide and this measures a
     // font nothing ships in — CLAUDE.md §7.
     await loadRealFonts();

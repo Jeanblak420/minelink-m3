@@ -197,6 +197,37 @@ final guards = <Guard>[
     plantLine: 'const c = Colors.red;',
   ),
   Guard(
+    id: 'capture-fixture-without-a-frozen-clock',
+    why: 'the capture fixtures date every row relative to `kCaptureNow`, a '
+        'FIXED instant, while the product measures its rolling windows from '
+        '`MlTime.now()`, the REAL clock. A test that pumps those fixtures '
+        'without freezing the clock asserts on arithmetic that changes with '
+        'the calendar — it passes for days and then goes off with nothing '
+        'changed but the date. `recon_table_legibility_test.dart` asserted a '
+        'period total of 103.22 t and did exactly that on 2026-08-21. THIRTEEN '
+        'test files were in that position. Call `freezeCaptureClock()` from '
+        'test_helpers/frozen_clock.dart in setUpAll.',
+    mode: Mode.block,
+    roots: ['test'],
+    extension: '.dart',
+    // The fixture files themselves DEFINE the overrides and have no setUp to
+    // freeze anything in; they are data, not tests.
+    exemptPath: RegExp(r'test/fixtures/'),
+    // A file that mentions a capture override set. The pairing with
+    // `freezeCaptureClock` cannot be expressed in one regex, so the guard
+    // matches the hazard and the exemption below clears the files that handle
+    // it — which is why the exemption is a NEGATIVE lookahead over the whole
+    // file rather than a line rule.
+    pattern: RegExp(
+      r'^(?![\s\S]*(?:freezeCaptureClock|MlTime\.debugClock))'
+      r'[\s\S]*(?:portalCaptureOverrides|consoleCaptureOverrides)',
+    ),
+    spanLines: true,
+    plantFile: 'planted_test.dart',
+    plantLine: 'void main() { portalCaptureOverrides(); }',
+    plantWrapped: 'void main() {\n  portalCaptureOverrides();\n}',
+  ),
+  Guard(
     id: 'count-without-plural-agreement',
     why: 'a figure interpolated straight in front of a hard-coded plural noun '
         'prints "1 trucks" the moment the figure is one. Read on the live '

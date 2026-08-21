@@ -759,8 +759,18 @@ class _RecentTripsCard extends ConsumerWidget {
                 MlPlatePill(t.truckReg ?? '—', fontSize: 12),
                 const SizedBox(height: 3),
                 if (req != null)
+                  // TWO lines. A route label is an IDENTITY — where the load
+                  // came from and where it went — and one line at 412dp cuts
+                  // it mid-word: on the emulator against live data it read
+                  // "Iron Hills Mining - pri…", which names neither end of the
+                  // trip it is labelling.
+                  //
+                  // The render set never showed it because the fixture's route
+                  // labels are short; the live ones are "Iron Hills Mining —
+                  // primary collection point → Richards Bay Dry Bulk Terminal,
+                  // Berth 704".
                   Text(req.routeLabel,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context)
                           .textTheme

@@ -61,6 +61,7 @@ import 'package:flutter_application_1/features/portal/screens/portal_tons_out_sc
 import '../fixtures/ml_sample_data.dart';
 import 'package:flutter_application_1/features/portal/models/company_access.dart';
 import 'package:flutter_application_1/features/chat/models/messaging_models.dart';
+import '../test_helpers/frozen_clock.dart';
 
 // Written into docs/, NOT build/. build/ is gitignored, and a design reference
 // that exists only on the machine that rendered it is not a reference — every
@@ -253,6 +254,7 @@ Future<void> _capture(
 
 void main() {
   setUpAll(() async {
+    freezeCaptureClock();
     TestWidgetsFlutterBinding.ensureInitialized();
     await _loadRealFonts();
     // The portal dashboards touch Supabase.instance while building. A dummy

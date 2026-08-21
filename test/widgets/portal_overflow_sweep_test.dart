@@ -78,6 +78,7 @@ import 'package:flutter_application_1/features/portal/screens/tons_out_detail_sc
 /// matters most: drivers and security run this on a phone.
 import '../fixtures/portal_capture_fixtures.dart';
 import '../fixtures/screen_fixtures.dart';
+import '../test_helpers/frozen_clock.dart';
 
 const _widths = <double>[360, 800, 1280];
 const _scales = <double>[0.85, 1.0, 1.3, 1.6, 2.0];
@@ -112,6 +113,7 @@ Future<void> _loadRealFonts() async {
 
 void main() {
   setUpAll(() async {
+    freezeCaptureClock();
     await _loadRealFonts();
     // Portal screens touch Supabase.instance while building. A dummy instance
     // gets them rendering; no request is ever made, so every provider resolves

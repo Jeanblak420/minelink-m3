@@ -38,9 +38,11 @@ import '../../fixtures/screen_fixtures.dart';
 import '../../test_helpers/fake_geolocator.dart';
 import '../../test_helpers/fake_path_provider.dart';
 import '../../test_helpers/real_fonts.dart';
+import '../../test_helpers/frozen_clock.dart';
 
 void main() {
   setUpAll(() async {
+    freezeCaptureClock();
     await loadRealFonts();
     SharedPreferences.setMockInitialValues({});
     installFakePathProvider();

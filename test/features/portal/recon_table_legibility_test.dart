@@ -32,9 +32,11 @@ import 'package:flutter_application_1/features/portal/widgets/raw_recon_view.dar
 import '../../fixtures/portal_capture_fixtures.dart';
 import '../../fixtures/screen_fixtures.dart';
 import '../../test_helpers/real_fonts.dart';
+import '../../test_helpers/frozen_clock.dart';
 
 void main() {
   setUpAll(() async {
+    freezeCaptureClock();
     await loadRealFonts();
     SharedPreferences.setMockInitialValues({});
     await Supabase.initialize(

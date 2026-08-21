@@ -69,6 +69,7 @@ import '../fixtures/ml_sample_data.dart';
 import '../fixtures/portal_capture_fixtures.dart';
 import '../fixtures/screen_fixtures.dart';
 import '../test_helpers/real_fonts.dart';
+import '../test_helpers/frozen_clock.dart';
 
 /// Widths the console content area actually sees. 1612 is the measured value
 /// on a 1920 window (1660 shell content minus the screen's own padding); the
@@ -117,6 +118,7 @@ void main() {
   });
 
   setUpAll(() async {
+    freezeCaptureClock();
     await loadRealFonts();
     // Several screens touch Supabase.instance during build. The sweep only
     // cares about layout, so a dummy instance is enough to get them rendering;
