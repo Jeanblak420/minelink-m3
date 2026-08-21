@@ -2084,17 +2084,9 @@ String _dateSeparatorLabel(DateTime dt) {
   return '${d.day}${_ordinalSuffix(d.day)} ${DateFormat('MMM yyyy').format(d)}';
 }
 
-/// Relative "last seen" phrasing (just now / N min ago / N h ago / yesterday /
-/// N days ago / date).
-String _relativeTime(DateTime dt) {
-  final d = DateTime.now().difference(dt);
-  if (d.inSeconds < 45) return 'just now';
-  if (d.inMinutes < 60) return '${d.inMinutes} min ago';
-  if (d.inHours < 24) return '${d.inHours} h ago';
-  if (d.inDays == 1) return 'yesterday';
-  if (d.inDays < 7) return '${d.inDays} days ago';
-  return DateFormat('d MMM').format(MlTime.sast(dt));
-}
+/// Relative "last seen" phrasing. The vocabulary is [MlTime.ago]'s, which this
+/// one supplied most of - it was the only copy of nine with a `yesterday`.
+String _relativeTime(DateTime dt) => MlTime.ago(dt);
 
 /// CPS-style presence line: "Online" (green) / "Last seen X" / "Offline".
 /// Fully real-time — watches live presence (online set + last-seen stamps) and

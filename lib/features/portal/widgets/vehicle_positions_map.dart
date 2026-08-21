@@ -45,6 +45,8 @@ class VehiclePositionsMap extends StatelessWidget {
       borderRadius: MlShape.radiusMedium,
       child: FlutterMap(
         options: MapOptions(
+          // Not flutter_map's near-white default: see mlMapBackground.
+          backgroundColor: mlMapBackground(context),
           initialCameraFit: fit,
           interactionOptions: const InteractionOptions(
             flags: InteractiveFlag.all & ~InteractiveFlag.rotate,

@@ -4,6 +4,8 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/models.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/features/super_admin/widgets/company_link_builder.dart'
+    show companyOrgTypeLabel;
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
@@ -52,6 +54,23 @@ class _TokenHistoryScreenState extends ConsumerState<TokenHistoryScreen>
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // THIS SCREEN HAD NO TITLE.
+          //
+          // Every other console screen states what it is - Audit Logs, Crash
+          // reports, Account deactivations, Live map - and this one opened
+          // straight onto a tab bar, so an admin arriving from the rail landed
+          // on three org-type tabs with nothing saying what was being listed.
+          // Jean's brief is about the placement of everything; a screen missing
+          // the one piece of chrome that names it is not that.
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 18, 20, 0),
+            child: MlPageHeader(
+              title: 'Token history',
+              description: 'Every token-related action on the platform, newest '
+                  'first, grouped by the organization it happened to.',
+            ),
+          ),
+          const SizedBox(height: 12),
           TabBar(
             controller: _tabs,
             isScrollable: true,
@@ -141,7 +160,16 @@ class _OrgTypeAuditTab extends ConsumerWidget {
                         ),
                       ),
                       subtitle: Text(
-                        '${entries.length} events · org $oid',
+                        // Was "9 events · org o1". `oid` is a database key: when
+                        // the name IS known it adds nothing, and when it is not
+                        // the title already shows it (`title = organizationName
+                        // ?? oid`) — so the id was either noise or a
+                        // repetition. The org TYPE is the useful second fact,
+                        // and it is what the tab above is filtered by.
+                        '${entries.length} '
+                        '${entries.length == 1 ? 'event' : 'events'}'
+                        '${entries.first.organizationType == null ? '' : ' · '
+                            '${companyOrgTypeLabel(entries.first.organizationType)}'}',
                         style: context.mlText.bodyMedium.copyWith(
                           color: semantic.textMuted,
                         ),
@@ -151,7 +179,11 @@ class _OrgTypeAuditTab extends ConsumerWidget {
                           ListTile(
                             dense: true,
                             title: Text(
-                              log.actionType,
+                              // Not `log.actionType`: that is the wire value,
+                              // and it rendered as TOKEN_GENERATED here while
+                              // the audit-log screen said "Token Generated" for
+                              // the very same row.
+                              log.actionLabel,
                               style: TextStyle(
                                 fontFamily: MlTokens.fontSans,
                                 fontWeight: FontWeight.w600,

@@ -543,6 +543,81 @@ final guards = <Guard>[
     plantLine: 'final delta = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);',
   ),
   Guard(
+    id: 'map-states-its-background',
+    why: 'a `MapOptions` with no `backgroundColor`. flutter_map defaults to '
+        '`0xFFE0E0E0` — near-white — and not one of the five maps in this app '
+        'set it, so wherever a tile has not arrived a dark console paints a '
+        'large white rectangle. That is not only the test harness (which '
+        'answers every tile request with a 400): it is the FIRST PAINT of '
+        'every map before any tile lands, every map on a bad connection, and '
+        'the whole map offline — which for the driver navigation screen is the '
+        'exact situation the screen exists for. Photographed 2026-08-21 on the '
+        'console live map, where four trucks float on a sheet of near-white in '
+        'an otherwise navy screen. `mlMapBackground(context)` resolves the '
+        'right ground from the theme.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // A `MapOptions(` with no `backgroundColor` anywhere in the next 400
+    // characters — long enough to cover an argument list and its comments,
+    // short enough not to reach into whatever follows the call.
+    //
+    // The first draft anchored on "reach `initialCenter:` without passing
+    // `backgroundColor:`", which reported the driver navigation screen as a
+    // violation for putting `initialCenter` FIRST. Argument order is the
+    // author's business; presence is the rule.
+    pattern: RegExp(r'MapOptions\((?![\s\S]{0,400}?backgroundColor)'),
+    spanLines: true,
+    plantFile: 'map.dart',
+    plantLine:
+        'FlutterMap(options: MapOptions(initialZoom: 5, initialCenter: p));',
+    plantWrapped: 'FlutterMap(\n'
+        '  options: MapOptions(\n'
+        '    initialZoom: 5,\n'
+        '    initialCenter: p,\n'
+        '  ),\n'
+        ');',
+  ),
+  Guard(
+    id: 'one-vocabulary-for-time-ago',
+    why: 'a hand-rolled "x ago" string. There were NINE of these in `lib/` and '
+        'they agreed on almost nothing: `5m ago` and `5 min ago`; `3h ago` and '
+        '`3 h ago`; `2d ago`, `2 d ago` and `2 days ago`; three different '
+        '"just now" thresholds; one screen with a `yesterday` and eight '
+        'without; three date fallbacks (`13/8/2026`, `13 Aug`, `dd MMM`). A '
+        'reader moving between the console\'s audit log and its live map was '
+        'reading two dialects of the same sentence.\n'
+        '\n'
+        'SIX OF THE NINE ALSO READ `DateTime.now()` — the device\'s opinion of '
+        'the hour, which CLAUDE.md §7.1 keeps out of anything a user reads. '
+        'The audit log is where it showed: rendered against a frozen clock its '
+        'newest three entries (22 minutes, 3 hours and 9 hours old) all '
+        'printed "5d ago", because the subtraction was against the real wall '
+        'clock and not against the data. A handset with a wrong date does the '
+        'same to a real admin, on the screen whose entire job is saying when '
+        'something happened. One of them was worse still: request tracking '
+        'subtracted a WALL CLOCK from an instant, so every row was two hours '
+        'young for anybody outside South Africa.\n'
+        '\n'
+        'Use `MlTime.ago(at)` for a sentence and `MlTime.agoTag(at)` for a '
+        'column too narrow for one. Both take an `asOf:`.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // The literal suffix, in every spacing the nine used. Anchored on the
+    // closing quote so `'... ago'` in ordinary prose inside a string (a
+    // notification body, a label) does not match — only the interpolated
+    // `${...} ago` form a formatter builds.
+    pattern: RegExp(r"\}\s?(m|h|d|s|min|mins|hour|hours|day|days) ago'"),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    // The one implementation. Exempted by PATH, the same way the design-token
+    // layer is exempted from the colour guards — the rule reads "a relative
+    // time is built in `core/time/ml_time.dart` and nowhere else".
+    exemptPath: RegExp(r'lib/core/time/ml_time\.dart$'),
+    plantFile: 'stamp.dart',
+    plantLine: "String ago(Duration d) => '\${d.inMinutes}m ago';",
+  ),
+  Guard(
     id: 'fractional-fill-declares-its-height',
     why: 'a `FractionallySizedBox` that declares only a `widthFactor` passes '
         'its parent\'s HEIGHT RANGE straight through, so under loose '

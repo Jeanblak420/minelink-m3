@@ -981,6 +981,10 @@ class _DriverNavigationScreenState
       options: MapOptions(
         initialCenter: _pos ?? destPoint,
         initialZoom: 15,
+        // Not flutter_map's near-white default: see mlMapBackground. A driver
+        // at a boom gate with no signal gets the ground the rest of the screen
+        // is painted on, not a white sheet.
+        backgroundColor: mlMapBackground(context),
         // The camera cannot be driven before this fires.
         //
         // `MapController.moveAndRotate` throws "You need to have the FlutterMap

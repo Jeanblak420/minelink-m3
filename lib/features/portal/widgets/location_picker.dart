@@ -279,6 +279,9 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                   child: FlutterMap(
                     mapController: _mapController,
                     options: MapOptions(
+                      // Not flutter_map's near-white default: see
+                      // mlMapBackground.
+                      backgroundColor: mlMapBackground(context),
                       initialCenter: _pin ?? _saCenter,
                       initialZoom: _pin != null ? 14 : 5,
                       onLongPress: (_, latLng) =>

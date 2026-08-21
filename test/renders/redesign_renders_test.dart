@@ -30,6 +30,8 @@ import 'package:flutter_application_1/core/design/shell/ml_app_shell.dart';
 import 'package:flutter_application_1/core/design/shell/ml_rail_blocks.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/core/widgets/osm_tile_layer.dart';
+import 'package:flutter_map/flutter_map.dart' show NetworkTileProvider;
 import 'package:flutter_application_1/core/widgets/user_identity_flyout.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/auth/screens/login_screen.dart';
@@ -62,6 +64,16 @@ import 'package:flutter_application_1/features/super_admin/screens/organization_
 import 'package:flutter_application_1/features/super_admin/screens/targets_platform_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/targets_org_type_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/targets_company_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/platform_users_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/audit_logs_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/token_history_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/organization_detail_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/available_routes_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/route_marketplace_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/crash_reports_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/account_deactivations_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/live_map_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/request_tracking_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/token_requests_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/margin_ledger_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/super_admin_org_insights_screen.dart';
@@ -72,6 +84,7 @@ import 'package:flutter_application_1/features/super_admin/nav/console_nav.dart'
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screen_dashboard.dart';
 
 import '../fixtures/console_capture_fixtures.dart';
+import '../fixtures/console_tail_fixtures.dart';
 import '../fixtures/ml_sample_data.dart';
 import '../fixtures/nav_fixtures.dart';
 import '../fixtures/portal_capture_fixtures.dart';
@@ -99,6 +112,17 @@ void main() {
     // will even conclude a tile is unavailable, and the MissingPluginException
     // that follows fails the TEST from an async gap rather than the widget.
     installFakePathProvider();
+    // And keep `flutter_cache_manager` out of the maps entirely.
+    //
+    // The disk-backed tile provider holds a housekeeping timer on its
+    // `CacheStore`, and a pending timer fails the test AFTER the body has
+    // run - with the golden already on disk. The console's live map tripped
+    // it the first time it was rendered, and the phone frame passed only
+    // because it asks for fewer tiles, which is the shape of a flake rather
+    // than a pass. `NetworkTileProvider` is flutter_map's own and is what
+    // this app already ships on web.
+    mlTileProviderOverride = NetworkTileProvider.new;
+    addTearDown(() => mlTileProviderOverride = null);
     // FREEZE THE CLOCK.
     //
     // The driver's navigation HUD prints an ETA, which is a real clock time, so
@@ -205,38 +229,35 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    // Capture layout faults instead of failing on them, then REPORT them and
-    // still write the image.
+    // Capture EVERYTHING the framework throws, then REPORT it and still write
+    // the image.
     //
     // The point of this file is to produce something to look at. A render that
     // refuses to exist because the screen inside it overflows tells you less
     // than the picture of it overflowing — and the picture is what makes the
     // fault arguable. The layout sweeps in test/widgets are what fail the
     // build; this one documents.
+    //
+    // IT USED TO CAPTURE A WHITELIST OF FOUR PHRASES and forward the rest to
+    // `previousOnError`, where `tester.takeException()` swallowed them and the
+    // golden was written anyway. That hid two real defects in two days, both of
+    // them assertions thrown on EVERY BUILD in debug:
+    //
+    //   * a `Spacer` inside a `Wrap` on the organisations registry --
+    //     "Incorrect use of ParentDataWidget" -- found only because a widget
+    //     test on the same screen happened to report it;
+    //   * a `ListTile` inside a coloured `Container` on the organisation-detail
+    //     status banner -- "ListTile background color or ink splashes may be
+    //     invisible" -- found only because a NEW widget test tripped over it.
+    //
+    // Both times the repair was to add the phrase, and both times that left the
+    // next unknown class of error just as invisible. A whitelist is the wrong
+    // shape for "tell me what went wrong": report everything and let a reader
+    // decide what matters.
     final captured = <String>[];
     final previousOnError = FlutterError.onError;
-    FlutterError.onError = (d) {
-      final s = d.exception.toString();
-      if (s.contains('overflowed') ||
-          s.contains('forces an infinite') ||
-          s.contains('BoxConstraints') ||
-          // A misused ParentDataWidget throws on every build and is NOT a
-          // layout fault by the three tests above, so it fell through to
-          // `previousOnError` — where `tester.takeException()` swallowed it and
-          // the render was written anyway.
-          //
-          // That is exactly what happened to the organisation registry: a
-          // `Spacer` inside a `Wrap` (a `Spacer` IS an `Expanded`, and a `Wrap`
-          // cannot take `FlexParentData`) threw "Incorrect use of
-          // ParentDataWidget" on every frame, and the golden looked fine. It
-          // was found only because a widget test on the same screen reported
-          // it — which is one screen's luck, not a system.
-          s.contains('ParentDataWidget')) {
-        captured.add(s.split('\n').first);
-      } else {
-        previousOnError?.call(d);
-      }
-    };
+    FlutterError.onError =
+        (d) => captured.add(d.exception.toString().split('\n').first);
 
     await tester.pumpWidget(widget);
     // The whole settle schedule, and the reasoning behind every step of it,
@@ -254,7 +275,7 @@ void main() {
 
     if (captured.isNotEmpty) {
       // ignore: avoid_print
-      print('RENDER NOTE [$name] ${captured.length} layout fault(s) at '
+      print('RENDER NOTE [$name] ${captured.length} framework error(s) at '
           '${size.width.toInt()}x${size.height.toInt()}:');
       for (final c in captured.toSet()) {
         // ignore: avoid_print
@@ -1701,6 +1722,173 @@ void main() {
         const Size(412, 1800),
         'screen-organizations-phone-dark',
       );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // THE REST OF THE CONSOLE — every screen that still had no picture.
+  //
+  // All of these were already SWEPT for overflow, and most of them were swept
+  // against the dummy Supabase, which means they were swept EMPTY. An empty
+  // table has no long company name to break a row, no six-figure Rand figure
+  // to ellipsise and no plate pill to push over. `console_tail_fixtures.dart`
+  // is what makes these real, and every list in it carries the row a uniform
+  // fixture would never have.
+  // -------------------------------------------------------------------------
+  group('the rest of the console', () {
+    List<Override> tail() => [
+          ...consoleCaptureOverrides(),
+          ...portalCaptureOverrides(),
+          ...consoleTailOverrides(),
+        ];
+
+    Future<void> shootConsole(
+      WidgetTester tester,
+      Widget body,
+      Size size,
+      String name,
+    ) =>
+        shoot(
+          tester,
+          console(
+            brightness: Brightness.dark,
+            body: body,
+            extraOverrides: tail(),
+          ),
+          size,
+          name,
+        );
+
+    testWidgets('request tracking — desktop dark', (tester) async {
+      await shootConsole(tester, const RequestTrackingScreen(),
+          const Size(1600, 1500), 'screen-request-tracking-desktop-dark');
+    });
+
+    testWidgets('request tracking — phone dark', (tester) async {
+      await shootConsole(tester, const RequestTrackingScreen(),
+          const Size(412, 2000), 'screen-request-tracking-phone-dark');
+    });
+
+    testWidgets('platform users — desktop dark', (tester) async {
+      await shootConsole(tester, const PlatformUsersScreen(),
+          const Size(1600, 1600), 'screen-platform-users-desktop-dark');
+    });
+
+    testWidgets('platform users — phone dark', (tester) async {
+      await shootConsole(tester, const PlatformUsersScreen(),
+          const Size(412, 2000), 'screen-platform-users-phone-dark');
+    });
+
+    testWidgets('audit logs — desktop dark', (tester) async {
+      await shootConsole(tester, const AuditLogsScreen(),
+          const Size(1600, 1600), 'screen-audit-logs-desktop-dark');
+    });
+
+    testWidgets('audit logs — phone dark', (tester) async {
+      await shootConsole(tester, const AuditLogsScreen(), const Size(412, 2200),
+          'screen-audit-logs-phone-dark');
+    });
+
+    // EXPANDED, not collapsed. Every event on this screen lives inside the
+    // group tile, so a picture of the closed list photographs one card and
+    // proves nothing about the thing the screen is for.
+    Future<void> openFirstGroup(WidgetTester tester) async {
+      final tile = find.byType(ExpansionTile);
+      if (tile.evaluate().isEmpty) return;
+      await tester.tap(tile.first);
+      await tester.pump();
+    }
+
+    testWidgets('token history — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const TokenHistoryScreen(),
+          extraOverrides: tail(),
+        ),
+        const Size(1600, 1600),
+        'screen-token-history-desktop-dark',
+        act: openFirstGroup,
+      );
+    });
+
+    testWidgets('token history — phone dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const TokenHistoryScreen(),
+          extraOverrides: tail(),
+        ),
+        const Size(412, 1900),
+        'screen-token-history-phone-dark',
+        act: openFirstGroup,
+      );
+    });
+
+    testWidgets('organization detail — desktop dark', (tester) async {
+      await shootConsole(
+          tester,
+          const OrganizationDetailScreen(organizationId: 'o4'),
+          const Size(1600, 1800),
+          'screen-organization-detail-desktop-dark');
+    });
+
+    testWidgets('organization detail — phone dark', (tester) async {
+      await shootConsole(
+          tester,
+          const OrganizationDetailScreen(organizationId: 'o4'),
+          const Size(412, 2400),
+          'screen-organization-detail-phone-dark');
+    });
+
+    testWidgets('available routes — desktop dark', (tester) async {
+      await shootConsole(tester, const AvailableRoutesScreen(),
+          const Size(1600, 1500), 'screen-available-routes-desktop-dark');
+    });
+
+    testWidgets('available routes — phone dark', (tester) async {
+      await shootConsole(tester, const AvailableRoutesScreen(),
+          const Size(412, 2200), 'screen-available-routes-phone-dark');
+    });
+
+    testWidgets('route marketplace — desktop dark', (tester) async {
+      await shootConsole(tester, const RouteMarketplaceScreen(),
+          const Size(1600, 1300), 'screen-route-marketplace-desktop-dark');
+    });
+
+    testWidgets('crash reports — desktop dark', (tester) async {
+      await shootConsole(tester, const CrashReportsScreen(),
+          const Size(1600, 1500), 'screen-crash-reports-desktop-dark');
+    });
+
+    testWidgets('crash reports — phone dark', (tester) async {
+      await shootConsole(tester, const CrashReportsScreen(),
+          const Size(412, 2000), 'screen-crash-reports-phone-dark');
+    });
+
+    testWidgets('account deactivations — desktop dark', (tester) async {
+      await shootConsole(tester, const AccountDeactivationsScreen(),
+          const Size(1600, 1400), 'screen-account-deactivations-desktop-dark');
+    });
+
+    testWidgets('account deactivations — phone dark', (tester) async {
+      await shootConsole(tester, const AccountDeactivationsScreen(),
+          const Size(412, 2200), 'screen-account-deactivations-phone-dark');
+    });
+
+    // The tiles are blank in every render — `flutter_test` answers every HTTP
+    // request with a 400, and OpenStreetMap is HTTP. The pins, the cards, the
+    // status pills and the whole layout around them are real.
+    testWidgets('live map — desktop dark', (tester) async {
+      await shootConsole(tester, const LiveMapScreen(), const Size(1600, 1300),
+          'screen-live-map-desktop-dark');
+    });
+
+    testWidgets('live map — phone dark', (tester) async {
+      await shootConsole(tester, const LiveMapScreen(), const Size(412, 1600),
+          'screen-live-map-phone-dark');
     });
   });
 

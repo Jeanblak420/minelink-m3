@@ -67,7 +67,8 @@ final _mirrorSearchIndexProvider = FutureProvider.autoDispose
               Icons.person_outline,
               'User',
               name.isEmpty ? 'Employee' : name,
-              (m['role'] as String?) ?? 'Team member',
+              UserRole.labelFor(m['role'] as String?,
+                  fallback: 'Team member'),
               'admin',
             ),
           );
@@ -1873,6 +1874,9 @@ class _MirrorLiveMapPreview extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(MlControlRoom.rTile),
                   child: FlutterMap(
                     options: MapOptions(
+                      // Not flutter_map's near-white default: see
+                      // mlMapBackground.
+                      backgroundColor: mlMapBackground(context),
                       initialCameraFit: safeCoordinatesFit(
                         [for (final t in withFix) t.point!],
                         padding: const EdgeInsets.all(36),

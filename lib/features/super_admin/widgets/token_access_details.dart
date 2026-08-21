@@ -23,18 +23,54 @@ DateTime? parseOrgTimestamp(dynamic raw) {
 }
 
 /// Static countdown text (use with a parent timer tick, e.g. Tokens table).
+///
+/// Two things changed here on 2026-08-21, both found by rendering the
+/// organisation detail screen for the first time.
+///
+/// **The clock.** It read `DateTime.now()` — the device's opinion of the hour,
+/// which CLAUDE.md §7.1 keeps out of anything a user reads, and a number that
+/// changes every second cannot be photographed at all: the golden differed on
+/// every run. `MlTime.instant()` is the real instant and honours the render
+/// harness's frozen clock.
+///
+/// **The seconds.** A year-long countdown printed `308d 9h 9m 29s`, and the
+/// widget below redrew every second to advance a figure whose left-hand digits
+/// move once a day. Seconds appear under an hour, minutes under a day, and
+/// above that the reading is days and hours — which is the precision anybody
+/// renewing a token is working at.
 String formatTokenExpiresRemaining(DateTime expiresAt, {bool compact = false}) {
-  final d = expiresAt.difference(DateTime.now());
+  final d = expiresAt.toUtc().difference(MlTime.instant());
   if (d.isNegative) return 'Expired';
   final days = d.inDays;
   final hours = d.inHours.remainder(24);
   final minutes = d.inMinutes.remainder(60);
   final seconds = d.inSeconds.remainder(60);
   if (compact) {
-    return '${days}d ${hours}h ${minutes}m ${seconds}s';
+    if (days > 0) return '${days}d ${hours}h';
+    if (d.inHours > 0) return '${hours}h ${minutes}m';
+    return '${minutes}m ${seconds}s';
   }
-  return '$days days, $hours hours, $minutes minutes, '
+  if (days > 0) {
+    return '$days ${days == 1 ? 'day' : 'days'}, '
+        '$hours ${hours == 1 ? 'hour' : 'hours'}';
+  }
+  if (d.inHours > 0) {
+    return '$hours ${hours == 1 ? 'hour' : 'hours'}, '
+        '$minutes ${minutes == 1 ? 'minute' : 'minutes'}';
+  }
+  return '$minutes ${minutes == 1 ? 'minute' : 'minutes'}, '
       '${seconds.toString().padLeft(2, '0')} seconds';
+}
+
+/// How often a countdown to [expiresAt] needs to redraw.
+///
+/// Matches what [formatTokenExpiresRemaining] actually prints: a second while
+/// seconds are on screen, otherwise half a minute. A `Timer.periodic(1s)` that
+/// rebuilds a tab to change nothing is not a live readout, it is a repaint
+/// loop.
+Duration tokenCountdownTick(DateTime expiresAt) {
+  final d = expiresAt.toUtc().difference(MlTime.instant());
+  return d.inHours >= 1 ? const Duration(seconds: 30) : const Duration(seconds: 1);
 }
 
 /// Rows: Token Assigned, Lifetime, Expiration, live countdown — plus optional heading.
@@ -184,7 +220,8 @@ class _TokenExpiryLiveCountdownState extends State<TokenExpiryLiveCountdown> {
       _timer = null;
       return;
     }
-    _timer ??= Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    _timer ??=
+        Timer.periodic(tokenCountdownTick(widget.expiresAt), (_) => _tick());
   }
 
   void _tick() {
@@ -202,7 +239,7 @@ class _TokenExpiryLiveCountdownState extends State<TokenExpiryLiveCountdown> {
 
   @override
   Widget build(BuildContext context) {
-    final remaining = widget.expiresAt.difference(DateTime.now());
+    final remaining = widget.expiresAt.toUtc().difference(MlTime.instant());
     final text = formatTokenExpiresRemaining(widget.expiresAt, compact: widget.compact);
     final style = widget.compact
         ? Theme.of(context).textTheme.bodyMedium

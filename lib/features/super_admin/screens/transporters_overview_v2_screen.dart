@@ -211,13 +211,8 @@ abstract final class TransportersOverviewMapper {
     return parts.take(2).map((w) => w[0]).join().toUpperCase();
   }
 
-  static String _ago(DateTime from, DateTime now) {
-    final d = now.difference(from);
-    if (d.inMinutes < 1) return 'just now';
-    if (d.inMinutes < 60) return '${d.inMinutes}m ago';
-    if (d.inHours < 24) return '${d.inHours}h ago';
-    return '${d.inDays}d ago';
-  }
+  static String _ago(DateTime from, DateTime now) =>
+      MlTime.ago(from, asOf: now);
 
   /// Thousands-grouped with exactly one decimal, per the drop's formatting
   /// rule: format once here so no widget can drift from it.

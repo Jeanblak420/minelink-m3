@@ -14,6 +14,7 @@ import 'package:flutter_application_1/features/super_admin/providers/super_admin
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_control_room_palette.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 enum _CompanyFilter { all, active, highThroughput, attention }
 
@@ -53,12 +54,7 @@ class _SuperAdminOrgInsightsScreenState
   /// When the live bundle last landed — feeds the "updated Xm ago" subtitle.
   DateTime? _dataAt;
 
-  String _agoShort(DateTime t) {
-    final d = DateTime.now().difference(t);
-    if (d.inSeconds < 60) return 'just now';
-    if (d.inMinutes < 60) return '${d.inMinutes} min ago';
-    return '${d.inHours}h ago';
-  }
+  String _agoShort(DateTime t) => MlTime.ago(t);
 
   String get _plural => switch (widget.orgType) {
     'transporter' => 'transporters',
@@ -1941,7 +1937,15 @@ class _Derived {
     required this.partyName,
   });
 
-  DateTime get _now => DateTime.now();
+  /// The South African wall clock (CLAUDE.md §7.1), not the device's.
+  ///
+  /// It is not only the "x ago" stamps that read this. `tonsDeltaPctFor`
+  /// compares month-to-date against the same day-window of the previous month
+  /// off `_now.month` and `_now.day` — a MONTH boundary and a DAY boundary,
+  /// both of which the device's zone was deciding. A laptop left on UTC moved
+  /// the comparison window by a day for every load recorded between midnight
+  /// and 02:00 SAST, which is the middle of the night shift.
+  DateTime get _now => MlTime.now();
 
   bool _sameMonth(DateTime d, DateTime m) =>
       d.year == m.year && d.month == m.month;
@@ -1995,22 +1999,14 @@ class _Derived {
   String? lastActiveFor(String companyName) {
     final latest = lastActiveAtFor(companyName);
     if (latest == null) return null;
-    final diff = _now.difference(latest);
-    if (diff.inMinutes < 1) return 'just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    return '${diff.inDays}d ago';
+    return MlTime.ago(latest);
   }
 
   /// Compact age stamp for the alerts column ("12m", "1h", "3d").
   String? ageTagFor(String companyName) {
     final latest = lastActiveAtFor(companyName);
     if (latest == null) return null;
-    final diff = _now.difference(latest);
-    if (diff.inMinutes < 1) return 'now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
-    if (diff.inHours < 24) return '${diff.inHours}h';
-    return '${diff.inDays}d';
+    return MlTime.agoTag(latest);
   }
 
   /// Tons MTD vs the same day-window of the previous month, from recon rows.

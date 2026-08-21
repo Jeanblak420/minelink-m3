@@ -213,7 +213,11 @@ class _CompanyLinkBuilderState extends ConsumerState<CompanyLinkBuilder> {
 }
 
 /// A scrollable list of companies grouped under org-type headers, single-select.
-class _GroupedCompanyList extends StatelessWidget {
+///
+/// Stateful only for the `ScrollController`: `thumbVisibility: true` needs one
+/// it can attach to, and a permanently-visible thumb is the point — see the
+/// note in [build].
+class _GroupedCompanyList extends StatefulWidget {
   final List<Map<String, dynamic>> companies;
   final String? selectedId;
   final Set<String> excludeIds;
@@ -225,6 +229,24 @@ class _GroupedCompanyList extends StatelessWidget {
     required this.excludeIds,
     required this.onPick,
   });
+
+  @override
+  State<_GroupedCompanyList> createState() => _GroupedCompanyListState();
+}
+
+class _GroupedCompanyListState extends State<_GroupedCompanyList> {
+  final ScrollController _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  List<Map<String, dynamic>> get companies => widget.companies;
+  String? get selectedId => widget.selectedId;
+  Set<String> get excludeIds => widget.excludeIds;
+  ValueChanged<String> get onPick => widget.onPick;
 
   @override
   Widget build(BuildContext context) {
@@ -240,31 +262,73 @@ class _GroupedCompanyList extends StatelessWidget {
       ...groups.keys.where((t) => !_orgTypeOrder.contains(t)),
     ];
 
-    return SizedBox(
-      height: 220,
-      child: ListView(
-        children: [
-          for (final t in orderedTypes) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
-              child: Text(
-                companyOrgTypeLabel(t == 'other' ? null : t).toUpperCase(),
-                style: context.mlText.labelSmall.copyWith(
-                  color: semantic.textFaint,
-                  fontWeight: FontWeight.w800,
+    // A MAXIMUM, scaled, with a scrollbar — not a fixed 220.
+    //
+    // Three things were wrong with `SizedBox(height: 220)`:
+    //
+    //   * It reserved 220px for three companies and then CLIPPED the third
+    //     mid-row, because 220 is not a multiple of anything here. Rendered on
+    //     a phone, the picker showed "TRANSPORTER" and half a row under it.
+    //   * It was fixed while its contents are text. The console has a per-admin
+    //     text-size slider (`ConsolePrefs.textScale`), and at 2.0 those rows are
+    //     twice as tall inside the same 220px — one and a half companies
+    //     visible out of however many exist.
+    //   * Nothing said it scrolled. A list clipped flush at its own edge with
+    //     no scrollbar reads as a list that ends there, which is the same fault
+    //     `MlWideTable` grew a scrollbar to fix.
+    //
+    // `shrinkWrap` means a short list takes only what it needs, and the cap
+    // rides the live text scaler so it always holds about the same NUMBER of
+    // rows rather than the same number of pixels.
+    final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: 220 * scale),
+      // `thumbVisibility: true`, permanently. A list clipped flush at its own
+      // edge with nothing to say so reads as a list that ends there — and this
+      // one ended, in the render, on the word TRANSPORTER with the row under it
+      // cut in half. Same reasoning as `MlWideTable`: a hidden row is hidden
+      // data, and the bar is the only thing that says it exists.
+      //
+      // ⚠️ The thumb is NOT in `screen-organization-detail-phone-dark.png`, and
+      // that is a capture artefact rather than a missing affordance. Measured:
+      // this exact widget, pumped standalone through `pumpForCapture`, paints
+      // 1,090 thumb pixels; inside the organisation detail screen the Scrollbar
+      // is in the tree and the list reports `maxScrollExtent 32 / viewport 220`
+      // and paints none. `RawScrollbar` reveals its thumb from a one-shot
+      // post-frame callback registered in `initState`, and on a screen whose
+      // picker is built only once two futures have resolved that callback and
+      // the position attach do not line up. Worth knowing before anybody reads
+      // the render as evidence the bar is absent.
+      child: Scrollbar(
+        controller: _controller,
+        thumbVisibility: true,
+        child: ListView(
+          controller: _controller,
+          shrinkWrap: true,
+          padding: const EdgeInsets.only(right: 8),
+          children: [
+            for (final t in orderedTypes) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
+                child: Text(
+                  companyOrgTypeLabel(t == 'other' ? null : t).toUpperCase(),
+                  style: context.mlText.labelSmall.copyWith(
+                    color: semantic.textFaint,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
-            ),
-            for (final c in groups[t]!)
-              _CompanyRow(
-                name: (c['company_name'] as String?)?.trim().isNotEmpty == true
-                    ? c['company_name'] as String
-                    : 'Company',
-                selected: c['id'] == selectedId,
-                onTap: () => onPick(c['id'] as String),
-              ),
+              for (final c in groups[t]!)
+                _CompanyRow(
+                  name: (c['company_name'] as String?)?.trim().isNotEmpty == true
+                      ? c['company_name'] as String
+                      : 'Company',
+                  selected: c['id'] == selectedId,
+                  onTap: () => onPick(c['id'] as String),
+                ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

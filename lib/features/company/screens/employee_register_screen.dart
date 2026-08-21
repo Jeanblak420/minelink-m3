@@ -247,10 +247,7 @@ class _EmployeeRegisterScreenState
   String get _syncedLabel {
     final t = _loadedAt;
     if (t == null) return 'Live';
-    final d = DateTime.now().difference(t);
-    if (d.inSeconds < 60) return 'Live · Synced ${d.inSeconds}s ago';
-    if (d.inMinutes < 60) return 'Live · Synced ${d.inMinutes}m ago';
-    return 'Live · Synced ${d.inHours}h ago';
+    return 'Live · Synced ${MlTime.ago(t)}';
   }
 
   @override
@@ -1506,24 +1503,22 @@ class _MemberCard extends ConsumerWidget {
       case _Presence.online:
         return 'Online now';
       case _Presence.away:
-        final ago = lastSeen == null ? null : _ago(lastSeen!);
-        return ago == null ? 'Away' : 'Away · $ago';
+        // A chip, so the compact form.
+        return lastSeen == null
+            ? 'Away'
+            : 'Away · ${MlTime.agoTag(lastSeen!)}';
       case _Presence.offline:
-        final ago = lastSeen == null ? null : _ago(lastSeen!);
-        return ago == null ? 'Offline' : 'Last seen $ago ago';
+        // A sentence, so the sentence form. This used to interpolate the
+        // COMPACT one into "Last seen $ago ago", which reads "Last seen 5m
+        // ago" for five minutes and "Last seen 412d ago" for over a year.
+        return lastSeen == null
+            ? 'Offline'
+            : 'Last seen ${MlTime.ago(lastSeen!)}';
     }
   }
 
-  static String _ago(DateTime t) {
-    final d = DateTime.now().difference(t);
-    if (d.inMinutes < 1) return 'now';
-    if (d.inMinutes < 60) return '${d.inMinutes}m';
-    if (d.inHours < 24) return '${d.inHours}h';
-    return '${d.inDays}d';
-  }
-
   static String _tenure(DateTime createdAt) {
-    final d = DateTime.now().difference(createdAt);
+    final d = MlTime.instant().difference(createdAt);
     if (d.inDays >= 365) return '${d.inDays ~/ 365}y tenure';
     if (d.inDays >= 30) return '${d.inDays ~/ 30}mo tenure';
     return 'New this month';

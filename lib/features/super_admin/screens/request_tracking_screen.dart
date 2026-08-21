@@ -627,17 +627,13 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
   }
 }
 
-String _relative(DateTime t) {
-  final d = DateTime.now().difference(MlTime.sast(t));
-  if (d.inMinutes < 1) return 'just now';
-  if (d.inMinutes < 60) {
-    return '${d.inMinutes} min${d.inMinutes == 1 ? '' : 's'} ago';
-  }
-  if (d.inHours < 24) return '${d.inHours} hour${d.inHours == 1 ? '' : 's'} ago';
-  if (d.inDays < 30) return '${d.inDays} day${d.inDays == 1 ? '' : 's'} ago';
-  final months = (d.inDays / 30).floor();
-  return '$months month${months == 1 ? '' : 's'} ago';
-}
+// This subtracted a WALL CLOCK from an instant: `MlTime.sast(t)` carries South
+// African fields flagged non-UTC, so `DateTime.now().difference(...)` re-applied
+// the reader's own offset on top. On a laptop set to UTC every row here was two
+// hours younger than it really was, and a row from ninety minutes ago read
+// "just now". Correct only in South Africa, which is the one place nobody would
+// have noticed.
+String _relative(DateTime t) => MlTime.ago(t);
 
 // ---- Header ---------------------------------------------------------------
 

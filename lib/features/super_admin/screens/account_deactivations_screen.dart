@@ -8,6 +8,7 @@ import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/models.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
 
 /// Super-global admin console: the review queue over
 /// `account_deactivation_requests` (Tasks 6-9 built the backend and the
@@ -477,8 +478,12 @@ class _RequestCard extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Text(
+                            // `controllerWB` is a column value, and it
+                            // read exactly like that here while the platform
+                            // users list beside it said "Load Controller" for
+                            // the same person.
                             '${row.companyName ?? 'No company'} · '
-                            '${row.role ?? 'Unknown role'}',
+                            '${UserRole.labelFor(row.role, fallback: 'Unknown role')}',
                             overflow: TextOverflow.ellipsis,
                             style: context.mlText.bodyMedium.copyWith(
                               color: semantic.textMuted,

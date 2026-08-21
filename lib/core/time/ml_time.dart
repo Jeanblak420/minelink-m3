@@ -36,6 +36,7 @@
 library;
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:intl/intl.dart' show DateFormat;
 
 /// South Africa's offset from UTC. Fixed, and no daylight saving.
 const Duration kSastOffset = Duration(hours: 2);
@@ -118,6 +119,73 @@ abstract final class MlTime {
       '${wallClock.year.toString().padLeft(4, '0')}-'
       '${wallClock.month.toString().padLeft(2, '0')}-'
       '${wallClock.day.toString().padLeft(2, '0')}';
+
+  /// How long ago [instant] was, in ONE vocabulary for the whole product.
+  ///
+  /// ```
+  ///   just now      under a minute
+  ///   N min ago     under an hour
+  ///   N h ago       under a day
+  ///   yesterday     exactly one day
+  ///   N days ago    under a week
+  ///   3 Aug         older, same calendar year
+  ///   3 Aug 2025    older still
+  /// ```
+  ///
+  /// ## Why this exists
+  ///
+  /// There were **nine** hand-rolled copies of this in `lib/` and they agreed
+  /// on almost nothing. Six vocabularies for the same idea — `5m ago` and
+  /// `5 min ago`; `3h ago` and `3 h ago`; `2d ago`, `2 d ago` and `2 days ago`
+  /// — three different "just now" thresholds (45s, 60s, one minute), one screen
+  /// with a `yesterday` and eight without, and three different date fallbacks
+  /// (`13/8/2026`, `13 Aug`, `13 Aug`). A reader moving between the console's
+  /// audit log and its live map was reading two dialects of the same sentence.
+  ///
+  /// **And six of the nine read `DateTime.now()`** — the DEVICE's opinion of
+  /// the hour, which CLAUDE.md §7.1 exists to keep out of anything a user
+  /// reads. The audit log is the one where it showed: rendered against a frozen
+  /// clock its newest three entries — 22 minutes, 3 hours and 9 hours old —
+  /// all printed **"5d ago"**, because the subtraction was against the real
+  /// wall clock and not against the data. On a handset with a wrong date it
+  /// does the same thing to a real admin, on the screen whose entire job is
+  /// saying when something happened.
+  ///
+  /// [asOf] is for callers that already hold a reference instant (a "data
+  /// fetched at" stamp, a table rendering every row against one moment) so
+  /// every row in one paint agrees. It defaults to [instant]'s own clock.
+  static String ago(DateTime at, {DateTime? asOf}) {
+    final d = (asOf?.toUtc() ?? MlTime.instant()).difference(at.toUtc());
+    // A timestamp in the future is a clock disagreement, not a negative age.
+    if (d.isNegative || d.inSeconds < 60) return 'just now';
+    if (d.inMinutes < 60) return '${d.inMinutes} min ago';
+    if (d.inHours < 24) return '${d.inHours} h ago';
+    if (d.inDays == 1) return 'yesterday';
+    if (d.inDays < 7) return '${d.inDays} days ago';
+    final on = sast(at);
+    final now = sast(asOf ?? MlTime.instant());
+    return on.year == now.year
+        ? _dayMonth.format(on)
+        : _dayMonthYear.format(on);
+  }
+
+  /// [ago] for a column too narrow for a sentence: `now`, `5m`, `3h`, `2d`.
+  ///
+  /// Past a week it falls back to the same date [ago] uses, because `412d` is
+  /// not more informative than `3 Aug 2025` and is harder to read. The two
+  /// forms therefore never disagree about WHEN something happened, only about
+  /// how much room they take to say it.
+  static String agoTag(DateTime at, {DateTime? asOf}) {
+    final d = (asOf?.toUtc() ?? MlTime.instant()).difference(at.toUtc());
+    if (d.isNegative || d.inMinutes < 1) return 'now';
+    if (d.inMinutes < 60) return '${d.inMinutes}m';
+    if (d.inHours < 24) return '${d.inHours}h';
+    if (d.inDays < 7) return '${d.inDays}d';
+    return ago(at, asOf: asOf);
+  }
+
+  static final DateFormat _dayMonth = DateFormat('d MMM');
+  static final DateFormat _dayMonthYear = DateFormat('d MMM yyyy');
 
   /// Turn a South African wall clock back into the instant it names.
   ///

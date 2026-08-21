@@ -38,6 +38,24 @@ class AuditLog {
     required this.createdAt,
   });
 
+  /// `TOKEN_REQUEST_APPROVED` as a person reads it: "Token Request Approved".
+  ///
+  /// The audit-logs screen had this as a private helper and the token-history
+  /// screen had nothing — so the same event was "Token Generated" on one
+  /// console screen and **TOKEN_GENERATED** on the next, which is Postgres's
+  /// vocabulary on an admin's screen (the `IN_PROGRESS` pill and
+  /// "Seat expansion, mineSupplier" were the same family). It belongs on the
+  /// model, where both screens reach it.
+  String get actionLabel => labelForAction(actionType);
+
+  /// [actionLabel] for a bare action-type string — the filter chips label one
+  /// without having a row to hand.
+  static String labelForAction(String actionType) => actionType
+      .split('_')
+      .where((w) => w.isNotEmpty)
+      .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
+      .join(' ');
+
   factory AuditLog.fromJson(Map<String, dynamic> json) {
     return AuditLog(
       id: json['id'] as String,

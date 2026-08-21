@@ -284,14 +284,7 @@ class _TruckInfoCard extends StatelessWidget {
     return s;
   }
 
-  static String _ago(DateTime at) {
-    final d = DateTime.now().difference(at);
-    if (d.isNegative) return 'just now';
-    if (d.inSeconds < 60) return 'just now';
-    if (d.inMinutes < 60) return '${d.inMinutes} min ago';
-    if (d.inHours < 24) return '${d.inHours} h ago';
-    return '${d.inDays} d ago';
-  }
+  static String _ago(DateTime at) => MlTime.ago(at);
 }
 
 /// The moving / standing-still readout — the headline the user asked for.

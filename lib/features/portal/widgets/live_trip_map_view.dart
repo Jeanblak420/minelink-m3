@@ -163,6 +163,8 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
       child: FlutterMap(
         mapController: _camera.mapController,
         options: MapOptions(
+          // Not flutter_map's near-white default: see mlMapBackground.
+          backgroundColor: mlMapBackground(context),
           // Guard against identical/degenerate GPS samples, which would
           // otherwise give flutter_map an Infinity fit zoom and crash tile
           // rendering.
@@ -656,11 +658,5 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
     return parts.isEmpty ? 'Live' : parts.join(' · ');
   }
 
-  String _ago(DateTime at) {
-    final d = DateTime.now().difference(at);
-    if (d.inSeconds < 60) return 'just now';
-    if (d.inMinutes < 60) return '${d.inMinutes} min ago';
-    if (d.inHours < 24) return '${d.inHours} h ago';
-    return DateFormat('dd MMM').format(MlTime.sast(at));
-  }
+  String _ago(DateTime at) => MlTime.ago(at);
 }

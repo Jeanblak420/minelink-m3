@@ -804,7 +804,8 @@ class _OrganizationManagementScreenState
     final diff = exp.difference(now);
     if (diff.isNegative) {
       return _ExpiryInfo(
-        'Expired · ${-diff.inDays}d ago',
+        // The product's one relative-time vocabulary, not a tenth dialect.
+        'Expired · ${MlTime.ago(exp)}',
         true,
         MlTone.error,
         date,

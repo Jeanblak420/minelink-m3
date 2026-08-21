@@ -119,4 +119,108 @@ void main() {
     expect(MlTime.sastOrNull(null), isNull);
     expect(MlTime.sastOrNull(DateTime.utc(2026, 8, 17, 5))!.hour, 7);
   });
+
+  // ------------------------------------------------------------------------
+  // instant() — the real UTC instant, for durations
+  // ------------------------------------------------------------------------
+  group('instant', () {
+    test('it is an instant, not a wall clock', () {
+      // `now()` is SAST FIELDS flagged non-UTC. Subtracting a server timestamp
+      // from it is off by the reader's own offset everywhere except South
+      // Africa. `instant()` is the thing to subtract.
+      MlTime.debugClock = () => DateTime.utc(2026, 8, 17, 5, 51);
+      addTearDown(() => MlTime.debugClock = null);
+      expect(MlTime.instant(), DateTime.utc(2026, 8, 17, 5, 51));
+      expect(MlTime.instant().isUtc, isTrue);
+      // The wall clock says 07:51 for the same moment. Both are right; they
+      // answer different questions.
+      expect(MlTime.now().hour, 7);
+    });
+
+    test('it honours debugClock, which is what makes a render reproducible',
+        () {
+      MlTime.debugClock = () => DateTime.utc(2026, 1, 1);
+      addTearDown(() => MlTime.debugClock = null);
+      expect(MlTime.instant().year, 2026);
+      expect(MlTime.instant().month, 1);
+    });
+  });
+
+  // ------------------------------------------------------------------------
+  // ago() / agoTag() — ONE vocabulary, replacing nine
+  // ------------------------------------------------------------------------
+  //
+  // There were nine hand-rolled copies of this in `lib/`, six of them reading
+  // `DateTime.now()`. The one that showed was the console's audit log: rendered
+  // against a frozen clock, its newest three entries — 22 minutes, 3 hours and
+  // 9 hours old — all printed "5d ago", because the subtraction was against the
+  // real wall clock rather than against the data.
+  group('ago', () {
+    // Fixed so the thresholds are asserted, not sampled.
+    final now = DateTime.utc(2026, 8, 21, 12, 0);
+    String at(Duration d) => MlTime.ago(now.subtract(d), asOf: now);
+
+    test('the whole ladder', () {
+      expect(at(const Duration(seconds: 5)), 'just now');
+      expect(at(const Duration(seconds: 59)), 'just now');
+      expect(at(const Duration(minutes: 1)), '1 min ago');
+      expect(at(const Duration(minutes: 59)), '59 min ago');
+      expect(at(const Duration(hours: 1)), '1 h ago');
+      expect(at(const Duration(hours: 23)), '23 h ago');
+      expect(at(const Duration(days: 1)), 'yesterday');
+      expect(at(const Duration(days: 2)), '2 days ago');
+      expect(at(const Duration(days: 6)), '6 days ago');
+    });
+
+    test('past a week it names the day, in this year and in another', () {
+      // 21 Aug minus 8 days is 13 Aug, and 12:00 UTC is 14:00 SAST — the same
+      // calendar day either way, so this is not a date-line case.
+      expect(at(const Duration(days: 8)), '13 Aug');
+      expect(at(const Duration(days: 400)), '17 Jul 2025');
+    });
+
+    test('a timestamp in the FUTURE is a clock disagreement, not a negative age',
+        () {
+      // Server and device disagree by a few seconds all the time. "-3 min ago"
+      // is not a thing to show anybody.
+      expect(MlTime.ago(now.add(const Duration(minutes: 3)), asOf: now),
+          'just now');
+    });
+
+    test('the date it falls back to is the SOUTH AFRICAN day', () {
+      // 23:29 UTC on the 16th is 01:29 on the 17th at the mine — the exact
+      // date-line case that put a printed waybill a day out.
+      expect(
+        MlTime.ago(DateTime.utc(2026, 8, 16, 23, 29),
+            asOf: DateTime.utc(2026, 8, 30, 12)),
+        '17 Aug',
+      );
+    });
+
+    test('with no asOf it reads the frozen clock, not the device', () {
+      MlTime.debugClock = () => now;
+      addTearDown(() => MlTime.debugClock = null);
+      expect(MlTime.ago(now.subtract(const Duration(minutes: 22))),
+          '22 min ago');
+    });
+  });
+
+  group('agoTag', () {
+    final now = DateTime.utc(2026, 8, 21, 12, 0);
+    String at(Duration d) => MlTime.agoTag(now.subtract(d), asOf: now);
+
+    test('the compact ladder', () {
+      expect(at(const Duration(seconds: 30)), 'now');
+      expect(at(const Duration(minutes: 22)), '22m');
+      expect(at(const Duration(hours: 9)), '9h');
+      expect(at(const Duration(days: 3)), '3d');
+    });
+
+    test('past a week it agrees with the sentence form', () {
+      // Never "412d". The two forms differ in length, never in WHEN.
+      expect(at(const Duration(days: 400)), '17 Jul 2025');
+      expect(at(const Duration(days: 400)),
+          MlTime.ago(now.subtract(const Duration(days: 400)), asOf: now));
+    });
+  });
 }

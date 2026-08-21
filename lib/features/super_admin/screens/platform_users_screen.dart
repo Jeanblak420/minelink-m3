@@ -393,8 +393,6 @@ class _UserRow extends StatelessWidget {
     return ini.isEmpty ? '?' : ini;
   }
 
-  static String? _roleLabel(String? raw) {
-    if (raw == null || raw.isEmpty) return null;
-    return UserRole.tryParse(raw)?.label ?? raw;
-  }
+  static String? _roleLabel(String? raw) =>
+      (raw == null || raw.trim().isEmpty) ? null : UserRole.labelFor(raw);
 }

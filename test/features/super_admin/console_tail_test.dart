@@ -1,0 +1,271 @@
+// The console's tail: the screens that had never been rendered.
+//
+// Everything asserted here was found by looking at a picture on 2026-08-21, and
+// none of it failed anything before: an overflow paints a debug stripe and is
+// silently clipped in release, and a raw enum value is a perfectly valid string.
+//
+//   * The audit log's action badge was unflexed in a `Row`, so "COMPANY
+//     SUSPENDED" ran **20px past the card** at 412px while what was left of the
+//     entry read "Suspended for non-payment; t…" — CLAUDE.md §10.4 again. And
+//     the organisation line under it had no bound at all, so "Consolidated
+//     Mineral Offtake & Logistics Holdings" simply ran off the edge without
+//     even ellipsising.
+//   * `controllerWB` appeared verbatim on the account-deactivations queue —
+//     Postgres's vocabulary on an admin's screen, and the same defect the
+//     token-requests screen was fixed for two commits earlier. The platform
+//     users list beside it said "Load Controller" for the same person.
+//   * The token history said **TOKEN_GENERATED** where the audit log said
+//     "Token Generated" for the identical row, and captioned every group with
+//     `org o1` — a database key.
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:flutter_application_1/core/theme/app_theme.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/features/super_admin/screens/account_deactivations_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/audit_logs_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/organization_detail_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/platform_users_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/token_history_screen.dart';
+
+import '../../fixtures/console_capture_fixtures.dart';
+import '../../fixtures/console_tail_fixtures.dart';
+import '../../fixtures/portal_capture_fixtures.dart';
+import '../../fixtures/screen_fixtures.dart';
+import '../../test_helpers/real_fonts.dart';
+
+void main() {
+  setUpAll(() async {
+    await loadRealFonts();
+    SharedPreferences.setMockInitialValues({});
+    // Freeze the clock at the instant the fixtures are stamped from, exactly
+    // as the render harness does. Every relative date and countdown on these
+    // screens is measured from it, so without this the assertions below would
+    // be against the wall clock and would rot by the day.
+    MlTime.debugClock = () => kCaptureNow;
+    addTearDown(() => MlTime.debugClock = null);
+    await Supabase.initialize(
+      url: 'http://localhost:54321',
+      anonKey: 'console-tail',
+    );
+  });
+
+  /// Pumps [screen] and returns every overflow the framework reported.
+  ///
+  /// The handler is restored before returning, NOT in an `addTearDown` —
+  /// tear-downs run after the body's `expect`s and the binding then asserts
+  /// *"a test overrode FlutterError.onError but failed to return it"*, which
+  /// times the whole file out at ten minutes.
+  Future<List<String>> pump(
+    WidgetTester tester,
+    Widget screen, {
+    double width = 412,
+    double height = 2400,
+  }) async {
+    final overflows = <String>[];
+    final previous = FlutterError.onError;
+    FlutterError.onError = (details) {
+      final message = details.exception.toString();
+      if (message.contains('overflowed')) {
+        overflows.add(message.split('\n').first);
+      } else {
+        previous?.call(details);
+      }
+    };
+
+    tester.view.physicalSize = Size(width, height);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        ...companyScopeOverrides(),
+        ...consoleCaptureOverrides(),
+        ...portalCaptureOverrides(),
+        ...consoleTailOverrides(),
+      ],
+      child: MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: Scaffold(body: screen),
+      ),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 900));
+    FlutterError.onError = previous;
+    return overflows;
+  }
+
+  /// Every string this screen actually paints, `Text` and `TextSpan` alike.
+  ///
+  /// `find.text` cannot see a `TextSpan` (CLAUDE.md §5), and several of these
+  /// screens build their lines as spans of one paragraph — so walking
+  /// `RenderParagraph` is the only way to ask "does the word `controllerWB`
+  /// appear anywhere on this screen".
+  List<String> painted(WidgetTester tester) {
+    final out = <String>[];
+    void visit(Element e) {
+      final ro = e.renderObject;
+      if (ro is RenderParagraph) out.add(ro.text.toPlainText());
+      e.visitChildren(visit);
+    }
+
+    tester.allElements.first.visitAncestorElements((a) {
+      visit(a);
+      return false;
+    });
+    return out;
+  }
+
+  /// The wire values that must never reach a reader.
+  ///
+  /// Substring matching, because they appear inside sentences — "Iron Hills
+  /// Mining · controllerWB" is the shape the fault took.
+  const wireVocabulary = <String>[
+    'controllerWB',
+    'supervisorForeman',
+    'mineSupplier',
+    'TOKEN_GENERATED',
+    'TOKEN_REVOKED',
+    'COMPANY_SUSPENDED',
+    'USER_ASSIGNED_TO_SEAT',
+    'in_progress',
+    'seat_expansion',
+    'token_renewal',
+  ];
+
+  void expectNoWireVocabulary(WidgetTester tester, String where) {
+    final leaks = <String>[];
+    for (final line in painted(tester)) {
+      for (final wire in wireVocabulary) {
+        if (line.contains(wire)) leaks.add('"$line" contains `$wire`');
+      }
+    }
+    expect(leaks, isEmpty,
+        reason: '$where is showing Postgres\'s vocabulary to an admin:\n'
+            '${leaks.join('\n')}\n'
+            'Roles go through `UserRole.labelFor`, audit actions through '
+            '`AuditLog.actionLabel`, statuses through '
+            '`MlStatusBadge.humaniseStatus`.');
+  }
+
+  // ------------------------------------------------------------------ audit
+  for (final width in const [360.0, 412.0]) {
+    testWidgets('the audit log stays inside its cards at ${width.toInt()}px',
+        (tester) async {
+      final overflows = await pump(tester, const AuditLogsScreen(),
+          width: width, height: 2600);
+      expect(overflows, isEmpty,
+          reason: 'the audit log overflows ${overflows.length} time(s). The '
+              'action badge is unflexed beside the description again: below '
+              '380px it belongs on its own line, not squeezing a two-line '
+              'entry into a third of the card.');
+    });
+  }
+
+  testWidgets('and the organisation on an audit entry ellipsises',
+      (tester) async {
+    await pump(tester, const AuditLogsScreen(), height: 2600);
+    final org = find.text(kLongOrgName);
+    expect(org, findsWidgets, reason: 'the long-named org is not on screen.');
+    final widths = org
+        .evaluate()
+        .map((e) => tester.getRect(find.byElementPredicate((x) => x == e)).width)
+        .toList();
+    for (final w in widths) {
+      expect(w, lessThan(412),
+          reason: 'the organisation line is $w px wide inside a 412px screen, '
+              'so it is laid out against an unbounded constraint and its '
+              'ellipsis can never engage.');
+    }
+  });
+
+  testWidgets('and the badge is a kicker on a phone, beside the entry on a '
+      'console', (tester) async {
+    await pump(tester, const AuditLogsScreen(), height: 2600);
+    final badge = tester.getRect(find.text('TOKEN GENERATED').first);
+    final entry = tester
+        .getRect(find.text('Issued a 365-day serial token with 5 seats.').first);
+    expect(badge.bottom, lessThanOrEqualTo(entry.top + 1),
+        reason: 'at 412px the badge is still beside the entry.');
+
+    await pump(tester, const AuditLogsScreen(), width: 1600, height: 1600);
+    final wideBadge = tester.getRect(find.text('TOKEN GENERATED').first);
+    final wideEntry = tester
+        .getRect(find.text('Issued a 365-day serial token with 5 seats.').first);
+    expect(wideBadge.left, greaterThan(wideEntry.right),
+        reason: 'the badge dropped onto its own line at 1600px, where there '
+            'is room for both. Stacking everywhere is not the fix.');
+  });
+
+  // ------------------------------------------------------------ vocabulary
+  testWidgets('account deactivations name the role in English',
+      (tester) async {
+    await pump(tester, const AccountDeactivationsScreen(), height: 2600);
+    expectNoWireVocabulary(tester, 'the account deactivations queue');
+    // The positive half: the fixture's `controllerWB` has to appear AS
+    // something, or this test passes on a screen that renders nothing.
+    expect(find.textContaining('Load Controller'), findsWidgets);
+  });
+
+  testWidgets('platform users name the role in English', (tester) async {
+    await pump(tester, const PlatformUsersScreen(), height: 2600);
+    expectNoWireVocabulary(tester, 'the platform users list');
+    expect(find.textContaining('Load Controller'), findsWidgets);
+    expect(find.textContaining('Supervisor/Foreman'), findsWidgets);
+  });
+
+  testWidgets('token history names the action in English, and no database key',
+      (tester) async {
+    await pump(tester, const TokenHistoryScreen(), height: 2600);
+    // Open the group; every event lives inside it.
+    await tester.tap(find.byType(ExpansionTile).first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expectNoWireVocabulary(tester, 'the token history');
+    expect(find.text('Token Generated'), findsWidgets,
+        reason: 'the action type is being printed raw again.');
+    // `org o1` was the subtitle. A database key is not a fact about a company.
+    for (final line in painted(tester)) {
+      expect(line.contains('org o1'), isFalse,
+          reason: 'the group caption is printing a database id: "$line".');
+    }
+  });
+
+  testWidgets('and the token-history screen says what it is', (tester) async {
+    await pump(tester, const TokenHistoryScreen(), width: 1600, height: 1200);
+    expect(find.text('Token history'), findsOneWidget,
+        reason: 'this screen opened straight onto a tab bar with no title, '
+            'which no other console screen does.');
+  });
+
+  // ------------------------------------------------------- the org detail
+  testWidgets('the organisation banner says what its number is',
+      (tester) async {
+    await pump(tester, const OrganizationDetailScreen(organizationId: 'o4'),
+        width: 1600, height: 1800);
+    expect(find.text('Status: Suspended'), findsOneWidget);
+    expect(find.textContaining('Token expires in'), findsWidgets,
+        reason: 'the countdown is the bare subtitle of a status banner again, '
+            'so a suspended company reads "Status: Suspended / 308d 9h 9m 29s" '
+            '— a figure in the position that explains the line above it, '
+            'explaining nothing.');
+  });
+
+  testWidgets('and the countdown is not measured against the device clock',
+      (tester) async {
+    // The fixture token expires 314 days after `kCaptureNow`. Read off
+    // `DateTime.now()` the figure moves every second and the golden could
+    // never match twice; read off `MlTime.instant()` it is this, exactly.
+    await pump(tester, const OrganizationDetailScreen(organizationId: 'o4'),
+        width: 1600, height: 1800);
+    expect(find.textContaining('314 days'), findsWidgets,
+        reason: 'the token countdown is not being measured from the frozen '
+            'clock, so it cannot be photographed and it is the device\'s '
+            'opinion of the hour (CLAUDE.md §7.1).');
+  });
+}

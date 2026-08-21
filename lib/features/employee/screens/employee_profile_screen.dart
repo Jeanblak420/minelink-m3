@@ -36,6 +36,7 @@ import 'package:flutter_application_1/features/portal/screens/compliance_screen.
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// URL segment for an org's portal routes.
 String portalOrgSegment(OrgType org) => switch (org) {
@@ -106,14 +107,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
 
   // ── helpers ──────────────────────────────────────────────────────────────
 
-  String _ago(DateTime? t) {
-    if (t == null) return '—';
-    final d = DateTime.now().difference(t);
-    if (d.inSeconds < 60) return '${math.max(d.inSeconds, 1)}s ago';
-    if (d.inMinutes < 60) return '${d.inMinutes}m ago';
-    if (d.inHours < 24) return '${d.inHours}h ago';
-    return '${d.inDays}d ago';
-  }
+  String _ago(DateTime? t) => t == null ? '—' : MlTime.ago(t);
 
   String _hm(DateTime t) =>
       '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
@@ -1387,7 +1381,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
 
   Widget _roleSnapshotCard(MlSemantic s, EmployeeProfileBundle b) {
     final e = b.person.employee;
-    final months = DateTime.now().difference(e.createdAt).inDays ~/ 30;
+    final months = MlTime.instant().difference(e.createdAt).inDays ~/ 30;
     final tenure = months < 12 ? '$months mo' : '${months ~/ 12}y';
     const monthNames = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',

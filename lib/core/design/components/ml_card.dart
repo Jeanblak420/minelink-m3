@@ -115,15 +115,33 @@ class _MlCardState extends State<MlCard> {
 
     Widget content = Padding(padding: widget.padding, child: widget.child);
     if (widget.onTap != null) {
-      content = Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: radius,
-          onTap: widget.onTap,
-          child: content,
-        ),
+      content = InkWell(
+        borderRadius: radius,
+        onTap: widget.onTap,
+        child: content,
       );
     }
+
+    // A `Material` ALWAYS, tap or no tap.
+    //
+    // It used to appear only when the card had an `onTap`, and the card's
+    // surface is painted by an `AnimatedContainer` — so an untapped card was a
+    // coloured box with no `Material` of its own. Two consequences, both real:
+    //
+    //   * Any `ListTile` inside one throws *"ListTile background color or ink
+    //     splashes may be invisible"* on EVERY BUILD in debug. The transporter's
+    //     Active-trips list does exactly that, and the render harness had been
+    //     swallowing the assertion.
+    //   * Every ripple from a button, chip or tile inside a card was painted on
+    //     the nearest Material ABOVE the card — the page — so it drew behind the
+    //     card's own background instead of on it, and was not clipped to the
+    //     card's corners.
+    //
+    // `MaterialType.transparency` adds no surface of its own, so nothing about
+    // the card's appearance changes; it only gives the subtree the ink host it
+    // has been assuming all along. The `clipBehavior: Clip.antiAlias` already
+    // on the container keeps the splash inside the radius.
+    content = Material(type: MaterialType.transparency, child: content);
 
     final lift = (widget.hoverLift || widget.onTap != null) && _hovered;
     Widget card = AnimatedContainer(

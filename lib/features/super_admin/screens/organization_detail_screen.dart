@@ -392,32 +392,97 @@ class _OverviewTab extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(MlTokens.rLg),
                       border: Border.all(color: tone.fg.withValues(alpha: 0.25)),
                     ),
-                    child: ListTile(
-                      leading: Icon(
+                    // A Row, NOT a `ListTile`.
+                    //
+                    // A `ListTile` paints its background and its ink splashes
+                    // on the nearest `Material` ancestor, so putting one inside
+                    // a `Container` that has a colour makes the framework throw
+                    //
+                    //     ListTile background color or ink splashes may be
+                    //     invisible.
+                    //
+                    // on EVERY BUILD, in debug — which is every frame a
+                    // developer or a widget test sees. Nothing in this app
+                    // reported it, because `shoot()` forwarded anything that
+                    // was not one of four layout phrases to
+                    // `tester.takeException()` and wrote the golden anyway.
+                    // Second time that has happened; the harness catches
+                    // everything now.
+                    //
+                    // The banner is not interactive — no tap, no splash — so
+                    // the tile brought machinery it never used and an assertion
+                    // it could not satisfy.
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                      Icon(
                         status.isActive
                             ? Icons.check_circle
                             : Icons.warning_amber_rounded,
                         color: tone.fg,
                       ),
-                      title: Text('Status: ${status.displayName}',
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                      Text('Status: ${status.displayName}',
                           style: TextStyle(
                             fontFamily: MlTokens.fontSans,
                             fontWeight: FontWeight.w700,
                             color: tone.fg,
                           )),
-                      subtitle: expirationIso != null
-                      ? TokenExpiryLiveCountdown(
-                          expiresAt: expirationIso,
-                          compact: true,
+                      const SizedBox(height: 3),
+                      // SAY WHAT THE NUMBER IS.
+                      //
+                      // The countdown was the bare subtitle, so a suspended
+                      // company rendered
+                      //
+                      //     Status: Suspended
+                      //     308d 9h 9m 29s
+                      //
+                      // — a figure sitting directly under a status line, in the
+                      // position a subtitle takes to EXPLAIN the line above it,
+                      // and explaining nothing: how long a token has left is
+                      // unrelated to why an account was suspended. Naming it
+                      // costs three words and removes the reading entirely.
+                      if (expirationIso != null)
+                        Row(
+                          children: [
+                            Text(
+                              'Token expires in ',
+                              style: context.mlText.bodyMedium.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                            ),
+                            Flexible(
+                              child: TokenExpiryLiveCountdown(
+                                expiresAt: expirationIso,
+                                compact: true,
+                              ),
+                            ),
+                          ],
                         )
-                      : Text(
+                      else
+                        Text(
                           status.isActive
                               ? 'No token expiry on file'
                               : 'See access token section below',
                           style: context.mlText.bodyMedium.copyWith(
-                            color: Theme.of(context) .colorScheme .onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
+                          ],
+                        ),
+                      ),
+                      ],
+                      ),
                     ),
                   );
                 }),
@@ -754,7 +819,7 @@ class _UsersTab extends ConsumerWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Role: ${u['role'] as String? ?? 'unassigned'}',
+                                      'Role: ${UserRole.labelFor(u['role'] as String?, fallback: 'unassigned')}',
                                       style: context.mlText.bodyMedium.copyWith(
                                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                                       ),
@@ -905,9 +970,7 @@ class _UsersTab extends ConsumerWidget {
     );
   }
 
-  String _roleLabel(String r) {
-    return UserRole.tryParse(r)?.label ?? r;
-  }
+  String _roleLabel(String r) => UserRole.labelFor(r);
 }
 
 bool _serialTokenCountsAsValid(SerialToken t) {
@@ -1284,7 +1347,8 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
                             : '${u['first_name'] ?? ''} ${u['last_name'] ?? ''}'
                                 .trim()),
                         subtitle: Text(
-                            '${u['email'] ?? '—'} · ${u['role'] ?? 'no role'}'),
+                            '${u['email'] ?? '—'} · '
+                            '${UserRole.labelFor(u['role'] as String?, fallback: 'no role')}'),
                         onTap: remaining > 0
                             ? () => Navigator.of(ctx).pop(u)
                             : null,

@@ -6,6 +6,7 @@ import 'package:flutter_application_1/features/super_admin/data/models/models.da
 import 'package:flutter_application_1/features/super_admin/utils/audit_log_csv_exporter.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 // AuditLogExporter & ExportFormat are in the same file via audit_log_csv_exporter.dart
 
@@ -91,7 +92,11 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    label: Text(type == 'All' ? 'All' : _formatLabel(type), style: const TextStyle(fontSize: 12)),
+                    label: Text(
+                        type == 'All'
+                            ? 'All'
+                            : AuditLog.labelForAction(type),
+                        style: const TextStyle(fontSize: 12)),
                     selected: isSelected,
                     onSelected: (_) {
                       setState(() {
@@ -133,13 +138,6 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
     );
   }
 
-  String _formatLabel(String actionType) {
-    return actionType
-        .split('_')
-        .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
-        .join(' ');
-  }
-
 }
 
 
@@ -169,24 +167,57 @@ class _AuditLogCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          log.description,
-                          style: TextStyle(
-                            fontFamily: MlTokens.fontSans,
-                            fontWeight: FontWeight.w600,
-                            color: semantic.textStrong,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                  // THE BADGE MOVES, THE ENTRY DOES NOT.
+                  //
+                  // As one Row the badge was unflexed, so it took its natural
+                  // width from an unbounded constraint (CLAUDE.md §10.4) and
+                  // "COMPANY SUSPENDED" ran **20px past the card** at 412px —
+                  // while what was left of the description read "Suspended for
+                  // non-payment; t…". Two lines of a 312px column against a
+                  // 165px tag repeating what the icon and its colour already
+                  // say.
+                  //
+                  // The description IS the audit entry; the action type is
+                  // also the icon, also its tone, and also a filter pill at the
+                  // top of the screen. So below 380 — the width the pair needs
+                  // before either has to give — the tag becomes a kicker on its
+                  // own line and the sentence gets the full column.
+                  LayoutBuilder(
+                    builder: (context, box) {
+                      final badge = MlStatusBadge(
+                        label: log.actionLabel,
+                        tone: tone,
+                      );
+                      final description = Text(
+                        log.description,
+                        style: TextStyle(
+                          fontFamily: MlTokens.fontSans,
+                          fontWeight: FontWeight.w600,
+                          color: semantic.textStrong,
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      MlStatusBadge(label: _formatLabel(log.actionType), tone: tone),
-                    ],
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      );
+                      if (box.maxWidth < 380) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            badge,
+                            const SizedBox(height: 7),
+                            description,
+                          ],
+                        );
+                      }
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: description),
+                          const SizedBox(width: 8),
+                          badge,
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 6),
                   Row(
@@ -218,10 +249,18 @@ class _AuditLogCard extends StatelessWidget {
                       children: [
                         Icon(Icons.business_outlined, size: 13, color: semantic.textFaint),
                         const SizedBox(width: 4),
-                        Text(
-                          log.organizationName!,
-                          style: context.mlText.bodySmall.copyWith(
-                            color: semantic.textMuted,
+                        // Unflexed, this took unbounded width from the Row and
+                        // "Consolidated Mineral Offtake & Logistics Holdings"
+                        // simply ran off the card — no ellipsis, because an
+                        // ellipsis needs a bound to engage against.
+                        Expanded(
+                          child: Text(
+                            log.organizationName!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.mlText.bodySmall.copyWith(
+                              color: semantic.textMuted,
+                            ),
                           ),
                         ),
                       ],
@@ -236,12 +275,6 @@ class _AuditLogCard extends StatelessWidget {
     );
   }
 
-  String _formatLabel(String actionType) {
-    return actionType
-        .split('_')
-        .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
-        .join(' ');
-  }
 
   IconData _actionIcon(String action) {
     if (action.contains('TOKEN')) return Icons.vpn_key_rounded;
@@ -263,12 +296,9 @@ class _AuditLogCard extends StatelessWidget {
     return MlTone.neutral;
   }
 
-  String _timeAgo(DateTime dt) {
-    final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1) return 'just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return '${dt.day}/${dt.month}/${dt.year}';
-  }
+  // One vocabulary, one clock. This used to subtract from `DateTime.now()`,
+  // so an entry written twenty-two minutes ago printed "5d ago" whenever the
+  // device disagreed with the data — on the screen whose entire job is saying
+  // when something happened.
+  String _timeAgo(DateTime dt) => MlTime.ago(dt);
 }

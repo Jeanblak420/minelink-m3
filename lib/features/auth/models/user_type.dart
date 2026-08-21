@@ -59,6 +59,25 @@ enum UserRole {
   final String label;
   const UserRole(this.label);
 
+  /// The human label for a wire role, for anywhere a role is DISPLAYED.
+  ///
+  /// `controllerWB` is a column value. It appeared verbatim on the account
+  /// deactivations queue — "Iron Hills Mining · controllerWB" — and twice more
+  /// on the organisation detail screen, while the platform-users list beside
+  /// them said "Load Controller" for the same person. Same family as the
+  /// `IN_PROGRESS` pill and "Seat expansion · mineSupplier" that were fixed on
+  /// the token-requests screen: Postgres's vocabulary on an admin's screen.
+  ///
+  /// [fallback] is what an empty value reads as. An UNKNOWN value falls through
+  /// to itself rather than to [fallback] — a role this build does not know
+  /// about is worth seeing raw, and hiding it behind "Unknown role" would make
+  /// a schema change invisible.
+  static String labelFor(String? raw, {String fallback = '—'}) {
+    final value = raw?.trim();
+    if (value == null || value.isEmpty) return fallback;
+    return tryParse(value)?.label ?? value;
+  }
+
   static UserRole? tryParse(String? value) {
     if (value == null) {
       return null;
