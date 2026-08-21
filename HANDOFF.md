@@ -18,6 +18,10 @@ point. Nothing is half-applied and nothing is uncommitted.
   a Material") and the `docs:` one on top of it.** Working tree clean. Run
   `git log --oneline -3` — no hash is written down here, because a hash in a
   file the same commit changes is wrong the moment it lands.
+- **Both builds were run for real at the end of this session**, not assumed:
+  `flutter build web --release` produced a 7.86 MB `main.dart.js`, and
+  `flutter build apk --debug` produced `app-debug.apk`. Neither had been run
+  since commit `ed9ebcd` before that.
 - **The gate was run and is green** (numbers in §2). The original worktree was
   re-checked against its §0 baseline immediately before that commit and is
   **byte-for-byte untouched**.
