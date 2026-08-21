@@ -863,7 +863,7 @@ void main() {
           role: UserRole.admin,
           selectedRoute: '/portal/transporter',
         ),
-        const Size(412, 1000),
+        const Size(412, 934),
         'screen-employees-phone-dark',
       );
     });
@@ -902,7 +902,7 @@ void main() {
           selectedRoute: '/portal/transporter',
           extraOverrides: [operationsOverride()],
         ),
-        const Size(412, 1700),
+        const Size(412, 1165),
         'screen-operations-hub-phone-dark',
       );
     });
@@ -1078,7 +1078,7 @@ void main() {
           selectedRoute: '/portal/transporter/trucks',
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 1500),
+        const Size(412, 1044),
         'screen-trucks-on-route-phone-dark',
       );
     });
@@ -1117,7 +1117,7 @@ void main() {
           selectedRoute: '/portal/mine/gate',
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 2139),
+        const Size(412, 2151),
         'screen-security-checkin-phone-dark',
       );
     });
@@ -1175,7 +1175,7 @@ void main() {
           selectedRoute: '/portal/mine/weighbridge',
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 1700),
+        const Size(412, 1681),
         'screen-load-controller-phone-dark',
       );
     });
@@ -1217,7 +1217,7 @@ void main() {
           body: const ReconTablesScreen(),
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 2304),
+        const Size(412, 2327),
         'screen-recon-tables-phone-dark',
       );
     });
@@ -1282,7 +1282,7 @@ void main() {
           // without it every card read "Unknown company".
           extraOverrides: [...portalCaptureOverrides(), ...portalTailOverrides()],
         ),
-        const Size(412, 4600),
+        const Size(412, 4322),
         'screen-buyer-reconciliations-phone-dark',
       );
     });
@@ -1404,7 +1404,7 @@ void main() {
           selectedRoute: '/portal/mine',
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 4200),
+        const Size(412, 3259),
         'dash-mine-phone-dark',
       );
     });
@@ -1442,7 +1442,7 @@ void main() {
           selectedRoute: '/portal/driver',
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 1400),
+        const Size(412, 1078),
         'dash-driver-trip-phone-dark',
       );
     });
@@ -1797,7 +1797,7 @@ void main() {
           body: const MarginLedgerScreen(),
           extraOverrides: consoleCaptureOverrides(),
         ),
-        const Size(412, 1700),
+        const Size(412, 915),
         'screen-margin-ledger-phone-dark',
       );
     });
@@ -1855,7 +1855,7 @@ void main() {
             ...portalCaptureOverrides(),
           ],
         ),
-        const Size(412, 4400),
+        const Size(412, 4344),
         'screen-transporters-overview-v2-phone-dark',
       );
     });
@@ -2139,7 +2139,7 @@ void main() {
               requestType: 'transportation', origin: 'mine'),
           extraOverrides: portalCaptureOverrides(),
         ),
-        const Size(412, 1900),
+        const Size(412, 915),
         'screen-requests-mine-transport-phone-dark',
       );
     });
@@ -2278,7 +2278,7 @@ void main() {
         // Same measurement as the org-type frame above: content ends at
         // 4,510 in a 6,200 frame, plus the 142px bottom bar. The company band
         // is the tallest of the three - a search field and five pills.
-        const Size(412, 4741),
+        const Size(412, 4757),
         'screen-targets-company-phone-dark',
       );
     });
@@ -2330,7 +2330,7 @@ void main() {
           body: const OrganizationManagementScreen(),
           extraOverrides: consoleCaptureOverrides(),
         ),
-        const Size(412, 1800),
+        const Size(412, 1174),
         'screen-organizations-phone-dark',
       );
     });
@@ -2378,7 +2378,7 @@ void main() {
 
     testWidgets('request tracking — phone dark', (tester) async {
       await shootConsole(tester, const RequestTrackingScreen(),
-          const Size(412, 2000), 'screen-request-tracking-phone-dark');
+          const Size(412, 1343), 'screen-request-tracking-phone-dark');
     });
 
     testWidgets('platform users — desktop dark', (tester) async {
@@ -2388,7 +2388,7 @@ void main() {
 
     testWidgets('platform users — phone dark', (tester) async {
       await shootConsole(tester, const PlatformUsersScreen(),
-          const Size(412, 2000), 'screen-platform-users-phone-dark');
+          const Size(412, 1327), 'screen-platform-users-phone-dark');
     });
 
     testWidgets('audit logs — desktop dark', (tester) async {
@@ -2397,7 +2397,7 @@ void main() {
     });
 
     testWidgets('audit logs — phone dark', (tester) async {
-      await shootConsole(tester, const AuditLogsScreen(), const Size(412, 2200),
+      await shootConsole(tester, const AuditLogsScreen(), const Size(412, 1629),
           'screen-audit-logs-phone-dark');
     });
 
@@ -2433,7 +2433,7 @@ void main() {
           body: const TokenHistoryScreen(),
           extraOverrides: tail(),
         ),
-        const Size(412, 1900),
+        const Size(412, 1230),
         'screen-token-history-phone-dark',
         act: openFirstGroup,
       );
@@ -2451,7 +2451,7 @@ void main() {
       await shootConsole(
           tester,
           const OrganizationDetailScreen(organizationId: 'o4'),
-          const Size(412, 6600),
+          const Size(412, 1755),
           'screen-organization-detail-phone-dark');
     });
 
@@ -2462,7 +2462,7 @@ void main() {
 
     testWidgets('available routes — phone dark', (tester) async {
       await shootConsole(tester, const AvailableRoutesScreen(),
-          const Size(412, 2200), 'screen-available-routes-phone-dark');
+          const Size(412, 1421), 'screen-available-routes-phone-dark');
     });
 
     testWidgets('route marketplace — desktop dark', (tester) async {
@@ -2477,7 +2477,7 @@ void main() {
 
     testWidgets('crash reports — phone dark', (tester) async {
       await shootConsole(tester, const CrashReportsScreen(),
-          const Size(412, 2000), 'screen-crash-reports-phone-dark');
+          const Size(412, 915), 'screen-crash-reports-phone-dark');
     });
 
     testWidgets('account deactivations — desktop dark', (tester) async {
@@ -2487,7 +2487,7 @@ void main() {
 
     testWidgets('account deactivations — phone dark', (tester) async {
       await shootConsole(tester, const AccountDeactivationsScreen(),
-          const Size(412, 2200), 'screen-account-deactivations-phone-dark');
+          const Size(412, 996), 'screen-account-deactivations-phone-dark');
     });
 
     // The tiles are blank in every render — `flutter_test` answers every HTTP
@@ -2499,7 +2499,7 @@ void main() {
     });
 
     testWidgets('live map — phone dark', (tester) async {
-      await shootConsole(tester, const LiveMapScreen(), const Size(412, 1600),
+      await shootConsole(tester, const LiveMapScreen(), const Size(412, 1177),
           'screen-live-map-phone-dark');
     });
 
@@ -2517,7 +2517,7 @@ void main() {
 
     testWidgets('platform dashboard v2 — phone dark', (tester) async {
       await shootConsole(tester, const SuperAdminDashboardV2Screen(),
-          const Size(412, 5600), 'screen-super-admin-dashboard-v2-phone-dark');
+          const Size(412, 4695), 'screen-super-admin-dashboard-v2-phone-dark');
     });
 
     testWidgets('transporter leaderboard — desktop dark', (tester) async {
@@ -2527,7 +2527,7 @@ void main() {
 
     testWidgets('transporter leaderboard — phone dark', (tester) async {
       await shootConsole(tester, const TransporterLeaderboardScreen(),
-          const Size(412, 2200), 'screen-transporter-leaderboard-phone-dark');
+          const Size(412, 2007), 'screen-transporter-leaderboard-phone-dark');
     });
 
     testWidgets('chat connections — desktop dark', (tester) async {
@@ -2537,7 +2537,7 @@ void main() {
 
     testWidgets('chat connections — phone dark', (tester) async {
       await shootConsole(tester, const ChatConnectionsScreen(),
-          const Size(412, 2000), 'screen-chat-connections-phone-dark');
+          const Size(412, 2007), 'screen-chat-connections-phone-dark');
     });
 
     testWidgets('driver limit requests — desktop dark', (tester) async {
@@ -2547,7 +2547,7 @@ void main() {
 
     testWidgets('driver limit requests — phone dark', (tester) async {
       await shootConsole(tester, const DriverLimitRequestsScreen(),
-          const Size(412, 1400), 'screen-driver-limit-requests-phone-dark');
+          const Size(412, 937), 'screen-driver-limit-requests-phone-dark');
     });
 
     testWidgets('platform settings — desktop dark', (tester) async {
@@ -2562,7 +2562,7 @@ void main() {
 
     testWidgets('register company — phone dark', (tester) async {
       await shootConsole(tester, const RegisterCompanyScreen(),
-          const Size(412, 2000), 'screen-register-company-phone-dark');
+          const Size(412, 1009), 'screen-register-company-phone-dark');
     });
 
     testWidgets('user preferences — desktop dark', (tester) async {
@@ -2572,7 +2572,7 @@ void main() {
 
     testWidgets('user preferences — phone dark', (tester) async {
       await shootConsole(tester, const UserPreferencesScreen(),
-          const Size(412, 1900), 'screen-user-preferences-phone-dark');
+          const Size(412, 1112), 'screen-user-preferences-phone-dark');
     });
 
     // THE COMPANY MIRROR — a platform admin looking at one company's workspace
@@ -2598,7 +2598,7 @@ void main() {
             body: const SuperAdminCompanyMirrorScreen(companyId: 'o4'),
             extraOverrides: [...tail(), ...companyMirrorOverrides()],
           ),
-          const Size(412, 4800),
+          const Size(412, 3830),
           'screen-company-mirror-phone-dark');
     });
   });
@@ -2657,7 +2657,7 @@ void main() {
       await shootPortal(
         tester,
         const BuyerWaybillsScreen(),
-        const Size(412, 1500),
+        const Size(412, 1050),
         'screen-buyer-waybills-phone-dark',
         orgType: OrgType.buyer,
         title: 'Fixture Metals',
@@ -2683,7 +2683,7 @@ void main() {
       await shootPortal(
         tester,
         const BuyerRequestsScreen(),
-        const Size(412, 2600),
+        const Size(412, 1929),
         'screen-buyer-requests-phone-dark',
         orgType: OrgType.buyer,
         title: 'Fixture Metals',
@@ -2709,7 +2709,7 @@ void main() {
       await shootPortal(
         tester,
         const BuyerRoutesMinesScreen(),
-        const Size(412, 1400),
+        const Size(412, 915),
         'screen-buyer-routes-mines-phone-dark',
         orgType: OrgType.buyer,
         title: 'Fixture Metals',
@@ -2754,7 +2754,7 @@ void main() {
       await shootPortal(
         tester,
         const BuyerTruckLocationsScreen(),
-        const Size(412, 1400),
+        const Size(412, 957),
         'screen-buyer-truck-locations-phone-dark',
         orgType: OrgType.buyer,
         title: 'Fixture Metals',
@@ -2795,7 +2795,7 @@ void main() {
       await shootPortal(
         tester,
         const MineLocationsScreen(),
-        const Size(412, 1900),
+        const Size(412, 1358),
         'screen-mine-locations-phone-dark',
         orgType: OrgType.mineSupplier,
         title: 'Fixture Minerals',
@@ -2821,7 +2821,7 @@ void main() {
       await shootPortal(
         tester,
         const StockpileDetailScreen(),
-        const Size(412, 1700),
+        const Size(412, 1642),
         'screen-stockpile-detail-phone-dark',
         orgType: OrgType.mineSupplier,
         role: UserRole.supervisorForeman,
@@ -2864,7 +2864,7 @@ void main() {
             home: const StockpileAuditScreen(),
           ),
         ),
-        const Size(412, 1700),
+        const Size(412, 1069),
         'screen-stockpile-audit-phone-dark',
       );
     });
@@ -2896,7 +2896,7 @@ void main() {
       await shootPortal(
         tester,
         TonsOutDetailScreen(entries: kTonsOut),
-        const Size(412, 2300),
+        const Size(412, 1625),
         'screen-tons-out-detail-phone-dark',
         orgType: OrgType.mineSupplier,
         title: 'Fixture Minerals',
@@ -2925,7 +2925,7 @@ void main() {
       await shootPortal(
         tester,
         const PortalTripDetailScreen(tripId: 't-2'),
-        const Size(412, 1500),
+        const Size(412, 915),
         'screen-trip-detail-phone-dark',
         orgType: OrgType.buyer,
         title: 'Fixture Metals',
@@ -2953,7 +2953,7 @@ void main() {
       await shootPortal(
         tester,
         const TransporterDriversScreen(),
-        const Size(412, 1700),
+        const Size(412, 1207),
         'screen-transporter-drivers-phone-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
@@ -2979,7 +2979,7 @@ void main() {
       await shootPortal(
         tester,
         const FuelCostsScreen(),
-        const Size(412, 2600),
+        const Size(412, 2232),
         'screen-fuel-costs-phone-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
@@ -3005,7 +3005,7 @@ void main() {
       await shootPortal(
         tester,
         const ComplianceScreen(),
-        const Size(412, 2100),
+        const Size(412, 1196),
         'screen-compliance-phone-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
@@ -3041,7 +3041,7 @@ void main() {
       await shootPortal(
         tester,
         const DropOffScreen(tripId: 't-2'),
-        const Size(412, 1100),
+        const Size(412, 915),
         'screen-drop-off-phone-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
@@ -3067,7 +3067,7 @@ void main() {
       await shootPortal(
         tester,
         const PortalOwnCompanyScreen(),
-        const Size(412, 1900),
+        const Size(412, 915),
         'screen-own-company-phone-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
@@ -3094,7 +3094,7 @@ void main() {
             home: RequestTransportationScreen(prefill: kMyAvailableRoutes.first),
           ),
         ),
-        const Size(412, 2400),
+        const Size(412, 1837),
         'screen-request-transportation-phone-dark',
       );
     });
@@ -3138,7 +3138,7 @@ void main() {
       await shootPortal(
         tester,
         const PortalTonsOutSearchScreen(),
-        const Size(412, 1900),
+        const Size(412, 1721),
         'screen-tons-out-search-phone-dark',
         orgType: OrgType.mineSupplier,
         title: 'Fixture Minerals',
@@ -3164,7 +3164,7 @@ void main() {
       await shootPortal(
         tester,
         const TransporterRequestTrackingScreen(),
-        const Size(412, 1500),
+        const Size(412, 915),
         'screen-transporter-request-tracking-phone-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
@@ -3254,7 +3254,7 @@ void main() {
           selectedRoute: '/portal/transporter',
           extraOverrides: [...tail(), ...expiredCompanyOverride()],
         ),
-        const Size(412, 1400),
+        const Size(412, 1320),
         'screen-expired-access-phone-dark',
       );
     });
@@ -3373,7 +3373,7 @@ void main() {
       await shootPortal(
         tester,
         const PortalTonsOutScreen(),
-        const Size(412, 1950),
+        const Size(412, 1891),
         'screen-tons-out-phone-dark',
         orgType: OrgType.mineSupplier,
         title: 'Fixture Minerals',
@@ -3425,7 +3425,7 @@ void main() {
       await shootPortal(
         tester,
         const LiveTripMapScreen(),
-        const Size(412, 1000),
+        const Size(412, 963),
         'screen-live-trip-map-phone-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
@@ -3451,7 +3451,7 @@ void main() {
       await shootPortal(
         tester,
         const MineSupplierBuyersDetailScreen(),
-        const Size(412, 1200),
+        const Size(412, 1163),
         'screen-mine-buyers-phone-dark',
         orgType: OrgType.mineSupplier,
         title: 'Fixture Minerals',
@@ -3609,7 +3609,7 @@ void main() {
       await shootShared(
         tester,
         const NotificationScreen(),
-        const Size(412, 1600),
+        const Size(412, 1462),
         'screen-notifications-phone-dark',
         subtitle: 'Notifications',
         selectedRoute: '/notifications',
@@ -3642,7 +3642,7 @@ void main() {
       await shootShared(
         tester,
         const NotificationManagementScreen(title: 'All Notifications'),
-        const Size(412, 1600),
+        const Size(412, 1398),
         'screen-notification-manager-phone-dark',
         subtitle: 'All notifications',
         selectedRoute: '/notifications',
@@ -3655,7 +3655,7 @@ void main() {
       await shootShared(
         tester,
         const ProfileScreen(),
-        const Size(412, 4000),
+        const Size(412, 3955),
         'screen-profile-phone-dark',
         subtitle: 'Profile',
         selectedRoute: '/profile',
@@ -3679,7 +3679,7 @@ void main() {
       await shootShared(
         tester,
         const AccountSecurityScreen(),
-        const Size(412, 1500),
+        const Size(412, 1429),
         'screen-account-security-phone-dark',
         subtitle: 'Account & security',
         selectedRoute: '/account-security',
@@ -3706,7 +3706,7 @@ void main() {
       await shootShared(
         tester,
         const AppearanceThemeScreen(),
-        const Size(412, 1500),
+        const Size(412, 1283),
         'screen-appearance-phone-dark',
         orgType: OrgType.mineSupplier,
         title: 'Fixture Chrome Mine',
@@ -3737,7 +3737,7 @@ void main() {
       await shootShared(
         tester,
         const PortalEmployeeRegisterScreen(),
-        const Size(412, 3950),
+        const Size(412, 3910),
         'screen-employee-register-phone-dark',
         subtitle: 'Register',
         selectedRoute: '/portal/transporter/register',

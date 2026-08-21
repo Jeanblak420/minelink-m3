@@ -5,7 +5,17 @@
 // fault; this lays the string out in the real font at the real size and prints
 // what it actually measures.
 //
-// Run: flutter test test/renders/measure_strings_test.dart --plain-name ruler
+// It prints nothing in an ordinary run — a full suite should not carry twenty
+// lines of reference data — and everything under ML_RULER:
+//
+//     ML_RULER=1 flutter test test/renders/measure_strings_test.dart
+//
+// Add a string here when a fixed width around it is in question, rather than
+// estimating characters x font size. The estimate was wrong every time it was
+// tried: the search field on the tons-out screen was widened twice on
+// arithmetic and cut both times, because `prefixIcon` is given a 48px box
+// whatever size the icon in it is.
+import 'dart:io' show Platform;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -49,6 +59,12 @@ void main() {
       'AVG PER ACTIVE HAULER': const TextStyle(
           fontFamily: sans, fontSize: 10, letterSpacing: 1.15),
     };
+
+    if (!Platform.environment.containsKey('ML_RULER')) {
+      expect(widthOf('CK 84 RT GP', const TextStyle(fontFamily: mono)),
+          greaterThan(0));
+      return;
+    }
 
     // ignore: avoid_print
     print('RULER (font metrics, no scaling):');
