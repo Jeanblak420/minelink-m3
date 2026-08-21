@@ -591,6 +591,39 @@ final List<TransportationRequest> kAdminTransportRequests = [
     createdAt: _ago(const Duration(hours: 6)),
     updatedAt: _ago(const Duration(hours: 6)),
   ),
+  // THE APPROVED ONE, and the reason it exists.
+  //
+  // The linking panel only shows its dispatch step — the mine picker, the
+  // margin-in-Rand pricing, the resulting transporter price and the ordered
+  // due-diligence gate CLAUDE.md §4 is emphatic about — once a request is
+  // `approved`. Until 2026-08-21 no fixture request had that status, so the
+  // most consequential flow in the product was unreachable in every test and
+  // every render: the queue said "Approved 0" and the panel stopped at
+  // Approve / Decline / Send back.
+  TransportationRequest(
+    id: 'areq-5',
+    requestingCompanyId: 'co-buyer',
+    buyerCompanyId: 'co-buyer',
+    requestType: 'transportation',
+    status: RequestStatus.approved,
+    loadingPoint: 'Iron Hills Mining',
+    offloadingPoint: 'Maputo Port',
+    commodity: 'Manganese',
+    paymentTerms: '14 days from delivery',
+    numSlots: '4',
+    tonsAvailable: '2400',
+    pricePerTon: 742.50,
+    isOngoing: false,
+    operatingStart: '05:00',
+    operatingEnd: '18:00',
+    sealRequired: true,
+    routeNotes: 'Border post closes 22:00; no night crossings.',
+    requesterOrgType: 'buyer',
+    requesterCompany: _requester('co-buyer', 'Atlas Buyer Group', 'buyer'),
+    startingDate: kCaptureNow.add(const Duration(days: 5)),
+    createdAt: _ago(const Duration(days: 2)),
+    updatedAt: _ago(const Duration(hours: 3)),
+  ),
   TransportationRequest(
     id: 'areq-2',
     requestingCompanyId: 'co-mine',

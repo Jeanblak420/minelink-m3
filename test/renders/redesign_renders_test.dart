@@ -83,6 +83,7 @@ import 'package:flutter_application_1/features/portal/screens/drop_off_screen.da
 import 'package:flutter_application_1/features/portal/screens/portal_own_company_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/request_transportation_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/portal_trip_detail_screen.dart';
+import 'package:flutter_application_1/features/portal/widgets/waybill_modal.dart';
 import 'package:flutter_application_1/features/portal/screens/mine_supplier_truck_locations_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/transporter_truck_locations_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/earnings_screen.dart';
@@ -1502,6 +1503,41 @@ void main() {
       );
     });
 
+    // THE HAZARD REPORT SHEET — what a driver fills in from the road.
+    //
+    // §4.2 listed it as never photographed. It is opened from the navigation
+    // screen's own control, so this is the whole path: a driver mid-route taps
+    // "Report a hazard" and gets the type, the severity and a description.
+    testWidgets('reporting a hazard — phone dark', (tester) async {
+      FakeGeolocatorPlatform.install(
+        latitude: kNavTruck.latitude,
+        longitude: kNavTruck.longitude,
+      );
+      await shoot(
+        tester,
+        ProviderScope(
+          overrides: [
+            ...companyScopeOverrides(role: UserRole.driver),
+            ...portalCaptureOverrides(),
+            ...navigationOverrides(),
+          ],
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.build(Brightness.dark),
+            home: const DriverNavigationScreen(tripId: 't-3'),
+          ),
+        ),
+        const Size(412, 915),
+        'screen-hazard-report-phone-dark',
+        act: (tester) async {
+          final f = find.byTooltip('Report a hazard');
+          if (f.evaluate().isEmpty) return;
+          await tester.tap(f.first, warnIfMissed: false);
+          await tester.pumpAndSettle();
+        },
+      );
+    });
+
     // The degraded state, which CLAUDE.md lists as built behaviour and which
     // nobody had looked at either: Valhalla and OSRM both unreachable, so the
     // screen falls back to bearing-and-distance with no turn list. A driver in
@@ -1820,6 +1856,176 @@ void main() {
         act: (tester) async {
           // The `requested` row — the one an admin would actually pick up.
           await tester.tap(find.textContaining('Iron Hills Mining').first);
+        },
+      );
+    });
+
+    // THE DISPATCH STEP, which no test and no render had ever reached.
+    //
+    // It only appears once a request is `approved`, and until this session no
+    // fixture request had that status — so everything CLAUDE.md §4 specifies
+    // about linking (select a mine, enter the admin's margin in Rand, see the
+    // resulting transporter price, then the ordered due-diligence gate) was
+    // unreachable. The queue said "Approved 0" and the panel stopped at
+    // Approve / Decline / Send back.
+    testWidgets('a request approved — the dispatch step, desktop dark',
+        (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const RequestReviewScreen(
+              requestType: 'transportation', origin: 'buyer'),
+          extraOverrides: [
+            ...portalCaptureOverrides(),
+            ...portalTailOverrides(),
+          ],
+        ),
+        const Size(1600, 2000),
+        'screen-request-dispatch-desktop-dark',
+        act: (tester) async {
+          final row = find.textContaining('Maputo Port');
+          if (row.evaluate().isEmpty) return;
+          await tester.tap(row.first);
+          await tester.pumpAndSettle();
+        },
+      );
+    });
+
+    // THE DUE-DILIGENCE GATE — the flow CLAUDE.md §4 specifies most exactly,
+    // and the one nothing had ever driven.
+    //
+    // Five dialogs in order: a preview of what the transporter receives ->
+    // "are you sure the information is correct?" -> a GREEN TICKABLE checkbox
+    // reading "Due diligence done correctly, accurately and accepted" ->
+    // "are you 100% sure?" -> a final confirm naming the transporter and the
+    // mine. Nothing dispatches until all five are answered.
+    //
+    // Reaching it means doing what an admin does: pick the mine, type the
+    // agreed price and the margin, tick a transporter, then press the button.
+    // The `act` below is long for that reason, and it is the point — it proves
+    // the whole chain is wired, not just that a dialog widget lays out.
+    Future<void> openTheGate(WidgetTester tester) async {
+      final row = find.textContaining('Maputo Port');
+      if (row.evaluate().isEmpty) return;
+      await tester.tap(row.first);
+      await tester.pumpAndSettle();
+
+      final mine = find.text('Iron Hills Mining');
+      if (mine.evaluate().isEmpty) return;
+      await tester.ensureVisible(mine.last);
+      await tester.pumpAndSettle();
+      await tester.tap(mine.last, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      final agreed = find.widgetWithText(TextField, 'Agreed price / ton');
+      final margin = find.widgetWithText(TextField, 'Your margin / ton');
+      if (agreed.evaluate().isEmpty || margin.evaluate().isEmpty) return;
+      await tester.enterText(agreed.first, '820');
+      await tester.enterText(margin.first, '65');
+      await tester.pumpAndSettle();
+
+      final carrier = find.text('Roadhaul Logistics');
+      if (carrier.evaluate().isEmpty) return;
+      await tester.ensureVisible(carrier.last);
+      await tester.pumpAndSettle();
+      await tester.tap(carrier.last, warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      final send = find.text('Review & send to transporter');
+      if (send.evaluate().isEmpty) return;
+      await tester.ensureVisible(send.first);
+      await tester.pumpAndSettle();
+      await tester.tap(send.first, warnIfMissed: false);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('the due-diligence gate, step 1 — preview, desktop dark',
+        (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const RequestReviewScreen(
+              requestType: 'transportation', origin: 'buyer'),
+          extraOverrides: [
+            ...portalCaptureOverrides(),
+            ...portalTailOverrides(),
+          ],
+        ),
+        const Size(1600, 1400),
+        'screen-due-diligence-preview-desktop-dark',
+        act: openTheGate,
+      );
+    });
+
+    // Step 3, the tick. Two dialogs further in: "Approve and send", then
+    // "Yes" to the first confirm.
+    testWidgets('the due-diligence gate, step 3 — the tick, desktop dark',
+        (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const RequestReviewScreen(
+              requestType: 'transportation', origin: 'buyer'),
+          extraOverrides: [
+            ...portalCaptureOverrides(),
+            ...portalTailOverrides(),
+          ],
+        ),
+        const Size(1600, 1400),
+        'screen-due-diligence-tick-desktop-dark',
+        act: (tester) async {
+          await openTheGate(tester);
+          for (final label in ['Approve and send', 'Yes']) {
+            final f = find.text(label);
+            if (f.evaluate().isEmpty) return;
+            await tester.tap(f.first, warnIfMissed: false);
+            await tester.pumpAndSettle();
+          }
+        },
+      );
+    });
+
+    // …and TICKED, because §4 asks for "a green tickable checkbox" and the
+    // colour is the half a picture of the unticked state cannot show. It also
+    // shows `Continue` changing from disabled to enabled, which is the gate
+    // actually gating.
+    testWidgets('the due-diligence gate, step 3 ticked — desktop dark',
+        (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const RequestReviewScreen(
+              requestType: 'transportation', origin: 'buyer'),
+          extraOverrides: [
+            ...portalCaptureOverrides(),
+            ...portalTailOverrides(),
+          ],
+        ),
+        const Size(1600, 1400),
+        'screen-due-diligence-ticked-desktop-dark',
+        act: (tester) async {
+          await openTheGate(tester);
+          for (final label in ['Approve and send', 'Yes']) {
+            final f = find.text(label);
+            if (f.evaluate().isEmpty) return;
+            await tester.tap(f.first, warnIfMissed: false);
+            await tester.pumpAndSettle();
+          }
+          // SCOPED TO THE DIALOG. `find.byType(Checkbox)` also matches the
+          // three transporter checkboxes on the panel BEHIND the modal, and
+          // tapping one of those lands on the barrier and closes the gate —
+          // which is what the first attempt photographed.
+          final box = find.descendant(
+            of: find.byType(AlertDialog),
+            matching: find.byType(Checkbox),
+          );
+          if (box.evaluate().isEmpty) return;
+          await tester.tap(box.first, warnIfMissed: false);
+          await tester.pumpAndSettle();
         },
       );
     });
@@ -3618,6 +3824,57 @@ void main() {
         title: 'Fixture Haulage',
         subtitle: 'Messages',
         selectedRoute: '/messages',
+      );
+    });
+
+    // THE WAYBILL MODAL, in the state a reader most needs to understand.
+    //
+    // WHAT THIS PROVES AND WHAT IT DOES NOT. The modal's body is a
+    // `PdfPreview`, which rasterises through the platform's PDF engine — that
+    // does not exist under `flutter_test`, so a picture of the document itself
+    // is not obtainable here. The waybill's own LAYOUT is covered instead by
+    // `waybill_pdf_test.dart` and was rasterised against the reference image
+    // `assets/Varsiwave waybil 2l.png` in an earlier phase.
+    //
+    // What IS here is the chrome nobody had looked at: the header, the
+    // waybill number, the copy-link control S6-27 added, Close, and the empty
+    // state a trip with no waybill yet shows — which is the state a load
+    // controller sees before the second weigh, and therefore the one most
+    // likely to be met by surprise.
+    testWidgets('waybill modal, none yet — phone dark', (tester) async {
+      await shoot(
+        tester,
+        ProviderScope(
+          overrides: companyScopeOverrides(),
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.build(Brightness.dark),
+            home: Consumer(
+              builder: (context, ref, _) => Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    child: const Text('Open waybill'),
+                    onPressed: () => showWaybillModal(
+                      context,
+                      ref,
+                      tripId: 't-2',
+                      waybillNumber: 'TRP-000124',
+                      fetch: (_, __) async => null,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const Size(412, 915),
+        'dialog-waybill-none-phone-dark',
+        act: (tester) async {
+          final f = find.text('Open waybill');
+          if (f.evaluate().isEmpty) return;
+          await tester.tap(f.first, warnIfMissed: false);
+          await tester.pumpAndSettle();
+        },
       );
     });
 

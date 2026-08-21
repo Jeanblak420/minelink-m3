@@ -1,5 +1,6 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/transportation_request.dart';
@@ -1571,14 +1572,26 @@ class _DispatchStep extends ConsumerWidget {
           data: (list) {
             if (list.isEmpty) {
               return Text(
-                'No mineSupplier companies registered yet.',
+                // `OrgType.label`, not the wire spelling. This empty state
+                // read "No mineSupplier companies registered yet." — the
+                // `companies.org_type` value, in camelCase, in a sentence.
+                'No ${OrgType.mineSupplier.label} companies registered yet.',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               );
             }
             final dupNames = _duplicateNames([for (final m in list) m.name]);
-            return Column(
+            // A `Material`, because these rows are `ListTile`s and a
+            // `ListTile` needs one to paint its background and its ink. The
+            // framework raises "ListTile background color or ink splashes may
+            // be invisible" on EVERY build without it, and the tap feedback on
+            // the mine picker — the first step of the due-diligence gate — is
+            // simply absent. Reported by the render harness the first time
+            // this step was reachable, 2026-08-21.
+            return Material(
+              type: MaterialType.transparency,
+              child: Column(
               children: [
                 for (final m in list)
                   ListTile(
@@ -1607,6 +1620,7 @@ class _DispatchStep extends ConsumerWidget {
                     onTap: () => onSelectSupplier(m.id),
                   ),
               ],
+              ),
             );
           },
         ),
@@ -1633,7 +1647,9 @@ class _DispatchStep extends ConsumerWidget {
               );
             }
             final dupNames = _duplicateNames([for (final t in list) t.name]);
-            return Column(
+            return Material(
+              type: MaterialType.transparency,
+              child: Column(
               children: [
                 for (final t in list)
                   CheckboxListTile(
@@ -1655,6 +1671,7 @@ class _DispatchStep extends ConsumerWidget {
                         : null,
                   ),
               ],
+              ),
             );
           },
         ),
