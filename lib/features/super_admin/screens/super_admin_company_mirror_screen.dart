@@ -1473,7 +1473,15 @@ class _DashboardBody extends StatelessWidget {
                             Text(
                               d.tons == 0 ? '0' : _tons.format(d.tons),
                               style: context.mlText.code(
-                                color: d.tons == 0 ? MlControlRoom.textMuted.withValues(alpha: 0.6) : MlControlRoom.textMuted,
+                                // `textFaint`, not `textMuted` at 60%.
+                                // A zero SHOULD be quieter than a real
+                                // figure; stacking an alpha on an ink to say
+                                // so took it to 3.85:1. There is a token that
+                                // means exactly "one step quieter" and it is
+                                // legible on every surface in the product.
+                                color: d.tons == 0
+                                    ? MlControlRoom.textFaint
+                                    : MlControlRoom.textMuted,
                                 size: 11,
                                 weight: FontWeight.w400,
                               ),

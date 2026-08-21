@@ -255,8 +255,7 @@ class _BackChipState extends State<_BackChip> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(MlOv.rPill),
                 border: Border.all(
-                  color:
-                      _hovered ? t.acc.withValues(alpha: 0.40) : t.line2,
+                  color: _hovered ? t.acc.withValues(alpha: 0.40) : t.line2,
                 ),
               ),
               child: Row(
@@ -270,10 +269,7 @@ class _BackChipState extends State<_BackChip> {
                   const SizedBox(width: 2),
                   Text(
                     'Back to overview',
-                    style: t.s(
-                      size: 12,
-                      color: _hovered ? t.acc2 : t.inkMid,
-                    ),
+                    style: t.s(size: 12, color: _hovered ? t.acc2 : t.inkMid),
                   ),
                 ],
               ),
@@ -313,8 +309,9 @@ class _PeriodChip extends StatelessWidget {
             color: active ? t.acc.withValues(alpha: 0.12) : Colors.transparent,
             borderRadius: MlShape.radiusSmall,
             border: Border.all(
-              color:
-                  active ? t.acc.withValues(alpha: 0.30) : Colors.transparent,
+              color: active
+                  ? t.acc.withValues(alpha: 0.30)
+                  : Colors.transparent,
             ),
           ),
           child: Text(
@@ -389,17 +386,17 @@ class _KpiRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => OvCellGrid(
-        columns: kpis.length,
-        narrowColumns: 2,
-        // A per-cell measure matters more here than anywhere else on this
-        // screen, because `columns` is the number of KPIs and therefore
-        // VARIABLE: one row-width threshold cannot be right for four tiles
-        // and for six.
-        minCellWidth: 160,
-        gap: 14,
-        rowGap: 14,
-        cells: [for (final k in kpis) _KpiTile(tokens: tokens, kpi: k)],
-      );
+    columns: kpis.length,
+    narrowColumns: 2,
+    // A per-cell measure matters more here than anywhere else on this
+    // screen, because `columns` is the number of KPIs and therefore
+    // VARIABLE: one row-width threshold cannot be right for four tiles
+    // and for six.
+    minCellWidth: 160,
+    gap: 14,
+    rowGap: 14,
+    cells: [for (final k in kpis) _KpiTile(tokens: tokens, kpi: k)],
+  );
 }
 
 class _KpiTile extends StatelessWidget {
@@ -531,158 +528,181 @@ class _LeaderCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: radius,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            border: Border.all(color: t.acc.withValues(alpha: 0.32)),
-            gradient: LinearGradient(
-              begin: const Alignment(-0.9, -1),
-              end: const Alignment(0.9, 1),
-              colors: [
-                t.acc.withValues(alpha: 0.14),
-                t.acc3.withValues(alpha: 0.05),
-                t.glassBase.withValues(alpha: 0.85),
-              ],
-              stops: const [0, 0.45, 0.8],
+        // ── AN OPAQUE GROUND UNDER THE WASH ──────────────────────────────
+        //
+        // The card's body composited to a flat #1D8FA4 - sampled across it,
+        // not eyeballed - and that is a MID teal, which is the one place no
+        // ink works: white on it is 3.81:1, so even "Roadhaul Logistics",
+        // the line that LOOKED fine, was under AA. "RANK 01" was 2.26:1, the
+        // flagship "4,382.6 t" 1.27:1, and the delta 1.91:1. The card exists
+        // to announce the winner and none of what it announces could be read.
+        //
+        // The teal was not the wash. It was the GLOW: the parent draws
+        // `acc` at 60% with a 48px blur and a -22 spread, so the shadow's
+        // blurred rect covers the card's own interior - and every stop of the
+        // wash over it is translucent, so the glow came through the middle of
+        // the card at nearly full strength. Lowering the wash barely moved it
+        // (#1D8FA4 -> #1B8CA2), which is what said the wash was not the term
+        // that mattered.
+        //
+        // A card is a surface: it gets its own ground, and the glow stays
+        // outside where a glow belongs. The wash then does what it was drawn
+        // for - a cyan cast over a dark panel - instead of being a window.
+        child: ColoredBox(
+          color: t.accentCardGround,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              border: Border.all(color: t.acc.withValues(alpha: 0.32)),
+              gradient: LinearGradient(
+                begin: const Alignment(-0.9, -1),
+                end: const Alignment(0.9, 1),
+                colors: [
+                  t.acc.withValues(alpha: 0.14),
+                  t.acc3.withValues(alpha: 0.05),
+                  t.glassBase.withValues(alpha: 0.85),
+                ],
+                stops: const [0, 0.45, 0.8],
+              ),
             ),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 1,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        t.acc.withValues(alpha: 0),
-                        t.acc.withValues(alpha: 0.7),
-                        t.acc.withValues(alpha: 0),
-                      ],
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 1,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          t.acc.withValues(alpha: 0),
+                          t.acc.withValues(alpha: 0.7),
+                          t.acc.withValues(alpha: 0),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 38,
-                          height: 38,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            borderRadius: MlShape.radiusMedium,
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [t.acc3, t.acc],
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: MlShape.radiusMedium,
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [t.acc3, t.acc],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: t.acc.withValues(alpha: 0.8),
+                                  blurRadius: 18,
+                                  spreadRadius: -8,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: t.acc.withValues(alpha: 0.8),
-                                blurRadius: 18,
-                                spreadRadius: -8,
-                                offset: const Offset(0, 6),
+                            child: Icon(
+                              Icons.emoji_events_rounded,
+                              size: 20,
+                              color: t.trophyInk,
+                            ),
+                          ),
+                          const Spacer(),
+                          if (entry.delta != null)
+                            Flexible(
+                              child: Text(
+                                entry.delta!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.right,
+                                style: t.m(
+                                  size: 12,
+                                  weight: FontWeight.w500,
+                                  color: entry.deltaUp ? t.good : t.bad,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'RANK 0${entry.rank}',
+                        style: t.s(
+                          size: 11,
+                          weight: FontWeight.w600,
+                          // `inkOnAccent`, not `acc2`: this card's ground is an
+                          // accent gradient, not the canvas.
+                          color: t.inkOnAccent,
+                          letterSpacing: 1.76,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        entry.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: t.s(
+                          size: 20,
+                          weight: FontWeight.w600,
+                          color: t.inkHi,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text.rich(
+                          TextSpan(
+                            style: t.m(
+                              size: 28,
+                              weight: FontWeight.w500,
+                              color: t.inkOnAccent,
+                            ),
+                            children: [
+                              TextSpan(text: entry.tons),
+                              TextSpan(
+                                text: ' t',
+                                style: t.m(size: 13, color: t.inkOnAccentMuted),
                               ),
                             ],
                           ),
-                          child: Icon(
-                            Icons.emoji_events_rounded,
-                            size: 20,
-                            color: t.trophyInk,
-                          ),
-                        ),
-                        const Spacer(),
-                        if (entry.delta != null)
-                          Flexible(
-                            child: Text(
-                              entry.delta!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.right,
-                              style: t.m(
-                                size: 12,
-                                weight: FontWeight.w500,
-                                color: entry.deltaUp ? t.good : t.bad,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'RANK 0${entry.rank}',
-                      style: t.s(
-                        size: 11,
-                        weight: FontWeight.w600,
-                        // `inkOnAccent`, not `acc2`: this card's ground is an
-                        // accent gradient, not the canvas.
-                        color: t.inkOnAccent,
-                        letterSpacing: 1.76,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      entry.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.s(
-                        size: 20,
-                        weight: FontWeight.w600,
-                        color: t.inkHi,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text.rich(
-                        TextSpan(
-                          style: t.m(
-                            size: 28,
-                            weight: FontWeight.w500,
-                            color: t.inkOnAccent,
-                          ),
-                          children: [
-                            TextSpan(text: entry.tons),
-                            TextSpan(
-                              text: ' t',
-                              style: t.m(size: 13, color: t.inkOnAccentMuted),
-                            ),
-                          ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    OvMeter(
-                      fraction: entry.barFraction,
-                      height: 5,
-                      track: t.overlay(0.06),
-                      gradient: LinearGradient(colors: [t.acc, t.acc3]),
-                      glowColor: t.acc,
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      [
-                        entry.shareLabel,
-                        if (entry.metaSuffix != null) entry.metaSuffix!,
-                      ].join(' '),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.m(size: 11, color: t.inkOnAccentMuted),
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+                      OvMeter(
+                        fraction: entry.barFraction,
+                        height: 5,
+                        track: t.overlay(0.06),
+                        gradient: LinearGradient(colors: [t.acc, t.acc3]),
+                        glowColor: t.acc,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        [
+                          entry.shareLabel,
+                          if (entry.metaSuffix != null) entry.metaSuffix!,
+                        ].join(' '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: t.m(size: 11, color: t.inkOnAccentMuted),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -735,10 +755,7 @@ class _RunnerUpCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.right,
-                    style: t.m(
-                      size: 12,
-                      color: entry.deltaUp ? t.good : t.bad,
-                    ),
+                    style: t.m(size: 12, color: entry.deltaUp ? t.good : t.bad),
                   ),
                 ),
             ],
@@ -969,30 +986,30 @@ class _GridLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: padding,
-        decoration: decoration,
-        child: Row(
-          children: [
-            SizedBox(width: cols.rank, child: rank),
-            SizedBox(width: cols.gap),
-            Expanded(flex: (_Cols.nameFlex * 100).round(), child: name),
-            SizedBox(width: cols.gap),
-            Expanded(flex: (_Cols.shareFlex * 100).round(), child: share),
-            SizedBox(width: cols.gap),
-            SizedBox(width: cols.tons, child: tons),
-            SizedBox(width: cols.gap),
-            SizedBox(width: cols.trips, child: trips),
-            SizedBox(width: cols.gap),
-            SizedBox(width: cols.avg, child: avg),
-            SizedBox(width: cols.gap),
-            SizedBox(width: cols.onTime, child: onTime),
-            SizedBox(width: cols.gap),
-            SizedBox(width: cols.open, child: open),
-            SizedBox(width: cols.gap),
-            SizedBox(width: cols.delta, child: delta),
-          ],
-        ),
-      );
+    padding: padding,
+    decoration: decoration,
+    child: Row(
+      children: [
+        SizedBox(width: cols.rank, child: rank),
+        SizedBox(width: cols.gap),
+        Expanded(flex: (_Cols.nameFlex * 100).round(), child: name),
+        SizedBox(width: cols.gap),
+        Expanded(flex: (_Cols.shareFlex * 100).round(), child: share),
+        SizedBox(width: cols.gap),
+        SizedBox(width: cols.tons, child: tons),
+        SizedBox(width: cols.gap),
+        SizedBox(width: cols.trips, child: trips),
+        SizedBox(width: cols.gap),
+        SizedBox(width: cols.avg, child: avg),
+        SizedBox(width: cols.gap),
+        SizedBox(width: cols.onTime, child: onTime),
+        SizedBox(width: cols.gap),
+        SizedBox(width: cols.open, child: open),
+        SizedBox(width: cols.gap),
+        SizedBox(width: cols.delta, child: delta),
+      ],
+    ),
+  );
 }
 
 class _HeaderRow extends StatelessWidget {
@@ -1061,12 +1078,12 @@ class _BodyRow extends StatelessWidget {
     final t = tokens;
 
     Widget num(String text, Color color, {double size = 13}) => Text(
-          text,
-          textAlign: TextAlign.right,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: t.m(size: size, color: color),
-        );
+      text,
+      textAlign: TextAlign.right,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: t.m(size: size, color: color),
+    );
 
     return _GridLine(
       cols: cols,
@@ -1081,8 +1098,7 @@ class _BodyRow extends StatelessWidget {
                 stops: const [0, 0.6],
               )
             : null,
-        border:
-            last ? null : Border(bottom: BorderSide(color: t.line)),
+        border: last ? null : Border(bottom: BorderSide(color: t.line)),
       ),
       rank: Align(
         alignment: Alignment.centerLeft,
@@ -1112,8 +1128,8 @@ class _BodyRow extends StatelessWidget {
               color: leader
                   ? t.trophyInk
                   : row.inactive
-                      ? t.inkXlo
-                      : t.inkMid,
+                  ? t.inkXlo
+                  : t.inkMid,
             ),
           ),
         ),
@@ -1140,10 +1156,7 @@ class _BodyRow extends StatelessWidget {
             row.meta,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: t.s(
-              size: 11,
-              color: row.inactive ? t.inkXlo : t.inkLo,
-            ),
+            style: t.s(size: 11, color: row.inactive ? t.inkXlo : t.inkLo),
           ),
         ],
       ),
@@ -1169,16 +1182,13 @@ class _BodyRow extends StatelessWidget {
               color: leader
                   ? t.inkMid
                   : row.inactive
-                      ? t.inkXlo
-                      : t.inkLo,
+                  ? t.inkXlo
+                  : t.inkLo,
             ),
           ),
         ],
       ),
-      tons: num(
-        row.tons,
-        leader ? t.acc2 : (row.inactive ? t.inkLo : t.inkHi),
-      ),
+      tons: num(row.tons, leader ? t.acc2 : (row.inactive ? t.inkLo : t.inkHi)),
       trips: num(row.trips, row.inactive ? t.inkLo : t.inkHi),
       avg: num(row.avgPerTrip, row.inactive ? t.inkXlo : t.inkHi),
       onTime: num(row.onTime, t.tone(row.onTimeTone)),

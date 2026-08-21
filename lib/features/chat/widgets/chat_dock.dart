@@ -2738,7 +2738,17 @@ class _Bubble extends StatelessWidget {
                 Text(
                   MlTime.clock(message.timestamp),
                   style: context.mlText.labelSmall.copyWith(
-                    color: fg.withValues(alpha: 0.75),
+                    // `fg` with NO extra alpha.
+                    //
+                    // `fg` is already the ink the palette chose for this
+                    // bubble; taking 75% of it moves it back toward the
+                    // bubble and eats the contrast the palette was picked
+                    // for. On the default cyan bubble that put the timestamp
+                    // at **1.46:1**. It stays quieter than the message by
+                    // being `labelSmall` at w500 beside a w400 body - size
+                    // and weight, which is the same answer `textFaint`, the
+                    // pager and the driver hero all arrived at.
+                    color: fg,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

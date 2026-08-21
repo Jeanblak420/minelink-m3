@@ -257,7 +257,24 @@ class _MlPrimaryButtonState extends State<MlPrimaryButton> {
           // control under it the moment somebody pressed Tab.
           foregroundDecoration: !enabled
               ? BoxDecoration(
-                  color: MlAuth.bg.withValues(alpha: 0.55),
+                  // 0.28, not 0.55.
+                  //
+                  // A veil in FRONT dims the fill and the INK together, and
+                  // compositing both toward one colour compresses the ratio
+                  // between them: at 0.55 the word "Sign in" measured
+                  // **2.53:1** on the product's primary action. A disabled
+                  // control is exempt from the 4.5 bar, and a disabled
+                  // control nobody can read is still a bad one — this is the
+                  // button that says what will happen when the form is
+                  // filled in.
+                  //
+                  // At 0.28 the label is 5.35:1 on the gradient's middle
+                  // (6.58 on its light stop), and the fill still desaturates
+                  // from #22D3EE to a muted teal, which is what says
+                  // "disabled". Measured across all three stops rather than
+                  // picked: 0.35 was the highest that kept the middle over
+                  // 4.5, and 0.28 leaves margin for the corner.
+                  color: MlAuth.bg.withValues(alpha: 0.28),
                   borderRadius: BorderRadius.circular(MlAuth.fieldRadius),
                 )
               : _focused

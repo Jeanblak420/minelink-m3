@@ -70,6 +70,7 @@ class MlOv {
     required this.slate700,
     required this.glassBase,
     required this.accentBase,
+    required this.accentCardGround,
     required this.markerFill,
     required this.railDotFill,
     required this.avatarInner,
@@ -108,6 +109,19 @@ class MlOv {
 
   /// Fill of the one accent card (the leaderboard).
   final Color accentBase;
+
+  /// The OPAQUE ground the leaderboard's winner card is painted on.
+  ///
+  /// Distinct from [accentBase], which is translucent by design so the canvas
+  /// shows through a glass panel. The winner card cannot afford that: its
+  /// parent draws a cyan glow at 60% with a 48px blur and a -22 spread, so
+  /// the glow's blurred rect covers the card's own interior and came straight
+  /// through it - the body composited to a flat mid teal (#1D8FA4) on which
+  /// nothing was legible, white included at 3.81:1.
+  ///
+  /// So this card gets a ground of its own and the glow stays outside, where
+  /// a glow belongs.
+  final Color accentCardGround;
 
   /// Solid fills that sit *under* translucent art, so they cannot be an
   /// overlay: the hollow chart marker, the rail chart's end dot, the inside of
@@ -173,6 +187,7 @@ class MlOv {
     slate700: Color(0xFF334155),
     glassBase: Color(0xBF0F1A2E),
     accentBase: Color(0xE60F1A2E),
+    accentCardGround: Color(0xFF0F1A2E),
     markerFill: Color(0xFF0C1930),
     railDotFill: Color(0xFF0F1A2E),
     avatarInner: Color(0xFF0E1728),
@@ -213,24 +228,44 @@ class MlOv {
     inkMid: Color(0xFF455368),
     inkLo: Color(0xFF525F76),
     inkXlo: Color(0xFF5C6980),
-    acc: Color(0xFF0891B2),
-    acc2: Color(0xFF0E7490),
-    acc3: Color(0xFF0D9488),
-    // `good` and `bad` are used as INK as often as they are used as a fill -
-    // the targets month table writes its "107%" in `good`, the expiry badge
-    // writes "EXPIRED" in `bad` - and at #059669 / #DC2626 those measured
-    // 3.77:1 and 3.95:1 on the surfaces they land on. Deepened to 4.64:1 and
-    // 4.62:1. `warn` already cleared at #B45309 (5.02:1 on white) and is
-    // unchanged; moving it too would have been symmetry rather than a fix.
-    good: Color(0xFF047C57),
-    warn: Color(0xFFB45309),
-    bad: Color(0xFFC82323),
+    // ── THE LIGHT HUE SET, DEEPENED 2026-08-21 ──────────────────────────
+    //
+    // These are used as INK far more than as a fill, and the light surface
+    // they land on is not white: this is the "glass" treatment, a translucent
+    // panel over a cyan wash, so a card's real ground composites to #DCEAEE,
+    // #C2DBE6, #B9DFE8 - noticeably darker and more saturated than paper.
+    // Against those, the paper-tuned values measured 2.55-3.10:1 and put the
+    // leaderboard's own title, its tonnage and every chip on it under AA.
+    //
+    // Deepened until each clears 4.5:1 on the WORST glass ground it lands on
+    // (worst column below is #C2DBE6 / #E5D9D2):
+    //
+    //           was        now      on white   worst
+    //     acc   #0891B2 -> #05637A    6.84      4.74
+    //     acc2  #0E7490 -> #0E5A80    7.52      5.22
+    //     acc3  #0D9488 -> #09665E    6.83      4.74
+    //     good  #047C57 -> #036B4B    6.55      4.54
+    //     warn  #B45309 -> #984608    6.53      4.53
+    //     bad   #C82323 -> #B62020    6.53      4.53
+    //
+    // `acc` and `acc2` are two different HUES (cyan and sky), not two rungs
+    // of one ladder, so `acc2` is pushed toward blue rather than simply
+    // darkened - solving both to the same target had landed them on #05637A
+    // and #0C637C, which is one colour twice and would have collapsed two
+    // series in every chart.
+    acc: Color(0xFF05637A),
+    acc2: Color(0xFF0E5A80),
+    acc3: Color(0xFF09665E),
+    good: Color(0xFF036B4B),
+    warn: Color(0xFF984608),
+    bad: Color(0xFFB62020),
     violet: Color(0xFF7C3AED),
     pink: Color(0xFFDB2777),
     slate500: Color(0xFF64748B),
     slate700: Color(0xFF334155),
     glassBase: Color(0xE6FFFFFF),
     accentBase: Color(0xF2FFFFFF),
+    accentCardGround: Color(0xFFFFFFFF),
     markerFill: Color(0xFFFFFFFF),
     railDotFill: Color(0xFFFFFFFF),
     avatarInner: Color(0xFFF3F6FA),

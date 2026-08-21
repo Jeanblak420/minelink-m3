@@ -516,17 +516,18 @@ class FleetVehicleTable extends StatelessWidget {
   }
 
   Widget _statusChip(FleetVehicle vehicle, bool isAssigned) {
+    // Named once, so the fill and the ink chosen FOR that fill cannot end up
+    // describing two different pills.
+    final fill = !vehicle.isActive
+        ? const [MlTokens.slate400, MlTokens.slate500]
+        : isAssigned
+            ? const [MlTokens.emerald400, MlTokens.emerald500]
+            : const [MlTokens.red400, MlTokens.red500];
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         borderRadius: MlShape.pill,
-        gradient: LinearGradient(
-          colors: !vehicle.isActive
-              ? [MlTokens.slate400, MlTokens.slate500]
-              : isAssigned
-                  ? [MlTokens.emerald400, MlTokens.emerald500]
-                  : [MlTokens.red400, MlTokens.red500],
-        ),
+        gradient: LinearGradient(colors: fill),
       ),
       child: Text(
         !vehicle.isActive
@@ -534,8 +535,12 @@ class FleetVehicleTable extends StatelessWidget {
             : isAssigned
                 ? 'Assigned'
                 : 'Unassigned',
-        style: const TextStyle(
-          color: MlTokens.inkOnFill,
+        style: TextStyle(
+          // Measured against THIS pill's own gradient, not assumed white.
+          // These are mid-saturation status hues and white lost on both of
+          // the ones that matter: 2.09:1 on the emerald ("Assigned") and
+          // 3.44:1 on the red ("Unassigned").
+          color: MlTokens.inkOnFills(fill),
           fontWeight: FontWeight.w600,
           fontSize: 12,
         ),

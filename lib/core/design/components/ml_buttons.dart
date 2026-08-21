@@ -192,7 +192,12 @@ class _MlButtonState extends State<MlButton> {
       case _MlButtonKind.go:
         gradient = const LinearGradient(
             colors: [MlTokens.green600, MlTokens.green700]);
-        fg = MlTokens.inkOnFill;
+        // Let the ink be MEASURED against this gradient rather than assumed.
+        // Green happens to keep white (4.72:1 on the lighter stop); the
+        // orange below does not, and the point of asking is that the answer
+        // is different per fill and changes when a fill is retuned.
+        fg = MlTokens.inkOnFills(
+            const [MlTokens.green600, MlTokens.green700]);
         shadow = const [
           BoxShadow(
               color: MlTokens.glowSuccess, offset: Offset(0, 6), blurRadius: 14),
@@ -200,7 +205,11 @@ class _MlButtonState extends State<MlButton> {
       case _MlButtonKind.leave:
         gradient = const LinearGradient(
             colors: [MlTokens.orange500, MlTokens.orange600]);
-        fg = MlTokens.inkOnFill;
+        // White on this orange is 2.80:1 on the lighter stop and 3.56 on the
+        // darker one — "Mark Left" measured 3.18:1 in the security screens.
+        // Near-black is 5.90 / 4.65 and wins outright.
+        fg = MlTokens.inkOnFills(
+            const [MlTokens.orange500, MlTokens.orange600]);
         shadow = const [
           BoxShadow(
               color: MlTokens.glowWarn, offset: Offset(0, 6), blurRadius: 14),
@@ -232,7 +241,7 @@ class _MlButtonState extends State<MlButton> {
         fg = semantic.textMuted;
       case _MlButtonKind.danger:
         bg = MlTokens.red600;
-        fg = MlTokens.inkOnFill;
+        fg = MlTokens.inkOn(MlTokens.red600);
     }
     if (!enabled) {
       bg = semantic.surfaceSunken;

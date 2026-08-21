@@ -255,6 +255,12 @@ class _ModeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = MlSemantic.of(context);
     return Material(
+      // The ink on a SELECTED chip is chosen for the accent it is filled
+      // with, not assumed white. Six accents are on offer and white fails on
+      // the mid-saturation ones - 3.19:1 on Amber, which is the console
+      // DEFAULT, so the out-of-the-box state was the broken one.
+      // `MlScheme.withAccent` already recomputes `onPrimary` this way; this
+      // chip reached past it and hard-coded white.
       color: selected ? accent : s.surfaceCard,
       shape: RoundedRectangleBorder(
         borderRadius: MlShape.radiusMedium,
@@ -269,12 +275,12 @@ class _ModeButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon,
-                  size: 18, color: selected ? MlTokens.inkOnFill : s.textBody),
+                  size: 18, color: selected ? MlTokens.inkOn(accent) : s.textBody),
               const SizedBox(width: 7),
               Text(
                 label,
                 style: context.mlText.titleSmall.copyWith(
-                  color: selected ? MlTokens.inkOnFill : s.textBody,
+                  color: selected ? MlTokens.inkOn(accent) : s.textBody,
                   fontWeight: FontWeight.w700,
                 ),
               ),

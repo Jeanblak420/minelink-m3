@@ -205,18 +205,37 @@ class MlGlass {
     inkMid: Color(0xFF455368),
     inkLo: Color(0xFF525F76),
     inkXlo: Color(0xFF5C6980),
-    accent: Color(0xFF0891B2),
-    accent2: Color(0xFF0E7490),
-    accent3: Color(0xFF0D9488),
-    // `good` and `bad` are used as INK as often as they are used as a fill -
-    // the targets month table writes its "107%" in `good`, the expiry badge
-    // writes "EXPIRED" in `bad` - and at #059669 / #DC2626 those measured
-    // 3.77:1 and 3.95:1 on the surfaces they land on. Deepened to 4.64:1 and
-    // 4.62:1. `warn` already cleared at #B45309 (5.02:1 on white) and is
-    // unchanged; moving it too would have been symmetry rather than a fix.
-    good: Color(0xFF047C57),
-    warn: Color(0xFFB45309),
-    bad: Color(0xFFC82323),
+    // ── THE LIGHT HUE SET, DEEPENED 2026-08-21 ──────────────────────────
+    //
+    // These are used as INK far more than as a fill, and the light surface
+    // they land on is not white: this is the "glass" treatment, a translucent
+    // panel over a cyan wash, so a card's real ground composites to #DCEAEE,
+    // #C2DBE6, #B9DFE8 - noticeably darker and more saturated than paper.
+    // Against those, the paper-tuned values measured 2.55-3.10:1 and put the
+    // leaderboard's own title, its tonnage and every chip on it under AA.
+    //
+    // Deepened until each clears 4.5:1 on the WORST glass ground it lands on
+    // (worst column below is #C2DBE6 / #E5D9D2):
+    //
+    //           was        now      on white   worst
+    //     accent #0891B2 -> #05637A    6.84      4.74
+    //     accent2#0E7490 -> #0E5A80    7.52      5.22
+    //     accent3#0D9488 -> #09665E    6.83      4.74
+    //     good  #047C57 -> #036B4B    6.55      4.54
+    //     warn  #B45309 -> #984608    6.53      4.53
+    //     bad   #C82323 -> #B62020    6.53      4.53
+    //
+    // `accent` and `accent2` are two different HUES (cyan and sky), not two rungs
+    // of one ladder, so `accent2` is pushed toward blue rather than simply
+    // darkened - solving both to the same target had landed them on #05637A
+    // and #0C637C, which is one colour twice and would have collapsed two
+    // series in every chart.
+    accent: Color(0xFF05637A),
+    accent2: Color(0xFF0E5A80),
+    accent3: Color(0xFF09665E),
+    good: Color(0xFF036B4B),
+    warn: Color(0xFF984608),
+    bad: Color(0xFFB62020),
     violet: Color(0xFF7C3AED),
     glassTop: Color(0xCCFFFFFF),
     glassBottom: Color(0x99FFFFFF),
