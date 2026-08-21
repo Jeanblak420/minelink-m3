@@ -71,12 +71,22 @@ class _PhotoCaptureFieldState extends State<PhotoCaptureField> {
               : MlSemantic.of(context).borderCard,
         ),
       ),
-      child: Row(
-        children: [
-          _thumb(scheme),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
+      // The BUTTON drops below the label when the row is narrow.
+      //
+      // Thumbnail, label and a "Take picture" button in one Row leave the
+      // label about 60px on a phone, so "Empty scale photo" was drawn as
+      // three stacked words beside a picture of nothing. Photographed on
+      // `dialog-record-load-phone-dark` — and this is the load controller's
+      // screen, where the label is the only thing saying WHICH weigh the
+      // photo is for.
+      child: LayoutBuilder(builder: (context, c) {
+        final narrow = c.maxWidth < 420;
+        final identity = Row(
+          children: [
+            _thumb(scheme),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -97,6 +107,9 @@ class _PhotoCaptureFieldState extends State<PhotoCaptureField> {
               ],
             ),
           ),
+          ],
+        );
+        final actions = [
           if (captured)
             IconButton(
               tooltip: 'Remove',
@@ -109,8 +122,20 @@ class _PhotoCaptureFieldState extends State<PhotoCaptureField> {
                 size: 18),
             label: Text(captured ? 'Retake' : 'Take picture'),
           ),
-        ],
-      ),
+        ];
+        if (narrow) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              identity,
+              const SizedBox(height: 4),
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: actions),
+            ],
+          );
+        }
+        return Row(children: [Expanded(child: identity), ...actions]);
+      }),
     );
   }
 

@@ -726,27 +726,36 @@ class _ReadOnlyBanner extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(
-                borderRadius: MlShape.pill,
-                border: Border.all(color: MlControlRoom.borderCard),
-                color: MlControlRoom.surfaceTile,
-              ),
-              child: Text(
-                'Permissions active',
-                style: context.mlText.labelMedium.copyWith(
-                  color: MlControlRoom.textMuted,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+            // The pill only shares the row when there is room for both.
+            //
+            // At its natural ~150px beside an `Expanded` sentence, a phone
+            // left the sentence a 110px column — five lines of "Edits,
+            // deletes, and moves are disabled" next to a pill that says less.
+            if (MediaQuery.sizeOf(context).width >= 560) ...[
+              const SizedBox(width: 10),
+              _permissionsPill(context),
+            ],
           ],
         ),
       ),
     );
   }
+
+  Widget _permissionsPill(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        decoration: BoxDecoration(
+          borderRadius: MlShape.pill,
+          border: Border.all(color: MlControlRoom.borderCard),
+          color: MlControlRoom.surfaceTile,
+        ),
+        child: Text(
+          'Permissions active',
+          style: context.mlText.labelMedium.copyWith(
+            color: MlControlRoom.textMuted,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
 }
 
 class _PillTabBar extends StatelessWidget {
@@ -1119,32 +1128,38 @@ class _DashboardBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Operational snapshot',
-                      style: context.mlText.titleMedium.copyWith(
-                        color: MlControlRoom.textStrong,
-                        fontWeight: FontWeight.w800,
-                      ),
+          // Words then pills, stacked — not words BESIDE pills in a Row.
+          //
+          // Two chips of natural width beside an `Expanded` column left the
+          // heading about 110px on a phone: "Operational snapshot" over two
+          // lines and its sentence over five, in a column narrower than the
+          // pills next to it. Photographed on
+          // `screen-company-mirror-phone-dark`.
+          LayoutBuilder(
+            builder: (context, c) {
+              final words = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Operational snapshot',
+                    style: context.mlText.titleMedium.copyWith(
+                      color: MlControlRoom.textStrong,
+                      fontWeight: FontWeight.w800,
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'This calendar month, from the company\'s live records',
-                      style: context.mlText.bodySmall.copyWith(
-                        color: MlControlRoom.textMuted,
-                      ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'This calendar month, from the company\'s live records',
+                    style: context.mlText.bodySmall.copyWith(
+                      color: MlControlRoom.textMuted,
                     ),
-                  ],
-                ),
-              ),
-              Wrap(
+                  ),
+                ],
+              );
+              final pills = Wrap(
                 spacing: 8,
+                runSpacing: 8,
                 children: [
                   if ((s?.drivers ?? 0) > 0)
                     chipPill(
@@ -1157,8 +1172,18 @@ class _DashboardBody extends StatelessWidget {
                       MlControlRoom.green,
                     ),
                 ],
-              ),
-            ],
+              );
+              if (c.maxWidth < 520) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [words, const SizedBox(height: 10), pills],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [Expanded(child: words), pills],
+              );
+            },
           ),
           const SizedBox(height: 16),
           // Tiles reflow 4-across → 2×2 → stacked as the card narrows.

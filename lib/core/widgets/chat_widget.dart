@@ -821,7 +821,13 @@ class _ChatWidgetState extends State<ChatWidget> {
               ),
               cursorColor: MlTokens.accent,
               decoration: InputDecoration(
-                hintText: 'Type a message…',
+                // "Write a message…", the wording the other two composers
+                // use. This product has three message boxes — this one, the
+                // Messages screen's and the chat dock's — and this was the
+                // only one that said "Type". Photographed side by side on
+                // `screen-messages-phone-dark` and
+                // `screen-chat-thread-phone-dark`.
+                hintText: 'Write a message…',
                 hintStyle: context.mlText.bodyLarge.copyWith(
                   color: semantic.textFaint,
                 ),

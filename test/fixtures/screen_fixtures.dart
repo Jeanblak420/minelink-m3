@@ -440,14 +440,21 @@ Override profileSetupOverride() {
         SetupItemKind.document, SetupItemStatus.missing, order: 2),
     item('signature', 'Signature', SetupCategory.identity,
         SetupItemKind.signature, SetupItemStatus.complete, order: 3),
+    // The DATE and the COUNTDOWN have to agree. These said
+    // "Expires 01 Mar 2020 · In 12 days" and "Expires 15 Jan 2020 · 4 days
+    // overdue" against a product whose today is 15 August 2026 — a card
+    // contradicting itself in its own two lines. `daysToExpiry` is what the
+    // server computes from `expiresAt`, so a fixture that sets them
+    // independently can print an impossibility that the real screen never
+    // would.
     item('medical', 'Medical certificate', SetupCategory.medical,
         SetupItemKind.document, SetupItemStatus.expiring,
         order: 4,
-        expiresAt: DateTime.utc(2020, 3, 1),
+        expiresAt: DateTime.utc(2026, 8, 27),
         daysToExpiry: 12),
     item('licence', 'Driving licence', SetupCategory.licences,
         SetupItemKind.document, SetupItemStatus.expired,
-        order: 5, expiresAt: DateTime.utc(2020, 1, 15), daysToExpiry: -4),
+        order: 5, expiresAt: DateTime.utc(2026, 8, 11), daysToExpiry: -4),
     item('hazmat', 'Hazmat certificate', SetupCategory.certifications,
         SetupItemKind.document, SetupItemStatus.missing,
         required: false, order: 6),
