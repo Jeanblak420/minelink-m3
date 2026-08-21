@@ -149,6 +149,7 @@ import '../test_helpers/fake_geolocator.dart';
 import '../test_helpers/fake_path_provider.dart';
 import '../test_helpers/real_fonts.dart';
 import '../test_helpers/render_pumps.dart';
+import 'low_contrast_report.dart';
 
 /// Screen class name -> the console route that builds it, read off the router.
 ///
@@ -401,7 +402,12 @@ void main() {
     FlutterError.onError =
         (d) => captured.add(d.exception.toString().split('\n').first);
 
-    await tester.pumpWidget(widget);
+    // Wrapped so the pixels can be read back. `matchesGoldenFile` captures
+    // its own image internally and hands it to a comparator; the contrast
+    // report below needs the same pixels IN the test, which means a boundary
+    // of our own. It changes nothing about what is drawn.
+    final captureKey = GlobalKey();
+    await tester.pumpWidget(RepaintBoundary(key: captureKey, child: widget));
     // The whole settle schedule, and the reasoning behind every step of it,
     // lives in `test/test_helpers/render_pumps.dart` — shared with the test
     // that proves the schedule is long enough, so the two cannot drift.
@@ -598,6 +604,49 @@ void main() {
         print('      ${entry.value}');
       }
     }
+
+    // AND EVERY STRING THAT IS TOO FAINT TO READ, MEASURED OFF THE PIXELS.
+    //
+    // `test/design/token_contrast_test.dart` measures every colour PAIR the
+    // design system can produce, in both brightnesses, and it is the right
+    // shape for what it covers. Its own header explains the limit: it reasons
+    // that "a screen cannot have a light-mode colour fault of its own; it can
+    // only inherit one from a token pair".
+    //
+    // That is not true, and the leaderboard's winner card disproved it — rank,
+    // tonnage and share drawn at **2.2:1** on a gradient the widget builds
+    // itself out of two colours that are each fine on the surfaces the palette
+    // knows about. A pair audit cannot see a ground that no token names.
+    //
+    // So this one measures what was PAINTED. For every paragraph: take the
+    // pixels inside its box, call the most common colour the ground, call the
+    // pixels furthest from it the ink, and report the WEAKEST ink against that
+    // ground. Reading it back from the raster is what makes gradients, alpha
+    // stacks, sheens, shadows and images all just work — none of them has to
+    // be modelled, because they have already happened.
+    //
+    // Three details that are load-bearing:
+    //
+    //  * **The weakest ink, not the strongest.** A gradient wordmark has a
+    //    readable end and a less readable one, and the less readable one is
+    //    the one a person struggles with.
+    //  * **Only glyph CORES count.** Anti-aliased edges sit between ink and
+    //    ground by construction; counting them would report every string on
+    //    the screen as failing. The cut is at half the maximum distance from
+    //    the ground.
+    //  * **The threshold follows WCAG's own definition of large text** —
+    //    3:1 at >=24px, or >=18.66px bold; 4.5:1 otherwise — computed from the
+    //    paragraph's real style and the ambient text scaler, not assumed.
+    //
+    // REPORTED, not failed, like the cut list above it: a decorative watermark
+    // and a disabled control are both meant to be faint, and a check that
+    // fails on those teaches people to add exclusions rather than to look.
+    final faint = await reportLowContrast(tester, captureKey, name, size);
+    // REPORTED like the two above it, and RATCHETED unlike them. There are
+    // 1,859 of these and clearing that is not a commit — but a screen getting
+    // fainter than it already is should not pass quietly either. The baseline
+    // is per render, so it can only shrink.
+    expectNoNewLowContrast(name, faint.length);
 
     await expectLater(
       find.byType(MaterialApp),
