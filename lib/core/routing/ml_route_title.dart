@@ -116,8 +116,35 @@ MlRouteTitle mlRouteTitle(Uri uri, {MlPortalTabs tabs = MlPortalTabs.empty}) {
 // `_SuperAdminShellLayoutState._titleForPath` / `_subtitleForPath`.
 // ---------------------------------------------------------------------------
 
+/// ## Twenty-one routes used to fall off the bottom of this ladder
+///
+/// Driven in a browser as the platform admin on 2026-08-21, the targets screen
+/// had a top bar reading "Platform Admin / Platform management" over a page
+/// headed "Platform targets". It was not alone: 21 of the console's 38 routes
+/// hit the `return 'Platform Admin'` below, and 29 hit the matching subtitle
+/// fallback — margin ledger, recon tables, disputes, crash reports, the live
+/// map, account deactivations, seat requests, tons out, the marketplace, all
+/// five targets screens. Half the console announced itself by the name of the
+/// console.
+///
+/// One was worse than unnamed. `/super-admin/requests/transportation-buyer` is
+/// the BUYER TRANSPORT inbox, and `path.contains('/requests/buyer')` matched
+/// it first and titled it **"Requested buyers"** — the name of a different
+/// inbox, one screen away in the same rail group. A missing name is a gap; a
+/// confidently wrong one is a lie, and the router already carries a note about
+/// this same ladder doing the same thing to an unknown request type.
+///
+/// The names below are the RAIL's own labels (`console_nav.dart`), so the bar
+/// and the rail agree about what a destination is called — the same rule the
+/// portal half of this file adopted when it had this fault.
+///
+/// `test/core/every_console_route_is_named_test.dart` reads the router and
+/// fails on any route that reaches either fallback, so a new console route
+/// cannot be added without naming it.
 String _consoleTitle(String path) {
-  if (path == '/super-admin') return 'Global Admin · Dashboard';
+  if (path == '/super-admin' || path.contains('/dashboard-v2')) {
+    return 'Global Admin · Dashboard';
+  }
   if (path.startsWith('/super-admin/insights/') && path.contains('/company/')) {
     return 'Company workspace';
   }
@@ -128,13 +155,52 @@ String _consoleTitle(String path) {
       !path.contains('/company/')) {
     return 'Organization insights';
   }
+
+  // Targets: three independent scopes (CLAUDE.md §4 "the scope rule"), and the
+  // bar has to say WHICH, because the three screens are otherwise identical
+  // and a platform target is not a rollup of the others.
+  if (path.contains('/targets/org-type')) return 'Org-type targets';
+  if (path.contains('/targets/company')) return 'Company targets';
+  if (path.contains('/targets')) return 'Platform targets';
+
   if (path.contains('/chat-links')) return 'Chat links';
   if (path.contains('/organizations')) return 'Organizations';
+  // Singular — one organization, not the roster. It does NOT contain
+  // "/organizations", so it never reached the line above.
+  if (path.contains('/organization/')) return 'Organization';
   if (path.contains('/register-company')) return 'Register company';
+  if (path.contains('/users')) return 'Platform users';
   if (path.contains('/audit-logs')) return 'Audit logs';
+  if (path.contains('/crash-reports')) return 'Crash reports';
+  if (path.contains('/account-deactivations')) return 'Account deactivations';
+
+  // The two transport inboxes FIRST — both contain '/requests/transportation',
+  // and the buyer one also contains '/requests/buyer'.
+  if (path.contains('/requests/transportation-mine')) {
+    return 'Mine/Supplier transport';
+  }
+  if (path.contains('/requests/transportation-buyer')) {
+    return 'Buyer transport';
+  }
+  if (path.contains('/requests/mine-transport')) return 'Mine/Supplier transport';
+  if (path.contains('/requests/buyer-transport')) return 'Buyer transport';
   if (path.contains('/requests/transportation')) return 'Requested routes';
   if (path.contains('/requests/product')) return 'Requested product';
   if (path.contains('/requests/buyer')) return 'Requested buyers';
+
+  // '/request-tracking' has no '/requests/' in it, so it never collided with
+  // the block above — it simply was not listed.
+  if (path.contains('/request-tracking')) return "Request's Tracking Logs";
+  if (path.contains('/driver-limits')) return 'Transporter Driver limits';
+  if (path.contains('/margin-ledger')) return 'Margin ledger History';
+  if (path.contains('/recon-tables')) return 'Recon tables';
+  if (path.contains('/disputes')) return 'Disputes';
+  if (path.contains('/tons-out')) return 'Tons out';
+  if (path.contains('/available-routes')) return 'Available routes';
+  if (path.contains('/route-marketplace')) return 'Route marketplace';
+  if (path.contains('/live-map')) return 'Live map';
+  if (path.contains('/seat-requests')) return 'Seat requests';
+
   if (path.contains('/token-requests')) return 'Token requests';
   if (path.contains('/token-history')) return 'Token history';
   if (path.contains('/notifications')) return 'Notifications';
@@ -145,7 +211,7 @@ String _consoleTitle(String path) {
 }
 
 String _consoleSubtitle(String path) {
-  if (path == '/super-admin') {
+  if (path == '/super-admin' || path.contains('/dashboard-v2')) {
     return 'Full system overview · Live · updated just now';
   }
   if (path.startsWith('/super-admin/insights/') && path.contains('/company/')) {
@@ -153,7 +219,16 @@ String _consoleSubtitle(String path) {
   }
   if (path.startsWith('/super-admin/insights/') &&
       !path.contains('/company/')) {
-    return 'This month (device calendar) · monthly rollups per company';
+    // NOT "(device calendar)", which is what this said until 2026-08-21 and
+    // was read on a live console before anybody noticed it was false. The
+    // window is `MlTime.now()` — the Africa/Johannesburg month (CLAUDE.md
+    // §7.1) — so it is the same month for every reader whatever their laptop
+    // is set to, and that is the whole point of the one-clock rule. Telling an
+    // admin the number depends on their device is precisely the misconception
+    // §7.1 exists to end, and it was printed in the chrome of the screen the
+    // number is on. The wording matches the notification screen's, which is
+    // the product's existing user-facing phrase for this.
+    return 'This month (South African time) · monthly rollups per company';
   }
   if (path.contains('/chat-links')) {
     return 'Link companies so their people can message each other';
@@ -166,6 +241,101 @@ String _consoleSubtitle(String path) {
   }
   if (path.contains('/notifications')) {
     return 'Platform alerts and token activity';
+  }
+
+  // The 29 that reached "Platform management" — a line that describes the
+  // console rather than the screen, and so said nothing at all on the screen
+  // it was printed on. Each one says what this page is FOR, in a clause, which
+  // is what the four above it already did.
+  //
+  // Ordered exactly like `_consoleTitle`: the three targets scopes before the
+  // bare `/targets`, and the two transport inboxes before the generic
+  // transportation match, for the same collisions.
+  if (path.contains('/targets/org-type')) {
+    return 'One commitment per organization type · independent of the others';
+  }
+  if (path.contains('/targets/company')) {
+    return 'One commitment per company · independent of the others';
+  }
+  if (path.contains('/targets')) {
+    return 'Every organisation combined · monthly goals and the 12-month cycle';
+  }
+  if (path.contains('/organizations')) {
+    return 'Every registered company, its seats and its token expiry';
+  }
+  if (path.contains('/organization/')) {
+    return 'One company · seats, people and token history';
+  }
+  if (path.contains('/register-company')) {
+    return 'Create a company and issue its first access token';
+  }
+  if (path.contains('/users')) {
+    return 'Every person with an account, across all organizations';
+  }
+  if (path.contains('/audit-logs')) {
+    return 'Who did what, and when · newest first';
+  }
+  if (path.contains('/crash-reports')) {
+    return 'Errors reported by the app itself · grouped by fingerprint';
+  }
+  if (path.contains('/account-deactivations')) {
+    return 'Requests to deactivate an account, and the accounts already held';
+  }
+  if (path.contains('/requests/transportation-mine') ||
+      path.contains('/requests/mine-transport')) {
+    return 'Mines and suppliers asking for trucks · approve, send back or link';
+  }
+  if (path.contains('/requests/transportation-buyer') ||
+      path.contains('/requests/buyer-transport')) {
+    return 'Buyers asking for trucks · approve, send back or link';
+  }
+  if (path.contains('/requests/transportation')) {
+    return 'Route and transporter requests awaiting review';
+  }
+  if (path.contains('/requests/product')) {
+    return 'Buyers asking for a product listing';
+  }
+  if (path.contains('/requests/buyer')) {
+    return 'Mines asking for buyer connections and roster access';
+  }
+  if (path.contains('/request-tracking')) {
+    return 'Every request, and where it has got to';
+  }
+  if (path.contains('/driver-limits')) {
+    return 'Requests to put more than two drivers on one truck · max five';
+  }
+  if (path.contains('/margin-ledger')) {
+    return 'Agreed price, your cut and the transporter price, per route';
+  }
+  if (path.contains('/recon-tables')) {
+    return 'Every load from every transporter, combined · exportable';
+  }
+  if (path.contains('/disputes')) {
+    return 'Weight and delivery disagreements raised by a party';
+  }
+  if (path.contains('/tons-out')) {
+    return 'Weighbridge movements out of the mines';
+  }
+  if (path.contains('/available-routes')) {
+    return 'Learned routes you can assign to an organization to pre-fill';
+  }
+  if (path.contains('/route-marketplace')) {
+    return 'Every route every transporter runs · admin-only until published';
+  }
+  if (path.contains('/live-map')) {
+    return 'Trucks reporting position right now, across every trip';
+  }
+  if (path.contains('/seat-requests')) {
+    return 'Companies asking for more seats than their token allows';
+  }
+  if (path.contains('/token-requests')) {
+    return 'Access tokens awaiting your approval';
+  }
+  if (path.contains('/token-history')) {
+    return 'Every token ever issued, renewed or revoked';
+  }
+  if (path.endsWith('/settings')) {
+    return 'Platform-wide configuration';
   }
   return 'Platform management';
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_application_1/core/constants/app_branding.dart';
 import 'package:flutter_application_1/core/design/shell/ml_nav_rail.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_chrome.dart';
@@ -13,6 +14,36 @@ import 'package:flutter_application_1/core/widgets/user_identity_flyout.dart';
 /// Shared by the console and the portal. Previously each drew its own — same
 /// logo, different padding, different collapsed behaviour — so the two rails
 /// did not line up with each other at any width.
+///
+/// ## Why the MARK and not the lockup
+///
+/// This drew `MineLinkLogo(height: 28)` — the full STACKED lockup, which is
+/// three tiers of artwork: the chain mark, the "MineLink" wordmark under it,
+/// and a letter-spaced "TECHNOLOGIES" strapline under that. Measured against
+/// the asset's own ink bands (1281x991, `minelink_logo_white.png`), 28 logical
+/// pixels buys:
+///
+///   * chain mark      584/991 of the height  ->  **16.50 px**
+///   * "MineLink"      231/991                ->  **6.53 px**
+///   * "TECHNOLOGIES"   67/991                ->  **1.89 px**
+///
+/// A 6.5px wordmark and a 1.9px strapline are not small type, they are mush —
+/// and the mark itself came out SMALLER than the 34px avatar at the foot of
+/// the same rail. It was photographed in `console-desktop-dark.png` from the
+/// first render onward and read as a broken image rather than as a brand.
+///
+/// So the rail now draws what that slot is for: `MineLinkMark`, which is the
+/// chain mark alone and is documented for exactly this ("compact brand spots
+/// (collapsed sidebars, auth headers)"). The wordmark comes back as REAL TEXT
+/// in the app's own face — which is also what `MlChrome.wordmarkStart/End`
+/// were added for. Those two tokens were defined, threaded through `copyWith`
+/// and `lerp`, and then used by no widget at all; this is the widget they
+/// were waiting for.
+///
+/// The lockup is still right where it is large enough to be read — the auth
+/// panel (132px, and 290px wide) and the boot screen (128px / 96px). The
+/// `brand-lockup-drawn-too-small` guard holds the floor at its own default
+/// height of 64, below which the strapline drops under 4.3px.
 class MlRailBrand extends StatelessWidget {
   const MlRailBrand({
     super.key,
@@ -52,18 +83,40 @@ class MlRailBrand extends StatelessWidget {
                   ? MainAxisAlignment.start
                   : MainAxisAlignment.center,
               children: [
-                const MineLinkLogo(height: 28, onDark: true),
-                if (open && subtitle != null) ...[
+                const MineLinkMark(size: 30, onDark: true),
+                if (open) ...[
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Text(
-                      subtitle!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: text.labelSmall?.copyWith(
-                        color: chrome.railSectionLabel,
-                        letterSpacing: 1.1,
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _RailWordmark(
+                          start: chrome.wordmarkStart,
+                          end: chrome.wordmarkEnd,
+                          style: text.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.2,
+                            height: 1.05,
+                            // Painted over by the shader. It is a real token
+                            // rather than a placeholder so that the one case
+                            // where the shader does not apply — a platform
+                            // that declines the mask — still reads.
+                            color: chrome.railLabelSelected,
+                          ),
+                        ),
+                        if (subtitle != null)
+                          Text(
+                            subtitle!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: text.labelSmall?.copyWith(
+                              color: chrome.railSectionLabel,
+                              letterSpacing: 1.1,
+                              height: 1.2,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
@@ -71,6 +124,46 @@ class MlRailBrand extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// The product name, in the app's own face, under the brand's cyan->blue.
+///
+/// `BlendMode.srcIn` paints the gradient THROUGH the glyphs, so the shader
+/// replaces the text colour rather than tinting a box around it. The gradient
+/// runs across the text's own bounds, not the rail's, so the two stops land on
+/// the word whatever the rail is doing behind it.
+///
+/// Both stops clear WCAG AA *body* against every rail ground the product has,
+/// in both brightnesses — 6.54:1 at worst (`#5AA2FF` on the light theme's
+/// `#0C1C34` rail top). That is not luck: the rail is navy in BOTH themes by
+/// design (see `MlChrome.dark`'s note), so there is no light-mode ground for
+/// this to fall onto. `test/design/token_contrast_test.dart` measures it.
+class _RailWordmark extends StatelessWidget {
+  const _RailWordmark({
+    required this.start,
+    required this.end,
+    required this.style,
+  });
+
+  final Color start;
+  final Color end;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (bounds) => LinearGradient(
+        colors: [start, end],
+      ).createShader(Offset.zero & bounds.size),
+      child: Text(
+        AppBranding.appName,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: style,
       ),
     );
   }

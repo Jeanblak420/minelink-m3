@@ -16,6 +16,20 @@
 // and `startsWith`, so several routes match more than one rule and only the
 // order picks the winner — a reordered branch is the plausible edit here, and
 // it does not fail to compile.
+//
+// ## Nine console subtitles have deliberately moved on from the carry-over
+//
+// The pre-merge table gave nine routes the generic "Platform management" —
+// organizations, register-company, audit-logs, the three request inboxes,
+// token-requests, token-history and settings. That is a line about the console
+// printed on a screen, and it said nothing about any of them. They now carry a
+// clause each, and the expectations here were updated to match rather than
+// pinned to the old string: this file exists to catch UNINTENDED drift, and a
+// deliberate improvement recorded in the same commit is not that.
+//
+// The change came out of `every_console_route_is_named_test.dart`, which found
+// 21 console routes with no title at all and 29 with no subtitle. Everything
+// else below is still the verbatim carry-over.
 
 import 'package:flutter_application_1/core/routing/ml_route_title.dart';
 import 'package:flutter_application_1/core/routing/notifications_manage_route.dart';
@@ -33,7 +47,7 @@ void main() {
       ),
       '/super-admin/insights/transporter': (
         'Organization insights',
-        'This month (device calendar) · monthly rollups per company'
+        'This month (South African time) · monthly rollups per company'
       ),
       '/super-admin/insights/transporter/company/abc': (
         'Company workspace',
@@ -43,26 +57,38 @@ void main() {
         'Chat links',
         'Link companies so their people can message each other'
       ),
-      '/super-admin/organizations': ('Organizations', 'Platform management'),
+      '/super-admin/organizations': (
+        'Organizations',
+        'Every registered company, its seats and its token expiry'
+      ),
       '/super-admin/register-company': (
         'Register company',
-        'Platform management'
+        'Create a company and issue its first access token'
       ),
-      '/super-admin/audit-logs': ('Audit logs', 'Platform management'),
+      '/super-admin/audit-logs': (
+        'Audit logs',
+        'Who did what, and when · newest first'
+      ),
       '/super-admin/requests/transportation': (
         'Requested routes',
-        'Platform management'
+        'Route and transporter requests awaiting review'
       ),
       '/super-admin/requests/product': (
         'Requested product',
-        'Platform management'
+        'Buyers asking for a product listing'
       ),
       '/super-admin/requests/buyer': (
         'Requested buyers',
-        'Platform management'
+        'Mines asking for buyer connections and roster access'
       ),
-      '/super-admin/token-requests': ('Token requests', 'Platform management'),
-      '/super-admin/token-history': ('Token history', 'Platform management'),
+      '/super-admin/token-requests': (
+        'Token requests',
+        'Access tokens awaiting your approval'
+      ),
+      '/super-admin/token-history': (
+        'Token history',
+        'Every token ever issued, renewed or revoked'
+      ),
       '/super-admin/notifications': (
         'Notifications',
         'Platform alerts and token activity'
@@ -75,7 +101,10 @@ void main() {
         'User Preferences',
         'Appearance, display & accessibility · saved to your account only'
       ),
-      '/super-admin/settings': ('Platform settings', 'Platform management'),
+      '/super-admin/settings': (
+        'Platform settings',
+        'Platform-wide configuration'
+      ),
       '/super-admin/anything-unmapped': (
         'Platform Admin',
         'Platform management'

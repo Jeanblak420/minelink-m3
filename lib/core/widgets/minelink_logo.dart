@@ -15,6 +15,26 @@ class MineLinkLogo extends StatelessWidget {
   static const assetLight = 'assets/branding/minelink_logo.png'; // black/gold
   static const assetDark = 'assets/branding/minelink_logo_white.png';
 
+  /// The committed artwork is 1281x991, so the lockup is this much wider than
+  /// it is tall. Named here because [legibleHeight] has to reason about a
+  /// caller who sized the WIDTH — `BoxFit.contain` then derives the height,
+  /// and a width small enough to crush the strapline looks perfectly innocent
+  /// at the call site.
+  static const lockupAspect = 1281 / 991;
+
+  /// Below this the lockup stops being a logo and starts being a smudge.
+  ///
+  /// The artwork is three stacked bands of ink, and the two type bands are the
+  /// small ones — "MineLink" is 231 of the 991 rows and the letter-spaced
+  /// "TECHNOLOGIES" strapline is 67. At this height they draw 14.9px and 4.3px
+  /// respectively, which is the floor at which both are still type. At the 28
+  /// the rail used to ask for, they drew 6.5px and **1.89px**.
+  ///
+  /// It is deliberately the widget's own default height: asking for less than
+  /// the default is asking for [MineLinkMark], and that is what the assert
+  /// says.
+  static const legibleHeight = 64.0;
+
   final double? height;
   final double? width;
 
@@ -30,7 +50,19 @@ class MineLinkLogo extends StatelessWidget {
     // Only default the height when the caller sized neither axis — passing
     // width alone must NOT also pin height, or the art letterboxes down to
     // the 64px default inside the requested width.
-    final h = height ?? (width == null ? 64.0 : null);
+    final h = height ?? (width == null ? legibleHeight : null);
+    assert(
+      (h ?? double.infinity) >= legibleHeight,
+      'MineLinkLogo asked for height ${h!} — the stacked lockup is illegible '
+      'below $legibleHeight (its strapline draws under 4.3px). Use '
+      'MineLinkMark for a compact brand spot.',
+    );
+    assert(
+      width == null || width! / lockupAspect >= legibleHeight,
+      'MineLinkLogo asked for width $width, which BoxFit.contain resolves to '
+      '${(width ?? 0) / lockupAspect} tall — below the $legibleHeight the '
+      'lockup needs. Use MineLinkMark for a compact brand spot.',
+    );
     return Image.asset(
       dark ? assetDark : assetLight,
       height: h,

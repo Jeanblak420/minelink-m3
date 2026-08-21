@@ -76,6 +76,119 @@ Duration mlDuration(BuildContext context, Duration d) =>
 // Buttons
 // ===========================================================================
 
+/// What makes a hand-drawn auth button a BUTTON.
+///
+/// Both buttons on the sign-in card are drawn by hand — a gradient slab and a
+/// tinted outline — so neither is a `ButtonStyleButton` and neither inherits
+/// what one gives you for free. Until 2026-08-21 they inherited none of it,
+/// and driving the redesign in a real browser is what showed it. The live
+/// accessibility tree of the sign-in card, on the empty form every user meets
+/// first, read:
+///
+///     button     "Show password"
+///     button     "Forgot password?"
+///     StaticText "Sign in"                    <- the primary action
+///     button     "Sign in with WhatsApp code"
+///
+/// Three separate things were wrong, and only the first one is visible there:
+///
+///  1. **A disabled button vanished instead of announcing as disabled.**
+///     `onPressed` is null until the form validates, so `GestureDetector.onTap`
+///     was null, so the node carried no tap action and collapsed to a bare
+///     string. A screen-reader user was told the sign-in screen has no sign-in
+///     control — rather than that it has one and it is not ready yet, which is
+///     the entire message that state exists to send.
+///  2. **Neither was a button even when ENABLED.** The browser was being
+///     generous: Flutter's web engine maps any tappable node to `role=button`
+///     in the DOM, so the ghost button *looked* correct in the tree while
+///     carrying no `isButton` flag at all. Under `flutter test`, which reads
+///     the real semantics, both failed. A platform that infers less — and
+///     every non-web one does — got neither.
+///  3. **Neither could be reached by keyboard.** A `GestureDetector` takes no
+///     focus, so Tab walked email -> password -> Show password -> Forgot
+///     password and then straight past both buttons to the legal links. Enter
+///     appeared to work only because the text field's own submit action fires
+///     the same callback; from the password field alone, with nothing else
+///     focused, there was no way to sign in without a pointer.
+///
+/// So it is all here, once, rather than twice and drifting:
+///
+///  * `Semantics(button, enabled, label)` with `excludeSemantics`, so the node
+///    is one button carrying one label instead of a container wrapping a
+///    string. The label is the EFFECTIVE one, which is why a busy button
+///    announces "Signing in…" rather than the label under the spinner.
+///  * `FocusableActionDetector` for focus, hover and Enter/Space. Its
+///    `enabled` flag is the same `onPressed != null`, so a disabled button is
+///    skipped by Tab rather than focused and inert.
+///  * A visible focus ring, drawn by the caller through [focused] — keyboard
+///    operability with no indicator is half a fix.
+///
+/// Pinned by `test/widgets/auth_buttons_are_buttons_test.dart`.
+class _AuthPressable extends StatelessWidget {
+  const _AuthPressable({
+    required this.label,
+    required this.onPressed,
+    required this.onHover,
+    required this.onFocus,
+    required this.child,
+    this.onDown,
+  });
+
+  /// What the button is ANNOUNCED as. Pass the busy label while busy.
+  final String label;
+  final VoidCallback? onPressed;
+  final ValueChanged<bool> onHover;
+  final ValueChanged<bool> onFocus;
+  final ValueChanged<bool>? onDown;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onPressed != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      // The tap action has to be declared HERE, not left to the
+      // `GestureDetector` below, because `excludeSemantics` drops everything
+      // underneath — the label AND the action. Without this the node is a
+      // button an assistive technology can see and cannot press, which is a
+      // worse state than the one being fixed. Caught by the enabled-button
+      // test, which asserts the action and not only the flags.
+      onTap: onPressed,
+      excludeSemantics: true,
+      child: FocusableActionDetector(
+        enabled: enabled,
+        mouseCursor:
+            enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+        onShowHoverHighlight: onHover,
+        onShowFocusHighlight: onFocus,
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.numpadEnter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+        },
+        actions: <Type, Action<Intent>>{
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              onPressed?.call();
+              return null;
+            },
+          ),
+        },
+        child: GestureDetector(
+          onTapDown:
+              enabled && onDown != null ? (_) => onDown!(true) : null,
+          onTapUp: enabled && onDown != null ? (_) => onDown!(false) : null,
+          onTapCancel: enabled && onDown != null ? () => onDown!(false) : null,
+          onTap: enabled ? onPressed : null,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
 class MlPrimaryButton extends StatefulWidget {
   const MlPrimaryButton({
     super.key,
@@ -99,21 +212,21 @@ class MlPrimaryButton extends StatefulWidget {
 class _MlPrimaryButtonState extends State<MlPrimaryButton> {
   bool _hover = false;
   bool _down = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
     final enabled = widget.onPressed != null && !widget.busy;
+    final effectiveLabel =
+        widget.busy ? (widget.busyLabel ?? widget.label) : widget.label;
 
-    return MouseRegion(
-      cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
-        onTapDown: enabled ? (_) => setState(() => _down = true) : null,
-        onTapUp: enabled ? (_) => setState(() => _down = false) : null,
-        onTapCancel: enabled ? () => setState(() => _down = false) : null,
-        onTap: enabled ? widget.onPressed : null,
-        child: AnimatedContainer(
+    return _AuthPressable(
+      label: effectiveLabel,
+      onPressed: enabled ? widget.onPressed : null,
+      onHover: (v) => setState(() => _hover = v),
+      onFocus: (v) => setState(() => _focused = v),
+      onDown: (v) => setState(() => _down = v),
+      child: AnimatedContainer(
           duration: mlDuration(context, const Duration(milliseconds: 150)),
           curve: Curves.easeOut,
           height: widget.height,
@@ -138,12 +251,22 @@ class _MlPrimaryButtonState extends State<MlPrimaryButton> {
                   ]
                 : null,
           ),
-          foregroundDecoration: enabled
-              ? null
-              : BoxDecoration(
+          // The disabled veil, or — when the button has keyboard focus — the
+          // focus ring. Both are drawn in FRONT so neither changes the
+          // button's size: a ring that grew the box by 2px would move every
+          // control under it the moment somebody pressed Tab.
+          foregroundDecoration: !enabled
+              ? BoxDecoration(
                   color: MlAuth.bg.withValues(alpha: 0.55),
                   borderRadius: BorderRadius.circular(MlAuth.fieldRadius),
-                ),
+                )
+              : _focused
+                  ? BoxDecoration(
+                      border: Border.all(color: MlAuth.inkHi, width: 2),
+                      borderRadius:
+                          BorderRadius.circular(MlAuth.fieldRadius),
+                    )
+                  : null,
           alignment: Alignment.center,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -183,7 +306,6 @@ class _MlPrimaryButtonState extends State<MlPrimaryButton> {
             ],
           ),
         ),
-      ),
     );
   }
 }
@@ -208,16 +330,16 @@ class MlGhostButton extends StatefulWidget {
 
 class _MlGhostButtonState extends State<MlGhostButton> {
   bool _hover = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
-        onTap: widget.onPressed,
-        child: AnimatedContainer(
+    return _AuthPressable(
+      label: widget.label,
+      onPressed: widget.onPressed,
+      onHover: (v) => setState(() => _hover = v),
+      onFocus: (v) => setState(() => _focused = v),
+      child: AnimatedContainer(
           duration: mlDuration(context, const Duration(milliseconds: 150)),
           height: 52,
           transform: Matrix4.translationValues(0, _hover ? -1.5 : 0, 0),
@@ -226,10 +348,17 @@ class _MlGhostButtonState extends State<MlGhostButton> {
                 ? widget.tint.withValues(alpha: 0.09)
                 : MlAuth.tintRest,
             borderRadius: BorderRadius.circular(MlAuth.fieldRadius),
+            // The focus ring is this button's own border, brightened and
+            // doubled, rather than a second ring outside it — an outline
+            // button already has the outline, and two concentric rings read
+            // as a rendering fault rather than as focus.
             border: Border.all(
-              color: _hover
-                  ? widget.tint.withValues(alpha: 0.42)
-                  : MlAuth.line2,
+              width: _focused ? 2 : 1,
+              color: _focused
+                  ? MlAuth.inkHi
+                  : _hover
+                      ? widget.tint.withValues(alpha: 0.42)
+                      : MlAuth.line2,
             ),
           ),
           alignment: Alignment.center,
@@ -260,7 +389,6 @@ class _MlGhostButtonState extends State<MlGhostButton> {
             ],
           ),
         ),
-      ),
     );
   }
 }

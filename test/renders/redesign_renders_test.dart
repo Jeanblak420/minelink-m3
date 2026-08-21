@@ -29,6 +29,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide UserIdentity;
 
 import 'package:flutter_application_1/core/design/shell/ml_app_shell.dart';
 import 'package:flutter_application_1/core/design/shell/ml_rail_blocks.dart';
+import 'package:flutter_application_1/core/routing/ml_route_title.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/core/widgets/osm_tile_layer.dart';
@@ -149,8 +150,85 @@ import '../test_helpers/fake_path_provider.dart';
 import '../test_helpers/real_fonts.dart';
 import '../test_helpers/render_pumps.dart';
 
+/// Screen class name -> the console route that builds it, read off the router.
+///
+/// ## Why the harness is not allowed to write its own chrome any more
+///
+/// Every console render used to be built with `selectedRoute: '/super-admin'`,
+/// `title: 'Global Admin'` and `subtitle: 'Platform overview'` passed by hand.
+/// Three separate things were wrong with that, and all three were invisible
+/// **because the picture is the evidence and the frame is part of it**:
+///
+///  * The running app produces `Global Admin · Dashboard` /
+///    `Full system overview · Live · updated just now` for that route. So a
+///    hundred pictures showed a top bar the product does not have.
+///  * The rail highlighted **Dashboard** on every one of them — including the
+///    audit log, the margin ledger and the crash reports. A reader checking
+///    "does the rail show where I am" got yes, always, wrongly.
+///  * And because the chrome was a literal rather than a resolution, no render
+///    could ever have caught the 21 console routes whose top bar really did
+///    read "Platform Admin / Platform management". Driving the built web app
+///    is what found those, and this is the change that lets a picture find the
+///    next one.
+///
+/// So `console()` no longer takes a title at all: it takes a route, defaults
+/// it by looking the body's own class up in `app_router.dart`, and resolves
+/// the chrome through `mlRouteTitle` exactly as `MlAppShell` does in the app.
+///
+/// Parsed from source rather than hand-listed for the reason
+/// `tool/unphotographed_screens.py` gives for doing the same: an inventory
+/// kept by hand drifts, and this one would drift silently into another
+/// mislabelled frame.
+final Map<String, String> _consoleRouteByScreen = () {
+  final src = File('lib/core/routing/app_router.dart').readAsStringSync();
+  final map = <String, String>{};
+  // `path:` then, within the same GoRoute block, the screen classes its
+  // builder can return. The window stops at the next `path:` so a builder
+  // never claims the following route's screens.
+  final routeStarts =
+      RegExp(r"""path:\s*'(/super-admin[^']*)'""").allMatches(src).toList();
+  for (var i = 0; i < routeStarts.length; i++) {
+    final m = routeStarts[i];
+    final end =
+        i + 1 < routeStarts.length ? routeStarts[i + 1].start : src.length;
+    final block = src.substring(m.end, end);
+    final path = m
+        .group(1)!
+        .replaceAll(':orgType', 'transporter')
+        .replaceAll(':companyId', 'c-1')
+        .replaceAll(':orgId', 'o-1')
+        .replaceAll(':type', 'transportation');
+    for (final s in RegExp(r'\b([A-Z][A-Za-z0-9_]*Screen)\b').allMatches(block)) {
+      // First route wins: a screen mounted at two paths keeps the one the
+      // router declares first, which is the canonical one in every case here.
+      map.putIfAbsent(s.group(1)!, () => path);
+    }
+  }
+  return map;
+}();
+
 void main() {
   _noOrphanGoldensTest();
+
+  // If the regex behind `_consoleRouteByScreen` ever stops matching — a
+  // reformat, a renamed field, `path :` with a space — every console render
+  // falls back to '/super-admin' and quietly goes back to captioning the whole
+  // console "Global Admin · Dashboard" with the Dashboard rail item lit. That
+  // is the exact failure this map was added to end, and it would look like 100
+  // passing renders. So it is asserted, not assumed.
+  test('the render harness can still read routes out of the router', () {
+    expect(_consoleRouteByScreen.length, greaterThan(20));
+    expect(_consoleRouteByScreen['AuditLogsScreen'], '/super-admin/audit-logs');
+    expect(
+      _consoleRouteByScreen['MarginLedgerScreen'],
+      '/super-admin/margin-ledger',
+    );
+    // And the chrome it resolves is the app's, not a literal.
+    expect(
+      mlRouteTitle(Uri.parse('/super-admin/audit-logs')).title,
+      'Audit logs',
+    );
+  });
 
   setUpAll(() async {
     await loadRealFonts();
@@ -208,6 +286,15 @@ void main() {
     Widget? body,
     List<Override> extraOverrides = const [],
   }) {
+    // The route this body is really mounted at, and therefore the rail item
+    // that should be lit and the chrome the app would draw. See
+    // `_consoleRouteByScreen` for why none of this is written by hand.
+    final route = body == null
+        ? '/super-admin'
+        : (_consoleRouteByScreen[body.runtimeType.toString()] ??
+            '/super-admin');
+    final chrome = mlRouteTitle(Uri.parse(route));
+
     return ProviderScope(
       overrides: [...companyScopeOverrides(), ...extraOverrides],
       child: MaterialApp(
@@ -215,10 +302,10 @@ void main() {
         theme: AppTheme.build(brightness),
         home: MlAppShell(
           tree: consoleNavTree(),
-          selectedRoute: '/super-admin',
+          selectedRoute: route,
           onNavigate: (_) {},
-          title: 'Global Admin',
-          subtitle: 'Platform overview',
+          title: chrome.title,
+          subtitle: chrome.subtitle ?? '',
           expanded: railExpanded,
           onExpandedChanged: (_) {},
           badgeCounts: const {
@@ -337,6 +424,31 @@ void main() {
         print('  - $c');
       }
     }
+
+    // AND THIS ONE FAILS, unlike the two reports below it.
+    //
+    // The file's header says the three checks deliberately report rather than
+    // fail, and for a truncation that is right — six of them are intentional
+    // and a check that fails on an intentional case teaches people to add
+    // exclusions. A framework error is not like that. There is no deliberate
+    // one, the documented state is zero, and a picture taken while the
+    // framework was throwing is not evidence of anything.
+    //
+    // It stayed at "reported" until 2026-08-21, when the company mirror was
+    // found throwing **21 errors on every desktop render** — a `LayoutBuilder`
+    // inside `IntrinsicHeight`, immediately under a comment saying a
+    // LayoutBuilder cannot go there. It had been printing that on every run
+    // for the whole phase.
+    //
+    // It was missed because every reading of this output had been piped
+    // through `tail`, and this render is not last. Reporting only works if
+    // somebody reads the report; failing does not need anybody.
+    expect(
+      captured,
+      isEmpty,
+      reason: 'the framework threw while rendering "$name" — the picture was '
+          'still written, but it is a picture of a broken layout',
+    );
 
     // AND EVERY STRING THAT WAS CUT OFF.
     //

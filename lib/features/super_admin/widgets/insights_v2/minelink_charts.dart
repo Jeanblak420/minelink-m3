@@ -310,19 +310,40 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
                       // Target caption, riding just above its own dashed line.
                       // Absent entirely when no target is set — see the note
                       // on the constructor.
+                      //
+                      // On its own ground, for the reason written out at the
+                      // matching caption in `tons_moved_card.dart`: this text
+                      // sits INSIDE the plot body, and the series decides
+                      // where it goes. The sibling `_LatestPill` a few lines
+                      // down has always had a ground; this one had none, and
+                      // the two are the same kind of thing over the same kind
+                      // of paint.
                       if (widget.target != null)
                         Positioned(
                           right: 6,
-                          top: _yFor(widget.target!, widget.height) - 16,
-                          child: Text(
-                            (widget.targetLabel ??
-                                    'Target ${mlThousands(widget.target!.round())} t')
-                                .toUpperCase(),
-                            style: context.mlText.code(
-                              color: t.accent2.withValues(alpha: 0.8),
-                              size: 9,
-                              weight: FontWeight.w500,
-                              letterSpacing: 2,
+                          top: _yFor(widget.target!, widget.height) - 20,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: t.bg0.withValues(alpha: 0.92),
+                              border: Border.all(
+                                color: t.accent2.withValues(alpha: 0.35),
+                              ),
+                              borderRadius: MlShape.radiusSmall,
+                            ),
+                            child: Text(
+                              (widget.targetLabel ??
+                                      'Target ${mlThousands(widget.target!.round())} t')
+                                  .toUpperCase(),
+                              style: context.mlText.code(
+                                color: t.accent2,
+                                size: 9,
+                                weight: FontWeight.w500,
+                                letterSpacing: 2,
+                              ),
                             ),
                           ),
                         ),

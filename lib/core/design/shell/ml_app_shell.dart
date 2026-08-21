@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/core/design/nav/ml_nav_node.dart';
@@ -7,6 +9,7 @@ import 'package:flutter_application_1/core/design/shell/workspace_canvas.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_chrome.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_motion.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 /// **One shell, every audience, every platform.**
 ///
@@ -325,11 +328,48 @@ class _MlAppShellState extends State<MlAppShell> {
           )
         : widget.leading;
 
+    // ── The phone title gets TWO lines, and the bar grows to hold them ──────
+    //
+    // A 412px console bar spends 112 on its leading (drawer + back), 96 on its
+    // two actions and 16 on title spacing, leaving the title **180px**. The
+    // render harness used to pass the literal `'Global Admin'`, which fits, so
+    // 218 pictures said this was fine. The app resolves
+    // `Global Admin · Dashboard` — and once the harness was made to resolve the
+    // title the same way the app does, the very first run reported it cut:
+    //
+    //     CUT OFF [console-phone-dark] 1 string(s) at 412x915:
+    //       ~ Global Admin · Dashboard   180px  _AppBarTitleBox
+    //
+    // It is not one title, either. `Mine/Supplier transport`,
+    // `Account deactivations` and `Request's Tracking Logs` are all about that
+    // long, and the page title is the one thing on a phone that says where you
+    // are — the subtitle is already dropped at this width.
+    //
+    // Two lines rather than smaller type: shrinking below the type scale is
+    // what `type_scale_codemod.py` exists to stop, and an ellipsis on the only
+    // label a screen has is worse than a wrap.
+    //
+    // The toolbar has to grow with it, and with the READER's text scale. The
+    // console lets each admin set 0.85–1.3 and the sweeps go to 2.0; two lines
+    // of `titleMedium` at 2.0 is ~77px against a 72px bar, which would paint
+    // the yellow-and-black overflow bars across the top of every phone screen
+    // — the same 2px miss the `leadingWidth` comment above records. So the
+    // height is computed from the style and the scale rather than assumed, and
+    // it never goes BELOW the token.
+    final compactTitleStyle = text.titleMedium;
+    final compactLine = (compactTitleStyle?.fontSize ?? 16) *
+        (compactTitleStyle?.height ?? 1.25);
+    final compactToolbarHeight = math.max(
+      MlTokens.appBarHeight,
+      MediaQuery.textScalerOf(context).scale(compactLine) * 2 + 20,
+    );
+
     return AppBar(
       backgroundColor: chrome.topBarSurface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
+      toolbarHeight: compact ? compactToolbarHeight : null,
       // The hairline is what separates the bar from the canvas once the theme
       // stops using elevation to do it. M3 drops shadows from the app bar;
       // without a border the bar and the workspace merge on scroll.
@@ -348,11 +388,12 @@ class _MlAppShellState extends State<MlAppShell> {
         children: [
           Text(
             _resolvedTitle,
-            maxLines: 1,
+            // Two on a phone, where the title is the only thing naming the
+            // screen and it has 180px to do it in; one everywhere else, where
+            // there is a subtitle under it and room beside it.
+            maxLines: compact ? 2 : 1,
             overflow: TextOverflow.ellipsis,
-            style: windowClass == MlWindowClass.compact
-                ? text.titleMedium
-                : text.titleLarge,
+            style: compact ? compactTitleStyle : text.titleLarge,
           ),
           if (subtitle != null && windowClass != MlWindowClass.compact)
             Text(

@@ -197,6 +197,66 @@ final guards = <Guard>[
     plantLine: 'const c = Colors.red;',
   ),
   Guard(
+    id: 'no-device-clock-in-copy',
+    why: 'after CLAUDE.md §7.1 every date this product decides is an '
+        'Africa/Johannesburg one, so copy telling a user that a date, a month '
+        'or a day window comes from their DEVICE is simply false. The console '
+        'insights header said "This month (device calendar)" for the whole '
+        'redesign and was read on a live console on 2026-08-21 before anybody '
+        'noticed — the window is MlTime.now(). `one_clock_check.py` guards the '
+        'code; nothing guarded the sentence printed next to the number. Say '
+        '"South African time", as the notification screen already does.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // Deliberately only the CLOCK words. "in your device settings" (the
+    // location-permission message) is about a device setting and is true, and
+    // the notification screen's "whatever your device is set to" exists to
+    // deny exactly this claim — neither is matched.
+    pattern: RegExp(
+      r"device('s)? (calendar|clock|date|timezone|time ?zone|time\b)",
+      caseSensitive: false,
+    ),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'planted.dart',
+    plantLine: "const s = 'This month (device calendar) · rollups';",
+  ),
+  Guard(
+    id: 'brand-lockup-drawn-too-small',
+    why: 'MineLinkLogo is the STACKED lockup — chain mark, "MineLink" wordmark, '
+        '"TECHNOLOGIES" strapline — and the two type bands are 231 and 67 of '
+        'its 991 rows. The rail drew it at height 28, which is a 6.5px wordmark '
+        'and a 1.89px strapline: photographed in every console render from the '
+        'first one, and read as a broken image rather than as a brand. Below '
+        'MineLinkLogo.legibleHeight (64) use MineLinkMark, which is the mark '
+        'alone and is documented for exactly this. The equivalent WIDTH floor '
+        'is 83, since BoxFit.contain derives height from it at aspect 1.293.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // The number is spelled out as an alternation rather than captured and
+    // compared, because a grep cannot do arithmetic: `[0-9]|[1-5][0-9]|6[0-3]`
+    // is every integer under 64 and nothing else. The `[,)]` terminator is what
+    // keeps `height: 132` and `height: 96` out — an anchor of `\b` would let
+    // the leading `1` of `132` match and then stop.
+    pattern: RegExp(
+      r'MineLinkLogo\(\s*[^)]*?(?:height:\s*(?:[0-9]|[1-5][0-9]|6[0-3])'
+      r'|width:\s*(?:[0-9]|[1-7][0-9]|8[0-2]))(?:\.\d+)?\s*[,)]',
+    ),
+    // The doc comments on MlRailBrand and MineLinkLogo quote the very call
+    // this guard forbids, in order to explain why it is forbidden.
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    // `\s*` sits between the constructor and its arguments, and between the
+    // value and its comma — both are places the formatter breaks a long call.
+    spanLines: true,
+    plantFile: 'planted.dart',
+    plantLine: 'const w = MineLinkLogo(height: 28, onDark: true);',
+    plantWrapped: 'const w = MineLinkLogo(\n'
+        '  height: 28,\n'
+        '  onDark: true,\n'
+        ');',
+  ),
+  Guard(
     id: 'no-coming-soon',
     why: 'a "coming soon" string is a dead end shipped to a paying user '
         '(P0-12).',

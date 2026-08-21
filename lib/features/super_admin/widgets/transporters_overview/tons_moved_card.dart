@@ -222,18 +222,47 @@ class _ChartBlock extends StatelessWidget {
                   // entirely when no target is set. It moves to the left edge
                   // when the rule sits high, where the right edge already
                   // belongs to the callout chip.
+                  //
+                  // IT CARRIES ITS OWN GROUND, and that is not decoration.
+                  // Bare, at 9px and 80% alpha, it was drawn in the plot body
+                  // where the series is free to go — and against live data on
+                  // 2026-08-21 the series went exactly there: the line, its
+                  // node ring and the dashed comparison all crossed the
+                  // glyphs, in a cyan a shade off the caption's own, and
+                  // `TARGET · 32 T/DAY` read as `T RGET 32 T/DAY`. Z-order was
+                  // never the problem — the caption already paints last. Two
+                  // cyans of similar value on top of each other do not
+                  // separate however they are stacked.
+                  //
+                  // Fixture data never crossed it, which is the whole reason
+                  // this survived 218 renders. A caption laid over a plot
+                  // needs a ground for the SAME reason the callout chip beside
+                  // it has one, so it uses the same three tokens.
                   if (data.targetY != null && data.targetLabel != null)
                     Positioned(
                       right: data.targetY! < 0.3 ? null : 6,
                       left: data.targetY! < 0.3 ? 0 : null,
-                      top: (data.targetY!.clamp(0.0, 1.0) * h) - 14,
-                      child: Text(
-                        data.targetLabel!.toUpperCase(),
-                        style: t.m(
-                          size: 9,
-                          weight: FontWeight.w500,
-                          color: t.acc2.withValues(alpha: 0.8),
-                          letterSpacing: 1.8,
+                      top: (data.targetY!.clamp(0.0, 1.0) * h) - 18,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: t.calloutFill,
+                          borderRadius: MlShape.radiusSmall,
+                          border: Border.all(
+                            color: t.acc2.withValues(alpha: 0.35),
+                          ),
+                        ),
+                        child: Text(
+                          data.targetLabel!.toUpperCase(),
+                          style: t.m(
+                            size: 9,
+                            weight: FontWeight.w500,
+                            color: t.acc2,
+                            letterSpacing: 1.8,
+                          ),
                         ),
                       ),
                     ),

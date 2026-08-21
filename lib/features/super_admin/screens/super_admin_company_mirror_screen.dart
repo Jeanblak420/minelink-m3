@@ -973,7 +973,11 @@ class _DashboardBody extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: _mapCard(context)),
+              // Half the row, minus the scroll padding and the 16px gap —
+              // the same arithmetic `_snapshotCard` above is given, and for
+              // the same reason: this card is inside IntrinsicHeight and
+              // nothing under it may ask for its own constraints.
+              Expanded(child: _mapCard(context, (maxWidth - 32 - 16) / 2)),
               const SizedBox(width: 16),
               Expanded(child: _alertsCard(context)),
             ],
@@ -997,7 +1001,7 @@ class _DashboardBody extends StatelessWidget {
         const SizedBox(height: 16),
         _timelineCard(context),
         const SizedBox(height: 16),
-        _mapCard(context),
+        _mapCard(context, maxWidth - 32),
         const SizedBox(height: 16),
         _alertsCard(context),
       ],
@@ -1135,8 +1139,22 @@ class _DashboardBody extends StatelessWidget {
           // lines and its sentence over five, in a column narrower than the
           // pills next to it. Photographed on
           // `screen-company-mirror-phone-dark`.
-          LayoutBuilder(
-            builder: (context, c) {
+          //
+          // It reflows off `tilesWidth`, NOT off a `LayoutBuilder`. The fix
+          // for the phone layout above originally used one, immediately below
+          // the comment on this method saying a LayoutBuilder cannot live here
+          // — and it produced 21 framework errors on the desktop render, led
+          // by "LayoutBuilder does not support returning intrinsic
+          // dimensions", every time this card was measured inside
+          // `_wideLayout`'s `IntrinsicHeight`.
+          //
+          // Nobody saw them because the harness captures framework errors and
+          // writes the picture anyway (which is the right call), and because
+          // every reading of that output had been piped through `tail`. The
+          // width is passed into this method precisely so no descendant has to
+          // ask for it; use it.
+          Builder(
+            builder: (context) {
               final words = Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -1173,7 +1191,7 @@ class _DashboardBody extends StatelessWidget {
                     ),
                 ],
               );
-              if (c.maxWidth < 520) {
+              if (tilesWidth < 520) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [words, const SizedBox(height: 10), pills],
@@ -1652,7 +1670,7 @@ class _DashboardBody extends StatelessWidget {
 
   // ---- live-map shortcut ----
 
-  Widget _mapCard(BuildContext context) {
+  Widget _mapCard(BuildContext context, double width) {
     return _card(
       context,
       child: Column(
@@ -1701,9 +1719,15 @@ class _DashboardBody extends StatelessWidget {
               // "Live GPS positions for every vehicle on this organization's
               // active trips" in four cramped lines, with the title wrapping
               // too. Stacked, both get the full width.
-              return LayoutBuilder(
-                builder: (context, c) {
-                  if (c.maxWidth >= 420) {
+              // Off the passed-down width, not a LayoutBuilder. See the
+              // note on `_snapshotCard`: on the wide layout this card is a
+              // child of `IntrinsicHeight`, and a LayoutBuilder there throws
+              // "does not support returning intrinsic dimensions" — which is
+              // what the doc comment on `_MapPreview` below already warns
+              // about for FlutterMap's own internal one.
+              return Builder(
+                builder: (context) {
+                  if (width - 36 >= 420) {
                     return Row(
                       children: [
                         icon,

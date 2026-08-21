@@ -375,6 +375,11 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
     final org = portalOrgSegment(b.company.orgType);
     Widget crumb(String t, {bool strong = false}) => Text(
           t,
+          // One line each, so an over-long SINGLE crumb ellipsises rather than
+          // breaking a company name across two lines mid-word. Crumbs that do
+          // not fit together move to the next line — that is the `Wrap`'s job
+          // below, not this one's.
+          maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: context.mlText.overline.copyWith(
             color: strong ? MlTone.transit.colors(Theme.of(context).brightness).fg : s.textFaint,
@@ -389,15 +394,31 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
     // the next one, which is the only arrangement that fits six 36px targets
     // and a pill. Above it, the original single row.
     final narrow = MediaQuery.sizeOf(context).width < 720;
-    final crumbs = Row(mainAxisSize: MainAxisSize.min, children: [
-      Flexible(child: crumb(b.company.name.toUpperCase())),
-      crumb('  /  '),
-      if (!narrow) ...[
-        crumb('EMPLOYEE REGISTER'),
+    // A `Wrap`, not a `Row` of two `Flexible`s.
+    //
+    // Two flex children share the free space EQUALLY whatever they hold, so
+    // the longer of two names is cut to the shorter one's width even when the
+    // row has room to spare. Moving the breadcrumb onto its own line (above)
+    // fixed the OVERFLOW and left this: on the 412px phone render the leaf
+    // crumb "FIXTURE OPERATOR" was drawn in full while the company beside it
+    // was ellipsised at **143px** to "FIXTURE HAULAGE (P…".
+    //
+    // A company name is an identity, not a preview. Wrapped, both crumbs are
+    // read in full on two lines, and nothing is lost at any width — on the
+    // desktop path below they still sit on one.
+    final crumbs = Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      runSpacing: 2,
+      children: [
+        crumb(b.company.name.toUpperCase()),
         crumb('  /  '),
+        if (!narrow) ...[
+          crumb('EMPLOYEE REGISTER'),
+          crumb('  /  '),
+        ],
+        crumb(e.fullName.toUpperCase(), strong: true),
       ],
-      Flexible(child: crumb(e.fullName.toUpperCase(), strong: true)),
-    ]);
+    );
     final controls = [
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
