@@ -19,6 +19,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -333,6 +334,46 @@ void main() {
       for (final c in captured.toSet()) {
         // ignore: avoid_print
         print('  - $c');
+      }
+    }
+
+    // AND EVERY STRING THAT WAS CUT OFF.
+    //
+    // A truncation is a VALID layout: nothing throws, no sweep fails, and the
+    // golden is written happily. It is also the single most productive fault
+    // family this phase has had — "Leaderboard — …", "WAYBILLS CLO…",
+    // "TONS 4,382.…", "Invoiced am…", "Save empty weight — truck goes t…",
+    // "net_mass · last_7_da…", every row of the phone trips list — all found
+    // by looking at one picture at a time and none of them by a test.
+    //
+    // `didExceedMaxLines` is the paragraph's own answer to "did I have to cut
+    // this", so the harness can ask it of EVERY render at once.
+    //
+    // REPORTED, NOT FAILED, for the same reason the framework errors above
+    // are: some truncations are deliberate (a company name in a compact
+    // ranking row, a long address in a table cell), and a render file that
+    // fails on those teaches people to add exclusions rather than to look.
+    // The list is the reading material; the judgement stays human.
+    final cut = <String>[];
+    void visitCut(Element e) {
+      final ro = e.renderObject;
+      if (ro is RenderParagraph && ro.didExceedMaxLines) {
+        cut.add(ro.text.toPlainText());
+      }
+      e.visitChildren(visitCut);
+    }
+
+    tester.allElements.first.visitAncestorElements((a) {
+      visitCut(a);
+      return false;
+    });
+    if (cut.isNotEmpty) {
+      // ignore: avoid_print
+      print('CUT OFF [$name] ${cut.toSet().length} string(s) at '
+          '${size.width.toInt()}x${size.height.toInt()}:');
+      for (final c in cut.toSet()) {
+        // ignore: avoid_print
+        print('  ~ $c');
       }
     }
 
