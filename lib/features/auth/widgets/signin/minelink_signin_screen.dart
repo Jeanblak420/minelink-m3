@@ -525,6 +525,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
               text: accent,
               style: const TextStyle(
                 fontFamily: MlAuth.serif,
+                fontFamilyFallback: MlAuth.serifFallback,
                 fontStyle: FontStyle.italic,
                 fontWeight: FontWeight.w400,
                 color: MlAuth.gold2,

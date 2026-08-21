@@ -1,311 +1,179 @@
-// A table wider than its column must say so.
+// A table that scrolls sideways has to SAY it scrolls sideways.
 //
-// A `SingleChildScrollView(scrollDirection: Axis.horizontal)` around a table is
-// the right structure — a thirteen-column fleet register cannot be made to fit
-// a laptop and should not be truncated to try. What it does not do is tell
-// anyone: Flutter draws no scrollbar for a horizontal scroll view unless one is
-// asked for, so a reader sees a last column cut off mid-word and no reason to
-// think there is anything past it. On a desktop, with nothing to flick, that is
-// simply a broken-looking table.
+// `MlWideTable` exists for exactly that — its own header records that fifteen
+// of the sixteen horizontal scroll views in `lib/` had no scrollbar, so a
+// reader saw a last column cut off mid-word and no reason to think anything
+// was past it. On a desktop, with no touch surface to flick, that is simply a
+// broken-looking table.
 //
-// Measured 2026-08-20: fifteen of the sixteen horizontal scroll views in `lib/`
-// had no scrollbar. This pins the treatment on the shared component and on the
-// screens that were converted to it, because "we added a scrollbar" is exactly
-// the kind of claim that quietly stops being true.
-import 'dart:math' as math;
-import 'dart:typed_data';
+// `find.byType(Scrollbar)` does not prove that. A `Scrollbar` is in the tree
+// on every one of those screens; the question is whether a THUMB was painted,
+// and `RawScrollbar` reveals its thumb through a fade driven by a post-frame
+// callback that does not always line up with the scroll position attaching
+// (measured on the console's company-link picker — the reasoning is in
+// `company_link_builder.dart`).
+//
+// So this asks the painter. `ScrollbarPainter.hitTest` returns false both when
+// no thumb rect was computed and when the fade opacity is still zero, which is
+// exactly the pair of failures worth catching. Probing a line of points across
+// the scroll view finds the thumb wherever it was drawn.
+//
+// Written 2026-08-21 after `screen-buyer-requests-phone-dark.png` showed the
+// portal's Request-tracking table clipped mid-word at the card edge with no
+// bar under it, while the console's own tracking table three renders away had
+// one.
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:flutter_application_1/core/design/components/ml_wide_table.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_requests_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_waybills_screen.dart';
+
+import '../fixtures/portal_capture_fixtures.dart';
+import '../fixtures/portal_tail_fixtures.dart';
+import '../fixtures/screen_fixtures.dart';
 import '../test_helpers/real_fonts.dart';
 import '../test_helpers/render_pumps.dart';
 
 void main() {
-  setUpAll(loadRealFonts);
-  _contrastTests();
-  _paintTests();
-
-  Future<void> pump(WidgetTester tester, Widget child, double width) async {
-    await tester.pumpWidget(MaterialApp(
-      theme: AppTheme.darkTheme,
-      home: Scaffold(body: SizedBox(width: width, child: child)),
-    ));
-    await tester.pump();
-    // See `_ContrastProbe`: the thumb fades in from a post-frame callback, so
-    // one pump never shows it.
-    await tester.pump(const Duration(milliseconds: 400));
-  }
-
-  group('MlWideTable', () {
-    testWidgets('scrolls WITH a visible bar when the content is too wide',
-        (tester) async {
-      await pump(tester, const MlWideTable(child: SizedBox(width: 1200)), 400);
-
-      final bar = tester.widget<Scrollbar>(find.byType(Scrollbar));
-      expect(bar.thumbVisibility, isTrue,
-          reason: 'a thumb that only appears while dragging is no use to '
-              'somebody who does not know there is anything to drag');
-      expect(find.byType(SingleChildScrollView), findsOneWidget);
-    });
-
-    testWidgets('owns a controller, or thumbVisibility asserts at runtime',
-        (tester) async {
-      // A horizontal SingleChildScrollView does NOT adopt the
-      // PrimaryScrollController — that is vertical-only by default — so a
-      // Scrollbar given neither a controller nor a primary scroll view throws
-      // in debug, on the screen that scrolls. Any exception here is that.
-      await pump(tester, const MlWideTable(child: SizedBox(width: 1200)), 400);
-      expect(tester.takeException(), isNull);
-
-      final bar = tester.widget<Scrollbar>(find.byType(Scrollbar));
-      expect(bar.controller, isNotNull);
-      final view =
-          tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
-      expect(view.controller, same(bar.controller),
-          reason: 'the bar and the view must share one controller, or the bar '
-              'has nothing to report');
-    });
-
-    testWidgets('draws NO bar when the content already fits', (tester) async {
-      // A scrollbar over content that cannot scroll is a promise of more.
-      await pump(
-        tester,
-        const MlWideTable(minWidth: 300, child: SizedBox(width: 300)),
-        800,
-      );
-      expect(find.byType(Scrollbar), findsNothing);
-      expect(find.byType(SingleChildScrollView), findsNothing);
-    });
-
-    testWidgets('a null minWidth lets the child size itself and still scrolls',
-        (tester) async {
-      // Material's DataTable measures its own columns, so it is handed no
-      // minWidth — the scroll view takes whatever it turns out to be.
-      await pump(tester, const MlWideTable(child: SizedBox(width: 900)), 400);
-      expect(find.byType(Scrollbar), findsOneWidget);
-      final view =
-          tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
-      expect(view.child, isA<SizedBox>());
-    });
-
-    testWidgets('leaves room under the content for the bar', (tester) async {
-      // Without it the thumb sits on the last row of the table.
-      await pump(tester, const MlWideTable(child: SizedBox(width: 1200)), 400);
-      final view =
-          tester.widget<SingleChildScrollView>(find.byType(SingleChildScrollView));
-      final padding = (view.padding as EdgeInsets?) ?? EdgeInsets.zero;
-      expect(padding.bottom, greaterThan(0));
-    });
+  setUpAll(() async {
+    await loadRealFonts();
+    SharedPreferences.setMockInitialValues({});
+    await Supabase.initialize(
+      url: 'http://localhost:54321',
+      anonKey: 'wide-table-scrollbar',
+    );
   });
-}
 
-
-/// The thumb has to be LEGIBLE, and that is a measurement rather than an
-/// opinion.
-///
-/// `Scrollbar` in this app is not decoration: on a wide table it is the only
-/// thing saying there are columns past the right edge. Two plausible-looking
-/// values were tried before this one and both were invisible —
-///
-///   Material's default   `onSurface` at 8%
-///   the first attempt    `outline` at 55%  ->  composited **2.01:1**
-///
-/// — under WCAG's 3:1 for a non-text control. Neither could be told apart from
-/// the other by reading the source, which is why the ratio is computed here
-/// from the theme's own colours rather than trusted.
-///
-/// This asserts the COLOUR, not the painting. Painting is `_paintTests` below —
-/// which had to be written because "the structure is right and the colour is
-/// legible" was true for a whole session while the renders still showed a
-/// truncated table with no bar on it at all.
-void _contrastTests() {
-  const kNonTextContrast = 3.0;
-
-  double luminance(Color c) {
-    double channel(double u) =>
-        u <= 0.03928 ? u / 12.92 : math.pow((u + 0.055) / 1.055, 2.4) as double;
-    return 0.2126 * channel(c.r) +
-        0.7152 * channel(c.g) +
-        0.0722 * channel(c.b);
-  }
-
-  double contrast(Color a, Color b) {
-    final x = luminance(a), y = luminance(b);
-    return (math.max(x, y) + 0.05) / (math.min(x, y) + 0.05);
-  }
-
-  /// [over] composited under [c]'s alpha — what the eye actually receives.
-  Color flatten(Color c, Color over) => Color.from(
-        alpha: 1,
-        red: c.r * c.a + over.r * (1 - c.a),
-        green: c.g * c.a + over.g * (1 - c.a),
-        blue: c.b * c.a + over.b * (1 - c.a),
-      );
-
-  group('the thumb is legible against the surface it sits on', () {
-    for (final entry in {
-      'dark': AppTheme.darkTheme,
-      'light': AppTheme.lightTheme,
-    }.entries) {
-      test(entry.key, () {
-        final theme = entry.value;
-        final thumb = theme.scrollbarTheme.thumbColor!.resolve(<WidgetState>{});
-        expect(thumb, isNotNull,
-            reason: 'no scrollbar thumb colour is themed at all, so Material '
-                'draws its default onSurface-at-8%');
-
-        // A scrollbar sits over a card, which is the surface a wide table is
-        // on — not the scaffold background.
-        final surface = theme.cardTheme.color ?? theme.colorScheme.surface;
-        final ratio = contrast(flatten(thumb!, surface), surface);
-
-        expect(ratio, greaterThanOrEqualTo(kNonTextContrast),
-            reason: 'the thumb measures ${ratio.toStringAsFixed(2)}:1 on the '
-                '${entry.key} card. It is the only thing telling a reader a '
-                'table has more columns, so it is a non-text control and owes '
-                '3:1.');
-      });
-    }
-
-    test('and it is chrome, not an accent', () {
-      // A cyan bar under every table would read as a control rather than as
-      // the edge of a scroll. The accent is reserved for the DRAGGED state,
-      // where it is feedback for something the user is doing.
-      final t = AppTheme.darkTheme.scrollbarTheme;
-      final resting = t.thumbColor!.resolve(<WidgetState>{});
-      final dragged = t.thumbColor!.resolve({WidgetState.dragged});
-      expect(resting, isNot(AppTheme.darkTheme.colorScheme.primary));
-      expect(dragged, AppTheme.darkTheme.colorScheme.primary);
-    });
-
-    test('the thumb grows on hover, because it is also a drag target', () {
-      final t = AppTheme.darkTheme.scrollbarTheme;
-      final resting = t.thickness!.resolve(<WidgetState>{})!;
-      final hovered = t.thickness!.resolve({WidgetState.hovered})!;
-      expect(hovered, greaterThan(resting));
-    });
-  });
-}
-
-/// The thumb has to be **on the picture**, and that is pixels, not structure.
-///
-/// Everything above this asserts that a `Scrollbar` is in the tree and that its
-/// colour would be legible if drawn. Both were true, for a whole session, while
-/// `docs/redesign/renders/screen-load-controller-phone-dark.png` showed a table
-/// cut off mid-column with no bar anywhere on it — the exact fault `MlWideTable`
-/// exists to end, in the picture of `MlWideTable` working.
-///
-/// The cause was the render harness's pump schedule, not the component: a screen
-/// fed by a `FutureProvider` renders a spinner on frame one, so the table is not
-/// built until frame two, its scroll metrics notify from *that* frame's
-/// post-frame callback, and the 300ms fade has not started when frame three
-/// paints. `shoot()`'s last pump carried no duration, so the clock never moved.
-///
-/// This drives the real schedule — [pumpForCapture], the same function the
-/// render harness calls — over a table whose rows arrive from a future, and then
-/// counts thumb-coloured pixels in the captured image. Shorten the schedule and
-/// this fails.
-void _paintTests() {
-  testWidgets('the thumb is PAINTED when the rows arrive from a future',
-      (tester) async {
-    tester.view.physicalSize = const ui.Size(400, 300);
+  Future<void> pump(WidgetTester tester, Widget body, Size size) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
-
-    // A future that resolves after the first frame, exactly like every portal
-    // provider on a real screen. A table built synchronously does not reproduce
-    // this — that is why it went unnoticed.
-    final rows = Future<List<String>>.delayed(
-      const Duration(milliseconds: 1),
-      () => const ['BX 09 LM NW'],
-    );
-
-    await tester.pumpWidget(MaterialApp(
-      theme: AppTheme.darkTheme,
-      home: Scaffold(
-        body: Center(
-          child: SizedBox(
-            width: 400,
-            child: Card(
-              child: FutureBuilder<List<String>>(
-                future: rows,
-                builder: (context, snap) {
-                  if (!snap.hasData) {
-                    return const SizedBox(
-                        height: 60,
-                        child: Center(child: CircularProgressIndicator()));
-                  }
-                  return MlWideTable(
-                    minWidth: 900,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        for (final r in snap.data!)
-                          SizedBox(height: 60, child: Text(r)),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        ...companyScopeOverrides(),
+        ...portalCaptureOverrides(),
+        ...portalTailOverrides(),
+      ],
+      child: MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: Scaffold(body: body),
       ),
     ));
-
+    // `pumpForCapture`, not a hand-rolled pump: the reveal takes three frames
+    // on any screen whose data arrives from a `FutureProvider`, and that
+    // schedule is written down once in `render_pumps.dart` so the render
+    // harness and this test cannot drift. Both of those files already name
+    // THIS file as the thing that proves the schedule is long enough — it had
+    // never actually been written.
     await pumpForCapture(tester);
+  }
 
-    final thumb = AppTheme.darkTheme.scrollbarTheme.thumbColor!
-        .resolve(<WidgetState>{})!;
-    final surface = AppTheme.darkTheme.cardTheme.color ??
-        AppTheme.darkTheme.colorScheme.surface;
-    // What the eye receives: the thumb's alpha composited onto the card.
-    final expected = Color.from(
-      alpha: 1,
-      red: thumb.r * thumb.a + surface.r * (1 - thumb.a),
-      green: thumb.g * thumb.a + surface.g * (1 - thumb.a),
-      blue: thumb.b * thumb.a + surface.b * (1 - thumb.a),
-    );
-
-    final boundary = tester.renderObject<RenderRepaintBoundary>(
-        find.byType(RepaintBoundary).first);
-    late Uint8List data;
-    late int w, h;
-    await tester.runAsync(() async {
-      final image = await boundary.toImage();
-      final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-      data = bytes!.buffer.asUint8List();
-      w = image.width;
-      h = image.height;
-    });
-
-    // The longest unbroken horizontal run of pixels near the thumb's composited
-    // colour. A run is the right measure: text antialiasing scatters a handful
-    // of similar pixels across a row, a thumb is a solid bar.
-    var longest = 0;
-    for (var y = 0; y < h; y++) {
-      var run = 0;
-      for (var x = 0; x < w; x++) {
-        final i = (y * w + x) * 4;
-        final near = (data[i] - (expected.r * 255)).abs() < 12 &&
-            (data[i + 1] - (expected.g * 255)).abs() < 12 &&
-            (data[i + 2] - (expected.b * 255)).abs() < 12;
-        run = near ? run + 1 : 0;
-        if (run > longest) longest = run;
-      }
+  /// Every horizontally-scrolling viewport on screen, with how far it can
+  /// scroll and the rectangle it occupies.
+  List<({ScrollPosition position, Rect rect})> horizontalViewports(
+      WidgetTester tester) {
+    final out = <({ScrollPosition position, Rect rect})>[];
+    // `tester.stateList`, not `Scrollable.of(element)`: `of` reads an
+    // INHERITED widget, so handing it the Scrollable's own element finds the
+    // scrollable ABOVE it — on a page that is itself a scroll view, that is
+    // the page, and every horizontal table reports the page's vertical axis.
+    // The first draft did that and measured nothing at all.
+    for (final state in tester.stateList<ScrollableState>(
+        find.byType(Scrollable, skipOffstage: false))) {
+      final axis = state.widget.axisDirection;
+      if (axis != AxisDirection.right && axis != AxisDirection.left) continue;
+      if (!state.position.hasContentDimensions) continue;
+      final box = state.context.findRenderObject() as RenderBox?;
+      if (box == null || !box.hasSize) continue;
+      out.add((
+        position: state.position,
+        rect: box.localToGlobal(Offset.zero) & box.size,
+      ));
     }
+    return out;
+  }
 
-    // The viewport is 400 of 900, so the thumb is roughly 4/9 of the track.
-    expect(longest, greaterThan(100),
-        reason: 'no bar of the thumb colour was painted. The Scrollbar is in '
-            'the tree and its colour is legible — both are asserted above — so '
-            'this is the capture schedule finishing before the fade does, and '
-            'every render taken with it shows a truncated table with no '
-            'affordance. Longest run found: $longest px.');
+  /// How many scrollbar painters on screen actually PAINT something.
+  ///
+  /// Not `hitTest`: that returns false whenever `ignorePointer` is set, and
+  /// Material's `Scrollbar` sets it on every touch platform — so a perfectly
+  /// visible thumb answers "no" and the first draft of this measured zero on a
+  /// screen whose render plainly has one.
+  ///
+  /// Not `find.byType(Scrollbar)` either: the widget is in the tree on every
+  /// one of these screens; the question is whether anything was drawn.
+  ///
+  /// So run the painter over a recording canvas and count the marks. That is
+  /// the same reasoning as `meter_fill_is_visible_test.dart` — a grep proves
+  /// the argument is written, only a measurement proves the pixels are there.
+  Future<int> paintedThumbs(WidgetTester tester) async {
+    var found = 0;
+    for (final element in find.byType(CustomPaint, skipOffstage: false)
+        .evaluate()) {
+      final painter = (element.widget as CustomPaint).foregroundPainter;
+      if (painter is! ScrollbarPainter) continue;
+      final box = element.renderObject as RenderBox?;
+      if (box == null || !box.hasSize) continue;
+
+      final recorder = ui.PictureRecorder();
+      painter.paint(Canvas(recorder), box.size);
+      final picture = recorder.endRecording();
+      final image = picture.toImageSync(
+          box.size.width.ceil().clamp(1, 4096),
+          box.size.height.ceil().clamp(1, 4096));
+      final bytes = await tester
+          .runAsync(() => image.toByteData(format: ui.ImageByteFormat.rawRgba));
+      image.dispose();
+      picture.dispose();
+      if (bytes == null) continue;
+
+      var opaque = 0;
+      final data = bytes.buffer.asUint8List();
+      for (var i = 3; i < data.length; i += 4) {
+        if (data[i] > 8) opaque++;
+      }
+      if (opaque > 0) found++;
+    }
+    return found;
+  }
+
+  Future<void> expectEveryWideTableSaysSo(
+      WidgetTester tester, String where) async {
+    final viewports = horizontalViewports(tester)
+        .where((v) => v.position.maxScrollExtent > 0)
+        .toList();
+    expect(viewports, isNotEmpty,
+        reason: 'nothing on $where scrolls sideways at this width, so this '
+            'test is measuring nothing — either the fixture stopped producing '
+            'rows or the table stopped being wide.');
+    final thumbs = await paintedThumbs(tester);
+    expect(thumbs, greaterThanOrEqualTo(viewports.length),
+        reason: '${viewports.length} table(s) on $where scroll sideways and '
+            'only $thumbs of them paint a thumb. A horizontal scroll view '
+            'with no visible bar reads as a table that has been cut off, not '
+            'as one that can be scrolled — Flutter draws no bar unless one is '
+            'asked for, and `thumbVisibility: true` still needs a controller '
+            'the bar can attach to.');
+  }
+
+  // 412px: the width the renders are taken at, and the width the fault was
+  // found at. A nine-column tracking table has no chance of fitting it, so
+  // every one of these genuinely scrolls.
+  testWidgets('the buyer\'s Requests screen shows a bar on its tracking table',
+      (tester) async {
+    await pump(tester, const BuyerRequestsScreen(), const Size(412, 2600));
+    await expectEveryWideTableSaysSo(tester, "the buyer's Requests screen");
+  });
+
+  testWidgets('the buyer\'s Waybills screen shows a bar on every route table',
+      (tester) async {
+    await pump(tester, const BuyerWaybillsScreen(), const Size(412, 1500));
+    await expectEveryWideTableSaysSo(tester, "the buyer's Waybills screen");
   });
 }

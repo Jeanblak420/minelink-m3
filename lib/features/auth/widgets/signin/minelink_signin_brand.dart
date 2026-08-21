@@ -343,6 +343,7 @@ class _MlBrandPanelState extends State<MlBrandPanel>
               text: widget.headlineAccent,
               style: TextStyle(
                 fontFamily: MlAuth.serif,
+                fontFamilyFallback: MlAuth.serifFallback,
                 fontStyle: FontStyle.italic,
                 fontWeight: FontWeight.w400,
                 fontSize: fs * 1.04,

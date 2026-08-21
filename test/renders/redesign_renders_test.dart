@@ -42,6 +42,12 @@ import 'package:flutter_application_1/features/operations/screens/operations_hub
 import 'package:flutter_application_1/features/chat/screens/communications_hub_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_portal_dashboard_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_loads_value_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_waybills_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_requests_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_routes_mines_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/buyer_truck_locations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_supplier_truck_locations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/transporter_truck_locations_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/earnings_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/mine_production_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/mine_quality_screen.dart';
@@ -88,6 +94,7 @@ import '../fixtures/console_tail_fixtures.dart';
 import '../fixtures/ml_sample_data.dart';
 import '../fixtures/nav_fixtures.dart';
 import '../fixtures/portal_capture_fixtures.dart';
+import '../fixtures/portal_tail_fixtures.dart';
 import '../fixtures/screen_fixtures.dart';
 import '../test_helpers/fake_geolocator.dart';
 import '../test_helpers/fake_path_provider.dart';
@@ -1889,6 +1896,192 @@ void main() {
     testWidgets('live map — phone dark', (tester) async {
       await shootConsole(tester, const LiveMapScreen(), const Size(412, 1600),
           'screen-live-map-phone-dark');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // THE PORTAL TAIL.
+  //
+  // The screens a company actually spends its week in that had never been
+  // photographed: the buyer's waybills, requests and routes; the mine's saved
+  // locations; the tons-out and trip detail views; the stockpile ledger; the
+  // three truck-location maps; the transporter's drivers, fuel costs,
+  // compliance and own-company pages; and the request form itself.
+  //
+  // `portalTailOverrides()` is what makes them real — see
+  // `test/fixtures/portal_tail_fixtures.dart`.
+  group('the portal tail', () {
+    List<Override> tail() => [
+          ...portalCaptureOverrides(),
+          ...portalTailOverrides(),
+        ];
+
+    Future<void> shootPortal(
+      WidgetTester tester,
+      Widget body,
+      Size size,
+      String name, {
+      required OrgType orgType,
+      required String title,
+      required String subtitle,
+      required String selectedRoute,
+      UserRole role = UserRole.admin,
+      Brightness brightness = Brightness.dark,
+      Future<void> Function(WidgetTester tester)? act,
+    }) =>
+        shoot(
+          tester,
+          screen(
+            brightness: brightness,
+            child: body,
+            title: title,
+            subtitle: subtitle,
+            orgType: orgType,
+            role: role,
+            selectedRoute: selectedRoute,
+            extraOverrides: tail(),
+          ),
+          size,
+          name,
+          act: act,
+        );
+
+    // --- The buyer's own three -------------------------------------------
+
+    testWidgets('buyer waybills — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const BuyerWaybillsScreen(),
+        const Size(412, 1500),
+        'screen-buyer-waybills-phone-dark',
+        orgType: OrgType.buyer,
+        title: 'Fixture Metals',
+        subtitle: 'Waybills',
+        selectedRoute: '/portal/buyer/waybills',
+      );
+    });
+
+    testWidgets('buyer waybills — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const BuyerWaybillsScreen(),
+        const Size(1600, 1100),
+        'screen-buyer-waybills-desktop-dark',
+        orgType: OrgType.buyer,
+        title: 'Fixture Metals',
+        subtitle: 'Waybills',
+        selectedRoute: '/portal/buyer/waybills',
+      );
+    });
+
+    testWidgets('buyer requests — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const BuyerRequestsScreen(),
+        const Size(412, 2600),
+        'screen-buyer-requests-phone-dark',
+        orgType: OrgType.buyer,
+        title: 'Fixture Metals',
+        subtitle: 'Requests',
+        selectedRoute: '/portal/buyer/requests',
+      );
+    });
+
+    testWidgets('buyer requests — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const BuyerRequestsScreen(),
+        const Size(1600, 2000),
+        'screen-buyer-requests-desktop-dark',
+        orgType: OrgType.buyer,
+        title: 'Fixture Metals',
+        subtitle: 'Requests',
+        selectedRoute: '/portal/buyer/requests',
+      );
+    });
+
+    testWidgets('buyer routes & mines — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const BuyerRoutesMinesScreen(),
+        const Size(412, 1400),
+        'screen-buyer-routes-mines-phone-dark',
+        orgType: OrgType.buyer,
+        title: 'Fixture Metals',
+        subtitle: 'Routes & mines',
+        selectedRoute: '/portal/buyer/routes',
+      );
+    });
+
+    testWidgets('buyer routes & mines — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const BuyerRoutesMinesScreen(),
+        const Size(1600, 1100),
+        'screen-buyer-routes-mines-desktop-dark',
+        orgType: OrgType.buyer,
+        title: 'Fixture Metals',
+        subtitle: 'Routes & mines',
+        selectedRoute: '/portal/buyer/routes',
+      );
+    });
+
+    // --- The three truck-location maps ------------------------------------
+    //
+    // One panel, three sets of copy and three different scopes. The tiles are
+    // blank for the reason the console's live map records; the rail of GPS
+    // samples, the pins and the whole reflow are real.
+
+    testWidgets('buyer truck locations — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const BuyerTruckLocationsScreen(),
+        const Size(1600, 1100),
+        'screen-buyer-truck-locations-desktop-dark',
+        orgType: OrgType.buyer,
+        title: 'Fixture Metals',
+        subtitle: 'Truck locations',
+        selectedRoute: '/portal/buyer/trucks',
+      );
+    });
+
+    testWidgets('buyer truck locations — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const BuyerTruckLocationsScreen(),
+        const Size(412, 1400),
+        'screen-buyer-truck-locations-phone-dark',
+        orgType: OrgType.buyer,
+        title: 'Fixture Metals',
+        subtitle: 'Truck locations',
+        selectedRoute: '/portal/buyer/trucks',
+      );
+    });
+
+    testWidgets('mine truck locations — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const MineSupplierTruckLocationsScreen(),
+        const Size(1600, 1100),
+        'screen-mine-truck-locations-desktop-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Truck locations',
+        selectedRoute: '/portal/mine/trucks',
+      );
+    });
+
+    testWidgets('transporter truck locations — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const TransporterTruckLocationsScreen(),
+        const Size(1600, 1100),
+        'screen-transporter-truck-locations-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Truck locations',
+        selectedRoute: '/portal/transporter/trucks',
+      );
     });
   });
 

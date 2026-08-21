@@ -137,6 +137,15 @@ class MlAuth {
   static const String mono = 'JetBrainsMono';
   static const String serif = 'Fraunces';
 
+  /// What draws a character Fraunces does not have.
+  ///
+  /// Fraunces is missing seven of the non-ASCII characters this product's UI
+  /// strings use — the reasoning, and the render that found it, are on
+  /// `MlTokens.fontSerifFallback`. Spelled out here for the same reason the
+  /// three faces above are, and pinned against that constant by
+  /// `one_type_scale_test.dart`.
+  static const List<String> serifFallback = <String>[sans];
+
   // -- geometry ------------------------------------------------------------
   static const double cardMaxWidth = 452;
   static const double cardRadius = 20;

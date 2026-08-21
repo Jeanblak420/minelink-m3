@@ -210,13 +210,24 @@ def main() -> int:
         for s in sites:
             print(f'             {s}')
 
-    # Absent from SOME face. Not a failure: this tool cannot tell which face
-    # will draw a given string, and a character used only in sans text is fine
-    # even if the mono lacks it. Printed so the list stays visible.
+    # Absent from SOME face. Not a failure, and since 2026-08-21 not a hazard
+    # either: this tool cannot tell which face will draw a given string, so the
+    # answer was to stop needing to know. Every site that names the serif also
+    # names `MlTokens.fontSerifFallback`, held by the
+    # `serif-declares-its-fallback` release guard, so a character Fraunces
+    # lacks is drawn by Plus Jakarta Sans instead of by nothing.
+    #
+    # It WAS a hazard until then. The buyer's Waybills screen heads each route
+    # group with the two points and an arrow between them, and MlSectionTitle
+    # draws its title in the serif — so every heading on that screen read
+    # "Iron Hills Mining [tofu] Richards Bay". This list already named U+2192
+    # and could only ever call it advisory.
+    #
+    # Still printed, because the list is the inventory of what that fallback
+    # is carrying, and it is worth reading before a new symbol is introduced.
     if partial:
-        print(f'\n  {len(partial)} character(s) missing from SOME face — not a '
-              f'failure, because this cannot tell which face draws which '
-              f'string:')
+        print(f'\n  {len(partial)} character(s) missing from SOME face — '
+              f'covered by the declared font fallback, not a failure:')
         for ch, absent, sites in partial:
             print(f'    U+{ord(ch):04X} {ch!r} — not in {", ".join(absent)} '
                   f'({sites[0]})')

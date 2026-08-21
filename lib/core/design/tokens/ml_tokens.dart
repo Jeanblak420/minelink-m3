@@ -209,6 +209,35 @@ abstract final class MlTokens {
   static const fontMono = 'JetBrainsMono';
   static const fontSerif = 'Fraunces';
 
+  /// What draws a character **Fraunces does not have**.
+  ///
+  /// Fraunces is a display face and its cmap is short. Measured against every
+  /// non-ASCII character in a Dart string literal under `lib/`, it is missing
+  /// SEVEN of them — and the sans and the mono are missing none:
+  ///
+  ///     ₂ ₃  (U+2082/2083 — Cr₂O₃, the commodity spec on every quality screen)
+  ///     ← → ↓ (U+2190/2192/2193 — a route, a delta, a back link)
+  ///     ▲ ▼  (U+25B2/25BC — the org-insights trend arrows)
+  ///
+  /// A `fontFamily` that resolves but lacks a glyph does not throw. On a
+  /// handset the platform's own fallback chain usually supplies the character;
+  /// **on the web it does not**, and neither does a test render. So this class
+  /// of fault looks fine everywhere anyone has looked.
+  ///
+  /// Found 2026-08-21 the first time the buyer's Waybills screen was
+  /// photographed: every route heading is `'$from → $to'` and
+  /// [MlSectionTitle] draws its title in the serif, so all four read
+  /// "Iron Hills Mining ▯ Richards Bay" — a tofu box where the arrow belongs,
+  /// on the screen's only structural label.
+  ///
+  /// `tool/glyph_coverage_check.py` had already listed those seven characters
+  /// and could only report them as advisory, because a source scan cannot tell
+  /// WHICH face draws a given string. This removes the question: every site
+  /// that names the serif also names this, so a missing glyph is drawn by the
+  /// sans instead of by nothing. Held by the `serif-declares-its-fallback`
+  /// release guard.
+  static const fontSerifFallback = <String>[fontSans];
+
   // ---- Type scale (px) ----
   //
   // **These are the M3 slot sizes, under the app's older names.**
@@ -648,6 +677,7 @@ abstract final class MlType {
   }) =>
       TextStyle(
         fontFamily: MlTokens.fontSerif,
+        fontFamilyFallback: MlTokens.fontSerifFallback,
         fontSize: size,
         fontWeight: FontWeight.w500,
         letterSpacing: -0.2,

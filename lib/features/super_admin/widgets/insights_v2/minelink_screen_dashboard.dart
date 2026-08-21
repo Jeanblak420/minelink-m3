@@ -525,6 +525,7 @@ class _RegistryTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: MlGlass.display,
+                      fontFamilyFallback: MlGlass.displayFallback,
                       fontSize: 30,
                       fontWeight: FontWeight.w400,
                       height: 1,

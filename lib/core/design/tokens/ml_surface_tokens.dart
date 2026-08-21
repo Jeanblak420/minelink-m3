@@ -102,6 +102,12 @@ class MlGlass {
   /// The flagship numeral face.
   static const String display = MlTokens.fontSerif;
 
+  /// What draws a character the display face does not have — see
+  /// [MlTokens.fontSerifFallback]. Named here so a site reaching for
+  /// [display] does not have to reach into a second token file for the
+  /// other half of the same decision.
+  static const List<String> displayFallback = MlTokens.fontSerifFallback;
+
   // MlGlass used to carry four radii of its own — rSm 6, r 10, rLg 14, rXl 20,
   // a FOURTH set of corner values beside MlShape, MlTokens.r* and the literals
   // scattered through the screens. They are deleted rather than aliased: a

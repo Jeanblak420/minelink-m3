@@ -45,6 +45,7 @@ import 'package:flutter_application_1/features/fleet/providers/fleet_provider.da
 import 'package:flutter_application_1/features/fleet/providers/maintenance_providers.dart';
 import 'package:flutter_application_1/features/portal/models/buyer_load_value.dart';
 import 'package:flutter_application_1/features/portal/models/load_quality.dart';
+import 'package:flutter_application_1/features/operations/models/operations_models.dart';
 import 'package:flutter_application_1/features/portal/models/logistics_models.dart';
 import 'package:flutter_application_1/features/portal/models/mine_trip.dart';
 import 'package:flutter_application_1/features/portal/models/production_entry.dart';
@@ -930,6 +931,147 @@ final List<ProductionDispatchDay> kProductionReport = [
 // Logistics snapshot — routes, trips and reconciliations for the dashboards
 // ---------------------------------------------------------------------------
 
+/// The TRANSACTIONS behind the trips — what `LogisticsSnapshot.waybills` holds.
+///
+/// These were `const []` until 2026-08-21, and that emptiness reached further
+/// than the screen named after them:
+///
+///   * the buyer's Waybills screen photographed its empty state;
+///   * the buyer's Reconciliations screen filters trips to those whose
+///     `transactionId` is in this list, so it rendered ZERO trips — an empty
+///     table photographed as though it were the design (CLAUDE.md §10.5);
+///   * the mine dashboard's tonnage sparkline sums `netTonsOut` from here, so
+///     every one of its windows was a flat zero;
+///   * "Routes & Mines" counts this list in its header.
+///
+/// The ids match `kLogistics.trips` exactly (`txn-1`..`txn-3`), because that
+/// join is what every one of those screens does. `txn-4` deliberately has NO
+/// route metadata and no order number — the row that renders as em dashes and
+/// groups under "— → —", which is what an operator sees before a transaction
+/// has been linked to a route.
+final List<OperationTransaction> kWaybills = [
+  OperationTransaction(
+    id: 'txn-1',
+    referenceNumber: 'TRP-000121',
+    supplierCompanyId: 'co-mine',
+    buyerCompanyId: 'co-buyer',
+    transporterCompanyId: 'co-transporter',
+    status: 'completed',
+    quantity: 200,
+    netTonsOut: 36.22,
+    metadata: const {
+      'loading_point': 'Iron Hills Mining',
+      'offloading_point': 'Richards Bay',
+      'commodity': 'Chrome',
+      'order_no': 'PO-88213',
+    },
+    createdAt: _ago(const Duration(days: 6)),
+    updatedAt: _ago(const Duration(days: 1)),
+  ),
+  OperationTransaction(
+    id: 'txn-2',
+    referenceNumber: 'TRP-000123',
+    supplierCompanyId: 'co-mine',
+    buyerCompanyId: 'co-buyer',
+    transporterCompanyId: 'co-transporter',
+    status: 'in_transit',
+    quantity: 200,
+    netTonsOut: 34.90,
+    metadata: const {
+      'loading_point': 'Iron Hills Mining',
+      'offloading_point': 'Richards Bay',
+      'commodity': 'Chrome',
+      'order_no': 'PO-88214',
+    },
+    createdAt: _ago(const Duration(days: 3)),
+    updatedAt: _ago(const Duration(hours: 2)),
+  ),
+  OperationTransaction(
+    id: 'txn-3',
+    referenceNumber: 'TRP-000124',
+    supplierCompanyId: 'co-mine',
+    buyerCompanyId: 'co-buyer-2',
+    transporterCompanyId: 'co-transporter',
+    status: 'loading',
+    quantity: 90,
+    netTonsOut: 0,
+    metadata: const {
+      'loading_point': 'Iron Hills Mining',
+      'offloading_point': 'Maputo',
+      'commodity': 'Manganese',
+      'order_no': 'PO-88301',
+    },
+    createdAt: _ago(const Duration(days: 2)),
+    updatedAt: _ago(const Duration(minutes: 20)),
+  ),
+  // Nothing filled in yet. Groups under "— → —" and prints em dashes.
+  OperationTransaction(
+    id: 'txn-4',
+    referenceNumber: 'TRP-000125',
+    supplierCompanyId: 'co-mine',
+    buyerCompanyId: 'co-buyer',
+    status: 'draft',
+    quantity: 0,
+    metadata: const {},
+    createdAt: _ago(const Duration(hours: 9)),
+    updatedAt: _ago(const Duration(hours: 9)),
+  ),
+];
+
+/// The newest GPS sample per vehicle — what the three Truck-locations screens
+/// and the map draw. Also `const []` until 2026-08-21, so all three of those
+/// screens could only ever have photographed "No trucks have GPS coordinates
+/// recorded."
+///
+/// Three trucks, on three legs of the same haul, and deliberately NOT all
+/// fresh: `veh-3` last reported nine hours ago, which is the row an operator
+/// has to be able to tell apart from the two that reported minutes ago.
+final List<VehiclePositionRecord> kPositions = [
+  VehiclePositionRecord(
+    id: 'pos-1',
+    vehicleId: 'veh-1',
+    lat: -25.8721,
+    lng: 29.2334,
+    heading: 118,
+    recordedAt: _ago(const Duration(minutes: 4)),
+  ),
+  VehiclePositionRecord(
+    id: 'pos-2',
+    vehicleId: 'veh-2',
+    lat: -27.4102,
+    lng: 31.0455,
+    heading: 143,
+    recordedAt: _ago(const Duration(minutes: 21)),
+  ),
+  VehiclePositionRecord(
+    id: 'pos-3',
+    vehicleId: 'veh-3',
+    lat: -28.7802,
+    lng: 32.0377,
+    recordedAt: _ago(const Duration(hours: 9)),
+  ),
+];
+
+/// Reconciliation headers on the snapshot. One open, one settled.
+final List<ReconciliationRecord> kSnapshotReconciliations = [
+  ReconciliationRecord(
+    id: 'rec-1',
+    buyerCompanyId: 'co-buyer',
+    supplierCompanyId: 'co-mine',
+    transporterCompanyId: 'co-transporter',
+    status: 'open',
+    updatedAt: _ago(const Duration(hours: 6)),
+  ),
+  ReconciliationRecord(
+    id: 'rec-2',
+    buyerCompanyId: 'co-buyer',
+    supplierCompanyId: 'co-mine',
+    transporterCompanyId: 'co-transporter',
+    status: 'settled',
+    updatedAt: _ago(const Duration(days: 4)),
+  ),
+];
+
 final LogisticsSnapshot kLogistics = LogisticsSnapshot(
   routes: [
     HaulRouteRecord(
@@ -986,9 +1128,9 @@ final LogisticsSnapshot kLogistics = LogisticsSnapshot(
       updatedAt: _ago(const Duration(minutes: 20)),
     ),
   ],
-  positions: const [],
-  reconciliations: const [],
-  waybills: const [],
+  positions: kPositions,
+  reconciliations: kSnapshotReconciliations,
+  waybills: kWaybills,
 );
 
 // ---------------------------------------------------------------------------

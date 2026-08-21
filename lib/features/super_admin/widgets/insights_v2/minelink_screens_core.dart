@@ -552,6 +552,7 @@ class MlSectionHead extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontFamily: MlGlass.display,
+                        fontFamilyFallback: MlGlass.displayFallback,
                         fontSize: size,
                         fontWeight: FontWeight.w400,
                         letterSpacing: -0.2,

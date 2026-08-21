@@ -26,9 +26,20 @@
 //      nothing to say more existed — the one fault `MlWideTable` was built to
 //      end, still in the pictures of it.
 //
+//   3. **Three pumps were not enough for a screen with TWO futures.** Measured
+//      2026-08-21 on the buyer's Requests screen: the screen resolves its own
+//      request list, and the `RequestTrackingView` inside it then resolves a
+//      second provider a frame later, so its nine-column table is built on
+//      frame 3 and its 300ms fade had not begun when the schedule ended. The
+//      table reported `maxScrollExtent 858` beside a scrollbar at `opacity
+//      0.0` — a picture of seven unreachable columns with nothing to say so.
+//
 // The schedule lives here so the render harness and the test that PROVES it
 // works cannot drift apart. `wide_table_scrollbar_test.dart` drives this exact
 // function and then counts thumb pixels; shorten anything below and it fails.
+// (That file did not exist until 2026-08-21, though both this header and
+// `render_settle_test.dart` already named it. Writing it is what found the
+// third fault above.)
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -87,4 +98,26 @@ Future<void> pumpForCapture(WidgetTester tester) async {
   //    it is a picture of a number, and the number is wrong. Sized to the
   //    longest animation the system has rather than to the one that bit first.
   await tester.pump(kCountUp + const Duration(milliseconds: 200));
+
+  // 5. A SECOND future's worth of frames — the same fault one level deeper.
+  //
+  //    Step 2's note says "a resolved future built during frame 1". A screen
+  //    can have TWO: the buyer's Requests screen resolves its own request list,
+  //    and the `RequestTrackingView` inside it then watches a second provider
+  //    which resolves a frame later still. Its nine-column table is therefore
+  //    built on frame 3, its scroll metrics notify from THAT frame's
+  //    post-frame callback, and the 300ms fade had not begun when step 4's
+  //    pump ended.
+  //
+  //    Measured 2026-08-21 in `wide_table_scrollbar_test.dart`: the table
+  //    reports `maxScrollExtent 858` and its scrollbar painter reports
+  //    `opacity 0.0` — seven of nine columns unreachable with nothing to say
+  //    so, in the picture of the screen. Two more frames take it to 1.0.
+  //
+  //    Two pumps rather than one, because the first has to RUN the frame the
+  //    notification schedules and the second has to advance the fade through
+  //    it. This is the third time this schedule has been one step short, and
+  //    each time the symptom was a render that looked finished.
+  await tester.pump(kScrollbarFade + const Duration(milliseconds: 100));
+  await tester.pump(kScrollbarFade + const Duration(milliseconds: 100));
 }

@@ -213,6 +213,11 @@ PortalNavNode _settings(String org) => PortalNavNode.group(
 List<PortalNavNode> _personalTail(String org) => [
       PortalNavNode.leaf(
         label: 'Compliance',
+        // One word, ten letters, broken mid-word in the phone's 72px
+        // slot. "Docs" is what the screen holds — certificates, licences
+        // and permits with expiry dates — and it is short enough that no
+        // phone this product supports has to break it.
+        shortLabel: 'Docs',
         icon: Icons.verified_user_outlined,
         route: '/portal/$org/compliance',
         badge: PortalNavBadge.expiringCompliance,
@@ -412,6 +417,17 @@ List<PortalNavNode> _mineTree(UserRole? role) {
     ),
     const PortalNavNode.group(
       label: 'Reconciliation',
+      // ONE WORD, and 14 letters of it. The phone's bottom bar gives a
+      // destination a 72-90px slot and `NavigationBar` does not ellipsize,
+      // so the full label wrapped between two letters — "Reconciliatio"
+      // over an orphaned "n" sitting on the bar's bottom edge.
+      // Photographed 2026-08-21, the first time a phone render carried
+      // this tree. "Recon" is not an abbreviation invented for the bar:
+      // it is the word this product already uses for the thing
+      // (CLAUDE.md §4 — "recon table", "recon rows"), and
+      // "Recon tables (tons out)" is a leaf of this very group. The full
+      // label stays on the long-press tooltip and in the drawer.
+      shortLabel: 'Recon',
       icon: Icons.balance_outlined,
       children: [
         PortalNavNode.leaf(
@@ -457,6 +473,12 @@ List<PortalNavNode> _buyerTree(UserRole? role) {
     ),
     const PortalNavNode.group(
       label: 'Procurement',
+      // Same fault as Reconciliation: one word, eleven letters, broken
+      // mid-word in a 72px slot at 360px. The bar navigates a group to
+      // its FIRST LEAF, and this group's first leaf is Requests — so the
+      // short form names exactly where the tap lands rather than
+      // inventing a vocabulary for the bar.
+      shortLabel: 'Requests',
       icon: Icons.shopping_bag_outlined,
       children: [
         PortalNavNode.leaf(
@@ -505,6 +527,17 @@ List<PortalNavNode> _buyerTree(UserRole? role) {
     ),
     const PortalNavNode.group(
       label: 'Reconciliation',
+      // ONE WORD, and 14 letters of it. The phone's bottom bar gives a
+      // destination a 72-90px slot and `NavigationBar` does not ellipsize,
+      // so the full label wrapped between two letters — "Reconciliatio"
+      // over an orphaned "n" sitting on the bar's bottom edge.
+      // Photographed 2026-08-21, the first time a phone render carried
+      // this tree. "Recon" is not an abbreviation invented for the bar:
+      // it is the word this product already uses for the thing
+      // (CLAUDE.md §4 — "recon table", "recon rows"), and
+      // "Recon tables (tons out)" is a leaf of this very group. The full
+      // label stays on the long-press tooltip and in the drawer.
+      shortLabel: 'Recon',
       icon: Icons.balance_outlined,
       children: [
         PortalNavNode.leaf(
@@ -564,6 +597,11 @@ List<PortalNavNode> _transporterTree(UserRole? role) {
       ),
       PortalNavNode.leaf(
         label: 'Compliance',
+        // One word, ten letters, broken mid-word in the phone's 72px
+        // slot. "Docs" is what the screen holds — certificates, licences
+        // and permits with expiry dates — and it is short enough that no
+        // phone this product supports has to break it.
+        shortLabel: 'Docs',
         icon: Icons.verified_user_outlined,
         route: '/portal/transporter/compliance',
         badge: PortalNavBadge.expiringCompliance,
@@ -675,6 +713,17 @@ List<PortalNavNode> _transporterTree(UserRole? role) {
     ),
     const PortalNavNode.group(
       label: 'Reconciliation',
+      // ONE WORD, and 14 letters of it. The phone's bottom bar gives a
+      // destination a 72-90px slot and `NavigationBar` does not ellipsize,
+      // so the full label wrapped between two letters — "Reconciliatio"
+      // over an orphaned "n" sitting on the bar's bottom edge.
+      // Photographed 2026-08-21, the first time a phone render carried
+      // this tree. "Recon" is not an abbreviation invented for the bar:
+      // it is the word this product already uses for the thing
+      // (CLAUDE.md §4 — "recon table", "recon rows"), and
+      // "Recon tables (tons out)" is a leaf of this very group. The full
+      // label stays on the long-press tooltip and in the drawer.
+      shortLabel: 'Recon',
       icon: Icons.balance_outlined,
       children: [
         PortalNavNode.leaf(

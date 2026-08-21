@@ -55,6 +55,7 @@ abstract final class MlTypeScale {
         // ---- display: Fraunces, tabular. Figures and section titles. ----
         displayLarge: TextStyle(
           fontFamily: MlTokens.fontSerif,
+          fontFamilyFallback: MlTokens.fontSerifFallback,
           fontSize: 45,
           height: 52 / 45,
           fontWeight: FontWeight.w500,
@@ -64,6 +65,7 @@ abstract final class MlTypeScale {
         ),
         displayMedium: TextStyle(
           fontFamily: MlTokens.fontSerif,
+          fontFamilyFallback: MlTokens.fontSerifFallback,
           fontSize: 36,
           height: 44 / 36,
           fontWeight: FontWeight.w500,
@@ -73,6 +75,7 @@ abstract final class MlTypeScale {
         ),
         displaySmall: TextStyle(
           fontFamily: MlTokens.fontSerif,
+          fontFamilyFallback: MlTokens.fontSerifFallback,
           fontSize: 32,
           height: 40 / 32,
           fontWeight: FontWeight.w500,
@@ -230,6 +233,7 @@ abstract final class MlTypeScale {
           Color color) =>
       TextStyle(
         fontFamily: MlTokens.fontSerif,
+        fontFamilyFallback: MlTokens.fontSerifFallback,
         fontSize: size,
         height: height,
         fontWeight: FontWeight.w500,

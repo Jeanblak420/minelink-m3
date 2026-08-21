@@ -163,7 +163,7 @@ class ComponentsDemoScreen extends ConsumerWidget {
               return ListTile(
                 title: Text(company.companyName),
                 subtitle: Text(company.whatsappNumber),
-                trailing: Text(company.orgType.name),
+                trailing: Text(company.orgType.label),
               );
             },
             showDivider: true,

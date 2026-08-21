@@ -318,6 +318,14 @@ class MlOv {
   static const String mono = 'JetBrainsMono';
   static const String serif = 'Fraunces';
 
+  /// What draws a character Fraunces does not have.
+  ///
+  /// The reasoning and the seven characters are on
+  /// `MlTokens.fontSerifFallback`; spelled out here because this file is a
+  /// byte-for-byte port that imports nothing but Flutter, and pinned against
+  /// that constant by `one_type_scale_test.dart`.
+  static const List<String> serifFallback = <String>[sans];
+
   TextStyle s({
     double size = 12,
     FontWeight weight = FontWeight.w400,
@@ -367,6 +375,7 @@ class MlOv {
   }) =>
       TextStyle(
         fontFamily: serif,
+        fontFamilyFallback: serifFallback,
         fontSize: size,
         fontWeight: weight,
         color: color ?? inkHi,

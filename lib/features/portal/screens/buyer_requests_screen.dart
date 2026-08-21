@@ -404,42 +404,64 @@ class _AllocatedTrucksSection extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 6),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final t in trucks)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHighest.withValues(
-                        alpha: 0.5,
-                      ),
-                      borderRadius: MlShape.radiusMedium,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        MlPlatePill(t.truckReg ?? '—', fontSize: 12),
-                        const SizedBox(width: 8),
-                        Text(
-                          [
-                            if (t.transporterName != null) t.transporterName!,
-                            if (t.drivers != null) t.drivers!,
-                            TripStatus.parse(t.tripStatus).label,
-                          ].join(' · '),
-                          style: context.mlText.bodySmall.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
+            // A `Wrap` lays its children out against UNBOUNDED width, so the
+            // `Row` inside each chip took its natural size and the plate,
+            // transporter, drivers and status ran straight off the card —
+            // measured at 156px past a 412px phone, with the request's own
+            // status badge pushed off the screen behind it (CLAUDE.md §10.4,
+            // photographed 2026-08-21). Nothing ellipsised, because an
+            // ellipsis needs a bound to engage against.
+            //
+            // `LayoutBuilder` supplies the bound the `Wrap` does not, and the
+            // detail line is `Flexible` inside it so a long crew list
+            // shortens rather than shoving the plate out. The plate itself is
+            // never truncated: it is the identifier.
+            LayoutBuilder(builder: (context, c) {
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final t in trucks)
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: c.maxWidth),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
                         ),
-                      ],
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainerHighest.withValues(
+                            alpha: 0.5,
+                          ),
+                          borderRadius: MlShape.radiusMedium,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            MlPlatePill(t.truckReg ?? '—', fontSize: 12),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                [
+                                  if (t.transporterName != null)
+                                    t.transporterName!,
+                                  if (t.drivers != null) t.drivers!,
+                                  TripStatus.parse(t.tripStatus).label,
+                                ].join(' · '),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.mlText.bodySmall.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-              ],
-            ),
+                ],
+              );
+            }),
           ],
         );
       },

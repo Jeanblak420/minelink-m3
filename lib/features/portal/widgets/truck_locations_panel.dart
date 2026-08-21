@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/logistics_models.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -179,8 +178,19 @@ class TruckLocationsPanel extends StatelessWidget {
                   ],
                 ),
               ),
+              // HOW OLD the sample is, not what day it landed.
+              //
+              // This printed `dd MMM`, so three trucks reporting 4 minutes,
+              // 21 minutes and NINE HOURS ago all read "15 Aug" — measured
+              // 2026-08-21 out of `screen-buyer-truck-locations-desktop-dark`.
+              // On a screen whose entire subject is where a truck is right
+              // now, the only thing the reader needs from this column is
+              // whether the position is fresh, and a date that is identical
+              // for every row cannot say. `MlTime.agoTag` is the product's one
+              // short relative-time form and it falls back to that same date
+              // past a week, so nothing is lost for a stale sample.
               Text(
-                DateFormat('dd MMM').format(MlTime.sast(p.recordedAt)),
+                MlTime.agoTag(p.recordedAt),
                 style: context.mlText.code(
                   color: semantic.textFaint,
                   size: 12,

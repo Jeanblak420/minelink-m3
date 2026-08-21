@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/portal/providers/logistics_provider.dart';
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
 import 'package:flutter_application_1/features/portal/utils/portal_dashboard_navigation.dart';
@@ -39,10 +40,17 @@ class BuyerRoutesMinesScreen extends ConsumerWidget {
         children: [
           MlSectionTitle(
             'Routes & Mines',
+            // `routes`, not `waybills`.
+            //
+            // This counted the snapshot's TRANSACTIONS and called them route
+            // records, on the header of a section whose cards are the routes:
+            // photographed 2026-08-21 reading "4 route records" over two route
+            // cards. The two lists are related but they are not the same list,
+            // and the header is the only number a reader has to check the
+            // section against.
             meta: routesAsync.valueOrNull == null
                 ? null
-                : mlCount(routesAsync.value!.waybills.length, 'route record',
-                    'route records'),
+                : mlCount(routesAsync.value!.routes.length, 'route'),
             icon: Icons.alt_route_rounded,
             margin: const EdgeInsets.only(bottom: 4),
           ),
@@ -156,7 +164,11 @@ class BuyerRoutesMinesScreen extends ConsumerWidget {
                         title: Text(pins[i].name,
                             style:
                                 const TextStyle(fontWeight: FontWeight.w700)),
-                        subtitle: Text(pins[i].orgType ?? 'Partner'),
+                        // `CompanyPin.orgType` is `companies.org_type` verbatim, so this
+                        // read "mineSupplier" under both partners —
+                        // Postgres's vocabulary on a buyer's screen.
+                        subtitle: Text(OrgType.labelFor(pins[i].orgType,
+                            fallback: 'Partner')),
                       ),
                     ],
                   ],

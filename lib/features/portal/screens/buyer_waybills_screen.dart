@@ -33,13 +33,35 @@ class BuyerWaybillsScreen extends ConsumerWidget {
       ),
       data: (snap) {
         // Group by route ("loading → offloading") from metadata.
+        //
+        // A transaction that has not been linked to a route yet has NEITHER
+        // point, and the first draft of this interpolated the em-dash fallback
+        // into the heading anyway — so a real group rendered as
+        //
+        //     ⑂  — → —
+        //        1 waybill
+        //
+        // three punctuation marks where a heading belongs, indistinguishable
+        // from a rendering failure and counted in "3 routes" beside a screen
+        // that only has two. Found 2026-08-21, first render of this screen.
+        // It gets its own named group at the bottom instead, and is not
+        // counted as a route.
+        const unrouted = 'Not linked to a route yet';
         final groups = <String, List<OperationTransaction>>{};
         for (final w in snap.waybills) {
-          final from = (w.metadata['loading_point'] as String?) ?? '—';
-          final to = (w.metadata['offloading_point'] as String?) ?? '—';
-          groups.putIfAbsent('$from → $to', () => []).add(w);
+          final from = (w.metadata['loading_point'] as String?)?.trim() ?? '';
+          final to = (w.metadata['offloading_point'] as String?)?.trim() ?? '';
+          final key = (from.isEmpty && to.isEmpty)
+              ? unrouted
+              : '${from.isEmpty ? '—' : from} → ${to.isEmpty ? '—' : to}';
+          groups.putIfAbsent(key, () => []).add(w);
         }
-        final routeKeys = groups.keys.toList()..sort();
+        // The unrouted group sorts last whatever it is called, rather than
+        // alphabetically among the routes it is not one of.
+        final routeKeys = groups.keys.where((k) => k != unrouted).toList()
+          ..sort();
+        if (groups.containsKey(unrouted)) routeKeys.add(unrouted);
+        final realRoutes = groups.keys.where((k) => k != unrouted).length;
 
         return MlPageBody(
           child: Column(
@@ -48,7 +70,7 @@ class BuyerWaybillsScreen extends ConsumerWidget {
               MlPageHeader(
                 title: 'Waybills',
                 meta: '${mlCount(snap.waybills.length, 'waybill')} · '
-                    '${mlCount(routeKeys.length, 'route')}',
+                    '${mlCount(realRoutes, 'route')}',
                 description:
                     'Your transactions per route. Tap a waybill to edit destination, '
                     'product and order number.',
@@ -66,7 +88,9 @@ class BuyerWaybillsScreen extends ConsumerWidget {
               else
                 for (final route in routeKeys) ...[
                   MlSectionTitle(route,
-                      icon: Icons.alt_route_outlined,
+                      icon: route == unrouted
+                          ? Icons.link_off_rounded
+                          : Icons.alt_route_outlined,
                       meta: mlCount(groups[route]!.length, 'waybill'),
                       margin: const EdgeInsets.only(bottom: 10)),
                   MlCard(

@@ -316,19 +316,6 @@ class _OverviewTab extends ConsumerWidget {
     required this.seatsUsed,
   });
 
-  static String _typeLabel(String t) {
-    switch (t) {
-      case 'mineSupplier':
-        return 'Mine / Supplier';
-      case 'buyer':
-        return 'Buyer';
-      case 'transporter':
-        return 'Transporter';
-      default:
-        return t;
-    }
-  }
-
   static String _ownerName(Map<String, dynamic> org) {
     final raw = org['owner_profile'];
     if (raw is Map) {
@@ -500,7 +487,11 @@ class _OverviewTab extends ConsumerWidget {
                   value: org['company_name'] as String? ?? '—'),
               _InfoRow(
                   label: 'Organization Type',
-                  value: _typeLabel(orgType)),
+                  // `OrgType.labelFor`, not a private switch. This screen
+                  // carried its own, returning "Mine / Supplier" — a second
+                  // spelling of a word the rest of the console writes
+                  // "Mine/Supplier", on the same admin's screens.
+                  value: OrgType.labelFor(orgType)),
               _InfoRow(label: 'WhatsApp', value: ownerContact),
               _InfoRow(
                 label: 'CEO',

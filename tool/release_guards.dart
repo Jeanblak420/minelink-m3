@@ -618,6 +618,60 @@ final guards = <Guard>[
     plantLine: "String ago(Duration d) => '\${d.inMinutes}m ago';",
   ),
   Guard(
+    id: 'serif-declares-its-fallback',
+    why: 'a `TextStyle` that names the SERIF face without naming what draws '
+        'the characters that face does not have. Fraunces is a display face '
+        'and its cmap is short: measured against every non-ASCII character in '
+        'a Dart string literal under `lib/`, it is missing SEVEN of them — '
+        '₂ ₃ (Cr₂O₃, on every quality screen), '
+        '← → ↓ (a route, a delta, a back link) and '
+        '▲ ▼ (the org-insights trend arrows). The sans and the mono '
+        'are missing none of them.\n'
+        '\n'
+        'A `fontFamily` that resolves but lacks a GLYPH does not throw. On a '
+        'handset the platform supplies the character from its own fallback '
+        'chain; **on the web it does not**, and neither does a test render. So '
+        'this fails in exactly the place nobody checks and looks fine in '
+        'exactly the place everybody does.\n'
+        '\n'
+        'Photographed 2026-08-21, the first time the buyer\'s Waybills screen '
+        'was rendered: every route heading on it is `\'\$from → \$to\'` '
+        'and `MlSectionTitle` draws its title in the serif, so all four read '
+        '"Iron Hills Mining ▯ Richards Bay" — a tofu box in place of the '
+        'arrow, on the screen\'s only structural label.\n'
+        '\n'
+        '`tool/glyph_coverage_check.py` had already LISTED those seven and '
+        'could only report them as advisory, because a source scan cannot tell '
+        'which face draws which string. Declaring the fallback removes the '
+        'question instead of answering it. Use `MlTokens.fontSerifFallback` '
+        '(or the local alias beside the face name).',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // A `fontFamily:` naming a serif alias, without a `fontFamilyFallback` in
+    // the ~120 characters that follow — far enough to clear the argument the
+    // formatter puts on the next line, short enough to stay inside the same
+    // TextStyle.
+    //
+    // Anchored on the FAMILY NAMES rather than on `TextStyle(`, because the
+    // face is named in four different token files under four different local
+    // aliases and half the sites are `copyWith`.
+    pattern: RegExp(
+      r'fontFamily:\s*(?:MlTokens\.fontSerif|MlGlass\.display|MlAuth\.serif|'
+      r'kEditorialSerif|serif)\s*,'
+      r'(?![\s\S]{0,120}?fontFamilyFallback)',
+    ),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    spanLines: true,
+    plantFile: 'title.dart',
+    plantLine:
+        'const TextStyle(fontFamily: MlTokens.fontSerif, fontSize: 20);',
+    plantWrapped: 'const TextStyle(\n'
+        '  fontFamily: MlTokens.fontSerif,\n'
+        '  fontSize: 20,\n'
+        ');',
+  ),
+  Guard(
     id: 'fractional-fill-declares-its-height',
     why: 'a `FractionallySizedBox` that declares only a `widthFactor` passes '
         'its parent\'s HEIGHT RANGE straight through, so under loose '

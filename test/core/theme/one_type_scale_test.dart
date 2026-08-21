@@ -159,6 +159,7 @@ void _oneFaceEachTests() {
       expect(MlGlass.sans, MlTokens.fontSans);
       expect(MlGlass.mono, MlTokens.fontMono);
       expect(MlGlass.display, MlTokens.fontSerif);
+      expect(MlGlass.displayFallback, MlTokens.fontSerifFallback);
     });
 
     // MlGlass was the only one this test knew about. There are four
@@ -171,12 +172,18 @@ void _oneFaceEachTests() {
       expect(MlAuth.sans, MlTokens.fontSans);
       expect(MlAuth.mono, MlTokens.fontMono);
       expect(MlAuth.serif, MlTokens.fontSerif);
+      // The other half of naming the face: what draws a character it lacks.
+      // Fraunces is missing seven of the non-ASCII characters this product's
+      // UI strings use, and a `fontFamily` that resolves but has no glyph does
+      // not throw — it renders a tofu box on the web and in a test render.
+      expect(MlAuth.serifFallback, MlTokens.fontSerifFallback);
     });
 
     test('MlOv names the same faces as MlTokens', () {
       expect(MlOv.sans, MlTokens.fontSans);
       expect(MlOv.mono, MlTokens.fontMono);
       expect(MlOv.serif, MlTokens.fontSerif);
+      expect(MlOv.serifFallback, MlTokens.fontSerifFallback);
     });
 
     test('there is no FOURTH face left in lib/', () {
@@ -319,6 +326,12 @@ void _mlTextTests() {
         type.editorialSmall,
       ]) {
         expect(style.fontFamily, MlTokens.fontSerif);
+        // Every editorial rung carries the fallback, so a section title
+        // containing an arrow, a subscript or a trend caret is drawn rather
+        // than boxed. `MlSectionTitle` renders its title in `editorialMedium`,
+        // and the buyer's Waybills screen puts a "→" in every one of its
+        // titles.
+        expect(style.fontFamilyFallback, MlTokens.fontSerifFallback);
         // `MlType.figure` is tabular because a numeral that re-measures every
         // frame visibly jitters. A title is words; tabular spacing in running
         // words looks typed rather than set.

@@ -172,6 +172,7 @@ class MlExpiryNotice extends StatelessWidget {
                             access.headline,
                             style: TextStyle(
                               fontFamily: MlGlass.display,
+                              fontFamilyFallback: MlGlass.displayFallback,
                               fontSize: compact ? 15 : 17,
                               fontWeight: FontWeight.w400,
                               letterSpacing: -0.2,

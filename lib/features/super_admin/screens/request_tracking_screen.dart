@@ -671,6 +671,7 @@ class _Header extends StatelessWidget {
                 ),
                 style: const TextStyle(
                   fontFamily: MlTokens.fontSerif,
+                  fontFamilyFallback: MlTokens.fontSerifFallback,
                   fontSize: MlTokens.fsDisplay,
                   fontWeight: FontWeight.w600,
                   height: 1.1,
@@ -769,6 +770,7 @@ class _OpsStatCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: MlTokens.fontSerif,
+                          fontFamilyFallback: MlTokens.fontSerifFallback,
                           fontStyle: FontStyle.italic,
                           fontSize: MlTokens.fsLabel,
                           color: semantic.textMuted,

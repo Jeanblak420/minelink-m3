@@ -57,7 +57,7 @@ class CompanyListScreen extends ConsumerWidget {
       },
       emptyWidget: MlEmptyState(
         icon: Icons.business_outlined,
-        title: 'No ${orgType.name} companies found',
+        title: 'No ${orgType.label} companies found',
         message: 'No companies of this type are registered yet.',
       ),
       showDivider: false,

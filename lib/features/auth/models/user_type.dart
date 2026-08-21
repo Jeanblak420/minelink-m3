@@ -28,6 +28,32 @@ enum OrgType {
   final String label;
   const OrgType(this.label);
 
+  /// The human label for a wire org type, for anywhere one is DISPLAYED.
+  ///
+  /// The twin of [UserRole.labelFor], and it exists for the same reason.
+  /// `companies.org_type` stores `mineSupplier`, and that string reached three
+  /// readers verbatim:
+  ///
+  ///   * the buyer's Routes & Mines screen captioned both of its linked mines
+  ///     "mineSupplier" (photographed 2026-08-21);
+  ///   * the company registry's empty state read "No mineSupplier companies
+  ///     found";
+  ///   * the components demo listed every company's type as its wire value.
+  ///
+  /// A fourth site had the opposite problem: the organisation detail screen
+  /// carried its own private switch returning "Mine / Supplier" — a second
+  /// spelling of the same word, on the console, next to screens saying
+  /// "Mine/Supplier". One place now.
+  ///
+  /// [fallback] is what an empty value reads as. An UNKNOWN value falls
+  /// through to itself, so a schema change stays visible rather than being
+  /// hidden behind a friendly word.
+  static String labelFor(String? raw, {String fallback = '—'}) {
+    final value = raw?.trim();
+    if (value == null || value.isEmpty) return fallback;
+    return tryParse(value)?.label ?? value;
+  }
+
   static OrgType? tryParse(String? value) {
     if (value == null) {
       return null;

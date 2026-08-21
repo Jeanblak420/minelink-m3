@@ -135,6 +135,45 @@ void main() {
                 '${oneLine.toStringAsFixed(1)}px) — give the node a '
                 'shortLabel');
           }
+          // A SINGLE WORD BROKEN IN HALF, at the size text is read at.
+          //
+          // Two lines are allowed above, and the bar is sized for them —
+          // because a label like "Loads & value" breaks at its space and both
+          // halves are still words. A label with NO space in it has nowhere
+          // legitimate to break, so `NavigationBar` breaks it between two
+          // letters: at 412px the Reconciliation tab rendered
+          //
+          //     Reconciliatio
+          //     n
+          //
+          // with the orphaned "n" on the bar's bottom edge. That passes every
+          // rule above — two lines, inside the bar, no overlap — and reads as
+          // a corrupted string rather than a destination. Found 2026-08-21 in
+          // `screen-buyer-waybills-phone-dark.png`, which is the first time
+          // anybody had looked at one.
+          //
+          // **Only at text scale 1.0**, and that is a decision rather than an
+          // oversight. Flutter's `NavigationBar` clamps its label scaling at
+          // 1.3, so 1.3 is the real ceiling — and at 1.3 on a 360px phone the
+          // 72px slot cannot hold "Dashboard", "Logistics" or "Stockpiles" on
+          // one line either. The only ways out of that are to abbreviate
+          // ordinary English words until they stop naming anything, or to move
+          // half the destinations behind "More" for anyone who turned their
+          // text up. Both are worse than a word wrapping. The bar is sized for
+          // two lines precisely so the large-text case degrades legibly; what
+          // this rule protects is the size the product is actually read at.
+          //
+          // 1.4 rather than 2.4: this is "more than one line", not "more than
+          // two".
+          if (oneLine != null &&
+              textScale == 1.0 &&
+              !e.key.contains(' ') &&
+              e.value.height > oneLine * 1.4) {
+            problems.add('${entry.key}: "${e.key}" is ONE WORD and does not '
+                'fit on one line (${e.value.height.toStringAsFixed(1)}px '
+                'against a one-line ${oneLine.toStringAsFixed(1)}px), so it '
+                'is broken between two letters — give the node a shortLabel');
+          }
           // CLEARANCE, not merely "inside". At 412px the two-line labels ended
           // 2px from the bottom of the screen: not clipped by a measurement,
           // and unmistakably clipped to look at — descenders sitting on the

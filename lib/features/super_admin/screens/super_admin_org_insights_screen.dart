@@ -704,6 +704,7 @@ class _SuperAdminOrgInsightsScreenState
           text: TextSpan(
             style: TextStyle(
               fontFamily: MlTokens.fontSerif,
+              fontFamilyFallback: MlTokens.fontSerifFallback,
               fontWeight: FontWeight.w700,
               color: MlControlRoom.textStrong,
             ),
@@ -1104,6 +1105,7 @@ class _SuperAdminOrgInsightsScreenState
             // Mock: rail section heads are the editorial serif, like the
             // console's page title — only the panel labels stay sans caps.
             fontFamily: MlTokens.fontSerif,
+            fontFamilyFallback: MlTokens.fontSerifFallback,
             fontSize: 16,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.15,
@@ -1408,6 +1410,7 @@ class _SuperAdminOrgInsightsScreenState
               style: TextStyle(
                 // Mock: the list head matches the console's editorial serif.
                 fontFamily: MlTokens.fontSerif,
+                fontFamilyFallback: MlTokens.fontSerifFallback,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 letterSpacing: -0.15,
