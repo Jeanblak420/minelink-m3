@@ -182,7 +182,18 @@ class MlStatCard extends StatelessWidget {
                             const SizedBox(height: 3),
                             Text(
                               caption!,
-                              maxLines: 1,
+                              // TWO lines. `net_mass · last_365_days` is 24
+                              // characters of 11px mono — about 163px — and
+                              // the text column of a 220px tile is 128. So the
+                              // recon table's five period cards, on the screen
+                              // whose whole purpose is those five figures,
+                              // read `last_7_da…`, `last_30_d…`,
+                              // `last_365_…`. The caption is a machine string
+                              // and its whole value is being exact about which
+                              // window the number covers; cut in half it says
+                              // the opposite of what it is for. Photographed
+                              // 2026-08-21. It breaks at the middot.
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               // A caption is a machine string
                               // (`net_mass · all_time`), so it is code, not

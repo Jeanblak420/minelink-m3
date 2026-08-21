@@ -118,7 +118,13 @@ class _MineSupplierBuyersDetailScreenState
     // resolved with `.valueOrNull ?? []` — that renders a confident empty
     // Buyers page out of an RLS denial or a dead network (P2-09).
     final partnersAsync = ref.watch(
-        partnerCompaniesProvider((companyId: companyId, orgFilter: 'Buyer')));
+        // `'buyer'`, the wire spelling — the same one `companies.org_type`
+        // holds and `buyer_routes_mines_screen.dart` passes for
+        // `'mineSupplier'`. It said `'Buyer'`, which works only because
+        // `listPartnerCompanies` lowercases both sides, and which is enough to
+        // make anything matching the argument exactly resolve to the wrong
+        // list without erroring.
+        partnerCompaniesProvider((companyId: companyId, orgFilter: 'buyer')));
     final stockpiles =
         ref.watch(stockpilesProvider(companyId)).valueOrNull ?? const [];
 
@@ -137,7 +143,7 @@ class _MineSupplierBuyersDetailScreenState
           if (partnersAsync.hasError) {
             return PartnerLoadError(
               companyId: companyId,
-              orgFilter: 'Buyer',
+              orgFilter: 'buyer',
               error: partnersAsync.error!,
               subject: 'buyers',
             );

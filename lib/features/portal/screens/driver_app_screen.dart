@@ -677,6 +677,24 @@ class _WeekChartCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
+          // NOTHING DELIVERED THIS WEEK IS A SENTENCE, NOT A CHART.
+          //
+          // `max <= 0` used to fall through to `heightFactor: 0.03`, so a week
+          // with no deliveries drew seven identical grey stubs under 116px of
+          // empty plot. A driver on their first Monday, or anyone between
+          // loads, opened the app to what reads as a chart that failed to
+          // load. Photographed 2026-08-21, the first time this tab was
+          // rendered.
+          if (max <= 0)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                'No deliveries recorded this week yet.',
+                style: context.mlText.bodyMedium
+                    .copyWith(color: semantic.textMuted),
+              ),
+            )
+          else
           SizedBox(
             height: 120,
             child: Row(

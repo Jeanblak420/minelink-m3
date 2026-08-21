@@ -39,6 +39,11 @@ import 'package:flutter_application_1/features/company/screens/company_employees
 import 'package:flutter_application_1/features/employee/screens/employee_profile_screen.dart';
 import 'package:flutter_application_1/features/company/screens/company_list_screen.dart';
 import 'package:flutter_application_1/features/employee/screens/employee_grid_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/portal_tons_out_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/portal_trips_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/live_trip_map_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_supplier_buyers_detail_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/driver_app_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/transporters_overview_v2_screen.dart';
 import 'package:flutter_application_1/features/fleet/screens/fleet_management_screen.dart';
 import 'package:flutter_application_1/features/operations/screens/operations_hub_screen.dart';
@@ -1256,6 +1261,115 @@ void main() {
   // IS real here is everything drawn on top of it: the route line, the truck
   // puck, the instruction banner, the destination bar and the HUD. The tiles
   // are the one part of this screen that still needs a device.
+  // -------------------------------------------------------------------------
+  // THE DRIVER APP SHELL.
+  //
+  // `DriverAppScreen` is the three-tab driver app (Dashboard · Trip · Profile)
+  // and `PortalShellLayout` renders it BARE for a driver employee — the driver
+  // app draws its own chrome. So this one is not wrapped in `MlAppShell`:
+  // doing so would photograph two navigations stacked on one phone, which is
+  // not what a driver sees.
+  //
+  // Its three tabs are three routes (`/portal/driver/home`, `/trip`,
+  // `/profile`) and none had ever been rendered. `DriverRoutesScreen` — the
+  // Trip tab's BODY — had, which is how the shell around it went unlooked-at.
+  group('the driver app', () {
+    // DISMISS THE SETUP PROMPT before photographing the screen underneath.
+    //
+    // `ProfileSetupBanner` pops a once-per-session dialog whenever a required
+    // compliance item is outstanding, and the fixture account has one — which
+    // is the honest fixture (a finished account renders the shortest, least
+    // informative version of every one of these surfaces). So the first thing
+    // any driver render sees is a modal over the page. The dialog gets its own
+    // picture below; these three want what is behind it.
+    Future<void> dismissSetupPrompt(WidgetTester tester) async {
+      final later = find.widgetWithText(TextButton, 'Later');
+      if (later.evaluate().isEmpty) return;
+      await tester.tap(later.first);
+      await tester.pump();
+    }
+
+    Future<void> shootDriver(
+      WidgetTester tester,
+      int tab,
+      String name, {
+      Size size = const Size(412, 1500),
+      Future<void> Function(WidgetTester tester)? act,
+      List<Override> extra = const [],
+    }) =>
+        shoot(
+          tester,
+          ProviderScope(
+            overrides: [
+              ...companyScopeOverrides(role: UserRole.driver),
+              ...portalCaptureOverrides(),
+              ...portalTailOverrides(),
+              // `sharedTailOverrides` for ONE widget: the driver dashboard
+              // carries an `AnimatedNotificationBell`, and `notificationProvider`
+              // un-overridden opens a real socket. That is not a slow render —
+              // the connect attempt outlives the widget tree and fails the test
+              // with "A Timer is still pending", after the golden is written.
+              ...sharedTailOverrides(),
+              // A driver's outstanding setup is their OWN — licence, PrDP,
+              // medical. `sharedTailOverrides` supplies the company-admin
+              // state (`audience: 'company'`), and the prompt dialog keys its
+              // title off that field, so without this it told a driver to
+              // "Complete your company account setup".
+              ...driverProfileSetupOverride(),
+              ...extra,
+            ],
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.build(Brightness.dark),
+              home: DriverAppScreen(initialTab: tab),
+            ),
+          ),
+          size,
+          name,
+          act: act ?? dismissSetupPrompt,
+        );
+
+    testWidgets('dashboard tab — phone dark', (tester) async {
+      await shootDriver(tester, 0, 'screen-driver-app-dashboard-phone-dark',
+          size: const Size(412, 1550));
+    });
+
+    testWidgets('trip tab — phone dark', (tester) async {
+      await shootDriver(tester, 1, 'screen-driver-app-trip-phone-dark',
+          size: const Size(412, 1150));
+    });
+
+    testWidgets('profile tab — phone dark', (tester) async {
+      await shootDriver(tester, 2, 'screen-driver-app-profile-phone-dark',
+          size: const Size(412, 1100));
+    });
+
+    // A driver on a tablet, which is a real thing in a cab.
+    testWidgets('dashboard tab — tablet dark', (tester) async {
+      await shootDriver(tester, 0, 'screen-driver-app-dashboard-tablet-dark',
+          size: const Size(1024, 1500));
+    });
+
+    // The same tab for a driver who HAS delivered this week, because the
+    // fixture driver has one trip and it is still en route — so the week chart
+    // above photographs its empty state and its populated state is drawn by
+    // nothing. Two completed loads, three and five days back.
+    testWidgets('dashboard tab, a week with deliveries — phone dark',
+        (tester) async {
+      await shootDriver(
+          tester, 0, 'screen-driver-app-dashboard-delivered-phone-dark',
+          size: const Size(412, 1600), extra: driverDeliveredWeekOverride());
+    });
+
+    // And the prompt itself — the first thing a driver with an outstanding
+    // compliance item sees when they open the app, and one of the dialogs
+    // §4.2 lists as never photographed.
+    testWidgets('account setup prompt — phone dark', (tester) async {
+      await shootDriver(tester, 0, 'screen-account-setup-prompt-phone-dark',
+          size: const Size(412, 915), act: (_) async {});
+    });
+  });
+
   group('driver navigation', () {
     testWidgets('navigating — phone dark', (tester) async {
       FakeGeolocatorPlatform.install(
@@ -2526,7 +2640,7 @@ void main() {
           orgType: OrgType.transporter,
           title: 'Transporters',
         ),
-        const Size(412, 1000),
+        const Size(412, 915),
         'screen-company-registry-phone-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
@@ -2539,7 +2653,7 @@ void main() {
       await shootPortal(
         tester,
         CompanyDetailsScreen(company: kCompanyRegistry.first),
-        const Size(1600, 1100),
+        const Size(1600, 1000),
         'screen-company-details-desktop-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
@@ -2552,7 +2666,7 @@ void main() {
       await shootPortal(
         tester,
         CompanyDetailsScreen(company: kCompanyRegistry.first),
-        const Size(412, 1200),
+        const Size(412, 915),
         'screen-company-details-phone-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
@@ -2568,12 +2682,118 @@ void main() {
           companyId: 'co-transporter',
           companyName: 'Fixture Haulage',
         ),
-        const Size(1600, 1200),
+        const Size(1600, 1000),
         'screen-employee-grid-desktop-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
         subtitle: 'Employees',
         selectedRoute: '/portal/transporter',
+      );
+    });
+
+    // --- The five operational screens nothing had rendered ---------------
+
+    testWidgets('tons out — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const PortalTonsOutScreen(),
+        const Size(1600, 1150),
+        'screen-tons-out-desktop-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Tons out',
+        selectedRoute: '/portal/mine/tons-out',
+      );
+    });
+
+    testWidgets('tons out — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const PortalTonsOutScreen(),
+        const Size(412, 1950),
+        'screen-tons-out-phone-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Tons out',
+        selectedRoute: '/portal/mine/tons-out',
+      );
+    });
+
+    testWidgets('trips — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const PortalTripsScreen(basePath: '/portal/mine/trips'),
+        const Size(1600, 1000),
+        'screen-trips-desktop-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Trips',
+        selectedRoute: '/portal/mine/trips',
+      );
+    });
+
+    testWidgets('trips — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const PortalTripsScreen(basePath: '/portal/mine/trips'),
+        const Size(412, 915),
+        'screen-trips-phone-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Trips',
+        selectedRoute: '/portal/mine/trips',
+      );
+    });
+
+    testWidgets('live trip map — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const LiveTripMapScreen(),
+        const Size(1600, 1000),
+        'screen-live-trip-map-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Live map',
+        selectedRoute: '/portal/transporter/live-map',
+      );
+    });
+
+    testWidgets('live trip map — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const LiveTripMapScreen(),
+        const Size(412, 1000),
+        'screen-live-trip-map-phone-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Live map',
+        selectedRoute: '/portal/transporter/live-map',
+      );
+    });
+
+    testWidgets('mine buyers — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const MineSupplierBuyersDetailScreen(),
+        const Size(1600, 1000),
+        'screen-mine-buyers-desktop-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Buyers',
+        selectedRoute: '/portal/mine/buyers',
+      );
+    });
+
+    testWidgets('mine buyers — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const MineSupplierBuyersDetailScreen(),
+        const Size(412, 1200),
+        'screen-mine-buyers-phone-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Buyers',
+        selectedRoute: '/portal/mine/buyers',
       );
     });
 
@@ -2584,7 +2804,7 @@ void main() {
           companyId: 'co-transporter',
           companyName: 'Fixture Haulage',
         ),
-        const Size(412, 1300),
+        const Size(412, 915),
         'screen-employee-grid-phone-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',

@@ -616,6 +616,23 @@ class _Workspace extends StatelessWidget {
         // rather than as a layout choice.
         layoutBuilder: (currentChild, previousChildren) => Stack(
           alignment: Alignment.topCenter,
+          // PASSTHROUGH, not the default `StackFit.loose`.
+          //
+          // The canvas fix above makes the WORKSPACE fill its viewport, but a
+          // loose Stack hands its children `0..maxHeight`, so a page that
+          // shrink-wraps still stops where its content stops — and roughly a
+          // third of the portal's screens paint their OWN ground
+          // (`ColoredBox(surfaceApp)`, one step lighter than the shell canvas)
+          // rather than sitting on the canvas. Those came out two-tone:
+          // measured on the mine's Buyers page 2026-08-21, `surfaceApp` ran to
+          // y=607 of a 1600px page and the canvas showed for the remaining
+          // 993. Same seam as the canvas one, one layer in.
+          //
+          // Passthrough gives non-positioned children the constraints the
+          // Stack itself received — including the minimum height — so a page
+          // that CAN fill does. A page taller than the viewport is unaffected:
+          // the maximum is the same either way.
+          fit: StackFit.passthrough,
           children: <Widget>[
             ...previousChildren,
             if (currentChild != null) currentChild,

@@ -198,6 +198,14 @@ abstract final class MineSupplierOverviewMetrics {
     }).length;
   }
 
+  /// A placeholder for a buyer whose company row this party cannot read.
+  ///
+  /// ALWAYS prefixed, and it did not used to be: `id.length <= 8` returned the
+  /// raw id, so a short company id rendered as a company NAME. Photographed
+  /// 2026-08-21 on the mine's Buyers page, where two cards were headed
+  /// `co-buyer` and `Buyer co-buy` — one a database key printed as a name, the
+  /// other a key with a word glued to the front of it. A name we do not have
+  /// must look like a name we do not have.
   static String _shortId(String id) =>
-      id.length <= 8 ? id : 'Buyer ${id.substring(0, 6)}';
+      'Buyer ${id.substring(0, id.length < 6 ? id.length : 6)}';
 }

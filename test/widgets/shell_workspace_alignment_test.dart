@@ -155,6 +155,58 @@ void main() {
               "painted in the Scaffold's canvasBase instead of the canvas");
     });
 
+    // AND THE PAGE INSIDE IT FILLS TOO.
+    //
+    // The canvas fix above is one layer short on its own: the
+    // `AnimatedSwitcher`'s `Stack` was `StackFit.loose`, which hands children
+    // `0..maxHeight`, so a page that shrink-wraps stops where its content
+    // stops. About a third of the portal's screens paint their OWN ground —
+    // `ColoredBox(MlSemantic.surfaceApp)`, one step lighter than the shell's
+    // canvas — and those came out TWO-TONE. Measured on the mine's Buyers page
+    // 2026-08-21: `surfaceApp` ran to y=607 of a 1600px page and the canvas
+    // showed for the remaining 993.
+    testWidgets('a page that paints its own ground fills the workspace',
+        (tester) async {
+      tester.view.physicalSize = const Size(1400, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      const key = ValueKey('own-ground');
+      await tester.pumpWidget(MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: MlAppShell(
+          tree: tree,
+          selectedRoute: '/home',
+          onNavigate: (_) {},
+          title: 'Fixture',
+          subtitle: 'Workspace',
+          expanded: true,
+          onExpandedChanged: (_) {},
+          // The exact shape those screens use: a ground colour wrapped around
+          // a scroll view whose content is shorter than the window.
+          child: const ColoredBox(
+            key: key,
+            // The colour does not matter to the assertion — the SHAPE does:
+            // a ground wrapped around a scroll view shorter than the window.
+            color: Color(0xFF0A1424),
+            child: SingleChildScrollView(
+              child: SizedBox(height: 120, child: Text('page top')),
+            ),
+          ),
+        ),
+      ));
+      await tester.pump(const Duration(milliseconds: 900));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      final ground = tester.getSize(find.byKey(key)).height;
+      // 1200 window − 72 app bar.
+      expect(ground, closeTo(1200 - 72, 2),
+          reason: 'the page paints its own ground for only '
+              '${ground.toStringAsFixed(0)}px of a '
+              '${(1200 - 72).toStringAsFixed(0)}px workspace, so the shell '
+              'canvas shows underneath it from there down');
+    });
+
     testWidgets('the workspace fills the height it is given', (tester) async {
       // The positive statement behind the two above: the workspace should be
       // as tall as the Row, so a page CAN fill it and a scroll view inside it

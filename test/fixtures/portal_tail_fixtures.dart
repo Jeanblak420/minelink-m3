@@ -29,8 +29,12 @@ import 'package:flutter_application_1/features/portal/models/fuel_models.dart';
 import 'package:flutter_application_1/features/portal/models/mine_location.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_transaction.dart';
 import 'package:flutter_application_1/features/portal/models/tons_out_entry.dart';
+import 'package:flutter_application_1/features/portal/models/logistics_models.dart';
 import 'package:flutter_application_1/features/portal/models/trip_waypoint.dart';
 import 'package:flutter_application_1/features/portal/models/company_location.dart';
+import 'package:flutter_application_1/features/portal/models/live_trip_position.dart';
+import 'package:flutter_application_1/features/portal/models/trip_status.dart';
+import 'package:flutter_application_1/features/portal/providers/live_tracking_provider.dart';
 import 'package:flutter_application_1/features/portal/models/transportation_request.dart';
 import 'package:flutter_application_1/features/portal/providers/company_location_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/lifecycle_provider.dart';
@@ -898,6 +902,122 @@ CompanyMCP fixtureCompanyRecord({OrgType orgType = OrgType.transporter}) {
 }
 
 // ---------------------------------------------------------------------------
+// The live map, from ONE company's side
+// ---------------------------------------------------------------------------
+
+/// The portal's own live feed — the fixture company's own two trucks, on the
+/// two routes `kLogistics` describes.
+///
+/// Deliberately NOT `kLivePositions` from `console_tail_fixtures.dart`: that
+/// list is the platform's view of every transporter on the network, which is
+/// exactly the data a portal render must never show. A mine looking at its own
+/// live map sees its own trucks.
+///
+/// One moving and one standing still, because a map where everything is moving
+/// cannot show the state anybody opens a live map to find.
+final List<LiveTripPosition> kPortalLivePositions = [
+  LiveTripPosition(
+    tripId: 't-2',
+    status: TripStatus.enRouteToOffload,
+    vehicleId: 'veh-2',
+    truckReg: 'JD 22 PL MP',
+    transporterName: 'Fixture Haulage',
+    supplierName: 'Iron Hills Mining',
+    buyerName: 'Atlas Buyer Group',
+    loadingPoint: 'Iron Hills Mining, Steelpoort',
+    offloadingPoint: 'Richards Bay Dry Bulk Terminal',
+    lat: -25.9,
+    lng: 30.68,
+    heading: 118,
+    speedKmh: 74.2,
+    recordedAt: _ago(const Duration(seconds: 40)),
+    driverName: 'Bongani Khumalo',
+    driverPhone: '+27 83 000 0002',
+    tripCreatedAt: _ago(const Duration(hours: 9)),
+    arrivedAt: _ago(const Duration(hours: 8)),
+    loadedAt: _ago(const Duration(hours: 6)),
+    leftAt: _ago(const Duration(hours: 5, minutes: 40)),
+    navInstruction: 'In 1.2 km — Turn left onto the N4 towards Komatipoort',
+    navTimeLeftS: 4 * 60 * 60 + 600,
+    navDistanceLeftM: 318000,
+    navSpeedKmh: 74.2,
+    navUpdatedAt: _ago(const Duration(seconds: 40)),
+  ),
+  LiveTripPosition(
+    tripId: 't-3',
+    status: TripStatus.loading,
+    vehicleId: 'veh-3',
+    truckReg: 'BX 09 LM NW',
+    transporterName: 'Fixture Haulage',
+    supplierName: 'Iron Hills Mining',
+    buyerName: 'Northvale Alloys',
+    loadingPoint: 'Iron Hills Mining, Steelpoort',
+    offloadingPoint: 'Maputo Port',
+    lat: -24.71,
+    lng: 30.19,
+    heading: 74,
+    speedKmh: 0,
+    recordedAt: _ago(const Duration(minutes: 2)),
+    stationarySince: _ago(const Duration(minutes: 38)),
+    driverName: 'Pieter Nel',
+    driverPhone: '+27 60 12 3456',
+    tripCreatedAt: _ago(const Duration(hours: 3)),
+    arrivedAt: _ago(const Duration(hours: 1)),
+  ),
+];
+
+// ---------------------------------------------------------------------------
+// A driver who has actually delivered something this week
+// ---------------------------------------------------------------------------
+
+/// The fixture driver holds ONE trip (`t-2`, en route) and no completed one,
+/// which is honest and is what the driver dashboard photographs — but it means
+/// the "Tons delivered · This week" chart's populated state is never drawn by
+/// anything. Two completed trips on the driver's own truck, three and five
+/// days back, so the bars land on two different weekdays and the today column
+/// is not one of them.
+///
+/// Deliberately an OVERRIDE rather than a change to `kLogistics`: adding
+/// completed trips to the shared snapshot would move the tonnage on the recon
+/// tables, the dashboards and the earnings screens, all to photograph one card.
+List<Override> driverDeliveredWeekOverride() => [
+      logisticsSnapshotProvider.overrideWith((ref, _) async {
+        final base = kLogistics;
+        return LogisticsSnapshot(
+          routes: base.routes,
+          positions: base.positions,
+          reconciliations: base.reconciliations,
+          waybills: base.waybills,
+          trips: [
+            ...base.trips,
+            TripRecord(
+              id: 't-week-1',
+              transactionId: 'txn-1',
+              dispatchId: 'dsp-1',
+              vehicleId: 'veh-2',
+              routeId: 'rt-1',
+              status: 'completed',
+              netTons: 34.10,
+              truckReg: 'JD 22 PL MP',
+              updatedAt: _ago(const Duration(days: 3)),
+            ),
+            TripRecord(
+              id: 't-week-2',
+              transactionId: 'txn-1',
+              dispatchId: 'dsp-1',
+              vehicleId: 'veh-2',
+              routeId: 'rt-1',
+              status: 'completed',
+              netTons: 28.75,
+              truckReg: 'JD 22 PL MP',
+              updatedAt: _ago(const Duration(days: 5)),
+            ),
+          ],
+        );
+      }),
+    ];
+
+// ---------------------------------------------------------------------------
 // The override list
 // ---------------------------------------------------------------------------
 
@@ -906,8 +1026,14 @@ CompanyMCP fixtureCompanyRecord({OrgType orgType = OrgType.transporter}) {
 List<Override> portalTailOverrides() => [
       allocatedTrucksProvider.overrideWith(
           (ref, requestId) async => kAllocatedTrucks[requestId] ?? const []),
+      // CASE-INSENSITIVE, like the service it stands in for
+      // (`listPartnerCompanies` lowercases both sides). It matched exactly,
+      // and the mine's Buyers screen asked for `'Buyer'` — so the fixture fell
+      // through its default and handed a mine's BUYERS page a list of MINES.
+      // The picture showed Iron Hills Mining and Selati Chrome Works as this
+      // mine's customers, which is not a layout anybody would look at twice.
       partnerCompaniesProvider.overrideWith((ref, args) async =>
-          switch (args.orgFilter) {
+          switch (args.orgFilter.toLowerCase()) {
             'buyer' => kBuyerPartners,
             'transporter' => kTransporterPartners,
             _ => kMinePartners,
@@ -937,4 +1063,12 @@ List<Override> portalTailOverrides() => [
       ),
       employeeRepositoryProvider
           .overrideWithValue(FixtureEmployeeRepository(kCompanyRoster)),
+      // A StreamProvider over Supabase realtime. Left alone it does not merely
+      // render an empty map — its subscription outlives the widget tree and
+      // throws from `runOnDispose` AFTER the harness has restored
+      // `FlutterError.onError`, so the test fails with the capture already on
+      // disk. It is also order-dependent, which is why the portal live map
+      // passed on its own and failed inside the suite.
+      liveTripPositionsProvider
+          .overrideWith((ref, _) => Stream.value(kPortalLivePositions)),
     ];

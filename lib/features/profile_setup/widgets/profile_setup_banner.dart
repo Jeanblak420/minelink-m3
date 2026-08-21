@@ -78,7 +78,13 @@ class ProfileSetupBanner extends ConsumerWidget {
                               .textTheme
                               .bodySmall
                               ?.copyWith(color: semantic.textMuted),
-                          maxLines: 1,
+                          // TWO lines. This line IS the banner — it is the
+                          // only place that says what is outstanding — and at
+                          // 412px beside a "Complete now" button one line cut
+                          // "1 required item missing · 1 expiring soon" to
+                          // "…· 1 exp…". A banner that will not say what it
+                          // is about is a banner nobody can act on.
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                     ],

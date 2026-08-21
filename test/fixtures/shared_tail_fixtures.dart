@@ -601,6 +601,16 @@ final RegisterKpiBundle kRegisterKpis = RegisterKpiBundle(
   ],
 );
 
+/// The compliance items this product actually asks a company for — the same
+/// vocabulary `compliance_documents.label` holds.
+const List<String> _missingLabels = [
+  'Tax clearance certificate',
+  'Public liability insurance',
+  'BEE certificate',
+  'Company registration (CIPC)',
+  'Proof of banking details',
+];
+
 ProfileSetup _setup({
   required int percent,
   int missing = 0,
@@ -617,7 +627,15 @@ ProfileSetup _setup({
         requiredTotal: 5,
         requiredComplete: 5 - missing,
         completionPercent: percent,
-        missingRequired: [for (var i = 0; i < missing; i++) 'item_$i'],
+        // REAL LABELS, because that is what the server sends. The RPC builds
+        // `missing_required` from `v_r.label` — the human name of the
+        // compliance item — and the setup dialog prints each entry verbatim.
+        // This fixture used to emit `item_0`, so the one picture ever taken of
+        // that dialog showed a reader "Item_0" and invited a fix to a fault
+        // that does not exist.
+        missingRequired: [
+          for (var i = 0; i < missing; i++) _missingLabels[i % _missingLabels.length],
+        ],
         missingCount: missing,
         expiringCount: expiring,
         expiredCount: expired,
@@ -654,6 +672,21 @@ final List<Override> _registerSetupOverrides = [
 /// the shortest, least informative version of it.
 final ProfileSetup kMyProfileSetup =
     _setup(percent: 70, missing: 1, expiring: 1, audience: 'company');
+
+/// The same state for a DRIVER, whose setup is their own — licence, PrDP,
+/// medical — not the company's paperwork.
+///
+/// `kMyProfileSetup` above is `audience: 'company'`, which is right for the
+/// profile screen of a company admin and wrong under any driver render: the
+/// prompt dialog keys its title off exactly that field, so it told a driver to
+/// "Complete your **company** account setup".
+final ProfileSetup kDriverProfileSetup =
+    _setup(percent: 70, missing: 1, expiring: 1, audience: 'employee');
+
+/// Install over [sharedTailOverrides] for a driver-side render.
+List<Override> driverProfileSetupOverride() => [
+      myProfileSetupProvider.overrideWith((ref) async => kDriverProfileSetup),
+    ];
 
 /// The company's serial tokens, read by the profile screen's expiry notice.
 final List<SerialToken> kProfileTokens = [

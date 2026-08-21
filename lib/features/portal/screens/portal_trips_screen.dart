@@ -71,13 +71,18 @@ class PortalTripsScreen extends ConsumerWidget {
                           'Trips appear here once a linked route is dispatched.',
                     )
                   else
-                    Container(
-                      decoration: BoxDecoration(
-                        color: semantic.surfaceCard,
-                        borderRadius: BorderRadius.circular(MlTokens.rLg),
-                        border: Border.all(color: semantic.borderCard),
-                      ),
-                      clipBehavior: Clip.antiAlias,
+                    // `MlCard`, not a hand-rolled `Container` — because the
+                    // rows inside are `ListTile`s and a `ListTile` needs a
+                    // `Material` ancestor to paint its own background and its
+                    // ink splash. Against a bare coloured `Container` the
+                    // framework raises "ListTile background color or ink
+                    // splashes may be invisible" on EVERY build, and the tap
+                    // feedback on every trip in the list is simply absent.
+                    // Reported by the render harness the first time this
+                    // screen was photographed, 2026-08-21. `MlCard` provides
+                    // the `Material` and the same clip, radius and border.
+                    MlCard(
+                      padding: EdgeInsets.zero,
                       child: ListView.separated(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -127,30 +132,72 @@ class _PortalTripRow extends StatelessWidget {
       if (net != null) '${net.toStringAsFixed(2)} t',
       'Updated ${MlTime.day(trip.updatedAt)}',
     ].join(' · ');
-    return ListTile(
+    // NOT a `ListTile`.
+    //
+    // `ListTile` puts the status badge in `trailing`, which is laid out first
+    // and at its natural width — and "EN ROUTE TO OFFLOAD" is 160px of a
+    // 380px phone row. What was left could not hold a registration: measured
+    // 2026-08-21 at 412px, `JD 22 PL MP` wrapped onto two lines and the
+    // subtitle beneath it — reference, commodity, tonnage and when it last
+    // moved, four facts — rendered as "TRP-000123 …". Every row on the phone
+    // trips list said nothing but a plate.
+    //
+    // A `Wrap` puts the badge beside the plate when there is room and under it
+    // when there is not, and the subtitle gets two lines. Nothing is cut at
+    // any width.
+    return InkWell(
       onTap: onTap,
-      leading: Icon(Icons.local_shipping_outlined,
-          color: tone.colors(brightness).fg),
-      title: Text(
-        trip.truckReg ?? reference ?? 'Trip ${trip.id.substring(0, 8)}…',
-        style: TextStyle(
-          fontFamily: MlTokens.fontMono,
-          fontWeight: FontWeight.w700,
-          color: semantic.textStrong,
-          fontFeatures: const [FontFeature.tabularFigures()],
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Icon(Icons.local_shipping_outlined,
+                  color: tone.colors(brightness).fg),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        trip.truckReg ??
+                            reference ??
+                            'Trip ${trip.id.substring(0, 8)}…',
+                        style: TextStyle(
+                          fontFamily: MlTokens.fontMono,
+                          fontWeight: FontWeight.w700,
+                          color: semantic.textStrong,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      MlStatusBadge(label: status.label, tone: tone),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: semantic.textMuted)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child:
+                  Icon(Icons.chevron_right_rounded, color: semantic.textFaint),
+            ),
+          ],
         ),
-      ),
-      subtitle: Text(subtitle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: semantic.textMuted)),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          MlStatusBadge(label: status.label, tone: tone),
-          const SizedBox(width: 8),
-          Icon(Icons.chevron_right_rounded, color: semantic.textFaint),
-        ],
       ),
     );
   }

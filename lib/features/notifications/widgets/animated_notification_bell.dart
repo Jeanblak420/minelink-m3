@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +26,17 @@ class _AnimatedNotificationBellState
 
   late Animation<double> _scaleAnimation;
   late Animation<Color?> _colorAnimation;
+
+  /// The 30-second re-shake, HELD so it can be cancelled.
+  ///
+  /// It was a bare `Future.delayed` with a `mounted` check inside, which
+  /// cannot be cancelled at all: the delay outlives `dispose()` and keeps a
+  /// live timer for up to thirty seconds after the widget is gone. This bell
+  /// is in the app bar of every screen in the product, so navigating around
+  /// leaves one behind each time. In a widget test it is worse than untidy —
+  /// the pending timer fails the test after the body has finished, which is
+  /// how the driver app's dashboard came to be unphotographable.
+  Timer? _reShake;
 
   @override
   void initState() {
@@ -96,6 +109,7 @@ class _AnimatedNotificationBellState
 
   @override
   void dispose() {
+    _reShake?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -127,7 +141,8 @@ class _AnimatedNotificationBellState
       _controller.forward().then((_) {
         // If there are still unread notifications, repeat the animation periodically
         if (unreadCount > 0 && mounted) {
-          Future.delayed(const Duration(seconds: 30), () {
+          _reShake?.cancel();
+          _reShake = Timer(const Duration(seconds: 30), () {
             if (mounted && unreadCount > 0 && !_controller.isAnimating) {
               setState(() {
                 // Trigger animation again

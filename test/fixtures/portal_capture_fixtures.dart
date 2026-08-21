@@ -240,6 +240,19 @@ final List<SecurityConfirmation> kPendingConfirmations = [
 /// the state the model's own comment insists is not a measured zero: the truck
 /// is loaded and gone but no POD has landed. A fixture where every load is
 /// closed hides exactly the row a reconciler is looking for.
+///
+/// **Rows 4 and 5 are OLD, and that is the point.** The recon table's five
+/// period cards — Day, Week, Month, Year, Total — are rolling windows over
+/// these rows, and until 2026-08-21 every row here fell inside 24 hours. So
+/// all five cards read `103.22 t`, identically, in every render of every recon
+/// screen. Five stat cards showing one number cannot show that the windows
+/// work, cannot show that they differ, and cannot fail if one of them breaks.
+/// Rows 4–8 sit one in each window: four days back (inside the week, outside
+/// the day), twenty-one days back (inside the month, outside the week), forty
+/// days back (inside the year, outside the month), two hundred days back
+/// (inside the year), and eighteen months back (inside the total only). So
+/// Day < Week < Month < Year < Total — five DISTINCT figures, and a window
+/// that stops working shows up as two cards agreeing.
 final List<RawReconRow> kRawReconRows = [
   RawReconRow(
     tripId: 't-1',
@@ -290,6 +303,91 @@ final List<RawReconRow> kRawReconRows = [
     netMass: 32.10,
     timeOut: DateTime.utc(2026, 8, 14, 15, 22),
     tripStatus: 'en_route_to_offload',
+  ),
+  RawReconRow(
+    tripId: 't-wk-1',
+    tripDate: DateTime.utc(2026, 8, 11, 6, 20),
+    timeIn: DateTime.utc(2026, 8, 11, 6, 20),
+    waybillNumber: 'TRP-000112',
+    transporterName: 'Roadhaul Logistics',
+    truckReg: 'JD 22 PL MP',
+    destination: 'Richards Bay',
+    product: 'Chrome',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Atlas Buyer Group',
+    netMass: 33.48,
+    deliveredTons: 33.10,
+    varianceTons: 0.38,
+    timeOut: DateTime.utc(2026, 8, 11, 7, 15),
+    tripStatus: 'completed',
+  ),
+  RawReconRow(
+    tripId: 't-mo-1',
+    tripDate: DateTime.utc(2026, 7, 25, 12, 5),
+    timeIn: DateTime.utc(2026, 7, 25, 12, 5),
+    waybillNumber: 'TRP-000101',
+    transporterName: 'Northline Carriers',
+    truckReg: 'BX 09 LM NW',
+    destination: 'Maputo',
+    product: 'Manganese',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Northvale Alloys',
+    netMass: 31.76,
+    deliveredTons: 31.20,
+    varianceTons: 0.56,
+    timeOut: DateTime.utc(2026, 7, 25, 12, 58),
+    tripStatus: 'completed',
+  ),
+  RawReconRow(
+    tripId: 't-old-1',
+    tripDate: DateTime.utc(2026, 7, 6, 7, 40),
+    timeIn: DateTime.utc(2026, 7, 6, 7, 40),
+    waybillNumber: 'TRP-000088',
+    transporterName: 'Roadhaul Logistics',
+    truckReg: 'CK 84 RT GP',
+    destination: 'Richards Bay',
+    product: 'Chrome',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Atlas Buyer Group',
+    netMass: 35.64,
+    deliveredTons: 35.64,
+    varianceTons: 0,
+    timeOut: DateTime.utc(2026, 7, 6, 8, 31),
+    tripStatus: 'completed',
+  ),
+  RawReconRow(
+    tripId: 't-old-2',
+    tripDate: DateTime.utc(2026, 1, 28, 5, 55),
+    timeIn: DateTime.utc(2026, 1, 28, 5, 55),
+    waybillNumber: 'TRP-000021',
+    transporterName: 'Northline Carriers',
+    truckReg: 'BX 09 LM NW',
+    destination: 'Maputo',
+    product: 'Manganese',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Northvale Alloys',
+    netMass: 30.05,
+    deliveredTons: 29.40,
+    varianceTons: 0.65,
+    timeOut: DateTime.utc(2026, 1, 28, 6, 48),
+    tripStatus: 'completed',
+  ),
+  RawReconRow(
+    tripId: 't-old-3',
+    tripDate: DateTime.utc(2025, 2, 10, 8, 5),
+    timeIn: DateTime.utc(2025, 2, 10, 8, 5),
+    waybillNumber: 'TRP-000004',
+    transporterName: 'Northline Carriers',
+    truckReg: 'BX 09 LM NW',
+    destination: 'Maputo',
+    product: 'Manganese',
+    sourceName: 'Iron Hills Mining',
+    customerName: 'Northvale Alloys',
+    netMass: 28.90,
+    deliveredTons: 28.90,
+    varianceTons: 0,
+    timeOut: DateTime.utc(2025, 2, 10, 9, 2),
+    tripStatus: 'completed',
   ),
 ];
 
