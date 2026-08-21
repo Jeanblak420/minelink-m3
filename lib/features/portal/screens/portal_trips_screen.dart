@@ -11,6 +11,7 @@ import 'package:flutter_application_1/features/portal/utils/trip_status_tone.dar
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 // Extracted from `app_router.dart` (P4-01…P4-07). It was declared inside
 // the router itself, which is why it had no screen file and no test.
@@ -124,7 +125,7 @@ class _PortalTripRow extends StatelessWidget {
       if (reference != null && reference.isNotEmpty) reference,
       if (commodity != null && commodity.isNotEmpty) commodity,
       if (net != null) '${net.toStringAsFixed(2)} t',
-      'Updated ${MaterialLocalizations.of(context).formatShortDate(trip.updatedAt)}',
+      'Updated ${MlTime.day(trip.updatedAt)}',
     ].join(' · ');
     return ListTile(
       onTap: onTap,

@@ -7,7 +7,6 @@ import 'package:flutter_application_1/core/services/storage_asset_service.dart';
 import 'package:flutter_application_1/core/widgets/file_upload_widget.dart';
 import 'package:flutter_application_1/core/config/supabase_config.dart';
 import 'package:flutter_application_1/features/chat/models/chat_room_model.dart';
-import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
@@ -536,9 +535,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       showDragHandle: true,
       builder: (context) {
         final theme = Theme.of(context);
-        final createdLabel = DateFormat(
-          'MMM d, yyyy • h:mm a',
-        ).format(MlTime.sast(widget.chatRoom.createdAt));
+        final createdLabel = MlTime.stamp(widget.chatRoom.createdAt);
 
         return SafeArea(
           child: Padding(

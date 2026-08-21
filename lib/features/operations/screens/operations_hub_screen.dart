@@ -12,7 +12,6 @@ import 'package:flutter_application_1/features/employee/providers/employee_provi
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_model.dart';
 import 'package:flutter_application_1/features/operations/models/operations_models.dart';
 import 'package:flutter_application_1/features/operations/providers/operations_provider.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
@@ -581,9 +580,7 @@ class _OperationsTabView extends StatelessWidget {
     }
   }
 
-  String _formatDate(DateTime value) {
-    return DateFormat('MMM d • h:mm a').format(MlTime.sast(value));
-  }
+  String _formatDate(DateTime value) => MlTime.stamp(value);
 
   String _formatOptionalNumber(double? value) {
     return value == null ? '--' : value.toStringAsFixed(2);
@@ -1684,7 +1681,6 @@ class _DateTimeField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter = DateFormat('MMM d, yyyy • h:mm a');
     return InkWell(
       borderRadius: MlShape.radiusLargeIncreased,
       onTap: () async {
@@ -1698,7 +1694,7 @@ class _DateTimeField extends StatelessWidget {
           labelText: label,
           suffixIcon: const Icon(Icons.event_outlined),
         ),
-        child: Text(formatter.format(MlTime.sast(value))),
+        child: Text(MlTime.stamp(value)),
       ),
     );
   }

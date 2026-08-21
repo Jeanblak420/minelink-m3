@@ -618,6 +618,79 @@ final guards = <Guard>[
     plantLine: "String ago(Duration d) => '\${d.inMinutes}m ago';",
   ),
   Guard(
+    id: 'a-date-is-not-the-readers-locale',
+    why: '`MaterialLocalizations.formatShortDate` / `formatFullDate` / '
+        '`formatMediumDate` / `formatTimeOfDay` render in the READER\'S '
+        'locale. MineLink is a South African logistics platform whose whole '
+        'subject is two parties agreeing about one load, and there were '
+        'TWENTY-ONE of these — so an American buyer\'s screen said `8/15/2026` '
+        'where the mine\'s said `15/08/2026`, for the same trip, on the same '
+        'day, with nothing on either screen to say which order it was in.\n'
+        '\n'
+        'The trip detail was worse than ambiguous. It formatted the DATE off '
+        'the raw UTC instant and the TIME through `MlTime.sast`, so a trip '
+        'updated at 01:30 SAST — 23:30 UTC the previous day — printed the '
+        'previous day\'s date beside 01:30. That is precisely the fault '
+        'CLAUDE.md §7.1 exists for, and it exists because a printed waybill '
+        'once carried the wrong date.\n'
+        '\n'
+        'Use `MlTime.stamp` / `MlTime.day` / `MlTime.clock` for an INSTANT, '
+        'and `MlTime.calendarDay` / `MlTime.calendarStamp` for a value that is '
+        'already a calendar date — a Postgres `date` column, a '
+        '`showDatePicker` result, or a model that ran `MlTime.sast` at parse '
+        'time. Converting one of those a second time moves the date, which is '
+        'the same bug from the other side.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    pattern: RegExp(
+        r'\.format(ShortDate|FullDate|MediumDate|CompactDate|TimeOfDay)\('),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'when.dart',
+    plantLine:
+        "Text(MaterialLocalizations.of(context).formatShortDate(trip.updatedAt));",
+  ),
+  Guard(
+    id: 'one-vocabulary-for-a-timestamp',
+    why: 'a hand-rolled absolute date or time. A moment in time was written '
+        'SEVEN ways in `lib/` — `dd MMM yyyy · HH:mm`, `MMM d, yyyy, h:mm a`, '
+        '`MMM d, yyyy • h:mm a`, `MMM d • h:mm a`, `MMM d · h:mm a`, '
+        '`d MMM · HH:mm` and `yyyy-MM-dd HH:mm:ss` — four of them month-first '
+        'on a 12-hour clock, in a product whose every other surface is '
+        'day-first and 24-hour. A reader moving between the chat dock and the '
+        'stockpile audit was reading two dialects of the same sentence, and '
+        'the bullet-versus-middot separator made it three.\n'
+        '\n'
+        'Same rule as `one-vocabulary-for-time-ago`, one scale up: '
+        '`MlTime.stamp(instant)` for a full timestamp, `MlTime.day` for a '
+        'date, `MlTime.clock` for a time, and the `calendar*` pair for a value '
+        'that is already a calendar date.\n'
+        '\n'
+        'A `DateFormat` for something that is NOT a moment a reader acts on — '
+        'an export filename, a chart axis month, a machine-readable CSV column '
+        '— is not this, and those patterns are not matched.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // The stamp shapes: anything pairing a day with a time, and anything on a
+    // 12-hour clock. Deliberately NOT `dd MMM yyyy` alone (18 sites, all
+    // agreeing with `MlTime.day`'s own output, and several of them formatting
+    // a value whose provenance has to be read before it can be converted) and
+    // not `HH:mm` alone (a time-only column, already one vocabulary).
+    pattern: RegExp(r"DateFormat\(\s*'[^']*(h:mm a|"
+        r"(MMM|MM|yyyy)[^']*(·|•|,)?\s*HH:mm)[^']*'"),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    // The one implementation, exempted by path — the same arrangement
+    // `one-vocabulary-for-time-ago` has.
+    exemptPath: RegExp(r'lib/core/time/ml_time\.dart$'),
+    spanLines: true,
+    plantFile: 'when.dart',
+    plantLine: "final f = DateFormat('MMM d, yyyy, h:mm a');",
+    plantWrapped: 'final f = DateFormat(\n'
+        "  'MMM d, yyyy, h:mm a',\n"
+        ');',
+  ),
+  Guard(
     id: 'serif-declares-its-fallback',
     why: 'a `TextStyle` that names the SERIF face without naming what draws '
         'the characters that face does not have. Fraunces is a display face '

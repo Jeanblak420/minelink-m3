@@ -308,10 +308,7 @@ void showBuyerInvoice(BuildContext context, String buyerName,
                               contentPadding: EdgeInsets.zero,
                               title: Text(w.referenceNumber),
                               trailing: Text('${fmt.format(w.netTonsOut)} t'),
-                              subtitle: Text(
-                                MaterialLocalizations.of(context)
-                                    .formatShortDate(w.updatedAt),
-                              ),
+                              subtitle: Text(MlTime.day(w.updatedAt)),
                             ),
                         ],
                       ),
@@ -444,7 +441,7 @@ class _BuyerPanel extends StatelessWidget {
                 leading: const Icon(Icons.balance_outlined),
                 title: Text('Recon ${r.id.substring(0, 8)}…'),
                 subtitle: Text('Status: ${r.status} · '
-                    '${MaterialLocalizations.of(context).formatShortDate(r.updatedAt)}'),
+                    '${MlTime.day(r.updatedAt)}'),
               ),
           const SizedBox(height: 16),
           Wrap(

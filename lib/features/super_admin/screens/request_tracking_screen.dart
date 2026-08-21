@@ -2,7 +2,6 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/request_tracking.dart';
@@ -29,7 +28,6 @@ enum _TrackFilter { all, requested, linked, done }
 enum _SortField { tons, updated }
 
 class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
-  static final _dateFmt = DateFormat('dd MMM yyyy');
   static const _pageSize = 25;
 
   /// Below this the table scrolls horizontally instead of squashing columns.
@@ -109,7 +107,7 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
               '${r.tripsTotal}',
               r.tonsDelivered == 0 ? '' : r.tonsDelivered.toStringAsFixed(2),
               r.isCompleted ? 'Completed' : r.displayStatus,
-              _dateFmt.format(MlTime.sast(r.updatedAt)),
+              MlTime.day(r.updatedAt),
             ],
         ],
         filters: {'View': _filter.name.toUpperCase()},
@@ -545,7 +543,7 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _dateFmt.format(MlTime.sast(r.updatedAt)),
+                      MlTime.day(r.updatedAt),
                       maxLines: 1,
                       style: context.mlText.titleSmall.copyWith(
                         color: semantic.textBody,
@@ -1399,7 +1397,6 @@ class _RequestDetailsDialog extends StatelessWidget {
 
   final RequestTrackingRow row;
 
-  static final _dateTimeFmt = DateFormat('dd MMM yyyy · HH:mm');
 
   @override
   Widget build(BuildContext context) {
@@ -1505,7 +1502,7 @@ class _RequestDetailsDialog extends StatelessWidget {
                 _detail(
                   context,
                   'Last updated',
-                  _dateTimeFmt.format(MlTime.sast(row.updatedAt)),
+                  MlTime.stamp(row.updatedAt),
                 ),
                 const SizedBox(height: 4),
                 Divider(color: semantic.divider, height: 20),

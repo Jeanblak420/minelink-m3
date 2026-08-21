@@ -287,7 +287,7 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
                         title: Text(expectedBack == null
                             ? 'Expected back (optional)'
                             : 'Expected back: '
-                                '${MaterialLocalizations.of(ctx).formatMediumDate(expectedBack!)}'),
+                                '${MlTime.calendarDay(expectedBack!)}'),
                         trailing: const Icon(Icons.calendar_month_outlined),
                         onTap: () async {
                           final picked = await showDatePicker(
@@ -540,7 +540,7 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
                       title: Text(dueDate == null
                           ? 'Due date (optional)'
                           : 'Due: '
-                              '${MaterialLocalizations.of(ctx).formatMediumDate(dueDate!)}'),
+                              '${MlTime.calendarDay(dueDate!)}'),
                       trailing: dueDate == null
                           ? const Icon(Icons.calendar_month_outlined)
                           : IconButton(
@@ -739,7 +739,6 @@ class _OpenRecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = MaterialLocalizations.of(context);
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     return MlCard(
       child: Column(
@@ -769,9 +768,9 @@ class _OpenRecordCard extends StatelessWidget {
           Text(
             [
               if (record.startedAt != null)
-                'Since ${loc.formatMediumDate(record.startedAt!)}',
+                'Since ${MlTime.calendarDay(record.startedAt!)}',
               if (record.expectedBackAt != null)
-                'expected back ${loc.formatMediumDate(record.expectedBackAt!)}',
+                'expected back ${MlTime.calendarDay(record.expectedBackAt!)}',
               if (record.costZar != null)
                 'R ${record.costZar!.toStringAsFixed(2)}',
               if (record.odometerKm != null) '${record.odometerKm} km',
@@ -815,7 +814,6 @@ class _ScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = MaterialLocalizations.of(context);
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final s = schedule;
     return MlCard(
@@ -845,14 +843,14 @@ class _ScheduleCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             [
-              if (s.dueDate != null) 'Due ${loc.formatMediumDate(s.dueDate!)}',
+              if (s.dueDate != null) 'Due ${MlTime.calendarDay(s.dueDate!)}',
               if (s.dueOdometerKm != null)
                 'due at ${s.dueOdometerKm} km'
                     '${s.vehicleOdometerKm != null ? ' (now ${s.vehicleOdometerKm} km)' : ''}',
               if (s.repeatMonths != null) 'every ${s.repeatMonths} mo',
               if (s.repeatKm != null) 'every ${s.repeatKm} km',
               if (s.lastDoneAt != null)
-                'last done ${loc.formatMediumDate(s.lastDoneAt!)}',
+                'last done ${MlTime.calendarDay(s.lastDoneAt!)}',
             ].join(' · '),
             style:
                 Theme.of(context).textTheme.bodySmall?.copyWith(color: muted),
@@ -905,7 +903,6 @@ class _HistorySectionState extends State<_HistorySection> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = MaterialLocalizations.of(context);
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final shown = _expanded ? widget.records : widget.records.take(5).toList();
     return Column(
@@ -953,7 +950,7 @@ class _HistorySectionState extends State<_HistorySection> {
                           if (r.costZar != null)
                             'R ${r.costZar!.toStringAsFixed(0)}',
                           if (r.closedAt != null)
-                            loc.formatMediumDate(r.closedAt!),
+                            MlTime.calendarDay(r.closedAt!),
                         ].join(' · '),
                         style: Theme.of(context)
                             .textTheme

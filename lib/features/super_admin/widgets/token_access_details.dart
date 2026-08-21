@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/features/super_admin/data/models/serial_token.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
@@ -13,9 +12,7 @@ SerialToken? pickActiveSerialToken(List<SerialToken> tokens) {
   return active.isEmpty ? null : active.first;
 }
 
-String formatAccessTimestamp(DateTime utc) {
-  return DateFormat('dd-MM-yyyy HH:mm:ss').format(MlTime.sast(utc));
-}
+String formatAccessTimestamp(DateTime utc) => MlTime.stamp(utc);
 
 DateTime? parseOrgTimestamp(dynamic raw) {
   if (raw == null) return null;

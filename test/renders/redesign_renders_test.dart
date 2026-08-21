@@ -46,6 +46,11 @@ import 'package:flutter_application_1/features/portal/screens/buyer_waybills_scr
 import 'package:flutter_application_1/features/portal/screens/buyer_requests_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_routes_mines_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_truck_locations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_locations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/stockpile_detail_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/stockpile_audit_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/tons_out_detail_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/portal_trip_detail_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/mine_supplier_truck_locations_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/transporter_truck_locations_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/earnings_screen.dart';
@@ -2081,6 +2086,164 @@ void main() {
         title: 'Fixture Haulage',
         subtitle: 'Truck locations',
         selectedRoute: '/portal/transporter/trucks',
+      );
+    });
+
+    // --- The mine's own tail -----------------------------------------------
+
+    testWidgets('mine locations — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const MineLocationsScreen(),
+        const Size(412, 1900),
+        'screen-mine-locations-phone-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Locations',
+        selectedRoute: '/portal/mine/locations',
+      );
+    });
+
+    testWidgets('mine locations — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const MineLocationsScreen(),
+        const Size(1600, 1300),
+        'screen-mine-locations-desktop-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Locations',
+        selectedRoute: '/portal/mine/locations',
+      );
+    });
+
+    testWidgets('stockpile detail — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const StockpileDetailScreen(),
+        const Size(412, 1700),
+        'screen-stockpile-detail-phone-dark',
+        orgType: OrgType.mineSupplier,
+        role: UserRole.supervisorForeman,
+        title: 'Fixture Minerals',
+        subtitle: 'Stockpiles',
+        selectedRoute: '/portal/mine/stockpiles',
+      );
+    });
+
+    testWidgets('stockpile detail — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const StockpileDetailScreen(),
+        const Size(1600, 1200),
+        'screen-stockpile-detail-desktop-dark',
+        orgType: OrgType.mineSupplier,
+        role: UserRole.supervisorForeman,
+        title: 'Fixture Minerals',
+        subtitle: 'Stockpiles',
+        selectedRoute: '/portal/mine/stockpiles',
+      );
+    });
+
+    // The audit trail builds its OWN `Scaffold` with an `AppBar` — it is
+    // pushed as a route rather than shown in the workspace — so it is
+    // photographed standalone rather than inside the shell.
+    testWidgets('stockpile audit — phone dark', (tester) async {
+      await shoot(
+        tester,
+        ProviderScope(
+          overrides: [
+            ...companyScopeOverrides(
+                role: UserRole.supervisorForeman,
+                orgType: OrgType.mineSupplier),
+            ...tail(),
+          ],
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.build(Brightness.dark),
+            home: const StockpileAuditScreen(),
+          ),
+        ),
+        const Size(412, 1700),
+        'screen-stockpile-audit-phone-dark',
+      );
+    });
+
+    testWidgets('stockpile audit — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        ProviderScope(
+          overrides: [
+            ...companyScopeOverrides(
+                role: UserRole.supervisorForeman,
+                orgType: OrgType.mineSupplier),
+            ...tail(),
+          ],
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.build(Brightness.dark),
+            home: const StockpileAuditScreen(),
+          ),
+        ),
+        const Size(1600, 1200),
+        'screen-stockpile-audit-desktop-dark',
+      );
+    });
+
+    // --- Tons out, and one trip --------------------------------------------
+
+    testWidgets('tons-out detail — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        TonsOutDetailScreen(entries: kTonsOut),
+        const Size(412, 2300),
+        'screen-tons-out-detail-phone-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Tons out',
+        selectedRoute: '/portal/mine/tons-out',
+      );
+    });
+
+    testWidgets('tons-out detail — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        TonsOutDetailScreen(entries: kTonsOut),
+        const Size(1600, 1600),
+        'screen-tons-out-detail-desktop-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Minerals',
+        subtitle: 'Tons out',
+        selectedRoute: '/portal/mine/tons-out',
+      );
+    });
+
+    // `t-2` deliberately: the trip that is EN ROUTE, with a dispatch, a route
+    // and a transaction behind it. `t-3` has no net tonnage yet and would
+    // photograph the half-filled state instead.
+    testWidgets('trip detail — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const PortalTripDetailScreen(tripId: 't-2'),
+        const Size(412, 1500),
+        'screen-trip-detail-phone-dark',
+        orgType: OrgType.buyer,
+        title: 'Fixture Metals',
+        subtitle: 'Trip',
+        selectedRoute: '/portal/buyer/trips',
+      );
+    });
+
+    testWidgets('trip detail — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const PortalTripDetailScreen(tripId: 't-2'),
+        const Size(1600, 1100),
+        'screen-trip-detail-desktop-dark',
+        orgType: OrgType.buyer,
+        title: 'Fixture Metals',
+        subtitle: 'Trip',
+        selectedRoute: '/portal/buyer/trips',
       );
     });
   });

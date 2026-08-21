@@ -5290,8 +5290,7 @@ class _SupportHome extends ConsumerWidget {
                                       )),
                                   const SizedBox(height: 2),
                                   Text(
-                                      DateFormat('d MMM · HH:mm')
-                                          .format(n.createdAt),
+                                      MlTime.stamp(n.createdAt),
                                       style: context.mlText.code(
                                         color: pal.bodySubtle,
                                         size: 11,
@@ -5876,8 +5875,7 @@ class _TicketViewState extends ConsumerState<_TicketView> {
                                             fontWeight: FontWeight.w700,
                                           )),
                                       Text(
-                                          DateFormat('d MMM · HH:mm')
-                                              .format(e.createdAt),
+                                          MlTime.stamp(e.createdAt),
                                           style: context.mlText.code(
                                             color: pal.bodySubtle,
                                             size: 11,

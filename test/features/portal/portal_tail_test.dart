@@ -35,6 +35,10 @@ import 'package:flutter_application_1/features/portal/screens/buyer_requests_scr
 import 'package:flutter_application_1/features/portal/screens/buyer_truck_locations_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_routes_mines_screen.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_waybills_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/mine_locations_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/portal_trip_detail_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/stockpile_audit_screen.dart';
+import 'package:flutter_application_1/features/portal/screens/tons_out_detail_screen.dart';
 
 import '../../fixtures/portal_capture_fixtures.dart';
 import '../../fixtures/portal_tail_fixtures.dart';
@@ -121,6 +125,34 @@ void main() {
     void visit(Element e) {
       final ro = e.renderObject;
       if (ro is RenderParagraph) out.add(ro.text.toPlainText());
+      e.visitChildren(visit);
+    }
+
+    tester.allElements.first.visitAncestorElements((a) {
+      visit(a);
+      return false;
+    });
+    return out;
+  }
+
+  /// Every string on screen that was CUT OFF — laid out past its line limit
+  /// and finished with an ellipsis.
+  ///
+  /// [painted] cannot see this. `RenderParagraph.text.toPlainText()` returns
+  /// the whole string whichever part of it was drawn, so an assertion that a
+  /// name "appears on screen" passes happily while the reader sees
+  /// "Main Gate …". Measured the hard way: that assertion survived reverting
+  /// the fix it was written for.
+  ///
+  /// `didExceedMaxLines` is the paragraph's own answer to "did I have to
+  /// truncate", which is the question.
+  List<String> truncated(WidgetTester tester) {
+    final out = <String>[];
+    void visit(Element e) {
+      final ro = e.renderObject;
+      if (ro is RenderParagraph && ro.didExceedMaxLines) {
+        out.add(ro.text.toPlainText());
+      }
       e.visitChildren(visit);
     }
 
@@ -225,6 +257,91 @@ void main() {
               'and hours apart all printed the same DATE until 2026-08-21.\n'
               'Painted: ${lines.take(20).join(' | ')}');
     }
+  });
+
+  // ------------------------------------------------------- the mine's tail
+
+  testWidgets('an anchor point states its own NAME on a phone', (tester) async {
+    await pump(tester, const MineLocationsScreen(), height: 1900);
+    // The row was icon + title + badge + button on ONE line, and at 412px that
+    // left the title about 85px — so every anchor read "Main Gate …" /
+    // "Weighbridge …", the name truncated back to the word the row already
+    // says, on the screen whose whole job is naming these three points.
+    //
+    // `truncated`, not `painted`: the paragraph still HOLDS the whole name
+    // when it is ellipsised, so asking whether the string is on screen is not
+    // asking anything. Proved by reverting the fix and watching that version
+    // of this test pass.
+    final cut = truncated(tester)
+        .where((l) =>
+            l.contains('Main Gate') ||
+            l.contains('Weighbridge') ||
+            l.contains('Loading Point') ||
+            l.contains('Beside the workshop') ||
+            l.contains('R37'))
+        .toList();
+    expect(cut, isEmpty,
+        reason: 'the anchor rows are truncating what they exist to say:\n'
+            '  ${cut.join('\n  ')}');
+  });
+
+  testWidgets('and an unpinned anchor shows the address it DOES have',
+      (tester) async {
+    await pump(tester, const MineLocationsScreen(), height: 1900);
+    final lines = painted(tester);
+    // `kMineAnchors` gives the Weighbridge a name and an address but no
+    // coordinate. The row used to fall through to the generic description, so
+    // the address the mine had typed in appeared nowhere on the screen.
+    expect(lines.any((l) => l.contains('Beside the workshop')), isTrue,
+        reason: 'the unpinned anchor is showing boilerplate instead of the '
+            'address it holds.\nPainted: ${lines.take(20).join(' | ')}');
+  });
+
+  testWidgets('the stockpile audit names the buyer once', (tester) async {
+    await pump(tester, const StockpileAuditScreen(), height: 1700);
+    final lines = painted(tester);
+    final doubled = lines
+        .where((l) =>
+            'Atlas Buyer Group'.allMatches(l).length > 1 ||
+            'Northvale Alloys'.allMatches(l).length > 1)
+        .toList();
+    expect(doubled, isEmpty,
+        reason: 'an order pile is NAMED after its buyer, so appending the '
+            'buyer again gives "Loaded out · Order pile · Atlas Buyer Group · '
+            'Atlas Buyer Group" — three lines of a phone to say one thing:\n'
+            '${doubled.join('\n')}');
+  });
+
+  testWidgets('the tons-out cards carry their unit', (tester) async {
+    await pump(tester, TonsOutDetailScreen(entries: kTonsOut), height: 2300);
+    final lines = painted(tester);
+    // 6 loads summing to 197.70 t. The card printed `198` — no unit, and
+    // rounded, so it disagreed with the table under it about the same figure.
+    expect(lines.any((l) => l.trim() == '197.7 t'), isTrue,
+        reason: 'the All-time card is not showing "197.7 t". It printed a bare '
+            'rounded number on a screen called Tons out until 2026-08-21.\n'
+            'Painted: ${lines.take(24).join(' | ')}');
+  });
+
+  testWidgets('the trip detail says both ends of the haul, and says WHEN in '
+      'one vocabulary', (tester) async {
+    await pump(tester, const PortalTripDetailScreen(tripId: 't-2'),
+        height: 1500);
+    final lines = painted(tester);
+    expect(lines.any((l) => l.contains('Iron Hills Mining')), isTrue,
+        reason: 'the trip detail names the destination and not the source, so '
+            'a load can be read here without knowing which mine it left.');
+    // `t-2` is stamped two hours before `kCaptureNow` (09:30 UTC), i.e.
+    // 07:30 UTC = 09:30 SAST on 15 Aug.
+    expect(lines.any((l) => l.contains('15 Aug 2026 · 09:30')), isTrue,
+        reason: 'the Updated row is not in the product\'s one timestamp '
+            'vocabulary. It used `MaterialLocalizations`, which is the '
+            'READER\'S locale — and it took the DATE from the raw UTC instant '
+            'while taking the TIME from SAST.\n'
+            'Painted: ${lines.take(20).join(' | ')}');
+    expect(lines.any((l) => l.contains('Truck registration')), isFalse,
+        reason: 'the plate is the hero at the top of this screen; the fact '
+            'table repeated it as its second row.');
   });
 
   // -------------------------------------------------------------- requests

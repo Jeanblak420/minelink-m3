@@ -168,6 +168,26 @@ class _AnchorRow extends ConsumerWidget {
 
   bool get _configured => location?.hasCoordinates ?? false;
 
+  /// What the second line says.
+  ///
+  /// A configured anchor states its pin and its address. An anchor that has a
+  /// NAME and an ADDRESS but no pin used to fall through to the generic
+  /// description — so the Weighbridge row read "Where trucks are weighed (tare
+  /// and gross)." while the address the mine had typed in was nowhere on the
+  /// screen. The badge already says NOT SET; the line should carry the user's
+  /// own data when there is any.
+  String _detail() {
+    final l = location;
+    if (_configured) {
+      final address =
+          l!.address.trim().isNotEmpty ? ' · ${l.address}' : '';
+      return '${l.latitude!.toStringAsFixed(6)}, '
+          '${l.longitude!.toStringAsFixed(6)}$address';
+    }
+    final address = l?.address.trim() ?? '';
+    return address.isNotEmpty ? address : description;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final semantic = MlSemantic.of(context);
@@ -175,79 +195,110 @@ class _AnchorRow extends ConsumerWidget {
     final done = MlTone.done.colors(brightness);
     final l = location;
 
+    final action = MlButton.outline(
+        label: _configured ? 'Edit' : 'Set up',
+        icon: _configured
+            ? Icons.edit_outlined
+            : Icons.add_location_alt_outlined,
+        compact: true,
+        onPressed: () => _edit(context, ref));
+
+    final title = Text(
+      (l?.name.trim().isNotEmpty ?? false) ? l!.name : type.label,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: context.mlText.titleSmall.copyWith(
+        color: semantic.textStrong,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+
+    final badge = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: _configured ? done.bg : semantic.surfaceSunken,
+        borderRadius: BorderRadius.circular(MlTokens.rPill),
+      ),
+      child: Text(
+        _configured ? 'CONFIGURED' : 'NOT SET',
+        style: context.mlText.labelSmall.copyWith(
+          color: _configured ? done.fg : semantic.textMuted,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+
+    final detail = Text(
+      _detail(),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+          fontFamily: _configured ? MlTokens.fontMono : MlTokens.fontSans,
+          fontSize: 12,
+          color: semantic.textMuted),
+    );
+
+    // THE BUTTON GOES BELOW ON A PHONE.
+    //
+    // Icon + title + badge + button in one row leaves the title about 85px at
+    // 412px, and every anchor on the screen read "Main Gate …" /
+    // "Weighbridge …" — the name truncated to the word the row already
+    // says, on the screen whose whole job is naming these three points
+    // (measured 2026-08-21, first render). Nothing overflowed; an ellipsis is
+    // a valid layout.
+    //
+    // 520 is where the wide arrangement stops fitting the longest real anchor
+    // name beside a CONFIGURED badge and an Edit button, not a round number.
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: semantic.divider))),
-      child: Row(children: [
-        MlIconWell(
-            icon: icon,
-            tone: _configured ? MlTone.done : MlTone.neutral,
-            size: 38,
-            radius: 11),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(children: [
-                Flexible(
-                  child: Text(
-                    (l?.name.trim().isNotEmpty ?? false)
-                        ? l!.name
-                        : type.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.mlText.titleSmall.copyWith(
-                      color: semantic.textStrong,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: _configured ? done.bg : semantic.surfaceSunken,
-                    borderRadius: BorderRadius.circular(MlTokens.rPill),
-                  ),
-                  child: Text(
-                    _configured ? 'CONFIGURED' : 'NOT SET',
-                    style: context.mlText.labelSmall.copyWith(
-                      color: _configured ? done.fg : semantic.textMuted,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ]),
-              const SizedBox(height: 2),
-              Text(
-                _configured
-                    ? '${l!.latitude!.toStringAsFixed(6)}, '
-                        '${l.longitude!.toStringAsFixed(6)}'
-                        '${l.address.trim().isNotEmpty ? ' · ${l.address}' : ''}'
-                    : description,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontFamily:
-                        _configured ? MlTokens.fontMono : MlTokens.fontSans,
-                    fontSize: 12,
-                    color: semantic.textMuted),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 10),
-        MlButton.outline(
-            label: _configured ? 'Edit' : 'Set up',
-            icon: _configured
-                ? Icons.edit_outlined
-                : Icons.add_location_alt_outlined,
-            compact: true,
-            onPressed: () => _edit(context, ref)),
-      ]),
+      child: LayoutBuilder(builder: (context, c) {
+        final wide = c.maxWidth >= 520;
+        final text = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              Flexible(child: title),
+              const SizedBox(width: 8),
+              badge,
+            ]),
+            const SizedBox(height: 2),
+            detail,
+          ],
+        );
+
+        if (wide) {
+          return Row(children: [
+            MlIconWell(
+                icon: icon,
+                tone: _configured ? MlTone.done : MlTone.neutral,
+                size: 38,
+                radius: 11),
+            const SizedBox(width: 12),
+            Expanded(child: text),
+            const SizedBox(width: 10),
+            action,
+          ]);
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              MlIconWell(
+                  icon: icon,
+                  tone: _configured ? MlTone.done : MlTone.neutral,
+                  size: 38,
+                  radius: 11),
+              const SizedBox(width: 12),
+              Expanded(child: text),
+            ]),
+            const SizedBox(height: 10),
+            Align(alignment: Alignment.centerRight, child: action),
+          ],
+        );
+      }),
     );
   }
 

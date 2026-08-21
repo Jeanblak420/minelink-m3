@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/live_trip_position.dart';
@@ -263,7 +262,7 @@ class _TruckInfoCard extends StatelessWidget {
                 label: 'Last updated',
                 value: t.recordedAt == null
                     ? 'No fix yet'
-                    : '${_ago(t.recordedAt!)} · ${DateFormat('dd MMM HH:mm').format(MlTime.sast(t.recordedAt!))}',
+                    : '${_ago(t.recordedAt!)} · ${MlTime.stamp(t.recordedAt!)}',
               ),
             ],
           ),

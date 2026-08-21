@@ -14,6 +14,7 @@ import 'package:printing/printing.dart';
 import 'package:flutter_application_1/core/utils/file_save.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Reconciliation export formats (CLAUDE.md §4: Excel + CSV + PDF).
 enum ReconExportFormat { csv, excel, pdf }
@@ -168,7 +169,7 @@ class ReconExporter {
     if (hasContext) {
       if (title != null) buf.writeln(_esc(title));
       buf.writeln(
-        _esc('Generated ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}'
+        _esc('Generated ${MlTime.stamp(MlTime.instant())}'
             '  ·  ${rows.length} row(s)'),
       );
       buf.writeln();
@@ -316,7 +317,7 @@ class ReconExporter {
       0,
       row,
       TextCellValue(
-        'Generated ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}'
+        'Generated ${MlTime.stamp(MlTime.instant())}'
         '  ·  ${rows.length} row(s)',
       ),
       CellStyle(
@@ -506,7 +507,7 @@ class ReconExporter {
               ),
               pw.SizedBox(height: 4),
               pw.Text(
-                'Generated: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}'
+                'Generated: ${MlTime.stamp(MlTime.instant())}'
                 '  |  Page ${p + 1} of $pages  |  ${rows.length} rows',
                 style: pw.TextStyle(
                   font: font,

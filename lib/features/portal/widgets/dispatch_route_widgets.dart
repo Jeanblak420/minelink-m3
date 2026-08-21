@@ -15,6 +15,7 @@ import 'package:flutter_application_1/features/portal/providers/request_provider
 import 'package:flutter_application_1/features/portal/widgets/premium_overview_widgets.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Per-route delivery metrics derived from the trips created off a dispatch.
 class RouteMetrics {
@@ -232,10 +233,10 @@ class _RouteDetailSheet extends ConsumerWidget {
             : null);
     final start = r.isOngoing
         ? (r.startingDate != null
-            ? 'Ongoing from ${MaterialLocalizations.of(context).formatFullDate(r.startingDate!)}'
+            ? 'Ongoing from ${MlTime.calendarDay(r.startingDate!)}'
             : 'Ongoing')
         : (r.startingDate != null
-            ? MaterialLocalizations.of(context).formatFullDate(r.startingDate!)
+            ? MlTime.calendarDay(r.startingDate!)
             : null);
 
     return SafeArea(
@@ -292,8 +293,7 @@ class _RouteDetailSheet extends ConsumerWidget {
                     : 'Not required',
                 'Starting date': start,
                 'End date': (!r.isOngoing && r.endingDate != null)
-                    ? MaterialLocalizations.of(context)
-                        .formatFullDate(r.endingDate!)
+                    ? MlTime.calendarDay(r.endingDate!)
                     : null,
                 'Loading point': r.loadingPoint,
                 'Offloading point': r.offloadingPoint,

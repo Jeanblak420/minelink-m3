@@ -103,7 +103,12 @@ final List<StockpileEntry> kStockpiles = [
     buyerCompanyId: 'co-buyer-2',
     tons: 18.0,
     mineral: 'Chrome',
-    maxCapTons: 90,
+    // 96, not 90. At 90 this pile had exactly 72 t to go and so did the one
+    // above it (200 - 128.4 = 71.6, which rounds to 72) — two different piles
+    // printing the identical figure one card apart, which reads as a
+    // copy-paste fault in a picture of the screen even though both numbers
+    // are right.
+    maxCapTons: 96,
     requestId: 'req-2',
   ),
   // A ROM production pile — no buyer, no cap.

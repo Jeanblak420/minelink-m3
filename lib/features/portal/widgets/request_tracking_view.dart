@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/request_tracking.dart';
@@ -18,7 +17,6 @@ class RequestTrackingView extends ConsumerWidget {
 
   final String? companyId;
 
-  static final _dateFmt = DateFormat('dd MMM yyyy');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -119,7 +117,7 @@ class RequestTrackingView extends ConsumerWidget {
                           _statusChip(context, r),
                           _text(
                             context,
-                            _dateFmt.format(MlTime.sast(r.updatedAt)),
+                            MlTime.day(r.updatedAt),
                           ),
                         ],
                     ],

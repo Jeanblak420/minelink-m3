@@ -16,6 +16,7 @@ import 'package:flutter_application_1/features/portal/widgets/request_dialogs.da
 import 'package:flutter_application_1/features/portal/widgets/request_tracking_view.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// "Requests" — raise a transportation request and track its review status
 /// (§7.5). Sent-back requests can be re-opened, edited and resubmitted.
@@ -284,7 +285,7 @@ class _RequestCard extends StatelessWidget {
                 if (r.isOngoing)
                   'Ongoing'
                 else if (r.startingDate != null)
-                  'from ${MaterialLocalizations.of(context).formatShortDate(r.startingDate!)}',
+                  'from ${MlTime.calendarDay(r.startingDate!)}',
               ].whereType<String>().join(' · '),
               style: Theme.of(
                 context,

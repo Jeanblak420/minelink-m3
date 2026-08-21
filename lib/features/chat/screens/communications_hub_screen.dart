@@ -13,7 +13,6 @@ import 'package:flutter_application_1/features/employee/models/employee_model.da
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
@@ -459,9 +458,7 @@ class _AnnouncementsTab extends StatelessWidget {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            DateFormat(
-                              'MMM d · h:mm a',
-                            ).format(MlTime.sast(announcement.timestamp)),
+                            MlTime.stamp(announcement.timestamp),
                             style: context.mlText.code(
                               color: semantic.textFaint,
                               size: 12,
@@ -602,9 +599,8 @@ class _ChatRoomsTab extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                DateFormat('MMM d · h:mm a').format(
-                                  MlTime.sast(room.lastMessageTimestamp ?? room.createdAt),
-                                ),
+                                MlTime.stamp(
+                                    room.lastMessageTimestamp ?? room.createdAt),
                                 style: context.mlText.code(
                                   color: semantic.textFaint,
                                   size: 11,

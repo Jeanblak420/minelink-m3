@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
@@ -42,7 +41,6 @@ class ReconUploadsPanel extends ConsumerStatefulWidget {
 }
 
 class _ReconUploadsPanelState extends ConsumerState<ReconUploadsPanel> {
-  static final _dateFmt = DateFormat('dd MMM yyyy · HH:mm');
   bool _busy = false;
 
   String _buildOriginalCsv(String side) {
@@ -259,7 +257,7 @@ class _ReconUploadsPanelState extends ConsumerState<ReconUploadsPanel> {
               ActionChip(
                 avatar: const Icon(Icons.lock_outline, size: 15),
                 label: Text(
-                  'Original — ${_dateFmt.format(MlTime.sast(pair.originalCreatedAt))}',
+                  'Original — ${MlTime.stamp(pair.originalCreatedAt)}',
                   style: const TextStyle(fontSize: 12),
                 ),
                 onPressed: () => _openPath(pair.originalPath),
@@ -268,7 +266,7 @@ class _ReconUploadsPanelState extends ConsumerState<ReconUploadsPanel> {
                 ActionChip(
                   avatar: const Icon(Icons.edit_outlined, size: 15),
                   label: Text(
-                    'Edited — uploaded ${pair.editedUploadedAt == null ? '—' : _dateFmt.format(MlTime.sast(pair.editedUploadedAt!))}',
+                    'Edited — uploaded ${pair.editedUploadedAt == null ? '—' : MlTime.stamp(pair.editedUploadedAt!)}',
                     style: const TextStyle(fontSize: 12),
                   ),
                   onPressed: () => _openPath(pair.editedPath!),

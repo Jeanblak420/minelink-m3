@@ -18,9 +18,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_application_1/features/portal/models/available_route.dart';
+import 'package:flutter_application_1/features/portal/models/mine_location.dart';
+import 'package:flutter_application_1/features/portal/models/stockpile_transaction.dart';
+import 'package:flutter_application_1/features/portal/models/tons_out_entry.dart';
 import 'package:flutter_application_1/features/portal/models/company_location.dart';
 import 'package:flutter_application_1/features/portal/models/transportation_request.dart';
 import 'package:flutter_application_1/features/portal/providers/company_location_provider.dart';
+import 'package:flutter_application_1/features/portal/providers/lifecycle_provider.dart';
+import 'package:flutter_application_1/features/portal/providers/mine_location_provider.dart';
+import 'package:flutter_application_1/features/portal/providers/stockpile_ledger_provider.dart'
+    show StockpileLedgerState;
 import 'package:flutter_application_1/features/portal/providers/logistics_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/order_stockpile_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/request_provider.dart';
@@ -170,6 +177,204 @@ final List<CompanyLocation> kCompanyLocations = const [
 ];
 
 // ---------------------------------------------------------------------------
+// Mine anchor points — Main Gate / Weighbridge / Loading Point
+// ---------------------------------------------------------------------------
+
+/// Deliberately only TWO of the three anchors, and one of those has no
+/// coordinate.
+///
+/// The screen draws a row per anchor type whether or not a row exists, so a
+/// fixture with all three configured photographs only the "CONFIGURED" state
+/// and never the "NOT SET" one — which is what a mine sees on the day it signs
+/// up, and the state the whole screen exists to get out of. The Loading Point
+/// is absent entirely; the Weighbridge exists as a NAME with no pin, which is
+/// the halfway state (`hasCoordinates` false) that decides whether
+/// `auto_generate_trip_waypoints` can use it.
+final List<MineLocation> kMineAnchors = const [
+  MineLocation(
+    id: 'ml-1',
+    mineCompanyId: 'co-mine',
+    locationType: MineLocationType.mainGate,
+    name: 'Main Gate — R37 entrance',
+    address: 'R37, Burgersfort, Limpopo',
+    latitude: -25.8721,
+    longitude: 29.2334,
+  ),
+  MineLocation(
+    id: 'ml-2',
+    mineCompanyId: 'co-mine',
+    locationType: MineLocationType.weighbridge,
+    name: 'Weighbridge (pin not dropped yet)',
+    address: 'Beside the workshop',
+  ),
+];
+
+// ---------------------------------------------------------------------------
+// Stockpile ledger — the audit trail
+// ---------------------------------------------------------------------------
+
+/// The append-only history behind the piles in [kStockpiles].
+///
+/// Newest first, and covering all three transaction types — an allocation, two
+/// additions and two deductions — because the screen tones and signs each one
+/// differently and a fixture of one type photographs one treatment. One
+/// deduction names no truck, which is the shape a load recorded before the
+/// plate was captured takes.
+final List<StockpileTransaction> kStockpileLedger = [
+  StockpileTransaction(
+    stockpileId: 'sp-1',
+    stockpileName: 'Order pile · Atlas Buyer Group',
+    buyer: 'Atlas Buyer Group',
+    type: StockpileTxnType.deduction,
+    delta: -36.22,
+    balanceAfter: 128.4,
+    truckReg: 'CK 84 RT GP',
+    at: _ago(const Duration(hours: 5)),
+  ),
+  StockpileTransaction(
+    stockpileId: 'sp-1',
+    stockpileName: 'Order pile · Atlas Buyer Group',
+    buyer: 'Atlas Buyer Group',
+    type: StockpileTxnType.addition,
+    delta: 64.62,
+    balanceAfter: 164.62,
+    at: _ago(const Duration(days: 1)),
+  ),
+  StockpileTransaction(
+    stockpileId: 'sp-2',
+    stockpileName: 'Order pile · Northvale Alloys',
+    buyer: 'Northvale Alloys',
+    type: StockpileTxnType.addition,
+    delta: 18.0,
+    balanceAfter: 18.0,
+    at: _ago(const Duration(days: 2)),
+  ),
+  StockpileTransaction(
+    stockpileId: 'sp-1',
+    stockpileName: 'Order pile · Atlas Buyer Group',
+    buyer: 'Atlas Buyer Group',
+    type: StockpileTxnType.deduction,
+    delta: -34.90,
+    balanceAfter: 100.0,
+    at: _ago(const Duration(days: 3)),
+  ),
+  StockpileTransaction(
+    stockpileId: 'sp-1',
+    stockpileName: 'Order pile · Atlas Buyer Group',
+    buyer: 'Atlas Buyer Group',
+    type: StockpileTxnType.allocation,
+    delta: 134.9,
+    balanceAfter: 134.9,
+    at: _ago(const Duration(days: 6)),
+  ),
+];
+
+final StockpileLedgerState kStockpileLedgerState = StockpileLedgerState(
+  stockpiles: kStockpiles,
+  transactions: kStockpileLedger,
+);
+
+// ---------------------------------------------------------------------------
+// Tons out — the dispatch register the drill-down filters
+// ---------------------------------------------------------------------------
+
+/// Six loads over three days, two transporters, two products, two customers.
+///
+/// The screen's filters are by transporter, product, customer, date and a mass
+/// RANGE, and every one of those needs at least two distinct values to do
+/// anything at all. The last row has **no delivered weight and therefore no
+/// variance**, which the model's own comment insists is not a measured zero:
+/// the truck is loaded and gone and no POD has landed.
+final List<TonsOutEntry> kTonsOut = [
+  TonsOutEntry(
+    date: DateTime.utc(2026, 8, 15),
+    time: '06:12',
+    transporter: 'Roadhaul Logistics',
+    truckReg: 'CK 84 RT GP',
+    destination: 'Richards Bay',
+    product: 'Chrome',
+    customer: 'Atlas Buyer Group',
+    netMass: 36.22,
+    waybillNumber: 'TRP-000121',
+    source: 'Iron Hills Mining',
+    deliveredTons: 36.10,
+    varianceTons: 0.12,
+    tripId: 't-1',
+  ),
+  TonsOutEntry(
+    date: DateTime.utc(2026, 8, 15),
+    time: '09:41',
+    transporter: 'Roadhaul Logistics',
+    truckReg: 'JD 22 PL MP',
+    destination: 'Richards Bay',
+    product: 'Chrome',
+    customer: 'Atlas Buyer Group',
+    netMass: 34.90,
+    waybillNumber: 'TRP-000123',
+    source: 'Iron Hills Mining',
+    deliveredTons: 34.48,
+    varianceTons: 0.42,
+    tripId: 't-2',
+  ),
+  TonsOutEntry(
+    date: DateTime.utc(2026, 8, 14),
+    time: '14:05',
+    transporter: 'Summit Carriers',
+    truckReg: 'BX 09 LM NW',
+    destination: 'Maputo',
+    product: 'Manganese',
+    customer: 'Northvale Alloys',
+    netMass: 31.08,
+    waybillNumber: 'TRP-000118',
+    source: 'Iron Hills Mining',
+    deliveredTons: 31.08,
+    varianceTons: 0,
+    tripId: 't-3',
+  ),
+  TonsOutEntry(
+    date: DateTime.utc(2026, 8, 14),
+    time: '07:33',
+    transporter: 'Summit Carriers',
+    truckReg: 'TN 55 QQ GP',
+    destination: 'Maputo',
+    product: 'Manganese',
+    customer: 'Northvale Alloys',
+    netMass: 29.74,
+    waybillNumber: 'TRP-000117',
+    source: 'Iron Hills Mining',
+    deliveredTons: 28.90,
+    varianceTons: 0.84,
+  ),
+  TonsOutEntry(
+    date: DateTime.utc(2026, 8, 13),
+    time: '11:20',
+    transporter: 'Roadhaul Logistics',
+    truckReg: 'CK 84 RT GP',
+    destination: 'Richards Bay',
+    product: 'Chrome',
+    customer: 'Atlas Buyer Group',
+    netMass: 35.61,
+    waybillNumber: 'TRP-000114',
+    source: 'Iron Hills Mining',
+    deliveredTons: 35.61,
+    varianceTons: 0,
+  ),
+  // Loaded and gone; no POD yet, so no delivered weight and no variance.
+  TonsOutEntry(
+    date: DateTime.utc(2026, 8, 13),
+    time: '05:58',
+    transporter: 'Summit Carriers',
+    truckReg: 'BX 09 LM NW',
+    destination: 'Maputo',
+    product: 'Manganese',
+    customer: 'Northvale Alloys',
+    netMass: 30.15,
+    waybillNumber: 'TRP-000112',
+    source: 'Iron Hills Mining',
+  ),
+];
+
+// ---------------------------------------------------------------------------
 // The override list
 // ---------------------------------------------------------------------------
 
@@ -190,4 +395,7 @@ List<Override> portalTailOverrides() => [
           .overrideWith((ref, requestId) async => kOrderFills[requestId]),
       companyLocationsProvider
           .overrideWith((ref, _) async => kCompanyLocations),
+      mineLocationsProvider.overrideWith((ref, _) async => kMineAnchors),
+      stockpileLedgerDbProvider
+          .overrideWith((ref, _) async => kStockpileLedgerState),
     ];

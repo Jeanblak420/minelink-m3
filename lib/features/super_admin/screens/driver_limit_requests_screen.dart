@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/config/supabase_config.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
@@ -35,7 +34,6 @@ class DriverLimitRequestsScreen extends ConsumerStatefulWidget {
 
 class _DriverLimitRequestsScreenState
     extends ConsumerState<DriverLimitRequestsScreen> {
-  static final _dateFmt = DateFormat('dd MMM yyyy · HH:mm');
   bool _busy = false;
 
   Future<void> _decide(DriverLimitRequest r, bool approve) async {
@@ -128,7 +126,6 @@ class _DriverLimitRequestsScreenState
                   for (final r in requests) ...[
                     _RequestCard(
                       request: r,
-                      dateFmt: _dateFmt,
                       busy: _busy,
                       onApprove: () => _decide(r, true),
                       onDecline: () => _decide(r, false),
@@ -148,14 +145,12 @@ class _DriverLimitRequestsScreenState
 
 class _RequestCard extends StatelessWidget {
   final DriverLimitRequest request;
-  final DateFormat dateFmt;
   final bool busy;
   final VoidCallback onApprove;
   final VoidCallback onDecline;
 
   const _RequestCard({
     required this.request,
-    required this.dateFmt,
     required this.busy,
     required this.onApprove,
     required this.onDecline,
@@ -201,7 +196,7 @@ class _RequestCard extends StatelessWidget {
             ),
           ),
           Text(
-            'by ${r.requestedByName ?? '—'} · ${dateFmt.format(MlTime.sast(r.createdAt))}',
+            'by ${r.requestedByName ?? '—'} · ${MlTime.stamp(r.createdAt)}',
             style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint),
           ),
           if (r.isPending) ...[

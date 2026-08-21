@@ -84,22 +84,34 @@ class PortalTripDetailScreen extends ConsumerWidget {
     final status = TripStatus.parse(trip.status);
     final tone = tripStatusTone(status);
     final meta = txn?.metadata ?? const <String, dynamic>{};
-    final localizations = MaterialLocalizations.of(context);
     final facts = <(String, String)>[
       if (txn != null) ('Waybill number', txn.referenceNumber),
-      if (trip.truckReg != null) ('Truck registration', trip.truckReg!),
+      // NOT "Truck registration". The plate is the hero at the top of this
+      // screen, in 32px mono; repeating it as the second row of the fact table
+      // spent a line saying what the reader had already read.
       if (meta['commodity'] is String && (meta['commodity'] as String).isNotEmpty)
         ('Product', meta['commodity'] as String),
+      // SOURCE and DESTINATION, not destination alone. The recon table names
+      // both for every load and this screen named half of it, so a trip could
+      // be read here without knowing which mine it came out of.
+      if (meta['loading_point'] is String &&
+          (meta['loading_point'] as String).isNotEmpty)
+        ('Source', meta['loading_point'] as String),
       if (meta['offloading_point'] is String &&
           (meta['offloading_point'] as String).isNotEmpty)
         ('Destination', meta['offloading_point'] as String),
       if (trip.netTons != null)
         ('Net mass', '${trip.netTons!.toStringAsFixed(2)} t'),
-      (
-        'Updated',
-        '${localizations.formatShortDate(trip.updatedAt)} '
-            '${localizations.formatTimeOfDay(TimeOfDay.fromDateTime(MlTime.sast(trip.updatedAt)))}',
-      ),
+      // THE DATE CAME FROM UTC AND THE TIME FROM SAST.
+      //
+      // `formatShortDate(trip.updatedAt)` formatted the raw instant while the
+      // line beside it converted, so a trip updated at 01:30 SAST — 23:30 UTC
+      // the previous day — printed the previous day's date next to 01:30. That
+      // is the fault CLAUDE.md §7.1 was written for, on the screen that says
+      // when a load moved. It was also the READER'S LOCALE: an American
+      // buyer's screen said `8/15/2026 9:30 AM` where a South African's said
+      // `15/08/2026 09:30`, for the same load.
+      ('Updated', MlTime.stamp(trip.updatedAt)),
     ];
     return MlPageBody(
       child: Column(
@@ -142,8 +154,16 @@ class PortalTripDetailScreen extends ConsumerWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // The label column RIDES THE TEXT SCALER.
+                        //
+                        // It was a flat 160px under a per-user type size, which
+                        // is the fault `MlColumn.minWidth` was written for one
+                        // table over: at 1.0 it over-paid (the longest label
+                        // here, "Waybill number", wants about 100px) and at the
+                        // 1.3 ceiling it squeezed the VALUE column instead —
+                        // the half a reader is here for.
                         SizedBox(
-                          width: 160,
+                          width: MediaQuery.textScalerOf(context).scale(120),
                           child: Text(
                             label,
                             style: context.mlText.bodyMedium.copyWith(

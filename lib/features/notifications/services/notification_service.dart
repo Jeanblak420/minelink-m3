@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_application_1/core/config/supabase_config.dart';
 import 'package:flutter_application_1/core/utils/logger.dart';
@@ -408,8 +407,7 @@ class NotificationService {
   /// [MlTime] is the third and, unlike the first, is both correct and honestly
   /// typed: it returns a wall clock, not a shifted instant wearing a UTC flag.
   /// If MineLink ever does leave South Africa, `ml_time.dart` is the one edit.
-  String formatTimestamp(DateTime timestamp) =>
-      DateFormat('MMM d, yyyy, h:mm a').format(MlTime.sast(timestamp));
+  String formatTimestamp(DateTime timestamp) => MlTime.stamp(timestamp);
 
   Future<String?> _getOrgTypeFromUserId(String userId) async {
     try {

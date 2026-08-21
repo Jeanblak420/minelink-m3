@@ -9,7 +9,6 @@ import 'package:flutter_application_1/features/portal/providers/stockpile_ledger
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
 import 'package:flutter_application_1/features/portal/widgets/premium_overview_widgets.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
@@ -19,7 +18,6 @@ import 'package:flutter_application_1/core/time/ml_time.dart';
 class StockpileAuditScreen extends ConsumerWidget {
   const StockpileAuditScreen({super.key});
 
-  static final _ts = DateFormat('dd MMM yyyy · HH:mm');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -84,7 +82,7 @@ class StockpileAuditScreen extends ConsumerWidget {
                       children: [
                         for (var i = 0; i < ledger.transactions.length; i++) ...[
                           if (i > 0) const Divider(height: 1),
-                          _TxnRow(txn: ledger.transactions[i], ts: _ts),
+                          _TxnRow(txn: ledger.transactions[i]),
                         ],
                       ],
                     ),
@@ -205,8 +203,7 @@ class _Stat extends StatelessWidget {
 
 class _TxnRow extends StatelessWidget {
   final StockpileTransaction txn;
-  final DateFormat ts;
-  const _TxnRow({required this.txn, required this.ts});
+  const _TxnRow({required this.txn});
 
   @override
   Widget build(BuildContext context) {
@@ -237,12 +234,28 @@ class _TxnRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${txn.type.label} · ${txn.stockpileName} · ${txn.buyer}',
+                  // The buyer, ONCE.
+                  //
+                  // An order pile is named after the buyer it was minted
+                  // for — "Order pile · Atlas Buyer Group" — and this line
+                  // then appended the buyer again, so every entry on the
+                  // trail read "Loaded out · Order pile · Atlas Buyer Group
+                  // · Atlas Buyer Group" and took three lines of a phone to
+                  // say it (photographed 2026-08-21). A production pile has
+                  // no buyer in its name, so the buyer is still worth
+                  // stating when it is genuinely absent.
+                  [
+                    txn.type.label,
+                    txn.stockpileName,
+                    if (txn.buyer.trim().isNotEmpty &&
+                        !txn.stockpileName.contains(txn.buyer.trim()))
+                      txn.buyer,
+                  ].join(' · '),
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${ts.format(MlTime.sast(txn.at))}'
+                  '${MlTime.stamp(txn.at)}'
                   '${txn.truckReg != null ? ' · truck ${txn.truckReg}' : ''}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant),

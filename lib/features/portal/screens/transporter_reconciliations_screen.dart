@@ -9,6 +9,7 @@ import 'package:flutter_application_1/features/portal/widgets/raw_recon_view.dar
 import 'package:flutter_application_1/features/portal/widgets/recon_uploads_panel.dart';
 import 'package:flutter_application_1/features/portal/widgets/weight_reconciliation_view.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Transporter reconciliations (ui_kits/transporter): load vs delivery
 /// variance batches with status.
@@ -112,8 +113,7 @@ class TransporterReconciliationsScreen extends ConsumerWidget {
                         ),
                         MlStatusBadge.forStatus(r.status),
                         Text(
-                          MaterialLocalizations.of(context)
-                              .formatShortDate(r.updatedAt),
+                          MlTime.day(r.updatedAt),
                           textAlign: TextAlign.right,
                           style: context.mlText.code(
                             color: MlSemantic.of(context).textMuted,

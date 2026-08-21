@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_application_1/features/employee/models/employee_model.dart';
 import 'package:flutter_application_1/features/company/models/company_model.dart';
 import 'package:flutter_application_1/features/employee/models/employee_status_model.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// A timeline widget that displays the employee's approval process stages
 class EmployeeStatusTimeline extends ConsumerWidget {
@@ -193,7 +193,7 @@ class EmployeeStatusTimeline extends ConsumerWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      DateFormat('yyyy-MM-dd HH:mm').format(dateTime),
+                      MlTime.stamp(dateTime),
                       style: textTheme.bodySmall?.copyWith(
                         color: MlSemantic.of(context).textMuted,
                       ),

@@ -96,7 +96,6 @@ class MarginLedgerScreen extends ConsumerStatefulWidget {
 }
 
 class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
-  static final _dateFmt = DateFormat('dd MMM yyyy · HH:mm');
   static final _num = NumberFormat('#,##0.00');
   static final _tonsFmt = NumberFormat('#,##0.0');
 
@@ -130,7 +129,7 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
   static List<List<String>> exportRows(List<MarginLedgerEntry> entries) => [
     for (final e in entries)
       [
-        _dateFmt.format(MlTime.sast(e.createdAt)),
+        MlTime.stamp(e.createdAt),
         e.routeNumber ?? '—',
         e.supplierName ?? '—',
         e.buyerName ?? '—',
@@ -460,7 +459,7 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
         rows: [
           for (final e in visible)
             [
-              _cell(context, _dateFmt.format(MlTime.sast(e.createdAt))),
+              _cell(context, MlTime.stamp(e.createdAt)),
               _cell2(context, e.routeNumber ?? '—', e.commodity),
               _cell2(
                 context,

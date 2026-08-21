@@ -184,8 +184,80 @@ abstract final class MlTime {
     return ago(at, asOf: asOf);
   }
 
-  static final DateFormat _dayMonth = DateFormat('d MMM');
-  static final DateFormat _dayMonthYear = DateFormat('d MMM yyyy');
+  /// A full timestamp a reader can act on: `15 Aug 2026 · 09:30`.
+  ///
+  /// ONE vocabulary, and the reason it has to be one is the same reason [ago]
+  /// does. Counted 2026-08-21 across `lib/`, a moment in time was written
+  /// SEVEN different ways:
+  ///
+  ///     dd MMM yyyy · HH:mm      7 sites
+  ///     MMM d, yyyy, h:mm a      the chat dock
+  ///     MMM d, yyyy • h:mm a     a bullet instead of a middot
+  ///     MMM d • h:mm a           no year
+  ///     MMM d · h:mm a           a middot again, still no year
+  ///     d MMM · HH:mm            2 sites
+  ///     yyyy-MM-dd HH:mm:ss      the audit log
+  ///
+  /// plus `MaterialLocalizations.formatShortDate` on the trip detail, which is
+  /// the reader's LOCALE — so an American buyer's screen said `8/15/2026` and
+  /// a South African one `15/08/2026` for the same load.
+  ///
+  /// Four of those put the month first and used a 12-hour clock, in a product
+  /// whose every other surface is day-first and 24-hour and whose §7.1 rule
+  /// exists because a printed waybill once carried the wrong DATE.
+  ///
+  /// The trip detail was worse than inconsistent. It formatted the DATE from
+  /// the raw UTC instant and the TIME from [sast], so a trip updated at 01:30
+  /// SAST — 23:30 UTC the previous day — printed the previous day's date
+  /// beside 01:30. Exactly the fault §7.1 was written for, on the screen that
+  /// says when a load moved.
+  ///
+  /// Takes the INSTANT, not a wall clock: it converts. Held by the
+  /// `one-vocabulary-for-a-timestamp` release guard.
+  static String stamp(DateTime instant) => _stamp.format(sast(instant));
+
+  /// [stamp] without the time — `15 Aug 2026`.
+  static String day(DateTime instant) => _dayMonthYear.format(sast(instant));
+
+  /// [stamp] without the date — `09:30`. For a column whose rows are already
+  /// grouped by day.
+  static String clock(DateTime instant) => _clock.format(sast(instant));
+
+  /// A value that is ALREADY a calendar date, formatted as it stands.
+  ///
+  /// [day] converts, and converting twice moves a date. Three kinds of value
+  /// in this product have already been converted, or never were an instant at
+  /// all:
+  ///
+  ///   * a Postgres `date` column. Supabase returns `2026-08-15`, and
+  ///     `DateTime.parse` on a string with no zone gives **device-local
+  ///     midnight** — `TransportationRequest.startingDate` and `endingDate`
+  ///     are these.
+  ///   * a `showDatePicker` result, which is likewise a local midnight the
+  ///     user chose on a calendar.
+  ///   * a model that ran [sast] at parse time. `MaintenanceRecord` and
+  ///     `ServiceSchedule` both do (`MlTime.sastOrNull`), so their fields are
+  ///     South African wall clocks before any screen sees them.
+  ///
+  /// Handing any of those to [day] adds two more hours: a wall clock at 23:00
+  /// becomes 01:00 the next day, and the date on screen moves. That is the
+  /// exact failure §7.1 exists to prevent, arrived at from the other side.
+  static String calendarDay(DateTime dateOnly) => _dayMonthYear.format(dateOnly);
+
+  /// [stamp] for a value already on the South African clock — see
+  /// [calendarDay] for which those are.
+  static String calendarStamp(DateTime wallClock) => _stamp.format(wallClock);
+
+  // ZERO-PADDED, and that is the majority spelling rather than a preference:
+  // eighteen sites in `lib/` already write `dd MMM yyyy` and seven write
+  // `dd MMM yyyy · HH:mm`. `ago`'s own fallback was the odd one out at
+  // `d MMM yyyy`, so a list mixing "yesterday" with "3 Aug 2026" disagreed
+  // with the table beside it saying "03 Aug 2026". A padded day also lines up
+  // in a column, which is where most of these live.
+  static final DateFormat _dayMonth = DateFormat('dd MMM');
+  static final DateFormat _dayMonthYear = DateFormat('dd MMM yyyy');
+  static final DateFormat _stamp = DateFormat('dd MMM yyyy · HH:mm');
+  static final DateFormat _clock = DateFormat('HH:mm');
 
   /// Turn a South African wall clock back into the instant it names.
   ///

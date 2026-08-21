@@ -2,6 +2,7 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/portal/models/tons_out_entry.dart';
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
+import 'package:flutter_application_1/features/portal/widgets/premium_overview_widgets.dart';
 import 'package:flutter_application_1/features/portal/utils/tons_out_filter.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
@@ -29,7 +30,6 @@ class _TonsOutDetailScreenState extends State<TonsOutDetailScreen> {
 
   static final _dateFmt = DateFormat('dd/MM/yyyy');
   static final _massFmt = NumberFormat('#,##0.00');
-  static final _sumFmt = NumberFormat.decimalPattern();
 
   @override
   void initState() {
@@ -80,7 +80,7 @@ class _TonsOutDetailScreenState extends State<TonsOutDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _SummaryStrip(summary: summary, fmt: _sumFmt),
+            _SummaryStrip(summary: summary),
             const SizedBox(height: 20),
             _FilterBar(
               entries: widget.entries,
@@ -135,8 +135,7 @@ class _TonsOutDetailScreenState extends State<TonsOutDetailScreen> {
 
 class _SummaryStrip extends StatelessWidget {
   final TonsOutSummary summary;
-  final NumberFormat fmt;
-  const _SummaryStrip({required this.summary, required this.fmt});
+  const _SummaryStrip({required this.summary});
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +166,17 @@ class _SummaryStrip extends StatelessWidget {
             for (final it in items)
               SizedBox(
                 width: w,
-                child: _SummaryBox(code: it.$1, label: it.$2, value: fmt.format(it.$3.round())),
+                // `formatTons`, the product's one tonnage formatter.
+                //
+                // These cards printed a bare `198` on a screen titled
+                // Tons out, beside a table whose every mass carries two
+                // decimals and a stockpile screen three taps away that
+                // writes `128.4 / 200 t`. And `.round()` threw the
+                // decimals away, so the All-time card read 198 for a
+                // register summing to 197.70 — the same figure, said two
+                // ways, on one screen (photographed 2026-08-21).
+                child: _SummaryBox(
+                    code: it.$1, label: it.$2, value: formatTons(it.$3)),
               ),
           ],
         );

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
@@ -27,7 +26,6 @@ class ChatConnectionsScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatConnectionsScreenState extends ConsumerState<ChatConnectionsScreen> {
-  static final _dateFmt = DateFormat('dd MMM yyyy · HH:mm');
   bool _busy = false;
 
   Future<void> _grant(String a, String b, String okMsg) => _run(
@@ -253,7 +251,6 @@ class _ChatConnectionsScreenState extends ConsumerState<ChatConnectionsScreen> {
                 bName: nameOf(p.companyIdB),
                 aType: companyOrgTypeLabel(orgTypeById[p.companyIdA]),
                 bType: companyOrgTypeLabel(orgTypeById[p.companyIdB]),
-                dateFmt: _dateFmt,
                 busy: _busy,
                 onConnect: () => _grant(
                   p.companyIdA,
@@ -303,7 +300,6 @@ class _ChatConnectionsScreenState extends ConsumerState<ChatConnectionsScreen> {
               semantic: semantic,
               conn: conn,
               revoked: false,
-              dateFmt: _dateFmt,
               busy: _busy,
               aId: conn.companyLowId,
               bId: conn.companyHighId,
@@ -330,7 +326,6 @@ class _ChatConnectionsScreenState extends ConsumerState<ChatConnectionsScreen> {
               semantic: semantic,
               conn: conn,
               revoked: true,
-              dateFmt: _dateFmt,
               busy: _busy,
               aId: conn.companyLowId,
               bId: conn.companyHighId,
@@ -355,7 +350,6 @@ class _RecommendationCard extends StatelessWidget {
   final MlSemantic semantic;
   final BusinessPair pair;
   final String aName, bName, aType, bType;
-  final DateFormat dateFmt;
   final bool busy;
   final VoidCallback onConnect;
 
@@ -366,7 +360,6 @@ class _RecommendationCard extends StatelessWidget {
     required this.bName,
     required this.aType,
     required this.bType,
-    required this.dateFmt,
     required this.busy,
     required this.onConnect,
   });
@@ -416,7 +409,7 @@ class _RecommendationCard extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            'Tied together ${dateFmt.format(MlTime.sast(pair.date))}',
+            'Tied together ${MlTime.stamp(pair.date)}',
             style: context.mlText.bodySmall.copyWith(color: semantic.textFaint),
           ),
           const SizedBox(height: 12),
@@ -440,7 +433,6 @@ class _ConnectionCard extends StatelessWidget {
   final OrgConnection conn;
   final bool revoked;
   final String aId, bId, aName, bName, aType, bType;
-  final DateFormat dateFmt;
   final bool busy;
   final VoidCallback onAction;
 
@@ -454,7 +446,6 @@ class _ConnectionCard extends StatelessWidget {
     required this.bName,
     required this.aType,
     required this.bType,
-    required this.dateFmt,
     required this.busy,
     required this.onAction,
   });
@@ -497,7 +488,7 @@ class _ConnectionCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '$aType  ·  $bType'
-                  '${when != null ? '  ·  ${revoked ? 'Revoked' : 'Linked'} ${dateFmt.format(MlTime.sast(when))}' : ''}',
+                  '${when != null ? '  ·  ${revoked ? 'Revoked' : 'Linked'} ${MlTime.stamp(when)}' : ''}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.mlText.bodyMedium.copyWith(

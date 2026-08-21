@@ -330,8 +330,7 @@ class _ReconCard extends ConsumerWidget {
                 MlStatusBadge.forStatus(recon.status),
                 const SizedBox(width: 10),
                 Text(
-                  MaterialLocalizations.of(context)
-                      .formatShortDate(recon.updatedAt),
+                  MlTime.day(recon.updatedAt),
                   style: Theme.of(context)
                       .textTheme
                       .labelSmall
@@ -426,9 +425,7 @@ class _ReconCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _kv(context, 'Status', recon.status),
-            _kv(context, 'Updated',
-                MaterialLocalizations.of(dialogContext)
-                    .formatFullDate(recon.updatedAt)),
+            _kv(context, 'Updated', MlTime.stamp(recon.updatedAt)),
             _kv(context, 'Supplier', _party(recon.supplierCompanyId)),
             _kv(context, 'Transporter', _party(recon.transporterCompanyId)),
             _kv(context, 'Buyer', _party(recon.buyerCompanyId)),

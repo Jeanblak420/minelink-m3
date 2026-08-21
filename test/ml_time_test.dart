@@ -223,4 +223,78 @@ void main() {
           MlTime.ago(now.subtract(const Duration(days: 400)), asOf: now));
     });
   });
+
+  group('stamp, day and clock', () {
+    // 23:29 UTC on the 16th is 01:29 on the 17th at the mine. This is THE case
+    // CLAUDE.md §7.1 exists for — a printed waybill once carried
+    // "DATE 2026-08-16 · TIME 23:29" for a hand-off at 01:29 on the 17th — and
+    // it is the case the trip-detail screen got wrong from the other
+    // direction, formatting the DATE off the raw instant while formatting the
+    // TIME through `sast`.
+    final crossesMidnight = DateTime.utc(2026, 8, 16, 23, 29);
+
+    test('a stamp is the South African day AND the South African hour', () {
+      expect(MlTime.stamp(crossesMidnight), '17 Aug 2026 · 01:29');
+    });
+
+    test('day and clock are the two halves of the same stamp', () {
+      expect(MlTime.day(crossesMidnight), '17 Aug 2026');
+      expect(MlTime.clock(crossesMidnight), '01:29');
+      expect(
+        MlTime.stamp(crossesMidnight),
+        '${MlTime.day(crossesMidnight)} · ${MlTime.clock(crossesMidnight)}',
+      );
+    });
+
+    test("the day is zero-padded, and agrees with ago's own fallback", () {
+      final early = DateTime.utc(2026, 8, 3, 9, 0);
+      expect(MlTime.day(early), '03 Aug 2026');
+      expect(
+        MlTime.ago(early, asOf: DateTime.utc(2027, 1, 1)),
+        contains('03 Aug'),
+      );
+    });
+
+    test('a stamp never reads the device clock', () {
+      // No debugClock set: the answer must depend only on the argument.
+      expect(MlTime.day(DateTime.utc(2026, 1, 1)), '01 Jan 2026');
+    });
+  });
+
+  group('calendarDay — the value that has already been converted', () {
+    test('it does NOT convert again', () {
+      // A model that ran `MlTime.sast` at parse time hands out a wall clock —
+      // `MaintenanceRecord` and `ServiceSchedule` both do. An hour before
+      // midnight is the case that moves: convert it twice and the date on
+      // screen becomes tomorrow.
+      final wallClock = MlTime.sast(DateTime.utc(2026, 8, 16, 21, 30));
+      expect(wallClock.hour, 23);
+      expect(MlTime.calendarDay(wallClock), '16 Aug 2026');
+      // The FIELDS are what it reads, whatever flag they arrive wearing.
+      expect(MlTime.calendarDay(DateTime.utc(2026, 8, 16, 23, 30)),
+          '16 Aug 2026');
+
+      // What `day` would do to the same value is deliberately NOT asserted
+      // here, and the reason is worth writing down: `sast` normalises through
+      // `toUtc()`, and `toUtc()` on a non-UTC DateTime uses THE MACHINE'S
+      // zone. On a developer machine already running SAST the second
+      // conversion cancels out and the wrong call gives the right answer; on a
+      // UTC machine the same expression returns 17 Aug. It is the failure mode
+      // this file's own header warns about — "the one place nobody would
+      // notice" — so a test asserting it would pass or fail by geography.
+    });
+
+    test('a Postgres date column keeps its own day', () {
+      // Supabase returns "2026-08-15" for a `date`, and `DateTime.parse` on a
+      // string with no zone gives DEVICE-LOCAL midnight — so it must not be
+      // routed through a converter either.
+      final dateOnly = DateTime.parse('2026-08-15');
+      expect(MlTime.calendarDay(dateOnly), '15 Aug 2026');
+    });
+
+    test('calendarStamp is the same rule with a time on it', () {
+      final wallClock = MlTime.sast(DateTime.utc(2026, 8, 16, 21, 30));
+      expect(MlTime.calendarStamp(wallClock), '16 Aug 2026 · 23:30');
+    });
+  });
 }

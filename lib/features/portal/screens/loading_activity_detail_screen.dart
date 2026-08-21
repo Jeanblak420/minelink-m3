@@ -228,7 +228,7 @@ class _TripsList extends StatelessWidget {
               [
                 status.label,
                 if (net != null) '${net.toStringAsFixed(2)} t',
-                'updated ${MaterialLocalizations.of(context).formatShortDate(t.updatedAt)}',
+                'updated ${MlTime.day(t.updatedAt)}',
               ].join(' · '),
             ),
             trailing: MlStatusBadge(

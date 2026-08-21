@@ -241,7 +241,6 @@ class AuditLogExporter {
     final doc = pw.Document();
     final font = await PdfGoogleFonts.notoSansRegular();
     final fontBold = await PdfGoogleFonts.notoSansBold();
-    final dateFmt = DateFormat('yyyy-MM-dd HH:mm');
 
     // Chunk logs into pages of 30 rows each
     const pageSize = 30;
@@ -263,7 +262,7 @@ class AuditLogExporter {
               ),
               pw.SizedBox(height: 4),
               pw.Text(
-                'Generated: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now())}  |  Page ${p + 1} of $pages  |  Total: ${logs.length} entries',
+                'Generated: ${MlTime.stamp(MlTime.instant())}  |  Page ${p + 1} of $pages  |  Total: ${logs.length} entries',
                 style: pw.TextStyle(font: font, fontSize: 9, color: PdfColors.grey600),
               ),
               pw.SizedBox(height: 8),
@@ -302,7 +301,7 @@ class AuditLogExporter {
                         color: isEven ? PdfColors.grey50 : PdfColors.white,
                       ),
                       children: [
-                        _pdfCell(dateFmt.format(MlTime.sast(log.createdAt)), font),
+                        _pdfCell(MlTime.stamp(log.createdAt), font),
                         _pdfCell(log.actorEmail, font),
                         _pdfCell(log.actionType.replaceAll('_', ' '), font),
                         _pdfCell(log.targetType, font),
@@ -347,7 +346,7 @@ class AuditLogExporter {
     try {
       final now = DateTime.now();
       final buf = StringBuffer();
-      buf.writeln('Token History for $orgName — Generated ${DateFormat('yyyy-MM-dd HH:mm').format(MlTime.sast(now))}');
+      buf.writeln('Token History for $orgName — Generated ${MlTime.stamp(now)}');
       buf.writeln('Preview,Valid Days,Seat Limit,Status,Created At,Expires At,Revoked At,Revoke Reason');
       for (final t in tokens) {
         final row = [

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/recon_dispute.dart';
@@ -21,7 +20,6 @@ class DisputeInboxScreen extends ConsumerStatefulWidget {
 }
 
 class _DisputeInboxScreenState extends ConsumerState<DisputeInboxScreen> {
-  static final _dateFmt = DateFormat('dd MMM yyyy · HH:mm');
   bool _activeOnly = true;
 
   @override
@@ -96,7 +94,6 @@ class _DisputeInboxScreenState extends ConsumerState<DisputeInboxScreen> {
                   for (final d in disputes) ...[
                     _DisputeRowCard(
                       dispute: d,
-                      dateFmt: _dateFmt,
                       onOpen: () => showDisputeDetailDialog(
                         context,
                         ref,
@@ -120,12 +117,10 @@ class _DisputeInboxScreenState extends ConsumerState<DisputeInboxScreen> {
 
 class _DisputeRowCard extends StatelessWidget {
   final ReconDispute dispute;
-  final DateFormat dateFmt;
   final VoidCallback onOpen;
 
   const _DisputeRowCard({
     required this.dispute,
-    required this.dateFmt,
     required this.onOpen,
   });
 
@@ -212,7 +207,7 @@ class _DisputeRowCard extends StatelessWidget {
                 child: Text(
                   'by ${d.raisedByName ?? '—'}'
                   '${d.raisedByCompanyName != null ? ' · ${d.raisedByCompanyName}' : ''}'
-                  ' · ${dateFmt.format(MlTime.sast(d.createdAt))}',
+                  ' · ${MlTime.stamp(d.createdAt)}',
                   style: context.mlText.bodySmall.copyWith(
                     color: semantic.textFaint,
                   ),

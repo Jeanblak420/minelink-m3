@@ -8,6 +8,7 @@ import 'package:flutter_application_1/features/portal/utils/portal_dashboard_nav
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Buyer Routes & Mines (ui_kits/buyer BuyerRoutesMines): route cards with a
 /// tinted conveyor well and origin → destination, plus the linked
@@ -111,7 +112,7 @@ class BuyerRoutesMinesScreen extends ConsumerWidget {
                                     ),
                                     const SizedBox(height: 10),
                                     Text(
-                                      'Updated ${MaterialLocalizations.of(context).formatShortDate(snap.routes[i].updatedAt)}',
+                                      'Updated ${MlTime.day(snap.routes[i].updatedAt)}',
                                       style: context.mlText.bodySmall.copyWith(
                                         color: semantic.textMuted,
                                       ),

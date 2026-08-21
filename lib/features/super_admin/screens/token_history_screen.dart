@@ -6,7 +6,6 @@ import 'package:flutter_application_1/features/super_admin/providers/super_admin
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/company_link_builder.dart'
     show companyOrgTypeLabel;
-import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
@@ -198,7 +197,7 @@ class _OrgTypeAuditTab extends ConsumerWidget {
                               ),
                             ),
                             trailing: Text(
-                              DateFormat('yyyy-MM-dd HH:mm:ss').format(MlTime.sast(log.createdAt)),
+                              MlTime.stamp(log.createdAt),
                               style: context.mlText.code(
                                 color: semantic.textFaint,
                                 size: 12,
