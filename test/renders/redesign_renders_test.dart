@@ -37,6 +37,9 @@ import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/auth/screens/login_screen.dart';
 import 'package:flutter_application_1/features/company/screens/company_employees_screen.dart';
 import 'package:flutter_application_1/features/employee/screens/employee_profile_screen.dart';
+import 'package:flutter_application_1/features/company/screens/company_list_screen.dart';
+import 'package:flutter_application_1/features/employee/screens/employee_grid_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/transporters_overview_v2_screen.dart';
 import 'package:flutter_application_1/features/fleet/screens/fleet_management_screen.dart';
 import 'package:flutter_application_1/features/operations/screens/operations_hub_screen.dart';
 import 'package:flutter_application_1/features/chat/screens/communications_hub_screen.dart';
@@ -1461,6 +1464,44 @@ void main() {
         'screen-org-insights-desktop-dark',
       );
     });
+
+    // The TRANSPORTER org type does not get the screen above.
+    // `/super-admin/insights/transporter` routes to the v2 overview instead
+    // (the 2026-08-09 "Replacing old views and screens" drop), so the picture
+    // named `screen-org-insights-*` is of the layout buyers and mines get and
+    // of a screen no admin reaches for transporters. The one they DO reach
+    // had never been rendered at any width.
+    testWidgets('transporters overview v2 — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const TransportersOverviewV2Screen(),
+          extraOverrides: [
+            ...consoleCaptureOverrides(),
+            ...portalCaptureOverrides(),
+          ],
+        ),
+        const Size(1600, 2000),
+        'screen-transporters-overview-v2-desktop-dark',
+      );
+    });
+
+    testWidgets('transporters overview v2 — phone dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const TransportersOverviewV2Screen(),
+          extraOverrides: [
+            ...consoleCaptureOverrides(),
+            ...portalCaptureOverrides(),
+          ],
+        ),
+        const Size(412, 4400),
+        'screen-transporters-overview-v2-phone-dark',
+      );
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -2446,6 +2487,109 @@ void main() {
         ),
         const Size(1600, 1800),
         'screen-request-transportation-desktop-dark',
+      );
+    });
+
+    // --- The platform registry pages, reached from the portal shell -------
+    //
+    // `/companies/:orgType`, `/companies/:orgType/:id/details` and
+    // `/employees/:companyId` are leaves of the portal `ShellRoute` and had
+    // never been rendered at any width by anything. Three of them had their
+    // own `Scaffold(appBar:)` removed in the previous commit on the strength
+    // of reading the router, with no picture taken afterwards.
+
+    testWidgets('company registry — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const CompanyListScreen(
+          orgType: OrgType.transporter,
+          title: 'Transporters',
+        ),
+        const Size(1600, 1000),
+        'screen-company-registry-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        // `mlRouteTitle` gives `/companies/…` the section name "Companies" and
+        // `/employees/…` "Employees". Those, not the page's own heading — a
+        // render that echoes the heading into the bar invents a duplicated
+        // title the product never draws, which is the exact fault that hid
+        // thirteen real ones for 118 renders.
+        subtitle: 'Companies',
+        selectedRoute: '/portal/transporter',
+      );
+    });
+
+    testWidgets('company registry — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const CompanyListScreen(
+          orgType: OrgType.transporter,
+          title: 'Transporters',
+        ),
+        const Size(412, 1000),
+        'screen-company-registry-phone-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Companies',
+        selectedRoute: '/portal/transporter',
+      );
+    });
+
+    testWidgets('company details — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        CompanyDetailsScreen(company: kCompanyRegistry.first),
+        const Size(1600, 1100),
+        'screen-company-details-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Companies',
+        selectedRoute: '/portal/transporter',
+      );
+    });
+
+    testWidgets('company details — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        CompanyDetailsScreen(company: kCompanyRegistry.first),
+        const Size(412, 1200),
+        'screen-company-details-phone-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Companies',
+        selectedRoute: '/portal/transporter',
+      );
+    });
+
+    testWidgets('employee grid — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const EmployeeGridScreen(
+          companyId: 'co-transporter',
+          companyName: 'Fixture Haulage',
+        ),
+        const Size(1600, 1200),
+        'screen-employee-grid-desktop-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Employees',
+        selectedRoute: '/portal/transporter',
+      );
+    });
+
+    testWidgets('employee grid — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const EmployeeGridScreen(
+          companyId: 'co-transporter',
+          companyName: 'Fixture Haulage',
+        ),
+        const Size(412, 1300),
+        'screen-employee-grid-phone-dark',
+        orgType: OrgType.transporter,
+        title: 'Fixture Haulage',
+        subtitle: 'Employees',
+        selectedRoute: '/portal/transporter',
       );
     });
   });

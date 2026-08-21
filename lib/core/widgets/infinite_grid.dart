@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
@@ -40,8 +42,23 @@ class InfiniteGrid<T> extends StatefulWidget {
   /// Scroll physics for the grid
   final ScrollPhysics? physics;
 
-  /// The number of items in the cross axis
+  /// The number of items in the cross axis.
+  ///
+  /// Ignored when [maxCrossAxisExtent] is set.
   final int crossAxisCount;
+
+  /// Tile by TILE SIZE instead of by a fixed column count.
+  ///
+  /// A fixed [crossAxisCount] is a phone measure that a desktop inherits. The
+  /// employee grid asked for 2 columns and got 2 columns at every width, so at
+  /// 1600px each person's name and phone number sat in a **630 x 790px** card
+  /// — a 24px avatar in an ocean of nothing, four people over three and a half
+  /// screens. Measured 2026-08-21, the first time that screen was rendered at
+  /// desktop width by anything.
+  ///
+  /// With an extent the grid picks its own column count: 2 on a phone, 5 or 6
+  /// on a monitor, and the tile stays the size the card was drawn for.
+  final double? maxCrossAxisExtent;
 
   /// The ratio of the cross-axis to the main-axis extent of each child
   final double childAspectRatio;
@@ -66,6 +83,7 @@ class InfiniteGrid<T> extends StatefulWidget {
     this.shrinkWrap = false,
     this.physics,
     this.crossAxisCount = 2,
+    this.maxCrossAxisExtent,
     this.childAspectRatio = 1.0,
     this.crossAxisSpacing = 10.0,
     this.mainAxisSpacing = 10.0,
@@ -182,10 +200,19 @@ class _InfiniteGridState<T> extends State<InfiniteGrid<T>> {
       return widget.emptyWidget ?? _defaultEmptyWidget(context);
     }
 
-    // Create a grid view with the items
+    // A `LayoutBuilder`, because the prefetch threshold below is "one row from
+    // the end" and only the laid-out width knows how many tiles a row holds
+    // once the grid tiles by extent.
+    return LayoutBuilder(builder: (context, constraints) {
+      final pad = (widget.padding ?? EdgeInsets.zero)
+          .resolve(Directionality.maybeOf(context) ?? TextDirection.ltr);
+      final usable = math.max(0.0, constraints.maxWidth - pad.horizontal);
+      final extent = widget.maxCrossAxisExtent;
+      final columns = extent == null || extent <= 0
+          ? widget.crossAxisCount
+          : math.max(1, (usable / extent).ceil());
 
-    // Create a custom scroll view with a grid
-    final gridView = CustomScrollView(
+      final gridView = CustomScrollView(
       controller: widget.scrollController,
       shrinkWrap: widget.shrinkWrap,
       physics: widget.physics,
@@ -193,15 +220,22 @@ class _InfiniteGridState<T> extends State<InfiniteGrid<T>> {
         SliverPadding(
           padding: widget.padding ?? EdgeInsets.zero,
           sliver: SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: widget.crossAxisCount,
-              childAspectRatio: widget.childAspectRatio,
-              crossAxisSpacing: widget.crossAxisSpacing,
-              mainAxisSpacing: widget.mainAxisSpacing,
-            ),
+            gridDelegate: extent == null || extent <= 0
+                ? SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: widget.crossAxisCount,
+                    childAspectRatio: widget.childAspectRatio,
+                    crossAxisSpacing: widget.crossAxisSpacing,
+                    mainAxisSpacing: widget.mainAxisSpacing,
+                  )
+                : SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: extent,
+                    childAspectRatio: widget.childAspectRatio,
+                    crossAxisSpacing: widget.crossAxisSpacing,
+                    mainAxisSpacing: widget.mainAxisSpacing,
+                  ),
             delegate: SliverChildBuilderDelegate((context, index) {
               // Load more data when reaching the end
-              if (index >= _items.length - widget.crossAxisCount &&
+              if (index >= _items.length - columns &&
                   !_isLoading &&
                   !_hasReachedEnd) {
                 _loadMoreData();
@@ -230,9 +264,10 @@ class _InfiniteGridState<T> extends State<InfiniteGrid<T>> {
       ],
     );
 
-    return widget.onRefresh != null
-        ? RefreshIndicator(onRefresh: _refresh, child: gridView)
-        : gridView;
+      return widget.onRefresh != null
+          ? RefreshIndicator(onRefresh: _refresh, child: gridView)
+          : gridView;
+    });
   }
 
   Widget _defaultEmptyWidget(BuildContext context) {

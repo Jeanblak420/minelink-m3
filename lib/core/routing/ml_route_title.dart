@@ -283,7 +283,14 @@ String _portalTitle(Uri uri, MlPortalTabs tabs) {
     default:
       if (path.startsWith('/operations')) return 'Operations Hub';
       if (path.startsWith('/companies/')) return 'Companies';
-      if (path.startsWith('/employees/')) return 'Team grid';
+      // "Employees", the word every other surface uses — `/company-employees`
+      // above, the `employees` portal alias, the rail. This read **"Team
+      // grid"**, which is the name of the WIDGET, and it was the top bar on
+      // BOTH the roster and a single person's profile page: a page about one
+      // employee announced itself as a grid. Photographed 2026-08-21.
+      if (path.startsWith('/employees/')) {
+        return path.endsWith('/details') ? 'Employee profile' : 'Employees';
+      }
       if (path.startsWith('/chat/')) return 'Chat';
       return 'Workspace';
   }

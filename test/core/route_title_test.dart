@@ -154,7 +154,10 @@ void main() {
       '/operations': 'Operations Hub',
       '/operations/weighbridge': 'Operations Hub',
       '/companies/123': 'Companies',
-      '/employees/123': 'Team grid',
+      '/employees/123': 'Employees',
+      // A person's page is about a person, not about the grid it was
+      // reached from. Both used to read "Team grid".
+      '/employees/123/456/details': 'Employee profile',
       '/chat/123': 'Chat',
       // These three render inside the portal shell, so the bar is on screen.
       // The table above listed `/super-admin/account-security` but not the

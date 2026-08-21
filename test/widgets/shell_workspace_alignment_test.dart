@@ -25,6 +25,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_application_1/core/design/shell/ml_app_shell.dart';
+import 'package:flutter_application_1/core/design/shell/workspace_canvas.dart';
 import 'package:flutter_application_1/core/design/nav/ml_nav_node.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import '../test_helpers/real_fonts.dart';
@@ -97,6 +98,61 @@ void main() {
               'further than the app bar plus one gutter');
       expect(top, greaterThanOrEqualTo(72),
           reason: 'the page has climbed under the app bar');
+    });
+
+    // ---------------------------------------------------------------------
+    // AND THE SAME FAULT ON A PHONE, where there is no Row to stretch.
+    //
+    // `Scaffold` lays its body out under a LOOSE height constraint. At compact
+    // width the workspace IS the body, the `AnimatedSwitcher`'s `Stack` is
+    // `StackFit.loose`, and `MlPageBody` is a bare `SingleChildScrollView` —
+    // so a page shorter than the screen shrink-wrapped the whole chain and the
+    // canvas painter, which sizes to its child, stopped painting where the
+    // content stopped. Below that line the `Scaffold`'s own `canvasBase`
+    // (`#0A1424`) showed against the canvas's `#060B15`: a hard horizontal
+    // seam across the page, at a different height on every screen.
+    //
+    // Measured on the phone renders 2026-08-21: **23 of 61** had it.
+    //
+    // The assertion is on the PAINTED canvas, not on the page, because the
+    // page is allowed to be short — that is the whole point. What may not be
+    // short is the ground under it.
+    testWidgets('the canvas fills a phone screen under a short page',
+        (tester) async {
+      tester.view.physicalSize = const Size(412, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: MlAppShell(
+          tree: tree,
+          selectedRoute: '/home',
+          onNavigate: (_) {},
+          title: 'Fixture',
+          subtitle: 'Workspace',
+          expanded: true,
+          onExpandedChanged: (_) {},
+          child: const SizedBox(height: 120, child: Text('page top')),
+        ),
+      ));
+      await tester.pump(const Duration(milliseconds: 900));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      final canvas = find.byWidgetPredicate(
+          (w) => w is CustomPaint && w.painter is MlWorkspaceCanvasPainter);
+      expect(canvas, findsOneWidget);
+
+      final painted = tester.getSize(canvas).height;
+      final bottomBar = tester.getSize(find.byType(NavigationBar)).height;
+      // 900 window − 72 app bar − the bottom bar. Anything materially short of
+      // that is the seam.
+      final available = 900 - 72 - bottomBar;
+      expect(painted, closeTo(available, 2),
+          reason: 'the workspace canvas is ${painted.toStringAsFixed(0)}px tall '
+              'in a ${available.toStringAsFixed(0)}px body, so '
+              '${(available - painted).toStringAsFixed(0)}px of the page is '
+              "painted in the Scaffold's canvasBase instead of the canvas");
     });
 
     testWidgets('the workspace fills the height it is given', (tester) async {

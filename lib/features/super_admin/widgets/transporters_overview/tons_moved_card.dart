@@ -73,7 +73,12 @@ class OvTonsMovedCard extends StatelessWidget {
               child: OvCellGrid(
                 columns: data.metrics.length,
                 narrowColumns: 1,
-                narrowBelow: 420,
+                // Each tile is an icon well, a gap, and a label over a value.
+                // "TRUCKS ACTIVE" at 10px with 1.2 letter-spacing is ~100px
+                // and the well and its gap take ~46, so 130 cut the label at
+                // 1300px — the width at which this card first gets three
+                // tiles in a row.
+                minCellWidth: 155,
                 gap: 14,
                 cells: [
                   for (final m in data.metrics)
@@ -85,7 +90,12 @@ class OvTonsMovedCard extends StatelessWidget {
             OvCellGrid(
               columns: 4,
               narrowColumns: 2,
-              narrowBelow: 420,
+              // "WAYBILLS CLOSED" at 10px with 1.2 letter-spacing is ~112px,
+              // and the old threshold let four of these run at 100 — so the
+              // headline card on the console's transporter board printed
+              // "WAYBILLS CLO…" on a 1600px monitor. Two columns of 200 read;
+              // four columns of 100 do not.
+              minCellWidth: 115,
               cells: [
                 for (final cell in data.footer)
                   _StatCell(tokens: t, cell: cell),

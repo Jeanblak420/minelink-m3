@@ -3,17 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/mcp/models/company_model.dart';
-import 'package:flutter_application_1/core/mcp/repositories/company_repository.dart';
+import 'package:flutter_application_1/core/mcp/repository_providers.dart';
 import 'package:flutter_application_1/core/widgets/infinite_list.dart';
 import 'package:flutter_application_1/core/utils/image_provider_utils.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
-
-/// Provider for the company repository
-final companyRepositoryProvider = Provider<CompanyRepository>((ref) {
-  return CompanyRepository();
-});
 
 /// Provider for the list of companies by organization type
 final companiesByOrgTypeProvider =

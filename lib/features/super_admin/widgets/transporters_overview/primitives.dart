@@ -566,7 +566,7 @@ class OvCellGrid extends StatelessWidget {
     required this.cells,
     required this.columns,
     required this.narrowColumns,
-    required this.narrowBelow,
+    required this.minCellWidth,
     this.gap = 14,
     this.rowGap = 14,
   });
@@ -574,14 +574,31 @@ class OvCellGrid extends StatelessWidget {
   final List<Widget> cells;
   final int columns;
   final int narrowColumns;
-  final double narrowBelow;
+
+  /// How wide ONE cell has to be before [columns] of them are worth having.
+  ///
+  /// This used to be `narrowBelow` — a threshold on the width of the whole
+  /// ROW — and every call site was a guess in the wrong unit. The transporter
+  /// card said 300 for four columns of tonnage: at 305px each cell got 72px
+  /// and the board's own ranking figure rendered as **"4,382.…"** on a phone.
+  /// The tons-moved footer said 420 for four columns and printed
+  /// **"WAYBILLS CLO…"** on a 1600px monitor. Both are the same arithmetic
+  /// mistake, and neither is visible in the number 300 or 420.
+  ///
+  /// A cell width is checkable against the content it has to hold, which a
+  /// row width is not. `columns` survives only while
+  /// `(width − gaps) / columns >= minCellWidth`.
+  final double minCellWidth;
   final double gap;
   final double rowGap;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, c) {
-          final cols = c.maxWidth < narrowBelow ? narrowColumns : columns;
+          final wide = columns <= 0
+              ? 0.0
+              : (c.maxWidth - (columns - 1) * gap) / columns;
+          final cols = wide >= minCellWidth ? columns : narrowColumns;
           final rows = (cells.length / cols).ceil();
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

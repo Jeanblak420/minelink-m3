@@ -12,8 +12,6 @@ import 'package:flutter_application_1/core/routing/initial_location.dart';
 import 'package:flutter_application_1/core/telemetry/crash_reporter.dart';
 import 'package:flutter_application_1/core/telemetry/error_screen_widget.dart';
 import 'package:flutter_application_1/core/telemetry/supabase_reporting_sink.dart';
-import 'package:flutter_application_1/core/mcp/repositories/company_repository.dart';
-import 'package:flutter_application_1/core/mcp/repositories/employee_repository.dart';
 import 'package:flutter_application_1/core/services/database_migration_service.dart';
 import 'package:flutter_application_1/core/services/database_service.dart';
 import 'package:flutter_application_1/core/constants/app_branding.dart';
@@ -23,15 +21,6 @@ import 'package:flutter_application_1/core/widgets/minelink_logo.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 final _logger = LoggerFactory.getLogger('Main');
-
-// Global providers for repositories
-final companyRepositoryProvider = Provider<CompanyRepository>((ref) {
-  return CompanyRepository();
-});
-
-final employeeRepositoryProvider = Provider<EmployeeRepository>((ref) {
-  return EmployeeRepository();
-});
 
 void main() async {
   // First, so that anything below is itself covered. The app had NO global

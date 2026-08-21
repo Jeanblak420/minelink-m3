@@ -19,8 +19,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_application_1/core/mcp/models/company_model.dart';
 import 'package:flutter_application_1/core/mcp/repositories/company_repository.dart';
+import 'package:flutter_application_1/core/mcp/models/employee_model.dart';
+import 'package:flutter_application_1/core/mcp/repositories/employee_repository.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
-import 'package:flutter_application_1/features/company/screens/company_list_screen.dart';
+import 'package:flutter_application_1/core/mcp/repository_providers.dart';
 import 'package:flutter_application_1/features/portal/models/available_route.dart';
 import 'package:flutter_application_1/features/portal/models/compliance_document.dart';
 import 'package:flutter_application_1/features/portal/models/fuel_models.dart';
@@ -707,13 +709,177 @@ final List<VehicleCostBreakdown> kVehicleCosts = const [
 /// an interface, because `SupabaseRepository` has a wide surface and this
 /// screen calls exactly one method of it.
 class FixtureCompanyRepository extends CompanyRepository {
-  FixtureCompanyRepository(this.company);
+  FixtureCompanyRepository(this.company, {this.registry = const []});
 
   final CompanyMCP company;
 
+  /// What `/companies/:orgType` pages through. Empty by default so the screens
+  /// that only resolve ONE company keep the behaviour they had.
+  final List<CompanyMCP> registry;
+
   @override
-  Future<CompanyMCP> getById(String id) async => company;
+  Future<CompanyMCP> getById(String id) async =>
+      registry.where((c) => c.id == id).firstOrNull ?? company;
+
+  /// `InfiniteList` asks for a page at a time and stops when a page comes back
+  /// SHORTER than the page size. Honouring `offset`/`limit` is therefore not
+  /// politeness — a fixture that returns the whole list for every page never
+  /// terminates, and the screen renders the same companies over and over.
+  @override
+  Future<List<CompanyMCP>> getByOrgType(
+    String orgType, {
+    String? orderBy,
+    bool ascending = true,
+    int? limit,
+    int? offset,
+  }) async {
+    final matching =
+        registry.where((c) => c.orgType.name == orgType).toList()
+          ..sort((a, b) => ascending
+              ? a.companyName.compareTo(b.companyName)
+              : b.companyName.compareTo(a.companyName));
+    final start = (offset ?? 0).clamp(0, matching.length);
+    final end =
+        limit == null ? matching.length : (start + limit).clamp(0, matching.length);
+    return matching.sublist(start, end);
+  }
 }
+
+/// The employee half of the same seam.
+///
+/// `EmployeeGridScreen` reads `employeeRepositoryProvider` and nothing else,
+/// so without this it photographs `InfiniteGrid`'s error state.
+class FixtureEmployeeRepository extends EmployeeRepository {
+  FixtureEmployeeRepository(this.roster);
+
+  final List<EmployeeMCP> roster;
+
+  @override
+  Future<EmployeeMCP> getById(String id) async =>
+      roster.firstWhere((e) => e.id == id, orElse: () => roster.first);
+
+  @override
+  Future<List<EmployeeMCP>> getByCompanyId(
+    String companyId, {
+    String? orderBy,
+    bool ascending = true,
+    int? limit,
+    int? offset,
+  }) async {
+    final matching = roster
+        .where((e) => e.companyId == null || e.companyId == companyId)
+        .toList()
+      ..sort((a, b) => ascending
+          ? a.firstName.compareTo(b.firstName)
+          : b.firstName.compareTo(a.firstName));
+    final start = (offset ?? 0).clamp(0, matching.length);
+    final end = limit == null
+        ? matching.length
+        : (start + limit).clamp(0, matching.length);
+    return matching.sublist(start, end);
+  }
+}
+
+/// The platform's transporter registry, as `/companies/transporter` lists it.
+///
+/// Deliberately NOT uniform: one company has no CEO recorded, one has no
+/// reference (it predates the column), one carries a name long enough to need
+/// the row to decide what to do about it, and the WhatsApp numbers are not all
+/// the same length. Those are the rows a tidy fixture never has.
+List<CompanyMCP> kCompanyRegistry = [
+  CompanyMCP(
+    id: 'co-transporter',
+    userId: 'u-co-1',
+    companyName: 'Fixture Haulage',
+    whatsappNumber: '+27 82 000 0001',
+    orgType: OrgType.transporter,
+    createdAt: _ago(const Duration(days: 420)),
+    updatedAt: _ago(const Duration(days: 9)),
+    ceoFirstName: 'Thandi',
+    ceoLastName: 'Mokoena',
+    regRef: 'FXH001',
+  ),
+  CompanyMCP(
+    id: 'co-roadhaul',
+    userId: 'u-co-2',
+    companyName: 'Roadhaul Logistics',
+    whatsappNumber: '+27 83 000 0002',
+    orgType: OrgType.transporter,
+    createdAt: _ago(const Duration(days: 310)),
+    updatedAt: _ago(const Duration(days: 2)),
+    ceoFirstName: 'Sipho',
+    ceoLastName: 'Ndlovu',
+    regRef: 'RHL014',
+  ),
+  CompanyMCP(
+    id: 'co-longname',
+    userId: 'u-co-3',
+    companyName: 'Highveld Bulk Commodity Carriers & Logistics',
+    whatsappNumber: '+27 71 555 0134',
+    orgType: OrgType.transporter,
+    createdAt: _ago(const Duration(days: 96)),
+    regRef: 'HBC207',
+  ),
+  CompanyMCP(
+    id: 'co-nocdetails',
+    userId: 'u-co-4',
+    companyName: 'Kalahari Freight',
+    whatsappNumber: '+27 60 12 3456',
+    orgType: OrgType.transporter,
+    createdAt: _ago(const Duration(days: 41)),
+  ),
+];
+
+/// The roster `/employees/:companyId` grids.
+///
+/// One of everything the card has to survive: a role it has no tone for, no
+/// role at all, a name long enough to ellipsis, and a photo URL that will
+/// never resolve in a test (which is the state a real broken image is in).
+List<EmployeeMCP> kCompanyRoster = [
+  EmployeeMCP(
+    id: 'emp-1',
+    userId: 'u-emp-1',
+    firstName: 'Thandi',
+    lastName: 'Mokoena',
+    whatsappNumber: '+27 82 000 0001',
+    companyId: 'co-transporter',
+    role: UserRole.admin,
+    status: 'active',
+    createdAt: _ago(const Duration(days: 400)),
+  ),
+  EmployeeMCP(
+    id: 'emp-2',
+    userId: 'u-emp-2',
+    firstName: 'Bongani',
+    lastName: 'Khumalo',
+    whatsappNumber: '+27 83 000 0002',
+    companyId: 'co-transporter',
+    role: UserRole.driver,
+    status: 'active',
+    createdAt: _ago(const Duration(days: 220)),
+  ),
+  EmployeeMCP(
+    id: 'emp-3',
+    userId: 'u-emp-3',
+    firstName: 'Annelize',
+    lastName: 'van der Merwe-Botha',
+    whatsappNumber: '+27 71 555 0134',
+    companyId: 'co-transporter',
+    role: UserRole.management,
+    status: 'active',
+    createdAt: _ago(const Duration(days: 150)),
+  ),
+  EmployeeMCP(
+    id: 'emp-4',
+    userId: 'u-emp-4',
+    firstName: 'Pieter',
+    lastName: 'Nel',
+    whatsappNumber: '+27 60 12 3456',
+    companyId: 'co-transporter',
+    status: 'pending',
+    createdAt: _ago(const Duration(days: 3)),
+  ),
+];
 
 CompanyMCP fixtureCompanyRecord({OrgType orgType = OrgType.transporter}) {
   final base = fixtureCompany(orgType: orgType);
@@ -763,6 +929,12 @@ List<Override> portalTailOverrides() => [
           .overrideWith((ref, _) async => kOperatingCosts),
       vehicleCostBreakdownProvider
           .overrideWith((ref, _) async => kVehicleCosts),
-      companyRepositoryProvider
-          .overrideWithValue(FixtureCompanyRepository(fixtureCompanyRecord())),
+      companyRepositoryProvider.overrideWithValue(
+        FixtureCompanyRepository(
+          fixtureCompanyRecord(),
+          registry: kCompanyRegistry,
+        ),
+      ),
+      employeeRepositoryProvider
+          .overrideWithValue(FixtureEmployeeRepository(kCompanyRoster)),
     ];

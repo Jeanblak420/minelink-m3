@@ -530,6 +530,42 @@ class _Workspace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // FILL THE VIEWPORT, even when the page inside is shorter than it.
+    //
+    // `Scaffold` lays its body out under a LOOSE height constraint, and on a
+    // phone the workspace IS the body (there is no rail Row with
+    // `crossAxisAlignment: stretch` to tighten it). Underneath, the
+    // `AnimatedSwitcher`'s `Stack` is `StackFit.loose` and `MlPageBody` is a
+    // bare `SingleChildScrollView`, so a page whose content does not reach the
+    // bottom of the screen shrink-wrapped the whole chain — and the canvas
+    // painter, which sizes to its child, stopped painting exactly where the
+    // content stopped. Below that line the `Scaffold`'s own `canvasBase`
+    // (`#0A1424`) showed through against the canvas's `#060B15`: a hard
+    // horizontal seam across the page, at a different height on every screen.
+    //
+    // Measured 2026-08-21 across the phone renders: **23 of 61** had it,
+    // including the driver's Trip screen, the load controller's weighbridge,
+    // the margin ledger and the employee register. It is not a test artefact —
+    // a 915px handset shows it on any of those pages whose content ends first,
+    // and it is invisible on desktop because the rail's `stretch` already
+    // tightens the constraint.
+    //
+    // `minHeight` rather than `SizedBox.expand`, so a genuinely unbounded
+    // parent (a workspace nested in a scrollable) is left alone rather than
+    // asserting, and so a page TALLER than the viewport still scrolls.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final canvas = _paintedCanvas(context);
+        if (!constraints.hasBoundedHeight) return canvas;
+        return ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: canvas,
+        );
+      },
+    );
+  }
+
+  Widget _paintedCanvas(BuildContext context) {
     final content = constrain
         // `Align(topCenter)`, not `Center`. The centring wanted here is
         // HORIZONTAL — cap the content at a readable measure and put it in the

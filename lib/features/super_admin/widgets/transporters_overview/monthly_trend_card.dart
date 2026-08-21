@@ -74,7 +74,9 @@ class _StatGrid extends StatelessWidget {
   Widget build(BuildContext context) => OvCellGrid(
         columns: 2,
         narrowColumns: 1,
-        narrowBelow: 190,
+        // Was `narrowBelow: 190`, which is this same figure written as a row
+        // width: (190 − 10) / 2.
+        minCellWidth: 90,
         gap: 10,
         rowGap: 10,
         cells: [for (final s in stats) _StatTile(tokens: tokens, stat: s)],

@@ -245,8 +245,15 @@ class TransporterRow {
   final int fleet;
   final int routes;
 
-  /// "3m ago" / "never".
-  final String lastActive;
+  /// "3 h ago" — the relative form only, and **null when the company has
+  /// never moved a load**.
+  ///
+  /// It used to be the string `'never'` for that case, and the card prints
+  /// `'last active $lastActive'`, so the console's transporter board read
+  /// **"last active never"**. Nullable rather than a sentinel string, so the
+  /// two states cannot be confused by a reader or by a `==` against a magic
+  /// word.
+  final String? lastActive;
 
   /// 15 raw daily values; the bars normalise themselves.
   final List<double> tempo;

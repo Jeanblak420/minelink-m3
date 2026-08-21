@@ -47,8 +47,18 @@ class OvTransporterCard extends StatelessWidget {
             child: _Stats(tokens: t, row: row),
           ),
           OvFlexItem(
-            basis: 220,
-            minWidth: 200,
+            // 260/240, not the drop's 220/200. The meter row is
+            // label + gap + bar + gap + a 40px percentage, and the label and
+            // the bar are both flex-1 — so the label gets (W − 64) / 2. At
+            // 220 that is 78px and "Waybills closed" needs 86: the card's own
+            // meter label rendered as "Waybills clos…" on any window wide
+            // enough for the three-column arrangement (~1750px with the rail).
+            // Measured 2026-08-21. It never showed up in a render because the
+            // console's content column collapses these cards to one column
+            // first, and it never failed a sweep because a truncation is a
+            // valid layout.
+            basis: 260,
+            minWidth: 240,
             child: _Meters(tokens: t, row: row, onOpen: onOpenWorkspace),
           ),
         ],
@@ -131,7 +141,10 @@ class _Identity extends StatelessWidget {
                   '${row.drivers} drivers',
                   '${row.fleet} fleet',
                   '${row.routes} routes',
-                  'last active ${row.lastActive}',
+                  // "never active", not "last active never".
+                  row.lastActive == null
+                      ? 'never active'
+                      : 'last active ${row.lastActive}',
                 ],
               ),
               const SizedBox(height: 12),
@@ -206,9 +219,12 @@ class _Stats extends StatelessWidget {
     return OvCellGrid(
       columns: 4,
       narrowColumns: 2,
-      // The drop dropped to two columns below 220, which leaves a 50px cell
-      // holding "12,420.5" at 15px mono. Four columns only survive from ~300.
-      narrowBelow: 300,
+      // 100px per cell, because that is what the widest thing in one holds:
+      // "12,420.5t" is ~95px of 15px JetBrains Mono, and the labels above it
+      // ("WB DONE") are shorter than that. The old threshold said the ROW had
+      // to be 300 wide, which at 305 gave each cell 72 and printed the board's
+      // ranking figure as "4,382.…" on a phone. Measured 2026-08-21.
+      minCellWidth: 100,
       // …and at 10 rather than the drop's 14: five figures of tonnage plus a
       // unit is 84px of JetBrains Mono, which three 14px gaps do not leave
       // room for at the width this column actually gets.
@@ -317,9 +333,12 @@ class _MeterRow extends StatelessWidget {
         Flexible(
           child: Text(
             spec.label,
-            maxLines: 1,
+            // TWO lines, and it wraps. The width above is sized so one line
+            // is enough at the default text scale; a reader who has raised
+            // the console's scale gets a taller row rather than a cut label,
+            // which is the right way for this to give.
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            softWrap: false,
             style: t.s(size: 11, color: t.inkMid),
           ),
         ),

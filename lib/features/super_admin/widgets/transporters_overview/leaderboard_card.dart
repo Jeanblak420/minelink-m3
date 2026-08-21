@@ -81,7 +81,69 @@ class _OvLeaderboardCardState extends State<OvLeaderboardCard> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
+          _header(context, t, data),
+          const SizedBox(height: 16),
+          if (data.entries.isEmpty)
+            Text(
+              'No tonnage recorded this month',
+              style: t.s(size: 12, color: t.inkMid),
+            )
+          else
+            for (var i = 0; i < data.entries.length; i++) ...[
+              if (i > 0) const SizedBox(height: 8),
+              _LeaderRow(
+                tokens: t,
+                entry: data.entries[i],
+                // The leader treatment belongs to whoever actually moved the
+                // most, so a month with no movement at all has no leader.
+                leader: i == 0 && !data.entries[i].muted,
+              ),
+            ],
+        ],
+      ),
+    );
+  }
+
+  /// Title on the left, total and chevron on the right — **until they no
+  /// longer both fit**, at which point the trailing pair moves to its own
+  /// line.
+  ///
+  /// On a 412px phone the one-row arrangement left the title column 140px, so
+  /// the card's own heading read "Leaderboard —…" and its subtitle "Network
+  /// share this mon…". Ellipsising the sentence that says what the card is,
+  /// to make room for a figure that is repeated in the first row below it, is
+  /// the wrong trade at any width.
+  Widget _header(BuildContext context, MlOv t, Leaderboard data) {
+    final title = _titleBlock(t);
+    final trailing = _trailing(t, data);
+    return LayoutBuilder(
+      builder: (context, c) {
+        // 34 icon + 12 + a title that can hold "Leaderboard — Tons" at 17px
+        // + 12 + the pill + 8 + the 26px chevron.
+        if (c.maxWidth < 380) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              title,
+              const SizedBox(height: 12),
+              trailing,
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: title),
+            const SizedBox(width: 12),
+            trailing,
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _titleBlock(MlOv t) => Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
@@ -149,58 +211,44 @@ class _OvLeaderboardCardState extends State<OvLeaderboardCard> {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
-              Flexible(
-                child: OvPill(
-                  tokens: t,
-                  label: data.totalLabel,
-                  tone: OvTone.accent,
-                  mono: true,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                ),
-              ),
-              if (widget.onTap != null) ...[
-                const SizedBox(width: 8),
-                Container(
-                  width: 26,
-                  height: 26,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: t.acc.withValues(alpha: 0.10),
-                    borderRadius: MlShape.radiusSmall,
-                    border: Border.all(color: t.acc.withValues(alpha: 0.30)),
-                  ),
-                  child: Icon(
-                    Icons.chevron_right_rounded,
-                    size: 16,
-                    color: t.acc2,
-                  ),
-                ),
-              ],
             ],
+          );
+
+  /// The total and the chevron. **Never flexed** — `Flexible` defaults to
+  /// `flex: 1`, so a short trailing block put in one splits the row EQUALLY
+  /// with the `Expanded` title beside it, and the title is the half that
+  /// loses. That is what ellipsised this card's heading to "Leaderboard — …",
+  /// and CLAUDE.md §10.4 records the same trap by name.
+  Widget _trailing(MlOv t, Leaderboard data) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          OvPill(
+            tokens: t,
+            label: data.totalLabel,
+            tone: OvTone.accent,
+            mono: true,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           ),
-          const SizedBox(height: 16),
-          if (data.entries.isEmpty)
-            Text(
-              'No tonnage recorded this month',
-              style: t.s(size: 12, color: t.inkMid),
-            )
-          else
-            for (var i = 0; i < data.entries.length; i++) ...[
-              if (i > 0) const SizedBox(height: 8),
-              _LeaderRow(
-                tokens: t,
-                entry: data.entries[i],
-                // The leader treatment belongs to whoever actually moved the
-                // most, so a month with no movement at all has no leader.
-                leader: i == 0 && !data.entries[i].muted,
+          if (widget.onTap != null) ...[
+            const SizedBox(width: 8),
+            Container(
+              width: 26,
+              height: 26,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: t.acc.withValues(alpha: 0.10),
+                borderRadius: MlShape.radiusSmall,
+                border: Border.all(color: t.acc.withValues(alpha: 0.30)),
               ),
-            ],
+              child: Icon(
+                Icons.chevron_right_rounded,
+                size: 16,
+                color: t.acc2,
+              ),
+            ),
+          ],
         ],
-      ),
-    );
-  }
+      );
 }
 
 class _LeaderRow extends StatelessWidget {

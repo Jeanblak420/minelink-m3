@@ -401,7 +401,7 @@ abstract final class TransportersOverviewMapper {
           drivers: c.drivers,
           fleet: c.fleetVehicles,
           routes: c.routesDistinct,
-          lastActive: lastSeen == null ? 'never' : _ago(lastSeen, today),
+          lastActive: lastSeen == null ? null : _ago(lastSeen, today),
           tempo: _dailyTons(tRows, thisMonth,
               now: today, days: 15, company: c.companyName),
           trips: '${c.trips}',

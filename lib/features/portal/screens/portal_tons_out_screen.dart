@@ -5,7 +5,7 @@ import 'package:flutter_application_1/core/utils/logger.dart';
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
 import 'package:flutter_application_1/features/portal/widgets/raw_recon_view.dart';
-import 'package:flutter_application_1/main.dart' show companyRepositoryProvider;
+import 'package:flutter_application_1/core/mcp/repository_providers.dart';
 import 'package:flutter_application_1/core/design/components/ml_page_body.dart';
 import 'package:flutter_application_1/core/design/components/ml_page_header.dart';
 

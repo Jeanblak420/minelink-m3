@@ -391,7 +391,11 @@ class _KpiRow extends StatelessWidget {
   Widget build(BuildContext context) => OvCellGrid(
         columns: kpis.length,
         narrowColumns: 2,
-        narrowBelow: 860,
+        // A per-cell measure matters more here than anywhere else on this
+        // screen, because `columns` is the number of KPIs and therefore
+        // VARIABLE: one row-width threshold cannot be right for four tiles
+        // and for six.
+        minCellWidth: 160,
         gap: 14,
         rowGap: 14,
         cells: [for (final k in kpis) _KpiTile(tokens: tokens, kpi: k)],

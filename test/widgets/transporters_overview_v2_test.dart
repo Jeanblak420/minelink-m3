@@ -9,6 +9,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -734,6 +735,131 @@ void main() {
         expect(find.text(ghost), findsNothing, reason: '$ghost is mock data');
       }
       expect(find.text('Nothing needs attention'), findsOneWidget);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // NOTHING ON THIS BOARD IS CUT OFF, at any width it is drawn at.
+  //
+  // Three separate truncations were photographed on 2026-08-21, the first time
+  // this screen was rendered at any width by anything:
+  //
+  //   * `TONS 4,382.…` on a phone — the figure the board is RANKED BY, in the
+  //     four-cell stat strip. `OvCellGrid`'s threshold was a row width (300)
+  //     rather than a cell width, and at 305 each cell got 72px.
+  //   * `WAYBILLS CLO…` on a 1600px monitor — same arithmetic, in the headline
+  //     tons-moved card's footer.
+  //   * `Leaderboard — …`, the card's own heading, because a short trailing
+  //     pill sat in a `Flexible` (default `flex: 1`) beside the `Expanded`
+  //     title and the two split the row equally (CLAUDE.md §10.4).
+  //
+  // None of them threw, none of them overflowed, and a sweep passes on all
+  // three. `didExceedMaxLines` is the paragraph's own answer to "did I have to
+  // cut this", which is the question.
+  group('nothing is truncated', () {
+    List<String> cutOff(WidgetTester tester) {
+      final out = <String>[];
+      void visit(Element e) {
+        final ro = e.renderObject;
+        if (ro is RenderParagraph && ro.didExceedMaxLines) {
+          out.add(ro.text.toPlainText());
+        }
+        e.visitChildren(visit);
+      }
+
+      tester.allElements.first.visitAncestorElements((a) {
+        visit(a);
+        return false;
+      });
+      return out;
+    }
+
+    Future<void> pumpBoard(WidgetTester tester, Size size) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      final data = TransportersOverviewMapper.build(
+        // Five figures of tonnage, because that is the width the strip has to
+        // survive and a three-figure fixture would pass through the fault.
+        // SHORT company names, deliberately.
+        //
+        // A company NAME is allowed to ellipsise in the leaderboard's compact
+        // ranking row — that row is 26px of rank, a name, a bar and a figure
+        // inside a 300px aside, the full name is on the card beside it, and
+        // `maxLines: 1` there is a decision with its own comment. What is not
+        // allowed is a LABEL or a FIGURE being cut, and a long fixture name
+        // would drown that signal in a truncation nobody intends to fix.
+        bundle: bundle([
+          company('Roadhaul', tons: 12420.5, trips: 128, fleet: 24,
+              done: 121, open: 7),
+          company('Kopano', tons: 96.2, trips: 3, fleet: 4),
+        ]),
+        rows: [row(date: DateTime(2026, 8, 4), truck: 'AAA', net: 120)],
+        targetTons: 4200,
+        now: now,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(brightness: Brightness.dark),
+          // NOT wrapped in another scroll view: `TransportersOverviewBody`
+          // has its own, inside a `Stack`. Nesting a second one hands that
+          // Stack an unbounded height, the flex row then lays out against a
+          // different width, and every measurement taken here would be of a
+          // layout the product never draws.
+          home: Scaffold(body: TransportersOverviewBody(data: data)),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    // A SWEEP, because every truncation on this board so far has appeared at
+    // one width and not at its neighbours: the meter label needs the card's
+    // three-column arrangement (widest), the tons-moved footer needs the
+    // fleet card beside it (middle), and the stat strip needs a phone.
+    for (final size in const [
+      Size(1900, 2800),
+      Size(1750, 2800),
+      Size(1600, 3000),
+      Size(1300, 3200),
+      Size(1100, 3400),
+      Size(900, 3800),
+      Size(700, 4200),
+      Size(412, 4600),
+      Size(360, 4800),
+    ]) {
+      testWidgets('at ${size.width.toInt()}px', (tester) async {
+        await pumpBoard(tester, size);
+        expect(cutOff(tester), isEmpty,
+            reason: 'these were cut off at ${size.width.toInt()}px');
+      });
+    }
+  });
+
+  group('a company that has never moved a load', () {
+    testWidgets('reads "never active", not "last active never"',
+        (tester) async {
+      tester.view.physicalSize = const Size(1600, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      final data = TransportersOverviewMapper.build(
+        bundle: bundle([company('Kopano Freight', tons: 0, trips: 0, fleet: 4)]),
+        rows: const [],
+        now: now,
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(brightness: Brightness.dark),
+          // NOT wrapped in another scroll view: `TransportersOverviewBody`
+          // has its own, inside a `Stack`. Nesting a second one hands that
+          // Stack an unbounded height, the flex row then lays out against a
+          // different width, and every measurement taken here would be of a
+          // layout the product never draws.
+          home: Scaffold(body: TransportersOverviewBody(data: data)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('last active never'), findsNothing);
+      expect(find.text('never active'), findsOneWidget);
     });
   });
 
