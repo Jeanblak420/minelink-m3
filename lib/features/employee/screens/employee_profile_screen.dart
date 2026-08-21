@@ -382,19 +382,25 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
             color: strong ? MlTone.transit.colors(Theme.of(context).brightness).fg : s.textFaint,
           ),
         );
-    return Row(children: [
-      _IconBtn(icon: Icons.chevron_left_rounded, size: 36, onTap: _close),
-      const SizedBox(width: 14),
-      Flexible(
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Flexible(child: crumb(b.company.name.toUpperCase())),
-          crumb('  /  '),
-          crumb('EMPLOYEE REGISTER'),
-          crumb('  /  '),
-          Flexible(child: crumb(e.fullName.toUpperCase(), strong: true)),
-        ]),
-      ),
-      const Spacer(),
+    // A breadcrumb, a live pill and SIX buttons. On a 412px phone that row
+    // overflowed — the framework's hazard stripes were in the render and the
+    // last button was clipped off the edge — and the two crumbs that fitted
+    // read "FIXTURE HAULAG…" and "FIXTURE OPERAT…".
+    //
+    // Below 720px the breadcrumb takes a line of its own and the controls take
+    // the next one, which is the only arrangement that fits six 36px targets
+    // and a pill. Above it, the original single row.
+    final narrow = MediaQuery.sizeOf(context).width < 720;
+    final crumbs = Row(mainAxisSize: MainAxisSize.min, children: [
+      Flexible(child: crumb(b.company.name.toUpperCase())),
+      crumb('  /  '),
+      if (!narrow) ...[
+        crumb('EMPLOYEE REGISTER'),
+        crumb('  /  '),
+      ],
+      Flexible(child: crumb(e.fullName.toUpperCase(), strong: true)),
+    ]);
+    final controls = [
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
@@ -445,6 +451,45 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
       ),
       const SizedBox(width: 8),
       _IconBtn(icon: Icons.close_rounded, tooltip: 'Close', onTap: _close),
+    ];
+
+    if (narrow) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            _IconBtn(
+                icon: Icons.chevron_left_rounded, size: 36, onTap: _close),
+            const SizedBox(width: 12),
+            Expanded(child: crumbs),
+          ]),
+          const SizedBox(height: 10),
+          // A Wrap, so the pill and the six buttons reflow instead of
+          // overflowing at a large text scale.
+          Wrap(
+            spacing: 0,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: controls,
+          ),
+        ],
+      );
+    }
+
+    return Row(children: [
+      _IconBtn(icon: Icons.chevron_left_rounded, size: 36, onTap: _close),
+      const SizedBox(width: 14),
+      // `Expanded` and NO `Spacer`. A `Spacer` IS an `Expanded(flex: 1)`, so
+      // beside a `Flexible(flex: 1)` it split the free space EQUALLY — the
+      // breadcrumb got 122px of a 1600px header and read
+      // "FIXTURE HAULAG… / EMPLOYEE REGISTER / FIXTURE OPERAT…" while half the
+      // row sat empty. The crumbs take the space and the controls sit at the
+      // right edge because nothing else claims it.
+      Expanded(
+        child: Align(alignment: Alignment.centerLeft, child: crumbs),
+      ),
+      const SizedBox(width: 12),
+      ...controls,
     ]);
   }
 
@@ -454,17 +499,33 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
       padding: const EdgeInsets.only(top: 18),
       decoration:
           BoxDecoration(border: Border(top: BorderSide(color: s.borderCard))),
-      child: Row(children: [
-        const Icon(Icons.check_rounded, size: 15, color: _green),
-        const SizedBox(width: 7),
-        Flexible(
-          child: Text(
-            'Live profile · Auto-updates on any change · Synced ${_ago(syncedAt)}',
-            overflow: TextOverflow.ellipsis,
-            style: context.mlText.bodySmall.copyWith(color: s.textFaint),
+      // A Wrap, and the sentence claims the row.
+      //
+      // It was a Row with a `Flexible` sentence and a `Spacer` — an
+      // `Expanded(flex: 1)` each, splitting the free space EQUALLY, so on a
+      // desktop half the row sat empty while the sentence ellipsised. On a
+      // phone even the full half is not enough beside a 190px "Export profile
+      // PDF" button, so the button drops to its own line.
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          SizedBox(
+            width: MediaQuery.sizeOf(context).width < 560 ? double.infinity : 420,
+            child: Row(children: [
+              const Icon(Icons.check_rounded, size: 15, color: _green),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  'Live profile · Auto-updates on any change · Synced ${_ago(syncedAt)}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.mlText.bodySmall.copyWith(color: s.textFaint),
+                ),
+              ),
+            ]),
           ),
-        ),
-        const Spacer(),
         OutlinedButton.icon(
           onPressed: () => _exportPdf(b),
           icon: const Icon(Icons.download_rounded, size: 16),
@@ -480,7 +541,8 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                 RoundedRectangleBorder(borderRadius: MlShape.radiusMedium),
           ),
         ),
-      ]),
+        ],
+      ),
     );
   }
 
@@ -810,15 +872,26 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
             borderRadius: MlShape.radiusSmall,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 9),
-              child: Row(children: [
-                Icon(icon, size: 16, color: s.textFaint),
+              // The label hugs the left, the VALUE takes the rest and may
+              // take two lines. An email is the longest thing this card holds
+              // and the likeliest thing a person is here to read: at one line
+              // it had 138px and showed "thandi.mokoena@f…", which "Tap to
+              // copy" only half excuses — you cannot check what you are
+              // copying.
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 1),
+                  child: Icon(icon, size: 16, color: s.textFaint),
+                ),
                 const SizedBox(width: 10),
                 Text(label,
                     style: context.mlText.bodySmall.copyWith(color: s.textMuted)),
-                const Spacer(),
-                Flexible(
+                const SizedBox(width: 12),
+                Expanded(
                   child: Text(
                     value,
+                    textAlign: TextAlign.right,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: mono ? MlTokens.fontMono : MlTokens.fontSans,
@@ -1434,6 +1507,12 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                 style: context.mlText.overline.copyWith(color: s.textFaint)),
             const SizedBox(height: 4),
             Text(value,
+                // TWO lines. These tiles are half a phone wide, and the
+                // LAST SIGN-IN value is a clock AND a relative age
+                // ("03:30 · 6 h ago") — at one line the phone kept the clock
+                // and dropped how long ago it was, which is the half that
+                // says whether this person is still around.
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: context.mlText.code(
                   color: s.textStrong,
@@ -1718,6 +1797,10 @@ class _DocTile extends StatelessWidget {
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(doc.title,
+                // TWO lines: the document's NAME, beside an icon and two
+                // action buttons on a phone. "Professional driving permit" is
+                // the longest and the one whose expiry matters most.
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: context.mlText.titleSmall.copyWith(
                   color: s.textStrong,

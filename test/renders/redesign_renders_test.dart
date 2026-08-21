@@ -136,6 +136,7 @@ import 'package:flutter_application_1/features/super_admin/nav/console_nav.dart'
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screen_dashboard.dart';
 
 import '../fixtures/console_capture_fixtures.dart';
+import '../fixtures/employee_profile_fixtures.dart';
 import '../fixtures/console_tail_fixtures.dart';
 import '../fixtures/ml_sample_data.dart';
 import '../fixtures/nav_fixtures.dart';
@@ -886,9 +887,34 @@ void main() {
           orgType: OrgType.transporter,
           role: UserRole.admin,
           selectedRoute: '/portal/transporter',
+          // Without these the screen photographed "Could not load profile ·
+          // The server refused the request" and was counted as photographed.
+          extraOverrides: employeeProfileOverrides(),
         ),
         const Size(1600, 1400),
         'screen-employee-profile-desktop-dark',
+      );
+    });
+
+    testWidgets('employee profile — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const EmployeeProfileScreen(
+            employeeId: 'FIXTURE-employee',
+            canManage: true,
+            inPortal: true,
+          ),
+          title: 'Fixture Haulage',
+          subtitle: 'People',
+          orgType: OrgType.transporter,
+          role: UserRole.admin,
+          selectedRoute: '/portal/transporter',
+          extraOverrides: employeeProfileOverrides(),
+        ),
+        const Size(412, 3844),
+        'screen-employee-profile-phone-dark',
       );
     });
 
