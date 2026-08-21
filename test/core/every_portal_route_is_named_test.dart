@@ -83,13 +83,23 @@ const _allowedDivergence = <String, String>{
   '/communications': 'rail "Announcements" / bar "Communications"',
   '/appearance': 'rail "Appearance" / bar "Appearance & theme"',
 
-  // These four are the ones worth a second look when the vocabulary is
-  // decided: the bar is not shorter, it is a DIFFERENT word.
-  '/portal/transporter/fleet': 'rail "Vehicles" / bar "Fleet management"',
-  '/portal/transporter/drivers': 'rail "Drivers" / bar "Driver" — singular',
-  '/portal/transporter/trucks-on-route':
-      'rail "Trucks on route" / bar "Trucks On Route" — capitalisation only',
-  '/portal/driver/trip': 'rail "My routes" / bar "Trip"',
+  // The four where the bar was not shorter but a DIFFERENT word are GONE —
+  // decided by Jean on 2026-08-22 and made to agree rather than recorded:
+  //
+  //   fleet            bar "Fleet management" -> "Vehicles". The rail leaf
+  //                    sits inside a group already called "Fleet", so the old
+  //                    bar title read as Fleet > Fleet.
+  //   drivers          bar "Driver" -> "Drivers". The screen lists a
+  //                    company's drivers.
+  //   trucks-on-route  bar "Trucks On Route" -> "Trucks on route". It was the
+  //                    title map's only Title Case entry.
+  //   trip             RAIL "My routes" -> "Trip", the other direction: the
+  //                    driver's bottom nav is Dashboard - Trip - Profile, so
+  //                    the bar already had the word the driver taps.
+  //
+  // Fifteen routes became eleven, and every remaining one is the same shape:
+  // longer in the rail, shorter in the bar, because the rail has a column and
+  // the bar shares a line.
 };
 
 void main() {

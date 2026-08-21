@@ -586,7 +586,10 @@ List<PortalNavNode> _transporterTree(UserRole? role) {
         route: '/portal/driver/home',
       ),
       const PortalNavNode.leaf(
-        label: 'My routes',
+        // "Trip", not "My routes". The driver's BOTTOM NAV is
+        // Dashboard · Trip · Profile (CLAUDE.md §4), so "Trip" is already the
+        // word this driver taps every day; the rail was the odd one out.
+        label: 'Trip',
         icon: Icons.alt_route_outlined,
         route: '/portal/driver/trip',
       ),

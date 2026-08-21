@@ -162,10 +162,14 @@ void main() {
       '/portal/mine/notifications': 'Notifications',
       '/portal/mine/profile': 'Profile',
       '/portal/buyer/waybills': 'Waybills',
-      '/portal/transporter/fleet': 'Fleet management',
-      '/portal/transporter/trucks-on-route': 'Trucks On Route',
+      // Settled 2026-08-22: the bar now uses the RAIL's word for these four.
+      // "Vehicles" because the rail leaf sits inside a group already called
+      // "Fleet"; sentence case because this map is sentence case everywhere
+      // else; plural because the screen lists a company's drivers.
+      '/portal/transporter/fleet': 'Vehicles',
+      '/portal/transporter/trucks-on-route': 'Trucks on route',
       '/portal/transporter/maintenance': 'Maintenance',
-      '/portal/transporter/drivers': 'Driver',
+      '/portal/transporter/drivers': 'Drivers',
       '/portal/mine/trips': 'Trips',
       '/portal/driver/home': 'Dashboard',
       '/portal/driver/trip': 'Trip',

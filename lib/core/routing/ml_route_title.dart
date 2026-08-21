@@ -412,10 +412,23 @@ String _portalTitle(Uri uri, MlPortalTabs tabs) {
       'notifications' => 'Notifications',
       'profile' => 'Profile',
       'waybills' => 'Waybills',
-      'fleet' => 'Fleet management',
-      'trucks-on-route' => 'Trucks On Route',
+      // ── Four names settled 2026-08-22 (Jean's call) ──────────────────
+      //
+      // These were the four routes where the bar was not SHORTER than the
+      // rail, it was a DIFFERENT word. Recorded as an inventory since the
+      // browser pass; decided now.
+      //
+      // `Vehicles`, not "Fleet management": the rail's leaf sits inside a
+      // GROUP already called "Fleet", so the bar saying "Fleet management"
+      // reads as Fleet > Fleet. The screen adds and edits vehicles.
+      'fleet' => 'Vehicles',
+      // Sentence case, like every other entry in this map. This was its only
+      // Title Case one, and the rail said "Trucks on route" a word away.
+      'trucks-on-route' => 'Trucks on route',
       'maintenance' => 'Maintenance',
-      'drivers' => 'Driver',
+      // PLURAL. The screen lists a company's drivers; "Driver" reads as a
+      // detail page for one of them.
+      'drivers' => 'Drivers',
       'trips' => 'Trips',
       'production' => 'Production',
       'quality' => 'Quality',
