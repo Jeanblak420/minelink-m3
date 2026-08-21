@@ -83,28 +83,26 @@ class _CrashReportsScreenState extends ConsumerState<CrashReportsScreen> {
     ));
     final facets = ref.watch(crashReportFacetsProvider).valueOrNull;
 
-    return Scaffold(
-      body: rowsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => MlEmptyState(
-          icon: Icons.error_outline,
-          title: 'Could not load crash reports',
-          message: friendlyError(e),
-        ),
-        data: (rows) => _CrashReportsBody(
-          rows: rows,
-          platforms: (facets?.platforms.toList() ?? const <String>[])..sort(),
-          appVersions: (facets?.appVersions.toList() ?? const <String>[])
-            ..sort(),
-          fatalOnly: _fatalOnly,
-          platform: _platform,
-          appVersion: _appVersion,
-          expandedId: _expandedId,
-          onFatalOnlyChanged: (v) => setState(() => _fatalOnly = v),
-          onPlatformChanged: (v) => setState(() => _platform = v),
-          onAppVersionChanged: (v) => setState(() => _appVersion = v),
-          onExpand: _onExpand,
-        ),
+    return rowsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => MlEmptyState(
+        icon: Icons.error_outline,
+        title: 'Could not load crash reports',
+        message: friendlyError(e),
+      ),
+      data: (rows) => _CrashReportsBody(
+        rows: rows,
+        platforms: (facets?.platforms.toList() ?? const <String>[])..sort(),
+        appVersions: (facets?.appVersions.toList() ?? const <String>[])
+          ..sort(),
+        fatalOnly: _fatalOnly,
+        platform: _platform,
+        appVersion: _appVersion,
+        expandedId: _expandedId,
+        onFatalOnlyChanged: (v) => setState(() => _fatalOnly = v),
+        onPlatformChanged: (v) => setState(() => _platform = v),
+        onAppVersionChanged: (v) => setState(() => _appVersion = v),
+        onExpand: _onExpand,
       ),
     );
   }

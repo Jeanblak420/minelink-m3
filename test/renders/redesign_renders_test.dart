@@ -112,6 +112,13 @@ import 'package:flutter_application_1/features/super_admin/screens/route_marketp
 import 'package:flutter_application_1/features/super_admin/screens/crash_reports_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/account_deactivations_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/live_map_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/super_admin_dashboard_v2_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/transporter_leaderboard_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/chat_connections_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/driver_limit_requests_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/platform_admin_settings_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/register_company_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/user_preferences_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/request_tracking_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/token_requests_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/margin_ledger_screen.dart';
@@ -2034,6 +2041,7 @@ void main() {
           ...consoleCaptureOverrides(),
           ...portalCaptureOverrides(),
           ...consoleTailOverrides(),
+          ...consoleLastOverrides(),
         ];
 
     Future<void> shootConsole(
@@ -2183,6 +2191,78 @@ void main() {
     testWidgets('live map — phone dark', (tester) async {
       await shootConsole(tester, const LiveMapScreen(), const Size(412, 1600),
           'screen-live-map-phone-dark');
+    });
+
+    // --- The seven the console had left ---------------------------------
+    //
+    // `/super-admin` itself among them: the platform dashboard the console
+    // group photographs is `MineLinkDashboardScreen`, the v2 insights board.
+    // `SuperAdminDashboardV2Screen` is the screen the ROUTE builds, and
+    // nothing had ever rendered it.
+
+    testWidgets('platform dashboard v2 — desktop dark', (tester) async {
+      await shootConsole(tester, const SuperAdminDashboardV2Screen(),
+          const Size(1600, 2000), 'screen-super-admin-dashboard-v2-desktop-dark');
+    });
+
+    testWidgets('platform dashboard v2 — phone dark', (tester) async {
+      await shootConsole(tester, const SuperAdminDashboardV2Screen(),
+          const Size(412, 3200), 'screen-super-admin-dashboard-v2-phone-dark');
+    });
+
+    testWidgets('transporter leaderboard — desktop dark', (tester) async {
+      await shootConsole(tester, const TransporterLeaderboardScreen(),
+          const Size(1600, 1400), 'screen-transporter-leaderboard-desktop-dark');
+    });
+
+    testWidgets('transporter leaderboard — phone dark', (tester) async {
+      await shootConsole(tester, const TransporterLeaderboardScreen(),
+          const Size(412, 2200), 'screen-transporter-leaderboard-phone-dark');
+    });
+
+    testWidgets('chat connections — desktop dark', (tester) async {
+      await shootConsole(tester, const ChatConnectionsScreen(),
+          const Size(1600, 1400), 'screen-chat-connections-desktop-dark');
+    });
+
+    testWidgets('chat connections — phone dark', (tester) async {
+      await shootConsole(tester, const ChatConnectionsScreen(),
+          const Size(412, 2000), 'screen-chat-connections-phone-dark');
+    });
+
+    testWidgets('driver limit requests — desktop dark', (tester) async {
+      await shootConsole(tester, const DriverLimitRequestsScreen(),
+          const Size(1600, 1100), 'screen-driver-limit-requests-desktop-dark');
+    });
+
+    testWidgets('driver limit requests — phone dark', (tester) async {
+      await shootConsole(tester, const DriverLimitRequestsScreen(),
+          const Size(412, 1400), 'screen-driver-limit-requests-phone-dark');
+    });
+
+    testWidgets('platform settings — desktop dark', (tester) async {
+      await shootConsole(tester, const PlatformAdminSettingsScreen(),
+          const Size(1600, 1100), 'screen-platform-settings-desktop-dark');
+    });
+
+    testWidgets('register company — desktop dark', (tester) async {
+      await shootConsole(tester, const RegisterCompanyScreen(),
+          const Size(1600, 1500), 'screen-register-company-desktop-dark');
+    });
+
+    testWidgets('register company — phone dark', (tester) async {
+      await shootConsole(tester, const RegisterCompanyScreen(),
+          const Size(412, 2000), 'screen-register-company-phone-dark');
+    });
+
+    testWidgets('user preferences — desktop dark', (tester) async {
+      await shootConsole(tester, const UserPreferencesScreen(),
+          const Size(1600, 1500), 'screen-user-preferences-desktop-dark');
+    });
+
+    testWidgets('user preferences — phone dark', (tester) async {
+      await shootConsole(tester, const UserPreferencesScreen(),
+          const Size(412, 1900), 'screen-user-preferences-phone-dark');
     });
   });
 

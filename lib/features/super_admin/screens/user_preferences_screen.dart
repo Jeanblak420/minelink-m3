@@ -94,9 +94,24 @@ class UserPreferencesScreen extends ConsumerWidget {
                     const SizedBox(height: 18),
                     _SwitchRow(
                       title: 'Canvas texture',
-                      description:
-                          'Engineering dot-grid and soft brand washes behind the light workspace.',
+                      // IT IS A LIGHT-MODE SETTING, and it says so when it
+                      // cannot do anything.
+                      //
+                      // `MlWorkspaceCanvasPainter` returns immediately in
+                      // dark — the dot grid and the brand washes are painted
+                      // only over the light canvas — so in the console's
+                      // DEFAULT mode this toggle changes nothing at all, while
+                      // presenting itself as live and describing "the light
+                      // workspace" to somebody looking at a dark one.
+                      // Photographed 2026-08-21.
+                      description: prefs.darkMode
+                          ? 'Engineering dot-grid and soft brand washes behind '
+                              'the workspace. Light mode only — switch Mode to '
+                              'Light to see it.'
+                          : 'Engineering dot-grid and soft brand washes behind '
+                              'the workspace.',
                       value: prefs.canvasTexture,
+                      enabled: !prefs.darkMode,
                       onChanged: notifier.setCanvasTexture,
                     ),
                   ],
@@ -316,12 +331,17 @@ class _SwitchRow extends StatelessWidget {
   final String title;
   final String description;
   final bool value;
+
+  /// False dims the row and refuses the switch, for a setting that genuinely
+  /// cannot do anything in the current mode.
+  final bool enabled;
   final ValueChanged<bool> onChanged;
   const _SwitchRow({
     required this.title,
     required this.description,
     required this.value,
     required this.onChanged,
+    this.enabled = true,
   });
 
   @override
@@ -336,20 +356,21 @@ class _SwitchRow extends StatelessWidget {
               Text(
                 title,
                 style: context.mlText.titleMedium.copyWith(
-                  color: s.textStrong,
+                  color: enabled ? s.textStrong : s.textMuted,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 description,
-                style: context.mlText.bodyMedium.copyWith(color: s.textMuted),
+                style: context.mlText.bodyMedium
+                    .copyWith(color: enabled ? s.textMuted : s.textFaint),
               ),
             ],
           ),
         ),
         const SizedBox(width: 14),
-        Switch(value: value, onChanged: onChanged),
+        Switch(value: value, onChanged: enabled ? onChanged : null),
       ],
     );
   }

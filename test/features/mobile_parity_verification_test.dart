@@ -165,8 +165,15 @@ void main() {
               (ref) async => _platformSettings(),
             ),
           ],
+          // A `Scaffold`, because the router mounts this screen inside one:
+          // it is a leaf of the console `ShellRoute`, whose own Scaffold
+          // provides the `Material` every `TextField` needs. The screen used
+          // to carry a Scaffold of its own, which also painted a second page
+          // ground over the shell's canvas — see
+          // `one_page_ground_under_the_shell_test.dart`.
           child: MaterialApp(
-          theme: AppTheme.darkTheme,home: RegisterCompanyScreen()),
+              theme: AppTheme.darkTheme,
+              home: const Scaffold(body: RegisterCompanyScreen())),
         ),
       );
       await tester.pumpAndSettle();

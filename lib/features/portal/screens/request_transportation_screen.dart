@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/shell/workspace_canvas.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/available_route.dart';
@@ -231,9 +232,15 @@ class _RequestTransportationScreenState
   Widget build(BuildContext context) {
     final editing = widget.existing != null;
     return Scaffold(
+      // The page ground, explicitly — a `Scaffold` was painting `#0A1424`
+      // over the shell's `#060B15`, and this is one of 18 screens that did.
+      //
+      // NOT `Colors.transparent`: this page is PUSHED, so nothing is painting
+      // behind it and transparent leaves it black. Measured.
+      backgroundColor: mlWorkspaceGround(Theme.of(context).brightness),
       appBar: AppBar(
         title: Text(editing ? 'Revise request' : 'Request transportation'),
-        backgroundColor: MlSemantic.of(context).surfaceApp,
+        backgroundColor: Colors.transparent,
         foregroundColor: MlSemantic.of(context).textStrong,
       ),
       body: SingleChildScrollView(

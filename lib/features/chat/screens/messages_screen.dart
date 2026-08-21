@@ -89,39 +89,36 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen> {
           onTab: (t) => setState(() => _sidebarTab = t),
         );
 
-        return ColoredBox(
-          color: semantic.surfaceApp,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    twoPane ? MlTokens.contentPadding : 16, 20, 16, 0),
-                child: header,
-              ),
-              Expanded(
-                child: twoPane
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(width: 340, child: sidebar),
-                          Container(width: 1, color: semantic.divider),
-                          const Expanded(child: _ConversationPane()),
-                        ],
-                      )
-                    // One pane at a time. The list until something is picked,
-                    // then the thread — with a back arrow, because on a phone
-                    // there is nothing else on screen to return to it.
-                    : room == null
-                        ? sidebar
-                        : _ConversationPane(
-                            onBack: () => ref
-                                .read(activeRoomProvider.notifier)
-                                .state = null,
-                          ),
-              ),
-            ],
-          ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                  twoPane ? MlTokens.contentPadding : 16, 20, 16, 0),
+              child: header,
+            ),
+            Expanded(
+              child: twoPane
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(width: 340, child: sidebar),
+                        Container(width: 1, color: semantic.divider),
+                        const Expanded(child: _ConversationPane()),
+                      ],
+                    )
+                  // One pane at a time. The list until something is picked,
+                  // then the thread — with a back arrow, because on a phone
+                  // there is nothing else on screen to return to it.
+                  : room == null
+                      ? sidebar
+                      : _ConversationPane(
+                          onBack: () => ref
+                              .read(activeRoomProvider.notifier)
+                              .state = null,
+                        ),
+            ),
+          ],
         );
       },
     );

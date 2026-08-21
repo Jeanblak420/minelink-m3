@@ -73,94 +73,91 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
         .where((n) => n.importance != NotificationImportance.normal)
         .length;
 
-    return ColoredBox(
-      color: semantic.surfaceApp,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 22, 24, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                MlPageHeader(
-                  title: 'Notifications',
-                  description: 'Recent alerts and updates for you and your '
-                      'company.',
-                  meta: '$unread unread · ${notifications.length} total',
-                  padding: EdgeInsets.zero,
-                  actions: [
-                    if (notifications.isNotEmpty)
-                      MlButton.outline(
-                        label: 'Mark all read',
-                        icon: Icons.done_all,
-                        compact: true,
-                        onPressed: () => ref
-                            .read(notificationProvider.notifier)
-                            .markAllAsRead(),
-                      ),
-                    if (notifications.isNotEmpty)
-                      MlButton.ghost(
-                        label: 'Clear all',
-                        icon: Icons.clear_all,
-                        compact: true,
-                        onPressed: () =>
-                            _showClearConfirmationDialog(context, ref),
-                      ),
-                    MlButton.ghost(
-                      label: 'View all',
-                      icon: Icons.view_list_outlined,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 22, 24, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MlPageHeader(
+                title: 'Notifications',
+                description: 'Recent alerts and updates for you and your '
+                    'company.',
+                meta: '$unread unread · ${notifications.length} total',
+                padding: EdgeInsets.zero,
+                actions: [
+                  if (notifications.isNotEmpty)
+                    MlButton.outline(
+                      label: 'Mark all read',
+                      icon: Icons.done_all,
                       compact: true,
-                      onPressed: () {
-                        context.go(
-                          NotificationsManageRoute.location(
-                            title: 'All Notifications',
-                            filterRole: _getUserRole(),
-                            useSuperAdminShell: inSuperAdminShell,
-                          ),
-                        );
-                      },
+                      onPressed: () => ref
+                          .read(notificationProvider.notifier)
+                          .markAllAsRead(),
                     ),
-                  ],
-                ),
-                if (notifications.isNotEmpty) ...[
-                  const SizedBox(height: 18),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _filterChip(_NotifFilter.all, 'All', notifications.length),
-                      _filterChip(_NotifFilter.unread, 'Unread', unread),
-                      _filterChip(_NotifFilter.priority, 'Priority', priority),
-                    ],
+                  if (notifications.isNotEmpty)
+                    MlButton.ghost(
+                      label: 'Clear all',
+                      icon: Icons.clear_all,
+                      compact: true,
+                      onPressed: () =>
+                          _showClearConfirmationDialog(context, ref),
+                    ),
+                  MlButton.ghost(
+                    label: 'View all',
+                    icon: Icons.view_list_outlined,
+                    compact: true,
+                    onPressed: () {
+                      context.go(
+                        NotificationsManageRoute.location(
+                          title: 'All Notifications',
+                          filterRole: _getUserRole(),
+                          useSuperAdminShell: inSuperAdminShell,
+                        ),
+                      );
+                    },
                   ),
                 ],
+              ),
+              if (notifications.isNotEmpty) ...[
+                const SizedBox(height: 18),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _filterChip(_NotifFilter.all, 'All', notifications.length),
+                    _filterChip(_NotifFilter.unread, 'Unread', unread),
+                    _filterChip(_NotifFilter.priority, 'Priority', priority),
+                  ],
+                ),
               ],
-            ),
+            ],
           ),
-          Divider(height: 1, color: semantic.divider),
-          Expanded(
-            child: notificationState.error != null
-                ? _buildErrorState(context, ref, notificationState.error!)
-                : notificationState.isLoading
-                ? Center(
-                    child: LoadingAnimationWidget.staggeredDotsWave(
-                      color: MlTokens.accent,
-                      size: 50,
-                    ),
-                  )
-                : notifications.isEmpty
-                ? _buildEmptyState()
-                : _buildNotificationList(
-                    context,
-                    ref,
-                    _applyFilter(notifications),
-                    authState.userType?.isCompany == true,
-                    inSuperAdminShell: inSuperAdminShell,
+        ),
+        Divider(height: 1, color: semantic.divider),
+        Expanded(
+          child: notificationState.error != null
+              ? _buildErrorState(context, ref, notificationState.error!)
+              : notificationState.isLoading
+              ? Center(
+                  child: LoadingAnimationWidget.staggeredDotsWave(
+                    color: MlTokens.accent,
+                    size: 50,
                   ),
-          ),
-        ],
-      ),
+                )
+              : notifications.isEmpty
+              ? _buildEmptyState()
+              : _buildNotificationList(
+                  context,
+                  ref,
+                  _applyFilter(notifications),
+                  authState.userType?.isCompany == true,
+                  inSuperAdminShell: inSuperAdminShell,
+                ),
+        ),
+      ],
     );
   }
 

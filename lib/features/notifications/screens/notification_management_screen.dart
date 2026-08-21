@@ -71,55 +71,51 @@ class _NotificationManagementScreenState
     final notificationState = ref.watch(notificationProvider);
     final authState = ref.watch(authStateProvider);
 
-    final semantic = MlSemantic.of(context);
     final rows = notificationState.managementNotifications;
 
-    return ColoredBox(
-      color: semantic.surfaceApp,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 22, 24, 0),
-            child: MlPageHeader(
-              title: widget.title,
-              description: 'Every notification kept for your role — a '
-                  'persistent record, unlike the bell, which can be cleared.',
-              meta: mlCount(rows.length, 'notification'),
-              padding: EdgeInsets.zero,
-              actions: [
-                if (widget.isFromAdminTab)
-                  MlButton.ghost(
-                    label: 'About',
-                    icon: Icons.info_outline,
-                    compact: true,
-                    onPressed: () => _showInfoDialog(context),
-                  ),
-              ],
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 22, 24, 0),
+          child: MlPageHeader(
+            title: widget.title,
+            description: 'Every notification kept for your role — a '
+                'persistent record, unlike the bell, which can be cleared.',
+            meta: mlCount(rows.length, 'notification'),
+            padding: EdgeInsets.zero,
+            actions: [
+              if (widget.isFromAdminTab)
+                MlButton.ghost(
+                  label: 'About',
+                  icon: Icons.info_outline,
+                  compact: true,
+                  onPressed: () => _showInfoDialog(context),
+                ),
+            ],
           ),
-          // Info banner explaining the distinction from bell icon (Step 5)
-          if (widget.isFromAdminTab) _buildInfoBanner(context),
-          // Main content
-          Expanded(
-            child: notificationState.isLoading
-                ? Center(
-                    child: LoadingAnimationWidget.staggeredDotsWave(
-                      color: MlTokens.accent,
-                      size: 50,
-                    ),
-                  )
-                : rows.isEmpty
-                ? _buildEmptyState()
-                : _buildNotificationList(
-                    context,
-                    ref,
-                    rows,
-                    authState.userType?.isCompany == true,
+        ),
+        // Info banner explaining the distinction from bell icon (Step 5)
+        if (widget.isFromAdminTab) _buildInfoBanner(context),
+        // Main content
+        Expanded(
+          child: notificationState.isLoading
+              ? Center(
+                  child: LoadingAnimationWidget.staggeredDotsWave(
+                    color: MlTokens.accent,
+                    size: 50,
                   ),
-          ),
-        ],
-      ),
+                )
+              : rows.isEmpty
+              ? _buildEmptyState()
+              : _buildNotificationList(
+                  context,
+                  ref,
+                  rows,
+                  authState.userType?.isCompany == true,
+                ),
+        ),
+      ],
     );
   }
 

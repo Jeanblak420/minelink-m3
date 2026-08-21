@@ -110,7 +110,7 @@ class _MineSupplierBuyersDetailScreenState
   Widget build(BuildContext context) {
     final companyId = resolvePortalCompanyId(ref);
     if (companyId == null) {
-      return const Scaffold(body: PortalCompanyRequired());
+      return const PortalCompanyRequired();
     }
 
     final logistics = ref.watch(logisticsSnapshotProvider(companyId));
@@ -130,119 +130,116 @@ class _MineSupplierBuyersDetailScreenState
 
     // NO `Scaffold(appBar:)` — `/portal/mine/buyers` is a leaf of the portal
     // `ShellRoute`, whose top bar already reads "Buyers".
-    return ColoredBox(
-      color: MlSemantic.of(context).surfaceApp,
-      child: logistics.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => MlLoadFailure(
-            subject: 'your buyers',
-            error: e,
-            onRetry: () => ref.invalidate(logisticsSnapshotProvider(companyId)),
-        ),
-        data: (snap) {
-          if (partnersAsync.hasError) {
-            return PartnerLoadError(
-              companyId: companyId,
-              orgFilter: 'buyer',
-              error: partnersAsync.error!,
-              subject: 'buyers',
-            );
-          }
-          if (partnersAsync.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final partners = partnersAsync.value ?? const <CompanyPin>[];
-          final all = _buyers(snap, partners, stockpiles);
-          final q = _search.text.trim().toLowerCase();
-          final rows = q.isEmpty
-              ? all
-              : all
-                  .where((r) => r.name.toLowerCase().contains(q))
-                  .toList(growable: false);
-          final selected = _selectedName == null
-              ? null
-              : all.firstWhere(
-                  (r) => r.name == _selectedName,
-                  orElse: () => _BuyerRow(name: _selectedName!, tonsOut: 0, allocated: 0),
-                );
+    return logistics.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => MlLoadFailure(
+          subject: 'your buyers',
+          error: e,
+          onRetry: () => ref.invalidate(logisticsSnapshotProvider(companyId)),
+      ),
+      data: (snap) {
+        if (partnersAsync.hasError) {
+          return PartnerLoadError(
+            companyId: companyId,
+            orgFilter: 'buyer',
+            error: partnersAsync.error!,
+            subject: 'buyers',
+          );
+        }
+        if (partnersAsync.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final partners = partnersAsync.value ?? const <CompanyPin>[];
+        final all = _buyers(snap, partners, stockpiles);
+        final q = _search.text.trim().toLowerCase();
+        final rows = q.isEmpty
+            ? all
+            : all
+                .where((r) => r.name.toLowerCase().contains(q))
+                .toList(growable: false);
+        final selected = _selectedName == null
+            ? null
+            : all.firstWhere(
+                (r) => r.name == _selectedName,
+                orElse: () => _BuyerRow(name: _selectedName!, tonsOut: 0, allocated: 0),
+              );
 
-          return MlPageBody(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                MlSectionTitle(
-                  'Buyers',
-                  meta: rows.length == all.length
-                      ? mlCount(all.length, 'buyer')
-                      : '${rows.length} of ${all.length} shown',
-                  icon: Icons.handshake_outlined,
-                  margin: EdgeInsets.zero,
-                  action: MlButton.primary(
-                    label: 'Request buyers',
-                    icon: Icons.group_add_outlined,
-                    compact: true,
-                    onPressed: () =>
-                        showBuyersRequestDialog(context, ref, companyId),
-                  ),
+        return MlPageBody(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MlSectionTitle(
+                'Buyers',
+                meta: rows.length == all.length
+                    ? mlCount(all.length, 'buyer')
+                    : '${rows.length} of ${all.length} shown',
+                icon: Icons.handshake_outlined,
+                margin: EdgeInsets.zero,
+                action: MlButton.primary(
+                  label: 'Request buyers',
+                  icon: Icons.group_add_outlined,
+                  compact: true,
+                  onPressed: () =>
+                      showBuyersRequestDialog(context, ref, companyId),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Tonnage shipped per buyer, with recons and invoicing.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Tonnage shipped per buyer, with recons and invoicing.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _search,
+                onChanged: (_) => setState(() {}),
+                decoration: const InputDecoration(
+                  isDense: true,
+                  prefixIcon: Icon(Icons.search),
+                  hintText: 'Search buyers…',
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _search,
-                  onChanged: (_) => setState(() {}),
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    prefixIcon: Icon(Icons.search),
-                    hintText: 'Search buyers…',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (all.isEmpty)
-                  _empty(context)
-                else ...[
-                  LayoutBuilder(builder: (context, c) {
-                    final w = c.maxWidth;
-                    final cols = w > 980 ? 3 : (w > 620 ? 2 : 1);
-                    const gap = 14.0;
-                    final itemW =
-                        cols <= 1 ? w : (w - gap * (cols - 1)) / cols;
-                    return Wrap(
-                      spacing: gap,
-                      runSpacing: gap,
-                      children: [
-                        for (final r in rows)
-                          SizedBox(
-                            width: itemW,
-                            child: BuyerOverviewCard(
-                              name: r.name,
-                              tons: r.tonsOut,
-                              onRecons: () => showBuyerRecons(
-                                  context, r.name, _buyerReconsFor(snap, r)),
-                              onInvoice: () => showBuyerInvoice(
-                                  context, r.name, _buyerWaybillsFor(snap, r)),
-                              onDetails: () => setState(() => _selectedName =
-                                  r.name == _selectedName ? null : r.name),
-                            ),
+              ),
+              const SizedBox(height: 16),
+              if (all.isEmpty)
+                _empty(context)
+              else ...[
+                LayoutBuilder(builder: (context, c) {
+                  final w = c.maxWidth;
+                  final cols = w > 980 ? 3 : (w > 620 ? 2 : 1);
+                  const gap = 14.0;
+                  final itemW =
+                      cols <= 1 ? w : (w - gap * (cols - 1)) / cols;
+                  return Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: [
+                      for (final r in rows)
+                        SizedBox(
+                          width: itemW,
+                          child: BuyerOverviewCard(
+                            name: r.name,
+                            tons: r.tonsOut,
+                            onRecons: () => showBuyerRecons(
+                                context, r.name, _buyerReconsFor(snap, r)),
+                            onInvoice: () => showBuyerInvoice(
+                                context, r.name, _buyerWaybillsFor(snap, r)),
+                            onDetails: () => setState(() => _selectedName =
+                                r.name == _selectedName ? null : r.name),
                           ),
-                      ],
-                    );
-                  }),
-                  if (selected != null) ...[
-                    const SizedBox(height: 24),
-                    _BuyerPanel(snap: snap, buyer: selected),
-                  ],
+                        ),
+                    ],
+                  );
+                }),
+                if (selected != null) ...[
+                  const SizedBox(height: 24),
+                  _BuyerPanel(snap: snap, buyer: selected),
                 ],
               ],
-            ),
-          );
-        },
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 

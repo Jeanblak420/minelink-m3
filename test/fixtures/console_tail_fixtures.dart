@@ -30,10 +30,15 @@ import 'package:flutter_application_1/features/super_admin/data/models/crash_rep
 import 'package:flutter_application_1/features/super_admin/data/models/organization_seat.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/serial_token.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
+import 'package:flutter_application_1/features/super_admin/screens/driver_limit_requests_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/available_routes_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/route_marketplace_screen.dart';
 
-import 'console_capture_fixtures.dart' show kOrganizations;
+import 'package:flutter_application_1/features/fleet/models/vehicle_driver.dart';
+import 'package:flutter_application_1/features/super_admin/data/models/business_pair.dart';
+
+import 'console_capture_fixtures.dart'
+    show kOrganizations, kTransporterInsights;
 import 'portal_capture_fixtures.dart' show kCaptureNow;
 
 DateTime _ago(Duration d) => kCaptureNow.subtract(d);
@@ -769,4 +774,124 @@ List<Override> consoleTailOverrides() => [
       // available.
       liveTripPositionsProvider
           .overrideWith((ref, _) => Stream.value(kLivePositions)),
+    ];
+
+// ---------------------------------------------------------------------------
+// The last of the console tail — the screens with no fixtures at all
+// ---------------------------------------------------------------------------
+
+/// What `super_admin_dashboard_v2_screen` reads for its stat band.
+///
+/// Every key the screen asks for, and no two of them equal: a dashboard
+/// fixture whose numbers agree cannot show which tile is which. Active +
+/// expired + suspended sums to the total, because the screen draws that split
+/// as a bar and an inconsistent fixture photographs a bar that does not add up.
+final Map<String, dynamic> kDashboardStats = {
+  'totalCompanies': 24,
+  'activeCompanies': 19,
+  'expiredCompanies': 3,
+  'suspendedCompanies': 2,
+  'totalUsers': 187,
+  'openTokenRequests': 4,
+  'tokensExpiringSoon': 5,
+  'activeRoutes': 11,
+  'totalTonsManaged': 128420.5,
+  'newCompanies24h': 2,
+  'newUsers24h': 9,
+  'newTokenRequests24h': 1,
+  'newExpired24h': 1,
+  'activeUsersNow': 12,
+  'tons24h': 1284.0,
+};
+
+/// Which companies have traded with which, for the chat-connections screen.
+///
+/// The ids are `kOrganizations`' own, so both sides of every pair resolve to a
+/// name — a pair that resolves to nothing photographs two blank rows.
+///
+/// `reason` is a SENTENCE, which is what `BusinessPair`'s own doc calls it and
+/// what `fromTransactions` / `fromDispatches` really produce ("Accepted
+/// transport request — Chrome", "Route dispatch to transporter", "Active
+/// transaction between parties"). The first draft of this fixture used the
+/// wire words `trip` and `transportation_request`, and the render printed them
+/// straight onto the card — a fixture inventing a defect the product does not
+/// have.
+final List<BusinessPair> kBusinessPairs = [
+  BusinessPair(
+    companyIdA: 'o1',
+    companyIdB: 'o2',
+    date: _ago(const Duration(days: 2)),
+    reason: 'Active transaction between parties',
+  ),
+  BusinessPair(
+    companyIdA: 'o2',
+    companyIdB: 'o4',
+    date: _ago(const Duration(days: 9)),
+    reason: 'Accepted transport request — Chrome',
+  ),
+  BusinessPair(
+    companyIdA: 'o1',
+    companyIdB: 'o4',
+    date: _ago(const Duration(days: 31)),
+    reason: 'Route dispatch to transporter',
+  ),
+];
+
+/// Transporters asking to put more than two drivers on one truck.
+///
+/// One pending, one approved and one declined — the three states the screen
+/// renders differently. A pending-only fixture shows one of them.
+final List<DriverLimitRequest> kDriverLimitRequests = [
+  DriverLimitRequest(
+    id: 'dlr-1',
+    companyId: 'co-transporter',
+    companyName: 'Roadhaul Logistics',
+    vehicleId: 'veh-1',
+    registration: 'CK 84 RT GP',
+    currentLimit: 2,
+    requestedLimit: 4,
+    status: 'pending',
+    requestedByName: 'Thandi Mokoena',
+    createdAt: _ago(const Duration(hours: 6)),
+  ),
+  DriverLimitRequest(
+    id: 'dlr-2',
+    companyId: 'co-transporter-2',
+    companyName: 'Northline Carriers',
+    vehicleId: 'veh-9',
+    registration: 'BX 09 LM NW',
+    currentLimit: 2,
+    requestedLimit: 5,
+    status: 'approved',
+    requestedByName: 'Sipho Ndlovu',
+    createdAt: _ago(const Duration(days: 4)),
+    decidedAt: _ago(const Duration(days: 3)),
+  ),
+  DriverLimitRequest(
+    id: 'dlr-3',
+    companyId: 'co-transporter-3',
+    companyName: 'Kalahari Freight',
+    vehicleId: 'veh-12',
+    registration: 'KF 220 NC',
+    currentLimit: 2,
+    requestedLimit: 3,
+    status: 'declined',
+    createdAt: _ago(const Duration(days: 18)),
+    decidedAt: _ago(const Duration(days: 17)),
+  ),
+];
+
+/// The console screens that had no fixtures at all until 2026-08-21.
+///
+/// Kept apart from [consoleTailOverrides] so the screens already photographed
+/// keep exactly the data they were judged against.
+List<Override> consoleLastOverrides() => [
+      dashboardStatsProvider.overrideWith((ref) async => kDashboardStats),
+      businessPairsProvider.overrideWith((ref) async => kBusinessPairs),
+      driverLimitRequestsProvider
+          .overrideWith((ref) async => kDriverLimitRequests),
+      // The leaderboard reads the bundle over a chosen PERIOD, which is a
+      // different provider from the month-to-date one the overview uses.
+      periodInsightsBundleProvider
+          .overrideWith((ref, _) async => kTransporterInsights),
     ];

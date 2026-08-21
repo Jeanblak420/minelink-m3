@@ -42,11 +42,11 @@ class _CompanyEmployeesScreenState
 
     if (access.canManageEmployees &&
         (state.company == null || state.company?.id != company?.id)) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (company == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Center(child: CircularProgressIndicator());
     }
 
     // NO `Scaffold(appBar:)` — this screen is a leaf of the portal
@@ -56,42 +56,39 @@ class _CompanyEmployeesScreenState
       return _buildRestrictedState(context);
     }
 
-    return ColoredBox(
-      color: MlSemantic.of(context).surfaceApp,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-            child: MlPageHeader(
-              title: 'Company Employees',
-              description: 'Everyone with a login under this company.',
-              meta: mlCount(state.employees.length, 'user'),
-              actions: [
-                MlButton.primary(
-                  label: 'Add user',
-                  icon: Icons.person_add_alt_1,
-                  compact: true,
-                  onPressed: () =>
-                      _showCreateUserDialog(context, company.orgType),
-                ),
-              ],
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+          child: MlPageHeader(
+            title: 'Company Employees',
+            description: 'Everyone with a login under this company.',
+            meta: mlCount(state.employees.length, 'user'),
+            actions: [
+              MlButton.primary(
+                label: 'Add user',
+                icon: Icons.person_add_alt_1,
+                compact: true,
+                onPressed: () =>
+                    _showCreateUserDialog(context, company.orgType),
+              ),
+            ],
           ),
-          Expanded(
-            child: state.isLoading
-                ? Center(
-                    child: LoadingAnimationWidget.staggeredDotsWave(
-                      color: MlTokens.accent,
-                      size: 50,
-                    ),
-                  )
-                : state.employees.isEmpty
-                    ? _buildEmptyState(context, company.orgType)
-                    : _buildEmployeeList(state.employees, company.orgType),
-          ),
-        ],
-      ),
+        ),
+        Expanded(
+          child: state.isLoading
+              ? Center(
+                  child: LoadingAnimationWidget.staggeredDotsWave(
+                    color: MlTokens.accent,
+                    size: 50,
+                  ),
+                )
+              : state.employees.isEmpty
+                  ? _buildEmptyState(context, company.orgType)
+                  : _buildEmployeeList(state.employees, company.orgType),
+        ),
+      ],
     );
   }
 

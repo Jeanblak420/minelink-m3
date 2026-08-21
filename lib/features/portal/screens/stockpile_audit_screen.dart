@@ -1,5 +1,6 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/shell/workspace_canvas.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_transaction.dart';
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
@@ -34,9 +35,13 @@ class StockpileAuditScreen extends ConsumerWidget {
     final buyerList = buyers.toList()..sort();
 
     return Scaffold(
+      // The page ground, explicitly. A PUSHED page has no shell behind it,
+      // so transparent would leave it black — see
+      // `request_transportation_screen`.
+      backgroundColor: mlWorkspaceGround(Theme.of(context).brightness),
       appBar: AppBar(
         title: const Text('Stockpile audit trail'),
-        backgroundColor: MlSemantic.of(context).surfaceApp,
+        backgroundColor: Colors.transparent,
         foregroundColor: MlSemantic.of(context).textStrong,
       ),
       body: SingleChildScrollView(

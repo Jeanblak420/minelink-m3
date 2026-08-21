@@ -221,23 +221,21 @@ class _AccountDeactivationsScreenState
     }
 
     final rowsAsync = ref.watch(accountDeactivationRequestsProvider);
-    return Scaffold(
-      body: rowsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => MlEmptyState(
-          icon: Icons.error_outline,
-          title: 'Could not load requests',
-          message: friendlyError(e),
-        ),
-        data: (all) => _Body(
-          rows: _filtered(all, isLiveFetch: true),
-          filter: _filter,
-          busyIds: _busyIds,
-          onFilterChanged: (v) => setState(() => _filter = v),
-          onApprove: _approve,
-          onReject: _reject,
-          onReactivate: _reactivate,
-        ),
+    return rowsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => MlEmptyState(
+        icon: Icons.error_outline,
+        title: 'Could not load requests',
+        message: friendlyError(e),
+      ),
+      data: (all) => _Body(
+        rows: _filtered(all, isLiveFetch: true),
+        filter: _filter,
+        busyIds: _busyIds,
+        onFilterChanged: (v) => setState(() => _filter = v),
+        onApprove: _approve,
+        onReject: _reject,
+        onReactivate: _reactivate,
       ),
     );
   }

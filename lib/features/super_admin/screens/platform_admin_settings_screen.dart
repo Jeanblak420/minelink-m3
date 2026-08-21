@@ -16,41 +16,39 @@ class PlatformAdminSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final roleAsync = ref.watch(currentPlatformRoleProvider);
-    return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: roleAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => _ErrorBlock(message: 'Error. ${friendlyError(e)}'),
-            data: (role) {
-              if (!role.isSuperAdmin) {
-                return const _OwnerOnlyPlaceholder();
-              }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Platform settings',
-                    style: context.mlText.titleLarge.copyWith(
-                      color: MlSemantic.of(context).textStrong,
-                      fontWeight: FontWeight.w800,
-                    ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 720),
+        child: roleAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => _ErrorBlock(message: 'Error. ${friendlyError(e)}'),
+          data: (role) {
+            if (!role.isSuperAdmin) {
+              return const _OwnerOnlyPlaceholder();
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Platform settings',
+                  style: context.mlText.titleLarge.copyWith(
+                    color: MlSemantic.of(context).textStrong,
+                    fontWeight: FontWeight.w800,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Both super-admins have identical, full rights. There are '
-                    'no delegated-admin controls to configure.',
-                    style: TextStyle(
-                      fontFamily: MlTokens.fontSans,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Both super-admins have identical, full rights. There are '
+                  'no delegated-admin controls to configure.',
+                  style: TextStyle(
+                    fontFamily: MlTokens.fontSans,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                ],
-              );
-            },
-          ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

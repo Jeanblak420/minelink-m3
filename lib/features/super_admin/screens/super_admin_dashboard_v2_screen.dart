@@ -480,7 +480,6 @@ class SuperAdminDashboardV2ViewModel {
       final o = sorted[i];
       final id = '${o['id']}';
       final expiresAt = DateTime.tryParse('${o['token_expires_at']}');
-      final createdAt = DateTime.tryParse('${o['created_at']}');
 
       final MlExpiry state;
       final String expiry;
@@ -489,7 +488,16 @@ class SuperAdminDashboardV2ViewModel {
         expiry = 'no token';
       } else if (expiresAt.isBefore(today)) {
         state = MlExpiry.expired;
-        expiry = 'expired';
+        // "Expired · 5d ago", the reference's own wording — not the bare word.
+        // How long ago it lapsed is the thing an admin acts on, this row
+        // already holds the date, and `docs/design-reference` renders it that
+        // way. Lower-case `expired` also read as a wire value beside the
+        // title-cased `Active` / `Suspended` in the column to its left.
+        // `MlTime.ago`, not a hand-rolled "Nd ago" — the guard
+        // `one-vocabulary-for-time-ago` caught this the moment it was written,
+        // which is what it is for. Past a week it falls back to the date,
+        // which is the right thing for a token that lapsed months back.
+        expiry = 'Expired · ${MlTime.ago(expiresAt, asOf: today)}';
       } else {
         final left = expiresAt.difference(today);
         state = left.inDays <= 14 ? MlExpiry.warn : MlExpiry.ok;
@@ -506,7 +514,15 @@ class SuperAdminDashboardV2ViewModel {
         seatsUsed: _int(o['seats_used']),
         seats: _int(o['seat_limit']),
         expiry: expiry,
-        date: createdAt == null ? '—' : _shortDate(createdAt),
+        // THE EXPIRY DATE, not the creation date.
+        //
+        // This cell sits under a column headed TOKEN EXPIRY, directly beside
+        // the countdown, and it printed `created_at`. Photographed 2026-08-21:
+        // four rows read "107d 22 : 30 : 00 · 01 Jul '26" — a token with 107
+        // days left, next to a date four months in the past — and the expired
+        // row read "expired · 01 Jul '26" for a token that lapsed on 1 August.
+        // The only date this column can mean is the one it is named after.
+        date: expiresAt == null ? '—' : _shortDate(expiresAt),
         expiryState: state,
         avatarColors: _avatarPalette[i % _avatarPalette.length],
       ));

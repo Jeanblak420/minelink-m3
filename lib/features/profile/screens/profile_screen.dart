@@ -294,98 +294,95 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     // `scaffoldBackgroundColor`, so opening Profile from any other portal
     // screen changed the colour of the canvas underneath the same rail. The
     // workspace's ground is `surfaceApp`, once, for every page on it.
-    return ColoredBox(
-      color: MlSemantic.of(context).surfaceApp,
-      child: SafeArea(
-        top: false,
-        child: MlPageBody(
-          maxWidth: 940,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              MlPageHeader(
-                title: 'Profile',
-                description: subtitle,
-                meta: authState.userType?.isCompany == true
-                    ? 'Company workspace'
-                    : 'Employee workspace',
+    return SafeArea(
+      top: false,
+      child: MlPageBody(
+        maxWidth: 940,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            MlPageHeader(
+              title: 'Profile',
+              description: subtitle,
+              meta: authState.userType?.isCompany == true
+                  ? 'Company workspace'
+                  : 'Employee workspace',
+            ),
+            MlCard(
+              hero: true,
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      MlStatusBadge(
+                        label: authState.userType?.isCompany == true
+                            ? 'Company workspace'
+                            : 'Employee workspace',
+                        tone: MlTone.accent,
+                      ),
+                      const MlStatusBadge(
+                        label: 'Live profile',
+                        tone: MlTone.done,
+                        dot: true,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                  // NO SECOND COPY of the page header's sentence. The header
+                  // above already says what this page is for; the hero card
+                  // says WHOSE it is. Printing `subtitle` in both put the
+                  // same sentence on screen twice, a hundred pixels apart.
+                  MlCard.heroTitleRule(),
+                ],
               ),
-              MlCard(
-                hero: true,
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        MlStatusBadge(
-                          label: authState.userType?.isCompany == true
-                              ? 'Company workspace'
-                              : 'Employee workspace',
-                          tone: MlTone.accent,
-                        ),
-                        const MlStatusBadge(
-                          label: 'Live profile',
-                          tone: MlTone.done,
-                          dot: true,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.w800),
-                    ),
-                    // NO SECOND COPY of the page header's sentence. The header
-                    // above already says what this page is for; the hero card
-                    // says WHOSE it is. Printing `subtitle` in both put the
-                    // same sentence on screen twice, a hundred pixels apart.
-                    MlCard.heroTitleRule(),
+            ),
+            const SizedBox(height: 18),
+                  const _AccountSetupLinkCard(),
+                  const SizedBox(height: 18),
+                  // `ChangePasswordSection` asks `accountEmailProvider` the
+                  // same question and hides itself when the answer is no, so
+                  // this gate is not a second opinion — it is only here to
+                  // drop the 18px gap with it.
+                  if (ref.watch(accountEmailProvider) != null) ...[
+                    const ChangePasswordSection(),
+                    const SizedBox(height: 18),
                   ],
-                ),
-              ),
-              const SizedBox(height: 18),
-                    const _AccountSetupLinkCard(),
+                  const ProfileSignatureCard(),
+                  const SizedBox(height: 18),
+                  authState.userType?.isCompany == true
+                      ? _buildCompanyProfileForm()
+                      : _buildEmployeeProfileForm(),
+                  // Company locations (spec 2026-07-16 §3): named collection
+                  // points; the primary auto-routes drivers.
+                  if (authState.userType?.isCompany == true &&
+                      companyState.company?.id != null) ...[
                     const SizedBox(height: 18),
-                    // `ChangePasswordSection` asks `accountEmailProvider` the
-                    // same question and hides itself when the answer is no, so
-                    // this gate is not a second opinion — it is only here to
-                    // drop the 18px gap with it.
-                    if (ref.watch(accountEmailProvider) != null) ...[
-                      const ChangePasswordSection(),
-                      const SizedBox(height: 18),
-                    ],
-                    const ProfileSignatureCard(),
-                    const SizedBox(height: 18),
-                    authState.userType?.isCompany == true
-                        ? _buildCompanyProfileForm()
-                        : _buildEmployeeProfileForm(),
-                    // Company locations (spec 2026-07-16 §3): named collection
-                    // points; the primary auto-routes drivers.
-                    if (authState.userType?.isCompany == true &&
-                        companyState.company?.id != null) ...[
-                      const SizedBox(height: 18),
-                      CompanyLocationsSection(
-                          companyId: companyState.company!.id),
-                    ],
-                    // The documents this account agreed to at sign-in.
-                    //
-                    // The sign-in screen links them, but somebody already
-                    // signed in had no way back to them at all — which is the
-                    // same gap in a quieter form: you can only be held to terms
-                    // you can re-read.
-                    const SizedBox(height: 18),
-                    const _LegalCard(),
-                    // Portal roles never see the super-admin shell, so this
-                    // has to be reachable here too — account_security_screen
-                    // carries the other copy for the super-admin surface.
-                    const SizedBox(height: 18),
-                    const DeactivateAccountCard(),
-            ],
-          ),
+                    CompanyLocationsSection(
+                        companyId: companyState.company!.id),
+                  ],
+                  // The documents this account agreed to at sign-in.
+                  //
+                  // The sign-in screen links them, but somebody already
+                  // signed in had no way back to them at all — which is the
+                  // same gap in a quieter form: you can only be held to terms
+                  // you can re-read.
+                  const SizedBox(height: 18),
+                  const _LegalCard(),
+                  // Portal roles never see the super-admin shell, so this
+                  // has to be reachable here too — account_security_screen
+                  // carries the other copy for the super-admin surface.
+                  const SizedBox(height: 18),
+                  const DeactivateAccountCard(),
+          ],
         ),
       ),
     );

@@ -204,6 +204,7 @@ class _OrganizationDetailScreenState extends ConsumerState<OrganizationDetailScr
 
     return orgAsync.when(
       loading: () => Scaffold(
+        backgroundColor: Colors.transparent,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -213,6 +214,7 @@ class _OrganizationDetailScreenState extends ConsumerState<OrganizationDetailScr
         ),
       ),
       error: (e, _) => Scaffold(
+        backgroundColor: Colors.transparent,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -230,6 +232,7 @@ class _OrganizationDetailScreenState extends ConsumerState<OrganizationDetailScr
       data: (org) {
         if (org == null) {
           return Scaffold(
+            backgroundColor: Colors.transparent,
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -253,6 +256,7 @@ class _OrganizationDetailScreenState extends ConsumerState<OrganizationDetailScr
         final seatsUsed = org['seats_used'] as int? ?? 0;
 
         return Scaffold(
+          backgroundColor: Colors.transparent,
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _showTokenDialog(context, ref, widget.organizationId, name, seatLimit),
             icon: const Icon(Icons.vpn_key_rounded),

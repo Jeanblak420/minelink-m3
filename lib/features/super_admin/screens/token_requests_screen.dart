@@ -57,113 +57,111 @@ class _TokenRequestsScreenState extends ConsumerState<TokenRequestsScreen> {
     // screen. A test overrides it with a no-op.
     ref.watch(tokenRequestsRealtimeProvider);
     final async = ref.watch(openTokenRequestsProvider);
-    return Scaffold(
-      body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => MlEmptyState(
-          icon: Icons.error_outline,
-          title: 'Could not load requests',
-          message: friendlyError(e),
-        ),
-        data: (list) {
-          if (list.isEmpty) {
-            return RefreshIndicator(
-              onRefresh: () async {
-                ref.invalidate(openTokenRequestsProvider);
-                ref.invalidate(dashboardStatsProvider);
-              },
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: const [
-                  SizedBox(height: 80),
-                  MlEmptyState(
-                    icon: Icons.inbox_outlined,
-                    title: 'Queue is clear',
-                    message: 'No open token requests right now.',
-                  ),
-                ],
-              ),
-            );
-          }
+    return async.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => MlEmptyState(
+        icon: Icons.error_outline,
+        title: 'Could not load requests',
+        message: friendlyError(e),
+      ),
+      data: (list) {
+        if (list.isEmpty) {
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(openTokenRequestsProvider);
               ref.invalidate(dashboardStatsProvider);
             },
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: list.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, i) {
-                final r = list[i];
-                final df = DateFormat.yMMMd().add_jm();
-                final semantic = MlSemantic.of(context);
-                return MlCard(
-                  padding: const EdgeInsets.all(14),
-                  onTap: () => _showDetailSheet(r),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const MlIconWell(
-                        icon: Icons.vpn_key_outlined,
-                        tone: MlTone.accent,
-                        size: 42,
-                        radius: 12,
-                      ),
-                      const SizedBox(width: 13),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              r.organizationName,
-                              style: context.mlText.titleMedium.copyWith(
-                                color: semantic.textStrong,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              '${r.requestKindLabel} · ${r.organizationTypeLabel}',
-                              style: context.mlText.bodyMedium.copyWith(
-                                color: semantic.textMuted,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Created: ${df.format(MlTime.sast(r.createdAt))}',
-                              style: context.mlText.code(
-                                color: semantic.textFaint,
-                                size: 12,
-                                weight: FontWeight.w400,
-                              ),
-                            ),
-                            if (r.isInProgress && r.handlingDisplayName != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 2),
-                                child: Text(
-                                  'Handled by: ${r.handlingDisplayName}',
-                                  style: const TextStyle(
-                                    fontFamily: MlTokens.fontSans,
-                                    fontSize: 13,
-                                    color: MlTokens.accentHover,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      MlStatusBadge.forStatus(r.status),
-                    ],
-                  ),
-                );
-              },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 80),
+                MlEmptyState(
+                  icon: Icons.inbox_outlined,
+                  title: 'Queue is clear',
+                  message: 'No open token requests right now.',
+                ),
+              ],
             ),
           );
-        },
-      ),
+        }
+        return RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(openTokenRequestsProvider);
+            ref.invalidate(dashboardStatsProvider);
+          },
+          child: ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: list.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            itemBuilder: (context, i) {
+              final r = list[i];
+              final df = DateFormat.yMMMd().add_jm();
+              final semantic = MlSemantic.of(context);
+              return MlCard(
+                padding: const EdgeInsets.all(14),
+                onTap: () => _showDetailSheet(r),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const MlIconWell(
+                      icon: Icons.vpn_key_outlined,
+                      tone: MlTone.accent,
+                      size: 42,
+                      radius: 12,
+                    ),
+                    const SizedBox(width: 13),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            r.organizationName,
+                            style: context.mlText.titleMedium.copyWith(
+                              color: semantic.textStrong,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            '${r.requestKindLabel} · ${r.organizationTypeLabel}',
+                            style: context.mlText.bodyMedium.copyWith(
+                              color: semantic.textMuted,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Created: ${df.format(MlTime.sast(r.createdAt))}',
+                            style: context.mlText.code(
+                              color: semantic.textFaint,
+                              size: 12,
+                              weight: FontWeight.w400,
+                            ),
+                          ),
+                          if (r.isInProgress && r.handlingDisplayName != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Text(
+                                'Handled by: ${r.handlingDisplayName}',
+                                style: const TextStyle(
+                                  fontFamily: MlTokens.fontSans,
+                                  fontSize: 13,
+                                  color: MlTokens.accentHover,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    MlStatusBadge.forStatus(r.status),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

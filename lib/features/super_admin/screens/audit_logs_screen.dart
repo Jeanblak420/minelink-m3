@@ -50,91 +50,89 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
     final logsAsync = ref.watch(auditLogsProvider(filters));
     final canExport = ref.watch(superAdminCanExportDownloadsProvider);
 
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Audit Logs',
-                    style: context.mlText.titleMedium.copyWith(
-                      color: MlSemantic.of(context).textStrong,
-                      fontWeight: FontWeight.w800,
-                    ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Audit Logs',
+                  style: context.mlText.titleMedium.copyWith(
+                    color: MlSemantic.of(context).textStrong,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                if (canExport)
-                  logsAsync.when(
-                    data: (logs) => IconButton(
-                      icon: const Icon(Icons.download_rounded),
-                      tooltip: 'Export Logs',
-                      onPressed: () => AuditLogExporter.pickFormatAndExport(context, logs),
-                    ),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          SizedBox(
-            height: 52,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              children: _actionTypes.map((type) {
-                final isSelected =
-                    type == 'All' ? _selectedActionType == null || _selectedActionType == 'All' : _selectedActionType == type;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(
-                        type == 'All'
-                            ? 'All'
-                            : AuditLog.labelForAction(type),
-                        style: const TextStyle(fontSize: 12)),
-                    selected: isSelected,
-                    onSelected: (_) {
-                      setState(() {
-                        _selectedActionType = type;
-                      });
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: logsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => MlEmptyState(
-                icon: Icons.error_outline,
-                title: 'Could not load logs',
-                message: friendlyError(e),
               ),
-              data: (logs) {
-                if (logs.isEmpty) {
-                  return const MlEmptyState(
-                    icon: Icons.history_toggle_off,
-                    title: 'No audit logs found',
-                    message: 'No activity matches the selected filter.',
-                  );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: logs.length,
-                  itemBuilder: (context, i) => _AuditLogCard(log: logs[i]),
-                );
-              },
-            ),
+              if (canExport)
+                logsAsync.when(
+                  data: (logs) => IconButton(
+                    icon: const Icon(Icons.download_rounded),
+                    tooltip: 'Export Logs',
+                    onPressed: () => AuditLogExporter.pickFormatAndExport(context, logs),
+                  ),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const Divider(height: 1),
+        SizedBox(
+          height: 52,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            children: _actionTypes.map((type) {
+              final isSelected =
+                  type == 'All' ? _selectedActionType == null || _selectedActionType == 'All' : _selectedActionType == type;
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilterChip(
+                  label: Text(
+                      type == 'All'
+                          ? 'All'
+                          : AuditLog.labelForAction(type),
+                      style: const TextStyle(fontSize: 12)),
+                  selected: isSelected,
+                  onSelected: (_) {
+                    setState(() {
+                      _selectedActionType = type;
+                    });
+                  },
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: logsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => MlEmptyState(
+              icon: Icons.error_outline,
+              title: 'Could not load logs',
+              message: friendlyError(e),
+            ),
+            data: (logs) {
+              if (logs.isEmpty) {
+                return const MlEmptyState(
+                  icon: Icons.history_toggle_off,
+                  title: 'No audit logs found',
+                  message: 'No activity matches the selected filter.',
+                );
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: logs.length,
+                itemBuilder: (context, i) => _AuditLogCard(log: logs[i]),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 

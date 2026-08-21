@@ -173,167 +173,173 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
       orElse: () => false,
     );
 
-    return Scaffold(
-      body: roleAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => MlEmptyState(
-          icon: Icons.error_outline,
-          title: 'Could not load',
-          message: friendlyError(e),
-        ),
-        data: (_) {
-          if (!allowed) {
-            return const MlEmptyState(
-              icon: Icons.lock_outline,
-              title: 'Permission required',
-              message:
-                  'You do not have permission to register new companies. Only the platform super admins can register companies.',
-            );
-          }
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton.icon(
-                      onPressed: () => context.go('/super-admin'),
-                      icon: const Icon(Icons.arrow_back_rounded, size: 18),
-                      label: const Text('Back to console'),
-                    ),
-                  ),
-                  Text(
-                    'Creates a company login. After this, open the company to generate a serial token, set seats, and validity days.',
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _companyName,
-                    decoration: const InputDecoration(
-                      labelText: 'Company name',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                    enabled: !_busy,
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _whatsapp,
-                    decoration: const InputDecoration(
-                      labelText: 'WhatsApp number',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                    enabled: !_busy,
-                  ),
-                  const SizedBox(height: 12),
-                  InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Organization type',
-                      border: OutlineInputBorder(),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<OrgType>(
-                        value: _orgType,
-                        isExpanded: true,
-                        items: OrgType.values
-                            .map(
-                              (o) => DropdownMenuItem(
-                                value: o,
-                                child: Text(o.label),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: _busy
-                            ? null
-                            : (v) {
-                                if (v != null) setState(() => _orgType = v);
-                              },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _ceoFirst,
-                          decoration: const InputDecoration(
-                            labelText: 'CEO first name',
-                            border: OutlineInputBorder(),
-                          ),
-                          enabled: !_busy,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextFormField(
-                          controller: _ceoLast,
-                          decoration: const InputDecoration(
-                            labelText: 'CEO last name',
-                            border: OutlineInputBorder(),
-                          ),
-                          enabled: !_busy,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _email,
-                    decoration: const InputDecoration(
-                      labelText: 'Owner login email',
-                      border: OutlineInputBorder(),
-                      helperText: 'The company signs in with this email',
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: Validators.validateEmail,
-                    enabled: !_busy,
-                  ),
-                  const SizedBox(height: 8),
-                  SwitchListTile(
-                    title: const Text('Generate temporary password'),
-                    subtitle: const Text('Turn off to set your own (min. 8 characters)'),
-                    value: _genPassword,
-                    onChanged: _busy
-                        ? null
-                        : (v) => setState(() {
-                            _genPassword = v;
-                          }),
-                  ),
-                  if (!_genPassword)
-                    TextFormField(
-                      controller: _tempPassword,
-                      decoration: const InputDecoration(
-                        labelText: 'Temporary password',
-                        border: OutlineInputBorder(),
-                      ),
-                      obscureText: true,
-                      validator: (v) {
-                        if (_genPassword) return null;
-                        if (v == null || v.length < 8) {
-                          return 'At least 8 characters';
-                        }
-                        return null;
-                      },
-                      enabled: !_busy,
-                    ),
-                  const SizedBox(height: 24),
-                  MlButton.primary(
-                    label: _busy ? 'Creating…' : 'Create company account',
-                    expand: true,
-                    onPressed: _busy ? null : () => _submit(allowed),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+    return roleAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => MlEmptyState(
+        icon: Icons.error_outline,
+        title: 'Could not load',
+        message: friendlyError(e),
       ),
+      data: (_) {
+        if (!allowed) {
+          return const MlEmptyState(
+            icon: Icons.lock_outline,
+            title: 'Permission required',
+            message:
+                'You do not have permission to register new companies. Only the platform super admins can register companies.',
+          );
+        }
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () => context.go('/super-admin'),
+                    icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                    label: const Text('Back to console'),
+                  ),
+                ),
+                // A HEADING. This page opened with a back link and then a
+                // sentence in third person — the only console screen with no
+                // title on it at all. Photographed 2026-08-21. `MlPageHeader`
+                // is what every other one uses, and the sentence is its
+                // description rather than a stray paragraph.
+                MlPageHeader(
+                  title: 'Register a company',
+                  description:
+                      'Creates a company login. After this, open the company '
+                      'to generate a serial token, set seats, and validity '
+                      'days.',
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _companyName,
+                  decoration: const InputDecoration(
+                    labelText: 'Company name',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  enabled: !_busy,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _whatsapp,
+                  decoration: const InputDecoration(
+                    labelText: 'WhatsApp number',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  enabled: !_busy,
+                ),
+                const SizedBox(height: 12),
+                InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Organization type',
+                    border: OutlineInputBorder(),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<OrgType>(
+                      value: _orgType,
+                      isExpanded: true,
+                      items: OrgType.values
+                          .map(
+                            (o) => DropdownMenuItem(
+                              value: o,
+                              child: Text(o.label),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: _busy
+                          ? null
+                          : (v) {
+                              if (v != null) setState(() => _orgType = v);
+                            },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _ceoFirst,
+                        decoration: const InputDecoration(
+                          labelText: 'CEO first name',
+                          border: OutlineInputBorder(),
+                        ),
+                        enabled: !_busy,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _ceoLast,
+                        decoration: const InputDecoration(
+                          labelText: 'CEO last name',
+                          border: OutlineInputBorder(),
+                        ),
+                        enabled: !_busy,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _email,
+                  decoration: const InputDecoration(
+                    labelText: 'Owner login email',
+                    border: OutlineInputBorder(),
+                    helperText: 'The company signs in with this email',
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: Validators.validateEmail,
+                  enabled: !_busy,
+                ),
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  title: const Text('Generate temporary password'),
+                  subtitle: const Text('Turn off to set your own (min. 8 characters)'),
+                  value: _genPassword,
+                  onChanged: _busy
+                      ? null
+                      : (v) => setState(() {
+                          _genPassword = v;
+                        }),
+                ),
+                if (!_genPassword)
+                  TextFormField(
+                    controller: _tempPassword,
+                    decoration: const InputDecoration(
+                      labelText: 'Temporary password',
+                      border: OutlineInputBorder(),
+                    ),
+                    obscureText: true,
+                    validator: (v) {
+                      if (_genPassword) return null;
+                      if (v == null || v.length < 8) {
+                        return 'At least 8 characters';
+                      }
+                      return null;
+                    },
+                    enabled: !_busy,
+                  ),
+                const SizedBox(height: 24),
+                MlButton.primary(
+                  label: _busy ? 'Creating…' : 'Create company account',
+                  expand: true,
+                  onPressed: _busy ? null : () => _submit(allowed),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -58,7 +58,7 @@ class FleetManagementScreen extends ConsumerWidget {
     final fleetProviderInstance = ref.watch(fleetProvider(companyId));
 
     return Scaffold(
-      backgroundColor: MlSemantic.of(context).surfaceApp,
+      backgroundColor: Colors.transparent,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

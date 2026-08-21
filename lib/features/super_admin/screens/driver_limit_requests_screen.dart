@@ -196,7 +196,13 @@ class _RequestCard extends StatelessWidget {
             ),
           ),
           Text(
-            'by ${r.requestedByName ?? '—'} · ${MlTime.stamp(r.createdAt)}',
+            // No name means DROP the clause, not print "by —". An em dash in
+            // a table cell reads as "we do not know this"; in the middle of a
+            // sentence it reads as a mistake. The timestamp still stands on
+            // its own.
+            r.requestedByName == null
+                ? MlTime.stamp(r.createdAt)
+                : 'by ${r.requestedByName} · ${MlTime.stamp(r.createdAt)}',
             style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint),
           ),
           if (r.isPending) ...[

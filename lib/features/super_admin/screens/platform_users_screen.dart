@@ -32,76 +32,74 @@ class _PlatformUsersScreenState extends ConsumerState<PlatformUsersScreen> {
     final usersAsync = ref.watch(allPlatformUsersProvider);
     final cs = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Platform users',
-                        style: context.mlText.titleMedium.copyWith(
-                          color: MlSemantic.of(context).textStrong,
-                          fontWeight: FontWeight.w800,
-                        ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Platform users',
+                      style: context.mlText.titleMedium.copyWith(
+                        color: MlSemantic.of(context).textStrong,
+                        fontWeight: FontWeight.w800,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Every employee on the platform, grouped by company. '
-                        'Tap a user or company to drill into the organization.',
-                        style: context.mlText.bodyMedium.copyWith(
-                          color: cs.onSurfaceVariant,
-                        ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Every employee on the platform, grouped by company. '
+                      'Tap a user or company to drill into the organization.',
+                      style: context.mlText.bodyMedium.copyWith(
+                        color: cs.onSurfaceVariant,
                       ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Refresh',
-                  icon: const Icon(Icons.refresh_rounded),
-                  onPressed: () =>
-                      ref.invalidate(allPlatformUsersProvider),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: SearchBar(
-              hintText: 'Search by name, email, or company…',
-              leading: const Icon(Icons.search),
-              onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
-              padding: WidgetStateProperty.all(
-                const EdgeInsets.symmetric(horizontal: 16),
-              ),
-            ),
-          ),
-          Expanded(
-            child: usersAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
-              error: (e, _) => MlEmptyState(
-                icon: Icons.error_outline,
-                title: 'Could not load users',
-                message: friendlyError(e),
-                action: MlButton.primary(
-                  label: 'Retry',
-                  icon: Icons.refresh,
-                  onPressed: () => ref.invalidate(allPlatformUsersProvider),
+                    ),
+                  ],
                 ),
               ),
-              data: (users) => _buildUserList(users),
+              IconButton(
+                tooltip: 'Refresh',
+                icon: const Icon(Icons.refresh_rounded),
+                onPressed: () =>
+                    ref.invalidate(allPlatformUsersProvider),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: SearchBar(
+            hintText: 'Search by name, email, or company…',
+            leading: const Icon(Icons.search),
+            onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
+            padding: WidgetStateProperty.all(
+              const EdgeInsets.symmetric(horizontal: 16),
             ),
           ),
-        ],
-      ),
+        ),
+        Expanded(
+          child: usersAsync.when(
+            loading: () =>
+                const Center(child: CircularProgressIndicator()),
+            error: (e, _) => MlEmptyState(
+              icon: Icons.error_outline,
+              title: 'Could not load users',
+              message: friendlyError(e),
+              action: MlButton.primary(
+                label: 'Retry',
+                icon: Icons.refresh,
+                onPressed: () => ref.invalidate(allPlatformUsersProvider),
+              ),
+            ),
+            data: (users) => _buildUserList(users),
+          ),
+        ),
+      ],
     );
   }
 

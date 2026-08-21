@@ -321,6 +321,74 @@ void _fabricationTests() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // THE DATE UNDER "TOKEN EXPIRY" IS THE TOKEN'S EXPIRY DATE.
+  //
+  // It was `created_at`, printed in the same cell as the countdown and under a
+  // column headed TOKEN EXPIRY. Photographed 2026-08-21: four rows read
+  // "107d 22 : 30 : 00 · 01 Jul '26" — a token with 107 days left beside a
+  // date four months in the PAST — and the expired row read "expired ·
+  // 01 Jul '26" for a token that lapsed on 1 August. Nothing threw and nothing
+  // overflowed; the cell was simply about a different fact than its heading.
+  group('the token-expiry cell', () {
+    Map<String, dynamic> org({
+      required String created,
+      required String expires,
+      String status = 'active',
+    }) =>
+        {
+          'id': 'o-x',
+          'company_name': 'Fixture Haulage',
+          'org_type': 'transporter',
+          'status': status,
+          'seat_limit': 5,
+          'seats_used': 4,
+          'created_at': created,
+          'token_expires_at': expires,
+          'physical_address': '12 Long Industrial Road, Emalahleni',
+        };
+
+    SuperAdminDashboardV2ViewModel vmFor(Map<String, dynamic> o) =>
+        SuperAdminDashboardV2ViewModel.from(
+          stats: const <String, dynamic>{},
+          organizations: [o],
+          rows: const <RawReconRow>[],
+          transporters: null,
+          buyers: null,
+          mines: null,
+          mineTransportCount: 0,
+          buyerTransportCount: 0,
+          productCount: 0,
+          buyerRequestCount: 0,
+          now: DateTime(2026, 8, 15),
+        );
+
+    test('names the expiry, not the day the company was created', () {
+      final vm = vmFor(org(
+        created: '2026-07-01T08:00:00Z',
+        expires: '2026-12-01T08:00:00Z',
+      ));
+      final row = vm.recentOrgs.single;
+      expect(row.date, "01 Dec '26",
+          reason: 'the cell under TOKEN EXPIRY reads ${row.date}, which is '
+              'the creation date');
+      expect(row.date, isNot("01 Jul '26"));
+    });
+
+    test('an expired token says WHEN, through MlTime, and is title-cased', () {
+      final vm = vmFor(org(
+        created: '2026-07-01T08:00:00Z',
+        expires: '2026-08-01T08:00:00Z',
+        status: 'expired',
+      ));
+      final row = vm.recentOrgs.single;
+      expect(row.date, "01 Aug '26");
+      // Past a week `MlTime.ago` falls back to the date, which is the
+      // right thing for a token that lapsed a fortnight ago.
+      expect(row.expiry, 'Expired · 01 Aug');
+    });
+  });
 }
 
 MineLinkDashboardScreen _sampleDashboard({

@@ -33,7 +33,7 @@ class CommunicationsHubScreen extends ConsumerWidget {
     );
 
     if (authState.user == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (access == null) {
@@ -57,162 +57,159 @@ class CommunicationsHubScreen extends ConsumerWidget {
 
     return DefaultTabController(
       length: 2,
-      child: ColoredBox(
-        color: MlSemantic.of(context).surfaceApp,
-        child: Column(
-          // A Column CENTRES its children and sizes each to its own content
-          // unless told otherwise, so the hero card floated in the middle of
-          // the page at whatever width its chips happened to need, while the
-          // tabs and the list below it — which stretch for their own reasons —
-          // ran the full width. One screen, two margins.
-          //
-          // Nothing overflowed and no test failed. It was visible the moment
-          // the screen was first photographed, on 2026-08-20, and invisible
-          // until then.
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-              child: MlPageHeader(
-                title: 'Communications Hub',
-                description: 'Company announcements and team conversations.',
-                actions: [
-                  MlButton.ghost(
-                    label: 'Refresh',
-                    icon: Icons.refresh,
-                    compact: true,
-                    onPressed:
-                        state.isLoading ? null : () => notifier.refresh(),
+      child: Column(
+        // A Column CENTRES its children and sizes each to its own content
+        // unless told otherwise, so the hero card floated in the middle of
+        // the page at whatever width its chips happened to need, while the
+        // tabs and the list below it — which stretch for their own reasons —
+        // ran the full width. One screen, two margins.
+        //
+        // Nothing overflowed and no test failed. It was visible the moment
+        // the screen was first photographed, on 2026-08-20, and invisible
+        // until then.
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+            child: MlPageHeader(
+              title: 'Communications Hub',
+              description: 'Company announcements and team conversations.',
+              actions: [
+                MlButton.ghost(
+                  label: 'Refresh',
+                  icon: Icons.refresh,
+                  compact: true,
+                  onPressed:
+                      state.isLoading ? null : () => notifier.refresh(),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+            child: MlCard(
+              hero: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    access.company.companyName,
+                    style: context.mlText.titleLarge.copyWith(
+                      color: MlSemantic.of(context).textStrong,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-              child: MlCard(
-                hero: true,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      access.company.companyName,
-                      style: context.mlText.titleLarge.copyWith(
-                        color: MlSemantic.of(context).textStrong,
-                        fontWeight: FontWeight.w800,
-                      ),
+                  MlCard.heroTitleRule(),
+                  Text(
+                    'Live announcements and team conversations for ${access.currentUserName}.',
+                    style: context.mlText.bodyLarge.copyWith(
+                      color: MlSemantic.of(context).textMuted,
                     ),
-                    MlCard.heroTitleRule(),
-                    Text(
-                      'Live announcements and team conversations for ${access.currentUserName}.',
-                      style: context.mlText.bodyLarge.copyWith(
-                        color: MlSemantic.of(context).textMuted,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // A Wrap lays every child out against UNBOUNDED width, so
-                    // a chip wider than the Wrap does not wrap — it overflows.
-                    // `maxWidth` hands each chip the row's real width to
-                    // ellipsize its label inside.
-                    LayoutBuilder(
-                      builder: (context, c) => Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          _CommunicationChip(
-                            label: 'Contacts',
-                            value: state.contacts.length.toString(),
-                            icon: Icons.people_outline,
-                            tone: MlTone.accent,
-                            maxWidth: c.maxWidth,
-                          ),
-                          _CommunicationChip(
-                            label: 'Announcements',
-                            value: state.announcements.length.toString(),
-                            icon: Icons.campaign_outlined,
-                            tone: MlTone.warn,
-                            maxWidth: c.maxWidth,
-                          ),
-                          _CommunicationChip(
-                            label: 'Chat rooms',
-                            value: state.chatRooms.length.toString(),
-                            icon: Icons.forum_outlined,
-                            tone: MlTone.transit,
-                            maxWidth: c.maxWidth,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TabBar.secondary(
-                  tabs: const [
-                    Tab(
-                      icon: Icon(Icons.campaign_outlined),
-                      text: 'Announcements',
-                    ),
-                    Tab(icon: Icon(Icons.forum_outlined), text: 'Chat Rooms'),
-                  ],
-                ),
-              ),
-            ),
-            if (state.error != null)
-              Builder(
-                builder: (context) {
-                  final tone = MlTone.error.colors(
-                    Theme.of(context).brightness,
-                  );
-                  return Container(
-                    margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: tone.bg,
-                      borderRadius: BorderRadius.circular(MlTokens.rMd),
-                      border: Border.all(
-                        color: tone.fg.withValues(alpha: 0.28),
-                      ),
-                    ),
-                    child: Row(
+                  ),
+                  const SizedBox(height: 16),
+                  // A Wrap lays every child out against UNBOUNDED width, so
+                  // a chip wider than the Wrap does not wrap — it overflows.
+                  // `maxWidth` hands each chip the row's real width to
+                  // ellipsize its label inside.
+                  LayoutBuilder(
+                    builder: (context, c) => Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
                       children: [
-                        Icon(Icons.error_outline, color: tone.fg, size: 22),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            state.error!,
-                            style: context.mlText.bodyMedium.copyWith(
-                              color: tone.fg,
-                            ),
-                          ),
+                        _CommunicationChip(
+                          label: 'Contacts',
+                          value: state.contacts.length.toString(),
+                          icon: Icons.people_outline,
+                          tone: MlTone.accent,
+                          maxWidth: c.maxWidth,
+                        ),
+                        _CommunicationChip(
+                          label: 'Announcements',
+                          value: state.announcements.length.toString(),
+                          icon: Icons.campaign_outlined,
+                          tone: MlTone.warn,
+                          maxWidth: c.maxWidth,
+                        ),
+                        _CommunicationChip(
+                          label: 'Chat rooms',
+                          value: state.chatRooms.length.toString(),
+                          icon: Icons.forum_outlined,
+                          tone: MlTone.transit,
+                          maxWidth: c.maxWidth,
                         ),
                       ],
                     ),
-                  );
-                },
-              ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _AnnouncementsTab(
-                    state: state,
-                    canCreate: access.canCreateAnnouncements,
-                    onCreate: () => _showAnnouncementDialog(context, notifier),
-                  ),
-                  _ChatRoomsTab(
-                    access: access,
-                    state: state,
-                    onCreate: () =>
-                        _showCreateChatRoomDialog(context, state, notifier),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TabBar.secondary(
+                tabs: const [
+                  Tab(
+                    icon: Icon(Icons.campaign_outlined),
+                    text: 'Announcements',
+                  ),
+                  Tab(icon: Icon(Icons.forum_outlined), text: 'Chat Rooms'),
+                ],
+              ),
+            ),
+          ),
+          if (state.error != null)
+            Builder(
+              builder: (context) {
+                final tone = MlTone.error.colors(
+                  Theme.of(context).brightness,
+                );
+                return Container(
+                  margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: tone.bg,
+                    borderRadius: BorderRadius.circular(MlTokens.rMd),
+                    border: Border.all(
+                      color: tone.fg.withValues(alpha: 0.28),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline, color: tone.fg, size: 22),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          state.error!,
+                          style: context.mlText.bodyMedium.copyWith(
+                            color: tone.fg,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _AnnouncementsTab(
+                  state: state,
+                  canCreate: access.canCreateAnnouncements,
+                  onCreate: () => _showAnnouncementDialog(context, notifier),
+                ),
+                _ChatRoomsTab(
+                  access: access,
+                  state: state,
+                  onCreate: () =>
+                      _showCreateChatRoomDialog(context, state, notifier),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -49,41 +49,39 @@ class _TokenHistoryScreenState extends ConsumerState<TokenHistoryScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // THIS SCREEN HAD NO TITLE.
-          //
-          // Every other console screen states what it is - Audit Logs, Crash
-          // reports, Account deactivations, Live map - and this one opened
-          // straight onto a tab bar, so an admin arriving from the rail landed
-          // on three org-type tabs with nothing saying what was being listed.
-          // Jean's brief is about the placement of everything; a screen missing
-          // the one piece of chrome that names it is not that.
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 18, 20, 0),
-            child: MlPageHeader(
-              title: 'Token history',
-              description: 'Every token-related action on the platform, newest '
-                  'first, grouped by the organization it happened to.',
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // THIS SCREEN HAD NO TITLE.
+        //
+        // Every other console screen states what it is - Audit Logs, Crash
+        // reports, Account deactivations, Live map - and this one opened
+        // straight onto a tab bar, so an admin arriving from the rail landed
+        // on three org-type tabs with nothing saying what was being listed.
+        // Jean's brief is about the placement of everything; a screen missing
+        // the one piece of chrome that names it is not that.
+        const Padding(
+          padding: EdgeInsets.fromLTRB(20, 18, 20, 0),
+          child: MlPageHeader(
+            title: 'Token history',
+            description: 'Every token-related action on the platform, newest '
+                'first, grouped by the organization it happened to.',
           ),
-          const SizedBox(height: 12),
-          TabBar(
+        ),
+        const SizedBox(height: 12),
+        TabBar(
+          controller: _tabs,
+          isScrollable: true,
+          tabs: [for (final t in _orgTypes) Tab(text: _tabLabel(t))],
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: TabBarView(
             controller: _tabs,
-            isScrollable: true,
-            tabs: [for (final t in _orgTypes) Tab(text: _tabLabel(t))],
+            children: [for (final t in _orgTypes) _OrgTypeAuditTab(orgType: t)],
           ),
-          const Divider(height: 1),
-          Expanded(
-            child: TabBarView(
-              controller: _tabs,
-              children: [for (final t in _orgTypes) _OrgTypeAuditTab(orgType: t)],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

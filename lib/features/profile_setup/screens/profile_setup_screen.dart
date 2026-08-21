@@ -30,83 +30,80 @@ class ProfileSetupScreen extends ConsumerWidget {
 
     // NO `Scaffold(appBar:)` — `/account-setup` is a leaf of the portal
     // `ShellRoute`, whose top bar already reads "Account setup".
-    return ColoredBox(
-      color: semantic.surfaceApp,
-      child: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => MlEmptyState(
-          icon: Icons.error_outline_rounded,
-          title: 'Could not load your account setup',
-          message: friendlyError(e),
-          action: MlButton.primary(
-            label: 'Retry',
-            icon: Icons.refresh_rounded,
-            onPressed: () => ref.invalidate(myProfileSetupProvider),
-          ),
+    return async.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => MlEmptyState(
+        icon: Icons.error_outline_rounded,
+        title: 'Could not load your account setup',
+        message: friendlyError(e),
+        action: MlButton.primary(
+          label: 'Retry',
+          icon: Icons.refresh_rounded,
+          onPressed: () => ref.invalidate(myProfileSetupProvider),
         ),
-        data: (setup) {
-          if (!setup.isApplicable) {
-            return const MlEmptyState(
-              icon: Icons.verified_user_outlined,
-              title: 'Nothing to complete',
-              message:
-                  'This account has no employee or company profile that needs setting up.',
-            );
-          }
-          return Align(
-            alignment: Alignment.topCenter,
-            child: RefreshIndicator(
-              onRefresh: () async => ref.invalidate(myProfileSetupProvider),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(20),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 940),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _ProgressHero(setup: setup),
-                      const SizedBox(height: 18),
-                      for (final category in setup.categories) ...[
-                        Builder(builder: (_) {
-                          final inCat = setup.itemsIn(category);
-                          final done = inCat
-                              .where((i) => i.status == SetupItemStatus.complete)
-                              .length;
-                          return MlSectionTitle(
-                            category.label,
-                            icon: _categoryIcon(category),
-                            // Progress within this category, not overall — the
-                            // hero above already carries the overall figure,
-                            // and repeating it here would say nothing new.
-                            meta: '$done of ${inCat.length} complete',
-                          );
-                        }),
-                        for (final item in setup.itemsIn(category)) ...[
-                          _ItemCard(setup: setup, item: item),
-                          const SizedBox(height: 10),
-                        ],
-                        const SizedBox(height: 8),
+      ),
+      data: (setup) {
+        if (!setup.isApplicable) {
+          return const MlEmptyState(
+            icon: Icons.verified_user_outlined,
+            title: 'Nothing to complete',
+            message:
+                'This account has no employee or company profile that needs setting up.',
+          );
+        }
+        return Align(
+          alignment: Alignment.topCenter,
+          child: RefreshIndicator(
+            onRefresh: () async => ref.invalidate(myProfileSetupProvider),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(20),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 940),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _ProgressHero(setup: setup),
+                    const SizedBox(height: 18),
+                    for (final category in setup.categories) ...[
+                      Builder(builder: (_) {
+                        final inCat = setup.itemsIn(category);
+                        final done = inCat
+                            .where((i) => i.status == SetupItemStatus.complete)
+                            .length;
+                        return MlSectionTitle(
+                          category.label,
+                          icon: _categoryIcon(category),
+                          // Progress within this category, not overall — the
+                          // hero above already carries the overall figure,
+                          // and repeating it here would say nothing new.
+                          meta: '$done of ${inCat.length} complete',
+                        );
+                      }),
+                      for (final item in setup.itemsIn(category)) ...[
+                        _ItemCard(setup: setup, item: item),
+                        const SizedBox(height: 10),
                       ],
                       const SizedBox(height: 8),
-                      Text(
-                        'Documents you add here are stored in your company\'s '
-                        'compliance register. You and your company are '
-                        'reminded automatically before anything expires.',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: semantic.textFaint),
-                        textAlign: TextAlign.center,
-                      ),
                     ],
-                  ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Documents you add here are stored in your company\'s '
+                      'compliance register. You and your company are '
+                      'reminded automatically before anything expires.',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: semantic.textFaint),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -95,59 +95,57 @@ class _OrganizationManagementScreenState
       orElse: () => false,
     );
 
-    return Scaffold(
-      body: MlPageBody(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            MlPageHeader(
-              title: 'Organizations',
-              meta: orgsAsync.valueOrNull == null
-                  ? null
-                  : mlCount(orgsAsync.value!.length, 'company', 'companies'),
-              actions: [
-                // Was a hand-styled `FilledButton.icon` re-specifying the
-                // accent, the ink and a 10px radius — the system's own solid
-                // cyan primary, written out again slightly differently.
-                if (canRegister)
-                  MlButton.primary(
-                    label: 'Register company',
-                    icon: Icons.add_rounded,
-                    compact: true,
-                    onPressed: () =>
-                        context.go('/super-admin/register-company'),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Container(
-              decoration: BoxDecoration(
-                color: s.surfaceCard,
-                borderRadius: BorderRadius.circular(MlTokens.rXl),
-                border: Border.all(color: s.borderCard),
-                boxShadow: MlTokens.shadowSm,
-              ),
-              padding: const EdgeInsets.all(22),
-              child: orgsAsync.when(
-                loading: () => const SizedBox(
-                  height: 200,
-                  child: Center(child: CircularProgressIndicator()),
+    return MlPageBody(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          MlPageHeader(
+            title: 'Organizations',
+            meta: orgsAsync.valueOrNull == null
+                ? null
+                : mlCount(orgsAsync.value!.length, 'company', 'companies'),
+            actions: [
+              // Was a hand-styled `FilledButton.icon` re-specifying the
+              // accent, the ink and a 10px radius — the system's own solid
+              // cyan primary, written out again slightly differently.
+              if (canRegister)
+                MlButton.primary(
+                  label: 'Register company',
+                  icon: Icons.add_rounded,
+                  compact: true,
+                  onPressed: () =>
+                      context.go('/super-admin/register-company'),
                 ),
-                error: (e, _) => MlEmptyState(
-                  icon: Icons.error_outline,
-                  title: 'Could not load organizations',
-                  message: friendlyError(e),
-                  action: MlButton.primary(
-                    label: 'Retry',
-                    icon: Icons.refresh,
-                    onPressed: () => ref.invalidate(organizationsProvider),
-                  ),
-                ),
-                data: (orgs) => _content(context, s, orgs),
-              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              color: s.surfaceCard,
+              borderRadius: BorderRadius.circular(MlTokens.rXl),
+              border: Border.all(color: s.borderCard),
+              boxShadow: MlTokens.shadowSm,
             ),
-          ],
-        ),
+            padding: const EdgeInsets.all(22),
+            child: orgsAsync.when(
+              loading: () => const SizedBox(
+                height: 200,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, _) => MlEmptyState(
+                icon: Icons.error_outline,
+                title: 'Could not load organizations',
+                message: friendlyError(e),
+                action: MlButton.primary(
+                  label: 'Retry',
+                  icon: Icons.refresh,
+                  onPressed: () => ref.invalidate(organizationsProvider),
+                ),
+              ),
+              data: (orgs) => _content(context, s, orgs),
+            ),
+          ),
+        ],
       ),
     );
   }

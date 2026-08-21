@@ -32,22 +32,19 @@ class CompanyListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // NO `Scaffold(appBar:)` — `/companies/:orgType` is a leaf of the portal
     // `ShellRoute`, whose top bar already carries this same title.
-    return ColoredBox(
-      color: MlSemantic.of(context).surfaceApp,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-            child: MlPageHeader(
-              title: title,
-              description: 'Every company of this type registered on the '
-                  'platform.',
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+          child: MlPageHeader(
+            title: title,
+            description: 'Every company of this type registered on the '
+                'platform.',
           ),
-          Expanded(child: _buildCompanyList(context, ref)),
-        ],
-      ),
+        ),
+        Expanded(child: _buildCompanyList(context, ref)),
+      ],
     );
   }
 
@@ -144,9 +141,7 @@ class CompanyDetailsLoaderScreen extends ConsumerWidget {
       future: repository.getById(companyId),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError || !snapshot.hasData) {
           return MlEmptyState(

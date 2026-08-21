@@ -62,6 +62,9 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
       _ => const DriverProfileTab(),
     };
 
+    // shell-ground-exempt: the driver app is SELF-CHROMED. `PortalShellLayout`
+    // renders these three tabs bare for a driver employee, so this Scaffold is
+    // the only one on screen and its ground is the page.
     return Scaffold(
       // The driver shell bypasses the portal scaffold, so it mounts its own
       // account-setup nag (renders nothing once setup is complete).

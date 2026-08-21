@@ -2,6 +2,7 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/shell/workspace_canvas.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -384,7 +385,11 @@ class _SuperAdminCompanyMirrorScreenState
         return DefaultTabController(
           length: tabs.length,
           child: Scaffold(
-            backgroundColor: MlControlRoom.pageBg,
+            // The page ground, through the helper the shell's own painter
+            // uses. It was `MlControlRoom.pageBg`, which happens to be the
+            // same colour — a coincidence that held only while both tracked
+            // `MlGlass.bg0`.
+            backgroundColor: mlWorkspaceGround(Theme.of(context).brightness),
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

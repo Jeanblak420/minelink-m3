@@ -15,6 +15,20 @@ import 'package:flutter_application_1/core/design/tokens/ml_rail_tokens.dart';
 /// washes + a 24px dot grid (`rgba(15,23,42,.045)`), so the white cards read
 /// as distinct floating surfaces. Dark: flat `#070C17`. The texture layer is
 /// user-toggleable from Settings → User Preferences.
+/// The page ground, for the rare widget that has to paint it itself.
+///
+/// [MlWorkspaceCanvasPainter] paints this behind every routed screen, so a
+/// screen inside either `ShellRoute` must NOT paint a ground of its own — 18
+/// of them did, in a colour one step lighter (`#0A1424` over `#060B15`), which
+/// is how the product came to have two page colours decided by nothing but
+/// whether a screen happened to wrap itself in a `Scaffold`.
+///
+/// A page pushed with `Navigator.push` is the exception: it covers the shell,
+/// so nothing is painting behind it and `Colors.transparent` leaves it BLACK.
+/// Those pass this.
+Color mlWorkspaceGround(Brightness brightness) =>
+    brightness == Brightness.dark ? mlConsoleCanvasDark : mlConsoleCanvasLight;
+
 class MlWorkspaceCanvasPainter extends CustomPainter {
   final bool dark;
   final bool texture;

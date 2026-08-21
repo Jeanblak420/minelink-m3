@@ -46,7 +46,7 @@ class OperationsHubScreen extends ConsumerWidget {
           );
 
     if (authState.user == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Center(child: CircularProgressIndicator());
     }
 
     // NO `Scaffold(appBar:)` — `/operations` is a leaf of the portal
@@ -87,7 +87,7 @@ class OperationsHubScreen extends ConsumerWidget {
       initialIndex: initialIndex,
       child: Scaffold(
         primary: observedCompany == null,
-        backgroundColor: MlSemantic.of(context).surfaceApp,
+        backgroundColor: Colors.transparent,
         body: Column(
           // See the same note on the communications hub: a Column centres its
           // children and sizes each to its own content, so this hero card

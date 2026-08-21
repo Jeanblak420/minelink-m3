@@ -31,21 +31,18 @@ class EmployeeGridScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // NO `Scaffold(appBar:)` — `/employees/:companyId` is a leaf of the portal
     // `ShellRoute`, whose top bar already names the company.
-    return ColoredBox(
-      color: MlSemantic.of(context).surfaceApp,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-            child: MlPageHeader(
-              title: '$companyName Employees',
-              description: 'Everyone registered under this company.',
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+          child: MlPageHeader(
+            title: '$companyName Employees',
+            description: 'Everyone registered under this company.',
           ),
-          Expanded(child: _buildEmployeeGrid(context, ref)),
-        ],
-      ),
+        ),
+        Expanded(child: _buildEmployeeGrid(context, ref)),
+      ],
     );
   }
 

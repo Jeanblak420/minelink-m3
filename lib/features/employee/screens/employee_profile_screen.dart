@@ -17,6 +17,7 @@ import 'dart:math' as math;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/shell/workspace_canvas.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -227,6 +228,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
   void _pushCompliance() {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => Scaffold(
+        backgroundColor: mlWorkspaceGround(Theme.of(context).brightness),
         // shell-app-bar-exempt: a PUSHED page. It covers the shell's body with
         // a route nothing else names, so this bar is the only thing that says
         // what the page is and the only way back off it.
@@ -279,7 +281,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
         return KeyEventResult.ignored;
       },
       child: Scaffold(
-        backgroundColor: semantic.surfaceApp,
+        backgroundColor: Colors.transparent,
         body: bundleAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(

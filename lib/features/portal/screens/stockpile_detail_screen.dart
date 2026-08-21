@@ -53,7 +53,7 @@ class StockpileDetailScreen extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final companyId = resolvePortalCompanyId(ref);
     if (companyId == null) {
-      return const Scaffold(body: PortalCompanyRequired());
+      return const PortalCompanyRequired();
     }
     final stockpiles =
         ref.watch(stockpilesProvider(companyId)).valueOrNull ?? const [];
@@ -63,138 +63,135 @@ class StockpileDetailScreen extends ConsumerWidget {
     // portal `ShellRoute`, whose top bar already reads "Stockpiles". The
     // "Audit trail" action moved into the page header, which is where every
     // other portal screen keeps its screen-level actions.
-    return ColoredBox(
-      color: MlSemantic.of(context).surfaceApp,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                MlPageHeader(
-                  title: 'Stockpile levels',
-                  description: 'What is standing on the ground at this mine, '
-                      'per order pile, and how much of each order it fills.',
-                  actions: [
-                    MlButton.ghost(
-                      label: 'Audit trail',
-                      icon: Icons.history_rounded,
-                      compact: true,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MlPageHeader(
+                title: 'Stockpile levels',
+                description: 'What is standing on the ground at this mine, '
+                    'per order pile, and how much of each order it fills.',
+                actions: [
+                  MlButton.ghost(
+                    label: 'Audit trail',
+                    icon: Icons.history_rounded,
+                    compact: true,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) => const StockpileAuditScreen()),
+                    ),
+                  ),
+                ],
+              ),
+              // The label is Flexible and the figure is not, deliberately.
+              // A Row gives non-flex children unbounded width, so a Text's
+              // ellipsis never engages (CLAUDE.md §10.4) — this overflowed by
+              // 23px at 360px wide and DEFAULT text scale, i.e. for anyone
+              // opening this on a phone. Flexing the label lets it ellipsize;
+              // the tonnage is the one thing on this line that must never be
+              // truncated, so it keeps its intrinsic width.
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      'Remaining on hand',
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(color: scheme.onSurfaceVariant),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    formatTons(totalBalance),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: PortalColors.accent,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (stockpiles.isEmpty)
+                OverviewHeroTile(
+                  title: 'No stockpiles yet',
+                  icon: Icons.layers_outlined,
+                  child: Text(
+                    'Stockpiles allocated to buyers (from the Supervisor view) '
+                    'will appear here with their remaining balances and actions.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                )
+              else
+                MlTileGrid.columns(
+                  columnsFor: (w) => w > 980 ? 3 : (w > 620 ? 2 : 1),
+                  children: [
+                    for (final s in stockpiles)
+                      Builder(
+                        builder: (context) => StockpileCard(
+                          pile: s,
+                          onAddTons: () =>
+                              _addTons(context, ref, companyId, s),
+                          onUploadResults: () => showStockpileDocsDialog(
+                            context,
+                            ref,
+                            supplierCompanyId: companyId,
+                            pile: s,
+                            kind: 'lab_result',
+                          ),
+                          onUploadPicture: () => showStockpileDocsDialog(
+                            context,
+                            ref,
+                            supplierCompanyId: companyId,
+                            pile: s,
+                            kind: 'picture',
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              const SizedBox(height: 24),
+              // Flexible so the button cannot exceed the page: with 18px of
+              // horizontal padding either side, an icon and this label, it
+              // overflowed by 26px at 360px wide and text scale 1.3. Flexing
+              // bounds it and lets the label ellipsize instead.
+              Row(
+                children: [
+                  Flexible(
+                    child: OutlinedButton.icon(
                       onPressed: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (_) => const StockpileAuditScreen()),
+                          builder: (_) => const StockpileAuditScreen(),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                // The label is Flexible and the figure is not, deliberately.
-                // A Row gives non-flex children unbounded width, so a Text's
-                // ellipsis never engages (CLAUDE.md §10.4) — this overflowed by
-                // 23px at 360px wide and DEFAULT text scale, i.e. for anyone
-                // opening this on a phone. Flexing the label lets it ellipsize;
-                // the tonnage is the one thing on this line that must never be
-                // truncated, so it keeps its intrinsic width.
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        'Remaining on hand',
+                      icon: const Icon(Icons.receipt_long_outlined, size: 18),
+                      label: const Text(
+                        'View audit trail',
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(color: scheme.onSurfaceVariant),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      formatTons(totalBalance),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: PortalColors.accent,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                if (stockpiles.isEmpty)
-                  OverviewHeroTile(
-                    title: 'No stockpiles yet',
-                    icon: Icons.layers_outlined,
-                    child: Text(
-                      'Stockpiles allocated to buyers (from the Supervisor view) '
-                      'will appear here with their remaining balances and actions.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  )
-                else
-                  MlTileGrid.columns(
-                    columnsFor: (w) => w > 980 ? 3 : (w > 620 ? 2 : 1),
-                    children: [
-                      for (final s in stockpiles)
-                        Builder(
-                          builder: (context) => StockpileCard(
-                            pile: s,
-                            onAddTons: () =>
-                                _addTons(context, ref, companyId, s),
-                            onUploadResults: () => showStockpileDocsDialog(
-                              context,
-                              ref,
-                              supplierCompanyId: companyId,
-                              pile: s,
-                              kind: 'lab_result',
-                            ),
-                            onUploadPicture: () => showStockpileDocsDialog(
-                              context,
-                              ref,
-                              supplierCompanyId: companyId,
-                              pile: s,
-                              kind: 'picture',
-                            ),
-                          ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 14,
                         ),
-                    ],
+                        side: BorderSide(
+                          color: MlSemantic.of(context).borderCard,
+                        ),
+                      ),
+                    ),
                   ),
-                const SizedBox(height: 24),
-                // Flexible so the button cannot exceed the page: with 18px of
-                // horizontal padding either side, an icon and this label, it
-                // overflowed by 26px at 360px wide and text scale 1.3. Flexing
-                // bounds it and lets the label ellipsize instead.
-                Row(
-                  children: [
-                    Flexible(
-                      child: OutlinedButton.icon(
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const StockpileAuditScreen(),
-                          ),
-                        ),
-                        icon: const Icon(Icons.receipt_long_outlined, size: 18),
-                        label: const Text(
-                          'View audit trail',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 14,
-                          ),
-                          side: BorderSide(
-                            color: MlSemantic.of(context).borderCard,
-                          ),
-                        ),
-                      ),
-                    ),
-                    // "Request testing" removed: lab/quality test requests are
-                    // not yet a scoped feature — a dead "coming soon" action was
-                    // hidden rather than shown (AUDIT_FINDINGS item 3).
-                  ],
-                ),
-              ],
-            ),
+                  // "Request testing" removed: lab/quality test requests are
+                  // not yet a scoped feature — a dead "coming soon" action was
+                  // hidden rather than shown (AUDIT_FINDINGS item 3).
+                ],
+              ),
+            ],
           ),
         ),
       ),

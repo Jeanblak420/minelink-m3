@@ -10,7 +10,6 @@ import 'package:flutter_application_1/features/chat/models/chat_room_model.dart'
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
-import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Provider for the current chat messages
@@ -411,118 +410,115 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // bars, with the same name printed twice, one directly under the other and
     // both truncated on a phone. The info button moved into the widget's own
     // header, which is what `headerActions` is for.
-    return ColoredBox(
-      color: MlSemantic.of(context).surfaceApp,
-      child: Column(
-        // Stretch, or the conditional file-upload panel above the message
-        // list is centred and sized to its own content while the list below
-        // it — an Expanded — runs full width. A Column centres by default.
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // File upload widget (conditionally shown)
-          if (_isAttaching)
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: FileUploadWidget(
-                bucketName: 'chat_files',
-                folderPath: widget.chatRoom.id,
-                returnStoragePath: true,
-                onUploadComplete: (fileUrls) {
-                  if (fileUrls.isNotEmpty) {
-                    final fileName = _fileNameFromUrl(fileUrls[0]);
-                    final fileType = _getFileType(fileName);
+    return Column(
+      // Stretch, or the conditional file-upload panel above the message
+      // list is centred and sized to its own content while the list below
+      // it — an Expanded — runs full width. A Column centres by default.
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // File upload widget (conditionally shown)
+        if (_isAttaching)
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: FileUploadWidget(
+              bucketName: 'chat_files',
+              folderPath: widget.chatRoom.id,
+              returnStoragePath: true,
+              onUploadComplete: (fileUrls) {
+                if (fileUrls.isNotEmpty) {
+                  final fileName = _fileNameFromUrl(fileUrls[0]);
+                  final fileType = _getFileType(fileName);
 
-                    // Send file message
-                    ref
-                        .read(chatMessagesProvider(widget.chatRoom.id).notifier)
-                        .sendFileMessage(
-                          'Sent a file',
-                          widget.currentUserId,
-                          widget.currentUserName,
-                          widget.currentUserAvatarUrl,
-                          fileUrls[0],
-                          fileType,
-                          fileName,
-                        );
-                  }
+                  // Send file message
+                  ref
+                      .read(chatMessagesProvider(widget.chatRoom.id).notifier)
+                      .sendFileMessage(
+                        'Sent a file',
+                        widget.currentUserId,
+                        widget.currentUserName,
+                        widget.currentUserAvatarUrl,
+                        fileUrls[0],
+                        fileType,
+                        fileName,
+                      );
+                }
 
-                  setState(() {
-                    _isAttaching = false;
-                  });
-                },
-                onError: (error) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error uploading file. ${friendlyError(error)}')),
-                  );
-
-                  setState(() {
-                    _isAttaching = false;
-                  });
-                },
-                buttonText: 'Select File',
-                imagesOnly: false,
-                allowMultiple: false,
-              ),
-            ),
-
-          // Chat widget
-          Expanded(
-            child: ChatWidget(
-              controller: _chatController,
-              messages: messages,
-              currentUserId: widget.currentUserId,
-              onSendMessage: (message, {String? replyToId}) {
-                ref
-                    .read(chatMessagesProvider(widget.chatRoom.id).notifier)
-                    .sendMessage(
-                      message,
-                      widget.currentUserId,
-                      widget.currentUserName,
-                      widget.currentUserAvatarUrl,
-                      replyToId: replyToId,
-                    );
-
-                // Set typing to false when sending a message
-                _typingUsersNotifier.setTyping(
-                  widget.currentUserId,
-                  widget.currentUserName,
-                  false,
-                );
-              },
-              onTypingChanged: (isTyping) {
-                _typingUsersNotifier.setTyping(
-                  widget.currentUserId,
-                  widget.currentUserName,
-                  isTyping,
-                );
-              },
-              onAttachFile: () {
                 setState(() {
-                  _isAttaching = true;
+                  _isAttaching = false;
                 });
               },
-              onMessageLongPress: (message) {
-                // Show message options
-                showModalBottomSheet(
-                  context: context,
-                  builder: (context) => _buildMessageOptions(context, message),
+              onError: (error) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error uploading file. ${friendlyError(error)}')),
                 );
+
+                setState(() {
+                  _isAttaching = false;
+                });
               },
-              title: widget.chatRoom.name,
-              participants: widget.participants,
-              showAvatarsInHeader: true,
-              typingUsers: typingUsers,
-              headerActions: [
-                IconButton(
-                  icon: const Icon(Icons.info_outline),
-                  tooltip: 'About this conversation',
-                  onPressed: _showChatInfo,
-                ),
-              ],
+              buttonText: 'Select File',
+              imagesOnly: false,
+              allowMultiple: false,
             ),
           ),
-        ],
-      ),
+
+        // Chat widget
+        Expanded(
+          child: ChatWidget(
+            controller: _chatController,
+            messages: messages,
+            currentUserId: widget.currentUserId,
+            onSendMessage: (message, {String? replyToId}) {
+              ref
+                  .read(chatMessagesProvider(widget.chatRoom.id).notifier)
+                  .sendMessage(
+                    message,
+                    widget.currentUserId,
+                    widget.currentUserName,
+                    widget.currentUserAvatarUrl,
+                    replyToId: replyToId,
+                  );
+
+              // Set typing to false when sending a message
+              _typingUsersNotifier.setTyping(
+                widget.currentUserId,
+                widget.currentUserName,
+                false,
+              );
+            },
+            onTypingChanged: (isTyping) {
+              _typingUsersNotifier.setTyping(
+                widget.currentUserId,
+                widget.currentUserName,
+                isTyping,
+              );
+            },
+            onAttachFile: () {
+              setState(() {
+                _isAttaching = true;
+              });
+            },
+            onMessageLongPress: (message) {
+              // Show message options
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => _buildMessageOptions(context, message),
+              );
+            },
+            title: widget.chatRoom.name,
+            participants: widget.participants,
+            showAvatarsInHeader: true,
+            typingUsers: typingUsers,
+            headerActions: [
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                tooltip: 'About this conversation',
+                onPressed: _showChatInfo,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
