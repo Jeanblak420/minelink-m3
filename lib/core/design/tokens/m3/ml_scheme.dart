@@ -96,7 +96,21 @@ abstract final class MlScheme {
     surfaceBright: Color(0xFFFFFFFF),
 
     outline: MlTokens.slate400,
-    outlineVariant: Color(0xFFE7EDF3),
+    // `slate300`, not `#E7EDF3`.
+    //
+    // Every card border, every table divider and every hairline in the product
+    // is this one value, and against a white card `#E7EDF3` measures
+    // **1.18:1** — below the 1.25 floor `test/design/token_contrast_test.dart`
+    // sets for "visible at all", and well under the 1.5:1 a hairline needs to
+    // read as an edge. In light mode the cards had no edges; what looked like
+    // a clean flat design was a border nobody could see.
+    //
+    // slate300 measures 1.49:1 on a white card and 1.42:1 on the page. Still
+    // quiet — it is a hairline, not a rule — but present. Found 2026-08-21 by
+    // measuring the token pairs rather than by photographing more screens:
+    // light mode had nine renders out of 204 and this was in every one of
+    // them.
+    outlineVariant: MlTokens.slate300,
 
     shadow: MlTokens.overlayDark,
     scrim: MlTokens.overlayDark,

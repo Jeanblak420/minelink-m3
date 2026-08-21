@@ -64,7 +64,11 @@ void main() {
       final s = MlSemantic.from(Brightness.light);
       expect(s.surfaceApp, const Color(0xFFF8FAFC));
       expect(s.surfaceCard, const Color(0xFFFFFFFF));
-      expect(s.borderCard, const Color(0xFFE7EDF3));
+      // slate300, raised from #E7EDF3 on 2026-08-21. The old value measured
+      // 1.18:1 against a white card — below the floor
+      // `test/design/token_contrast_test.dart` sets for a hairline being
+      // visible at all, so in light mode the cards and tables had no edges.
+      expect(s.borderCard, MlTokens.slate300);
       expect(s.textStrong, const Color(0xFF0F172A));
     });
 

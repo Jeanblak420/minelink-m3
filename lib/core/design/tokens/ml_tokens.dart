@@ -586,7 +586,12 @@ class MlSemantic {
       borderSubtle: scheme.outlineVariant,
       borderCard: scheme.outlineVariant,
       borderStrong: scheme.outline,
-      borderAccent: scheme.primary.withValues(alpha: 0.45),
+      // 0.72, not 0.45. This is the border that marks a SELECTED or focused
+      // element, and at 0.45 it measured 1.95:1 against a white card and
+      // 2.94:1 on dark — under the 3:1 WCAG puts on a UI boundary a person has
+      // to be able to see, in both brightnesses. At 0.70 it is 3.03:1 and
+      // 5.4:1. The hue is unchanged; only how much of it lands.
+      borderAccent: scheme.primary.withValues(alpha: 0.72),
       divider: scheme.outlineVariant,
     );
     _cachedScheme = scheme;
