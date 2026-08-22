@@ -199,5 +199,35 @@ void _notifierGroup() {
             'happened if this tells it.',
       );
     });
+
+    test('a refused ATTACHMENT insert is rethrown too', () async {
+      // The same swallow, one method down, and it survived the 2026-08-22 fix
+      // because that fix was applied to `sendMessage` alone. Found by reading
+      // the file while chasing an unrelated question on 2026-08-22.
+      //
+      // More is lost here than in the text case: `sendFileMessage` is called
+      // from `onUploadComplete`, so the object is ALREADY in the `chat_files`
+      // bucket by the time it runs. A swallowed failure leaves that object
+      // with no row pointing at it, the attach panel closes, and the sender
+      // watches their attachment not appear with nothing on screen to say why.
+      final notifier = ChatMessagesNotifier('room-under-test');
+      addTearDown(notifier.dispose);
+
+      await expectLater(
+        notifier.sendFileMessage(
+          'Sent a file',
+          _me,
+          'Load Controller',
+          null,
+          'chat_files/room-under-test/weighbridge-ticket.pdf',
+          'pdf',
+          'weighbridge-ticket.pdf',
+        ),
+        throwsA(anything),
+        reason: 'a failed attachment must reach the screen that offered to '
+            'send it; `ChatScreen` awaits this and shows "Attachment not '
+            'sent." — it can only do that if this tells it',
+      );
+    });
   });
 }

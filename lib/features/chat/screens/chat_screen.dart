@@ -174,7 +174,15 @@ class ChatMessagesNotifier extends StateNotifier<List<ChatMessage>> {
         'file_name': fileName,
       });
     } catch (e) {
+      // RETHROWN, for the same reason [sendMessage] is — and with more at
+      // stake. By the time this runs the file is ALREADY in the `chat_files`
+      // bucket: `onUploadComplete` is what called us. So a swallowed failure
+      // here leaves an uploaded object with no row pointing at it, while the
+      // attach panel closes and the sender watches their attachment simply not
+      // appear. The text path was fixed on 2026-08-22 and this one, three
+      // layers of the identical fault, was left in place.
       debugPrint('Error sending file message: $e');
+      rethrow;
     }
   }
 
@@ -419,25 +427,47 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               bucketName: 'chat_files',
               folderPath: widget.chatRoom.id,
               returnStoragePath: true,
-              onUploadComplete: (fileUrls) {
+              // AWAITED, and its failure is said out loud.
+              //
+              // This was fire-and-forget over a notifier that swallowed every
+              // exception, so the panel closed, the upload had succeeded, and
+              // the attachment never appeared in the thread with nothing on
+              // screen to say why. Same three layers as the text composer's
+              // send, one surface across.
+              onUploadComplete: (fileUrls) async {
                 if (fileUrls.isNotEmpty) {
                   final fileName = _fileNameFromUrl(fileUrls[0]);
                   final fileType = _getFileType(fileName);
 
-                  // Send file message
-                  ref
-                      .read(chatMessagesProvider(widget.chatRoom.id).notifier)
-                      .sendFileMessage(
-                        'Sent a file',
-                        widget.currentUserId,
-                        widget.currentUserName,
-                        widget.currentUserAvatarUrl,
-                        fileUrls[0],
-                        fileType,
-                        fileName,
-                      );
+                  try {
+                    await ref
+                        .read(chatMessagesProvider(widget.chatRoom.id).notifier)
+                        .sendFileMessage(
+                          'Sent a file',
+                          widget.currentUserId,
+                          widget.currentUserName,
+                          widget.currentUserAvatarUrl,
+                          fileUrls[0],
+                          fileType,
+                          fileName,
+                        );
+                  } catch (e) {
+                    // `context.mounted`, not `mounted`: this closure captures
+                    // the BUILD context, not `State.context`, and the analyzer
+                    // is right that a `State.mounted` check says nothing about
+                    // the element this `ScaffoldMessenger.of` will walk.
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Attachment not sent. ${friendlyError(e)}',
+                        ),
+                      ),
+                    );
+                  }
                 }
 
+                if (!mounted) return;
                 setState(() {
                   _isAttaching = false;
                 });

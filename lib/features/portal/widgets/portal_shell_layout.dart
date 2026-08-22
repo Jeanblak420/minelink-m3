@@ -40,6 +40,46 @@ import 'package:flutter_application_1/core/design/components/ml_expiry_notice.da
 import 'package:flutter_application_1/features/portal/providers/company_access_provider.dart';
 import 'package:flutter_application_1/core/layout/text_scale.dart';
 
+/// Whether the floating chat launcher belongs over [location].
+///
+/// It does not belong over a surface that IS the conversation. `/communications`
+/// has been excluded since the dock was introduced, for the plain reason that a
+/// floating button offering to open chat, on the chat hub, offers nothing.
+///
+/// `/chat/:chatRoomId` — the full-page thread — was not excluded, and there the
+/// redundancy is the smaller half of it: **the launcher lands on the composer's
+/// send button.** Measured in a browser as `roadhaul.admin` on 2026-08-22, in a
+/// 1689×1277 window, with the thread open at
+/// `#/chat/24f1bef3-c3be-41c7-973c-6625e4fa3913`:
+///
+///     send button   x 1633..1677   y 1220..1264   (44×44)
+///     dock launcher x 1601..1667   y 1189..1255   (66×66)
+///     overlap       x 1633..1667   y 1220..1255   = 34×35 px
+///
+/// That is **61% of the send button**, and the launcher is painted above it, so
+/// a real thumb aimed at Send opens the dock instead. It is the same fault
+/// `chat_dock_keeps_off_the_bottom_bar_test.dart` was written for — the dock
+/// wraps the whole shell and knows nothing about the bottom-anchored chrome
+/// underneath it — one surface further on. The bar got a reserve; the composer
+/// got nothing, because no page but this one has a composer at the bottom of
+/// the window.
+///
+/// Suppressing the dock here costs no capability: you are already in a
+/// conversation, and the way to another one is the hub, exactly as it is from
+/// `/communications`.
+bool portalShowsChatDock({
+  required String location,
+  required bool isEmployeeWithoutRole,
+}) {
+  if (isEmployeeWithoutRole) return false;
+  // `/communications` and `/communications/anything`.
+  if (location.startsWith('/communications')) return false;
+  // `/chat/:chatRoomId`. Matched with the trailing slash so a future
+  // `/chatter`-shaped route is not silently swept in with it.
+  if (location == '/chat' || location.startsWith('/chat/')) return false;
+  return true;
+}
+
 /// The rail for a session with no operational surface: an employee whose role
 /// has not been assigned yet, or a workspace whose org type has not resolved.
 ///
@@ -487,8 +527,10 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
         : null;
     final themeMode = ref.watch(themeModeProvider);
 
-    final showChatFab =
-        !vm.isEmployeeWithoutRole && !location.startsWith('/communications');
+    final showChatFab = portalShowsChatDock(
+      location: location,
+      isEmployeeWithoutRole: vm.isEmployeeWithoutRole,
+    );
 
     // Driver mobile: a phone-style Dashboard / Trip / Profile bottom bar (the
     // drawer still holds Live map / Truck locations / positions / Driver, so no
