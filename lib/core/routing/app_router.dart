@@ -69,6 +69,7 @@ import 'package:flutter_application_1/core/routing/return_to.dart';
 import 'package:flutter_application_1/features/portal/nav/portal_nav.dart';
 import 'package:flutter_application_1/features/employee/screens/employee_profile_screen.dart';
 import 'package:flutter_application_1/features/chat/models/chat_room_model.dart';
+import 'package:flutter_application_1/features/chat/screens/chat_room_route.dart';
 import 'package:flutter_application_1/features/chat/screens/chat_screen.dart';
 import 'package:flutter_application_1/features/chat/screens/communications_hub_screen.dart';
 import 'package:flutter_application_1/features/chat/screens/messages_screen.dart';
@@ -194,8 +195,6 @@ class AppRouter {
     '/whatsapp-otp',
   };
 
-
-
   /// Cached profile fields for routing (role, user type, password gate).
   static String? _cachedPlatformRole;
   static String? _cachedUserType;
@@ -283,7 +282,8 @@ class AppRouter {
           ? 'superGlobalSerialAdminMain'
           : rawPlatformRole;
       _cachedUserType = profile?['user_type'] as String?;
-      _cachedMustChangePassword = profile?['must_change_password'] as bool? ?? false;
+      _cachedMustChangePassword =
+          profile?['must_change_password'] as bool? ?? false;
     } catch (e) {
       _logger.w('Failed to refresh profile gate fields: $e');
     }
@@ -319,7 +319,9 @@ class AppRouter {
         // company_id test matters — a self-signup that has not chosen a
         // company yet is a different state with its own screen.
         _cachedIsEmployeeWithoutRole =
-            employee != null && companyId != null && _cachedEmployeeRole == null;
+            employee != null &&
+            companyId != null &&
+            _cachedEmployeeRole == null;
         if (companyId == null) {
           _cachedOrgType = null;
         } else {
@@ -408,8 +410,7 @@ class AppRouter {
       }
 
       if (isLoggedIn &&
-          (currentPath == '/login' ||
-              currentPath == '/forgot-password')) {
+          (currentPath == '/login' || currentPath == '/forgot-password')) {
         final isAdmin = _cachedPlatformRole == 'superGlobalSerialAdminMain';
 
         // G3 (S2-9) FIRST, and deliberately ahead of the deep link: a
@@ -426,16 +427,16 @@ class AppRouter {
         // it is a safe in-app path. Every guard below still applies to it — an
         // employee who deep-links a route their role does not own is bounced
         // by the role guard exactly as if they had typed it while signed in.
-        final returnTo = safeReturnTo(
-          state.uri.queryParameters[kReturnToKey],
-        );
+        final returnTo = safeReturnTo(state.uri.queryParameters[kReturnToKey]);
         if (returnTo != null) {
           _logger.d('Resuming interrupted deep link to $returnTo');
           return returnTo;
         }
 
         if (isAdmin) {
-          _logger.d('Redirecting super admin to /super-admin from $currentPath');
+          _logger.d(
+            'Redirecting super admin to /super-admin from $currentPath',
+          );
           return '/super-admin';
         }
         _logger.d('Redirecting authenticated user to /home from $currentPath');
@@ -459,8 +460,7 @@ class AppRouter {
         final pwd = mandatoryPasswordRedirect(
           path: currentPath,
           mustChangePassword: _cachedMustChangePassword,
-          isPlatformAdmin:
-              _cachedPlatformRole == 'superGlobalSerialAdminMain',
+          isPlatformAdmin: _cachedPlatformRole == 'superGlobalSerialAdminMain',
         );
         if (pwd != null && currentPath != '/login') return pwd;
       }
@@ -548,7 +548,9 @@ class AppRouter {
           currentPath != '/mandatory-password-change') {
         final lastVerified = await _deviceVerificationStore.lastVerifiedAt();
         if (requiresReverification(lastVerified, DateTime.now())) {
-          _logger.d('WhatsApp re-verification required; redirecting to /whatsapp-otp');
+          _logger.d(
+            'WhatsApp re-verification required; redirecting to /whatsapp-otp',
+          );
           return '/whatsapp-otp';
         }
       }
@@ -590,7 +592,9 @@ class AppRouter {
       // everyone else must match the section's org type — or the driver role
       // for `/portal/driver/*`. Unauthorized → `/home` (WT's always-safe
       // role-tab hub), never a hard error.
-      if (isLoggedIn && currentPath.startsWith('/portal/') && !isPlatformAdmin) {
+      if (isLoggedIn &&
+          currentPath.startsWith('/portal/') &&
+          !isPlatformAdmin) {
         if (shouldRefreshPortalGate(
           loaded: _portalGateFieldsLoaded,
           fetchedAt: _portalGateFetchedAt,
@@ -603,12 +607,12 @@ class AppRouter {
         }
         final String? requiredOrgType =
             _pathInPortalSection(currentPath, '/portal/mine')
-                ? OrgType.mineSupplier.name
-                : _pathInPortalSection(currentPath, '/portal/buyer')
-                    ? OrgType.buyer.name
-                    : _pathInPortalSection(currentPath, '/portal/transporter')
-                        ? OrgType.transporter.name
-                        : null;
+            ? OrgType.mineSupplier.name
+            : _pathInPortalSection(currentPath, '/portal/buyer')
+            ? OrgType.buyer.name
+            : _pathInPortalSection(currentPath, '/portal/transporter')
+            ? OrgType.transporter.name
+            : null;
         if (requiredOrgType != null && _cachedOrgType != requiredOrgType) {
           _logger.w(
             'Blocked $currentPath: org type ${_cachedOrgType ?? 'none'} '
@@ -659,8 +663,9 @@ class AppRouter {
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/whatsapp-otp',
-        builder: (context, state) =>
-            WhatsAppOtpScreen(whatsappNumber: state.uri.queryParameters['number']),
+        builder: (context, state) => WhatsAppOtpScreen(
+          whatsappNumber: state.uri.queryParameters['number'],
+        ),
       ),
       GoRoute(
         path: '/mandatory-password-change',
@@ -712,7 +717,10 @@ class AppRouter {
       ShellRoute(
         builder: (context, state, child) => PortalShellLayout(child: child),
         routes: [
-          GoRoute(path: '/home', builder: (context, state) => const HomeTabBodyScreen()),
+          GoRoute(
+            path: '/home',
+            builder: (context, state) => const HomeTabBodyScreen(),
+          ),
           GoRoute(
             path: '/profile',
             builder: (context, state) => const ProfileScreen(),
@@ -759,8 +767,9 @@ class AppRouter {
           ),
           GoRoute(
             path: '/operations',
-            builder: (context, state) =>
-                OperationsHubScreen(initialTabId: state.uri.queryParameters['tab']),
+            builder: (context, state) => OperationsHubScreen(
+              initialTabId: state.uri.queryParameters['tab'],
+            ),
           ),
           GoRoute(
             path: '/communications',
@@ -783,7 +792,8 @@ class AppRouter {
           GoRoute(
             path: '/companies/:orgType',
             builder: (context, state) {
-              final orgTypeStr = state.pathParameters['orgType'] ?? 'mineSupplier';
+              final orgTypeStr =
+                  state.pathParameters['orgType'] ?? 'mineSupplier';
               final orgType = OrgType.values.firstWhere(
                 (e) => e.name == orgTypeStr,
                 orElse: () => OrgType.mineSupplier,
@@ -832,8 +842,20 @@ class AppRouter {
             builder: (context, state) {
               final chatArgs = state.extra as ChatScreenArgs?;
 
+              // NOT the dashboard. This used to `return const
+              // HomeTabBodyScreen()` when `extra` was absent — so every arrival
+              // that did not come from the one tap in the Communications hub
+              // (a refresh, a bookmark, a pasted link, a notification deep
+              // link) silently got the WORKSPACE under a top bar reading
+              // "Chat", and `:chatRoomId` was parsed and thrown away.
+              // Photographed in a browser as `roadhaul.admin`, 2026-08-22.
+              //
+              // `ChatRoomRoute` resolves the room from the id through the same
+              // provider the hub reads, so the URL is a real address.
               if (chatArgs == null) {
-                return const HomeTabBodyScreen();
+                return ChatRoomRoute(
+                  chatRoomId: state.pathParameters['chatRoomId'] ?? '',
+                );
               }
 
               return ChatScreen(
@@ -1270,8 +1292,8 @@ class AppRouter {
           // Phase-2 T5/T6: transporter trips + waybill — same wiring as mine.
           GoRoute(
             path: '/portal/transporter/trips',
-            builder: (context, state) => const PortalTripsScreen(
-                basePath: '/portal/transporter/trips'),
+            builder: (context, state) =>
+                const PortalTripsScreen(basePath: '/portal/transporter/trips'),
           ),
           GoRoute(
             path: '/portal/transporter/trips/:id',
@@ -1327,9 +1349,8 @@ class AppRouter {
           // drives TripStatus.
           GoRoute(
             path: '/portal/transporter/drop-off/:tripId',
-            builder: (context, state) => DropOffScreen(
-              tripId: state.pathParameters['tripId'] ?? '',
-            ),
+            builder: (context, state) =>
+                DropOffScreen(tripId: state.pathParameters['tripId'] ?? ''),
           ),
 
           // Driver (`/portal/driver/*`) — the 3-tab driver app shell
@@ -1539,8 +1560,7 @@ class AppRouter {
               };
               return RequestReviewScreen(
                 key: ValueKey('req:$type'),
-                requestType:
-                    origin == null ? type : 'transportation',
+                requestType: origin == null ? type : 'transportation',
                 origin: origin,
               );
             },

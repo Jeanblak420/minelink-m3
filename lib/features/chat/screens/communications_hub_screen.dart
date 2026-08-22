@@ -24,7 +24,7 @@ class CommunicationsHubScreen extends ConsumerWidget {
     final authState = ref.watch(authStateProvider);
     final companyState = ref.watch(companyProvider);
     final employeeState = ref.watch(employeeProvider);
-    final access = _CommunicationsAccess.fromState(
+    final access = CommunicationsAccess.fromState(
       authStateUserId: authState.user?.id,
       userType: authState.userType,
       company: companyState.company,
@@ -43,7 +43,8 @@ class CommunicationsHubScreen extends ConsumerWidget {
       return const MlEmptyState(
         icon: Icons.forum_outlined,
         title: 'Communications Hub',
-        message: 'A linked company profile is required before live '
+        message:
+            'A linked company profile is required before live '
             'announcements and chat become available.',
       );
     }
@@ -79,8 +80,7 @@ class CommunicationsHubScreen extends ConsumerWidget {
                   label: 'Refresh',
                   icon: Icons.refresh,
                   compact: true,
-                  onPressed:
-                      state.isLoading ? null : () => notifier.refresh(),
+                  onPressed: state.isLoading ? null : () => notifier.refresh(),
                 ),
               ],
             ),
@@ -162,18 +162,14 @@ class CommunicationsHubScreen extends ConsumerWidget {
           if (state.error != null)
             Builder(
               builder: (context) {
-                final tone = MlTone.error.colors(
-                  Theme.of(context).brightness,
-                );
+                final tone = MlTone.error.colors(Theme.of(context).brightness);
                 return Container(
                   margin: const EdgeInsets.fromLTRB(24, 12, 24, 0),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: tone.bg,
                     borderRadius: BorderRadius.circular(MlTokens.rMd),
-                    border: Border.all(
-                      color: tone.fg.withValues(alpha: 0.28),
-                    ),
+                    border: Border.all(color: tone.fg.withValues(alpha: 0.28)),
                   ),
                   child: Row(
                     children: [
@@ -215,20 +211,20 @@ class CommunicationsHubScreen extends ConsumerWidget {
   }
 }
 
-class _CommunicationsAccess {
+class CommunicationsAccess {
   final String userId;
   final Company company;
   final Employee? employee;
   final bool isCompanyAccount;
 
-  const _CommunicationsAccess({
+  const CommunicationsAccess({
     required this.userId,
     required this.company,
     required this.employee,
     required this.isCompanyAccount,
   });
 
-  static _CommunicationsAccess? fromState({
+  static CommunicationsAccess? fromState({
     required String? authStateUserId,
     required UserType? userType,
     required Company? company,
@@ -240,7 +236,7 @@ class _CommunicationsAccess {
     }
 
     if (userType?.isCompany == true && company != null) {
-      return _CommunicationsAccess(
+      return CommunicationsAccess(
         userId: authStateUserId,
         company: company,
         employee: null,
@@ -252,7 +248,7 @@ class _CommunicationsAccess {
         employeeCompany != null &&
         employee != null &&
         employee.status == 'active') {
-      return _CommunicationsAccess(
+      return CommunicationsAccess(
         userId: authStateUserId,
         company: employeeCompany,
         employee: employee,
@@ -502,7 +498,7 @@ class _AnnouncementsTab extends StatelessWidget {
 }
 
 class _ChatRoomsTab extends StatelessWidget {
-  final _CommunicationsAccess access;
+  final CommunicationsAccess access;
   final CommunicationsState state;
   final VoidCallback onCreate;
 
@@ -553,9 +549,8 @@ class _ChatRoomsTab extends StatelessWidget {
           )
         else
           ...state.chatRooms.map((room) {
-            final participants = _participantsForRoom(room, access, state);
-            final hasLast =
-                room.lastMessageContent?.trim().isNotEmpty == true;
+            final participants = chatRoomParticipants(room, access, state);
+            final hasLast = room.lastMessageContent?.trim().isNotEmpty == true;
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: MlCard(
@@ -601,7 +596,8 @@ class _ChatRoomsTab extends StatelessWidget {
                               const SizedBox(width: 8),
                               Text(
                                 MlTime.stamp(
-                                    room.lastMessageTimestamp ?? room.createdAt),
+                                  room.lastMessageTimestamp ?? room.createdAt,
+                                ),
                                 style: context.mlText.code(
                                   color: semantic.textFaint,
                                   size: 11,
@@ -619,7 +615,9 @@ class _ChatRoomsTab extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: context.mlText.bodyMedium.copyWith(
                               color: semantic.textMuted,
-                              fontStyle: hasLast ? FontStyle.normal : FontStyle.italic,
+                              fontStyle: hasLast
+                                  ? FontStyle.normal
+                                  : FontStyle.italic,
                             ),
                           ),
                           if (participants.isNotEmpty) ...[
@@ -642,44 +640,51 @@ class _ChatRoomsTab extends StatelessWidget {
       ],
     );
   }
+}
 
-  List<AvatarUser> _participantsForRoom(
-    ChatRoom room,
-    _CommunicationsAccess access,
-    CommunicationsState state,
-  ) {
-    final participants = <AvatarUser>[];
+/// The avatar row for a chat room: the signed-in user marked "You", and every
+/// other participant resolved against the contact list.
+///
+/// A top-level function rather than a method on the hub because
+/// `ChatRoomRoute` needs exactly this to rebuild `ChatScreenArgs` from a bare
+/// room id — the `/chat/:chatRoomId` URL used to carry no other information
+/// and silently rendered the DASHBOARD instead of the chat.
+List<AvatarUser> chatRoomParticipants(
+  ChatRoom room,
+  CommunicationsAccess access,
+  CommunicationsState state,
+) {
+  final participants = <AvatarUser>[];
 
-    for (final userId in room.participantIds) {
-      if (userId == access.userId) {
-        participants.add(
-          AvatarUser(
-            id: userId,
-            name: access.currentUserName,
-            avatarUrl: access.currentUserAvatarUrl,
-            status: 'You',
-          ),
-        );
-        continue;
-      }
-
-      final contact = state.contacts.cast<ChatContactOption?>().firstWhere(
-        (entry) => entry?.userId == userId,
-        orElse: () => null,
-      );
-
+  for (final userId in room.participantIds) {
+    if (userId == access.userId) {
       participants.add(
         AvatarUser(
           id: userId,
-          name: contact?.displayName ?? 'Participant',
-          avatarUrl: contact?.avatarUrl,
-          status: contact?.subtitle,
+          name: access.currentUserName,
+          avatarUrl: access.currentUserAvatarUrl,
+          status: 'You',
         ),
       );
+      continue;
     }
 
-    return participants;
+    final contact = state.contacts.cast<ChatContactOption?>().firstWhere(
+      (entry) => entry?.userId == userId,
+      orElse: () => null,
+    );
+
+    participants.add(
+      AvatarUser(
+        id: userId,
+        name: contact?.displayName ?? 'Participant',
+        avatarUrl: contact?.avatarUrl,
+        status: contact?.subtitle,
+      ),
+    );
   }
+
+  return participants;
 }
 
 class _EmptyCommunicationsState extends StatelessWidget {
@@ -748,15 +753,9 @@ Future<void> _showAnnouncementDialog(
                         initialValue: importance,
                         label: 'Importance',
                         entries: const [
-                          DropdownMenuEntry(
-                            value: 'normal',
-                            label: 'Normal',
-                          ),
+                          DropdownMenuEntry(value: 'normal', label: 'Normal'),
                           DropdownMenuEntry(value: 'high', label: 'High'),
-                          DropdownMenuEntry(
-                            value: 'extreme',
-                            label: 'Extreme',
-                          ),
+                          DropdownMenuEntry(value: 'extreme', label: 'Extreme'),
                         ],
                         onSelected: (value) =>
                             setState(() => importance = value ?? importance),
@@ -808,7 +807,11 @@ Future<void> _showAnnouncementDialog(
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Could not publish announcement. ${friendlyError(error)}')),
+      SnackBar(
+        content: Text(
+          'Could not publish announcement. ${friendlyError(error)}',
+        ),
+      ),
     );
   }
 }
@@ -924,7 +927,9 @@ Future<void> _showCreateChatRoomDialog(
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Could not create chat room. ${friendlyError(error)}')),
+      SnackBar(
+        content: Text('Could not create chat room. ${friendlyError(error)}'),
+      ),
     );
   }
 }

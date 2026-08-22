@@ -120,7 +120,13 @@ class ChatMessagesNotifier extends StateNotifier<List<ChatMessage>> {
         'reply_to_id': replyToId,
       });
     } catch (e) {
+      // RETHROWN. This used to end here, on a `debugPrint` that goes nowhere a
+      // user can see and nowhere at all in a release web build — so a refused
+      // insert, an expired session or a client-side crash all looked exactly
+      // like a delivered message. `ChatWidget` puts the draft back and says
+      // what happened; it can only do that if this tells it.
       debugPrint('Error sending message: $e');
+      rethrow;
     }
   }
 
@@ -457,8 +463,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             controller: _chatController,
             messages: messages,
             currentUserId: widget.currentUserId,
-            onSendMessage: (message, {String? replyToId}) {
-              ref
+            // AWAITED. This was fire-and-forget over a notifier that caught
+            // every exception into a `debugPrint`, so a send that never left
+            // the device cleared the composer and said nothing.
+            onSendMessage: (message, {String? replyToId}) async {
+              await ref
                   .read(chatMessagesProvider(widget.chatRoom.id).notifier)
                   .sendMessage(
                     message,

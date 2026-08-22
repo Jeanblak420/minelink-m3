@@ -9,6 +9,7 @@ import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/widgets/avatar_stack.dart';
 import 'package:flutter_application_1/features/chat/services/attachment_url.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_chat_palettes.dart';
 
@@ -155,8 +156,14 @@ class ChatWidget extends StatefulWidget {
   /// The current user's ID
   final String currentUserId;
 
-  /// Callback when a message is sent
-  final Function(String message, {String? replyToId}) onSendMessage;
+  /// Callback when a message is sent.
+  ///
+  /// **Returns a future, and it is awaited.** A fire-and-forget send cannot
+  /// report a failure, and this composer clears itself on send — so a caller
+  /// that swallowed its own errors made a lost message indistinguishable from
+  /// a delivered one. See [_ChatWidgetState._sendMessage].
+  final Future<void> Function(String message, {String? replyToId})
+      onSendMessage;
 
   /// Callback when a file is attached
   final Function()? onAttachFile;
@@ -315,16 +322,54 @@ class _ChatWidgetState extends State<ChatWidget> {
     }
   }
 
-  void _sendMessage() {
+  /// Hands the draft to the parent, and only forgets it if that worked.
+  ///
+  /// ## A send that fails must not look like one that worked
+  ///
+  /// This used to call `widget.onSendMessage(...)` and clear the box on the
+  /// very next line, without awaiting anything. `ChatScreen`'s callback is
+  /// `async` and was not awaited either, and the notifier underneath it caught
+  /// every exception into a `debugPrint`. Three layers, none of which could
+  /// report a failure.
+  ///
+  /// So the composer emptied, the send button vanished, and nothing was sent.
+  /// Driven in a browser as `roadhaul.admin` on 2026-08-22, from BOTH entry
+  /// points — the `/chat/:id` URL and the Communications hub's own tap — the
+  /// message never reached the database and no HTTP request was ever issued.
+  /// The user's only evidence that it worked was the box going empty, which is
+  /// exactly what a success looks like.
+  ///
+  /// Now the draft is put BACK if the send throws, and the reason is said out
+  /// loud. Losing what somebody typed is the worst part of a failed send.
+  Future<void> _sendMessage() async {
     final message = _messageController.text.trim();
-    if (message.isNotEmpty) {
-      widget.onSendMessage(message, replyToId: _replyToId);
-      _messageController.clear();
-      _notifyTyping(false);
+    if (message.isEmpty) return;
+
+    final replyToId = _replyToId;
+    final replyToMessage = _replyToMessage;
+
+    // Cleared optimistically, because that is what makes a chat feel like one.
+    _messageController.clear();
+    _notifyTyping(false);
+    setState(() {
+      _replyToId = null;
+      _replyToMessage = null;
+    });
+
+    try {
+      await widget.onSendMessage(message, replyToId: replyToId);
+    } catch (e) {
+      if (!mounted) return;
+      _messageController.text = message;
+      _messageController.selection =
+          TextSelection.collapsed(offset: message.length);
       setState(() {
-        _replyToId = null;
-        _replyToMessage = null;
+        _replyToId = replyToId;
+        _replyToMessage = replyToMessage;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Message not sent. ${friendlyError(e)}')),
+      );
     }
   }
 
@@ -1207,7 +1252,21 @@ class _ChatWidgetState extends State<ChatWidget> {
           const SizedBox(width: 8),
           Padding(
             padding: const EdgeInsets.only(bottom: 1),
-            child: Material(
+            // NAMED. It read as a bare "button" in the accessibility tree —
+            // the only unlabelled control in the composer, and the one that
+            // does the thing.
+            //
+            // A `Tooltip`, NOT a `Semantics` wrapper inside the `InkWell`:
+            // that was tried first and it swallowed the tap. The InkWell's own
+            // semantics node carries the tap ACTION, and an inner
+            // `Semantics(button: true)` merged over it as a node advertising a
+            // button with no action behind it — so the control announced
+            // itself correctly and did nothing at all when clicked. Caught by
+            // driving it in a browser with a probe in `_sendMessage` that
+            // never printed.
+            child: Tooltip(
+              message: 'Send message',
+              child: Material(
               color: hasDraft ? MlTokens.accent : semantic.surfaceSunken,
               shape: const CircleBorder(),
               child: InkWell(
@@ -1222,6 +1281,7 @@ class _ChatWidgetState extends State<ChatWidget> {
                     color: hasDraft ? MlTokens.inkOnFill : semantic.textFaint,
                   ),
                 ),
+              ),
               ),
             ),
           ),

@@ -56,7 +56,7 @@ Future<void> _pump(
         body: ChatWidget(
           messages: messages,
           currentUserId: _me,
-          onSendMessage: (_, {String? replyToId}) {},
+          onSendMessage: (_, {String? replyToId}) async {},
         ),
       ),
     ),
