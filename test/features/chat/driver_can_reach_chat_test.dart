@@ -26,6 +26,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/features/chat/providers/messaging_providers.dart';
 import 'package:flutter_application_1/features/chat/widgets/chat_dock.dart';
 
@@ -136,8 +137,12 @@ void main() {
           chatConversationsProvider.overrideWith((ref) => Stream.value(const [])),
           chatContactsProvider.overrideWith((ref) async => const []),
         ],
-        child: const MaterialApp(
-          home: ChatDock(child: Scaffold(body: SizedBox.expand())),
+        // `theme:`, not a bare MaterialApp — stock Material's type scale and
+        // font family are a measurement of text this app never draws
+        // (`test-renders-under-the-app-theme`, and CLAUDE.md §10.5).
+        child: MaterialApp(
+          theme: AppTheme.build(Brightness.dark),
+          home: const ChatDock(child: Scaffold(body: SizedBox.expand())),
         ),
       ),
     );
