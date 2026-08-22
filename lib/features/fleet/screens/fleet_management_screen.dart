@@ -66,7 +66,8 @@ class FleetManagementScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
             child: MlPageHeader(
               title: 'Fleet Management',
-              description: 'Every vehicle registered to this company, and '
+              description:
+                  'Every vehicle registered to this company, and '
                   'whether it is available, on route or in maintenance.',
               actions: [
                 MlButton.ghost(
@@ -146,46 +147,97 @@ class FleetManagementScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Fleet summary — kit KPI stat row.
-            LayoutBuilder(builder: (context, c) {
-              final w = c.maxWidth;
-              const gap = 14.0;
-              final cols = w > 900 ? 4 : 2;
-              final itemW = (w - gap * (cols - 1)) / cols;
-              return Wrap(
-                spacing: gap,
-                runSpacing: gap,
-                children: [
-                  SizedBox(
-                      width: itemW,
-                      child: MlStatCard(
-                          label: 'Total Fleet',
-                          value: '${fleetState.vehicles.length}',
-                          icon: Icons.local_shipping_outlined,
-                          tone: MlTone.accent)),
-                  SizedBox(
-                      width: itemW,
-                      child: MlStatCard(
-                          label: 'On Trip / Assigned',
-                          value: '${fleetState.assignedVehicles.length}',
-                          icon: Icons.bolt_outlined,
-                          tone: MlTone.transit)),
-                  SizedBox(
-                      width: itemW,
-                      child: MlStatCard(
-                          label: 'Available',
-                          value: '${fleetState.unassignedVehicles.length}',
-                          icon: Icons.check_circle_outline,
-                          tone: MlTone.done)),
-                  SizedBox(
-                      width: itemW,
-                      child: MlStatCard(
-                          label: 'Inactive',
-                          value: '${fleetState.inactiveVehicles.length}',
-                          icon: Icons.do_not_disturb_on_outlined,
-                          tone: MlTone.warn)),
-                ],
-              );
-            }),
+            //
+            // Read from `fleetStatusProvider`, NOT from the driver-assignment
+            // flags on the vehicle rows: availability in this product is
+            // derived from active trips server-side, and the two are not the
+            // same question. Null while the read is in flight, which renders
+            // as "—" rather than as a confident zero.
+            Builder(
+              builder: (context) {
+                final statuses = ref.watch(fleetStatusProvider(companyId));
+                final rows = statuses.valueOrNull;
+                final onRoute = rows?.where((v) => v.onRoute).length;
+                final available = rows?.where((v) => v.available).length;
+                final inMaintenance = rows
+                    ?.where((v) => v.inMaintenance)
+                    .length;
+                return LayoutBuilder(
+                  builder: (context, c) {
+                    final w = c.maxWidth;
+                    const gap = 14.0;
+                    final cols = w > 900 ? 4 : 2;
+                    final itemW = (w - gap * (cols - 1)) / cols;
+                    return Wrap(
+                      spacing: gap,
+                      runSpacing: gap,
+                      children: [
+                        SizedBox(
+                          width: itemW,
+                          child: MlStatCard(
+                            label: 'Total Fleet',
+                            value: '${fleetState.vehicles.length}',
+                            icon: Icons.local_shipping_outlined,
+                            tone: MlTone.accent,
+                            caption: 'all_vehicles',
+                          ),
+                        ),
+                        // ON ROUTE AND AVAILABLE ARE DERIVED FROM ACTIVE TRIPS, not
+                        // from whether a driver happens to be rostered. They used to
+                        // read `hasAssignedDriver`, under the labels "On Trip /
+                        // Assigned" and "Available", and on 2026-08-22 that put every
+                        // one of Roadhaul's three trucks in the WRONG bucket: the two
+                        // carrying loads to Johannesburg have no driver row, so they
+                        // counted as Available, while the one parked truck has a
+                        // driver and counted as On Trip. "Available" is the number an
+                        // admin allocates from.
+                        //
+                        // `fleetStatusProvider` is the same server-derived source the
+                        // Trucks On Route screen and the dashboard already read
+                        // (`list_transporter_fleet_status`, CLAUDE.md §4), so all
+                        // three now agree by construction rather than by coincidence.
+                        SizedBox(
+                          width: itemW,
+                          child: MlStatCard(
+                            label: 'On route',
+                            value: onRoute == null ? '—' : '$onRoute',
+                            icon: Icons.bolt_outlined,
+                            tone: MlTone.transit,
+                            caption: 'carrying_a_load',
+                          ),
+                        ),
+                        SizedBox(
+                          width: itemW,
+                          child: MlStatCard(
+                            label: 'Available',
+                            value: available == null ? '—' : '$available',
+                            icon: Icons.check_circle_outline,
+                            tone: MlTone.done,
+                            // A truck in maintenance is active, not on a route,
+                            // and NOT allocatable. Without saying so the four
+                            // cards stop adding up to the total and the reader
+                            // has no way to see why.
+                            caption: (inMaintenance ?? 0) > 0
+                                ? 'excludes_${inMaintenance}_in_maintenance'
+                                : 'ready_to_allocate',
+                          ),
+                        ),
+                        SizedBox(
+                          width: itemW,
+                          child: MlStatCard(
+                            label: 'Inactive',
+                            value: '${fleetState.inactiveVehicles.length}',
+                            icon: Icons.do_not_disturb_on_outlined,
+                            tone: MlTone.warn,
+                            caption: 'not_in_service',
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
 
             const SizedBox(height: 24),
 
@@ -193,10 +245,14 @@ class FleetManagementScreen extends ConsumerWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                MlSectionTitle('Fleet Register',
-                    icon: Icons.local_shipping_outlined,
-                    meta: mlCount(
-                        fleetState.activeVehicles.length, 'active vehicle')),
+                MlSectionTitle(
+                  'Fleet Register',
+                  icon: Icons.local_shipping_outlined,
+                  meta: mlCount(
+                    fleetState.activeVehicles.length,
+                    'active vehicle',
+                  ),
+                ),
                 SizedBox(
                   width: double.infinity,
                   child: FleetVehicleTable(
@@ -238,10 +294,14 @@ class FleetManagementScreen extends ConsumerWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MlSectionTitle('Inactive Vehicles',
-                      icon: Icons.do_not_disturb_on_outlined,
-                      meta: mlCount(
-                          fleetState.inactiveVehicles.length, 'vehicle')),
+                  MlSectionTitle(
+                    'Inactive Vehicles',
+                    icon: Icons.do_not_disturb_on_outlined,
+                    meta: mlCount(
+                      fleetState.inactiveVehicles.length,
+                      'vehicle',
+                    ),
+                  ),
                   SizedBox(
                     width: double.infinity,
                     child: FleetVehicleTable(
@@ -279,10 +339,8 @@ class FleetManagementScreen extends ConsumerWidget {
   ) {
     showDialog(
       context: context,
-      builder: (context) => EditVehicleDialog(
-        companyId: companyId,
-        vehicle: vehicle,
-      ),
+      builder: (context) =>
+          EditVehicleDialog(companyId: companyId, vehicle: vehicle),
     );
   }
 
@@ -339,8 +397,9 @@ class FleetManagementScreen extends ConsumerWidget {
               Navigator.of(context).pop();
             },
             style: FilledButton.styleFrom(
-              backgroundColor:
-                  MlTone.error.colors(Theme.of(context).brightness).fg,
+              backgroundColor: MlTone.error
+                  .colors(Theme.of(context).brightness)
+                  .fg,
             ),
             child: const Text('Unassign'),
           ),
@@ -389,8 +448,9 @@ class FleetManagementScreen extends ConsumerWidget {
               );
             },
             style: FilledButton.styleFrom(
-              backgroundColor:
-                  MlTone.error.colors(Theme.of(context).brightness).fg,
+              backgroundColor: MlTone.error
+                  .colors(Theme.of(context).brightness)
+                  .fg,
             ),
             child: const Text('Yes'),
           ),
