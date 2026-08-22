@@ -275,48 +275,80 @@ class DriverDashboardTab extends ConsumerWidget {
                     : null,
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _MiniStat(
-                      icon: Icons.local_shipping_outlined,
-                      tone: MlTone.accent,
-                      value: '${weekLoads.length}',
-                      label: 'Loads this week',
+              // `IntrinsicHeight` + `stretch`, so the pair CANNOT sit crooked.
+              //
+              // `_MiniStat`'s label has no `maxLines` — it wraps rather than
+              // truncating, which is right for a label a driver has to read
+              // outdoors. But a `Row` of two `Expanded` cards centres children
+              // of different heights, so the moment one label wrapped and the
+              // other did not the two cards sat 20px out of line. Measured on
+              // renaming the tonnage card: 134 px beside 154 px at 360 px, and
+              // 150 beside 176 at text scale 1.3.
+              //
+              // Trimming the words to match lengths would be fixing the
+              // symptom, and it would come back the next time a label changed.
+              //
+              // NOT bare `CrossAxisAlignment.stretch`: this Row sits in a
+              // scrollable Column, so its cross axis is unbounded and stretch
+              // alone throws "BoxConstraints forces an infinite height"
+              // (CLAUDE.md §10.4). `IntrinsicHeight` bounds it to the taller
+              // child first, which is exactly the height wanted.
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: _MiniStat(
+                        icon: Icons.local_shipping_outlined,
+                        tone: MlTone.accent,
+                        value: '${weekLoads.length}',
+                        label: 'Loads this week',
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _MiniStat(
-                      icon: Icons.monitor_weight_outlined,
-                      tone: MlTone.transit,
-                      value: formatTons(weekTons),
-                      label: 'Tons this week',
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _MiniStat(
+                        icon: Icons.monitor_weight_outlined,
+                        tone: MlTone.transit,
+                        value: formatTons(weekTons),
+                        // "loaded", because the chart further down this same
+                        // screen is headed `Tons delivered / This week` and
+                        // shows a DIFFERENT figure — 170.5 t here against
+                        // 136.3 t there, measured on a real driver 2026-08-23
+                        // with one load weighed and still on the road. Both are
+                        // right; only one of the two labels said what it
+                        // counted, and the driver is paid on the other one.
+                        label: 'Tons loaded this week',
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _MiniStat(
-                      icon: Icons.check_circle_outline,
-                      tone: MlTone.done,
-                      value: '${delivered.length}',
-                      label: 'Deliveries',
+              // The all-time pair, held level the same way — see above.
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: _MiniStat(
+                        icon: Icons.check_circle_outline,
+                        tone: MlTone.done,
+                        value: '${delivered.length}',
+                        label: 'Deliveries',
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _MiniStat(
-                      icon: Icons.scale_outlined,
-                      tone: MlTone.atMine,
-                      value: formatTons(totalTons),
-                      label: 'Total tons',
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _MiniStat(
+                        icon: Icons.scale_outlined,
+                        tone: MlTone.atMine,
+                        value: formatTons(totalTons),
+                        label: 'Total tons',
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
               DriverLiveTrackingCard(hasActiveTrip: active.isNotEmpty),
@@ -510,70 +542,99 @@ class _ActiveTripHero extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: const BoxDecoration(
-                    color: MlTokens.cyan250,
-                    shape: BoxShape.circle,
+            // A WRAP THAT CLAIMS THE ROW, not a Row with a Spacer.
+            //
+            // Neither the eyebrow nor the status pill was flexible, so at
+            // 360 px and text scale 1.3 — a narrow phone with the platform
+            // text size turned up, which is a driver standing outdoors — the
+            // pair overflowed by 44 px and Flutter painted the yellow-and-black
+            // stripe across the driver's hero card. Measured 2026-08-23 with a
+            // real trip loaded; `EN ROUTE TO OFFLOAD` is five characters longer
+            // than the `NO ACTIVE TRIP` the empty state shows, which is why the
+            // portal overflow sweep — which pumps this screen with NO trip
+            // data — has always passed on it (CLAUDE.md §10.5).
+            //
+            // Making either side `Flexible` would ellipsise it, and both are
+            // things the driver needs whole: the eyebrow names the slot and the
+            // pill is the trip's live state. So the pill DROPS TO A SECOND LINE
+            // instead. `SizedBox(width: double.infinity)` because a `Wrap`
+            // sizes to its content, so `spaceBetween` has no free space to
+            // distribute until the wrap is told to fill the row (§10.4).
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: const BoxDecoration(
+                          color: MlTokens.cyan250,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      // "CURRENT TRIP", not "ACTIVE TRIP".
+                      //
+                      // The pill on the right of this same row carries the live
+                      // state, and when there is no trip it reads NO ACTIVE TRIP.
+                      // Beside a fixed eyebrow saying ACTIVE TRIP that is a card
+                      // contradicting itself in one line — photographed on an
+                      // Android emulator on 2026-08-21, driver signed in, no trip
+                      // assigned:
+                      //
+                      //     ● ACTIVE TRIP                    [ NO ACTIVE TRIP ]
+                      //
+                      // The eyebrow names the SLOT and has to stay true whatever is
+                      // in it; the pill says what is in it.
+                      const Text(
+                        'CURRENT TRIP',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                          // FULL white, not `inkOnFill70`.
+                          //
+                          // That token is documented for "the driver card's
+                          // navy gradient", and this is the CYAN end of it. On
+                          // a saturated cyan there is no room for a quieter
+                          // white at all: solving for the alpha that reaches
+                          // 4.5:1 gives 0.965, which is white. So the eyebrow
+                          // is white and stays quieter by being 11px, w800 and
+                          // tracked out beside a 12px pill - size and weight,
+                          // the same answer `textFaint` reached.
+                          color: MlTokens.inkOnFill,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 6),
-                // "CURRENT TRIP", not "ACTIVE TRIP".
-                //
-                // The pill on the right of this same row carries the live
-                // state, and when there is no trip it reads NO ACTIVE TRIP.
-                // Beside a fixed eyebrow saying ACTIVE TRIP that is a card
-                // contradicting itself in one line — photographed on an
-                // Android emulator on 2026-08-21, driver signed in, no trip
-                // assigned:
-                //
-                //     ● ACTIVE TRIP                    [ NO ACTIVE TRIP ]
-                //
-                // The eyebrow names the SLOT and has to stay true whatever is
-                // in it; the pill says what is in it.
-                const Text(
-                  'CURRENT TRIP',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
-                    // FULL white, not `inkOnFill70`.
-                    //
-                    // That token is documented for "the driver card's
-                    // navy gradient", and this is the CYAN end of it. On
-                    // a saturated cyan there is no room for a quieter
-                    // white at all: solving for the alpha that reaches
-                    // 4.5:1 gives 0.965, which is white. So the eyebrow
-                    // is white and stays quieter by being 11px, w800 and
-                    // tracked out beside a 12px pill - size and weight,
-                    // the same answer `textFaint` reached.
-                    color: MlTokens.inkOnFill,
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: MlTokens.inkOnFill.withValues(alpha: 0.16),
-                    borderRadius: MlShape.pill,
-                  ),
-                  child: Text(
-                    statusLabel,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.4,
-                      color: MlTokens.inkOnFill,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: MlTokens.inkOnFill.withValues(alpha: 0.16),
+                      borderRadius: MlShape.pill,
+                    ),
+                    child: Text(
+                      statusLabel,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.4,
+                        color: MlTokens.inkOnFill,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 14),
             Row(

@@ -337,15 +337,38 @@ class _ReadyTruckRow extends StatelessWidget {
         border: Border.all(color: semantic.borderCard),
       ),
       child: LayoutBuilder(builder: (context, c) {
-        final narrow = c.maxWidth < 640;
-        final identity = Row(
+        // THE BREAKPOINT SCALES WITH THE TEXT.
+        //
+        // A fixed 640 asks "is the card wide enough", when the question is
+        // "does the content fit" — and the content is text, which the reader
+        // can double. At text scale 2.0 the side-by-side branch put the truck
+        // identity, the fields and the actions on one 800 px row and ran off
+        // the end of it. Scaling the threshold hands those widths the stacked
+        // layout that already exists for a phone, which is the same answer for
+        // the same reason.
+        final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
+        final narrow = c.maxWidth < 640 * textScale;
+        // A `Wrap`, for the same reason `actions` below is one — and it is the
+        // same fault one row up the card.
+        //
+        // At 360 px and text scale 2.0 the icon well and the registration ran
+        // 22 px past the card, on the row that says WHICH TRUCK is being
+        // weighed. `Flexible` is NOT the fix here: `identity` is dropped
+        // straight into the wide branch's `Row`, where its width is unbounded,
+        // and a flex child under an unbounded constraint throws outright.
+        // A Wrap takes its natural one-line width there and lets the plate
+        // drop under the icon when there is genuinely no room — the plate is
+        // the row's identity and must not be ellipsised away.
+        final identity = Wrap(
+          spacing: 14,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             const MlIconWell(
                 icon: Icons.local_shipping_outlined,
                 tone: MlTone.transit,
                 size: 48,
                 radius: 12),
-            const SizedBox(width: 14),
             MlPlatePill(trip.reg, fontSize: 14),
           ],
         );

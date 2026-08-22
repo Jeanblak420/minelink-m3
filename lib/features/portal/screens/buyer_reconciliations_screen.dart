@@ -330,19 +330,44 @@ class _ReconCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-                MlStatusBadge.forStatus(recon.status),
-                const SizedBox(width: 10),
-                Text(
-                  MlTime.day(recon.updatedAt),
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelSmall
-                      ?.copyWith(color: scheme.onSurfaceVariant),
+                // The badge and the date are the TRAILING pair, and both
+                // were unflexed — so at 360 px and text scale 2.0 they
+                // demanded their natural width side by side and ran 21 px
+                // past the card, however far the `Expanded` title gave way.
+                //
+                // `Flexible` so the pair can shrink, `Wrap` so that when it
+                // does the date drops under the badge instead of either being
+                // ellipsised. This Row is inside a `Column` of bounded width,
+                // so a flex child here is safe — unlike the load controller's
+                // identity row, which is dropped into a shrink-wrapped Row.
+                Flexible(
+                  child: Wrap(
+                    alignment: WrapAlignment.end,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 10,
+                    runSpacing: 4,
+                    children: [
+                      MlStatusBadge.forStatus(recon.status),
+                      Text(
+                        MlTime.day(recon.updatedAt),
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall
+                            ?.copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 14),
-            Row(
+            // A `Wrap`, not a `Row`: two unflexed buttons ran 32 px past
+            // the card at 360 px and text scale 2.0. Neither label can be
+            // ellipsised — a button that cannot say what it does is worse
+            // than a taller card — so the second one drops to its own line.
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
               children: [
                 MlButton.outline(
                   label: 'View',
@@ -350,7 +375,6 @@ class _ReconCard extends ConsumerWidget {
                   compact: true,
                   onPressed: () => _showDetail(context, ref),
                 ),
-                const SizedBox(width: 12),
                 MlButton.outline(
                   label: 'Download',
                   icon: Icons.download_outlined,

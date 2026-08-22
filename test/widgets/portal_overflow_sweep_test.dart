@@ -153,6 +153,33 @@ void main() {
               // laid out nothing. This is the difference between a real sweep
               // and a green tick.
               mirrorCompanyIdProvider.overrideWith((ref) => 'sweep-company'),
+              // THE REAL FIXTURES, not an empty app.
+              //
+              // A company id alone gets past "Company not loaded", and the
+              // note below says so — but every provider then resolves to an
+              // EMPTY list, so this sweep spent 27 screens laying out empty
+              // states. An empty state is short, and short things do not
+              // overflow (CLAUDE.md §10.5).
+              //
+              // Measured 2026-08-23 by turning the data on: four real
+              // overflows the sweep had always passed, on screens it had
+              // always covered —
+              //
+              //   the load controller's truck identity row      22 px @ 360x2.0
+              //   the load controller's whole wide branch       @ 800x2.0
+              //   the buyer reconciliation card's header        21 px @ 360x2.0
+              //   the buyer reconciliation card's two buttons   32 px @ 360x2.0
+              //
+              // and a fifth on the driver's hero card, which this sweep still
+              // cannot see because the hero only exists when there is a trip
+              // to put in it (`driver_week_figures_name_their_basis_test`).
+              //
+              // The load controller's own source already carried a comment
+              // about a 29 px overflow "that no sweep had seen because the
+              // sweep ran with no trips" — found by hand, fixed by hand, and
+              // the sweep left blind to the next one. This is that comment
+              // turned into coverage.
+              ...portalCaptureOverrides(),
               ...overrides,
             ],
             child: MaterialApp(
