@@ -18,8 +18,9 @@ file governs the redesign work.**
 
 ## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The tree is **clean**, **121 commits**, nothing half-applied and nothing
-uncommitted. The tip is `docs: the handoff for the session a whole load moved`;
+The tree is **clean**, **123 commits**, nothing half-applied and nothing
+uncommitted. **The tip is the commit that carries THIS FILE**, so the count
+above includes it;
 the last two CODE commits under it are `61d2b37` (the driver's stale screen)
 and `de5a345` (the rate leak and the delta badge), and the whole gate in §2 was
 run green against them.
@@ -66,7 +67,7 @@ the running app** — §3.
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **121 commits**, clean tree. |
+| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **123 commits**, clean tree. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
@@ -713,7 +714,7 @@ off. Read these TWO handoff files before doing anything else, in this order.
 
 THE PATHS THAT MATTER
 
-  Work happens here (its own git repo, branch `main`, 121 commits, clean):
+  Work happens here (its own git repo, branch `main`, 123 commits, clean):
     C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
   NEVER TOUCHED, for any reason:
@@ -739,8 +740,9 @@ handoff — CHECK IT AT THE START OF THE SESSION AND AGAIN AT THE END:
 
 WHERE I LEFT OFF, EXACTLY
 
-The tree is CLEAN. 121 commits. Nothing is half-applied and nothing is
-uncommitted. The tip is "docs: the handoff for the session a whole load moved";
+The tree is CLEAN. 123 commits. Nothing is half-applied and nothing is
+uncommitted. THE TIP IS THE COMMIT THAT CARRIES THE HANDOFF FILE, so the count
+includes it;
 the last two CODE commits under it are 61d2b37 "a driver could not finish a
 load, because their screen never learned somebody else had moved it" and
 de5a345 "the transporter could read the buyer's rate, and every delta badge
