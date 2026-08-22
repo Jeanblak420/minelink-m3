@@ -99,9 +99,14 @@ class _TransporterPortalDashboardScreenState
     // The AsyncValue is kept, not just its value: the action queue has to tell
     // "still reading" from "could not read", and `valueOrNull` collapses both
     // to null. See `PortalQueueItem.loading`.
-    final earnings = ref.watch(tripEarningsProvider(companyId)).valueOrNull;
+    final earningsAsync = ref.watch(tripEarningsProvider(companyId));
+    final earnings = earningsAsync.valueOrNull;
     final fleetAsync = ref.watch(fleetStatusProvider(companyId));
     final fleet = fleetAsync.valueOrNull;
+    // A pending read is not a failed one. Both arrive at the widgets below as
+    // the same null, so the flags travel alongside it -- see `PortalKpi.loading`.
+    final earningsPending = earningsAsync.isFirstLoad;
+    final fleetPending = fleetAsync.isFirstLoad;
     final dispatchesAsync =
         ref.watch(transporterDispatchesProvider(companyId));
     final disputesAsync = ref.watch(reconDisputesProvider(companyId));
@@ -179,6 +184,7 @@ class _TransporterPortalDashboardScreenState
                 route: '/portal/transporter/tons-out',
                 delta: tons == null ? null : tons - priorTons,
                 emptyReason: 'earnings feed unavailable',
+                loading: earningsPending,
               ),
               PortalKpi(
                 label: 'Revenue',
@@ -201,6 +207,7 @@ class _TransporterPortalDashboardScreenState
                 // a bare `-956566` beside `R156,567`.
                 deltaPrefix: 'R',
                 emptyReason: 'earnings feed unavailable',
+                loading: earningsPending,
               ),
               PortalKpi(
                 label: 'Trucks on route',
@@ -212,6 +219,7 @@ class _TransporterPortalDashboardScreenState
                 tone: MlTone.transit,
                 route: '/portal/transporter/trucks-on-route',
                 emptyReason: 'fleet status unavailable',
+                loading: fleetPending,
               ),
               PortalKpi(
                 label: 'Fleet utilisation',
@@ -224,6 +232,7 @@ class _TransporterPortalDashboardScreenState
                 emptyReason: active == null
                     ? 'fleet status unavailable'
                     : 'no active trucks registered',
+                loading: fleetPending,
               ),
             ],
           ),
@@ -231,8 +240,10 @@ class _TransporterPortalDashboardScreenState
 
           LayoutBuilder(
             builder: (context, c) {
-              final trend = _earningsTrend(context, earnings, now);
-              final ring = _fleetRing(context, fleet, onRoute, inMaintenance);
+              final trend =
+                  _earningsTrend(context, earnings, now, pending: earningsPending);
+              final ring = _fleetRing(context, fleet, onRoute, inMaintenance,
+                  pending: fleetPending);
               if (c.maxWidth < 980) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -328,9 +339,11 @@ class _TransporterPortalDashboardScreenState
                         : '/portal/transporter/trips/${v.activeTripId}',
                   ),
               ],
-              emptyMessage: onRoute == null
-                  ? 'The fleet status could not be read.'
-                  : 'None of your trucks is on a route right now.',
+              emptyMessage: onRoute != null
+                  ? 'None of your trucks is on a route right now.'
+                  : fleetPending
+                      ? 'Reading fleet status…'
+                      : 'The fleet status could not be read.',
             ),
           ),
           const SizedBox(height: 26),
@@ -340,7 +353,7 @@ class _TransporterPortalDashboardScreenState
             subtitle: 'The last ten loads delivered, with what they earned.',
             meta: earnings == null ? null : '${earnings.length} all time',
             viewRoute: '/portal/transporter/earnings',
-            child: _recentTrips(context, earnings),
+            child: _recentTrips(context, earnings, pending: earningsPending),
           ),
           const SizedBox(height: 40),
         ],
@@ -351,8 +364,9 @@ class _TransporterPortalDashboardScreenState
   Widget _earningsTrend(
     BuildContext context,
     List<TripEarning>? earnings,
-    DateTime now,
-  ) {
+    DateTime now, {
+    required bool pending,
+  }) {
     if (earnings == null) {
       return PortalDashboardSection(
         title: 'Tons and earnings',
@@ -361,11 +375,13 @@ class _TransporterPortalDashboardScreenState
         child: MlCard(
           child: SizedBox(
             height: 200,
-            child: MlEmptyState(
-              icon: Icons.show_chart_rounded,
-              title: 'Earnings unavailable',
-              message: 'The trip-earnings feed could not be read.',
-            ),
+            child: pending
+                ? portalFeedPending('earnings')
+                : const MlEmptyState(
+                    icon: Icons.show_chart_rounded,
+                    title: 'Earnings unavailable',
+                    message: 'The trip-earnings feed could not be read.',
+                  ),
           ),
         ),
       );
@@ -418,18 +434,21 @@ class _TransporterPortalDashboardScreenState
     BuildContext context,
     List<FleetVehicleStatus>? fleet,
     List<FleetVehicleStatus>? onRoute,
-    List<FleetVehicleStatus>? inMaintenance,
-  ) {
+    List<FleetVehicleStatus>? inMaintenance, {
+    required bool pending,
+  }) {
     final s = MlSemantic.of(context);
     final brightness = Theme.of(context).brightness;
 
     Widget body;
     if (fleet == null) {
-      body = const MlEmptyState(
-        icon: Icons.pie_chart_outline,
-        title: 'Fleet status unavailable',
-        message: 'The vehicle availability feed could not be read.',
-      );
+      body = pending
+          ? portalFeedPending('fleet status')
+          : const MlEmptyState(
+              icon: Icons.pie_chart_outline,
+              title: 'Fleet status unavailable',
+              message: 'The vehicle availability feed could not be read.',
+            );
     } else if (fleet.isEmpty) {
       body = const MlEmptyState(
         icon: Icons.local_shipping_outlined,
@@ -485,15 +504,21 @@ class _TransporterPortalDashboardScreenState
     );
   }
 
-  Widget _recentTrips(BuildContext context, List<TripEarning>? earnings) {
+  Widget _recentTrips(
+    BuildContext context,
+    List<TripEarning>? earnings, {
+    required bool pending,
+  }) {
     final s = MlSemantic.of(context);
     if (earnings == null) {
       return MlCard(
-        child: MlEmptyState(
-          icon: Icons.error_outline,
-          title: 'Trips unavailable',
-          message: 'The trip-earnings feed could not be read.',
-        ),
+        child: pending
+            ? portalFeedPending('earnings')
+            : const MlEmptyState(
+                icon: Icons.error_outline,
+                title: 'Trips unavailable',
+                message: 'The trip-earnings feed could not be read.',
+              ),
       );
     }
     final done = earnings

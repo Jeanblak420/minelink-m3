@@ -168,6 +168,8 @@ class _BuyerPortalDashboardScreenState
                 route: '/portal/buyer/loads-value',
                 delta: delivered == null ? null : delivered - priorDelivered,
                 emptyReason: 'delivery values unavailable',
+                // A pending read is not a failed one -- see `PortalKpi.loading`.
+                loading: valuesAsync.isFirstLoad,
               ),
               PortalKpi(
                 label: 'Payable',
@@ -191,6 +193,7 @@ class _BuyerPortalDashboardScreenState
                 deltaPrefix: 'R',
                 deltaGoodWhenUp: false,
                 emptyReason: 'load values unavailable',
+                loading: valuesAsync.isFirstLoad,
               ),
               PortalKpi(
                 label: 'Open orders',
@@ -200,6 +203,7 @@ class _BuyerPortalDashboardScreenState
                 tone: MlTone.transit,
                 route: '/portal/buyer/orders',
                 emptyReason: 'orders unavailable',
+                loading: requestsAsync.isFirstLoad,
               ),
               PortalKpi(
                 label: 'Trucks inbound',
@@ -215,8 +219,10 @@ class _BuyerPortalDashboardScreenState
 
           LayoutBuilder(
             builder: (context, c) {
-              final trend = _valueTrend(context, values, now);
-              final ring = _invoiceRing(context, values);
+              final trend = _valueTrend(context, values, now,
+                  pending: valuesAsync.isFirstLoad);
+              final ring = _invoiceRing(context, values,
+                  pending: valuesAsync.isFirstLoad);
               if (c.maxWidth < 980) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -307,7 +313,8 @@ class _BuyerPortalDashboardScreenState
             subtitle: 'The last ten loads offloaded, with their payable value.',
             meta: values == null ? null : '${values.length} all time',
             viewRoute: '/portal/buyer/loads-value',
-            child: _recentDeliveries(context, values),
+            child: _recentDeliveries(context, values,
+                pending: valuesAsync.isFirstLoad),
           ),
 
           if (!mirror) ...[
@@ -323,8 +330,9 @@ class _BuyerPortalDashboardScreenState
   Widget _valueTrend(
     BuildContext context,
     List<BuyerLoadValue>? values,
-    DateTime now,
-  ) {
+    DateTime now, {
+    required bool pending,
+  }) {
     if (values == null) {
       return PortalDashboardSection(
         title: 'Delivered vs payable',
@@ -333,11 +341,13 @@ class _BuyerPortalDashboardScreenState
         child: MlCard(
           child: SizedBox(
             height: 200,
-            child: MlEmptyState(
-              icon: Icons.show_chart_rounded,
-              title: 'Load values unavailable',
-              message: 'The delivered-value feed could not be read.',
-            ),
+            child: pending
+                ? portalFeedPending('load values')
+                : const MlEmptyState(
+                    icon: Icons.show_chart_rounded,
+                    title: 'Load values unavailable',
+                    message: 'The delivered-value feed could not be read.',
+                  ),
           ),
         ),
       );
@@ -386,7 +396,8 @@ class _BuyerPortalDashboardScreenState
     );
   }
 
-  Widget _invoiceRing(BuildContext context, List<BuyerLoadValue>? values) {
+  Widget _invoiceRing(BuildContext context, List<BuyerLoadValue>? values,
+      {required bool pending}) {
     final s = MlSemantic.of(context);
     final brightness = Theme.of(context).brightness;
 
@@ -394,11 +405,13 @@ class _BuyerPortalDashboardScreenState
     final delivered =
         values?.where((v) => v.deliveredTons != null).toList();
     if (values == null) {
-      body = const MlEmptyState(
-        icon: Icons.pie_chart_outline,
-        title: 'Load values unavailable',
-        message: 'The delivered-value feed could not be read.',
-      );
+      body = pending
+          ? portalFeedPending('load values')
+          : const MlEmptyState(
+              icon: Icons.pie_chart_outline,
+              title: 'Load values unavailable',
+              message: 'The delivered-value feed could not be read.',
+            );
     } else if (delivered == null || delivered.isEmpty) {
       body = const MlEmptyState(
         icon: Icons.pie_chart_outline,
@@ -449,16 +462,19 @@ class _BuyerPortalDashboardScreenState
 
   Widget _recentDeliveries(
     BuildContext context,
-    List<BuyerLoadValue>? values,
-  ) {
+    List<BuyerLoadValue>? values, {
+    required bool pending,
+  }) {
     final s = MlSemantic.of(context);
     if (values == null) {
       return MlCard(
-        child: MlEmptyState(
-          icon: Icons.error_outline,
-          title: 'Deliveries unavailable',
-          message: 'The delivered-value feed could not be read.',
-        ),
+        child: pending
+            ? portalFeedPending('load values')
+            : const MlEmptyState(
+                icon: Icons.error_outline,
+                title: 'Deliveries unavailable',
+                message: 'The delivered-value feed could not be read.',
+              ),
       );
     }
     final delivered = values.where((v) => v.deliveredTons != null).toList()

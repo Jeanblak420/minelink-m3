@@ -80,9 +80,36 @@ enum PortalPeriod {
 /// One KPI: a real figure, an optional period-over-period delta, and the screen
 /// that shows its workings.
 ///
-/// [value] is `null` when the figure genuinely is not available — still
-/// loading, or nothing to count. It renders as a dash with [emptyReason], never
-/// as zero. A real zero is `'0'`.
+/// [value] is `null` when there is no figure to show. It renders as a dash,
+/// never as zero — a real zero is `'0'`.
+///
+/// ## "Still reading" is not "could not read", and this tile used to say it was
+///
+/// That null had TWO causes and one caption. A dashboard passes
+/// `feed.valueOrNull`, which collapses a pending read and a failed one into the
+/// same null, and the tile printed [emptyReason] over it — wording every
+/// caller had written for the failure: *"earnings feed unavailable"*,
+/// *"stockpiles unavailable"*, *"delivery values unavailable"*.
+///
+/// So for the second or two a feed takes to arrive, the dashboard told its
+/// reader the feed was broken. Driven in a browser as `roadhaul.admin` on
+/// 2026-08-22, a clean sign-in showed FOUR KPIs and three panels reporting
+/// failure, and then filled in by itself with no reload and no retry — 235 t,
+/// R184,611, 2 trucks on route. Nothing had gone wrong at any point; both RPCs
+/// returned 200 with real rows, which is what made it worth chasing.
+///
+/// The same fault was found on the mine's stockpile band on 2026-08-21 and
+/// fixed there, one card at a time — the note in
+/// `mine_supplier_portal_dashboard_screen.dart` still says "the comment below
+/// already named the trap; this line was the one still in it". It was closed
+/// for one card and left open for the KPI band of all three dashboards, which
+/// is what a one-card fix does to a class of fault.
+///
+/// [loading] is the missing half. When it is true the tile says it is still
+/// reading; only when it is false does [emptyReason] get to speak. A caller
+/// that cannot distinguish leaves it false and keeps the old behaviour, which
+/// is why `dashboards_do_not_cry_wolf_test.dart` checks the DASHBOARDS rather
+/// than this class.
 class PortalKpi {
   const PortalKpi({
     required this.label,
@@ -96,6 +123,7 @@ class PortalKpi {
     this.deltaGoodWhenUp = true,
     this.deltaPrefix,
     this.emptyReason = 'no data yet',
+    this.loading = false,
   });
 
   final String label;
@@ -125,7 +153,35 @@ class PortalKpi {
   /// — the delta was the half that got missed.
   final String? deltaPrefix;
   final String emptyReason;
+
+  /// Whether the feed behind [value] is still being read.
+  ///
+  /// Suppresses [emptyReason] in favour of [kPortalKpiLoadingReason]. See the
+  /// class doc: a pending read and a failed one arrive at this tile as the
+  /// same null, and only the caller can tell them apart.
+  final bool loading;
 }
+
+/// What a KPI says while its feed is still in flight.
+///
+/// The same word the action queue already uses for the same state
+/// (`PortalQueueItem.loading` renders "Checking…"), so a dashboard does not
+/// describe one pending read two ways on one screen.
+const String kPortalKpiLoadingReason = 'checking…';
+
+/// The panel-sized counterpart of [kPortalKpiLoadingReason].
+///
+/// A whole section whose feed has not answered yet must not print its failure
+/// card either — that is the same fault as the KPI's, one size up, and on the
+/// transporter dashboard it filled three panels at once on every sign-in.
+///
+/// [what] names the feed in the reader's words, lower case: "earnings",
+/// "fleet status", "stockpile balances".
+MlEmptyState portalFeedPending(String what) => MlEmptyState(
+      icon: Icons.hourglass_bottom_rounded,
+      title: 'Reading $what…',
+      message: 'This fills in as soon as the feed answers.',
+    );
 
 /// The KPI band — 4-up on desktop, 2-up on tablet, stacked on a phone.
 class PortalKpiRow extends StatelessWidget {
@@ -166,7 +222,11 @@ class PortalKpiRow extends StatelessWidget {
       value: k.value ?? '—',
       unit: k.value == null ? null : k.unit,
       label: k.label,
-      sublabel: k.value == null ? k.emptyReason : k.sublabel,
+      sublabel: k.value != null
+          ? k.sublabel
+          // A feed that has not answered yet has not failed. See the note on
+          // [PortalKpi.loading].
+          : (k.loading ? kPortalKpiLoadingReason : k.emptyReason),
       icon: k.icon,
       tint: tone.fg,
       iconFg: tone.fg,

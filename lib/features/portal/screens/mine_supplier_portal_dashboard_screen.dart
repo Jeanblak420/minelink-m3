@@ -211,6 +211,11 @@ class _MineSupplierPortalDashboardScreenState
                 tone: MlTone.atMine,
                 route: '/portal/mine/stockpiles',
                 emptyReason: 'stockpiles unavailable',
+                // A pending read is not a failed one. The stockpile RING was
+                // given this distinction on 2026-08-21; the tile above it was
+                // not, so the same screen said "Reading stockpiles..." in one
+                // band and "stockpiles unavailable" in the other.
+                loading: stockpilesAsync.isFirstLoad,
               ),
               PortalKpi(
                 label: 'Trucks inbound',
@@ -221,6 +226,7 @@ class _MineSupplierPortalDashboardScreenState
                 route: '/portal/mine/security',
                 deltaGoodWhenUp: false,
                 emptyReason: 'inbound queue unavailable',
+                loading: inboundAsync.isFirstLoad,
               ),
               PortalKpi(
                 label: 'Loads awaiting weigh',
@@ -231,6 +237,9 @@ class _MineSupplierPortalDashboardScreenState
                 route: '/portal/mine/weighbridge',
                 deltaGoodWhenUp: false,
                 emptyReason: 'weighbridge queue unavailable',
+                // Same feed as "Trucks inbound" above -- `awaitingWeigh` is a
+                // filter over the very same rows.
+                loading: inboundAsync.isFirstLoad,
               ),
             ],
           ),
@@ -249,7 +258,7 @@ class _MineSupplierPortalDashboardScreenState
               final ring = _stockpileBand(
                   context, stockpiles, cappedBalance, capacity,
                   totalOnGround: balance,
-                  loading: stockpilesAsync.isLoading);
+                  loading: stockpilesAsync.isFirstLoad);
               if (c.maxWidth < 980) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -332,9 +341,11 @@ class _MineSupplierPortalDashboardScreenState
             viewLabel: 'Truck locations',
             child: PortalLiveStrip(
               trucks: _liveTrucks(inbound),
-              emptyMessage: inbound == null
-                  ? 'The inbound queue could not be read.'
-                  : 'No trucks are inbound or on site right now.',
+              emptyMessage: inbound != null
+                  ? 'No trucks are inbound or on site right now.'
+                  : inboundAsync.isFirstLoad
+                      ? 'Reading the inbound queue…'
+                      : 'The inbound queue could not be read.',
             ),
           ),
           const SizedBox(height: 26),
