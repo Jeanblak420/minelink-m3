@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter_application_1/core/config/supabase_config.dart';
@@ -333,6 +334,94 @@ class LogisticsService {
       _logger.e('Failed to list partner companies for $companyId', e, st);
       rethrow;
     }
+  }
+
+  /// Ticks whenever a trip or transaction moves, so a screen reading
+  /// [loadForCompany] can re-read instead of showing a figure from whenever it
+  /// happened to mount.
+  ///
+  /// ## Why this exists
+  ///
+  /// `loadForCompany` is a SNAPSHOT, and the trip lifecycle is the one place
+  /// in this product where the thing on your screen is moved by SOMEBODY ELSE.
+  /// Driven end to end against production on 2026-08-22, on a real handset:
+  ///
+  /// | 04:33 | security marked the truck LEFT SITE — server went to `en_route_to_offload` |
+  /// | 04:37 | the driver's Trip screen still read **EN ROUTE TO LOAD** |
+  ///
+  /// Four minutes, across a tab switch and a pull gesture. And it is not
+  /// cosmetic: the driver's lifecycle buttons are gated on that status, so
+  /// `Arrived at offloading` stayed dimmed and **the driver could not complete
+  /// the load without killing the app.** The screen invalidates itself after
+  /// the driver's OWN actions (that is why the earlier steps looked fine) and
+  /// had nothing at all for anybody else's.
+  ///
+  /// The mine floor is the whole flow: security checks in, the load controller
+  /// weighs, security checks out — three changes by three other people that the
+  /// driver has to see.
+  ///
+  /// Shape copied from `LiveTrackingService.watchLivePositions`, which had
+  /// already met each of these: a **debounce**, because a single
+  /// `record_truck_load` writes the trip and its transaction together and that
+  /// must be one re-read; a **periodic fallback**, because realtime is a
+  /// best-effort transport and a dropped socket must not leave a driver stuck
+  /// the way this fault did; and an **immediate first tick**, so the snapshot
+  /// resolves on the first frame rather than after a round trip.
+  ///
+  /// Filtering is left to RLS. A postgres_changes filter can only test one
+  /// column, and a trip is reachable through its vehicle's company OR its
+  /// transaction's parties — so the honest choice is to listen for the table
+  /// and let the re-read (which is party-scoped already) decide.
+  Stream<int> watchLifecycle(String companyId) {
+    RealtimeChannel? channel;
+    Timer? debounce;
+    Timer? fallback;
+    var tick = 0;
+    late final StreamController<int> controller;
+
+    void bump() {
+      if (controller.isClosed) return;
+      controller.add(++tick);
+    }
+
+    void scheduleBump() {
+      debounce ??= Timer(const Duration(milliseconds: 700), () {
+        debounce = null;
+        bump();
+      });
+    }
+
+    controller = StreamController<int>(
+      onListen: () {
+        // Emit before subscribing so the FutureProvider that watches this
+        // resolves immediately instead of waiting on the socket.
+        bump();
+        channel = _client
+            .channel('logistics-lifecycle-$companyId')
+            .onPostgresChanges(
+              event: PostgresChangeEvent.all,
+              schema: 'public',
+              table: 'trips',
+              callback: (_) => scheduleBump(),
+            )
+            .onPostgresChanges(
+              event: PostgresChangeEvent.all,
+              schema: 'public',
+              table: 'transactions',
+              callback: (_) => scheduleBump(),
+            )
+            .subscribe();
+        fallback = Timer.periodic(const Duration(seconds: 60), (_) => bump());
+      },
+      onCancel: () {
+        debounce?.cancel();
+        fallback?.cancel();
+        final ch = channel;
+        if (ch != null) _client.removeChannel(ch);
+        controller.close();
+      },
+    );
+    return controller.stream;
   }
 }
 
