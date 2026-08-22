@@ -691,7 +691,34 @@ class _MlAppShellState extends State<MlAppShell> {
 }
 
 /// The canvas plus the content sitting on it.
-class _Workspace extends StatelessWidget {
+///
+/// ## Why this fades ONE subtree instead of cross-fading two
+///
+/// It used to wrap the routed child in an `AnimatedSwitcher`. An
+/// `AnimatedSwitcher` mounts the OUTGOING and INCOMING subtrees together, in
+/// one `Stack`, for the length of the transition — that is how a cross-fade
+/// works. Under a go_router `ShellRoute` the routed child hosts the shell's
+/// navigator, keyed `GlobalObjectKey(navigatorKey.hashCode)`, and it is the
+/// SAME navigator on both sides of a route change. So for the length of every
+/// navigation that global key was in the widget tree twice.
+///
+/// Measured on Jean's SM-G780G, 2026-08-22: seven navigations, seven
+/// "Duplicate GlobalKey detected in widget tree" reports, each naming a
+/// different `_NavHistoryRecorderState` — a fresh subtree every time — against
+/// the same `GlobalObjectKey int#f0d3c`. The framework's own warning is that
+/// this truncates parts of the tree.
+///
+/// A widget test cannot see it: `MlMotion` collapses to about a millisecond
+/// under the test binding, so the overlap is gone before the next pump. The
+/// handset is the instrument for this one, and the source check in
+/// `shell_keeps_the_workspace_in_one_place_test.dart` is what stops it coming
+/// back.
+///
+/// M3's fade-through is SEQUENTIAL anyway — outgoing to zero, then incoming in
+/// — not an overlap, so a single-subtree fade is closer to the spec than the
+/// cross-fade was, as well as being the only shape compatible with a GlobalKey
+/// underneath it.
+class _Workspace extends StatefulWidget {
   const _Workspace({
     required this.windowClass,
     required this.dark,
@@ -713,13 +740,56 @@ class _Workspace extends StatelessWidget {
   final Widget child;
 
   @override
+  State<_Workspace> createState() => _WorkspaceState();
+}
+
+class _WorkspaceState extends State<_Workspace>
+    with SingleTickerProviderStateMixin {
+  /// Starts COMPLETE, so the first frame is fully opaque rather than fading
+  /// in from nothing on a cold start. The duration here is a placeholder; the
+  /// motion-aware one is read in [build], where there is a context.
+  late final AnimationController _fade = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 200),
+    value: 1,
+  );
+
+  @override
+  void didUpdateWidget(covariant _Workspace oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A NAVIGATION, and nothing else. The old cross-fade keyed off the child
+    // widget's identity hash and so re-ran on any incidental rebuild.
+    if (oldWidget.pageKey != widget.pageKey) {
+      _fade.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _fade.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // The motion-aware duration, read here because it needs a context.
+    //
+    // NEVER Duration.zero, even under reduce-motion: an AnimationController
+    // with a zero duration notifies its listeners SYNCHRONOUSLY, and this one
+    // is driven from didUpdateWidget — mid-build. 1ms is the house workaround
+    // (CLAUDE.md §10.4, where the same trap took out AnimatedSize).
+    final motion = MlMotion.of(context, MlMotion.enter);
+    _fade.duration = motion > Duration.zero
+        ? motion
+        : const Duration(milliseconds: 1);
+
     // FILL THE VIEWPORT, even when the page inside is shorter than it.
     //
     // `Scaffold` lays its body out under a LOOSE height constraint, and on a
     // phone the workspace IS the body (there is no rail Row with
     // `crossAxisAlignment: stretch` to tighten it). Underneath, the
-    // `AnimatedSwitcher`'s `Stack` is `StackFit.loose` and `MlPageBody` is a
+    // fade below is a single child now (it used to be an `AnimatedSwitcher`
+    // whose `Stack` was `StackFit.loose`) and `MlPageBody` is a
     // bare `SingleChildScrollView`, so a page whose content does not reach the
     // bottom of the screen shrink-wrapped the whole chain — and the canvas
     // painter, which sizes to its child, stopped painting exactly where the
@@ -750,7 +820,7 @@ class _Workspace extends StatelessWidget {
   }
 
   Widget _paintedCanvas(BuildContext context) {
-    final content = constrain
+    final content = widget.constrain
         // `Align(topCenter)`, not `Center`. The centring wanted here is
         // HORIZONTAL — cap the content at a readable measure and put it in the
         // middle of the workspace — and `Center` does both axes. See the
@@ -760,95 +830,31 @@ class _Workspace extends StatelessWidget {
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: windowClass.contentMaxWidth,
+                maxWidth: widget.windowClass.contentMaxWidth,
               ),
               child: Padding(
-                padding: EdgeInsets.all(windowClass.contentPadding),
-                child: child,
+                padding: EdgeInsets.all(widget.windowClass.contentPadding),
+                child: widget.child,
               ),
             ),
           )
-        : child;
+        : widget.child;
 
     return CustomPaint(
-      painter: MlWorkspaceCanvasPainter(dark: dark, texture: texture),
-      child: AnimatedSwitcher(
-        duration: MlMotion.of(context, MlMotion.enter),
-        switchInCurve: MlMotion.curveOf(context, MlMotion.decelerate),
-        switchOutCurve: MlMotion.curveOf(context, MlMotion.accelerate),
-        // Fade only. The shipping console slid the workspace horizontally on
-        // every navigation, which at 1600px is a large surface travelling a
-        // long way — the single most common trigger for motion sickness in a
-        // desktop app, and the reason M3 moved to a shared-axis fade.
-        transitionBuilder: (child, animation) =>
-            FadeTransition(opacity: animation, child: child),
-        // A TOP-ALIGNED stack. `AnimatedSwitcher`'s default `layoutBuilder` is
-        // `Stack(alignment: Alignment.center)`, and that centres the workspace
-        // VERTICALLY whenever a page is shorter than the window.
-        //
-        // Measured 2026-08-20: on a 1900px-tall render the three role
-        // dashboards and the console dashboard all began 233–265px below the
-        // top bar with a matching gap beneath them, while the fleet register —
-        // a page long enough to fill the viewport — started at 100 like
-        // everything else. Rendering the same dashboard at 1200px, where its
-        // content does fill the height, put it back at 100. The gap scaled with
-        // the window, which is what gives it away: a page does not float on a
-        // laptop and float further on a monitor unless something is centring
-        // it.
-        //
-        // It is worst on exactly the pages that are short — an empty state, a
-        // settings page, a small form — where it reads as a rendering fault
-        // rather than as a layout choice.
-        layoutBuilder: (currentChild, previousChildren) => Stack(
-          alignment: Alignment.topCenter,
-          // PASSTHROUGH, not the default `StackFit.loose`.
-          //
-          // The canvas fix above makes the WORKSPACE fill its viewport, but a
-          // loose Stack hands its children `0..maxHeight`, so a page that
-          // shrink-wraps still stops where its content stops — and roughly a
-          // third of the portal's screens paint their OWN ground
-          // (`ColoredBox(surfaceApp)`, one step lighter than the shell canvas)
-          // rather than sitting on the canvas. Those came out two-tone:
-          // measured on the mine's Buyers page 2026-08-21, `surfaceApp` ran to
-          // y=607 of a 1600px page and the canvas showed for the remaining
-          // 993. Same seam as the canvas one, one layer in.
-          //
-          // Passthrough gives non-positioned children the constraints the
-          // Stack itself received — including the minimum height — so a page
-          // that CAN fill does. A page taller than the viewport is unaffected:
-          // the maximum is the same either way.
-          fit: StackFit.passthrough,
-          children: <Widget>[
-            ...previousChildren,
-            if (currentChild != null) currentChild,
-          ],
+      painter: MlWorkspaceCanvasPainter(
+        dark: widget.dark,
+        texture: widget.texture,
+      ),
+      // ONE widget.child, faded in place. See the class doc: an AnimatedSwitcher
+      // mounts two subtrees at once and the routed widget.child underneath carries
+      // go_router's shell-navigator GlobalKey, so a cross-fade put the same
+      // global key in the tree twice on every navigation.
+      child: FadeTransition(
+        opacity: CurvedAnimation(
+          parent: _fade,
+          curve: MlMotion.curveOf(context, MlMotion.decelerate),
         ),
-        // KEYED ON THE ROUTE, and it must not be keyed on the child.
-        //
-        // This was `ValueKey(child.runtimeType.toString() +
-        // child.hashCode.toString())`. `child` is the `Semantics(container:
-        // true, ...)` that `MlAppShell.build` constructs FRESH on every build,
-        // so its identity hash — and therefore this key — changed on every
-        // rebuild of the shell, for any reason at all: the window class
-        // resolving on the first frames, a theme change, a badge ticking over.
-        //
-        // Two things followed, and both were live:
-        //
-        //   * `AnimatedSwitcher` mounts the outgoing and incoming subtrees
-        //     TOGETHER while it cross-fades. Both contain the routed child,
-        //     which hosts go_router's shell navigator and its
-        //     `GlobalObjectKey` — so the same global key was in the tree
-        //     twice. That is the "Duplicate GlobalKey detected in widget tree"
-        //     report from Jean's SM-G780G, which named this Semantics as the
-        //     parent that did not update.
-        //   * A new key means a NEW SUBTREE. The page's State was disposed and
-        //     rebuilt — initState re-run, scroll position lost, controllers
-        //     recreated — every time the shell happened to rebuild. None of
-        //     those rebuilds is a navigation, and nobody asked for the fade.
-        //
-        // The route is what a cross-fade is actually about: it changes when
-        // the page changes and holds still when it does not.
-        child: KeyedSubtree(key: ValueKey(pageKey), child: content),
+        child: content,
       ),
     );
   }

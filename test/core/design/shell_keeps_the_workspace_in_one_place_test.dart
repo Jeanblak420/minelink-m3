@@ -60,7 +60,7 @@ final _tree = <MlNavNode>[
   const MlNavNode.leaf(label: 'Second', icon: Icons.list, route: '/b'),
 ];
 
-Widget _shellAt(double width) => MediaQuery(
+Widget _shellAt(double width, {String route = '/a'}) => MediaQuery(
   data: MediaQueryData(size: Size(width, 900)),
   child: MaterialApp(
     theme: AppTheme.build(Brightness.dark),
@@ -167,5 +167,40 @@ void main() {
     // ...and the routed child came through both of those unmoved, which is the
     // pair of properties that has to hold at once.
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('NAVIGATING does not mount the routed child twice', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    // The case the handset found. A cross-fade holds the OUTGOING and INCOMING
+    // subtrees in one Stack while it runs — and with go_router's ShellRoute the
+    // routed child is the same navigator, carrying the same GlobalObjectKey, on
+    // both sides of the transition. So the key is in the tree twice for the
+    // length of the animation, every single navigation.
+    await tester.pumpWidget(_shellAt(1400, route: '/a'));
+    await tester.pumpAndSettle();
+    final before = _navigatorKey.currentState;
+
+    await tester.pumpWidget(_shellAt(1400, route: '/b'));
+    // Deliberately mid-flight: pumpAndSettle would run past the overlap and
+    // hide the very frames the duplicate exists in.
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(
+      tester.takeException(),
+      isNull,
+      reason: 'both subtrees are mounted here if this cross-fades',
+    );
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(
+      identical(_navigatorKey.currentState, before),
+      isTrue,
+      reason: 'the shell navigator is the same one across a route change',
+    );
   });
 }
