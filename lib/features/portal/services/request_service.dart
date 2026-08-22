@@ -437,7 +437,10 @@ class RequestService {
         .from('request_dispatches')
         .select(
           '*, transportation_requests!inner($_transporterRequestColumns), '
-          'routes(route_number)',
+          // `seal_required` off the ROUTE, not the request: the mine
+          // floor enforces the route's flag and the two can disagree.
+          // See `DispatchedRoute.sealRequired`.
+          'routes(route_number, seal_required)',
         )
         .eq('transporter_company_id', transporterCompanyId)
         .order('dispatched_at', ascending: false);

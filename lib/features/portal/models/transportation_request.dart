@@ -370,6 +370,11 @@ class DispatchedRoute {
   /// holding everything the transporter receives except the admin's pricing.
   final String? routeId;
   final String? routeNumber;
+
+  /// `routes.seal_required` — the flag the MINE FLOOR enforces.
+  ///
+  /// Null only when the dispatch has no route row yet.
+  final bool? routeSealRequired;
   final TransportationRequest request;
 
   const DispatchedRoute({
@@ -381,10 +386,33 @@ class DispatchedRoute {
     this.transporterPricePerTon,
     this.routeId,
     this.routeNumber,
+    this.routeSealRequired,
   });
 
   bool get isOpen => status == DispatchStatus.dispatched;
   bool get isAccepted => status == DispatchStatus.accepted;
+
+  /// Whether this load needs seals — **the route's answer, not the request's**.
+  ///
+  /// The two are separate columns and they diverge in practice, because the
+  /// platform admin sets the route's condition at linking while the request
+  /// carries whatever the requester ticked. Measured on production,
+  /// 2026-08-23, route `56a1209a` (RT-DDC02437):
+  ///
+  ///     transportation_requests.seal_required   false
+  ///     routes.seal_required                    true
+  ///
+  /// `record_truck_load` reads the ROUTE, so the mine floor demanded four
+  /// numbered and photographed seals — while the sheet the transporter had
+  /// accepted from, reading the REQUEST, said "Seals — Not required". The
+  /// admin had even written "Seals required on this route" into the notes.
+  ///
+  /// A transporter that believes the sheet sends a truck with no seals and
+  /// their driver is refused at the weighbridge, 640 km from home. Whichever
+  /// flag the load is judged by is the one the sheet has to show; the
+  /// request's value is kept only as a fallback for a dispatch with no route
+  /// row yet.
+  bool get sealRequired => routeSealRequired ?? request.sealRequired;
 
   /// Columns of the embedded request that belong to the requester and the
   /// platform admin, and are dropped here before anything can render them.
@@ -415,6 +443,7 @@ class DispatchedRoute {
       transporterPricePerTon: (j['transporter_price_per_ton'] as num?)?.toDouble(),
       routeId: j['route_id'] as String?,
       routeNumber: routeJson?['route_number'] as String?,
+      routeSealRequired: routeJson?['seal_required'] as bool?,
       request: TransportationRequest.fromJson(reqJson),
     );
   }

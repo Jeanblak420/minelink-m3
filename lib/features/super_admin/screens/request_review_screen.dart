@@ -394,7 +394,8 @@ class _RequestReviewScreenState extends ConsumerState<RequestReviewScreen> {
       // The label is what makes the figure readable whatever was typed. It
       // does NOT invent a unit — guessing that a bare 820 is Rands would be
       // making up data about a price.
-      if (r.distance != null) 'Distance ${r.distance}',
+      if (mlDistanceText(r.distance) != null)
+        'Distance ${mlDistanceText(r.distance)}',
       if (r.rate != null) 'Rate ${r.rate}',
       if (r.paymentTerms != null) r.paymentTerms,
       if (_isRoutes && r.commodity != null) r.commodity,
@@ -1020,7 +1021,7 @@ class _DetailPanel extends ConsumerWidget {
                 ],
               _ => [
                   _kv('Commodity', r.commodity),
-                  _kv('Distance', r.distance),
+                  _kv('Distance', mlDistanceText(r.distance)),
                   _kv('Rate', r.rate),
                   _kv(
                     'Price / ton',

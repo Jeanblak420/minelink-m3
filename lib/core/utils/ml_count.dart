@@ -45,6 +45,30 @@ String mlCountText(Object? value, String singular, [String? plural]) {
   return text.isEmpty ? word : '$text $word';
 }
 
+/// A route distance the requester typed, with a unit on it.
+///
+/// `TransportationRequest.distance` is `String?` — free text, like `numSlots`
+/// and `tonsAvailable` above — and the requesters have not been consistent.
+/// Read off the transporter's Routes & dispatches screen as `roadhaul.admin`,
+/// 2026-08-23, nine cards, one column:
+///
+///     640 km · 620 · 640 · 640 km · (none) · (none) · 520 km · 120 · 120
+///
+/// A bare `120` in a chip row beside `2 trucks` and `R 1000.00 / ton` does not
+/// say what it measures. `tonsAvailable` already had this handled — every site
+/// runs it through [mlCountText], which puts the word "tons" on it — so
+/// distance was the last member of the family without a unit.
+///
+/// A value that already carries anything but digits is left EXACTLY as typed:
+/// `640 km`, `640km`, `about 600 km` and `620 miles` are all somebody's words,
+/// and appending "km" to the last one would change what it says. Only a bare
+/// number gets the unit.
+String? mlDistanceText(Object? value) {
+  final text = value?.toString().trim() ?? '';
+  if (text.isEmpty) return null;
+  return num.tryParse(text) == null ? text : '$text km';
+}
+
 /// Rewrites `N thing(s)` into `N thing` or `N things`, in text this app did
 /// not write.
 ///

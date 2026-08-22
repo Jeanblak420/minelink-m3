@@ -21,4 +21,4 @@
 library;
 
 export 'package:flutter_application_1/core/utils/ml_count.dart'
-    show mlCount, mlCountText;
+    show mlCount, mlCountText, mlDistanceText;

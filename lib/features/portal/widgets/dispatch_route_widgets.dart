@@ -70,7 +70,7 @@ class DispatchRouteCard extends StatelessWidget {
     final chips = <String>[
       if (r.commodity != null) r.commodity!,
       if (r.numSlots != null) mlCountText(r.numSlots, 'truck'),
-      if (r.distance != null) r.distance!,
+      if (mlDistanceText(r.distance) != null) mlDistanceText(r.distance)!,
       if (route.transporterPricePerTon != null)
         'R ${route.transporterPricePerTon!.toStringAsFixed(2)} / ton',
     ];
@@ -284,7 +284,7 @@ class _RouteDetailSheet extends ConsumerWidget {
               _detailGrid(context, {
                 'Route ID': route.routeNumber,
                 'Commodity': r.commodity,
-                'Distance': r.distance,
+                'Distance': mlDistanceText(r.distance),
                 'Tons available': r.tonsAvailable,
                 'Number of Trucks Required': r.numSlots,
                 'Your price / ton': route.transporterPricePerTon != null
@@ -308,7 +308,10 @@ class _RouteDetailSheet extends ConsumerWidget {
                 // preview named it and this did not: the only reason a
                 // transporter knew was if the mine happened to type "SEALED
                 // LOAD" into the free-text notes.
-                'Seals': r.sealRequired
+                // `route.sealRequired`, NOT `r.sealRequired`: the route's
+                // flag is the one the weighbridge enforces, and the two
+                // disagree on live data. See `DispatchedRoute.sealRequired`.
+                'Seals': route.sealRequired
                     ? 'Required — every load needs a number and a photo per seal'
                     : 'Not required',
                 'Starting date': start,
