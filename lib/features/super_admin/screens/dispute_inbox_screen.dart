@@ -9,6 +9,20 @@ import 'package:flutter_application_1/core/design/components/ml_components.dart'
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
+/// The disputes the Active/All segment is currently showing.
+///
+/// Both the header's count and the list below read THIS, and that is the whole
+/// point of it being a function. Until 2026-08-22 the header counted `all` and
+/// the list rendered the filtered subset, so the console read
+/// **"1 dispute"** directly above **"No open disputes"** — the platform's only
+/// dispute was resolved, and the Active tab correctly hid it. Two readers of
+/// one list, each applying its own rule, is how a header comes to contradict
+/// the thing it is a header for.
+List<ReconDispute> visibleDisputes(
+  List<ReconDispute> all, {
+  required bool activeOnly,
+}) => activeOnly ? all.where((d) => d.status.isActive).toList() : all;
+
 /// Super-admin reconciliation-dispute inbox. Lists every dispute raised across
 /// the platform (list_recon_disputes with a null company scope) so the admin
 /// can triage, review, and resolve/reject each one.
@@ -26,6 +40,10 @@ class _DisputeInboxScreenState extends ConsumerState<DisputeInboxScreen> {
   Widget build(BuildContext context) {
     final semantic = MlSemantic.of(context);
     final async = ref.watch(reconDisputesProvider(null));
+    final loaded = async.valueOrNull;
+    final shown = loaded == null
+        ? null
+        : visibleDisputes(loaded, activeOnly: _activeOnly);
 
     return MlPageBody(
       child: Column(
@@ -33,9 +51,12 @@ class _DisputeInboxScreenState extends ConsumerState<DisputeInboxScreen> {
         children: [
           MlPageHeader(
             title: 'Reconciliation disputes',
-            meta: async.valueOrNull == null
+            meta: shown == null
                 ? null
-                : mlCount(async.value!.length, 'dispute'),
+                : mlCount(
+                    shown.length,
+                    _activeOnly ? 'open dispute' : 'dispute',
+                  ),
             description:
                 'Every dispute a mine, buyer or transporter raised on a '
                 "trip's weight reconciliation. Review, resolve or reject.",
@@ -68,9 +89,7 @@ class _DisputeInboxScreenState extends ConsumerState<DisputeInboxScreen> {
               message: friendlyError(e),
             ),
             data: (all) {
-              final disputes = _activeOnly
-                  ? all.where((d) => d.status.isActive).toList()
-                  : all;
+              final disputes = visibleDisputes(all, activeOnly: _activeOnly);
               if (disputes.isEmpty) {
                 return Container(
                   width: double.infinity,
@@ -119,10 +138,7 @@ class _DisputeRowCard extends StatelessWidget {
   final ReconDispute dispute;
   final VoidCallback onOpen;
 
-  const _DisputeRowCard({
-    required this.dispute,
-    required this.onOpen,
-  });
+  const _DisputeRowCard({required this.dispute, required this.onOpen});
 
   static String _t(double? v) => v == null ? '—' : '${v.toStringAsFixed(2)} t';
 
