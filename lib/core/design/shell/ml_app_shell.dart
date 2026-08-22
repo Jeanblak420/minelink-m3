@@ -290,8 +290,9 @@ class _MlAppShellState extends State<MlAppShell> {
     // text, so a TextPainter that ignored it would under-measure for exactly
     // the readers most likely to overflow.
     final bold = MediaQuery.boldTextOf(context);
-    final scaler = MediaQuery.textScalerOf(context)
-        .clamp(maxScaleFactor: _labelScaleCeiling);
+    final scaler = MediaQuery.textScalerOf(
+      context,
+    ).clamp(maxScaleFactor: _labelScaleCeiling);
 
     var widest = 0.0;
     for (final style in styles) {
@@ -299,8 +300,9 @@ class _MlAppShellState extends State<MlAppShell> {
         text: TextSpan(
           text: text,
           style: bold
-              ? (style ?? const TextStyle())
-                  .copyWith(fontWeight: FontWeight.bold)
+              ? (style ?? const TextStyle()).copyWith(
+                  fontWeight: FontWeight.bold,
+                )
               : style,
         ),
         textDirection: TextDirection.ltr,
@@ -323,9 +325,8 @@ class _MlAppShellState extends State<MlAppShell> {
       node.isGroup ? node.leaves.first.route : node.route;
 
   /// A group stays lit while the user is anywhere inside it.
-  bool _bottomSelected(MlNavNode node) => node.contains(
-        widget.tree.resolveSelected(widget.selectedRoute),
-      );
+  bool _bottomSelected(MlNavNode node) =>
+      node.contains(widget.tree.resolveSelected(widget.selectedRoute));
 
   String get _resolvedTitle =>
       widget.title ?? widget.tree.leafFor(widget.selectedRoute)?.label ?? '';
@@ -341,6 +342,7 @@ class _MlAppShellState extends State<MlAppShell> {
       dark: isDark,
       texture: widget.showCanvasTexture,
       constrain: widget.constrainContent,
+      pageKey: widget.selectedRoute,
       // A semantics boundary around the body, and it is not optional.
       //
       // The routed child hosts a nested (ShellRoute) Navigator whose ModalRoute
@@ -397,7 +399,8 @@ class _MlAppShellState extends State<MlAppShell> {
                     header: widget.railHeader,
                     footer: widget.railFooter,
                     showSearch: widget.tree.allLeaves.length > 8,
-                    onToggleExpanded: windowClass.usesExpandedRail &&
+                    onToggleExpanded:
+                        windowClass.usesExpandedRail &&
                             widget.onExpandedChanged != null
                         ? () => widget.onExpandedChanged!(!widget.expanded)
                         : null,
@@ -419,10 +422,7 @@ class _MlAppShellState extends State<MlAppShell> {
   /// fall through to whatever is painted behind the rail.
   Widget _maybeLock(Widget child) => widget.navEnabled
       ? child
-      : Opacity(
-          opacity: 0.45,
-          child: AbsorbPointer(child: child),
-        );
+      : Opacity(opacity: 0.45, child: AbsorbPointer(child: child));
 
   PreferredSizeWidget _buildTopBar(
     BuildContext context,
@@ -491,7 +491,8 @@ class _MlAppShellState extends State<MlAppShell> {
     // height is computed from the style and the scale rather than assumed, and
     // it never goes BELOW the token.
     final compactTitleStyle = text.titleMedium;
-    final compactLine = (compactTitleStyle?.fontSize ?? 16) *
+    final compactLine =
+        (compactTitleStyle?.fontSize ?? 16) *
         (compactTitleStyle?.height ?? 1.25);
     final compactToolbarHeight = math.max(
       MlTokens.appBarHeight,
@@ -608,8 +609,10 @@ class _MlAppShellState extends State<MlAppShell> {
     const clearance = 8.0; // above and below, so nothing sits on an edge
     const maxLabelLines = 2;
 
-    final style = Theme.of(context).navigationBarTheme.labelTextStyle
-            ?.resolve(<WidgetState>{}) ??
+    final style =
+        Theme.of(
+          context,
+        ).navigationBarTheme.labelTextStyle?.resolve(<WidgetState>{}) ??
         Theme.of(context).textTheme.labelMedium;
     final size = style?.fontSize ?? 12.0;
     final lineHeight =
@@ -694,6 +697,7 @@ class _Workspace extends StatelessWidget {
     required this.dark,
     required this.texture,
     required this.constrain,
+    required this.pageKey,
     required this.child,
   });
 
@@ -701,6 +705,11 @@ class _Workspace extends StatelessWidget {
   final bool dark;
   final bool texture;
   final bool constrain;
+
+  /// What identifies the PAGE for the cross-fade below — the selected route.
+  /// See the `AnimatedSwitcher` for why this cannot be derived from [child].
+  final String? pageKey;
+
   final Widget child;
 
   @override
@@ -750,8 +759,9 @@ class _Workspace extends StatelessWidget {
         ? Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints:
-                  BoxConstraints(maxWidth: windowClass.contentMaxWidth),
+              constraints: BoxConstraints(
+                maxWidth: windowClass.contentMaxWidth,
+              ),
               child: Padding(
                 padding: EdgeInsets.all(windowClass.contentPadding),
                 child: child,
@@ -813,10 +823,32 @@ class _Workspace extends StatelessWidget {
             if (currentChild != null) currentChild,
           ],
         ),
-        child: KeyedSubtree(
-          key: ValueKey(child.runtimeType.toString() + child.hashCode.toString()),
-          child: content,
-        ),
+        // KEYED ON THE ROUTE, and it must not be keyed on the child.
+        //
+        // This was `ValueKey(child.runtimeType.toString() +
+        // child.hashCode.toString())`. `child` is the `Semantics(container:
+        // true, ...)` that `MlAppShell.build` constructs FRESH on every build,
+        // so its identity hash — and therefore this key — changed on every
+        // rebuild of the shell, for any reason at all: the window class
+        // resolving on the first frames, a theme change, a badge ticking over.
+        //
+        // Two things followed, and both were live:
+        //
+        //   * `AnimatedSwitcher` mounts the outgoing and incoming subtrees
+        //     TOGETHER while it cross-fades. Both contain the routed child,
+        //     which hosts go_router's shell navigator and its
+        //     `GlobalObjectKey` — so the same global key was in the tree
+        //     twice. That is the "Duplicate GlobalKey detected in widget tree"
+        //     report from Jean's SM-G780G, which named this Semantics as the
+        //     parent that did not update.
+        //   * A new key means a NEW SUBTREE. The page's State was disposed and
+        //     rebuilt — initState re-run, scroll position lost, controllers
+        //     recreated — every time the shell happened to rebuild. None of
+        //     those rebuilds is a navigation, and nobody asked for the fade.
+        //
+        // The route is what a cross-fade is actually about: it changes when
+        // the page changes and holds still when it does not.
+        child: KeyedSubtree(key: ValueKey(pageKey), child: content),
       ),
     );
   }
