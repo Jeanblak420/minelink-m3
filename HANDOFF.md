@@ -17,10 +17,11 @@ file governs the redesign work.**
 
 ## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The tree is **clean**, **132 commits**, nothing half-applied and nothing
+The tree is **clean**, **133 commits**, nothing half-applied and nothing
 uncommitted. **The tip is the commit that carries THIS FILE**, so the count
-above includes it. The last code commit under it is `eb84e45`, and the whole
-gate in §2 was run green against the tree as it stands.
+above includes it. The last code commit under it is `eb84e45`, with two earlier
+drafts of this same file between them, and the whole gate in §2 was run green
+against the tree as it stands.
 
 **The original worktree was re-checked against its §0 baseline at the start and
 at the end and is untouched** — HEAD `df451d0`, the same three pre-existing
@@ -49,7 +50,7 @@ Plus the two decisions Jean settled (§3.1, §3.2).
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **132 commits**, clean tree. |
+| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **133 commits**, clean tree. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
@@ -550,6 +551,19 @@ cd build/web && py -3 -m http.server 8123 --bind 127.0.0.1
 ⚠️ **Host mode is currently OFF** — see §4.2. `status` answers "no phone at a
 known address". Only Jean can turn it back on.
 
+🚨 **IF THE PHONE DOES NOT ANSWER, STOP AND ASK — DO NOT WORK AROUND IT.**
+Jean's standing instruction, 2026-08-22. When `phone_agent.py status` reports
+`no phone at a known address - broadcasting`, or the display is asleep
+(`probe` under 0.1 bits/pixel), **pause the whole task right there and say so**.
+Only he can turn host mode back on and only he can wake the screen; there is no
+way to do either from this PC. Wait for him to reply that the phone is awake
+and reachable, then retry from where you stopped.
+
+This is not "note it and carry on with something else". The phone step is the
+step — it is the only thing that proves a fix on real hardware — so a session
+that skips past it and reports everything else green has reported a half-done
+job. Ask, wait, resume.
+
 The install route, proven three times, about six minutes:
 
 ```
@@ -735,7 +749,7 @@ off. Read these TWO handoff files before doing anything else, in this order.
 
 THE PATHS THAT MATTER
 
-  Work happens here (its own git repo, branch `main`, 132 commits, clean):
+  Work happens here (its own git repo, branch `main`, 133 commits, clean):
     C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
   NEVER TOUCHED, for any reason:
@@ -761,11 +775,11 @@ handoff — CHECK IT AT THE START OF THE SESSION AND AGAIN AT THE END:
 
 WHERE I LEFT OFF, EXACTLY
 
-The tree is CLEAN. 132 commits. Nothing is half-applied and nothing is
+The tree is CLEAN. 133 commits. Nothing is half-applied and nothing is
 uncommitted. The tip is the commit carrying HANDOFF.md, so the count includes
-it. The last CODE commit under it is eb84e45, with one docs commit (539978d,
-an earlier draft of this same file) between them. The six code commits of the
-session are:
+it. The last CODE commit under it is eb84e45, with two earlier drafts of this
+same file (539978d, 1a881b9) between them. The six code commits of the session
+are:
 
     9c7dbe9  one name per destination, and three routes that announced
              themselves as "Workspace"
@@ -867,6 +881,16 @@ WHAT IS LEFT — START HERE
      no word broken in half. Jean turns it back on: CtrlBridge → Let my PC
      control this phone → Host mode on. The app there is signed in as the
      PLATFORM ADMIN and a sign-out was interrupted.
+     🚨 IF THE PHONE DOES NOT ANSWER AT ANY POINT — `phone_agent.py status`
+     says "no phone at a known address - broadcasting", or `probe` reports
+     under 0.1 bits/pixel because the display is asleep — PAUSE THE WHOLE TASK
+     RIGHT THERE AND TELL JEAN. Then WAIT for him to reply that the phone is
+     awake and reachable, and retry from exactly where you stopped. Only he
+     can turn host mode on and only he can wake a sleeping screen; neither is
+     possible from this PC, and injected touches cannot wake it. Do NOT work
+     around it, do NOT skip ahead to something else, and do NOT report the
+     rest green as though the phone step were optional — it is the only thing
+     that proves a fix on real hardware.
   3. A LEFTOVER FIREWALL RULE needs an ADMIN PowerShell — only Jean can run it:
        Remove-NetFirewallRule -DisplayName 'CtrlBridge APK download (TCP in)'
   4. THREE THINGS ARE OWED TO THE SHIPPING APP, not fixable in this fork
