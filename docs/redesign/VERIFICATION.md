@@ -590,3 +590,51 @@ rather than implying coverage it does not have.
   surviving a long backgrounding, and battery over a trip. Unchanged.
 - **iOS**, unchanged — no reachable Apple Developer account.
 - **Windows**, unchanged — two pre-existing faults, neither this project's.
+
+---
+
+## Current state — 2026-08-22 (late) — the Android role sweep
+
+Continues the session above. The browser tooling dropped, the Android emulator
+replaced it, and Jean's handset was used for hardware proof.
+
+| | |
+|---|---|
+| `flutter analyze` | no issues |
+| `flutter test` | **2,440 passed**, 1 skipped |
+| `dart tool/release_guards.dart` | **41/41** PASS, 0 FAIL |
+| `py -3 tool/one_clock_check.py` | 0 sites, exit 0 — **5 patterns now, was 3** |
+| `py -3 tool/health_probe.py` | 7/7 services answering |
+| Renders | 227 |
+| APK on the SM-G780G | **installed (1ffa3d2), NOT yet driven** |
+| Original worktree | `df451d0`, 14163 files, 3 pre-existing modified, 2 entries, 0 today |
+
+### Four more defects, all found by driving Android
+
+10. **The driver's week chart drew 33.7 t on a Sunday that had not happened.**
+    `byDay[t.updatedAt.weekday - 1]` read the UTC weekday while `inWeek` on the
+    lines either side correctly used `MlTime.sast`. The week TOTAL was right to
+    the kilogram, so only the distribution was wrong.
+11. **Every "Sign out" button opened a dialog saying "Logout"** — ten call
+    sites, plus two more dialogs titled "Confirm Logout".
+12. **"Departed Today" on the security gate asked the DEVICE what day it is** —
+    the mirror image of 10, and invisible on the emulator because it is set to
+    Africa/Johannesburg.
+13. **`employee_profile_screen`'s "since {Month}"** read a raw instant's month.
+
+### The instruments grew
+
+- `one_clock_check.py`: 3 patterns → 5. It passed this tree cleanly while four
+  real §7.1 faults were live. New: a calendar field off a receiver ending in
+  `At`, and a `DateTime.now()` local whose date parts are read.
+- `release_guards.dart`: 40 → 41, adding `one-vocabulary-for-signing-out`.
+
+### What is NOT proven
+
+- **The build on the handset has not been driven.** Three checks are queued —
+  the sign-out copy, no new Duplicate GlobalKey rows, and (on the emulator) the
+  driver week chart.
+- **Four roles have never been driven at screen level**: Load Controller,
+  Supervisor/Foreman, company & employee management, and the buyer/mine quality
+  and value tabs.
+- Physical GPS, iOS and Windows — all unchanged.
