@@ -669,10 +669,13 @@ against them.
 3. **The NAS carries that same APK** at
    `\\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk`, hash-verified
    `7511FB67…`. Ignore its timestamp — §5.
-4. **A web server and a Chrome are still running** — `py -3 -m http.server 8123`
-   in `build/web`, and Chrome on `--remote-debugging-port=9222` with four
-   MineLink pages open (admin, transporter, mine, driver contexts). The
-   devtools MCP server disconnected; Chrome itself is fine.
+4. **The web server IS still running; Chrome is NOT.**
+   `py -3 -m http.server 8123` in `build/web` answers 200 — verified. Chrome
+   **exited** after the devtools MCP server disconnected; `:9222` is dead —
+   also verified, and this line is a correction: an earlier draft of this
+   handoff claimed both were up, which was true when written and false twenty
+   minutes later. Relaunch Chrome with the command in §5 when you need it; the
+   server needs nothing.
 5. **The `CtrlBridge APK download (TCP in)` firewall rule is still Enabled**
    and needs an elevated shell — §4.1(c).
 
@@ -768,12 +771,12 @@ Green means EXACTLY this — compare against it rather than guessing:
   text deliberately to prove the instrument works. Count app screens with
   `grep "LOW CONTRAST \[" out.txt | grep -vc "\[unit\]"`, which is 0.
 
-STILL RUNNING FROM MY SESSION (you may reuse or kill them):
-  - `py -3 -m http.server 8123` serving build/web
-  - Chrome on --remote-debugging-port=9222 with four MineLink pages open
-    (admin / transporter / mine / driver isolated contexts)
-  ⚠️ The devtools MCP server DISCONNECTED near the end of my session. Chrome
-  itself is fine. If browser automation is missing, that is why.
+STILL RUNNING FROM MY SESSION:
+  - `py -3 -m http.server 8123` serving build/web — VERIFIED still answering
+    200. Reuse it; it is serving a CURRENT release build.
+  - Chrome is NOT running. It exited after the devtools MCP server
+    disconnected, and :9222 is dead — verified. Relaunch it with the command
+    in §5 of the handoff when you need browser automation.
 
 WHAT I DID — THE THING THAT HAD NEVER BEEN DONE
 
