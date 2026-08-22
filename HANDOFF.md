@@ -17,7 +17,7 @@ file governs the redesign work.**
 
 ## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The tree is **clean**, **131 commits**, nothing half-applied and nothing
+The tree is **clean**, **132 commits**, nothing half-applied and nothing
 uncommitted. **The tip is the commit that carries THIS FILE**, so the count
 above includes it. The last code commit under it is `eb84e45`, and the whole
 gate in §2 was run green against the tree as it stands.
@@ -49,7 +49,7 @@ Plus the two decisions Jean settled (§3.1, §3.2).
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **131 commits**, clean tree. |
+| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **132 commits**, clean tree. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
@@ -735,7 +735,7 @@ off. Read these TWO handoff files before doing anything else, in this order.
 
 THE PATHS THAT MATTER
 
-  Work happens here (its own git repo, branch `main`, 131 commits, clean):
+  Work happens here (its own git repo, branch `main`, 132 commits, clean):
     C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
   NEVER TOUCHED, for any reason:
@@ -761,9 +761,10 @@ handoff — CHECK IT AT THE START OF THE SESSION AND AGAIN AT THE END:
 
 WHERE I LEFT OFF, EXACTLY
 
-The tree is CLEAN. 131 commits. Nothing is half-applied and nothing is
+The tree is CLEAN. 132 commits. Nothing is half-applied and nothing is
 uncommitted. The tip is the commit carrying HANDOFF.md, so the count includes
-it. The last CODE commit under it is eb84e45. The six code commits of the
+it. The last CODE commit under it is eb84e45, with one docs commit (539978d,
+an earlier draft of this same file) between them. The six code commits of the
 session are:
 
     9c7dbe9  one name per destination, and three routes that announced
@@ -881,9 +882,9 @@ WHAT IS LEFT — START HERE
 
 HOW TO WORK — THIS IS JEAN'S INSTRUCTION, FOLLOW IT
 
-don't worry about me seeing anything, I'll want to see it when its all
+don't worry about me seeing anything, I'll want to see when everything is
 complete and done, so don't stop so much in between please run the task for as
-long as possible so that we can get this completley done and dusted, and
+long as possible so that we can get this completley done and sorted please,
 correct your self where you make mistakes and fix the mistakes and make sure
 you don't implement anything with gaps in them make sure its full and proper
 like the original
