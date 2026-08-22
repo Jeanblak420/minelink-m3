@@ -333,7 +333,26 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
     final isDriverEmployee = authState.userType?.isEmployee == true &&
         employeeState.employee?.role == UserRole.driver;
     if (shellPath == '/home' && isDriverEmployee) {
-      return const DriverAppScreen();
+      // Wrapped in the dock, because this `return` is BEFORE the one at the
+      // end of this method that wraps every other role's shell — so until
+      // 2026-08-22 a driver had no chat at all.
+      //
+      // Not "no chat FAB": no chat. `/home` IS the driver's app, the 3-tab
+      // shell replaces the sidebar so there is no rail entry to fall back on,
+      // and `DriverAppScreen` has no messages affordance of its own. A driver
+      // is a party to every load — load control, the transporter's admin, the
+      // mine's security — and could not be messaged back.
+      //
+      // It was invisible in every test and every render because the harness
+      // builds `MlAppShell` directly and never mounts this layout at all. It
+      // showed up the first time the app was opened on a real handset, signed
+      // in as a real driver, which is the whole argument for doing that.
+      //
+      // The disc keeps off the driver's own bottom nav for the same reason it
+      // keeps off the portal's: the dock reserves `kMlBottomNavHeight` by
+      // WINDOW CLASS rather than by asking whether a bar happens to be there
+      // (`chat_dock.dart`), and the driver shell is only ever narrow.
+      return const ChatDock(child: DriverAppScreen());
     }
     // Phase-2 nav merge (T2): /portal/driver/{home,trip,profile} deep-link
     // the same self-chromed driver app — render the routed child bare so the

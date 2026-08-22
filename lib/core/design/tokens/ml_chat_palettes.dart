@@ -94,7 +94,9 @@ class ChatPalette {
   Color quoteGround({required bool mine}) {
     final bubble = mine ? outgoingBubble : incomingBubble;
     final ink = mine ? outgoingText : incomingText;
-    final tint = ink.computeLuminance() > 0.5 ? Colors.black : Colors.white;
+    final tint = ink.computeLuminance() > 0.5
+        ? MlTokens.overlayDark
+        : MlTokens.overlayLight;
     // `alphaBlend` keeps the BACKGROUND's alpha, and every bubble here is
     // opaque, so the result is opaque too. CLAUDE.md §10.4 records the case
     // where that was not true and the "fix" produced another translucent

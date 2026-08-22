@@ -32,7 +32,12 @@ String _stripMentionTokens(String text) =>
 /// sits in. Tinting the other way — with the ink itself — is what produced a
 /// 3.17:1 quote heading in the dock and a 3.44:1 one here.
 Color _quoteGround(Color bubble, Color ink) => Color.alphaBlend(
-      (ink.computeLuminance() > 0.5 ? Colors.black : Colors.white)
+      // `overlay*`, not `Colors.*`: this is white and black as a translucent
+      // LAYER, where the alpha is the decision — which is the distinction
+      // those tokens exist to make, and which `no-material-colors` enforces.
+      (ink.computeLuminance() > 0.5
+              ? MlTokens.overlayDark
+              : MlTokens.overlayLight)
           .withValues(alpha: 0.14),
       bubble,
     );
