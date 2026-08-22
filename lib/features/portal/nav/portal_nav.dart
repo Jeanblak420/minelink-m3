@@ -96,17 +96,16 @@ List<PortalNavNode> portalNavTree({
 /// (Role · Company · Status · Alerts) and two chips — as the first screen every
 /// company user sees after signing in, while the rail beside it highlights
 /// "Dashboard" and the real dashboard sits one address away, unvisited.
-String portalLandingRoute({
-  required OrgType orgType,
-  required UserRole? role,
-}) {
-  for (final leaf in portalNavTree(orgType: orgType, role: role)
-      .expand((n) => n.leaves)) {
+String portalLandingRoute({required OrgType orgType, required UserRole? role}) {
+  for (final leaf in portalNavTree(
+    orgType: orgType,
+    role: role,
+  ).expand((n) => n.leaves)) {
     final route = leaf.route;
     if (route != null) return route;
   }
   // Unreachable by construction — every branch of every tree ends with at
-  // least `_personalTail`, and `_minimalTree` exists precisely so that an
+  // least `_myAccount`, and `_minimalTree` exists precisely so that an
   // unsupported role still gets a rail. Stated rather than asserted so a future
   // empty branch degrades to the profile screen instead of throwing on sign-in.
   return '/profile';
@@ -148,16 +147,16 @@ bool portalRouteAllowedForRole({
 }) {
   bool covers(String route) => path == route || path.startsWith('$route/');
 
-  final mine = portalNavTree(orgType: orgType, role: role)
-      .expand((n) => n.leaves)
-      .map((l) => l.route!)
-      .toSet();
+  final mine = portalNavTree(
+    orgType: orgType,
+    role: role,
+  ).expand((n) => n.leaves).map((l) => l.route!).toSet();
   if (mine.any(covers)) return true;
 
-  final full = portalNavTree(orgType: orgType, role: null)
-      .expand((n) => n.leaves)
-      .map((l) => l.route!)
-      .toSet();
+  final full = portalNavTree(
+    orgType: orgType,
+    role: null,
+  ).expand((n) => n.leaves).map((l) => l.route!).toSet();
   return !full.where((r) => !mine.contains(r)).any(covers);
 }
 
@@ -181,53 +180,103 @@ bool _isFullAccess(UserRole? role) =>
 // ---------------------------------------------------------------------------
 
 PortalNavNode _settings(String org) => PortalNavNode.group(
-      label: 'Settings',
-      icon: Icons.settings_outlined,
+  label: 'Settings',
+  icon: Icons.settings_outlined,
+  children: [
+    PortalNavNode.leaf(
+      label: 'My profile',
+      icon: Icons.person_outline_rounded,
+      route: '/portal/$org/profile',
+    ),
+    const PortalNavNode.leaf(
+      label: 'Account & security',
+      icon: Icons.lock_outline_rounded,
+      route: '/account-security',
+    ),
+    const PortalNavNode.leaf(
+      label: 'Appearance',
+      icon: Icons.palette_outlined,
+      route: '/appearance',
+    ),
+    PortalNavNode.leaf(
+      label: 'Notifications',
+      icon: Icons.notifications_none_rounded,
+      route: '/portal/$org/notifications',
+      badge: PortalNavBadge.unreadNotifications,
+    ),
+  ],
+);
+
+/// Overview ▾ — the workspace's own front page.
+///
+/// ## Why a group holds one destination
+///
+/// Ruled by jean, 2026-08-22: *"find a proper parent for everything inside of
+/// the sidebar nav menu that doesn't have a parent … none of them shouldn't
+/// have a parent, all should have a parent"*. Dashboard was the last loose
+/// leaf in every tree, and a rail where one entry is a destination and the
+/// rest are groups is exactly the inconsistency that instruction is about.
+///
+/// **"Overview" rather than a group named "Dashboard"** because that is
+/// already what the top bar calls this route (`mlRouteTitle` answers
+/// "Overview" for `/portal/mine`, `/portal/buyer` and `/portal/transporter`).
+/// Those four dashboard roots are on the divergence allow-list in
+/// `every_portal_route_is_named_test.dart` precisely because the rail said
+/// "Dashboard" and the bar said "Overview"; the group closes half of that gap
+/// without renaming the destination a person taps.
+///
+/// The cost, stated plainly: Dashboard is now one level deeper in the rail,
+/// because a rail group header TOGGLES rather than navigates. The landing
+/// route is unaffected — `portalLandingRoute` and the shell both read the
+/// first LEAF of the first node, which is still Dashboard.
+PortalNavNode _overview(String route) => PortalNavNode.group(
+  label: 'Overview',
+  icon: Icons.dashboard_outlined,
+  children: [
+    PortalNavNode.leaf(
+      label: 'Dashboard',
+      icon: Icons.dashboard_outlined,
+      route: route,
+    ),
+  ],
+);
+
+/// My account ▾ — the personal tail every restricted role gets: their own
+/// record and the documents they are chased for. Never the org's.
+///
+/// A GROUP as of 2026-08-22 (jean, above). It was two loose leaves at the foot
+/// of every restricted role's rail, which is where the inconsistency was most
+/// visible: a security guard's rail read `Security gate · Incidents · Docs ·
+/// My profile` — four things at one level, two of them about the gate and two
+/// about the person.
+///
+/// [profileRoute] is separate because the driver is the one role whose profile
+/// and compliance live under different org segments: their record is at
+/// `/portal/driver/profile` while their documents are the transporter's at
+/// `/portal/transporter/compliance`.
+PortalNavNode _myAccount(String org, {String? profileRoute}) =>
+    PortalNavNode.group(
+      label: 'My account',
+      icon: Icons.account_circle_outlined,
       children: [
+        PortalNavNode.leaf(
+          label: 'Compliance',
+          // One word, ten letters, broken mid-word in the phone's 72px
+          // slot. "Docs" is what the screen holds — certificates, licences
+          // and permits with expiry dates — and it is short enough that no
+          // phone this product supports has to break it.
+          shortLabel: 'Docs',
+          icon: Icons.verified_user_outlined,
+          route: '/portal/$org/compliance',
+          badge: PortalNavBadge.expiringCompliance,
+        ),
         PortalNavNode.leaf(
           label: 'My profile',
           icon: Icons.person_outline_rounded,
-          route: '/portal/$org/profile',
-        ),
-        const PortalNavNode.leaf(
-          label: 'Account & security',
-          icon: Icons.lock_outline_rounded,
-          route: '/account-security',
-        ),
-        const PortalNavNode.leaf(
-          label: 'Appearance',
-          icon: Icons.palette_outlined,
-          route: '/appearance',
-        ),
-        PortalNavNode.leaf(
-          label: 'Notifications',
-          icon: Icons.notifications_none_rounded,
-          route: '/portal/$org/notifications',
-          badge: PortalNavBadge.unreadNotifications,
+          route: profileRoute ?? '/portal/$org/profile',
         ),
       ],
     );
-
-/// The personal tail every restricted role gets: their own record and the
-/// documents they are chased for. Never the org's.
-List<PortalNavNode> _personalTail(String org) => [
-      PortalNavNode.leaf(
-        label: 'Compliance',
-        // One word, ten letters, broken mid-word in the phone's 72px
-        // slot. "Docs" is what the screen holds — certificates, licences
-        // and permits with expiry dates — and it is short enough that no
-        // phone this product supports has to break it.
-        shortLabel: 'Docs',
-        icon: Icons.verified_user_outlined,
-        route: '/portal/$org/compliance',
-        badge: PortalNavBadge.expiringCompliance,
-      ),
-      PortalNavNode.leaf(
-        label: 'My profile',
-        icon: Icons.person_outline_rounded,
-        route: '/portal/$org/profile',
-      ),
-    ];
 
 // ---------------------------------------------------------------------------
 // Mine / supplier
@@ -242,22 +291,28 @@ List<PortalNavNode> _mineTree(UserRole? role) {
   // and `gate_checks` holds 1 (P7-18).
   if (role == UserRole.security) {
     return [
-      const PortalNavNode.leaf(
-        label: 'Security gate',
+      const PortalNavNode.group(
+        label: 'Gate',
         icon: Icons.security_rounded,
-        route: '/portal/mine/security',
-        badge: PortalNavBadge.arrivalsAwaitingCheckIn,
+        children: [
+          PortalNavNode.leaf(
+            label: 'Security gate',
+            icon: Icons.security_rounded,
+            route: '/portal/mine/security',
+            badge: PortalNavBadge.arrivalsAwaitingCheckIn,
+          ),
+          PortalNavNode.leaf(
+            label: 'Incidents & gate checks',
+            // Three lines in a 72px bottom-bar slot at 360px, and the third
+            // was clipped away by the bar. The full label is still what the
+            // rail, the drawer and the bar's long-press tooltip say.
+            shortLabel: 'Incidents',
+            icon: Icons.report_gmailerrorred_outlined,
+            route: '/portal/mine/operations',
+          ),
+        ],
       ),
-      const PortalNavNode.leaf(
-        label: 'Incidents & gate checks',
-        // Three lines in a 72px bottom-bar slot at 360px, and the third was
-        // clipped away by the bar. The full label is still what the rail, the
-        // drawer and the bar's long-press tooltip say.
-        shortLabel: 'Incidents',
-        icon: Icons.report_gmailerrorred_outlined,
-        route: '/portal/mine/operations',
-      ),
-      ..._personalTail('mine'),
+      _myAccount('mine'),
     ];
   }
 
@@ -265,23 +320,29 @@ List<PortalNavNode> _mineTree(UserRole? role) {
   // — pending P8-15 — no history of their own loads yet.
   if (role == UserRole.controllerWB) {
     return [
-      const PortalNavNode.leaf(
-        label: 'Load controller',
+      const PortalNavNode.group(
+        label: 'Weighbridge',
         icon: Icons.tune_rounded,
-        route: '/portal/mine/weighbridge',
-        badge: PortalNavBadge.loadsAwaitingWeigh,
+        children: [
+          PortalNavNode.leaf(
+            label: 'Load controller',
+            icon: Icons.tune_rounded,
+            route: '/portal/mine/weighbridge',
+            badge: PortalNavBadge.loadsAwaitingWeigh,
+          ),
+          PortalNavNode.leaf(
+            label: 'Weighbridge records',
+            // Two long words: at the console's top text scale (1.3) neither
+            // fits a 72px bottom-bar slot, so Flutter breaks INSIDE a word and
+            // the label needs three lines. The full label is what the rail,
+            // the drawer and the bar's long-press tooltip say.
+            shortLabel: 'Records',
+            icon: Icons.scale_outlined,
+            route: '/portal/mine/operations',
+          ),
+        ],
       ),
-      const PortalNavNode.leaf(
-        label: 'Weighbridge records',
-        // Two long words: at the console's top text scale (1.3) neither fits a
-        // 72px bottom-bar slot, so Flutter breaks INSIDE a word and the label
-        // needs three lines. The full label is what the rail, the drawer and
-        // the bar's long-press tooltip say.
-        shortLabel: 'Records',
-        icon: Icons.scale_outlined,
-        route: '/portal/mine/operations',
-      ),
-      ..._personalTail('mine'),
+      _myAccount('mine'),
     ];
   }
 
@@ -290,40 +351,56 @@ List<PortalNavNode> _mineTree(UserRole? role) {
   // which trucks were inbound to collect the pile they were filling.
   if (role == UserRole.supervisorForeman) {
     return [
-      const PortalNavNode.leaf(
-        label: 'Dashboard',
-        icon: Icons.dashboard_outlined,
-        route: '/portal/mine',
+      _overview('/portal/mine'),
+      // The same group names the mine's FULL tree uses, so a supervisor
+      // promoted to admin finds the destinations they already know in the
+      // places they already know them.
+      const PortalNavNode.group(
+        label: 'Operations',
+        icon: Icons.precision_manufacturing_outlined,
+        children: [
+          PortalNavNode.leaf(
+            // "Stockpiles" rather than "Supervisor & stockpiles": it names the
+            // thing this destination is for, and the person reading it already
+            // is the supervisor. It is also what the top bar has always called
+            // this route, settled on Jean's call, 2026-08-22.
+            label: 'Stockpiles',
+            icon: Icons.supervisor_account_outlined,
+            route: '/portal/mine/stockpiles',
+          ),
+          PortalNavNode.leaf(
+            label: 'Production',
+            icon: Icons.terrain_outlined,
+            route: '/portal/mine/production',
+          ),
+        ],
       ),
-      const PortalNavNode.leaf(
-        // "Stockpiles" rather than "Supervisor & stockpiles": it names the
-        // thing this destination is for, and the person reading it already is
-        // the supervisor. It is also what the top bar has always called this
-        // route — settled on Jean's call, 2026-08-22, so the two agree and the
-        // label no longer needs a `shortLabel` to survive the phone's bar.
-        label: 'Stockpiles',
-        icon: Icons.supervisor_account_outlined,
-        route: '/portal/mine/stockpiles',
+      const PortalNavNode.group(
+        label: 'Logistics',
+        icon: Icons.local_shipping_outlined,
+        children: [
+          PortalNavNode.leaf(
+            label: 'Truck locations',
+            // "locations" alone overruns a 72px bottom-bar slot at text scale
+            // 1.3 and the label takes three lines.
+            shortLabel: 'Trucks',
+            icon: Icons.map_outlined,
+            route: '/portal/mine/truck-locations',
+          ),
+        ],
       ),
-      const PortalNavNode.leaf(
-        label: 'Production',
-        icon: Icons.terrain_outlined,
-        route: '/portal/mine/production',
-      ),
-      const PortalNavNode.leaf(
-        label: 'Truck locations',
-        // Same as "Weighbridge records" above — "locations" alone overruns a
-        // 72px slot at text scale 1.3 and the label takes three lines.
-        shortLabel: 'Trucks',
-        icon: Icons.map_outlined,
-        route: '/portal/mine/truck-locations',
-      ),
-      const PortalNavNode.leaf(
-        label: 'Reconciliations',
+      const PortalNavNode.group(
+        label: 'Reconciliation',
         icon: Icons.balance_outlined,
-        route: '/portal/mine/reconciliations',
+        children: [
+          PortalNavNode.leaf(
+            label: 'Reconciliations',
+            icon: Icons.balance_outlined,
+            route: '/portal/mine/reconciliations',
+          ),
+        ],
       ),
-      ..._personalTail('mine'),
+      _myAccount('mine'),
     ];
   }
 
@@ -332,11 +409,7 @@ List<PortalNavNode> _mineTree(UserRole? role) {
   }
 
   return [
-    const PortalNavNode.leaf(
-      label: 'Dashboard',
-      icon: Icons.dashboard_outlined,
-      route: '/portal/mine',
-    ),
+    _overview('/portal/mine'),
     const PortalNavNode.group(
       label: 'Operations',
       icon: Icons.precision_manufacturing_outlined,
@@ -473,11 +546,7 @@ List<PortalNavNode> _buyerTree(UserRole? role) {
   if (!_isFullAccess(role)) return _minimalTree('buyer');
 
   return [
-    const PortalNavNode.leaf(
-      label: 'Dashboard',
-      icon: Icons.dashboard_outlined,
-      route: '/portal/buyer',
-    ),
+    _overview('/portal/buyer'),
     const PortalNavNode.group(
       label: 'Procurement',
       // Same fault as Reconciliation: one word, eleven letters, broken
@@ -591,51 +660,39 @@ List<PortalNavNode> _transporterTree(UserRole? role) {
   // could not know which trip it meant.
   if (role == UserRole.driver) {
     return [
-      const PortalNavNode.leaf(
-        label: 'Dashboard',
-        icon: Icons.dashboard_outlined,
-        route: '/portal/driver/home',
-      ),
-      const PortalNavNode.leaf(
-        // "Trip", not "My routes". The driver's BOTTOM NAV is
-        // Dashboard · Trip · Profile (CLAUDE.md §4), so "Trip" is already the
-        // word this driver taps every day; the rail was the odd one out.
-        label: 'Trip',
+      _overview('/portal/driver/home'),
+      // The load in hand and the map that shows it, as one group, because
+      // they are one job. The driver's BOTTOM NAV is untouched by this: it is
+      // built explicitly in `portal_shell_layout.dart`, not read off this
+      // tree, so Dashboard / Trip / Profile still reads exactly that.
+      const PortalNavNode.group(
+        label: 'My trip',
         icon: Icons.alt_route_outlined,
-        route: '/portal/driver/trip',
+        children: [
+          PortalNavNode.leaf(
+            // "Trip", not "My routes": it is already the word this driver taps
+            // every day on the bottom bar; the rail was the odd one out.
+            label: 'Trip',
+            icon: Icons.alt_route_outlined,
+            route: '/portal/driver/trip',
+          ),
+          PortalNavNode.leaf(
+            label: 'Live map',
+            icon: Icons.gps_fixed_rounded,
+            route: '/portal/transporter/live-map',
+          ),
+        ],
       ),
-      const PortalNavNode.leaf(
-        label: 'Live map',
-        icon: Icons.gps_fixed_rounded,
-        route: '/portal/transporter/live-map',
-      ),
-      PortalNavNode.leaf(
-        label: 'Compliance',
-        // One word, ten letters, broken mid-word in the phone's 72px
-        // slot. "Docs" is what the screen holds — certificates, licences
-        // and permits with expiry dates — and it is short enough that no
-        // phone this product supports has to break it.
-        shortLabel: 'Docs',
-        icon: Icons.verified_user_outlined,
-        route: '/portal/transporter/compliance',
-        badge: PortalNavBadge.expiringCompliance,
-      ),
-      const PortalNavNode.leaf(
-        label: 'My profile',
-        icon: Icons.person_outline_rounded,
-        route: '/portal/driver/profile',
-      ),
+      // The driver is the one role whose two personal destinations live under
+      // different org segments, see [_myAccount].
+      _myAccount('transporter', profileRoute: '/portal/driver/profile'),
     ];
   }
 
   if (!_isFullAccess(role)) return _minimalTree('transporter');
 
   return [
-    const PortalNavNode.leaf(
-      label: 'Dashboard',
-      icon: Icons.dashboard_outlined,
-      route: '/portal/transporter',
-    ),
+    _overview('/portal/transporter'),
     const PortalNavNode.group(
       label: 'Operations',
       icon: Icons.precision_manufacturing_outlined,
@@ -782,46 +839,46 @@ List<PortalNavNode> _transporterTree(UserRole? role) {
 /// so the rail entry and the router guard are UX, not the boundary. This group
 /// is already restricted to the full-access roles.
 PortalNavNode _company(String org) => PortalNavNode.group(
+  label: 'Company',
+  icon: Icons.domain_outlined,
+  children: [
+    PortalNavNode.leaf(
+      label: 'Employees',
+      icon: Icons.groups_outlined,
+      route: '/portal/$org/employees',
+    ),
+    PortalNavNode.leaf(
+      label: 'Employee register',
+      icon: Icons.badge_outlined,
+      route: '/portal/$org/register',
+    ),
+    PortalNavNode.leaf(
+      label: 'Compliance',
+      icon: Icons.verified_user_outlined,
+      route: '/portal/$org/compliance',
+      badge: PortalNavBadge.expiringCompliance,
+    ),
+    // 920 built lines that no route reached: `/communications` and
+    // `/messages` both rendered `MessagesScreen`, so company announcements
+    // were unreachable in their entirety (P4-18).
+    // "Communications", not "Announcements": the screen behind it is the
+    // Communications hub, which carries announcements AND chat, and it is
+    // what the top bar calls `/communications`. Settled 2026-08-22.
+    const PortalNavNode.leaf(
+      label: 'Communications',
+      icon: Icons.campaign_outlined,
+      route: '/communications',
+    ),
+    // "Company", matching the bar. The group this leaf sits in is already
+    // the company's, and "profile" is the word the SAME tree uses for the
+    // user's own record ("My profile").
+    PortalNavNode.leaf(
       label: 'Company',
-      icon: Icons.domain_outlined,
-      children: [
-        PortalNavNode.leaf(
-          label: 'Employees',
-          icon: Icons.groups_outlined,
-          route: '/portal/$org/employees',
-        ),
-        PortalNavNode.leaf(
-          label: 'Employee register',
-          icon: Icons.badge_outlined,
-          route: '/portal/$org/register',
-        ),
-        PortalNavNode.leaf(
-          label: 'Compliance',
-          icon: Icons.verified_user_outlined,
-          route: '/portal/$org/compliance',
-          badge: PortalNavBadge.expiringCompliance,
-        ),
-        // 920 built lines that no route reached: `/communications` and
-        // `/messages` both rendered `MessagesScreen`, so company announcements
-        // were unreachable in their entirety (P4-18).
-        // "Communications", not "Announcements": the screen behind it is the
-        // Communications hub, which carries announcements AND chat, and it is
-        // what the top bar calls `/communications`. Settled 2026-08-22.
-        const PortalNavNode.leaf(
-          label: 'Communications',
-          icon: Icons.campaign_outlined,
-          route: '/communications',
-        ),
-        // "Company", matching the bar. The group this leaf sits in is already
-        // the company's, and "profile" is the word the SAME tree uses for the
-        // user's own record ("My profile").
-        PortalNavNode.leaf(
-          label: 'Company',
-          icon: Icons.business_outlined,
-          route: '/portal/$org/company',
-        ),
-      ],
-    );
+      icon: Icons.business_outlined,
+      route: '/portal/$org/company',
+    ),
+  ],
+);
 
 /// The fallback for a role that is not a supported configuration for its org
 /// type — their own record and nothing else.
@@ -829,10 +886,6 @@ PortalNavNode _company(String org) => PortalNavNode.group(
 /// Never an empty list: an empty rail reads as a broken app rather than a
 /// restricted one, and leaves no way to reach sign-out.
 List<PortalNavNode> _minimalTree(String org) => [
-      PortalNavNode.leaf(
-        label: 'Dashboard',
-        icon: Icons.dashboard_outlined,
-        route: '/portal/$org',
-      ),
-      ..._personalTail(org),
-    ];
+  _overview('/portal/$org'),
+  _myAccount(org),
+];
