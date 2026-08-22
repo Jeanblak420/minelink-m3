@@ -766,12 +766,13 @@ off. Read these TWO handoff files before doing anything else, in this order.
 
       C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
 
-   Rewritten 2026-08-22 at the end of the session that did four things Jean
+   Rewritten 2026-08-22 at the end of the session that did SIX things Jean
    asked for mid-run and fixed four faults found on the way to them. Read it in
    this order: "WHERE THIS SESSION STOPPED — READ THIS FIRST", then §0 (where
-   you are + the one rule), §2 (verified state), §3 (what was done), §4 (what
-   is NOT done — pick up here), §5 (how to work here, and the things that have
-   already gone wrong) and §6 (three things owed to the SHIPPING app).
+   you are + the one rule), §2 (verified state), §3 (what was done — §3.1 to
+   §3.9, and DO NOT REDO ANY OF IT), §4 (what is NOT done — pick up here), §5
+   (how to work here, and the things that have already gone wrong) and §6
+   (three things owed to the SHIPPING app that cannot be fixed in this fork).
 
 2. THE OLDER MACHINE-WIDE HANDOFF — BACKGROUND ONLY, DO NOT WORK FROM IT:
 
@@ -851,10 +852,12 @@ Green means EXACTLY this — compare against it rather than against a memory:
 
   ⚠️ CUT OFF counts RENDERS, not strings — 5 lines carrying 9 strings.
 
-WHAT I DID
+WHAT IS ALREADY DONE — DO NOT REDO ANY OF THIS
 
-Closed BOTH of the previous handoff's open items, and did the four things Jean
-asked for during the session.
+Closed BOTH of the previous handoff's open items, and did the SIX things Jean
+asked for during the session. Every one has a test that was SABOTAGED and
+watched to fail before being kept, and every one that can be seen on a screen
+was looked at in a browser AND on the phone.
 
   1. A LIVE CHAT BETWEEN TWO REAL ACCOUNTS IS DRIVEN, both directions, through
      the app's own composer, with the second message arriving in the first
@@ -864,13 +867,17 @@ asked for during the session.
      profile, not a defect. Settled by issuing the identical insert from the
      page's own JS (201) and then by temporary debugPrint probes, which DO
      reach the console in a release web build.
-  2. THE PHONE WAS DRIVEN. The current APK is installed on the SM-G780G and
-     four things were verified on that hardware: the console's bottom bar reads
-     Dashboard · Insights · Requests · More with no broken word; the drawer's
-     groups are collapsed; the live map carries overview/zoom/centre and a
-     1 km scale bar over real tiles; holding a plate pill produced our
-     "Copied — KVK007MP" AND Android's own clipboard toast; long-pressing the
-     map returned a dropped-pin sheet with real coordinates.
+  2. THE PHONE WAS DRIVEN. The FINAL build (tip 1b0982c, SHA-256
+     ee01e891…79f0, hash-matched both ends) is installed on the SM-G780G and
+     SIX things were verified on that hardware: the bottom bar reads
+     Dashboard · Insights · Access · More, four tiles, no broken word; the
+     drawer reads Dashboard (alone, no chevron) then Insights, Tokens & Seats,
+     Requests, Reconciliation, Routes, Communications, Tracking, Settings, ALL
+     COLLAPSED; the live map carries overview/zoom/centre and a 1 km scale bar
+     over real tiles; holding a plate pill produced our "Copied — KVK007MP"
+     AND Android's own clipboard toast; long-pressing the map returned a
+     dropped-pin sheet with real coordinates. The phone was left on home,
+     signed in as the platform admin, every screenshot deleted.
   3. THE MAPS. Five FlutterMaps had ONE control between them and onLongPress
      null everywhere. MlMapControls (compass, overview, zoom pill, three-state
      my-location, 48px targets) + a scale bar + press-and-hold-to-drop-a-pin,
@@ -883,16 +890,32 @@ asked for during the session.
      resolve, or the rail flashes 280px and snaps shut).
   6. EVERYTHING IN THE SIDEBAR HAS A PARENT. Nine new groups across the console
      and every role tree; 94 assertions sweep every org type × every role.
-  7. FOUR FAULTS FIXED ON THE WAY: the dock's launcher covered 61% of the chat
+  7. THE DASHBOARD IS THE ONE EXCEPTION TO 6, on Jean's correction the same
+     day: it has NO parent, and it is FIRST. That is also what the ORIGINAL app
+     does — minelink_sidebar_core.dart declares three sections, `dashboard` /
+     `main` / `footer`, the first holding one item above everything else.
+     Everything else keeps the parent it was given. DO NOT re-wrap it.
+  8. THE RAIL IS IN THE ORIGINAL APP'S ORDER, read out of the untouchable
+     worktree rather than remembered, and it is the same shape across the whole
+     app (Dashboard alone on top, then groups, Settings last):
+       Dashboard · Insights · Tokens & Seats · Requests · Reconciliation ·
+       Routes · Communications · Tracking · Settings
+     Tokens & Seats moved ABOVE Requests. The original's flat block keeps its
+     own sequence inside the new parents — Reconciliation's children are
+     Margin ledger History, Recon tables, Disputes, in that order. "Tracking"
+     houses Live map because that is the transporter portal's own word for it.
+     A test pins this order outright; it is the half a picture cannot check.
+     ⚠️ The bottom bar's third tile now reads "Access" — the PRE-EXISTING
+     shortLabel for Tokens & Seats, surfacing because that group moved up.
+  9. FOUR FAULTS FIXED ON THE WAY: the dock's launcher covered 61% of the chat
      send button (measured); a failed ATTACHMENT was silent; the driver's
      navigation map had NO OpenStreetMap attribution; the dashboard period
      pills had no Material and never rippled (132 assertions per run, zero
      failing tests).
 
-TWO JUDGEMENT CALLS JEAN MAY WANT TO REVERSE — both one-line reverts, both in
-§4.3: Dashboard now sits inside an "Overview" group (so it is one level deeper
-and the bottom bar's first tile reads "Overview"), and the chat dock is no
-longer mounted on /chat/:id.
+ONE JUDGEMENT CALL JEAN MAY STILL WANT TO REVERSE — a one-line revert, §4.3:
+the chat dock is no longer mounted on /chat/:id, because it was covering the
+send button. If it should stay, the fix has to become geometric instead.
 
 WHAT IS LEFT — START HERE
 
