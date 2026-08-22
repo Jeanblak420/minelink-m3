@@ -132,15 +132,18 @@ class _SuperAdminShellLayoutState extends ConsumerState<SuperAdminShellLayout> {
         onTap: () => context.go('/super-admin'),
       ),
       railFooter: _identity(context),
-      actions: [
-        const AnimatedNotificationBell(),
-        _overflow(context),
-      ],
+      actions: [const AnimatedNotificationBell(), _overflow(context)],
       // The semantics boundary that used to be here is now inside MlAppShell,
       // so the portal gets it too — it never had one, which left every company
       // user's rail invisible to assistive tech.
       child: NavHistoryRecorder(
-        key: ValueKey(navLocation.fullLocation),
+        // DELIBERATELY UNKEYED. A key that changes with the route
+        // REMOUNTS this on every navigation, and go_router keys its shell
+        // navigator with GlobalObjectKey(navigatorKey.hashCode) — so the
+        // remount reparented that global key out of a parent which never
+        // updated, which is a framework error and truncates the tree.
+        // It also made didUpdateWidget below unreachable, which is the one
+        // path this widget exists for.
         location: navLocation,
         isRoot: location == '/super-admin',
         child: widget.child,

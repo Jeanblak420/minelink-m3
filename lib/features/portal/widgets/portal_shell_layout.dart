@@ -170,7 +170,10 @@ String? _portalAliasTabLabel(String segment) {
 /// `/home`, the hosting tab for a `/portal/{org}` alias (phase-2 T3), and -1
 /// (no highlight) for every other routed page — matching prior behavior.
 int portalShellSelectedIndex(
-    String path, List<PortalTabItem> tabs, int homeTabIndex) {
+  String path,
+  List<PortalTabItem> tabs,
+  int homeTabIndex,
+) {
   if (path == '/home') return homeTabIndex.clamp(0, tabs.length - 1);
   final segment = _portalAliasSegment(path);
   if (segment == null) return -1;
@@ -193,7 +196,10 @@ int portalShellSelectedIndex(
 /// maps the portal's own `PortalTabItem`s down to the labels the resolver
 /// needs, which is the one piece of per-session state a title depends on.
 String portalShellSectionTitle(
-    Uri uri, List<PortalTabItem> tabs, int homeTabIndex) {
+  Uri uri,
+  List<PortalTabItem> tabs,
+  int homeTabIndex,
+) {
   return mlRouteTitle(
     uri,
     tabs: MlPortalTabs([for (final t in tabs) t.label], homeTabIndex),
@@ -213,6 +219,7 @@ class PortalShellLayout extends ConsumerStatefulWidget {
 class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
   bool _dialogOpen = false;
   final GlobalKey<ScaffoldState> _portalKey = GlobalKey<ScaffoldState>();
+
   /// Collapsed until the stored preference says otherwise (jean, 2026-08-22).
   ///
   /// This is the value for the frames BEFORE `readPortalExpanded` resolves,
@@ -233,10 +240,12 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
     final employee = ref.read(employeeProvider).employee;
     final companyNotifier = ref.read(companyProvider.notifier);
 
-    final canManage = employee != null &&
+    final canManage =
+        employee != null &&
         employee.companyId != null &&
         employee.status == 'active' &&
-        (employee.role == UserRole.admin || employee.role == UserRole.management);
+        (employee.role == UserRole.admin ||
+            employee.role == UserRole.management);
 
     if (canManage) {
       await companyNotifier.loadManagedCompanyContext(employee.companyId!);
@@ -304,24 +313,33 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
                 // they simply have no company of their own. Same reasoning as
                 // PortalWorkspacePhase.platformAdminObserver.
                 if (vm.phase == PortalWorkspacePhase.platformAdminObserver)
-                  Icon(Icons.admin_panel_settings_outlined,
-                      size: 48, color: Theme.of(context).colorScheme.primary)
+                  Icon(
+                    Icons.admin_panel_settings_outlined,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
                 else if (vm.retryAction == PortalRetryAction.none)
                   const CircularProgressIndicator()
                 else
-                  Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                  Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                 const SizedBox(height: 24),
                 Text(
                   vm.title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   vm.message,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 if (vm.retryAction != PortalRetryAction.none) ...[
@@ -333,9 +351,13 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
                         return;
                       }
                       if (vm.retryAction == PortalRetryAction.companyProfile) {
-                        ref.read(companyProvider.notifier).loadCompanyProfile(auth.id);
+                        ref
+                            .read(companyProvider.notifier)
+                            .loadCompanyProfile(auth.id);
                       } else {
-                        ref.read(employeeProvider.notifier).loadEmployeeProfile(auth.id);
+                        ref
+                            .read(employeeProvider.notifier)
+                            .loadEmployeeProfile(auth.id);
                       }
                     },
                     icon: const Icon(Icons.refresh),
@@ -405,7 +427,8 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
     // spec 2026-07-16 §5) instead of the sidebar chrome — on /home only, so
     // pushed routes (/profile, /notifications, /chat/...) keep normal chrome.
     final shellPath = GoRouterState.of(context).uri.path;
-    final isDriverEmployee = authState.userType?.isEmployee == true &&
+    final isDriverEmployee =
+        authState.userType?.isEmployee == true &&
         employeeState.employee?.role == UserRole.driver;
     if (shellPath == '/home' && isDriverEmployee) {
       // Wrapped in the dock, because this `return` is BEFORE the one at the
@@ -488,11 +511,13 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
     final badgeCompanyId = resolvePortalCompanyId(ref);
     final badgeCounts = (orgType == null || badgeCompanyId == null)
         ? const <PortalNavBadge, int>{}
-        : ref.watch(portalNavBadgeCountsProvider((
-            orgType: orgType,
-            role: isCompanyAccount ? null : employeeState.employee?.role,
-            companyId: badgeCompanyId,
-          )));
+        : ref.watch(
+            portalNavBadgeCountsProvider((
+              orgType: orgType,
+              role: isCompanyAccount ? null : employeeState.employee?.role,
+              companyId: badgeCompanyId,
+            )),
+          );
 
     _maybeShowRoleDialog(authState, employeeState);
 
@@ -511,7 +536,9 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
         if (!mounted || employee == null) {
           return;
         }
-        ref.read(employeeStatusProvider.notifier).loadEmployeeStatusHistory(employee.id);
+        ref
+            .read(employeeStatusProvider.notifier)
+            .loadEmployeeStatusHistory(employee.id);
       });
     }
 
@@ -556,17 +583,20 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
         onDestinationSelected: (i) => context.go(targets[i]),
         destinations: const [
           NavigationDestination(
-              icon: Icon(Icons.grid_view_outlined),
-              selectedIcon: Icon(Icons.grid_view_rounded),
-              label: 'Dashboard'),
+            icon: Icon(Icons.grid_view_outlined),
+            selectedIcon: Icon(Icons.grid_view_rounded),
+            label: 'Dashboard',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.local_shipping_outlined),
-              selectedIcon: Icon(Icons.local_shipping),
-              label: 'Trip'),
+            icon: Icon(Icons.local_shipping_outlined),
+            selectedIcon: Icon(Icons.local_shipping),
+            label: 'Trip',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person),
-              label: 'Profile'),
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
       );
     }
@@ -651,8 +681,7 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
       onNotifications: vm.isEmployeeWithoutRole
           ? null
           : () => context.go('/notifications'),
-      notificationsBadge:
-          ref.watch(notificationProvider).unreadCount > 0,
+      notificationsBadge: ref.watch(notificationProvider).unreadCount > 0,
       onProfile: () => context.go('/profile'),
       onToggleTheme: () => ref.read(themeModeProvider.notifier).toggle(),
       onAppearance: () => context.go('/appearance'),
@@ -696,7 +725,13 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
             ),
           Expanded(
             child: NavHistoryRecorder(
-              key: ValueKey(navLocation.fullLocation),
+              // DELIBERATELY UNKEYED. A key that changes with the route
+              // REMOUNTS this on every navigation, and go_router keys its shell
+              // navigator with GlobalObjectKey(navigatorKey.hashCode) — so the
+              // remount reparented that global key out of a parent which never
+              // updated, which is a framework error and truncates the tree.
+              // It also made didUpdateWidget below unreachable, which is the one
+              // path this widget exists for.
               location: navLocation,
               isRoot: isRootScreen,
               child: widget.child,
@@ -717,7 +752,8 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
     // message. Stacking them put the waiting screen behind a 70% scrim showing
     // a second copy of itself. Now that the router sends every other path
     // here, that doubling would be the primary experience rather than an edge.
-    final overlayExempt = location == '/home' ||
+    final overlayExempt =
+        location == '/home' ||
         location == '/profile' ||
         location == '/account-setup';
     Widget content = vm.isEmployeeWithoutRole && !overlayExempt
