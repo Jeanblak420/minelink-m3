@@ -1177,7 +1177,15 @@ class _ConversationsList extends ConsumerWidget {
             pal: pal,
             icon: Icons.forum_outlined,
             title: 'No conversations yet',
-            message: 'Open the People tab to start a chat.',
+            // "Contacts", because that is what THIS surface calls the tab.
+            //
+            // The string was copied verbatim from `MessagesScreen`, whose
+            // tabs really are Chats | People. The dock's are Conversations |
+            // Contacts — so the one instruction shown to somebody with no
+            // conversations pointed at a tab that is not on their screen.
+            // Seen on a real handset, as the first thing a driver is told
+            // when they open chat.
+            message: 'Open the Contacts tab to start a chat.',
           );
         }
         return ListView.builder(

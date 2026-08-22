@@ -355,15 +355,23 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
       return const ChatDock(child: DriverAppScreen());
     }
     // Phase-2 nav merge (T2): /portal/driver/{home,trip,profile} deep-link
-    // the same self-chromed driver app — render the routed child bare so the
-    // sidebar chrome isn't doubled around the driver shell's own scaffold.
+    // the same self-chromed driver app — render the routed child without the
+    // sidebar chrome, so it isn't doubled around the driver shell's own
+    // scaffold. **With the dock, though**, for the reason above.
+    //
+    // These three are where a driver actually lives: `portalLandingRoute`
+    // returns the first leaf of the role's tree, and the driver tree's first
+    // leaf is `/portal/driver/home` — so signing in redirects `/home` here
+    // immediately, and the `/home` branch above is only ever a single frame.
+    // Fixing that one alone left the disc still missing on the handset, which
+    // is how this second `return` was found.
     if (isDriverEmployee &&
         const {
           '/portal/driver/home',
           '/portal/driver/trip',
           '/portal/driver/profile',
         }.contains(shellPath)) {
-      return widget.child;
+      return ChatDock(child: widget.child);
     }
 
     final tabs = vm.tabs!;

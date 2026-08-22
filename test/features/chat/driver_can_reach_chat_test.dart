@@ -38,8 +38,38 @@ void main() {
   // nothing in this test dials out.
   setUpAll(ensureTestSupabaseInitialized);
 
-  test('the driver branch of PortalShellLayout wraps its shell in a ChatDock',
-      () {
+  test('BOTH driver branches of PortalShellLayout wrap their shell in a '
+      'ChatDock', () {
+    // There are two, and fixing one is not enough — that mistake was made and
+    // caught on the handset. `/home` is only ever a single frame for a driver:
+    // `portalLandingRoute` returns the first leaf of the role's tree, and the
+    // driver tree's first leaf is `/portal/driver/home`, so sign-in redirects
+    // straight past it. The route a driver actually lives on is the second
+    // branch.
+    final source = File(
+      'lib/features/portal/widgets/portal_shell_layout.dart',
+    ).readAsStringSync();
+
+    final deepLinkBranch = RegExp(
+      r"\}\.contains\(shellPath\)\) \{(.*?)\n    \}",
+      dotAll: true,
+    ).firstMatch(source);
+
+    expect(deepLinkBranch, isNotNull,
+        reason: 'The /portal/driver/{home,trip,profile} branch has moved. '
+            'Re-point this test at it — do not delete it.');
+    expect(
+      deepLinkBranch!.group(1)!.contains('ChatDock('),
+      isTrue,
+      reason: 'A driver deep-linked to /portal/driver/home — which is where '
+          'signing in actually lands them — is returned a shell with no '
+          'ChatDock above it, so they have no way to reach chat at all. '
+          'Wrap it: `return ChatDock(child: widget.child);`',
+    );
+  });
+
+  test('the /home driver branch of PortalShellLayout wraps its shell in a '
+      'ChatDock', () {
     // Read as source rather than by mounting the layout: `PortalShellLayout`
     // reaches for auth, the employee record, the router and the company scope
     // before it decides anything, and a fixture deep enough to reach the
