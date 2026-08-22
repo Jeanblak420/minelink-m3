@@ -17,7 +17,7 @@ file governs the redesign work.**
 
 ## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The tree is **clean**, **141 commits**, nothing half-applied and nothing
+The tree is **clean**, **143 commits**, nothing half-applied and nothing
 uncommitted. **The tip is the commit that carries THIS FILE**, so the count
 above includes it. The last code commit under it is `1b0982c`, and the whole
 gate in §2 was run green against the tree as it stands.
@@ -69,7 +69,7 @@ verified on the phone:**
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **141 commits**, clean tree. |
+| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **143 commits**, clean tree. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
@@ -784,7 +784,7 @@ off. Read these TWO handoff files before doing anything else, in this order.
 
 THE PATHS THAT MATTER
 
-  Work happens here (its own git repo, branch `main`, 141 commits, clean):
+  Work happens here (its own git repo, branch `main`, 143 commits, clean):
     C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
   NEVER TOUCHED, for any reason:
@@ -810,7 +810,7 @@ handoff — CHECK IT AT THE START OF THE SESSION AND AGAIN AT THE END:
 
 WHERE I LEFT OFF, EXACTLY
 
-The tree is CLEAN. 141 commits. Nothing is half-applied and nothing is
+The tree is CLEAN. 143 commits. Nothing is half-applied and nothing is
 uncommitted. The tip is the commit carrying HANDOFF.md, so the count includes
 it. The six code commits of the session are:
 
