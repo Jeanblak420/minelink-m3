@@ -59,6 +59,35 @@ const List<PortalNavNode> _waitingNav = [
 /// Aliased here so the sidebar-selection code below reads unchanged.
 String? _portalAliasSegment(String path) => mlPortalAliasSegment(path);
 
+/// Whether [path] routes to the driver's OWN self-chromed 3-tab app, and so
+/// must be rendered WITHOUT the portal's rail, top bar and banners.
+///
+/// `DriverAppScreen` is a complete shell: it draws its own scaffold, its own
+/// Dashboard · Trip · Profile bottom bar and its own `ProfileSetupBanner`.
+/// Wrapping it in the portal's chrome gives the driver two of each.
+///
+/// This was an exact-match set of three paths, and
+/// `/portal/driver/trip/:id/waybill` — which renders that same
+/// `DriverAppScreen`, on the Trip tab, with the signed waybill over it — was
+/// not one of them. Driven in a browser as the real driver on 2026-08-22,
+/// straight after recording a POD: the page came back with the account-setup
+/// banner drawn **twice**, one above the other, the portal rail on the left
+/// AND the driver's bottom bar underneath. Photographed.
+///
+/// So the rule is "this path is the driver app", not "this path is one of
+/// three strings", and anything under `/portal/driver/trip/` qualifies because
+/// that is where the driver app's own deep links live.
+///
+/// `/portal/driver/notifications` deliberately does NOT: it routes to
+/// `NotificationScreen`, which is an ordinary page and needs the shell's
+/// chrome to have a top bar and a way back at all.
+@visibleForTesting
+bool driverAppOwnsChrome(String path) =>
+    path == '/portal/driver/home' ||
+    path == '/portal/driver/profile' ||
+    path == '/portal/driver/trip' ||
+    path.startsWith('/portal/driver/trip/');
+
 /// Sidebar tab label hosting the equivalent screen for a `/portal/{org}/...`
 /// alias, or null when the alias has no sidebar tab (ops-hub tabs, employees,
 /// company, notifications, locations). Labels not present in an org's tab
@@ -365,12 +394,7 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
     // immediately, and the `/home` branch above is only ever a single frame.
     // Fixing that one alone left the disc still missing on the handset, which
     // is how this second `return` was found.
-    if (isDriverEmployee &&
-        const {
-          '/portal/driver/home',
-          '/portal/driver/trip',
-          '/portal/driver/profile',
-        }.contains(shellPath)) {
+    if (isDriverEmployee && driverAppOwnsChrome(shellPath)) {
       return ChatDock(child: widget.child);
     }
 

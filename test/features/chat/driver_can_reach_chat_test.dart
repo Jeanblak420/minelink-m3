@@ -51,13 +51,18 @@ void main() {
       'lib/features/portal/widgets/portal_shell_layout.dart',
     ).readAsStringSync();
 
+    // The set of three path literals became `driverAppOwnsChrome(...)` on
+    // 2026-08-22, when `/portal/driver/trip/:id/waybill` turned out not to be
+    // in the set and came back with the portal's chrome doubled around the
+    // driver app's own. Matching the predicate instead of the old `contains`
+    // keeps this test pointed at the same branch.
     final deepLinkBranch = RegExp(
-      r"\}\.contains\(shellPath\)\) \{(.*?)\n    \}",
+      r"driverAppOwnsChrome\(shellPath\)\) \{(.*?)\n    \}",
       dotAll: true,
     ).firstMatch(source);
 
     expect(deepLinkBranch, isNotNull,
-        reason: 'The /portal/driver/{home,trip,profile} branch has moved. '
+        reason: 'The driver deep-link branch has moved. '
             'Re-point this test at it — do not delete it.');
     expect(
       deepLinkBranch!.group(1)!.contains('ChatDock('),
