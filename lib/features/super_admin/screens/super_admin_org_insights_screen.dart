@@ -2048,14 +2048,15 @@ class _Derived {
   String? lastActiveFor(String companyName) {
     final latest = lastActiveAtFor(companyName);
     if (latest == null) return null;
-    return MlTime.ago(latest);
+    // A recon row's dates are already South African — see `MlTime.calendarAgo`.
+    return MlTime.calendarAgo(latest);
   }
 
   /// Compact age stamp for the alerts column ("12m", "1h", "3d").
   String? ageTagFor(String companyName) {
     final latest = lastActiveAtFor(companyName);
     if (latest == null) return null;
-    return MlTime.agoTag(latest);
+    return MlTime.calendarAgoTag(latest);
   }
 
   /// Tons MTD vs the same day-window of the previous month, from recon rows.

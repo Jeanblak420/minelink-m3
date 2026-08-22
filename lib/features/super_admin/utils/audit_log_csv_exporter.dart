@@ -100,7 +100,11 @@ class AuditLogExporter {
     }
 
     try {
-      final now = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      // `MlTime.now()`: the file is NAMED for the day it was exported and a
+      // mine keeps it, so on a laptop left on UTC it carried the previous
+      // day's name between midnight and 02:00 SAST. Formatting a wall clock,
+      // so no second conversion.
+      final now = DateFormat('yyyyMMdd_HHmmss').format(MlTime.now());
       final base = filename ?? '${filenameBase}_$now';
 
       List<int> bytes;
@@ -344,7 +348,9 @@ class AuditLogExporter {
     required String orgName,
   }) async {
     try {
-      final now = DateTime.now();
+      // Same rule as the export filename above — the day this history was
+      // pulled is a South African day, not the reader's device's.
+      final now = MlTime.now();
       final buf = StringBuffer();
       buf.writeln('Token History for $orgName — Generated ${MlTime.stamp(now)}');
       buf.writeln('Preview,Valid Days,Seat Limit,Status,Created At,Expires At,Revoked At,Revoke Reason');

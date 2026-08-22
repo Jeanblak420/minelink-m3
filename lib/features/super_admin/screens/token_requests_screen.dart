@@ -7,7 +7,6 @@ import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/models.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
@@ -95,7 +94,6 @@ class _TokenRequestsScreenState extends ConsumerState<TokenRequestsScreen> {
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (context, i) {
               final r = list[i];
-              final df = DateFormat.yMMMd().add_jm();
               final semantic = MlSemantic.of(context);
               return MlCard(
                 padding: const EdgeInsets.all(14),
@@ -130,7 +128,7 @@ class _TokenRequestsScreenState extends ConsumerState<TokenRequestsScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Created: ${df.format(MlTime.sast(r.createdAt))}',
+                            'Created: ${MlTime.stamp(r.createdAt)}',
                             style: context.mlText.code(
                               color: semantic.textFaint,
                               size: 12,
@@ -342,8 +340,6 @@ class _RequestDetailPanelState extends ConsumerState<_RequestDetailPanel> {
     final inProgressOther =
         r.isInProgress && r.handlingUserId != null && r.handlingUserId != uid;
 
-    final df = DateFormat.yMMMd().add_jm();
-
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -363,7 +359,7 @@ class _RequestDetailPanelState extends ConsumerState<_RequestDetailPanel> {
             Text('Requested total: ${r.requestedNewTotal} (+${r.requestedExtraSeats})'),
           if (r.requestedValidDays != null) Text('Requested validity (days): ${r.requestedValidDays}'),
           if (r.reason.isNotEmpty) Text('Reason: ${r.reason}'),
-          Text('Submitted: ${df.format(MlTime.sast(r.createdAt))}'),
+          Text('Submitted: ${MlTime.stamp(r.createdAt)}'),
           const Divider(height: 32),
           if (inProgressOther) ...[
             Text(

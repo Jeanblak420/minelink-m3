@@ -5367,7 +5367,10 @@ class _SupportHome extends ConsumerWidget {
                                       )),
                                   const SizedBox(height: 2),
                                   Text(
-                                      MlTime.stamp(n.createdAt),
+                                      // `calendarStamp`: SupportNotification
+                                      // converts at parse, so `stamp` would
+                                      // convert a wall clock a second time.
+                                      MlTime.calendarStamp(n.createdAt),
                                       style: context.mlText.code(
                                         color: pal.bodySubtle,
                                         size: 11,
@@ -5952,7 +5955,9 @@ class _TicketViewState extends ConsumerState<_TicketView> {
                                             fontWeight: FontWeight.w700,
                                           )),
                                       Text(
-                                          MlTime.stamp(e.createdAt),
+                                          // Already SAST at parse — see the
+                                          // note on the notification above.
+                                          MlTime.calendarStamp(e.createdAt),
                                           style: context.mlText.code(
                                             color: pal.bodySubtle,
                                             size: 11,

@@ -11,7 +11,6 @@ import 'package:flutter_application_1/core/widgets/osm_tile_layer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -1523,7 +1522,9 @@ class _DriverNavigationScreenState extends ConsumerState<DriverNavigationScreen>
     Color? planColor;
     if (est != null) {
       final etaAt = est.eta;
-      eta = DateFormat.Hm().format(etaAt);
+      // `est.eta` is `MlTime.now().add(...)` — already a South African wall
+      // clock, so it is formatted, not converted again.
+      eta = MlTime.calendarClock(etaAt);
       mins = '${(est.timeLeftS / 60).ceil()} min';
       dist = _fmtDistance(est.distLeftM.toDouble());
       // Late vs the session's original ETA (kept across reroutes).

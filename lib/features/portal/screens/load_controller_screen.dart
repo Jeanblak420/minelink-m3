@@ -2,7 +2,6 @@ import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/mine_trip.dart';
 import 'package:flutter_application_1/features/portal/services/trip_waybill_builder.dart';
@@ -242,10 +241,14 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
                               _monoText(context,
                                   t.netTons == null ? '—' : formatTons(t.netTons!)),
                               MlStatusBadge.forStatus(t.status.label),
+                              // `listStamp`, not a bare clock: these rows
+                              // are sorted newest first and can span days, so a
+                              // time on its own runs out of order and says
+                              // nothing about WHICH day. Measured on live data
+                              // 2026-08-22 the column read 10:10, 04:51, 13:39
+                              // — and the third was six days old.
                               _monoText(
-                                  context,
-                                  DateFormat.Hm()
-                                      .format(MlTime.sast(t.updatedAt))),
+                                  context, MlTime.listStamp(t.updatedAt)),
                             ],
                         ],
                       ),
@@ -752,7 +755,7 @@ class _RecordLoadSheetState extends ConsumerState<_RecordLoadSheet> {
                   label: trip.loadingAt == null
                       ? 'Empty (tare) — first weigh'
                       : 'Empty (tare) — weighed '
-                          '${DateFormat('HH:mm').format(trip.loadingAt!)}',
+                          '${MlTime.calendarClock(trip.loadingAt!)}',
                   value: '${trip.tareTons!.toStringAsFixed(2)} t',
                 ),
                 const SizedBox(height: 12),

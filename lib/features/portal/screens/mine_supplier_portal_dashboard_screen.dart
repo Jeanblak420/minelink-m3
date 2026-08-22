@@ -688,5 +688,7 @@ class _MineSupplierPortalDashboardScreenState
   /// reads as a sorting fault. `listDay` prints the year exactly when the date
   /// is not in the current South African one, the same rule `MlTime.ago`
   /// already used.
-  static String _date(DateTime d) => MlTime.listDay(d);
+  // `calendarListDay`: `w` is a `RawReconRow`, whose `tripDate` is already a
+  // South African wall clock — `MlTime.listDay` would convert it again.
+  static String _date(DateTime d) => MlTime.calendarListDay(d);
 }

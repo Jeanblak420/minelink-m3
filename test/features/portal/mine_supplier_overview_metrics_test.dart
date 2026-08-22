@@ -1,9 +1,19 @@
+import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/features/operations/models/operations_models.dart';
 import 'package:flutter_application_1/features/portal/models/logistics_models.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_entry.dart';
 import 'package:flutter_application_1/features/portal/services/logistics_service.dart';
 import 'package:flutter_application_1/features/portal/utils/mine_supplier_overview_metrics.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+/// The instant Postgres would have sent for a South African wall clock.
+///
+/// Every timestamp in these tests is written as the time it reads AT THE PIT,
+/// because that is what the assertions are about. The model receives the
+/// INSTANT, UTC-flagged, exactly as `timestamptz` arrives over PostgREST — and
+/// `MlTime.sast` now asserts on that, so a fixture that hands it a local
+/// `DateTime` is a fixture that does not resemble production.
+DateTime _atPit(DateTime wallClock) => MlTime.toServer(wallClock);
 
 /// Builds a waybill transaction. [netTonsOut] is the real weighbridge Net Mass
 /// (from `trips.net_tons`) — the figure tonnage metrics must use. [quantity]
@@ -15,25 +25,27 @@ OperationTransaction _txn({
   required double netTonsOut,
   required DateTime updatedAt,
 }) {
+  final at = _atPit(updatedAt);
   return OperationTransaction(
-    id: 'id-${updatedAt.microsecondsSinceEpoch}-$buyerId-$netTonsOut',
+    id: 'id-${at.microsecondsSinceEpoch}-$buyerId-$netTonsOut',
     buyerCompanyId: buyerId,
     referenceNumber: 'ref',
     status: 'in_transit',
     quantity: quantity,
     netTonsOut: netTonsOut,
     metadata: const {},
-    createdAt: updatedAt,
-    updatedAt: updatedAt,
+    createdAt: at,
+    updatedAt: at,
   );
 }
 
 TripRecord _trip({required String status, required DateTime updatedAt}) {
+  final at = _atPit(updatedAt);
   return TripRecord(
-    id: 'trip-${updatedAt.microsecondsSinceEpoch}-$status',
+    id: 'trip-${at.microsecondsSinceEpoch}-$status',
     transactionId: 'txn',
     status: status,
-    updatedAt: updatedAt,
+    updatedAt: at,
   );
 }
 

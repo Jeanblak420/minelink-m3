@@ -6,7 +6,6 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/widgets/osm_tile_layer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:flutter_application_1/features/portal/models/live_trip_position.dart';
@@ -530,7 +529,6 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
   Widget _detail(BuildContext context, LiveTripPosition t) {
     final semantic = MlSemantic.of(context);
     final brightness = Theme.of(context).brightness;
-    final hm = DateFormat('HH:mm');
 
     Widget stat(String value, String label, {Color? color}) => Column(
       mainAxisSize: MainAxisSize.min,
@@ -556,7 +554,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
     // Live nav numbers — the same four the driver's HUD shows.
     String eta = '—', mins = '—', dist = '—', speed = '—';
     if (t.hasFreshNav) {
-      if (t.navEta != null) eta = hm.format(MlTime.sast(t.navEta!));
+      if (t.navEta != null) eta = MlTime.clock(t.navEta!);
       if (t.navTimeLeftS != null) {
         mins = '${(t.navTimeLeftS! / 60).ceil()} min';
       }
@@ -607,7 +605,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
             ),
             Expanded(
               child: Text(
-                '${hm.format(MlTime.sast(at))}${suffix ?? ''}',
+                '${MlTime.clock(at)}${suffix ?? ''}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.mlText.code(
@@ -701,7 +699,12 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
           timelineRow('Offloaded', t.offloadedAt),
           timelineRow(
             'Now',
-            DateTime.now(),
+            // `MlTime.instant()`, not `DateTime.now()`: this row is the only
+            // one in the timeline that is not read off the trip, and it was
+            // the DEVICE's clock sitting in a column of server timestamps. It
+            // also honours `MlTime.debugClock`, so a render of this panel is
+            // reproducible instead of changing every minute.
+            MlTime.instant(),
             suffix: t.hasFix
                 ? ' · at ${t.lat!.toStringAsFixed(4)}, ${t.lng!.toStringAsFixed(4)}'
                       '${t.recordedAt != null ? ' (updated ${_ago(t.recordedAt!)})' : ''}'
@@ -732,8 +735,16 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
     if (km != null) parts.add('${km.toStringAsFixed(1)} km to go');
     final eta = t.eta;
     if (eta != null) {
-      final arrive = DateTime.now().add(eta);
-      parts.add('ETA ${DateFormat('HH:mm').format(arrive)}');
+      // `MlTime.now()`, not `DateTime.now()` — CLAUDE.md §7.1. This line built
+      // the arrival time off the READER'S DEVICE and printed it as a clock
+      // time, so a buyer, mine or admin whose machine was not on South African
+      // time read an ETA out by their own offset, on the screen whose whole
+      // subject is when a truck gets there. Everything else in this file was
+      // already going through `MlTime.sast`; this one was missed, and
+      // `one_clock_check.py` could not see it because no calendar field is
+      // read off the value — it goes straight into a formatter.
+      final arrive = MlTime.now().add(eta);
+      parts.add('ETA ${MlTime.calendarClock(arrive)}');
     }
     final at = t.recordedAt;
     if (at != null) parts.add('updated ${_ago(at)}');

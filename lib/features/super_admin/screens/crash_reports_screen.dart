@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
@@ -247,7 +246,6 @@ class _CrashReportCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final semantic = MlSemantic.of(context);
     final tone = report.fatal ? MlTone.error : MlTone.neutral;
-    final df = DateFormat.yMMMd().add_jm();
 
     return MlCard(
       padding: const EdgeInsets.all(14),
@@ -299,7 +297,7 @@ class _CrashReportCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
-                            df.format(MlTime.sast(report.at)),
+                            MlTime.stamp(report.at),
                             overflow: TextOverflow.ellipsis,
                             style: context.mlText.code(
                               color: semantic.textFaint,

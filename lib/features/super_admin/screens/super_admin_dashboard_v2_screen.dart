@@ -480,13 +480,21 @@ class SuperAdminDashboardV2ViewModel {
       final o = sorted[i];
       final id = '${o['id']}';
       final expiresAt = DateTime.tryParse('${o['token_expires_at']}');
+      // `today` is a WALL CLOCK (`MlTime.now()`), `expiresAt` is an INSTANT
+      // straight off `DateTime.parse`. Subtracting one from the other, or
+      // handing the wall clock to `MlTime.ago`'s `asOf:`, mixes the two units
+      // — and `MlTime.instant()`'s own doc says why that is only ever right in
+      // South Africa: the wall clock's epoch depends on the reader's device
+      // offset. So the comparison happens on ONE side of the boundary, in
+      // instants, and the wall clock keeps the calendar work it is for.
+      final nowInstant = MlTime.toServer(today);
 
       final MlExpiry state;
       final String expiry;
       if (expiresAt == null) {
         state = MlExpiry.warn;
         expiry = 'no token';
-      } else if (expiresAt.isBefore(today)) {
+      } else if (expiresAt.isBefore(nowInstant)) {
         state = MlExpiry.expired;
         // "Expired · 5d ago", the reference's own wording — not the bare word.
         // How long ago it lapsed is the thing an admin acts on, this row
@@ -497,9 +505,9 @@ class SuperAdminDashboardV2ViewModel {
         // `one-vocabulary-for-time-ago` caught this the moment it was written,
         // which is what it is for. Past a week it falls back to the date,
         // which is the right thing for a token that lapsed months back.
-        expiry = 'Expired · ${MlTime.ago(expiresAt, asOf: today)}';
+        expiry = 'Expired · ${MlTime.ago(expiresAt, asOf: nowInstant)}';
       } else {
-        final left = expiresAt.difference(today);
+        final left = expiresAt.difference(nowInstant);
         state = left.inDays <= 14 ? MlExpiry.warn : MlExpiry.ok;
         expiry = _countdown(left);
       }

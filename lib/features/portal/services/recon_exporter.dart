@@ -84,7 +84,11 @@ class ReconExporter {
     Set<int> noTotalColumns = const {},
   }) async {
     try {
-      final now = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      // `MlTime.now()`: the file is NAMED for the day it was exported and a
+      // mine keeps it, so on a laptop left on UTC it carried the previous
+      // day's name between midnight and 02:00 SAST. Formatting a wall clock,
+      // so no second conversion.
+      final now = DateFormat('yyyyMMdd_HHmmss').format(MlTime.now());
       final base = '${filenameBase}_$now';
 
       List<int> bytes;

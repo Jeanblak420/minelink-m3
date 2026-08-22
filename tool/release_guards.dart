@@ -930,6 +930,53 @@ final guards = <Guard>[
         ');',
   ),
   Guard(
+    id: 'no-skeleton-dateformat',
+    why:
+        'a `DateFormat` built from intl\'s SKELETON api — `DateFormat.Hm()`, '
+        '`DateFormat.yMMMd()`, `.add_jm()` — instead of the product\'s own '
+        'vocabulary.\n'
+        '\n'
+        '`one-vocabulary-for-a-timestamp` exists to stop exactly this, and it '
+        'could not see these: its pattern reads the literal inside '
+        '`DateFormat(\'…\')`, and a skeleton call has no literal to read. So '
+        'the guard reported green while an EIGHTH dialect — one already named '
+        'in `MlTime`\'s own list of the seven it replaced — was live on three '
+        'console screens.\n'
+        '\n'
+        'Photographed 2026-08-22 on `/super-admin/crash-reports` against real '
+        'rows: every card read **`Aug 22, 2026 8:50 PM`**. Month-first, '
+        '12-hour, comma-separated, in a product that is day-first and 24-hour '
+        'on every other surface, and whose §7.1 rule exists because a printed '
+        'waybill once carried the wrong DATE. `/super-admin/token-requests` '
+        'said the same thing twice more.\n'
+        '\n'
+        'A skeleton also hands the SHAPE to `Intl.getCurrentLocale()` rather '
+        'than stating it. Nothing in this app calls `initializeDateFormatting` '
+        'or sets `Intl.defaultLocale`, so today that resolves to `en_US` and '
+        'the output is stable — which is worse, not better: the dialect is '
+        'inherited by accident and would move the day the app gains a locale.\n'
+        '\n'
+        'Use `MlTime.stamp` / `day` / `clock` / `listStamp`, or the '
+        '`calendar*` family for a value already on the South African clock.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // `DateFormat.` followed by a letter is only ever a skeleton constructor
+    // (`.Hm`, `.yMMMd`, `.jm`) or a chained `.add_*`; the literal-pattern form
+    // is `DateFormat('…')`, which has a quote after the paren and no dot.
+    // `intl`'s add_* skeletons are spelled only from `yMdELQHhjms` and are
+    // always CALLED, which is what keeps `Icons.add_rounded` and
+    // `Icons.add_a_photo` — constants, never invoked — out of the match.
+    pattern: RegExp(r'DateFormat\s*\.\s*[A-Za-z_]|\.add_[yMdELQHhjms]{1,12}\(\)'),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    // Consistent with the other two members of this family: the one
+    // implementation is exempted by path. It uses only literal patterns today,
+    // so the carve-out is for symmetry rather than need.
+    exemptPath: RegExp(r'lib/core/time/ml_time\.dart$'),
+    plantFile: 'when.dart',
+    plantLine: 'final f = DateFormat.yMMMd().add_jm();',
+  ),
+  Guard(
     id: 'serif-declares-its-fallback',
     why:
         'a `TextStyle` that names the SERIF face without naming what draws '

@@ -1,7 +1,6 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/raw_recon_row.dart';
@@ -44,9 +43,6 @@ class RawReconView extends ConsumerStatefulWidget {
   /// otherwise ignored so the view falls back to "All".
   final String? initialTransporter;
 
-  static final _dateFmt = DateFormat('dd MMM yyyy');
-  static final _timeFmt = DateFormat('HH:mm');
-
   static const csvHeaders = [
     'DATE',
     'TIME-IN',
@@ -67,8 +63,14 @@ class RawReconView extends ConsumerStatefulWidget {
   static List<List<String>> csvRows(List<RawReconRow> rows) => [
     for (final r in rows)
       [
-        _dateFmt.format(MlTime.sast(r.tripDate)),
-        r.timeIn == null ? '' : _timeFmt.format(MlTime.sast(r.timeIn!)),
+        // `calendarDay` / `calendarClock`, NOT `MlTime.day` / `MlTime.clock`:
+        // `RawReconRow` runs `MlTime.sast` at parse, so these fields are
+        // already South African wall clocks and converting again would add the
+        // reader's own offset back on. See `MlTime.sast`'s doc — it is the
+        // identity in South Africa and two hours out everywhere else, which is
+        // why the export looked right here for weeks.
+        MlTime.calendarDay(r.tripDate),
+        r.timeIn == null ? '' : MlTime.calendarClock(r.timeIn!),
         r.waybillNumber ?? '',
         r.transporterName ?? '',
         r.truckReg ?? '',
@@ -84,7 +86,7 @@ class RawReconView extends ConsumerStatefulWidget {
         // no delivery weight was captured.
         r.varianceTons?.toStringAsFixed(2) ?? '',
         r.podPhotoPath == null ? '' : 'Yes',
-        r.timeOut == null ? '' : _timeFmt.format(MlTime.sast(r.timeOut!)),
+        r.timeOut == null ? '' : MlTime.calendarClock(r.timeOut!),
       ],
   ];
 
@@ -630,14 +632,13 @@ class _ExcelReconTable extends StatelessWidget {
     int index,
   ) {
     // §4: DATE displays only on the first row of each date group.
-    final date = RawReconView._dateFmt.format(MlTime.sast(r.tripDate));
-    final prevDate = index == 0
-        ? null
-        : RawReconView._dateFmt.format(MlTime.sast(rows[index - 1].tripDate));
+    // Already a South African wall clock — see the note on `csvRows`.
+    final date = MlTime.calendarDay(r.tripDate);
+    final prevDate =
+        index == 0 ? null : MlTime.calendarDay(rows[index - 1].tripDate);
     final showDate = date != prevDate;
 
-    String time(DateTime? t) =>
-        t == null ? '—' : RawReconView._timeFmt.format(MlTime.sast(t));
+    String time(DateTime? t) => t == null ? '—' : MlTime.calendarClock(t);
 
     final values = <String>[
       showDate ? date : '',

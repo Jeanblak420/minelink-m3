@@ -46,9 +46,54 @@ const Duration kSastOffset = Duration(hours: 2);
 abstract final class MlTime {
   /// [instant] as it reads on a clock in South Africa.
   ///
-  /// Accepts a UTC or a local DateTime and normalises through UTC first, so the
-  /// answer does not depend on the device's own zone.
+  /// Normalises through UTC first, so the answer does not depend on the
+  /// device's own zone.
+  ///
+  /// ## It takes an INSTANT, and it asserts that it got one
+  ///
+  /// The return value is flagged NON-UTC on purpose (see the library doc), and
+  /// that is exactly what makes the mistake below invisible:
+  ///
+  /// ```dart
+  ///   final wall = MlTime.sast(row.tripDate);   // tripDate is ALREADY sast
+  /// ```
+  ///
+  /// `toUtc()` on a wall clock subtracts **the reader's own offset**, and then
+  /// two hours go back on. So the second conversion is:
+  ///
+  /// | the reader's device | what the second `sast` does |
+  /// |---|---|
+  /// | SAST (UTC+2) | nothing — it is the identity |
+  /// | UTC | **+2 hours** |
+  /// | New York (UTC−4) | **+6 hours** |
+  ///
+  /// It is a no-op on every machine in South Africa and wrong on every other
+  /// one, which is the same shape as the faults §7.1 was written for and is
+  /// why looking at the screen here cannot find it. Six sites in the recon
+  /// table — including the Excel/CSV/PDF export of the billing record — and
+  /// two in the chat dock were doing it, undetected, on 2026-08-22.
+  ///
+  /// **Every real instant in this product arrives UTC-flagged**, because
+  /// Postgres returns `timestamptz` as an ISO string carrying `Z`/`+00:00` and
+  /// `DateTime.parse` honours it. So `isUtc` is a sound test for "this is an
+  /// instant and not somebody's wall clock", and the assert costs nothing in
+  /// release.
+  ///
+  /// If you hold a value that is already South African — a model that ran this
+  /// at parse, a `showDatePicker` result, a Postgres `date` column — you want
+  /// [calendarDay], [calendarStamp] or [calendarClock], which format what they
+  /// are given without converting it again.
   static DateTime sast(DateTime instant) {
+    assert(
+      instant.isUtc,
+      'MlTime.sast takes an INSTANT, and every instant in this product arrives '
+      'UTC-flagged from Postgres. This one is not, so it is almost certainly a '
+      'South African wall clock being converted a SECOND time — which is the '
+      'identity on a SAST machine and two hours out everywhere else. Use '
+      'MlTime.calendarDay / calendarStamp / calendarClock to format a value '
+      'that has already been converted, or .toUtc() if you genuinely hold a '
+      'local instant.',
+    );
     final utc = instant.toUtc();
     return DateTime(
       utc.year,
@@ -83,7 +128,12 @@ abstract final class MlTime {
   static DateTime Function()? debugClock;
 
   /// Now, on the South African wall clock.
-  static DateTime now() => sast(debugClock?.call() ?? DateTime.now());
+  ///
+  /// `.toUtc()` because `DateTime.now()` is local-flagged and [sast] asserts it
+  /// is handed a genuine instant. The conversion is a no-op on the value's
+  /// meaning — it is the same moment either way — and it lets the assert stay
+  /// exception-free.
+  static DateTime now() => sast((debugClock?.call() ?? DateTime.now()).toUtc());
 
   /// Now, as the real **instant** in UTC — for measuring a DURATION, never for
   /// display.
@@ -271,6 +321,86 @@ abstract final class MlTime {
   /// [stamp] for a value already on the South African clock — see
   /// [calendarDay] for which those are.
   static String calendarStamp(DateTime wallClock) => _stamp.format(wallClock);
+
+  /// [listDay] for a value already on the South African clock.
+  ///
+  /// The mine dashboard's "Recent waybills" card — the very card whose bug is
+  /// written up in [listDay] — reads `RawReconRow.tripDate`, which is South
+  /// African at parse. So it was converting twice, and the fix for its year
+  /// boundary was landing on a date that had already moved.
+  static String calendarListDay(DateTime wallClock, {DateTime? asOf}) =>
+      listDay(toServer(wallClock),
+          asOf: asOf == null ? null : toServer(asOf));
+
+  /// [ago] for a value already on the South African clock.
+  ///
+  /// The trap here is quieter than the other three, and it is why this exists
+  /// rather than the callers just "being careful": [ago] converts only in its
+  /// **older than a week** branch, so passing it a wall clock is correct for
+  /// minutes, hours and days and wrong only for the date it falls back to.
+  /// Three console sites were doing it — the transporters overview's
+  /// "last active" and the org-insights pair, all reading a `RawReconRow`,
+  /// which is South African at parse.
+  ///
+  /// [asOf] is also a wall clock, so a caller that already holds "now" on the
+  /// pit clock can pass it straight through.
+  static String calendarAgo(DateTime wallClock, {DateTime? asOf}) =>
+      ago(toServer(wallClock), asOf: asOf == null ? null : toServer(asOf));
+
+  /// [agoTag] for a value already on the South African clock — see
+  /// [calendarAgo] for why the trap is easy to miss.
+  static String calendarAgoTag(DateTime wallClock, {DateTime? asOf}) =>
+      agoTag(toServer(wallClock), asOf: asOf == null ? null : toServer(asOf));
+
+  /// [clock] for a value already on the South African clock — `09:30`.
+  ///
+  /// The third of the `calendar*` family, added when [sast] started asserting
+  /// on its input. Without it, a caller holding a wall clock had no way to
+  /// print just the time except by re-converting it, which is the fault the
+  /// assert exists to catch.
+  static String calendarClock(DateTime wallClock) => _clock.format(wallClock);
+
+  /// WHEN something happened, for a list whose rows can span days: `09:30`
+  /// today, `15 Aug` on another day this year, `10 Feb 2025` before that.
+  ///
+  /// ## Why a bare time is not enough
+  ///
+  /// A time-only column is only honest when the rows around it already say
+  /// which day they are — the recon table's do, because it carries its own
+  /// `DATE` column and groups by it. Two lists that do NOT were printing
+  /// `HH:mm` for every row anyway: the load controller's **Recent Loads** and
+  /// the security gate's **Recent Activity**.
+  ///
+  /// Measured on live data, 2026-08-22, the load controller's three rows read:
+  ///
+  /// ```
+  ///   S6W001GP   34.2 t   Completed             10:10     <- today
+  ///   KVK007MP   33.7 t   En route to offload   04:51     <- today
+  ///   fa243ad    30 t     En route to offload   13:39     <- SIX DAYS AGO
+  /// ```
+  ///
+  /// The list is sorted newest first, so the times run 10:10, 04:51, 13:39 —
+  /// out of order, and the only thing that explains it is a day nothing on
+  /// screen mentions. It is the mirror image of the fault fixed in
+  /// `truck_locations_panel.dart`, where a date-only column could not say how
+  /// FRESH a GPS sample was; here a time-only column cannot say WHICH DAY a
+  /// load was.
+  ///
+  /// The console's own company mirror already made this distinction by hand.
+  /// This is that rule, once, in the product's vocabulary — and it agrees with
+  /// [listDay] past midnight, so the two forms never disagree about the day.
+  ///
+  /// Takes the INSTANT, like [stamp] and [clock]; [asOf] is for tests and for
+  /// a caller that has already resolved "now".
+  static String listStamp(DateTime instant, {DateTime? asOf}) {
+    final on = sast(instant);
+    final today = asOf == null ? now() : sast(asOf);
+    return on.year == today.year &&
+            on.month == today.month &&
+            on.day == today.day
+        ? _clock.format(on)
+        : listDay(instant, asOf: asOf);
+  }
 
   // ZERO-PADDED, and that is the majority spelling rather than a preference:
   // eighteen sites in `lib/` already write `dd MMM yyyy` and seven write

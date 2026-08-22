@@ -34,7 +34,28 @@ void main() {
       final instant = DateTime.utc(2026, 8, 17, 5, 51);
       // Same instant, expressed two ways. A device-dependent implementation
       // would give different wall clocks for these.
-      expect(MlTime.sast(instant), MlTime.sast(instant.toLocal()));
+      expect(MlTime.sast(instant), MlTime.sast(instant.toLocal().toUtc()));
+    });
+
+    test('it REFUSES a value that is not an instant', () {
+      // The whole reason the answer cannot depend on the device zone: a wall
+      // clock never gets in. `sast` returns a NON-UTC DateTime by design (so
+      // `DateFormat` prints it as-is), which makes a second conversion look
+      // exactly like a first one — the identity on a South African machine and
+      // two hours out everywhere else. Six sites in the recon table, including
+      // the export of the billing record, and three in the console were doing
+      // it undetected until this assert existed.
+      final alreadySast = MlTime.sast(DateTime.utc(2026, 8, 17, 5, 51));
+      expect(alreadySast.isUtc, isFalse);
+      expect(() => MlTime.sast(alreadySast), throwsA(isA<AssertionError>()));
+      expect(() => MlTime.sast(DateTime(2026, 8, 17, 7, 51)),
+          throwsA(isA<AssertionError>()));
+
+      // And the `calendar*` family is the way to render one, without
+      // converting it again.
+      expect(MlTime.calendarClock(alreadySast), '07:51');
+      expect(MlTime.calendarDay(alreadySast), '17 Aug 2026');
+      expect(MlTime.calendarStamp(alreadySast), '17 Aug 2026 · 07:51');
     });
 
     test('no daylight saving — midwinter and midsummer are both +02:00', () {
@@ -319,6 +340,44 @@ void main() {
         // UTC this is last year and would carry a year it does not need.
         expect(MlTime.listDay(DateTime.utc(2025, 12, 31, 22, 30), asOf: asOf),
             '01 Jan');
+      });
+    });
+
+    group('listStamp', () {
+      // 22 Aug 2026, 10:47 in Johannesburg.
+      final asOf = DateTime.utc(2026, 8, 22, 8, 47);
+
+      test('today is the time of day', () {
+        expect(MlTime.listStamp(DateTime.utc(2026, 8, 22, 8, 10), asOf: asOf),
+            '10:10');
+        expect(MlTime.listStamp(DateTime.utc(2026, 8, 22, 2, 51), asOf: asOf),
+            '04:51');
+      });
+
+      test('another day is the DATE, not a bare time', () {
+        // The load controller's Recent Loads, measured on live data. Three
+        // rows sorted newest first read 10:10, 04:51 and 13:39 — out of order,
+        // and the only thing that explained it was that the third load was six
+        // days old and nothing on screen said so.
+        expect(MlTime.listStamp(DateTime.utc(2026, 8, 16, 11, 39), asOf: asOf),
+            '16 Aug');
+      });
+
+      test('another year keeps the year, exactly as listDay does', () {
+        expect(MlTime.listStamp(DateTime.utc(2025, 2, 10, 8, 5), asOf: asOf),
+            '10 Feb 2025');
+      });
+
+      test('the day boundary is the SOUTH AFRICAN one', () {
+        // 21 Aug 22:30 UTC is 00:30 on the 22nd at the pit, so it is TODAY and
+        // reads as a time. Bucketed on the UTC day it would print "21 Aug",
+        // which is the §7.1 fault this whole file exists for.
+        expect(MlTime.listStamp(DateTime.utc(2026, 8, 21, 22, 30), asOf: asOf),
+            '00:30');
+        // And 22 Aug 22:30 UTC is 00:30 on the 23rd — tomorrow at the pit, so
+        // it is NOT today and must carry its date.
+        expect(MlTime.listStamp(DateTime.utc(2026, 8, 22, 22, 30), asOf: asOf),
+            '23 Aug');
       });
     });
   });

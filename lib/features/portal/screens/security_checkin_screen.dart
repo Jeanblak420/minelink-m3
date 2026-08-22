@@ -1,7 +1,6 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/mine_trip.dart';
@@ -560,9 +559,11 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                                       ),
                                     ),
                                     Text(
-                                      DateFormat.Hm().format(
-                                        MlTime.sast(t.updatedAt),
-                                      ),
+                                      // Recent Activity spans days; a bare
+                                      // clock cannot say which one. Same fault
+                                      // and same fix as the load controller's
+                                      // Recent Loads.
+                                      MlTime.listStamp(t.updatedAt),
                                       style: context.mlText.code(
                                         color: semantic.textFaint,
                                         size: 13,

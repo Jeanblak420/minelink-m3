@@ -212,8 +212,13 @@ abstract final class TransportersOverviewMapper {
     return parts.take(2).map((w) => w[0]).join().toUpperCase();
   }
 
+  // `calendarAgo`: `_lastActive` reads `RawReconRow.timeOut/timeIn/tripDate`,
+  // and those are South African WALL CLOCKS at parse — so plain `MlTime.ago`
+  // re-converts them in its older-than-a-week branch and prints the wrong date
+  // for anybody outside South Africa. `now` is `MlTime.now()`, a wall clock
+  // too, so it goes the same way.
   static String _ago(DateTime from, DateTime now) =>
-      MlTime.ago(from, asOf: now);
+      MlTime.calendarAgo(from, asOf: now);
 
   /// Thousands-grouped with exactly one decimal, per the drop's formatting
   /// rule: format once here so no widget can drift from it.

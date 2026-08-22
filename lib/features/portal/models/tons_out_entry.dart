@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/features/portal/models/raw_recon_row.dart';
 
 /// A single outbound load row backing the Tons-out detail table.
@@ -71,10 +72,10 @@ class TonsOutEntry {
     final at = r.timeOut ?? r.timeIn;
     return TonsOutEntry(
       date: DateTime(when.year, when.month, when.day),
-      time: at == null
-          ? '—'
-          : '${at.hour.toString().padLeft(2, '0')}:'
-              '${at.minute.toString().padLeft(2, '0')}',
+      // `calendarClock`, not hand-rolled padding: `at` is already a South
+      // African wall clock (see the note above), so it is FORMATTED, never
+      // converted — and it now says so in the product's one vocabulary.
+      time: at == null ? '—' : MlTime.calendarClock(at),
       transporter: r.transporterName ?? '—',
       truckReg: r.truckReg ?? '—',
       destination: r.destination ?? '—',

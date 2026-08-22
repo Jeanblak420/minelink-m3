@@ -36,6 +36,7 @@
 // already shipped one screen whose empty state nobody had seen.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_status.dart';
 import 'package:flutter_application_1/features/fleet/models/maintenance_record.dart';
@@ -253,11 +254,24 @@ final List<SecurityConfirmation> kPendingConfirmations = [
 /// (inside the year), and eighteen months back (inside the total only). So
 /// Day < Week < Month < Year < Total — five DISTINCT figures, and a window
 /// that stops working shows up as two cards agreeing.
+/// A recon row's dates as the PARSER produces them.
+///
+/// `RawReconRow.fromJson` runs `MlTime.sast` on `trip_date`, `time_in` and
+/// `time_out`, so those three fields are South African **wall clocks** by the
+/// time any screen sees them — not instants. This fixture used raw
+/// `DateTime.utc` values, which are the opposite, and the recon view then
+/// converted them a second time. The two errors cancelled: the rendered time
+/// was right in the test and wrong in production on any device outside South
+/// Africa. Going through `MlTime.sast` here is what makes the fixture the same
+/// kind of value the app really holds, and it is why `MlTime.sast`'s assert
+/// now has something true to protect.
+DateTime _sast(DateTime instant) => MlTime.sast(instant);
+
 final List<RawReconRow> kRawReconRows = [
   RawReconRow(
     tripId: 't-1',
-    tripDate: DateTime.utc(2026, 8, 15, 6, 12),
-    timeIn: DateTime.utc(2026, 8, 15, 6, 12),
+    tripDate: _sast(DateTime.utc(2026, 8, 15, 6, 12)),
+    timeIn: _sast(DateTime.utc(2026, 8, 15, 6, 12)),
     waybillNumber: 'TRP-000123',
     transporterName: 'Roadhaul Logistics',
     truckReg: 'CK 84 RT GP',
@@ -268,14 +282,14 @@ final List<RawReconRow> kRawReconRows = [
     netMass: 36.22,
     deliveredTons: 35.80,
     varianceTons: 0.42,
-    timeOut: DateTime.utc(2026, 8, 15, 7, 4),
+    timeOut: _sast(DateTime.utc(2026, 8, 15, 7, 4)),
     tripStatus: 'completed',
     podPhotoPath: 'FIXTURE-company/pod/t-1.jpg',
   ),
   RawReconRow(
     tripId: 't-2',
-    tripDate: DateTime.utc(2026, 8, 15, 9, 30),
-    timeIn: DateTime.utc(2026, 8, 15, 9, 30),
+    tripDate: _sast(DateTime.utc(2026, 8, 15, 9, 30)),
+    timeIn: _sast(DateTime.utc(2026, 8, 15, 9, 30)),
     waybillNumber: 'TRP-000124',
     transporterName: 'Roadhaul Logistics',
     truckReg: 'JD 22 PL MP',
@@ -286,13 +300,13 @@ final List<RawReconRow> kRawReconRows = [
     netMass: 34.90,
     deliveredTons: 34.90,
     varianceTons: 0,
-    timeOut: DateTime.utc(2026, 8, 15, 10, 11),
+    timeOut: _sast(DateTime.utc(2026, 8, 15, 10, 11)),
     tripStatus: 'completed',
   ),
   RawReconRow(
     tripId: 't-3',
-    tripDate: DateTime.utc(2026, 8, 14, 14, 48),
-    timeIn: DateTime.utc(2026, 8, 14, 14, 48),
+    tripDate: _sast(DateTime.utc(2026, 8, 14, 14, 48)),
+    timeIn: _sast(DateTime.utc(2026, 8, 14, 14, 48)),
     waybillNumber: 'TRP-000119',
     transporterName: 'Northline Carriers',
     truckReg: 'BX 09 LM NW',
@@ -301,13 +315,13 @@ final List<RawReconRow> kRawReconRows = [
     sourceName: 'Iron Hills Mining',
     customerName: 'Northvale Alloys',
     netMass: 32.10,
-    timeOut: DateTime.utc(2026, 8, 14, 15, 22),
+    timeOut: _sast(DateTime.utc(2026, 8, 14, 15, 22)),
     tripStatus: 'en_route_to_offload',
   ),
   RawReconRow(
     tripId: 't-wk-1',
-    tripDate: DateTime.utc(2026, 8, 11, 6, 20),
-    timeIn: DateTime.utc(2026, 8, 11, 6, 20),
+    tripDate: _sast(DateTime.utc(2026, 8, 11, 6, 20)),
+    timeIn: _sast(DateTime.utc(2026, 8, 11, 6, 20)),
     waybillNumber: 'TRP-000112',
     transporterName: 'Roadhaul Logistics',
     truckReg: 'JD 22 PL MP',
@@ -318,13 +332,13 @@ final List<RawReconRow> kRawReconRows = [
     netMass: 33.48,
     deliveredTons: 33.10,
     varianceTons: 0.38,
-    timeOut: DateTime.utc(2026, 8, 11, 7, 15),
+    timeOut: _sast(DateTime.utc(2026, 8, 11, 7, 15)),
     tripStatus: 'completed',
   ),
   RawReconRow(
     tripId: 't-mo-1',
-    tripDate: DateTime.utc(2026, 7, 25, 12, 5),
-    timeIn: DateTime.utc(2026, 7, 25, 12, 5),
+    tripDate: _sast(DateTime.utc(2026, 7, 25, 12, 5)),
+    timeIn: _sast(DateTime.utc(2026, 7, 25, 12, 5)),
     waybillNumber: 'TRP-000101',
     transporterName: 'Northline Carriers',
     truckReg: 'BX 09 LM NW',
@@ -335,13 +349,13 @@ final List<RawReconRow> kRawReconRows = [
     netMass: 31.76,
     deliveredTons: 31.20,
     varianceTons: 0.56,
-    timeOut: DateTime.utc(2026, 7, 25, 12, 58),
+    timeOut: _sast(DateTime.utc(2026, 7, 25, 12, 58)),
     tripStatus: 'completed',
   ),
   RawReconRow(
     tripId: 't-old-1',
-    tripDate: DateTime.utc(2026, 7, 6, 7, 40),
-    timeIn: DateTime.utc(2026, 7, 6, 7, 40),
+    tripDate: _sast(DateTime.utc(2026, 7, 6, 7, 40)),
+    timeIn: _sast(DateTime.utc(2026, 7, 6, 7, 40)),
     waybillNumber: 'TRP-000088',
     transporterName: 'Roadhaul Logistics',
     truckReg: 'CK 84 RT GP',
@@ -352,13 +366,13 @@ final List<RawReconRow> kRawReconRows = [
     netMass: 35.64,
     deliveredTons: 35.64,
     varianceTons: 0,
-    timeOut: DateTime.utc(2026, 7, 6, 8, 31),
+    timeOut: _sast(DateTime.utc(2026, 7, 6, 8, 31)),
     tripStatus: 'completed',
   ),
   RawReconRow(
     tripId: 't-old-2',
-    tripDate: DateTime.utc(2026, 1, 28, 5, 55),
-    timeIn: DateTime.utc(2026, 1, 28, 5, 55),
+    tripDate: _sast(DateTime.utc(2026, 1, 28, 5, 55)),
+    timeIn: _sast(DateTime.utc(2026, 1, 28, 5, 55)),
     waybillNumber: 'TRP-000021',
     transporterName: 'Northline Carriers',
     truckReg: 'BX 09 LM NW',
@@ -369,13 +383,13 @@ final List<RawReconRow> kRawReconRows = [
     netMass: 30.05,
     deliveredTons: 29.40,
     varianceTons: 0.65,
-    timeOut: DateTime.utc(2026, 1, 28, 6, 48),
+    timeOut: _sast(DateTime.utc(2026, 1, 28, 6, 48)),
     tripStatus: 'completed',
   ),
   RawReconRow(
     tripId: 't-old-3',
-    tripDate: DateTime.utc(2025, 2, 10, 8, 5),
-    timeIn: DateTime.utc(2025, 2, 10, 8, 5),
+    tripDate: _sast(DateTime.utc(2025, 2, 10, 8, 5)),
+    timeIn: _sast(DateTime.utc(2025, 2, 10, 8, 5)),
     waybillNumber: 'TRP-000004',
     transporterName: 'Northline Carriers',
     truckReg: 'BX 09 LM NW',
@@ -386,7 +400,7 @@ final List<RawReconRow> kRawReconRows = [
     netMass: 28.90,
     deliveredTons: 28.90,
     varianceTons: 0,
-    timeOut: DateTime.utc(2025, 2, 10, 9, 2),
+    timeOut: _sast(DateTime.utc(2025, 2, 10, 9, 2)),
     tripStatus: 'completed',
   ),
 ];

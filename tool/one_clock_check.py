@@ -112,6 +112,32 @@ DEVICE_DAY_FIELD = "year|month|day|weekday"
 # was wrong. A check that only looks for `.toLocal()` cannot see it.
 RAW_CALENDAR_FIELD = re.compile(r"\b\w+At\s*\.\s*(weekday|day|month|year)\b")
 
+# A DEVICE CLOCK THAT IS PRINTED.
+#
+# Pattern 5 catches `DateTime.now()` whose `.year`/`.month`/`.day`/`.weekday`
+# is read. This is the other half: a value that never has a calendar field read
+# off it at all, because it goes straight into a FORMATTER — so nothing in the
+# source ever names a day, and pattern 5 is blind to it.
+#
+#     final arrive = DateTime.now().add(eta);
+#     parts.add('ETA ${DateFormat('HH:mm').format(arrive)}');
+#
+# That is the live map's GPS line, found 2026-08-22. Every other timestamp in
+# that file already went through `MlTime.sast`; this one built an arrival time
+# on the READER'S DEVICE and printed it as a clock time — to a buyer, a mine, a
+# transporter and the platform admin, on the screen whose whole subject is when
+# a truck gets there. `one_clock_check.py` reported 0 sites throughout.
+#
+# Two shapes: the value bound to a local first (with an optional `.add(...)` /
+# `.subtract(...)`, which is how an ETA or a deadline is built), and the direct
+# `format(DateTime.now())` — an export FILENAME is the usual one, and a file a
+# mine keeps, named for the day it was pulled, is a day decision like any other.
+DEVICE_SHOWN_VIA_LOCAL = re.compile(
+    r"(?:final|var|late final)\s+(\w+)\s*=\s*DateTime\.now\(\)\s*"
+    r"(?:\.\s*(?:add|subtract)\s*\([^;]*?\))?\s*;")
+DEVICE_SHOWN_DIRECT = re.compile(
+    r"(?:\.\s*format|MlTime\s*\.\s*calendar\w+)\s*\(\s*DateTime\.now\(\)")
+
 CURRENT_DATE = re.compile(r"\bcurrent_date\b", re.I)
 
 # The one file allowed to name the offset and cross between the two worlds.
@@ -238,6 +264,24 @@ def scan_dart(root):
                         (rel, _line_of(raw, m.end() + n.start()), "picker-now",
                          "a date picker's bounds are days a user reads and "
                          "submits: use MlTime.now() / MlTime.today()"))
+            for m in DEVICE_SHOWN_DIRECT.finditer(code):
+                findings.append(
+                    (rel, _line_of(raw, m.start()), "device-shown",
+                     "the DEVICE's clock is formatted for a reader: "
+                     "use MlTime.now()"))
+            for m in DEVICE_SHOWN_VIA_LOCAL.finditer(code):
+                name = m.group(1)
+                window = "\n".join(code[m.end():].split("\n")[:60])
+                hit = re.search(
+                    r"(?:\.\s*format\s*\(\s*%s\s*\)"
+                    r"|MlTime\s*\.\s*calendar\w+\s*\(\s*%s\b)"
+                    % (re.escape(name), re.escape(name)),
+                    window)
+                if hit:
+                    findings.append(
+                        (rel, _line_of(raw, m.start()), "device-shown",
+                         "`%s` comes off the DEVICE clock and is then "
+                         "formatted for a reader: use MlTime.now()" % name))
             for m in NAIVE_STAMP_VIA_LOCAL.finditer(code):
                 name = m.group(1)
                 window = "\n".join(code[m.end():].split("\n")[:60])
@@ -291,6 +335,21 @@ SELFTEST_DART = [
     ("a DateTime.now() used only for elapsed time, which is not a day",
      "class A { Duration f(DateTime x) {\n  final now = DateTime.now();\n"
      "  return now.difference(x);\n} }", False),
+    ("a device clock that is PRINTED, with no calendar field ever read",
+     "class A { String f(Duration eta) {\n  final arrive = DateTime.now().add(eta);\n"
+     "  return DateFormat('HH:mm').format(arrive);\n} }", True),
+    ("the same one on the pit clock",
+     "class A { String f(Duration eta) {\n  final arrive = MlTime.now().add(eta);\n"
+     "  return MlTime.calendarClock(arrive);\n} }", False),
+    ("a device clock formatted directly",
+     "class A { String f() => DateFormat('yyyyMMdd').format(DateTime.now()); }",
+     True),
+    ("the same one on the pit clock, formatted",
+     "class A { String f() => DateFormat('yyyyMMdd').format(MlTime.now()); }",
+     False),
+    ("a DateTime.now() that is only measured against, never shown",
+     "class A { bool f(DateTime x) {\n  final now = DateTime.now();\n"
+     "  return x.isBefore(now);\n} }", False),
     ("a weekday read off a raw instant",
      "class A { int f(T t) => t.updatedAt.weekday; }", True),
     ("the same one through MlTime",
