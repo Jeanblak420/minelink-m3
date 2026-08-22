@@ -7,6 +7,7 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/models/production_entry.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_entry.dart';
+import 'package:flutter_application_1/features/portal/utils/production_metrics.dart';
 import 'package:flutter_application_1/features/portal/providers/lifecycle_provider.dart';
 import 'package:flutter_application_1/features/portal/services/production_service.dart';
 import 'package:flutter_application_1/features/portal/services/recon_exporter.dart';
@@ -371,8 +372,14 @@ class _ReportSection extends StatelessWidget {
     final semantic = MlSemantic.of(context);
     final mined = days.fold<double>(0, (s, d) => s + d.minedTons);
     final dispatched = days.fold<double>(0, (s, d) => s + d.dispatchedTons);
-    final loss = mined - dispatched;
-    final yieldPct = mined > 0 ? (dispatched / mined * 100) : null;
+    // One object, so yield and loss cannot disagree about whether the window
+    // has an answer in it — see [ProductionYield] for the day they did.
+    final measure = ProductionYield(
+      minedTons: mined,
+      dispatchedTons: dispatched,
+    );
+    final yieldPct = measure.yieldPercent;
+    final loss = measure.lossTons;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -409,9 +416,14 @@ class _ReportSection extends StatelessWidget {
               ),
               MlStatCard(
                 label: 'Pit-to-port loss',
-                value: '${loss.toStringAsFixed(2)} t',
+                // Nothing recorded means no loss to state. Printing
+                // `mined - dispatched` here reported "-771.32 t" IN GREEN on a
+                // window where the pit had recorded nothing at all.
+                value: loss == null ? '—' : '${loss.toStringAsFixed(2)} t',
                 icon: Icons.trending_down_rounded,
-                tone: loss > 0 ? MlTone.warn : MlTone.done,
+                tone: loss == null
+                    ? MlTone.neutral
+                    : (loss > 0 ? MlTone.warn : MlTone.done),
               ),
             ];
             return Wrap(
