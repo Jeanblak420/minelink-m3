@@ -14,6 +14,13 @@ correct Dart and correct SQL, they just ask the wrong authority what day it is:
                              `MlTime.serverParam` for a wall clock.
   3. `current_date` in SQL  — a UTC calendar day, so it flips at 02:00 SAST, in
                              the middle of a night shift. Use `public.ml_today()`.
+  4. `someAt.weekday`       — a calendar FIELD read straight off a UTC instant.
+                             The same two-hour shift, but it survives a correct
+                             MlTime filter sitting right beside it, so the total
+                             is right and only the bucketing is wrong. Found
+                             2026-08-22 on the driver's week chart, which drew
+                             33.7 t on a Sunday that had not happened yet. Use
+                             `MlTime.sast(x).weekday`.
 
 Timestamps that merely *stamp* a row, or measure elapsed time, are not day
 decisions: `DateTime.now()` on its own, TTLs, timeouts, animation and "x minutes
@@ -66,6 +73,19 @@ DATE_PICKER = re.compile(r"showDatePicker\s*\(")
 PICKER_NOW = re.compile(r"DateTime\.now\(\)")
 
 # `current_date` as a word, in SQL.
+# A CALENDAR FIELD READ OFF A RAW INSTANT.
+#
+# `t.updatedAt.weekday`, `e.createdAt.month`. Scoped to receivers ending in
+# `At`, which is this codebase's consistent name for a `timestamptz` straight
+# off the wire — `tripDate` and friends are already `MlTime.sast(...)` at parse
+# time and must NOT be flagged.
+#
+# This is the shape that hid behind a CORRECT filter. `driver_app_screen` used
+# `MlTime.sast` in `inWeek` and `inPrevWeek` on the lines either side, so the
+# week total was right to the kilogram while the distribution across the days
+# was wrong. A check that only looks for `.toLocal()` cannot see it.
+RAW_CALENDAR_FIELD = re.compile(r"\b\w+At\s*\.\s*(weekday|day|month|year)\b")
+
 CURRENT_DATE = re.compile(r"\bcurrent_date\b", re.I)
 
 # The one file allowed to name the offset and cross between the two worlds.
@@ -156,6 +176,13 @@ def scan_dart(root):
             for m in TO_LOCAL.finditer(code):
                 findings.append((rel, _line_of(raw, m.start()), "toLocal",
                                  "use MlTime.sast / MlTime.sastOrNull"))
+            for m in RAW_CALENDAR_FIELD.finditer(code):
+                # `MlTime.sast(x).weekday` ends in `)` before the dot, so the
+                # pattern cannot match it — no extra exclusion needed.
+                findings.append(
+                    (rel, _line_of(raw, m.start()), "raw-calendar",
+                     "a calendar field off a UTC instant: "
+                     "use MlTime.sast(x).%s" % m.group(1)))
             for m in NAIVE_STAMP.finditer(code):
                 findings.append((rel, _line_of(raw, m.start()), "naive-stamp",
                                  "no offset: add .toUtc(), or MlTime.serverParam"))
@@ -218,6 +245,14 @@ def scan(root, exemptions=None):
 
 
 SELFTEST_DART = [
+    ("a weekday read off a raw instant",
+     "class A { int f(T t) => t.updatedAt.weekday; }", True),
+    ("the same one through MlTime",
+     "class A { int f(T t) => MlTime.sast(t.updatedAt).weekday; }", False),
+    ("a month off a raw instant",
+     "class A { int f(E e) => e.createdAt.month; }", True),
+    ("a calendar field on something already converted at parse",
+     "class A { int f(R r) => r.tripDate.day; }", False),
     ("a display site on the device clock",
      "class A { String f(DateTime d) => fmt.format(d.toLocal()); }", True),
     ("a nullable one",

@@ -11,6 +11,7 @@ import 'package:flutter_application_1/features/fleet/models/vehicle_driver.dart'
 import 'package:flutter_application_1/features/fleet/providers/fleet_provider.dart';
 import 'package:flutter_application_1/features/notifications/widgets/animated_notification_bell.dart';
 import 'package:flutter_application_1/features/portal/models/logistics_models.dart';
+import 'package:flutter_application_1/features/portal/utils/driver_week.dart';
 import 'package:flutter_application_1/features/portal/models/trip_status.dart';
 import 'package:flutter_application_1/features/portal/providers/lifecycle_provider.dart';
 import 'package:flutter_application_1/features/portal/providers/logistics_provider.dart';
@@ -82,17 +83,20 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
         onDestinationSelected: (i) => setState(() => _tab = i),
         destinations: const [
           NavigationDestination(
-              icon: Icon(Icons.grid_view_outlined),
-              selectedIcon: Icon(Icons.grid_view_rounded),
-              label: 'Dashboard'),
+            icon: Icon(Icons.grid_view_outlined),
+            selectedIcon: Icon(Icons.grid_view_rounded),
+            label: 'Dashboard',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.local_shipping_outlined),
-              selectedIcon: Icon(Icons.local_shipping_rounded),
-              label: 'Trip'),
+            icon: Icon(Icons.local_shipping_outlined),
+            selectedIcon: Icon(Icons.local_shipping_rounded),
+            label: 'Trip',
+          ),
           NavigationDestination(
-              icon: Icon(Icons.person_outline_rounded),
-              selectedIcon: Icon(Icons.person_rounded),
-              label: 'Profile'),
+            icon: Icon(Icons.person_outline_rounded),
+            selectedIcon: Icon(Icons.person_rounded),
+            label: 'Profile',
+          ),
         ],
       ),
     );
@@ -121,12 +125,14 @@ FleetVehicle? driverAssignedVehicle(
 }
 
 void _pushScreen(BuildContext context, String title, Widget screen) {
-  Navigator.of(context).push(MaterialPageRoute(
-    builder: (_) => Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: SafeArea(child: screen),
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: SafeArea(child: screen),
+      ),
     ),
-  ));
+  );
 }
 
 /// ---------------------------------------------------------------------------
@@ -166,12 +172,10 @@ class DriverDashboardTab extends ConsumerWidget {
     final assignments = assignmentsAsync.requireValue;
     final myVehicle = employee == null
         ? null
-        : driverAssignedVehicle(
-            fleet.activeVehicles, assignments, employee.id);
+        : driverAssignedVehicle(fleet.activeVehicles, assignments, employee.id);
     final dispatches = dispatchesAsync.requireValue;
     final routeByDispatch = {for (final d in dispatches) d.dispatchId: d};
-    final firstName =
-        (employee?.fullName ?? 'Driver').trim().split(' ').first;
+    final firstName = (employee?.fullName ?? 'Driver').trim().split(' ').first;
 
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -182,12 +186,13 @@ class DriverDashboardTab extends ConsumerWidget {
         final myTrips = myVehicle == null
             ? <TripRecord>[]
             : (snap.trips.where((t) => t.vehicleId == myVehicle.id).toList()
-              ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)));
+                ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)));
         final delivered = myTrips
             .where((t) => TripStatus.parse(t.status) == TripStatus.completed)
             .toList();
-        final active =
-            myTrips.where((t) => TripStatus.parse(t.status).isActive).toList();
+        final active = myTrips
+            .where((t) => TripStatus.parse(t.status).isActive)
+            .toList();
         final current = active.isEmpty ? null : active.first;
         final currentReq = current?.dispatchId == null
             ? null
@@ -208,18 +213,26 @@ class DriverDashboardTab extends ConsumerWidget {
             !MlTime.sast(t.updatedAt).isBefore(prevWeekStart) &&
             MlTime.sast(t.updatedAt).isBefore(weekStart);
 
-        final weekLoads =
-            myTrips.where((t) => t.netTons != null && inWeek(t)).toList();
-        final weekTons =
-            weekLoads.fold<double>(0, (s, t) => s + (t.netTons ?? 0));
-        final totalTons =
-            myTrips.fold<double>(0, (s, t) => s + (t.netTons ?? 0));
+        final weekLoads = myTrips
+            .where((t) => t.netTons != null && inWeek(t))
+            .toList();
+        final weekTons = weekLoads.fold<double>(
+          0,
+          (s, t) => s + (t.netTons ?? 0),
+        );
+        final totalTons = myTrips.fold<double>(
+          0,
+          (s, t) => s + (t.netTons ?? 0),
+        );
 
-        // Tons delivered per weekday (completed trips this week).
-        final byDay = List<double>.filled(7, 0);
-        for (final t in delivered.where(inWeek)) {
-          byDay[t.updatedAt.weekday - 1] += t.netTons ?? 0;
-        }
+        // Tons delivered per weekday. See [tonsByWeekday] for the day this
+        // asked UTC what weekday it was and drew 33.7 t on a Sunday that had
+        // not happened yet — under a week TOTAL that was correct to the
+        // kilogram, which is why nothing noticed.
+        final byDay = tonsByWeekday(
+          delivered.where(inWeek),
+          weekStart: weekStart,
+        );
         final prevWeekTons = delivered
             .where(inPrevWeek)
             .fold<double>(0, (s, t) => s + (t.netTons ?? 0));
@@ -231,19 +244,19 @@ class DriverDashboardTab extends ConsumerWidget {
         final heroRoute = current == null
             ? 'Your next load will appear here.'
             : currentReq?.routeLabel ??
-                '${currentReq?.loadingPoint ?? '?'} → '
-                    '${currentReq?.offloadingPoint ?? '?'}';
-        final heroPlate = current?.truckReg ??
-            myVehicle?.vehicleRegistrationNumber ??
-            '—';
+                  '${currentReq?.loadingPoint ?? '?'} → '
+                      '${currentReq?.offloadingPoint ?? '?'}';
+        final heroPlate =
+            current?.truckReg ?? myVehicle?.vehicleRegistrationNumber ?? '—';
 
         return MlPageBody(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _DashboardHeader(
-                  title: 'Dashboard',
-                  subtitle: '$firstName — your week at a glance'),
+                title: 'Dashboard',
+                subtitle: '$firstName — your week at a glance',
+              ),
               const SizedBox(height: 16),
               _ActiveTripHero(
                 plate: heroPlate,
@@ -253,44 +266,58 @@ class DriverDashboardTab extends ConsumerWidget {
                 onNavigate: current == null
                     ? null
                     : () =>
-                        context.push('/portal/driver/navigate/${current.id}'),
-                onStartRoute: (current != null &&
-                        TripStatus.parse(current.status) == TripStatus.scheduled)
+                          context.push('/portal/driver/navigate/${current.id}'),
+                onStartRoute:
+                    (current != null &&
+                        TripStatus.parse(current.status) ==
+                            TripStatus.scheduled)
                     ? () => _startRoute(context, ref, current, companyId)
                     : null,
               ),
               const SizedBox(height: 16),
-              Row(children: [
-                Expanded(
+              Row(
+                children: [
+                  Expanded(
                     child: _MiniStat(
-                        icon: Icons.local_shipping_outlined,
-                        tone: MlTone.accent,
-                        value: '${weekLoads.length}',
-                        label: 'Loads this week')),
-                const SizedBox(width: 12),
-                Expanded(
+                      icon: Icons.local_shipping_outlined,
+                      tone: MlTone.accent,
+                      value: '${weekLoads.length}',
+                      label: 'Loads this week',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
                     child: _MiniStat(
-                        icon: Icons.monitor_weight_outlined,
-                        tone: MlTone.transit,
-                        value: formatTons(weekTons),
-                        label: 'Tons this week')),
-              ]),
+                      icon: Icons.monitor_weight_outlined,
+                      tone: MlTone.transit,
+                      value: formatTons(weekTons),
+                      label: 'Tons this week',
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
-              Row(children: [
-                Expanded(
+              Row(
+                children: [
+                  Expanded(
                     child: _MiniStat(
-                        icon: Icons.check_circle_outline,
-                        tone: MlTone.done,
-                        value: '${delivered.length}',
-                        label: 'Deliveries')),
-                const SizedBox(width: 12),
-                Expanded(
+                      icon: Icons.check_circle_outline,
+                      tone: MlTone.done,
+                      value: '${delivered.length}',
+                      label: 'Deliveries',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
                     child: _MiniStat(
-                        icon: Icons.scale_outlined,
-                        tone: MlTone.atMine,
-                        value: formatTons(totalTons),
-                        label: 'Total tons')),
-              ]),
+                      icon: Icons.scale_outlined,
+                      tone: MlTone.atMine,
+                      value: formatTons(totalTons),
+                      label: 'Total tons',
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 16),
               DriverLiveTrackingCard(hasActiveTrip: active.isNotEmpty),
               if (myVehicle != null) ...[
@@ -342,12 +369,20 @@ class DriverDashboardTab extends ConsumerWidget {
           .read(lifecycleServiceProvider)
           .setTripStatus(trip.id, TripStatus.enRouteToLoad);
       ref.invalidateIfMounted(logisticsSnapshotProvider(companyId));
-      messenger.showSnackBar(const SnackBar(
-          content: Text('Trip started — you are en route to load. Turn on '
-              'Live location sharing so the parties can follow your truck.')));
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Trip started — you are en route to load. Turn on '
+            'Live location sharing so the parties can follow your truck.',
+          ),
+        ),
+      );
     } catch (e) {
-      messenger.showSnackBar(SnackBar(
-          content: Text('Could not start the trip. ${friendlyError(e)}')));
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Could not start the trip. ${friendlyError(e)}'),
+        ),
+      );
     }
   }
 }
@@ -363,24 +398,29 @@ class _DashboardHeader extends StatelessWidget {
     return Row(
       children: [
         const MlIconWell(
-            icon: Icons.grid_view_rounded,
-            tone: MlTone.accent,
-            size: 50,
-            radius: 14),
+          icon: Icons.grid_view_rounded,
+          tone: MlTone.accent,
+          size: 50,
+          radius: 14,
+        ),
         const SizedBox(width: 13),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style: context.mlText.titleLarge.copyWith(
-                    color: semantic.textStrong,
-                    fontWeight: FontWeight.w800,
-                  )),
-              Text(subtitle,
-                  style: context.mlText.bodyMedium.copyWith(
-                    color: semantic.textMuted,
-                  )),
+              Text(
+                title,
+                style: context.mlText.titleLarge.copyWith(
+                  color: semantic.textStrong,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              Text(
+                subtitle,
+                style: context.mlText.bodyMedium.copyWith(
+                  color: semantic.textMuted,
+                ),
+              ),
             ],
           ),
         ),
@@ -412,11 +452,8 @@ class DriverActiveTripHeroForTest extends StatelessWidget {
   final String statusLabel;
 
   @override
-  Widget build(BuildContext context) => _ActiveTripHero(
-        plate: plate,
-        route: route,
-        statusLabel: statusLabel,
-      );
+  Widget build(BuildContext context) =>
+      _ActiveTripHero(plate: plate, route: route, statusLabel: statusLabel);
 }
 
 /// Cyan→navy promo hero for the driver's current trip (approved design
@@ -464,7 +501,10 @@ class _ActiveTripHero extends StatelessWidget {
           ),
           boxShadow: const [
             BoxShadow(
-                color: MlTokens.navyShadowSoft, blurRadius: 22, offset: Offset(0, 8)),
+              color: MlTokens.navyShadowSoft,
+              blurRadius: 22,
+              offset: Offset(0, 8),
+            ),
           ],
         ),
         child: Column(
@@ -473,10 +513,13 @@ class _ActiveTripHero extends StatelessWidget {
             Row(
               children: [
                 Container(
-                    width: 7,
-                    height: 7,
-                    decoration: const BoxDecoration(
-                        color: MlTokens.cyan250, shape: BoxShape.circle)),
+                  width: 7,
+                  height: 7,
+                  decoration: const BoxDecoration(
+                    color: MlTokens.cyan250,
+                    shape: BoxShape.circle,
+                  ),
+                ),
                 const SizedBox(width: 6),
                 // "CURRENT TRIP", not "ACTIVE TRIP".
                 //
@@ -491,35 +534,44 @@ class _ActiveTripHero extends StatelessWidget {
                 //
                 // The eyebrow names the SLOT and has to stay true whatever is
                 // in it; the pill says what is in it.
-                const Text('CURRENT TRIP',
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
-                        // FULL white, not `inkOnFill70`.
-                        //
-                        // That token is documented for "the driver card's
-                        // navy gradient", and this is the CYAN end of it. On
-                        // a saturated cyan there is no room for a quieter
-                        // white at all: solving for the alpha that reaches
-                        // 4.5:1 gives 0.965, which is white. So the eyebrow
-                        // is white and stays quieter by being 11px, w800 and
-                        // tracked out beside a 12px pill - size and weight,
-                        // the same answer `textFaint` reached.
-                        color: MlTokens.inkOnFill)),
+                const Text(
+                  'CURRENT TRIP',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                    // FULL white, not `inkOnFill70`.
+                    //
+                    // That token is documented for "the driver card's
+                    // navy gradient", and this is the CYAN end of it. On
+                    // a saturated cyan there is no room for a quieter
+                    // white at all: solving for the alpha that reaches
+                    // 4.5:1 gives 0.965, which is white. So the eyebrow
+                    // is white and stays quieter by being 11px, w800 and
+                    // tracked out beside a 12px pill - size and weight,
+                    // the same answer `textFaint` reached.
+                    color: MlTokens.inkOnFill,
+                  ),
+                ),
                 const Spacer(),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                      color: MlTokens.inkOnFill.withValues(alpha: 0.16),
-                      borderRadius: MlShape.pill),
-                  child: Text(statusLabel,
-                      style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.4,
-                          color: MlTokens.inkOnFill)),
+                    color: MlTokens.inkOnFill.withValues(alpha: 0.16),
+                    borderRadius: MlShape.pill,
+                  ),
+                  child: Text(
+                    statusLabel,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.4,
+                      color: MlTokens.inkOnFill,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -530,33 +582,43 @@ class _ActiveTripHero extends StatelessWidget {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                      color: MlTokens.inkOnFill.withValues(alpha: 0.15),
-                      borderRadius: MlShape.radiusLarge),
-                  child: const Icon(Icons.local_shipping,
-                      size: 28, color: MlTokens.inkOnFill),
+                    color: MlTokens.inkOnFill.withValues(alpha: 0.15),
+                    borderRadius: MlShape.radiusLarge,
+                  ),
+                  child: const Icon(
+                    Icons.local_shipping,
+                    size: 28,
+                    color: MlTokens.inkOnFill,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(plate,
-                          style: const TextStyle(
-                              fontFamily: 'JetBrainsMono',
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.8,
-                              color: MlTokens.inkOnFill,
-                              fontFeatures: [FontFeature.tabularFigures()],
-                            )),
+                      Text(
+                        plate,
+                        style: const TextStyle(
+                          fontFamily: 'JetBrainsMono',
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                          color: MlTokens.inkOnFill,
+                          fontFeatures: [FontFeature.tabularFigures()],
+                        ),
+                      ),
                       const SizedBox(height: 2),
-                      Text(route,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              // Same as the eyebrow above: the cyan end of
-                              // this gradient has no room for a 70% white.
-                              fontSize: 13, color: MlTokens.inkOnFill)),
+                      Text(
+                        route,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          // Same as the eyebrow above: the cyan end of
+                          // this gradient has no room for a 70% white.
+                          fontSize: 13,
+                          color: MlTokens.inkOnFill,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -574,8 +636,10 @@ class _ActiveTripHero extends StatelessWidget {
                   ),
                   onPressed: onStartRoute,
                   icon: const Icon(Icons.play_arrow_rounded, size: 20),
-                  label: const Text('Start route',
-                      style: TextStyle(fontWeight: FontWeight.w800)),
+                  label: const Text(
+                    'Start route',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
                 ),
               ),
             ],
@@ -588,13 +652,15 @@ class _ActiveTripHero extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: MlTokens.inkOnFill,
                           side: BorderSide(
-                              color:
-                                  MlTokens.inkOnFill.withValues(alpha: 0.45)),
+                            color: MlTokens.inkOnFill.withValues(alpha: 0.45),
+                          ),
                         ),
                         onPressed: onNavigate,
                         icon: const Icon(Icons.navigation_rounded, size: 19),
-                        label: const Text('Navigate',
-                            style: TextStyle(fontWeight: FontWeight.w800)),
+                        label: const Text(
+                          'Navigate',
+                          style: TextStyle(fontWeight: FontWeight.w800),
+                        ),
                       )
                     : FilledButton.icon(
                         style: FilledButton.styleFrom(
@@ -603,8 +669,10 @@ class _ActiveTripHero extends StatelessWidget {
                         ),
                         onPressed: onNavigate,
                         icon: const Icon(Icons.navigation_rounded, size: 19),
-                        label: const Text('Navigate',
-                            style: TextStyle(fontWeight: FontWeight.w800)),
+                        label: const Text(
+                          'Navigate',
+                          style: TextStyle(fontWeight: FontWeight.w800),
+                        ),
                       ),
               ),
             ],
@@ -620,11 +688,12 @@ class _MiniStat extends StatelessWidget {
   final MlTone tone;
   final String value;
   final String label;
-  const _MiniStat(
-      {required this.icon,
-      required this.tone,
-      required this.value,
-      required this.label});
+  const _MiniStat({
+    required this.icon,
+    required this.tone,
+    required this.value,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -641,22 +710,26 @@ class _MiniStat extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Flexible(
-                child: Text(value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.mlText.headlineSmall.copyWith(
-                      color: semantic.textStrong,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.4,
-                    )),
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.mlText.headlineSmall.copyWith(
+                    color: semantic.textStrong,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                  ),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 1),
-          Text(label,
-              style: context.mlText.bodyMedium.copyWith(
-                color: semantic.textMuted,
-              )),
+          Text(
+            label,
+            style: context.mlText.bodyMedium.copyWith(
+              color: semantic.textMuted,
+            ),
+          ),
         ],
       ),
     );
@@ -699,36 +772,45 @@ class _WeekChartCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Tons delivered',
-                        style: context.mlText.titleMedium.copyWith(
-                          color: semantic.textStrong,
-                          fontWeight: FontWeight.w800,
-                        )),
+                    Text(
+                      'Tons delivered',
+                      style: context.mlText.titleMedium.copyWith(
+                        color: semantic.textStrong,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text('This week',
-                        style: context.mlText.bodyMedium.copyWith(
-                          color: semantic.textMuted,
-                        )),
+                    Text(
+                      'This week',
+                      style: context.mlText.bodyMedium.copyWith(
+                        color: semantic.textMuted,
+                      ),
+                    ),
                   ],
                 ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(formatTons(weekTotal),
-                      style: context.mlText.code(
-                        color: semantic.textStrong,
-                        size: 22,
-                        weight: FontWeight.w800,
-                      )),
+                  Text(
+                    formatTons(weekTotal),
+                    style: context.mlText.code(
+                      color: semantic.textStrong,
+                      size: 22,
+                      weight: FontWeight.w800,
+                    ),
+                  ),
                   if (prevWeekTotal > 0)
                     Text(
-                        '${deltaUp ? '▲' : '▼'} '
-                        '${formatTons(delta.abs())} vs last week',
-                        style: context.mlText.labelMedium.copyWith(
-                          color: (deltaUp ? MlTone.done : MlTone.warn) .colors(brightness) .fg,
-                          fontWeight: FontWeight.w700,
-                        )),
+                      '${deltaUp ? '▲' : '▼'} '
+                      '${formatTons(delta.abs())} vs last week',
+                      style: context.mlText.labelMedium.copyWith(
+                        color: (deltaUp ? MlTone.done : MlTone.warn)
+                            .colors(brightness)
+                            .fg,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                 ],
               ),
             ],
@@ -747,58 +829,66 @@ class _WeekChartCard extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 4),
               child: Text(
                 'No deliveries recorded this week yet.',
-                style: context.mlText.bodyMedium
-                    .copyWith(color: semantic.textMuted),
+                style: context.mlText.bodyMedium.copyWith(
+                  color: semantic.textMuted,
+                ),
               ),
             )
           else
-          SizedBox(
-            height: 120,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                for (var i = 0; i < byDay.length; i++)
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                          right: i == byDay.length - 1 ? 0 : 10),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: FractionallySizedBox(
-                                heightFactor: max <= 0
-                                    ? 0.03
-                                    : (byDay[i] / max).clamp(0.03, 1.0),
-                                widthFactor: 1,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: byDay[i] == 0
-                                        ? semantic.divider
-                                        : i == todayIndex
-                                            ? MlTokens.accent
-                                            : MlTone.accent.well(brightness),
-                                    borderRadius: MlShape.radiusSmall,
+            SizedBox(
+              height: 120,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (var i = 0; i < byDay.length; i++)
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: i == byDay.length - 1 ? 0 : 10,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: FractionallySizedBox(
+                                  heightFactor: max <= 0
+                                      ? 0.03
+                                      : (byDay[i] / max).clamp(0.03, 1.0),
+                                  widthFactor: 1,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: byDay[i] == 0
+                                          ? semantic.divider
+                                          : i == todayIndex
+                                          ? MlTokens.accent
+                                          : MlTone.accent.well(brightness),
+                                      borderRadius: MlShape.radiusSmall,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 7),
-                          Text(_labels[i],
+                            const SizedBox(height: 7),
+                            Text(
+                              _labels[i],
                               style: context.mlText.labelSmall.copyWith(
-                                color: i == todayIndex ? MlTokens.accent : semantic.textFaint,
-                                fontWeight: i == todayIndex ? FontWeight.w800 : FontWeight.w600,
-                              )),
-                        ],
+                                color: i == todayIndex
+                                    ? MlTokens.accent
+                                    : semantic.textFaint,
+                                fontWeight: i == todayIndex
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -813,41 +903,49 @@ class _QuickLinksCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return MlCard(
       padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: Column(children: [
-        _ProfileRow(
-          icon: Icons.gps_fixed_rounded,
-          tone: MlTone.accent,
-          label: 'Live map',
-          value: 'Active trips with live truck positions',
-          onTap: () =>
-              _pushScreen(context, 'Live map', const LiveTripMapScreen()),
-        ),
-        _ProfileRow(
-          icon: Icons.map_outlined,
-          tone: MlTone.transit,
-          label: 'Truck locations',
-          value: 'Latest known truck positions',
-          onTap: () => _pushScreen(context, 'Truck locations',
-              const TransporterTruckLocationsScreen()),
-        ),
-        _ProfileRow(
-          icon: Icons.place_outlined,
-          tone: MlTone.atMine,
-          label: 'Truck positions',
-          value: 'Position history & pings',
-          onTap: () => _pushScreen(context, 'Truck positions',
-              const TransporterTruckPositionsScreen()),
-        ),
-        _ProfileRow(
-          icon: Icons.local_shipping_outlined,
-          tone: MlTone.done,
-          label: 'My workspace',
-          value: 'Assignment, company & notifications',
-          onTap: () =>
-              _pushScreen(context, 'My workspace', const DriverTabScreen()),
-          last: true,
-        ),
-      ]),
+      child: Column(
+        children: [
+          _ProfileRow(
+            icon: Icons.gps_fixed_rounded,
+            tone: MlTone.accent,
+            label: 'Live map',
+            value: 'Active trips with live truck positions',
+            onTap: () =>
+                _pushScreen(context, 'Live map', const LiveTripMapScreen()),
+          ),
+          _ProfileRow(
+            icon: Icons.map_outlined,
+            tone: MlTone.transit,
+            label: 'Truck locations',
+            value: 'Latest known truck positions',
+            onTap: () => _pushScreen(
+              context,
+              'Truck locations',
+              const TransporterTruckLocationsScreen(),
+            ),
+          ),
+          _ProfileRow(
+            icon: Icons.place_outlined,
+            tone: MlTone.atMine,
+            label: 'Truck positions',
+            value: 'Position history & pings',
+            onTap: () => _pushScreen(
+              context,
+              'Truck positions',
+              const TransporterTruckPositionsScreen(),
+            ),
+          ),
+          _ProfileRow(
+            icon: Icons.local_shipping_outlined,
+            tone: MlTone.done,
+            label: 'My workspace',
+            value: 'Assignment, company & notifications',
+            onTap: () =>
+                _pushScreen(context, 'My workspace', const DriverTabScreen()),
+            last: true,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -864,11 +962,13 @@ class DriverProfileTab extends ConsumerWidget {
     final employeeState = ref.watch(employeeProvider);
     final employee = employeeState.employee;
     final companyId = resolvePortalCompanyId(ref);
-    final fleet = companyId == null ? null : ref.watch(fleetProvider(companyId));
+    final fleet = companyId == null
+        ? null
+        : ref.watch(fleetProvider(companyId));
     final assignments = companyId == null
         ? const <VehicleDriver>[]
         : ref.watch(vehicleDriversProvider(companyId)).asData?.value ??
-            const <VehicleDriver>[];
+              const <VehicleDriver>[];
     final myVehicle = (employee == null || fleet == null)
         ? null
         : driverAssignedVehicle(fleet.activeVehicles, assignments, employee.id);
@@ -878,28 +978,32 @@ class DriverProfileTab extends ConsumerWidget {
     final delivered = (snap == null || myVehicle == null)
         ? const <TripRecord>[]
         : (snap.trips
-            .where((t) =>
-                t.vehicleId == myVehicle.id &&
-                TripStatus.parse(t.status) == TripStatus.completed)
-            .toList()
-          ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)));
+              .where(
+                (t) =>
+                    t.vehicleId == myVehicle.id &&
+                    TripStatus.parse(t.status) == TripStatus.completed,
+              )
+              .toList()
+            ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)));
 
     final name = employee?.fullName.trim() ?? 'Driver';
     final initials = name.isEmpty
         ? 'D'
         : name
-            .split(RegExp(r'\s+'))
-            .where((p) => p.isNotEmpty)
-            .take(2)
-            .map((p) => p[0].toUpperCase())
-            .join();
+              .split(RegExp(r'\s+'))
+              .where((p) => p.isNotEmpty)
+              .take(2)
+              .map((p) => p[0].toUpperCase())
+              .join();
 
     return MlPageBody(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const _DashboardHeader(
-              title: 'Profile', subtitle: 'Account & settings'),
+            title: 'Profile',
+            subtitle: 'Account & settings',
+          ),
           const SizedBox(height: 16),
           MlCard(
             padding: const EdgeInsets.all(22),
@@ -912,32 +1016,40 @@ class DriverProfileTab extends ConsumerWidget {
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [MlTokens.cyan650, MlTokens.navy700]),
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [MlTokens.cyan650, MlTokens.navy700],
+                    ),
                   ),
-                  child: Text(initials,
-                      style: const TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          color: MlTokens.inkOnFill)),
+                  child: Text(
+                    initials,
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: MlTokens.inkOnFill,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 12),
-                Text(name,
-                    style: context.mlText.titleLarge.copyWith(
-                      color: semantic.textStrong,
-                      fontWeight: FontWeight.w800,
-                    )),
+                Text(
+                  name,
+                  style: context.mlText.titleLarge.copyWith(
+                    color: semantic.textStrong,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 const SizedBox(height: 2),
                 Text(
-                    'Driver · ${employeeState.company?.companyName ?? ''}',
-                    style:
-                        context.mlText.bodyMedium.copyWith(
-                          color: semantic.textMuted,
-                        )),
+                  'Driver · ${employeeState.company?.companyName ?? ''}',
+                  style: context.mlText.bodyMedium.copyWith(
+                    color: semantic.textMuted,
+                  ),
+                ),
                 const SizedBox(height: 12),
-                MlPlatePill(myVehicle?.vehicleRegistrationNumber ?? '—',
-                    fontSize: 12),
+                MlPlatePill(
+                  myVehicle?.vehicleRegistrationNumber ?? '—',
+                  fontSize: 12,
+                ),
               ],
             ),
           ),
@@ -957,7 +1069,8 @@ class DriverProfileTab extends ConsumerWidget {
                     const Padding(
                       padding: EdgeInsets.all(16),
                       child: SingleChildScrollView(
-                          child: ProfileSignatureCard()),
+                        child: ProfileSignatureCard(),
+                      ),
                     ),
                   ),
                 ),
@@ -974,7 +1087,10 @@ class DriverProfileTab extends ConsumerWidget {
                   label: 'Trip history',
                   value: '${delivered.length} completed trips',
                   onTap: () => _pushScreen(
-                      context, 'Trip history', _TripHistoryList(delivered)),
+                    context,
+                    'Trip history',
+                    _TripHistoryList(delivered),
+                  ),
                 ),
                 _ProfileRow(
                   icon: Icons.notifications_outlined,
@@ -1032,31 +1148,38 @@ class _TripHistoryList extends StatelessWidget {
         final t = trips[i];
         return MlCard(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(children: [
-            const MlIconWell(
+          child: Row(
+            children: [
+              const MlIconWell(
                 icon: Icons.check_circle_outline,
                 tone: MlTone.done,
                 size: 38,
-                radius: 11),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(t.truckReg ?? 'Trip ${t.id.substring(0, 6)}…',
+                radius: 11,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.truckReg ?? 'Trip ${t.id.substring(0, 6)}…',
                       style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          color: semantic.textStrong)),
-                  Text(
+                        fontWeight: FontWeight.w800,
+                        color: semantic.textStrong,
+                      ),
+                    ),
+                    Text(
                       '${MlTime.sast(t.updatedAt).toString().substring(0, 16)}'
                       '${t.netTons != null ? ' · ${formatTons(t.netTons!)}' : ''}',
                       style: context.mlText.bodySmall.copyWith(
                         color: semantic.textMuted,
-                      )),
-                ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
         );
       },
     );
@@ -1070,13 +1193,14 @@ class _ProfileRow extends StatelessWidget {
   final String value;
   final bool last;
   final VoidCallback? onTap;
-  const _ProfileRow(
-      {required this.icon,
-      required this.tone,
-      required this.label,
-      required this.value,
-      this.onTap,
-      this.last = false});
+  const _ProfileRow({
+    required this.icon,
+    required this.tone,
+    required this.label,
+    required this.value,
+    this.onTap,
+    this.last = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1088,7 +1212,8 @@ class _ProfileRow extends StatelessWidget {
         decoration: last
             ? null
             : BoxDecoration(
-                border: Border(bottom: BorderSide(color: semantic.divider))),
+                border: Border(bottom: BorderSide(color: semantic.divider)),
+              ),
         child: Row(
           children: [
             MlIconWell(icon: icon, tone: tone, size: 40, radius: 12),
@@ -1097,16 +1222,20 @@ class _ProfileRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label,
-                      style: context.mlText.titleMedium.copyWith(
-                        color: semantic.textStrong,
-                        fontWeight: FontWeight.w700,
-                      )),
+                  Text(
+                    label,
+                    style: context.mlText.titleMedium.copyWith(
+                      color: semantic.textStrong,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 1),
-                  Text(value,
-                      style: context.mlText.bodyMedium.copyWith(
-                        color: semantic.textMuted,
-                      )),
+                  Text(
+                    value,
+                    style: context.mlText.bodyMedium.copyWith(
+                      color: semantic.textMuted,
+                    ),
+                  ),
                 ],
               ),
             ),
