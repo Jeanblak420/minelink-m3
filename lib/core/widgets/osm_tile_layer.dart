@@ -154,8 +154,20 @@ Color mlMapBackground(BuildContext context) =>
 
 /// Matching attribution overlay — add as the LAST child of every FlutterMap
 /// so the credit always names whichever host [mlOsmTileLayer] is serving.
-Widget mlMapAttribution() => RichAttributionWidget(
+///
+/// [alignment] exists because the credit has to stay LEGIBLE, and the default
+/// bottom-right corner is now where the map controls live. Measured on
+/// `screen-driver-navigation-phone-dark.png` after the controls were added
+/// (2026-08-22): the attribution mark occupied x 334..352, y 758..780 and the
+/// my-location disc x 350..397, y 727..774 — the disc painted over the credit's
+/// right edge. OpenStreetMap's licence asks for the credit; a credit with a
+/// button on top of it is not one.
+Widget mlMapAttribution({
+  AttributionAlignment alignment = AttributionAlignment.bottomRight,
+}) =>
+    RichAttributionWidget(
       animationConfig: const ScaleRAWA(),
+      alignment: alignment,
       attributions: const [
         TextSourceAttribution(_kTileAttribution, prependCopyright: false),
       ],

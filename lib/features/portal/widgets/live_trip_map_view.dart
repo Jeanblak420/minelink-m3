@@ -58,6 +58,34 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
     }
   }
 
+  /// What the "centre on" control goes back to, or null if there is nothing to
+  /// go back to.
+  ///
+  /// The selected truck if one is selected; otherwise the ONLY truck, when
+  /// there is exactly one. That second case is the driver's own: a driver
+  /// watching this map has one active trip, so the button reads as "put me
+  /// back on my truck" without this widget having to work out who is looking
+  /// at it — which it cannot do honestly, because [LiveTripPosition] carries a
+  /// driver's NAME and not their user id.
+  LatLng? _focusPoint(List<LiveTripPosition> withFix) {
+    for (final t in withFix) {
+      if (t.tripId == _highlightTripId) return t.point;
+    }
+    if (withFix.length == 1) return withFix.first.point;
+    return null;
+  }
+
+  /// Press and hold anywhere to ask where that is (jean, 2026-08-22).
+  ///
+  /// `from` is deliberately null here. This map is watched by mine, buyer and
+  /// transporter office staff as well as by drivers, and the viewer's own
+  /// position is not among the things it knows — so "12.4 km NE **of you**"
+  /// would be a claim about somebody who might be sitting in Johannesburg.
+  /// A coordinate on its own cannot be wrong.
+  void _droppedPin(LatLng point) {
+    showMlDroppedPin(context, point: point);
+  }
+
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(liveTripPositionsProvider(widget.companyId));
@@ -153,10 +181,9 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
     final destColor = MlTone.error.colors(brightness).fg;
     // Active hazards (blasting zones, closures…) the drivers route around —
     // shown so watchers see the full operating picture. Degrades to nothing.
-    final hazards = ref.watch(activeHazardsProvider).maybeWhen(
-          data: (h) => h,
-          orElse: () => const <MineHazard>[],
-        );
+    final hazards = ref
+        .watch(activeHazardsProvider)
+        .maybeWhen(data: (h) => h, orElse: () => const <MineHazard>[]);
 
     final map = ClipRRect(
       borderRadius: MlShape.radiusMedium,
@@ -175,6 +202,7 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
           interactionOptions: const InteractionOptions(
             flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
           ),
+          onLongPress: (tapPosition, point) => _droppedPin(point),
         ),
         children: [
           mlOsmTiles(context),
@@ -285,14 +313,65 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
                 ),
             ],
           ),
+          mlMapScaleBar(context),
           mlMapAttribution(),
         ],
       ),
     );
 
+    // The controls sit OVER the map, not inside it: a `FlutterMap` child is
+    // laid out against the map's own coordinate space and would be dragged
+    // around with the tiles.
+    final withControls = Stack(
+      children: [
+        Positioned.fill(child: map),
+        Positioned(
+          right: 0,
+          bottom: 0,
+          child: MlMapControls(
+            controller: _camera.mapController,
+            // Rotation is excluded from this map's interaction flags, so a
+            // compass here could only ever point north — see [allowRotation].
+            allowRotation: false,
+            // Clear of the attribution mark, which sits in this corner.
+            // Measured on `screen-live-trip-map-phone-dark.png`: the credit
+            // occupies roughly the bottom 34px of the map and the disc was
+            // painting over it.
+            padding: const EdgeInsets.only(right: 10, bottom: 44),
+            hasFix: true,
+            recenterTooltip: withFix.length == 1
+                ? 'Centre on the truck'
+                : 'Centre on the selected truck',
+            // ABSENT rather than disabled when there is nothing to centre on.
+            //
+            // A fleet map with two trucks and none selected has no "me" — and
+            // the first render of this showed a permanently crossed-out
+            // location button, which reads as a broken control rather than an
+            // inapplicable one. It appears the moment a truck is selected, and
+            // is always there for a driver, who has exactly one.
+            onRecenter: _focusPoint(withFix) == null
+                ? null
+                : () {
+                    final p = _focusPoint(withFix);
+                    if (p != null) _camera.animateTo(dest: p);
+                  },
+            onOverview: withFix.isEmpty
+                ? null
+                : () => _camera.mapController.fitCamera(
+                    safeCoordinatesFit([
+                      for (final t in withFix) t.point!,
+                      if (dest != null) dest,
+                    ], padding: const EdgeInsets.all(46)),
+                  ),
+            overviewTooltip: 'Fit every truck on screen',
+          ),
+        ),
+      ],
+    );
+
     return height == null
-        ? SizedBox.expand(child: map)
-        : SizedBox(height: height, child: map);
+        ? SizedBox.expand(child: withControls)
+        : SizedBox(height: height, child: withControls);
   }
 
   MlTone _hazardTone(MineHazard h) {
@@ -464,10 +543,13 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
             weight: FontWeight.w800,
           ),
         ),
-        Text(label, style: context.mlText.labelSmall.copyWith(
-          color: semantic.textMuted,
-          fontWeight: FontWeight.w400,
-        )),
+        Text(
+          label,
+          style: context.mlText.labelSmall.copyWith(
+            color: semantic.textMuted,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
       ],
     );
 

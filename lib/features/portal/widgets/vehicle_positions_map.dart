@@ -7,14 +7,13 @@ import 'package:flutter_application_1/features/portal/models/logistics_models.da
 import 'package:flutter_application_1/features/portal/widgets/map_fit.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
 /// OpenStreetMap preview of [positions] (newest samples first is fine).
 ///
 /// When [highlightVehicleId] is set, that vehicle's marker is drawn larger and
 /// in an accent colour so a trip tapped elsewhere in the app stands out — this
 /// backs the global "click a trip → highlight that truck" rule.
-class VehiclePositionsMap extends StatelessWidget {
+class VehiclePositionsMap extends StatefulWidget {
   final List<VehiclePositionRecord> positions;
   final double? height;
   final String? highlightVehicleId;
@@ -27,7 +26,26 @@ class VehiclePositionsMap extends StatelessWidget {
   });
 
   @override
+  State<VehiclePositionsMap> createState() => _VehiclePositionsMapState();
+}
+
+class _VehiclePositionsMapState extends State<VehiclePositionsMap> {
+  /// Owned by the State, not built per frame: a controller recreated in
+  /// `build` would hand the zoom buttons a different map every rebuild, and
+  /// `MlMapControls` subscribes to its event stream once in `initState`.
+  final _controller = MapController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final positions = widget.positions;
+    final height = widget.height;
+    final highlightVehicleId = widget.highlightVehicleId;
     if (positions.isEmpty) return const SizedBox.shrink();
 
     final pts = positions.map((p) => LatLng(p.lat, p.lng)).toList();
@@ -44,6 +62,7 @@ class VehiclePositionsMap extends StatelessWidget {
     final map = ClipRRect(
       borderRadius: MlShape.radiusMedium,
       child: FlutterMap(
+        mapController: _controller,
         options: MapOptions(
           // Not flutter_map's near-white default: see mlMapBackground.
           backgroundColor: mlMapBackground(context),
@@ -51,6 +70,11 @@ class VehiclePositionsMap extends StatelessWidget {
           interactionOptions: const InteractionOptions(
             flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
           ),
+          // Press and hold to ask where a truck is standing (jean,
+          // 2026-08-22). `from` is null: this map does not know where the
+          // person reading it is.
+          onLongPress: (tapPosition, point) =>
+              showMlDroppedPin(context, point: point),
         ),
         children: [
           mlOsmTiles(context),
@@ -117,13 +141,35 @@ class VehiclePositionsMap extends StatelessWidget {
                   ),
             ],
           ),
+          mlMapScaleBar(context),
           mlMapAttribution(),
         ],
       ),
     );
 
+    final withControls = Stack(
+      children: [
+        Positioned.fill(child: map),
+        Positioned(
+          right: 0,
+          bottom: 0,
+          child: MlMapControls(
+            controller: _controller,
+            // This map excludes rotation, so a compass could only point north.
+            allowRotation: false,
+            // There is no "me" on a fleet overview -- only trucks.
+            onRecenter: null,
+            onOverview: () => _controller.fitCamera(fit),
+            overviewTooltip: 'Fit every truck on screen',
+            // Clear of the attribution mark in the same corner.
+            padding: const EdgeInsets.only(right: 8, bottom: 44),
+          ),
+        ),
+      ],
+    );
+
     return height == null
-        ? SizedBox.expand(child: map)
-        : SizedBox(height: height, child: map);
+        ? SizedBox.expand(child: withControls)
+        : SizedBox(height: height, child: withControls);
   }
 }

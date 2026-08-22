@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/widgets/osm_tile_layer.dart';
+import 'package:flutter_application_1/core/design/components/ml_map_controls.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:flutter_application_1/features/portal/services/place_search_service.dart';
@@ -26,10 +27,8 @@ Future<String?> showLocationPickerDialog(
 }) {
   return showDialog<String>(
     context: context,
-    builder: (_) => LocationPickerDialog(
-      initial: initial,
-      searchService: searchService,
-    ),
+    builder: (_) =>
+        LocationPickerDialog(initial: initial, searchService: searchService),
   );
 }
 
@@ -164,9 +163,13 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                   const Icon(Icons.location_on_outlined),
                   const SizedBox(width: 8),
                   const Expanded(
-                    child: Text('Pick product location',
-                        style:
-                            TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                    child: Text(
+                      'Pick product location',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close_rounded),
@@ -191,9 +194,10 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                       ? const Padding(
                           padding: EdgeInsets.all(12),
                           child: SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2)),
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
                         )
                       : null,
                   border: const OutlineInputBorder(),
@@ -202,10 +206,12 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
               if (_error != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Text(_error!,
-                      style: context.mlText.bodySmall.copyWith(
-                        color: scheme.error,
-                      )),
+                  child: Text(
+                    _error!,
+                    style: context.mlText.bodySmall.copyWith(
+                      color: scheme.error,
+                    ),
+                  ),
                 ),
               // The results are for a BROADER query than the one typed, because
               // nothing matched the full one. Saying so is the difference
@@ -237,10 +243,12 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                         ListTile(
                           dense: true,
                           leading: const Icon(Icons.place_outlined, size: 18),
-                          title: Text(p.label,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 13)),
+                          title: Text(
+                            p.label,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 13),
+                          ),
                           onTap: () {
                             _search.text = p.label.split(',').first;
                             _select(p.point);
@@ -255,63 +263,94 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                   child: Text(
                     PlaceSearchService.looksLikeLink(_noMatchesFor!)
                         ? 'That link did not carry a location. Open it in '
-                            'Google Maps, then copy the link from the address '
-                            'bar and paste it here.'
+                              'Google Maps, then copy the link from the address '
+                              'bar and paste it here.'
                         : 'No matches for “$_noMatchesFor”. Open-map data may '
-                            'not have this building — search the street, or '
-                            'find the place in Google Maps and paste its link '
-                            'here for an exact pin.',
+                              'not have this building — search the street, or '
+                              'find the place in Google Maps and paste its link '
+                              'here for an exact pin.',
                     style: context.mlText.bodySmall.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
                 ),
               const SizedBox(height: 10),
-              Text('Long-press the map to drop a pin, or paste “lat, lng”.',
-                  style:
-                      context.mlText.bodySmall.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      )),
+              Text(
+                'Long-press the map to drop a pin, or paste “lat, lng”.',
+                style: context.mlText.bodySmall.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 6),
               Expanded(
-                child: ClipRRect(
-                  borderRadius: MlShape.radiusMedium,
-                  child: FlutterMap(
-                    mapController: _mapController,
-                    options: MapOptions(
-                      // Not flutter_map's near-white default: see
-                      // mlMapBackground.
-                      backgroundColor: mlMapBackground(context),
-                      initialCenter: _pin ?? _saCenter,
-                      initialZoom: _pin != null ? 14 : 5,
-                      onLongPress: (_, latLng) =>
-                          setState(() => _pin = latLng),
-                      interactionOptions: const InteractionOptions(
-                        flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: MlShape.radiusMedium,
+                        child: FlutterMap(
+                          mapController: _mapController,
+                          options: MapOptions(
+                            // Not flutter_map's near-white default: see
+                            // mlMapBackground.
+                            backgroundColor: mlMapBackground(context),
+                            initialCenter: _pin ?? _saCenter,
+                            initialZoom: _pin != null ? 14 : 5,
+                            onLongPress: (_, latLng) =>
+                                setState(() => _pin = latLng),
+                            interactionOptions: const InteractionOptions(
+                              flags:
+                                  InteractiveFlag.all & ~InteractiveFlag.rotate,
+                            ),
+                          ),
+                          children: [
+                            mlOsmTiles(context),
+                            // Always present, empty when there is no pin. Adding and
+                            // removing a layer reshuffles FlutterMap's unkeyed child
+                            // list, which is churn the tile layer has no reason to
+                            // sit through every time somebody picks a place.
+                            MarkerLayer(
+                              markers: [
+                                if (_pin != null)
+                                  Marker(
+                                    point: _pin!,
+                                    width: 44,
+                                    height: 44,
+                                    alignment: Alignment.topCenter,
+                                    child: Icon(
+                                      Icons.location_on,
+                                      color: scheme.error,
+                                      size: 40,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            mlMapScaleBar(context),
+                            mlMapAttribution(),
+                          ],
+                        ),
                       ),
                     ),
-                    children: [
-                      mlOsmTiles(context),
-                      // Always present, empty when there is no pin. Adding and
-                      // removing a layer reshuffles FlutterMap's unkeyed child
-                      // list, which is churn the tile layer has no reason to
-                      // sit through every time somebody picks a place.
-                      MarkerLayer(
-                        markers: [
-                          if (_pin != null)
-                            Marker(
-                              point: _pin!,
-                              width: 44,
-                              height: 44,
-                              alignment: Alignment.topCenter,
-                              child: Icon(Icons.location_on,
-                                  color: scheme.error, size: 40),
-                            ),
-                        ],
+                    // Zoom, and a way back to the pin once it has been placed.
+                    // Choosing an exact gate on a phone without zoom buttons
+                    // means pinching one-handed inside a dialog.
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: MlMapControls(
+                        controller: _mapController,
+                        allowRotation: false,
+                        hasFix: _pin != null,
+                        recenterTooltip: 'Centre on the pin',
+                        onRecenter: () {
+                          final p = _pin;
+                          if (p != null) _mapController.move(p, 15);
+                        },
+                        // Clear of the attribution mark below it.
+                        padding: const EdgeInsets.only(right: 8, bottom: 44),
                       ),
-                      mlMapAttribution(),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 8),
@@ -325,11 +364,10 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                   _pin == null
                       ? 'No location picked yet.'
                       : 'Selected: ${_pin!.latitude.toStringAsFixed(5)}, '
-                          '${_pin!.longitude.toStringAsFixed(5)}',
-                  style:
-                      context.mlText.bodySmall.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
+                            '${_pin!.longitude.toStringAsFixed(5)}',
+                  style: context.mlText.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -345,7 +383,8 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                     onPressed: _pin == null
                         ? null
                         : () => Navigator.of(context).pop(
-                            googleMapsLink(_pin!.latitude, _pin!.longitude)),
+                            googleMapsLink(_pin!.latitude, _pin!.longitude),
+                          ),
                     icon: const Icon(Icons.check_rounded, size: 18),
                     label: const Text('Use this location'),
                   ),

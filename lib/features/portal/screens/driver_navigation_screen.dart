@@ -36,6 +36,7 @@ import 'package:flutter_application_1/features/portal/services/routing_service.d
 import 'package:flutter_application_1/features/portal/utils/nav_math.dart';
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
 import 'package:flutter_application_1/features/portal/widgets/hazard_report_sheet.dart';
+import 'package:flutter_application_1/features/portal/widgets/map_fit.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/portal/widgets/security_confirmation_dialog.dart';
 import 'package:flutter_application_1/features/portal/widgets/waypoint_progress_bar.dart';
@@ -56,8 +57,7 @@ class DriverNavigationScreen extends ConsumerStatefulWidget {
       _DriverNavigationScreenState();
 }
 
-class _DriverNavigationScreenState
-    extends ConsumerState<DriverNavigationScreen>
+class _DriverNavigationScreenState extends ConsumerState<DriverNavigationScreen>
     with SingleTickerProviderStateMixin {
   // Approved design exception (CLAUDE.md plan): the cyan→navy hero pair.
   // Was `Color(0xFF0B2545)` declared here. That is byte-identical to
@@ -72,8 +72,9 @@ class _DriverNavigationScreenState
   // Smooth motion (2026-07-17): raw GPS fixes arrive in steps; the puck and
   // follow camera glide between them instead of jumping (Waze-style feel).
   late final AnimationController _motion = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 750))
-    ..addListener(_onMotionTick);
+    vsync: this,
+    duration: const Duration(milliseconds: 750),
+  )..addListener(_onMotionTick);
   LatLng? _animFrom;
   LatLng? _animTo;
   double _headingFrom = 0;
@@ -165,7 +166,10 @@ class _DriverNavigationScreenState
     // load-bearing rather than defensive.
     if (_mapReady && _followCamera && _smoothPos != null) {
       _mapController.moveAndRotate(
-          _smoothPos!, _zoomForSpeed(_speedKmh), -_smoothHeading);
+        _smoothPos!,
+        _zoomForSpeed(_speedKmh),
+        -_smoothHeading,
+      );
     }
     if (mounted) setState(() {});
   }
@@ -200,7 +204,8 @@ class _DriverNavigationScreenState
         if (mounted) {
           setState(() {
             _loading = false;
-            _fatal = 'Location permission denied — allow location for MineLink '
+            _fatal =
+                'Location permission denied — allow location for MineLink '
                 'in your device settings, then try again.';
           });
         }
@@ -268,8 +273,9 @@ class _DriverNavigationScreenState
     try {
       final companyId = resolvePortalCompanyId(ref);
       if (companyId != null) {
-        final snap =
-            await ref.read(logisticsSnapshotProvider(companyId).future);
+        final snap = await ref.read(
+          logisticsSnapshotProvider(companyId).future,
+        );
         for (final t in snap.trips) {
           if (t.id == widget.tripId) {
             _offloadLeg =
@@ -329,20 +335,22 @@ class _DriverNavigationScreenState
     final companyPin = dest.fallbackPoint;
 
     NavDestination withCompanyPin() => dest.copyWith(
-        found: true,
-        point: companyPin,
-        label: dest.fallbackLabel ?? dest.label,
-        source: 'company_location');
+      found: true,
+      point: companyPin,
+      label: dest.fallbackLabel ?? dest.label,
+      source: 'company_location',
+    );
 
     NavDestination withHit(PlaceHit hit) => dest.copyWith(
-        found: true,
-        point: hit.point,
-        source: 'geocoded',
-        // A broadened match answered a different question than the one asked;
-        // say which, rather than presenting it as the booked place.
-        label: hit.matchedQuery == null
-            ? hit.label
-            : '${hit.label} (nearest match for "$named")');
+      found: true,
+      point: hit.point,
+      source: 'geocoded',
+      // A broadened match answered a different question than the one asked;
+      // say which, rather than presenting it as the booked place.
+      label: hit.matchedQuery == null
+          ? hit.label
+          : '${hit.label} (nearest match for "$named")',
+    );
 
     if (!_offloadLeg && companyPin != null) {
       return withCompanyPin(); // the mine's own collection point
@@ -351,14 +359,18 @@ class _DriverNavigationScreenState
     final hit = named.isEmpty ? null : await _geocode(named);
     if (hit != null) {
       if (hit.matchedQuery != null) {
-        _log.w('destination "$named" resolved only via "${hit.matchedQuery}" '
-            '→ ${hit.label}');
+        _log.w(
+          'destination "$named" resolved only via "${hit.matchedQuery}" '
+          '→ ${hit.label}',
+        );
       }
       return withHit(hit);
     }
     if (companyPin != null) {
-      _log.w('no place matched "$named" — using the company primary location '
-          'for trip ${widget.tripId}');
+      _log.w(
+        'no place matched "$named" — using the company primary location '
+        'for trip ${widget.tripId}',
+      );
       return withCompanyPin();
     }
     return dest; // nothing resolvable; build() renders the no-destination state
@@ -455,9 +467,12 @@ class _DriverNavigationScreenState
     final est = _liveEstimates();
     if (est == null) return;
     _lastTelemetryAt = now;
-    ref.read(liveTrackingServiceProvider).publishNavState(
-          instruction:
-              _arrived ? 'Arrived at destination' : _currentInstructionText(),
+    ref
+        .read(liveTrackingServiceProvider)
+        .publishNavState(
+          instruction: _arrived
+              ? 'Arrived at destination'
+              : _currentInstructionText(),
           eta: MlTime.toServer(est.eta),
           timeLeftS: est.timeLeftS,
           distanceLeftM: est.distLeftM,
@@ -477,7 +492,9 @@ class _DriverNavigationScreenState
     if (newSession) _originalEta = est?.eta;
     _sentRouteOnce = true;
     _lastTelemetryAt = DateTime.now();
-    ref.read(liveTrackingServiceProvider).publishNavState(
+    ref
+        .read(liveTrackingServiceProvider)
+        .publishNavState(
           instruction: _currentInstructionText(),
           eta: est == null ? null : MlTime.toServer(est.eta),
           timeLeftS: est?.timeLeftS,
@@ -491,19 +508,22 @@ class _DriverNavigationScreenState
   double _zoomForSpeed(double kmh) => kmh >= 80
       ? 14
       : kmh >= 40
-          ? 15.5
-          : 17;
+      ? 15.5
+      : 17;
 
   /// Critical-hazard avoid points along the from→to corridor (phase-5 §1):
   /// queried at the leg's midpoint with a radius covering the whole span
   /// (+20 km margin). Best-effort — `avoidZonesNear` never throws, so a
   /// hazard-fetch failure can never block routing.
   Future<List<LatLng>> _avoidZones(LatLng from, LatLng to) {
-    final mid = LatLng((from.latitude + to.latitude) / 2,
-        (from.longitude + to.longitude) / 2);
+    final mid = LatLng(
+      (from.latitude + to.latitude) / 2,
+      (from.longitude + to.longitude) / 2,
+    );
     final spanM = const Distance().as(LengthUnit.Meter, from, to);
-    return ref.read(hazardServiceProvider).avoidZonesNear(mid,
-        radiusMeters: (spanM / 2).round() + 20000);
+    return ref
+        .read(hazardServiceProvider)
+        .avoidZonesNear(mid, radiusMeters: (spanM / 2).round() + 20000);
   }
 
   // ---- Hazard layer (phase-5 T7) ---------------------------------------------
@@ -517,7 +537,8 @@ class _DriverNavigationScreenState
     final movedM = _hazardsAround == null
         ? double.infinity
         : const Distance().as(LengthUnit.Meter, _hazardsAround!, pos);
-    final stale = _hazardsAt == null ||
+    final stale =
+        _hazardsAt == null ||
         DateTime.now().difference(_hazardsAt!) > _hazardRefreshEvery;
     if (!force && !stale && movedM < _hazardRefreshMoveM) return;
     _hazardsRefreshing = true;
@@ -526,10 +547,12 @@ class _DriverNavigationScreenState
           .read(hazardServiceProvider)
           .nearby(pos.latitude, pos.longitude, radiusMeters: _hazardRadiusM);
       if (!mounted) return;
-      setState(() => _hazards = [
-            for (final h in hazards)
-              if (h.isActive) h, // only non-expired hazards render/announce
-          ]);
+      setState(
+        () => _hazards = [
+          for (final h in hazards)
+            if (h.isActive) h, // only non-expired hazards render/announce
+        ],
+      );
     } catch (e) {
       _log.w('hazard refresh failed (markers keep last data): $e');
     } finally {
@@ -564,8 +587,9 @@ class _DriverNavigationScreenState
     }
     if (nearest != null) {
       _voice.announceHazard(
-          hazardId: nearest.id,
-          text: 'Caution: ${nearest.typeLabel.toLowerCase()} ahead');
+        hazardId: nearest.id,
+        text: 'Caution: ${nearest.typeLabel.toLowerCase()} ahead',
+      );
     }
   }
 
@@ -574,7 +598,8 @@ class _DriverNavigationScreenState
     final phi1 = a.latitudeInRad, phi2 = b.latitudeInRad;
     final dLon = b.longitudeInRad - a.longitudeInRad;
     final y = math.sin(dLon) * math.cos(phi2);
-    final x = math.cos(phi1) * math.sin(phi2) -
+    final x =
+        math.cos(phi1) * math.sin(phi2) -
         math.sin(phi1) * math.cos(phi2) * math.cos(dLon);
     return (math.atan2(y, x) * 180 / math.pi + 360) % 360;
   }
@@ -583,8 +608,8 @@ class _DriverNavigationScreenState
   MlTone _hazardTone(MineHazard h) => h.isCritical
       ? MlTone.error
       : h.severity == 'medium'
-          ? MlTone.warn
-          : MlTone.neutral;
+      ? MlTone.warn
+      : MlTone.neutral;
 
   /// "Report a hazard" action: bottom sheet → `HazardService.report` at the
   /// CURRENT position (plain lat/lng insert), then refresh the overlay.
@@ -592,8 +617,11 @@ class _DriverNavigationScreenState
     final messenger = ScaffoldMessenger.of(context);
     final pos = _pos;
     if (pos == null) {
-      messenger.showSnackBar(const SnackBar(
-          content: Text('Waiting for a GPS fix — try again in a moment.')));
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Waiting for a GPS fix — try again in a moment.'),
+        ),
+      );
       return;
     }
     final draft = await showHazardReportSheet(context);
@@ -603,15 +631,23 @@ class _DriverNavigationScreenState
       // it (migration 20260816220000). Resolved from THIS trip on the server
       // rather than guessed here, so it cannot name a mine this driver is not
       // going to.
-      final mineId =
-          await ref.read(hazardServiceProvider).mineForTrip(widget.tripId);
+      final mineId = await ref
+          .read(hazardServiceProvider)
+          .mineForTrip(widget.tripId);
       if (mineId == null) {
-        messenger.showSnackBar(const SnackBar(
-            content: Text('Could not tell which mine this trip is for, so '
-                'the hazard was not sent.')));
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Could not tell which mine this trip is for, so '
+              'the hazard was not sent.',
+            ),
+          ),
+        );
         return;
       }
-      await ref.read(hazardServiceProvider).report(
+      await ref
+          .read(hazardServiceProvider)
+          .report(
             type: draft.type,
             mineCompanyId: mineId,
             severity: draft.severity,
@@ -622,10 +658,14 @@ class _DriverNavigationScreenState
       ref.invalidateIfMounted(nearbyHazardsProvider);
       if (mounted) unawaited(_maybeRefreshHazards(pos, force: true));
       messenger.showSnackBar(
-          const SnackBar(content: Text('Hazard reported — thank you.')));
+        const SnackBar(content: Text('Hazard reported — thank you.')),
+      );
     } catch (e) {
       messenger.showSnackBar(
-          SnackBar(content: Text('Could not report the hazard. ${friendlyError(e)}')));
+        SnackBar(
+          content: Text('Could not report the hazard. ${friendlyError(e)}'),
+        ),
+      );
     }
   }
 
@@ -679,15 +719,17 @@ class _DriverNavigationScreenState
           .clamp(0.0, double.infinity)
           .toDouble();
       _voice.onProgress(
-          stepIndex: _stepIx,
-          metersToManeuver: mtm,
-          instruction: r.steps[_stepIx].instruction);
+        stepIndex: _stepIx,
+        metersToManeuver: mtm,
+        instruction: r.steps[_stepIx].instruction,
+      );
     }
 
     if (isOffRoute(proj.offRouteM)) {
       _offRouteSince ??= DateTime.now();
       final offFor = DateTime.now().difference(_offRouteSince!);
-      final cooledDown = _lastRerouteAt == null ||
+      final cooledDown =
+          _lastRerouteAt == null ||
           DateTime.now().difference(_lastRerouteAt!) >
               const Duration(seconds: 15);
       if (!_rerouting && offFor > const Duration(seconds: 5) && cooledDown) {
@@ -710,8 +752,11 @@ class _DriverNavigationScreenState
     _lastRerouteAt = DateTime.now();
     _voice.announceRerouting();
     final zones = await _avoidZones(from, to);
-    final route =
-        await RoutingService().fetchRoute(from, to, avoidLocations: zones);
+    final route = await RoutingService().fetchRoute(
+      from,
+      to,
+      avoidLocations: zones,
+    );
     if (!mounted) return;
     setState(() {
       _rerouting = false;
@@ -734,11 +779,13 @@ class _DriverNavigationScreenState
         : (d?.address ?? '');
     if (target.isEmpty) return;
     final uri = Uri.parse(
-        'https://www.google.com/maps/dir/?api=1&destination=${Uri.encodeComponent(target)}');
+      'https://www.google.com/maps/dir/?api=1&destination=${Uri.encodeComponent(target)}',
+    );
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
         mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open maps.')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Could not open maps.')));
     }
   }
 
@@ -750,11 +797,15 @@ class _DriverNavigationScreenState
           .read(lifecycleServiceProvider)
           .setTripStatus(widget.tripId, TripStatus.arrivedAtMine);
       messenger.showSnackBar(
-          const SnackBar(content: Text('Marked arrived at the mine.')));
+        const SnackBar(content: Text('Marked arrived at the mine.')),
+      );
       router.pop();
     } catch (e) {
       messenger.showSnackBar(
-          SnackBar(content: Text('Could not update the trip. ${friendlyError(e)}')));
+        SnackBar(
+          content: Text('Could not update the trip. ${friendlyError(e)}'),
+        ),
+      );
     }
   }
 
@@ -771,12 +822,13 @@ class _DriverNavigationScreenState
           : SecurityConfirmationType.arrival;
       final waypoints =
           ref.read(tripWaypointsProvider(widget.tripId)).valueOrNull ??
-              const <TripWaypoint>[];
+          const <TripWaypoint>[];
       final gate = waypoints
           .where((w) => w.locationType == WaypointType.mainGate)
           .firstOrNull;
-      final gateName =
-          (gate?.name ?? '').trim().isNotEmpty ? gate!.name : 'Main Gate';
+      final gateName = (gate?.name ?? '').trim().isNotEmpty
+          ? gate!.name
+          : 'Main Gate';
       if (!mounted) return;
       await SecurityConfirmationDialog.show(
         context: context,
@@ -795,6 +847,54 @@ class _DriverNavigationScreenState
 
   String _fmtDistance(double m) =>
       m < 1000 ? '${m.round()} m' : '${(m / 1000).toStringAsFixed(1)} km';
+
+  /// Puts the camera back on the truck and resumes following.
+  ///
+  /// Both halves matter and the old FAB only did the second reliably: without
+  /// `_followCamera = true` the next GPS fix would not move the camera, so the
+  /// map jumped to the truck once and then went stale again — which reads as
+  /// the button not having worked.
+  void _recenterOnMe() {
+    final p = _smoothPos ?? _pos;
+    if (p == null) return;
+    setState(() => _followCamera = true);
+    if (!_mapReady) return;
+    _mapController.moveAndRotate(p, _zoomForSpeed(_speedKmh), -_smoothHeading);
+  }
+
+  /// Frames the whole journey — Google Maps' "route overview".
+  ///
+  /// Turns following OFF, because a camera that snaps back to the truck on the
+  /// next fix would undo this within a second and look like a glitch. The
+  /// my-location button then reads "not following", which is the truth and is
+  /// how the driver gets back.
+  void _overview() {
+    if (!_mapReady) return;
+    final pts = <LatLng>[
+      if (_route != null && _route!.points.length >= 2) ..._route!.points,
+      if (_pos != null) _pos!,
+      if (_destination?.point != null) _destination!.point!,
+    ];
+    if (pts.isEmpty) return;
+    setState(() => _followCamera = false);
+    _mapController.rotate(0);
+    _mapController.fitCamera(
+      safeCoordinatesFit(
+        pts,
+        // Room for the instruction banner above and the HUD below, so the
+        // route is not framed underneath either of them.
+        padding: const EdgeInsets.fromLTRB(40, 150, 40, 190),
+      ),
+    );
+  }
+
+  /// Press and hold the map to drop a pin (jean, 2026-08-22).
+  ///
+  /// `onLongPress` was null on every map in this product, so holding a finger
+  /// on one did nothing at all.
+  void _droppedPin(LatLng point) {
+    showMlDroppedPin(context, point: point, from: _smoothPos ?? _pos);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -826,10 +926,10 @@ class _DriverNavigationScreenState
         message: _destinationError != null
             ? 'Could not resolve the destination: $_destinationError'
             : hasAddress
-                ? 'The location "${_destination!.address}" could not be placed '
-                    'on the map. You can still open it in an external maps app.'
-                : 'Ask the ${_offloadLeg ? 'buyer' : 'mine'} to set their '
-                    'collection point under Locations on their company profile.',
+            ? 'The location "${_destination!.address}" could not be placed '
+                  'on the map. You can still open it in an external maps app.'
+            : 'Ask the ${_offloadLeg ? 'buyer' : 'mine'} to set their '
+                  'collection point under Locations on their company profile.',
         extra: hasAddress
             ? MlButton.outline(
                 label: 'Open in external maps',
@@ -841,87 +941,101 @@ class _DriverNavigationScreenState
     }
 
     return Scaffold(
-      body: Stack(children: [
-        _map(destPoint),
-        // Top instruction banner (+ waypoint progress when the trip has a
-        // mine-nav sequence — absent/empty renders nothing, phase-5 T5).
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-            child: Column(children: [
-              _banner(destPoint),
-              _destinationBar(),
-              _waypointBar(),
-            ]),
-          ),
-        ),
-        // Re-center FAB.
-        if (!_followCamera)
-          Positioned(
-            right: 14,
-            bottom: 130,
-            child: FloatingActionButton.small(
-              heroTag: 'nav-recenter',
-              onPressed: () {
-                setState(() => _followCamera = true);
-                final p = _pos;
-                if (p != null) {
-                  _mapController.moveAndRotate(
-                      p, _zoomForSpeed(_speedKmh), -_heading);
-                }
-              },
-              child: const Icon(Icons.my_location_rounded),
+      body: Stack(
+        children: [
+          _map(destPoint),
+          // Top instruction banner (+ waypoint progress when the trip has a
+          // mine-nav sequence — absent/empty renders nothing, phase-5 T5).
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: Column(
+                children: [
+                  _banner(destPoint),
+                  _destinationBar(),
+                  _waypointBar(),
+                ],
+              ),
             ),
           ),
-        // Arrival action.
-        if (_arrived)
+          // The map controls (jean, 2026-08-22).
+          //
+          // This was a `FloatingActionButton.small` that existed ONLY while
+          // `!_followCamera`, so the control a driver reaches for after swiping
+          // the map away was invisible until the moment he had already swiped —
+          // and there was nothing else: no zoom, no way back to north, no way to
+          // see the whole route. `MlMapControls` is always here, and its
+          // my-location button says which of the three states it is in rather
+          // than appearing and disappearing.
           Positioned(
-            left: 12,
-            right: 12,
-            bottom: 118,
-            child: MlCard(
-              padding: const EdgeInsets.all(14),
-              child: Row(children: [
-                const MlIconWell(
-                    icon: Icons.sports_score_rounded,
-                    tone: MlTone.done,
-                    size: 40,
-                    radius: 12),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text('You have arrived.',
-                      style: context.mlText.titleMedium.copyWith(
-                        color: semantic.textStrong,
-                        fontWeight: FontWeight.w800,
-                      )),
-                ),
-                _offloadLeg
-                    ? MlButton.go(
-                        label: 'Upload POD',
-                        icon: Icons.fact_check_outlined,
-                        compact: true,
-                        onPressed: () => context.pop(),
-                      )
-                    : MlButton.go(
-                        label: 'Arrived at mine',
-                        icon: Icons.where_to_vote_outlined,
-                        compact: true,
-                        onPressed: _markArrivedAtMine,
+            right: 2,
+            bottom: 128,
+            child: MlMapControls(
+              controller: _mapController,
+              hasFix: _pos != null,
+              following: _followCamera,
+              recenterTooltip: 'Follow my truck again',
+              onRecenter: _recenterOnMe,
+              onOverview: _overview,
+              overviewTooltip: 'See the whole route',
+            ),
+          ),
+          // Arrival action.
+          if (_arrived)
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 118,
+              child: MlCard(
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  children: [
+                    const MlIconWell(
+                      icon: Icons.sports_score_rounded,
+                      tone: MlTone.done,
+                      size: 40,
+                      radius: 12,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'You have arrived.',
+                        style: context.mlText.titleMedium.copyWith(
+                          color: semantic.textStrong,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-              ]),
+                    ),
+                    _offloadLeg
+                        ? MlButton.go(
+                            label: 'Upload POD',
+                            icon: Icons.fact_check_outlined,
+                            compact: true,
+                            onPressed: () => context.pop(),
+                          )
+                        : MlButton.go(
+                            label: 'Arrived at mine',
+                            icon: Icons.where_to_vote_outlined,
+                            compact: true,
+                            onPressed: _markArrivedAtMine,
+                          ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        // Bottom stats bar.
-        Positioned(left: 12, right: 12, bottom: 14, child: _bottomBar()),
-      ]),
+          // Bottom stats bar.
+          Positioned(left: 12, right: 12, bottom: 14, child: _bottomBar()),
+        ],
+      ),
     );
   }
 
-  Widget _messageScaffold(
-      {required IconData icon,
-      required String title,
-      required String message,
-      Widget? extra}) {
+  Widget _messageScaffold({
+    required IconData icon,
+    required String title,
+    required String message,
+    Widget? extra,
+  }) {
     return Scaffold(
       appBar: AppBar(title: const Text('Navigation')),
       body: SafeArea(
@@ -935,9 +1049,10 @@ class _DriverNavigationScreenState
               if (extra != null) ...[const SizedBox(height: 14), extra],
               const SizedBox(height: 10),
               MlButton.ghost(
-                  label: 'Close',
-                  icon: Icons.close_rounded,
-                  onPressed: () => context.pop()),
+                label: 'Close',
+                icon: Icons.close_rounded,
+                onPressed: () => context.pop(),
+              ),
             ],
           ),
         ),
@@ -969,10 +1084,7 @@ class _DriverNavigationScreenState
     if (r != null && r.points.length >= 2) {
       final cut = _routeSplitIx.clamp(0, r.points.length - 1);
       behind = r.points.sublist(0, cut + 1);
-      ahead = [
-        if (puckPos != null) puckPos,
-        ...r.points.sublist(cut + 1),
-      ];
+      ahead = [if (puckPos != null) puckPos, ...r.points.sublist(cut + 1)];
       if (ahead.length < 2) ahead = r.points;
     }
 
@@ -1009,7 +1121,10 @@ class _DriverNavigationScreenState
           final p = _smoothPos ?? _pos;
           if (p != null && _followCamera) {
             _mapController.moveAndRotate(
-                p, _zoomForSpeed(_speedKmh), -_smoothHeading);
+              p,
+              _zoomForSpeed(_speedKmh),
+              -_smoothHeading,
+            );
           }
         },
         onPositionChanged: (camera, hasGesture) {
@@ -1017,74 +1132,114 @@ class _DriverNavigationScreenState
             setState(() => _followCamera = false);
           }
         },
+        // Press and hold to ask where something is — see [_droppedPin].
+        onLongPress: (tapPosition, point) => _droppedPin(point),
       ),
       children: [
         mlOsmTiles(context),
         if (_route != null)
-          PolylineLayer(polylines: [
-            // Driven part, dimmed.
-            if (behind.length >= 2)
-              Polyline(
+          PolylineLayer(
+            polylines: [
+              // Driven part, dimmed.
+              if (behind.length >= 2)
+                Polyline(
                   points: behind,
                   strokeWidth: 7,
-                  color: _navy.withValues(alpha: 0.30)),
-            // Road ahead — full contrast casing + accent.
-            if (ahead.length >= 2) ...[
-              Polyline(points: ahead, strokeWidth: 11, color: _navy),
-              Polyline(
-                  points: ahead, strokeWidth: 7, color: MlTokens.accent),
+                  color: _navy.withValues(alpha: 0.30),
+                ),
+              // Road ahead — full contrast casing + accent.
+              if (ahead.length >= 2) ...[
+                Polyline(points: ahead, strokeWidth: 11, color: _navy),
+                Polyline(points: ahead, strokeWidth: 7, color: MlTokens.accent),
+              ],
             ],
-          ])
+          )
         else if (_pos != null)
           // Degraded mode: straight bearing line to the destination.
-          PolylineLayer(polylines: [
-            Polyline(
+          PolylineLayer(
+            polylines: [
+              Polyline(
                 points: [_pos!, destPoint],
                 strokeWidth: 4,
-                color: MlTokens.accent),
-          ]),
-        MarkerLayer(markers: [
-          // Phase-5 T7: active hazards near the driver, severity-toned
-          // (critical→error, medium→warn, low→neutral).
-          for (final h in _hazards)
-            if (h.isActive)
-              Marker(
-                point: LatLng(h.latitude, h.longitude),
-                width: 32,
-                height: 32,
-                child: _hazardMarker(h),
+                color: MlTokens.accent,
               ),
-          Marker(
-            point: destPoint,
-            width: 44,
-            height: 44,
-            alignment: Alignment.topCenter,
-            child: Icon(Icons.location_on_rounded,
-                size: 40,
-                color: MlTone.error.colors(Theme.of(context).brightness).fg),
+            ],
           ),
-          if (puckPos != null)
-            Marker(
-              point: puckPos,
-              width: 46,
-              height: 46,
-              child: Transform.rotate(
-                angle: arrowRad,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: _navy,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: MlTokens.inkOnFill, width: 2.5),
-                    boxShadow: const [
-                      BoxShadow(color: MlTokens.navyShadowStrong, blurRadius: 10),
-                    ],
-                  ),
-                  child: const Icon(Icons.navigation_rounded,
-                      size: 26, color: MlTokens.inkOnFill),
+        MarkerLayer(
+          markers: [
+            // Phase-5 T7: active hazards near the driver, severity-toned
+            // (critical→error, medium→warn, low→neutral).
+            for (final h in _hazards)
+              if (h.isActive)
+                Marker(
+                  point: LatLng(h.latitude, h.longitude),
+                  width: 32,
+                  height: 32,
+                  child: _hazardMarker(h),
                 ),
+            Marker(
+              point: destPoint,
+              width: 44,
+              height: 44,
+              alignment: Alignment.topCenter,
+              child: Icon(
+                Icons.location_on_rounded,
+                size: 40,
+                color: MlTone.error.colors(Theme.of(context).brightness).fg,
               ),
             ),
-        ]),
+            if (puckPos != null)
+              Marker(
+                point: puckPos,
+                width: 46,
+                height: 46,
+                child: Transform.rotate(
+                  angle: arrowRad,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: _navy,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: MlTokens.inkOnFill, width: 2.5),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: MlTokens.navyShadowStrong,
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.navigation_rounded,
+                      size: 26,
+                      color: MlTokens.inkOnFill,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        // SCALE. A map with no scale asks the driver to guess whether the gap
+        // to the next turn is 200 m or 2 km. Lifted clear of the HUD card,
+        // which is `Positioned(bottom: 14)` and about 100–160 tall.
+        Padding(
+          padding: const EdgeInsets.only(bottom: 170),
+          child: mlMapScaleBar(context),
+        ),
+        // ATTRIBUTION — this map had none.
+        //
+        // Four of the product's five maps call `mlMapAttribution()`; this one,
+        // the only fullscreen map and the one a driver stares at for an hour,
+        // did not. OpenStreetMap's licence requires the credit, and the helper
+        // exists precisely so the credit follows whichever host `MAP_TILE_URL`
+        // is pointed at.
+        //
+        // Bottom-LEFT, and padded up: in the default bottom-right corner the
+        // my-location disc paints over it (measured, x 350..352 of the credit's
+        // 334..352 — see `mlMapAttribution`), and in the corner proper it
+        // renders behind the HUD card.
+        Padding(
+          padding: const EdgeInsets.only(bottom: 118),
+          child: mlMapAttribution(alignment: AttributionAlignment.bottomLeft),
+        ),
       ],
     );
   }
@@ -1135,7 +1290,7 @@ class _DriverNavigationScreenState
     final headline = booked.isNotEmpty ? booked : d.label;
     final detail = fallback
         ? 'No map pin for "$booked" — heading to the registered address on '
-            'file, ${d.label}. Check with your controller before you offload.'
+              'file, ${d.label}. Check with your controller before you offload.'
         : switch (d.source) {
             'request' => 'Exact pin from the booking.',
             'company_location' => d.label,
@@ -1147,57 +1302,66 @@ class _DriverNavigationScreenState
       padding: const EdgeInsets.only(top: 8),
       child: MlCard(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(children: [
-          Icon(fallback ? Icons.warning_amber_rounded : Icons.place_outlined,
-              size: 20, color: colors.fg),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // The leg on its own line, as a label.
-                //
-                // It used to be a prefix — "Offloading at  {place}" on ONE
-                // line with an ellipsis — so thirteen characters of preamble
-                // ate the front of the only field on this screen that says
-                // where the truck is going. Photographed 2026-08-20 at 412px:
-                // "Offloading at  Iron Hills Mining — collection po…".
-                //
-                // As a label it costs no horizontal room at all, and the place
-                // gets the whole width and two lines.
-                Text(
-                  (_offloadLeg ? 'Offloading at' : 'Loading at').toUpperCase(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.mlText.overline.copyWith(
-                    color: semantic.textFaint,
+        child: Row(
+          children: [
+            Icon(
+              fallback ? Icons.warning_amber_rounded : Icons.place_outlined,
+              size: 20,
+              color: colors.fg,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // The leg on its own line, as a label.
+                  //
+                  // It used to be a prefix — "Offloading at  {place}" on ONE
+                  // line with an ellipsis — so thirteen characters of preamble
+                  // ate the front of the only field on this screen that says
+                  // where the truck is going. Photographed 2026-08-20 at 412px:
+                  // "Offloading at  Iron Hills Mining — collection po…".
+                  //
+                  // As a label it costs no horizontal room at all, and the place
+                  // gets the whole width and two lines.
+                  Text(
+                    (_offloadLeg ? 'Offloading at' : 'Loading at')
+                        .toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.mlText.overline.copyWith(
+                      color: semantic.textFaint,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  headline,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.mlText.titleSmall.copyWith(
-                    color: semantic.textStrong,
-                    fontWeight: FontWeight.w800,
+                  const SizedBox(height: 2),
+                  Text(
+                    headline,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.mlText.titleSmall.copyWith(
+                      color: semantic.textStrong,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                ),
-                // …and nothing underneath when the detail line would only
-                // repeat it. `detail` falls back to `d.label`, which for a
-                // booked pin IS the headline, so the bar printed the same
-                // place twice — the first copy truncated.
-                if (detail.trim().isNotEmpty && detail.trim() != headline.trim())
-                  Text(detail,
+                  // …and nothing underneath when the detail line would only
+                  // repeat it. `detail` falls back to `d.label`, which for a
+                  // booked pin IS the headline, so the bar printed the same
+                  // place twice — the first copy truncated.
+                  if (detail.trim().isNotEmpty &&
+                      detail.trim() != headline.trim())
+                    Text(
+                      detail,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: context.mlText.bodySmall.copyWith(
                         color: fallback ? colors.fg : semantic.textMuted,
-                      )),
-              ],
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }
@@ -1208,7 +1372,7 @@ class _DriverNavigationScreenState
   Widget _waypointBar() {
     final waypoints =
         ref.watch(tripWaypointsProvider(widget.tripId)).valueOrNull ??
-            const <TripWaypoint>[];
+        const <TripWaypoint>[];
     if (waypoints.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 8),
@@ -1247,15 +1411,14 @@ class _DriverNavigationScreenState
         primary = 'Waiting for GPS…';
       }
     } else {
-      final step =
-          _stepIx < r.steps.length ? r.steps[_stepIx] : r.steps.last;
+      final step = _stepIx < r.steps.length ? r.steps[_stepIx] : r.steps.last;
       icon = step.maneuver.icon;
       final mtm = _stepStartM.isEmpty
           ? 0.0
           : (_stepStartM[math.min(_stepIx, _stepStartM.length - 1)] -
-                  _traveledM)
-              .clamp(0.0, double.infinity)
-              .toDouble();
+                    _traveledM)
+                .clamp(0.0, double.infinity)
+                .toDouble();
       primary = '${_fmtMeters(mtm)} — ${step.instruction}';
       final nextIx = _stepIx + 1;
       if (nextIx < r.steps.length) {
@@ -1270,61 +1433,77 @@ class _DriverNavigationScreenState
         borderRadius: MlShape.radiusLarge,
         boxShadow: const [
           BoxShadow(
-              color: MlTokens.navyShadowSoft,
-              blurRadius: 18,
-              offset: Offset(0, 6)),
+            color: MlTokens.navyShadowSoft,
+            blurRadius: 18,
+            offset: Offset(0, 6),
+          ),
         ],
       ),
-      child: Row(children: [
-        Icon(icon, size: 34, color: MlTokens.inkOnFill),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(primary,
+      child: Row(
+        children: [
+          Icon(icon, size: 34, color: MlTokens.inkOnFill),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  primary,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      height: 1.15,
-                      color: MlTokens.inkOnFill)),
-              if (secondary != null) ...[
-                const SizedBox(height: 2),
-                // Two lines, like the primary above it.
-                //
-                // At one line the degraded banner read "Turn-by-turn is
-                // unavailable righ…" on a 412px phone — the sentence that
-                // explains why there is no route line, cut before it says
-                // anything. It shares the row with two icon buttons in that
-                // state, which is exactly when there is least width for it.
-                Text(secondary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    height: 1.15,
+                    color: MlTokens.inkOnFill,
+                  ),
+                ),
+                if (secondary != null) ...[
+                  const SizedBox(height: 2),
+                  // Two lines, like the primary above it.
+                  //
+                  // At one line the degraded banner read "Turn-by-turn is
+                  // unavailable righ…" on a 412px phone — the sentence that
+                  // explains why there is no route line, cut before it says
+                  // anything. It shares the row with two icon buttons in that
+                  // state, which is exactly when there is least width for it.
+                  Text(
+                    secondary,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style:
-                        const TextStyle(fontSize: 13, color: MlTokens.inkOnFill70)),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: MlTokens.inkOnFill70,
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-        if (_routeFailed && !_fetchingRoute) ...[
-          const SizedBox(width: 6),
-          IconButton(
-            tooltip: 'Retry route',
-            onPressed: () {
-              final p = _pos;
-              if (p != null) _fetchRoute(p, destPoint);
-            },
-            icon: const Icon(Icons.refresh_rounded, color: MlTokens.inkOnFill),
-          ),
-          IconButton(
-            tooltip: 'Open in external maps',
-            onPressed: _openExternalMaps,
-            icon: const Icon(Icons.open_in_new_rounded, color: MlTokens.inkOnFill),
-          ),
+          if (_routeFailed && !_fetchingRoute) ...[
+            const SizedBox(width: 6),
+            IconButton(
+              tooltip: 'Retry route',
+              onPressed: () {
+                final p = _pos;
+                if (p != null) _fetchRoute(p, destPoint);
+              },
+              icon: const Icon(
+                Icons.refresh_rounded,
+                color: MlTokens.inkOnFill,
+              ),
+            ),
+            IconButton(
+              tooltip: 'Open in external maps',
+              onPressed: _openExternalMaps,
+              icon: const Icon(
+                Icons.open_in_new_rounded,
+                color: MlTokens.inkOnFill,
+              ),
+            ),
+          ],
         ],
-      ]),
+      ),
     );
   }
 
@@ -1366,33 +1545,39 @@ class _DriverNavigationScreenState
     }
 
     Widget cell(String value, String label, {Color? color}) => Expanded(
-          child: Column(children: [
-            Text(value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: context.mlText.code(
-                  color: color ?? semantic.textStrong,
-                  size: 16,
-                  weight: FontWeight.w800,
-                )),
-            // The LABEL may take two lines, the value may not.
-            //
-            // "Time left" does not fit a 72px readout at text scale 1.3, and
-            // wrapping it at its space keeps both words. A VALUE has no space
-            // to wrap at — "6.1 km" broken across lines is unreadable at a
-            // glance — so that one stays on one line and ellipsises as a last
-            // resort.
-            Text(label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: context.mlText.labelSmall.copyWith(
-                  color: semantic.textMuted,
-                  fontWeight: FontWeight.w400,
-                )),
-          ]),
-        );
+      child: Column(
+        children: [
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: context.mlText.code(
+              color: color ?? semantic.textStrong,
+              size: 16,
+              weight: FontWeight.w800,
+            ),
+          ),
+          // The LABEL may take two lines, the value may not.
+          //
+          // "Time left" does not fit a 72px readout at text scale 1.3, and
+          // wrapping it at its space keeps both words. A VALUE has no space
+          // to wrap at — "6.1 km" broken across lines is unreadable at a
+          // glance — so that one stays on one line and ellipsises as a last
+          // resort.
+          Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: context.mlText.labelSmall.copyWith(
+              color: semantic.textMuted,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
 
     final readouts = <Widget>[
       cell(eta, 'ETA'),
@@ -1409,8 +1594,9 @@ class _DriverNavigationScreenState
         icon: const Icon(Icons.warning_amber_rounded),
       ),
       IconButton(
-        tooltip:
-            _offloadLeg ? 'Confirm at gate — exit' : 'Confirm at gate — arrival',
+        tooltip: _offloadLeg
+            ? 'Confirm at gate — exit'
+            : 'Confirm at gate — arrival',
         onPressed: _confirmAtGate,
         icon: const Icon(Icons.shield_outlined),
       ),
@@ -1420,11 +1606,13 @@ class _DriverNavigationScreenState
           _muted = !_muted;
           _voice.muted = _muted;
         }),
-        icon:
-            Icon(_muted ? Icons.volume_off_rounded : Icons.volume_up_rounded),
+        icon: Icon(_muted ? Icons.volume_off_rounded : Icons.volume_up_rounded),
       ),
       MlButton.danger(
-          label: 'End', compact: true, onPressed: () => context.pop()),
+        label: 'End',
+        compact: true,
+        onPressed: () => context.pop(),
+      ),
     ];
 
     // ── The readouts get their own row on a phone. ────────────────────────
@@ -1446,41 +1634,43 @@ class _DriverNavigationScreenState
     // worse.
     return MlCard(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: LayoutBuilder(builder: (context, c) {
-        final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+      child: LayoutBuilder(
+        builder: (context, c) {
+          final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
 
-        // How much room one readout gets if all five share the row. 66 is what
-        // the widest label — "Distance" — needs at scale 1; MEASURED, after a
-        // first attempt guessed a whole-bar threshold and still wrapped
-        // "Dista / nce" at 360px × 1.3, where five readouts get 62.4px each.
-        final perCell = (c.maxWidth - 24) / 5;
-        final readoutsFit = perCell >= 66 * scale;
+          // How much room one readout gets if all five share the row. 66 is what
+          // the widest label — "Distance" — needs at scale 1; MEASURED, after a
+          // first attempt guessed a whole-bar threshold and still wrapped
+          // "Dista / nce" at 360px × 1.3, where five readouts get 62.4px each.
+          final perCell = (c.maxWidth - 24) / 5;
+          final readoutsFit = perCell >= 66 * scale;
 
-        if (c.maxWidth >= 620 * scale && readoutsFit) {
-          return Row(children: [...readouts, ...actions]);
-        }
+          if (c.maxWidth >= 620 * scale && readoutsFit) {
+            return Row(children: [...readouts, ...actions]);
+          }
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (readoutsFit)
-              Row(children: readouts)
-            else ...[
-              // Three and two. Uneven, and right: the three a driver reads
-              // most while moving go on top, at 104px each, where every label
-              // fits whole at any scale this console offers.
-              Row(children: readouts.sublist(0, 3)),
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (readoutsFit)
+                Row(children: readouts)
+              else ...[
+                // Three and two. Uneven, and right: the three a driver reads
+                // most while moving go on top, at 104px each, where every label
+                // fits whole at any scale this console offers.
+                Row(children: readouts.sublist(0, 3)),
+                const SizedBox(height: 6),
+                Row(children: readouts.sublist(3)),
+              ],
               const SizedBox(height: 6),
-              Row(children: readouts.sublist(3)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: actions,
+              ),
             ],
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: actions,
-            ),
-          ],
-        );
-      }),
+          );
+        },
+      ),
     );
   }
 }
