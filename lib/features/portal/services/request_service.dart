@@ -390,15 +390,55 @@ class RequestService {
 
   // ---- Transporter side (§5) -----------------------------------------------
 
+  /// The columns of `transportation_requests` a TRANSPORTER may receive.
+  ///
+  /// Named one by one rather than `*`, because three of that table's columns
+  /// are the requester's and the platform admin's alone:
+  ///
+  /// * `rate` — the figure the BUYER (or mine) typed on the request. The admin
+  ///   sets the transporter's own price separately at linking, as
+  ///   `request_dispatches.transporter_price_per_ton`. Ship both to the same
+  ///   screen and the admin's margin is one subtraction: this route was
+  ///   dispatched at R820.00/ton against a request whose `rate` said 950, and
+  ///   the route sheet printed the two four rows apart. CLAUDE.md §4 — *"the
+  ///   transporter only ever sees their resulting price, never the admin's
+  ///   margin"* — and the admin's own due-diligence preview promises it in
+  ///   those words.
+  /// * `price_per_ton` — the product price on a Request Product. Same reason.
+  /// * `admin_notes` — what the platform admin wrote back to the REQUESTER
+  ///   when sending a request for revision. Addressed to them, not to a
+  ///   haulier who was not in that conversation.
+  ///
+  /// A column added to the table is therefore absent here until somebody
+  /// decides the transporter should have it. `dispatched_route_hides_requester_pricing_test.dart`
+  /// asserts that every field the transporter's own surfaces read still
+  /// arrives, so dropping one by accident fails rather than renders blank.
+  static const _transporterRequestColumns =
+      'id, requesting_company_id, buyer_company_id, supplier_company_id, '
+      'request_type, status, payment_terms, diesel, operating_hours_24h, '
+      'operating_start, operating_end, starting_date, ending_date, is_ongoing, '
+      'loading_point, offloading_point, commodity, distance, tons_available, '
+      'contract_duration, num_slots, route_notes, transaction_kind, '
+      'product_specifications, seal_required, created_at, updated_at';
+
   /// Routes dispatched to a transporter (open marketplace + accepted), newest
   /// first. RLS lets a transporter read its own dispatches and — via the
   /// additive policy — the embedded request detail.
+  ///
+  /// That policy is wider than this screen needs: measured against production
+  /// on 2026-08-22, a transporter's own JWT can select `rate` off the buyer's
+  /// request row. The embedded select below is narrowed so the app neither
+  /// fetches nor can draw it; tightening the policy itself belongs to the
+  /// shipping app, since `supabase/` is frozen in this fork.
   Future<List<DispatchedRoute>> listTransporterDispatches(
     String transporterCompanyId,
   ) async {
     final rows = await _client
         .from('request_dispatches')
-        .select('*, transportation_requests!inner(*), routes(route_number)')
+        .select(
+          '*, transportation_requests!inner($_transporterRequestColumns), '
+          'routes(route_number)',
+        )
         .eq('transporter_company_id', transporterCompanyId)
         .order('dispatched_at', ascending: false);
     return (rows as List)

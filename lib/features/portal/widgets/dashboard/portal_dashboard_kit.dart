@@ -24,6 +24,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
@@ -49,6 +50,21 @@ enum PortalPeriod {
   const PortalPeriod(this.label, this.days);
   final String label;
   final int days;
+
+  /// What a delta on this window is measured against, short enough to sit in
+  /// the corner of a stat tile: `1d`, `7d`, `30d`, `12m`.
+  ///
+  /// The badge used to say `24h` for all four, welded into the widget. Every
+  /// portal delta is computed against the previous window of the SELECTED
+  /// period (`priorFrom = from - period.days`), so on the live buyer dashboard
+  /// a seven-day movement was captioned `24h`, and on `12 months` a year would
+  /// have been.
+  String get deltaWindow => switch (this) {
+        PortalPeriod.day => '1d',
+        PortalPeriod.week => '7d',
+        PortalPeriod.month => '30d',
+        PortalPeriod.year => '12m',
+      };
 
   /// The start of this window, measured from midnight at the mine.
   ///
@@ -78,6 +94,7 @@ class PortalKpi {
     this.unit,
     this.delta,
     this.deltaGoodWhenUp = true,
+    this.deltaPrefix,
     this.emptyReason = 'no data yet',
   });
 
@@ -95,21 +112,48 @@ class PortalKpi {
   /// `null` draws no badge — an unknown delta is not a flat one.
   final double? delta;
   final bool deltaGoodWhenUp;
+
+  /// What [delta] is denominated in, written BEFORE the digits and after the
+  /// sign: `R` gives `−R6,351`.
+  ///
+  /// The money tiles had none, so the buyer's Payable card carried a bare
+  /// `−6351` beside a value of `R49,710`, and the transporter's Revenue card a
+  /// bare `−956566` beside `R156,567`. A five-figure number with no symbol,
+  /// on a card whose only other figure is Rand, reads as tons or as a
+  /// percentage. This file already carries a long note about `R` being a
+  /// prefix and not a unit, written when the same fault was found on the VALUE
+  /// — the delta was the half that got missed.
+  final String? deltaPrefix;
   final String emptyReason;
 }
 
 /// The KPI band — 4-up on desktop, 2-up on tablet, stacked on a phone.
 class PortalKpiRow extends StatelessWidget {
-  const PortalKpiRow({super.key, required this.kpis});
+  const PortalKpiRow({super.key, required this.kpis, required this.period});
 
   final List<PortalKpi> kpis;
 
-  static String formatDelta(double d) {
+  /// The window every delta in this row is measured against. Required, because
+  /// the badge used to assert a hardcoded `24h` whatever the reader had
+  /// selected, and a caption nobody has to supply is a caption nobody keeps
+  /// true.
+  final PortalPeriod period;
+
+  /// `+1,204` · `−R6,351` · `−35`.
+  ///
+  /// Thousands are grouped. `−956566` was a real badge on the transporter
+  /// dashboard, sitting beside a value of `R156,567` which the same screen
+  /// groups — so the two figures on one card were written in two different
+  /// notations, and the ungrouped one is the harder to read by far.
+  ///
+  /// The sign is U+2212 MINUS SIGN, matching the figure style elsewhere; the
+  /// arrow in `_Delta` keys off it.
+  static String formatDelta(double d, {String? prefix}) {
     final a = d.abs();
     final n = a >= 100
-        ? a.round().toString()
+        ? NumberFormat.decimalPattern('en_ZA').format(a.round())
         : a.toStringAsFixed(a >= 10 ? 0 : 1);
-    return '${d >= 0 ? '+' : '−'}$n';
+    return '${d >= 0 ? '+' : '−'}${prefix ?? ''}$n';
   }
 
   static const _gap = 14.0;
@@ -117,6 +161,7 @@ class PortalKpiRow extends StatelessWidget {
   Widget _tile(BuildContext context, PortalKpi k, Brightness brightness) {
     final tone = k.tone.colors(brightness);
     final d = k.delta;
+    final hasDelta = d != null && d != 0;
     return SaStatTile(
       value: k.value ?? '—',
       unit: k.value == null ? null : k.unit,
@@ -125,12 +170,16 @@ class PortalKpiRow extends StatelessWidget {
       icon: k.icon,
       tint: tone.fg,
       iconFg: tone.fg,
-      delta: d == null || d == 0 ? null : formatDelta(d),
-      deltaTone: d == null || d == 0
+      delta: hasDelta ? formatDelta(d, prefix: k.deltaPrefix) : null,
+      // Colour answers "is this movement welcome?"; the ARROW is derived from
+      // the sign inside `_Delta` and is no longer this decision's business.
+      // While it was, an unwelcome fall rendered `▲ −35`.
+      deltaTone: !hasDelta
           ? SaDeltaTone.flat
           : (d > 0) == k.deltaGoodWhenUp
               ? SaDeltaTone.good
               : SaDeltaTone.warn,
+      deltaPeriod: hasDelta ? period.deltaWindow : null,
       onTap: () => context.go(k.route),
     );
   }

@@ -61,11 +61,18 @@ class DispatchRouteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final r = route.request;
+    // The fourth chip used to be `r.rate` — the figure the BUYER typed on the
+    // request. On a card the transporter taps to accept, beside a sheet that
+    // states their own R 820.00, that is the admin's margin published to the
+    // party it is kept from (CLAUDE.md §4). It is the transporter's OWN price
+    // that belongs on a card they are deciding from, and it is the one number
+    // this card was missing.
     final chips = <String>[
       if (r.commodity != null) r.commodity!,
       if (r.numSlots != null) mlCountText(r.numSlots, 'truck'),
       if (r.distance != null) r.distance!,
-      if (r.rate != null) r.rate!,
+      if (route.transporterPricePerTon != null)
+        'R ${route.transporterPricePerTon!.toStringAsFixed(2)} / ton',
     ];
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -283,7 +290,14 @@ class _RouteDetailSheet extends ConsumerWidget {
                 'Your price / ton': route.transporterPricePerTon != null
                     ? 'R ${route.transporterPricePerTon!.toStringAsFixed(2)}'
                     : null,
-                'Rate': r.rate,
+                // `'Rate': r.rate` used to sit on this line, four rows below
+                // the price above it. `rate` is the REQUESTER's figure; the
+                // difference between the two is exactly the platform admin's
+                // margin, which this sheet exists to withhold — the admin's
+                // own preview dialog says so in those words before dispatch.
+                // Photographed on the live app, 2026-08-22: R 820.00 and 950
+                // on one card. The column no longer reaches the client at all
+                // (`RequestService._transporterRequestColumns`).
                 'Payment terms': r.paymentTerms,
                 'Diesel': r.diesel,
                 'Contract duration': r.contractDuration,

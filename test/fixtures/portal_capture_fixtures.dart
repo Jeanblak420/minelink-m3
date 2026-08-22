@@ -513,6 +513,29 @@ final List<ReconUploadPair> kReconUploadPairs = [
 // Requests and dispatches
 // ---------------------------------------------------------------------------
 
+/// A transportation request as the DATABASE actually returns one.
+///
+/// It used to set nine fields. A live row on production has twenty-odd, and
+/// the transporter's route card and route-detail sheet read most of the ones
+/// it was missing — `distance`, `tonsAvailable`, `numSlots`, `diesel`,
+/// `contractDuration`, `routeNotes`, the operating window, `sealRequired`,
+/// `endingDate`. Every one of them rendered as an absent row in
+/// `screen-transporter-routes-desktop-dark.png`, so 225 renders photographed a
+/// route sheet roughly half the size of the real one. A fixture that says less
+/// than the service it stands in for cannot photograph a fault in what it does
+/// not say — CLAUDE.md §10.5.
+///
+/// ⚠️ **`rate` is set on purpose, and is the one field that must NOT appear.**
+/// It is the figure the BUYER typed. The transporter's own price is
+/// `DispatchedRoute.transporterPricePerTon`, and the gap between the two is
+/// the platform admin's margin, which the transporter must never see
+/// (CLAUDE.md §4; the admin's due-diligence preview promises it in those
+/// words). Until 2026-08-22 the route sheet printed `Rate 950` four rows under
+/// `Your price / ton R 820.00` — found by signing in as a real transporter on
+/// the live app, and invisible here precisely because this fixture had no
+/// `rate` to leak. **Do not remove it to make a render tidy**: a fixture that
+/// omits the dangerous value can never prove the value is withheld.
+/// `dispatched_route_hides_requester_pricing_test.dart` reads it.
 TransportationRequest _request({
   required String id,
   required RequestStatus status,
@@ -529,6 +552,16 @@ TransportationRequest _request({
       offloadingPoint: 'Richards Bay',
       commodity: commodity,
       paymentTerms: '30 days',
+      diesel: 'On transporter',
+      distance: '620 km',
+      rate: '950',
+      tonsAvailable: '120',
+      numSlots: '1',
+      contractDuration: '30 days',
+      operatingHours24h: true,
+      sealRequired: true,
+      routeNotes: 'Weighbridge closes 18:00 on Saturdays. '
+          'Gate crew needs the load number before the truck rolls.',
       isOngoing: true,
       startingDate: _ago(const Duration(days: 4)),
       createdAt: _ago(const Duration(days: 5)),

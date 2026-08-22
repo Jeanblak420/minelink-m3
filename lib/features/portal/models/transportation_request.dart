@@ -386,8 +386,24 @@ class DispatchedRoute {
   bool get isOpen => status == DispatchStatus.dispatched;
   bool get isAccepted => status == DispatchStatus.accepted;
 
+  /// Columns of the embedded request that belong to the requester and the
+  /// platform admin, and are dropped here before anything can render them.
+  ///
+  /// `listTransporterDispatches` already declines to fetch them, so on the
+  /// live path this removes nothing. It is here because the leak it closes was
+  /// invisible: the route sheet printed `Rate 950` four rows under `Your price
+  /// / ton R 820.00`, which is the admin's margin stated twice over, on the
+  /// one screen whose contract — this class's own doc, and the admin's
+  /// due-diligence preview — is that the transporter never sees it. A `*`
+  /// re-introduced upstream by somebody who does not know that would put it
+  /// straight back. Here it cannot.
+  static const _requesterOnlyColumns = ['rate', 'price_per_ton', 'admin_notes'];
+
   factory DispatchedRoute.fromJson(Map<String, dynamic> j) {
     final reqJson = Map<String, dynamic>.from(j['transportation_requests'] as Map);
+    for (final column in _requesterOnlyColumns) {
+      reqJson.remove(column);
+    }
     final routeJson = j['routes'] is Map
         ? Map<String, dynamic>.from(j['routes'] as Map)
         : null;

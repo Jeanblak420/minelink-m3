@@ -382,8 +382,26 @@ class SaOrgTypeCard extends StatelessWidget {
   }
 }
 
-/// Delta-badge tone (design `Delta` component): up/warn add a ▲ and a "· 24h"
-/// suffix; good is a plain green phrase; live prepends a dot; flat is muted.
+/// Delta-badge tone (design `Delta` component) — **colour and emphasis only**.
+///
+/// It used to decide the ARROW too: `up` and `warn` drew a hardcoded `▲`, and
+/// `good` and `live` drew none. That was safe while the only deltas on this
+/// tile were the console's own 24-hour counts of NEW things, which cannot be
+/// negative. `PortalKpiRow` then reused the tile for a signed
+/// period-over-period figure and mapped the SIGN onto the TONE — welcome
+/// movement `good`, unwelcome movement `warn` — and the two meanings collided
+/// twice over on the live buyer dashboard, 2026-08-22:
+///
+///     ▲ −35 · 24h        Tons delivered 68.7 t     (amber)
+///       −6351            Payable R49,710           (green, no arrow)
+///
+/// An up arrow on a fall, and beside it the same kind of measurement wearing a
+/// different shape because a fall happened to be welcome there.
+///
+/// The direction is now derived from the sign of the delta string itself, in
+/// `_Delta`, so it cannot disagree with the number it sits next to. The tone
+/// answers the separate question — *is this movement welcome?* — which is why
+/// a falling `Payable` is correctly a green `▼`.
 enum SaDeltaTone { up, warn, good, live, flat }
 
 /// Platform-registry stat tile — matches the design exactly: subtle
@@ -403,6 +421,17 @@ class SaStatTile extends StatelessWidget {
   final Color iconFg;
   final String? delta;
   final SaDeltaTone deltaTone;
+
+  /// The window [delta] is measured over — `7d`, `30d`, `12m`. Rendered after
+  /// the figure as `· 7d`.
+  ///
+  /// It used to be the literal `24h`, welded into the badge. The portal's
+  /// deltas are computed against the previous window of the SELECTED period —
+  /// Today / 7 days / 30 days / 12 months — so on the live buyer dashboard a
+  /// seven-day movement was captioned `24h`, and on the 12-month view a year
+  /// would have been. The caller states the window because the caller is the
+  /// only one that knows it.
+  final String? deltaPeriod;
   final VoidCallback? onTap;
   const SaStatTile({
     super.key,
@@ -415,6 +444,7 @@ class SaStatTile extends StatelessWidget {
     this.unit,
     this.delta,
     this.deltaTone = SaDeltaTone.flat,
+    this.deltaPeriod,
     this.onTap,
   });
 
@@ -472,8 +502,23 @@ class SaStatTile extends StatelessWidget {
                               child: Icon(icon, size: 18, color: iconFg),
                             ),
                             const Spacer(),
+                            // FLEXIBLE, not a bare child. A `Row` hands a
+                            // non-flex child unbounded width (CLAUDE.md
+                            // §10.4), so the badge could never ellipsise — it
+                            // simply pushed the row over. It survived only
+                            // because `▲ −35 · 24h` is short; the moment a
+                            // delta carries a currency prefix, thousands
+                            // separators and a real period (`▼ −R156,567 ·
+                            // 12m`) it is 17 characters, and at the console's
+                            // 2.0 text scale that is wider than the tile.
                             if (delta != null)
-                              _Delta(delta: delta!, tone: deltaTone),
+                              Flexible(
+                                child: _Delta(
+                                  delta: delta!,
+                                  tone: deltaTone,
+                                  period: deltaPeriod,
+                                ),
+                              ),
                           ],
                         ),
                         const SizedBox(height: 14),
@@ -550,7 +595,30 @@ class SaStatTile extends StatelessWidget {
 class _Delta extends StatelessWidget {
   final String delta;
   final SaDeltaTone tone;
-  const _Delta({required this.delta, required this.tone});
+
+  /// Window the figure is measured over — `7d`, `12m`. Null draws no suffix.
+  final String? period;
+  const _Delta({required this.delta, required this.tone, this.period});
+
+  /// ▲ for a rise, ▼ for a fall, nothing for a figure that states no
+  /// direction — **read off [delta] itself, never off [tone]**.
+  ///
+  /// This is the whole point of the 2026-08-22 change. The arrow used to ride
+  /// on the tone, and the tone answers a different question (*is this movement
+  /// welcome?*), so the buyer dashboard drew `▲ −35`: an up arrow on a fall,
+  /// because a fall in tons delivered is unwelcome and unwelcome meant `warn`
+  /// and `warn` meant ▲. Derived from the sign, the glyph cannot contradict
+  /// the number it is glued to, whatever a caller does with the colour.
+  ///
+  /// `PortalKpiRow.formatDelta` writes U+2212 MINUS SIGN, not a hyphen, so the
+  /// negative test is on that character. A `+` is a rise; anything else — a
+  /// bare count like the console's `3` — gets no arrow, which is what those
+  /// registry tiles have always wanted.
+  String? get _arrow {
+    if (delta.startsWith('−') || delta.startsWith('-')) return '▼';
+    if (delta.startsWith('+')) return '▲';
+    return null;
+  }
 
   // Brightness-aware, not two fixed light-mode hues.
   //
@@ -572,20 +640,14 @@ class _Delta extends StatelessWidget {
     final green = MlTone.done.colors(brightness).fg;
     final orange = MlTone.warn.colors(brightness).fg;
     late final Color c;
-    var tri = false, dot = false, suffix = false;
+    var dot = false;
     switch (tone) {
       case SaDeltaTone.up:
+      case SaDeltaTone.good:
         c = green;
-        tri = true;
-        suffix = true;
         break;
       case SaDeltaTone.warn:
         c = orange;
-        tri = true;
-        suffix = true;
-        break;
-      case SaDeltaTone.good:
-        c = green;
         break;
       case SaDeltaTone.live:
         c = green;
@@ -595,6 +657,7 @@ class _Delta extends StatelessWidget {
         c = s.textFaint;
         break;
     }
+    final arrow = _arrow;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -606,9 +669,9 @@ class _Delta extends StatelessWidget {
           ),
           const SizedBox(width: 4),
         ],
-        if (tri) ...[
+        if (arrow != null) ...[
           Text(
-            '▲',
+            arrow,
             style: TextStyle(
               fontFamily: MlTokens.fontMono,
               fontSize: 8,
@@ -618,12 +681,22 @@ class _Delta extends StatelessWidget {
           ),
           const SizedBox(width: 3),
         ],
-        Text(
-          suffix ? '$delta · 24h' : delta,
-          style: context.mlText.code(
-            color: c,
-            size: 11,
-            weight: FontWeight.w700,
+        // The FIGURE first and the window after it, so that when the badge is
+        // squeezed — a narrow tile, or an admin on the 2.0 text scale — it is
+        // the `· 7d` tail that goes and never the number. Ellipsis rather than
+        // overflow is only possible because `SaStatTile` puts this whole Row
+        // in a `Flexible`; see the note at that call site.
+        Flexible(
+          child: Text(
+            period == null ? delta : '$delta · $period',
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            style: context.mlText.code(
+              color: c,
+              size: 11,
+              weight: FontWeight.w700,
+            ),
           ),
         ),
       ],

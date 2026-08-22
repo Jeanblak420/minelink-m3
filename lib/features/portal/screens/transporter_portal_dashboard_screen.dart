@@ -167,6 +167,7 @@ class _TransporterPortalDashboardScreenState
           const SizedBox(height: 20),
 
           PortalKpiRow(
+            period: _period,
             kpis: [
               PortalKpi(
                 label: 'Tons moved',
@@ -196,6 +197,9 @@ class _TransporterPortalDashboardScreenState
                 tone: MlTone.done,
                 route: '/portal/transporter/earnings',
                 delta: revenue == null ? null : revenue - priorRevenue,
+                // Rand, like the value above it. Without this the badge read
+                // a bare `-956566` beside `R156,567`.
+                deltaPrefix: 'R',
                 emptyReason: 'earnings feed unavailable',
               ),
               PortalKpi(

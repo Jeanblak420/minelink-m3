@@ -183,6 +183,7 @@ class _MineSupplierPortalDashboardScreenState
 
           // ---- band 1: KPI row -------------------------------------------
           PortalKpiRow(
+            period: _period,
             kpis: [
               PortalKpi(
                 label: 'Tons out',

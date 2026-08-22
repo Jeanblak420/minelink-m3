@@ -145,7 +145,7 @@ Widget _page({required PortalPeriod period}) => Builder(
                 ],
               ),
               const SizedBox(height: 20),
-              PortalKpiRow(kpis: _kpis),
+              PortalKpiRow(kpis: _kpis, period: period),
               const SizedBox(height: 24),
               PortalActionQueue(items: _queue),
               const SizedBox(height: 24),

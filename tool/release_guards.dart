@@ -1293,6 +1293,52 @@ final guards = <Guard>[
     plantFile: 'portal_shell_layout.dart',
     plantLine: 'textScaler: TextScaler.linear(uiPrefs.textScale),',
   ),
+  Guard(
+    id: 'no-star-select-on-embedded-request',
+    why: 'a `transportation_requests(*)` embed hands the reader EVERY column '
+        'of the request, and three of them are not the reader\'s to have. '
+        '`rate` is the figure the BUYER typed; `price_per_ton` is the product '
+        "price on a Request Product; `admin_notes` is what the platform "
+        'admin wrote back to the REQUESTER when bouncing a request. The '
+        'transporter is given their own price separately, as '
+        '`request_dispatches.transporter_price_per_ton` — and the gap between '
+        "that and `rate` IS the admin's margin.\n"
+        '\n'
+        'It was live. Driven on production 2026-08-22 as a real transporter '
+        'admin, the route-detail sheet printed `Your price / ton R 820.00` '
+        'and, four rows below it, `Rate 950`. Subtract: R130, the exact '
+        'margin typed into the linking panel ten minutes earlier — on the one '
+        'screen whose contract, stated in `DispatchedRoute`\'s own doc and '
+        "promised to the admin's face by the due-diligence preview (*\"The "
+        'transporter never sees your margin — only this price"*), is that it '
+        'is withheld. CLAUDE.md §4 says it twice more.\n'
+        '\n'
+        'NO RENDER COULD SEE IT: the `_request` fixture set no `rate`, so the '
+        'surface had nothing to leak — a fixture that says less than the '
+        'service it stands in for (CLAUDE.md §10.5). It does now, on purpose.\n'
+        '\n'
+        'Name the columns instead. `RequestService._transporterRequestColumns` '
+        'is the list, and `dispatched_route_hides_requester_pricing_test.dart` '
+        'checks that every field the transporter surfaces read still arrives, '
+        'so narrowing it cannot silently blank a row.\n'
+        '\n'
+        'NOTE: RLS still lets a transporter select `rate` off the request row '
+        'directly — measured, not assumed. This guard closes the app\'s half; '
+        'the policy is the shipping app\'s to tighten, `supabase/` being '
+        'frozen in this fork.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // `transportation_requests(*` or `transportation_requests!inner(*` — the
+    // PostgREST embed shapes. A same-table `from('transportation_requests')`
+    // with `.select()` is the requester's or the admin's own query and is not
+    // matched.
+    pattern: RegExp(r'transportation_requests(?:!inner)?\(\*'),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'request_service.dart',
+    plantLine:
+        "        .select('*, transportation_requests!inner(*), routes(route_number)')",
+  ),
 ];
 
 class Hit {

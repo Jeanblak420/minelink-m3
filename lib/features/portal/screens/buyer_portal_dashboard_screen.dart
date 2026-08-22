@@ -156,6 +156,7 @@ class _BuyerPortalDashboardScreenState
           const SizedBox(height: 20),
 
           PortalKpiRow(
+            period: _period,
             kpis: [
               PortalKpi(
                 label: 'Tons delivered',
@@ -185,6 +186,9 @@ class _BuyerPortalDashboardScreenState
                 tone: MlTone.done,
                 route: '/portal/buyer/loads-value',
                 delta: payable == null ? null : payable - priorPayable,
+                // Rand, like the value above it. Without this the badge read
+                // a bare `-6351` beside `R49,710`.
+                deltaPrefix: 'R',
                 deltaGoodWhenUp: false,
                 emptyReason: 'load values unavailable',
               ),
