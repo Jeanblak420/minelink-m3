@@ -1,4 +1,4 @@
-// Nothing in a sidebar sits at the top level on its own.
+// Nothing in a sidebar sits at the top level on its own, except the Dashboard.
 //
 // Ruled by jean, 2026-08-22:
 //
@@ -40,20 +40,36 @@ void main() {
     for (final (org, role) in _everySession()) {
       final who = '${org.name} / ${role?.name ?? 'company account'}';
 
-      test('$who has no top-level destination', () {
+      test('$who has no top-level destination but the Dashboard', () {
         final tree = portalNavTree(orgType: org, role: role);
 
         expect(tree, isNotEmpty,
             reason: 'an empty rail reads as a broken app rather than a '
                 'restricted one');
 
-        final loose = tree.where((n) => !n.isGroup).map((n) => n.label).toList();
+        final loose = tree.where((n) => !n.isGroup).toList();
         expect(
-          loose,
+          loose.map((n) => n.label).where((l) => l != 'Dashboard'),
           isEmpty,
-          reason: '$who still has ${loose.length} destination(s) with no '
-              'parent: ${loose.join(', ')}',
+          reason: '$who has a destination with no parent that is not the '
+              'Dashboard: ${loose.map((n) => n.label).join(', ')}',
         );
+        expect(
+          loose.length,
+          lessThanOrEqualTo(1),
+          reason: 'only ONE top-level destination is allowed, and it is the '
+              'Dashboard',
+        );
+        // And when it is there it is FIRST, above the groups -- which is what
+        // the original app's sidebar does and what jean asked for on
+        // 2026-08-22. A Dashboard in the middle of the groups is not the
+        // exception; it is a different bug.
+        if (loose.isNotEmpty) {
+          expect(tree.first.isGroup, isFalse,
+              reason: 'the Dashboard must be the FIRST entry, not buried '
+                  'between groups');
+          expect(tree.first.label, 'Dashboard');
+        }
       });
 
       test('$who has no group that leads nowhere', () {
@@ -81,14 +97,49 @@ void main() {
   });
 
   group('the console tree', () {
-    test('has no top-level destination', () {
-      final loose =
-          consoleNavTree().where((n) => !n.isGroup).map((n) => n.label).toList();
+    test('has no top-level destination but the Dashboard, and it is first', () {
+      final loose = consoleNavTree().where((n) => !n.isGroup).toList();
       expect(
-        loose,
+        loose.map((n) => n.label).where((l) => l != 'Dashboard'),
         isEmpty,
-        reason: 'the console still has ${loose.length} destination(s) with no '
-            'parent: ${loose.join(', ')}',
+        reason: 'the console has a destination with no parent that is not the '
+            'Dashboard: ${loose.map((n) => n.label).join(', ')}',
+      );
+      expect(loose.length, 1);
+      expect(consoleNavTree().first.label, 'Dashboard');
+    });
+
+    test('is in the ORIGINAL sidebar order', () {
+      // Read out of the untouchable worktree on 2026-08-22, from
+      // lib/features/super_admin/widgets/sidebar/minelink_sidebar_core.dart:
+      // its "dashboard" section alone, then "main" = Insights, Tokens &
+      // Seats, Requests,
+      // then the flat block Margin ledger History / Recon tables / Disputes /
+      // Available routes / Route marketplace / Chat links / Live map, then the
+      // footer's Notifications and Settings.
+      //
+      // jean asked for that order back across the whole app while keeping the
+      // M3 look and the new groups. This is the half a picture cannot check.
+      expect(
+        consoleNavTree().map((n) => n.label).toList(),
+        const [
+          'Dashboard',
+          'Insights',
+          'Tokens & Seats',
+          'Requests',
+          'Reconciliation',
+          'Routes',
+          'Communications',
+          'Tracking',
+          'Settings',
+        ],
+      );
+      // The flat block's own sequence survives inside its group.
+      final recon =
+          consoleNavTree().firstWhere((n) => n.label == 'Reconciliation');
+      expect(
+        recon.leaves.map((l) => l.label).toList(),
+        const ['Margin ledger History', 'Recon tables', 'Disputes'],
       );
     });
 
@@ -126,7 +177,10 @@ void main() {
     final tree =
         portalNavTree(orgType: OrgType.mineSupplier, role: UserRole.driver);
     expect(tree, isNotEmpty);
-    expect(tree.every((n) => n.isGroup), isTrue);
+    // Dashboard first, then groups — the shape the whole product uses.
+    expect(tree.first.label, 'Dashboard');
+    expect(tree.first.isGroup, isFalse);
+    expect(tree.skip(1).every((n) => n.isGroup), isTrue);
     expect(
       tree.expand((n) => n.leaves).map((l) => l.route),
       contains('/portal/mine/profile'),

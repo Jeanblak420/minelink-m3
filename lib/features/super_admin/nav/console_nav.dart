@@ -31,30 +31,20 @@ import 'package:flutter_application_1/core/routing/notifications_inbox_route.dar
 /// that rule is what keeps dead entries out of navigation by construction. It
 /// now lives in the top bar's overflow menu, where the app's other actions are.
 List<MlNavNode> consoleNavTree() => <MlNavNode>[
-  // Overview — the front page and the platform-wide live map.
+  // ON ITS OWN, above the groups.
   //
-  // A group rather than two loose leaves: ruled by jean on 2026-08-22,
-  // "none of them shouldn't have a parent, all should have a parent". Both
-  // of these answer the same question — what is happening on the platform
-  // right now — which is why they are the two that belong together.
-  const MlNavNode.group(
-    label: 'Overview',
+  // Ruled by jean on 2026-08-22, and it is what the ORIGINAL app's
+  // super-admin sidebar does: `minelink_sidebar_core.dart` declares
+  // `dashboard` as its own section ABOVE `main`, so the front page is one
+  // tap rather than a group to open first. Everything else on this rail
+  // has a parent; this is the single, deliberate exception, and
+  // `every_destination_has_a_parent_test.dart` names it as such rather
+  // than leaving a hole in the rule.
+  const MlNavNode.leaf(
+    label: 'Dashboard',
     icon: Icons.dashboard_outlined,
     selectedIcon: Icons.dashboard_rounded,
-    children: [
-      MlNavNode.leaf(
-        label: 'Dashboard',
-        icon: Icons.dashboard_outlined,
-        selectedIcon: Icons.dashboard_rounded,
-        route: '/super-admin',
-      ),
-      MlNavNode.leaf(
-        label: 'Live map',
-        icon: Icons.gps_fixed_outlined,
-        selectedIcon: Icons.gps_fixed_rounded,
-        route: '/super-admin/live-map',
-      ),
-    ],
+    route: '/super-admin',
   ),
 
   // ---- Insights ----
@@ -100,6 +90,52 @@ List<MlNavNode> consoleNavTree() => <MlNavNode>[
         icon: Icons.track_changes_outlined,
         selectedIcon: Icons.track_changes_rounded,
         route: '/super-admin/targets',
+      ),
+    ],
+  ),
+
+  // ---- Organisations, access and the audit trail ----
+  const MlNavNode.group(
+    label: 'Tokens & Seats',
+    shortLabel: 'Access',
+    icon: Icons.vpn_key_outlined,
+    selectedIcon: Icons.vpn_key_rounded,
+    children: [
+      MlNavNode.leaf(
+        label: 'Organizations',
+        icon: Icons.business_outlined,
+        selectedIcon: Icons.business_rounded,
+        route: '/super-admin/organizations',
+      ),
+      MlNavNode.leaf(
+        label: 'Token requests',
+        icon: Icons.key_outlined,
+        selectedIcon: Icons.key_rounded,
+        route: '/super-admin/token-requests',
+      ),
+      MlNavNode.leaf(
+        label: 'Token history',
+        icon: Icons.timeline_outlined,
+        selectedIcon: Icons.timeline_rounded,
+        route: '/super-admin/token-history',
+      ),
+      MlNavNode.leaf(
+        label: 'Audit logs',
+        icon: Icons.history_outlined,
+        selectedIcon: Icons.history_rounded,
+        route: '/super-admin/audit-logs',
+      ),
+      MlNavNode.leaf(
+        label: 'Crash reports',
+        icon: Icons.bug_report_outlined,
+        selectedIcon: Icons.bug_report_rounded,
+        route: '/super-admin/crash-reports',
+      ),
+      MlNavNode.leaf(
+        label: 'Account deactivations',
+        icon: Icons.person_off_outlined,
+        selectedIcon: Icons.person_off_rounded,
+        route: '/super-admin/account-deactivations',
       ),
     ],
   ),
@@ -153,52 +189,6 @@ List<MlNavNode> consoleNavTree() => <MlNavNode>[
     ],
   ),
 
-  // ---- Organisations, access and the audit trail ----
-  const MlNavNode.group(
-    label: 'Tokens & Seats',
-    shortLabel: 'Access',
-    icon: Icons.vpn_key_outlined,
-    selectedIcon: Icons.vpn_key_rounded,
-    children: [
-      MlNavNode.leaf(
-        label: 'Organizations',
-        icon: Icons.business_outlined,
-        selectedIcon: Icons.business_rounded,
-        route: '/super-admin/organizations',
-      ),
-      MlNavNode.leaf(
-        label: 'Token requests',
-        icon: Icons.key_outlined,
-        selectedIcon: Icons.key_rounded,
-        route: '/super-admin/token-requests',
-      ),
-      MlNavNode.leaf(
-        label: 'Token history',
-        icon: Icons.timeline_outlined,
-        selectedIcon: Icons.timeline_rounded,
-        route: '/super-admin/token-history',
-      ),
-      MlNavNode.leaf(
-        label: 'Audit logs',
-        icon: Icons.history_outlined,
-        selectedIcon: Icons.history_rounded,
-        route: '/super-admin/audit-logs',
-      ),
-      MlNavNode.leaf(
-        label: 'Crash reports',
-        icon: Icons.bug_report_outlined,
-        selectedIcon: Icons.bug_report_rounded,
-        route: '/super-admin/crash-reports',
-      ),
-      MlNavNode.leaf(
-        label: 'Account deactivations',
-        icon: Icons.person_off_outlined,
-        selectedIcon: Icons.person_off_rounded,
-        route: '/super-admin/account-deactivations',
-      ),
-    ],
-  ),
-
   // WAS "the flat, high-traffic destinations" — eight leaves at the
   // same level as the groups around them, which is the shape jean ruled
   // out on 2026-08-22: everything in the sidebar gets a parent.
@@ -211,17 +201,17 @@ List<MlNavNode> consoleNavTree() => <MlNavNode>[
     selectedIcon: Icons.balance_rounded,
     children: [
       MlNavNode.leaf(
-        label: 'Recon tables',
-        icon: Icons.table_rows_outlined,
-        selectedIcon: Icons.table_rows_rounded,
-        route: '/super-admin/recon-tables',
-      ),
-      MlNavNode.leaf(
         label: 'Margin ledger History',
         shortLabel: 'Margins',
         icon: Icons.receipt_long_outlined,
         selectedIcon: Icons.receipt_long_rounded,
         route: '/super-admin/margin-ledger',
+      ),
+      MlNavNode.leaf(
+        label: 'Recon tables',
+        icon: Icons.table_rows_outlined,
+        selectedIcon: Icons.table_rows_rounded,
+        route: '/super-admin/recon-tables',
       ),
       MlNavNode.leaf(
         label: 'Disputes',
@@ -268,6 +258,19 @@ List<MlNavNode> consoleNavTree() => <MlNavNode>[
         selectedIcon: Icons.notifications_rounded,
         route: NotificationsInboxRoute.superAdminPath,
         badge: MlNavBadge.unreadNotifications,
+      ),
+    ],
+  ),
+  const MlNavNode.group(
+    label: 'Tracking',
+    icon: Icons.gps_fixed_outlined,
+    selectedIcon: Icons.gps_fixed_rounded,
+    children: [
+      MlNavNode.leaf(
+        label: 'Live map',
+        icon: Icons.gps_fixed_outlined,
+        selectedIcon: Icons.gps_fixed_rounded,
+        route: '/super-admin/live-map',
       ),
     ],
   ),

@@ -207,38 +207,33 @@ PortalNavNode _settings(String org) => PortalNavNode.group(
   ],
 );
 
-/// Overview ▾ — the workspace's own front page.
+/// Dashboard — **the one destination in this product with no parent.**
 ///
-/// ## Why a group holds one destination
+/// ## Why it is the exception
 ///
-/// Ruled by jean, 2026-08-22: *"find a proper parent for everything inside of
-/// the sidebar nav menu that doesn't have a parent … none of them shouldn't
-/// have a parent, all should have a parent"*. Dashboard was the last loose
-/// leaf in every tree, and a rail where one entry is a destination and the
-/// rest are groups is exactly the inconsistency that instruction is about.
+/// jean ruled on 2026-08-22 that everything in the sidebar should have a
+/// parent, and it does — except this. He ruled again the same day, having seen
+/// it: *"no the dashboard button should not be inside of an parent … leave
+/// everything that you've just placed inside parents except for the dashboard
+/// as is"*.
 ///
-/// **"Overview" rather than a group named "Dashboard"** because that is
-/// already what the top bar calls this route (`mlRouteTitle` answers
-/// "Overview" for `/portal/mine`, `/portal/buyer` and `/portal/transporter`).
-/// Those four dashboard roots are on the divergence allow-list in
-/// `every_portal_route_is_named_test.dart` precisely because the rail said
-/// "Dashboard" and the bar said "Overview"; the group closes half of that gap
-/// without renaming the destination a person taps.
+/// It is also what the ORIGINAL app does, which is the look this redesign is
+/// asked to keep. `minelink_sidebar_core.dart` in the shipping tree declares
+/// three sections — `dashboard`, `main`, `footer` — and the first holds one
+/// item, above everything else. The front page is one tap, not a group to
+/// open first.
 ///
-/// The cost, stated plainly: Dashboard is now one level deeper in the rail,
-/// because a rail group header TOGGLES rather than navigates. The landing
-/// route is unaffected — `portalLandingRoute` and the shell both read the
-/// first LEAF of the first node, which is still Dashboard.
-PortalNavNode _overview(String route) => PortalNavNode.group(
-  label: 'Overview',
+/// Briefly wrapped in an "Overview" group earlier that day. That cost a tap on
+/// the most-used destination in the app, and made the bottom bar's first tile
+/// read "Overview". Both are now back as they were.
+///
+/// `every_destination_has_a_parent_test.dart` names this exception rather than
+/// leaving a hole in the rule: exactly one top-level leaf is permitted per
+/// tree, it must be the dashboard, and it must come first.
+PortalNavNode _dashboard(String route) => PortalNavNode.leaf(
+  label: 'Dashboard',
   icon: Icons.dashboard_outlined,
-  children: [
-    PortalNavNode.leaf(
-      label: 'Dashboard',
-      icon: Icons.dashboard_outlined,
-      route: route,
-    ),
-  ],
+  route: route,
 );
 
 /// My account ▾ — the personal tail every restricted role gets: their own
@@ -351,7 +346,7 @@ List<PortalNavNode> _mineTree(UserRole? role) {
   // which trucks were inbound to collect the pile they were filling.
   if (role == UserRole.supervisorForeman) {
     return [
-      _overview('/portal/mine'),
+      _dashboard('/portal/mine'),
       // The same group names the mine's FULL tree uses, so a supervisor
       // promoted to admin finds the destinations they already know in the
       // places they already know them.
@@ -409,7 +404,7 @@ List<PortalNavNode> _mineTree(UserRole? role) {
   }
 
   return [
-    _overview('/portal/mine'),
+    _dashboard('/portal/mine'),
     const PortalNavNode.group(
       label: 'Operations',
       icon: Icons.precision_manufacturing_outlined,
@@ -546,7 +541,7 @@ List<PortalNavNode> _buyerTree(UserRole? role) {
   if (!_isFullAccess(role)) return _minimalTree('buyer');
 
   return [
-    _overview('/portal/buyer'),
+    _dashboard('/portal/buyer'),
     const PortalNavNode.group(
       label: 'Procurement',
       // Same fault as Reconciliation: one word, eleven letters, broken
@@ -660,7 +655,7 @@ List<PortalNavNode> _transporterTree(UserRole? role) {
   // could not know which trip it meant.
   if (role == UserRole.driver) {
     return [
-      _overview('/portal/driver/home'),
+      _dashboard('/portal/driver/home'),
       // The load in hand and the map that shows it, as one group, because
       // they are one job. The driver's BOTTOM NAV is untouched by this: it is
       // built explicitly in `portal_shell_layout.dart`, not read off this
@@ -692,7 +687,7 @@ List<PortalNavNode> _transporterTree(UserRole? role) {
   if (!_isFullAccess(role)) return _minimalTree('transporter');
 
   return [
-    _overview('/portal/transporter'),
+    _dashboard('/portal/transporter'),
     const PortalNavNode.group(
       label: 'Operations',
       icon: Icons.precision_manufacturing_outlined,
@@ -886,6 +881,6 @@ PortalNavNode _company(String org) => PortalNavNode.group(
 /// Never an empty list: an empty rail reads as a broken app rather than a
 /// restricted one, and leaves no way to reach sign-out.
 List<PortalNavNode> _minimalTree(String org) => [
-  _overview('/portal/$org'),
+  _dashboard('/portal/$org'),
   _myAccount(org),
 ];

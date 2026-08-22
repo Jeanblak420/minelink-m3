@@ -1,7 +1,7 @@
 # MineLink M3 — session handoff
 
-**Rewritten 2026-08-22, at the end of the session that finished the load on the
-road and then found five faults by driving the app instead of reading it.**
+**Rewritten 2026-08-22, at the end of the session that did four things Jean
+asked for during the run and fixed four faults found on the way to them.**
 Everything below is verified state, not intention. It replaces the previous
 handoff of the same name; the parts of that one still true have been folded in.
 
@@ -17,11 +17,10 @@ file governs the redesign work.**
 
 ## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The tree is **clean**, **133 commits**, nothing half-applied and nothing
+The tree is **clean**, **139 commits**, nothing half-applied and nothing
 uncommitted. **The tip is the commit that carries THIS FILE**, so the count
-above includes it. The last code commit under it is `eb84e45`, with two earlier
-drafts of this same file between them, and the whole gate in §2 was run green
-against the tree as it stands.
+above includes it. The last code commit under it is `736a8b8`, and the whole
+gate in §2 was run green against the tree as it stands.
 
 **The original worktree was re-checked against its §0 baseline at the start and
 at the end and is untouched** — HEAD `df451d0`, the same three pre-existing
@@ -30,18 +29,35 @@ nothing modified today.
 
 ### What changed about this project this session
 
-**The load that was on the road is CLOSED**, and driving the app around it
-found five real faults that no test and no render could have shown. Every one
-was fixed, tested with a check that was sabotaged until it bit, and — where it
-could be — re-verified on the running app.
+**Two of the previous handoff's open items are CLOSED**, both by doing them
+rather than by deciding they could not be done:
 
-    1. the phone's bottom bar read "Dashboar / d"
-    2. three routes announced themselves as "Workspace"
-    3. the driver's waybill deep-link drew the portal's chrome twice
-    4. every sign-in told the reader their feeds were broken
-    5. the /chat/:id URL opened the dashboard, and a failed send was silent
+- **A live chat between two real accounts is driven**, both directions, through
+  the app's own composer, with the second message arriving in the first
+  account's already-open thread over realtime and delivery ticks rendering.
+- **The phone was driven.** The current APK is installed on the SM-G780G and
+  four separate things were verified on that hardware.
 
-Plus the two decisions Jean settled (§3.1, §3.2).
+**Jean asked for four things during the session. All four are built, tested and
+verified on the phone:**
+
+    1. a re-centre / re-focus control on the driver's map, and more of what
+       Google Maps gives a phone
+    2. more mobile tap-and-hold controls and features
+    3. the sidebar collapsed by default, and every parent in it collapsed,
+       on every device and platform
+    4. a proper parent for everything in the sidebar — no loose entries
+
+**And four faults were found and fixed on the way there:**
+
+    1. the chat dock's launcher sat on top of the composer's SEND button,
+       covering 61% of it (measured)
+    2. a failed ATTACHMENT was silent — the same three-layer swallow fixed for
+       text messages on 2026-08-22 and left in place for files
+    3. the driver's navigation map was the only map of five with NO
+       OpenStreetMap attribution
+    4. the dashboard period pills had no `Material` under them, so they never
+       rippled — 132 assertions per test run, no failing test
 
 ---
 
@@ -50,7 +66,7 @@ Plus the two decisions Jean settled (§3.1, §3.2).
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **133 commits**, clean tree. |
+| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **139 commits**, clean tree. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
@@ -105,9 +121,11 @@ Later instructions, which still stand:
 - **Work long, don't stop to check in.** The HOW TO WORK paragraph in §8.
 - **The chat is the dock** (2026-08-22).
 - **Fix what you find, as you go, and prove the fix.** §8.
+- **The sidebar and its groups start collapsed, everywhere** (2026-08-22).
+- **Everything in the sidebar has a parent** (2026-08-22).
 
 **`supabase/` is frozen.** No migration is created, applied or pushed here.
-Three things now need one and are therefore REPORTED, not fixed — §6.
+Three things need one and are therefore REPORTED, not fixed — §6.
 
 ---
 
@@ -118,7 +136,7 @@ stands:
 
 ```
 flutter analyze                                 no issues
-flutter test                                    2229 passed, 1 skipped
+flutter test                                    2397 passed, 1 skipped
 dart tool/release_guards.dart                   40/40 PASS, 0 FAIL
 dart tool/release_guards.dart --selftest        all guards bite
 py -3 tool/_sabotage.py                         all sabotages caught
@@ -134,295 +152,266 @@ render harness — RENDER NOTE                    0  (and it FAILS the test)
 render harness — FAILURE STATE                  0
 render harness — LOW CONTRAST                   0  (app screens; see below)
 render harness — CUT OFF                        5 renders / 9 strings, deliberate
-A WHOLE LOAD, ON THE LIVE DATABASE              CLOSED — trip completed
+render harness — "No Material widget found"     0  (was 132 — §3.7)
+A LIVE CHAT BETWEEN TWO REAL ACCOUNTS           DRIVEN, both directions
+THE CURRENT BUILD ON JEAN'S SM-G780G            INSTALLED and verified
 ```
 
-Test count went **2160 → 2229**: sixty-nine new, across six new files.
-Guards stayed at **40** (one new one last session; none added this one).
+Test count went **2229 → 2397**: a hundred and sixty-eight new, across five new
+files. Guards stayed at **40**.
 
-⚠️ **`CUT OFF` counts RENDERS, not strings.** The harness prints one line per
-render and names the strings under it: 5 lines, 9 strings — the same nine the
-previous handoff recorded (three crash-report exception messages, three chat
-message previews, three conversation-row previews). Nothing regressed; the
-earlier "9" was counting strings and this counter counts lines.
+⚠️ **`CUT OFF` counts RENDERS, not strings.** 5 lines, 9 strings — three
+crash-report exception messages, three chat message previews, three
+conversation-row previews. Unchanged.
 
 ⚠️ **LOW CONTRAST is 0 for app screens.** A raw `grep -c "LOW CONTRAST"` over a
-render run returns **11** — every one of them tagged `[unit]`, which is the
-low-contrast reporter's own self-test deliberately painting faint text to prove
-the instrument still works. Count
+full `test/renders` run returns **11**, every one tagged `[unit]` — the
+low-contrast reporter's own self-test, which paints faint text deliberately to
+prove the instrument still works. Count
 `grep "LOW CONTRAST \[" out.txt | grep -vc "\[unit\]"`.
 
 ---
 
 ## 3. What this session did
 
-Full reasoning is in each commit message — six long ones. Read them rather than
-trusting this summary.
+Full reasoning is in each commit message — five long ones. Read them rather
+than trusting this summary.
 
-### 3.1 Jean settled the route names (commit `9c7dbe9`)
+### 3.1 The live chat is driven, and the "broken send" was a stale bundle
 
-The eleven remaining rail/bar divergences, with the rule "the clearer of the
-two strings, per pair" — so the winner is sometimes the rail's word and
-sometimes the bar's:
+**This is the most important thing in this section, because it nearly became a
+fabricated bug report.**
 
-    mine/stockpiles   rail "Supervisor & stockpiles" -> "Stockpiles"
-    mine/security     bar  "Security"                -> "Security gate"
-    mine/locations    rail "Mine locations"          -> "Locations"
-    */tons-out        rail "Recon tables (tons out)" -> "Tons out"
-    */company         rail "Company profile"         -> "Company"
-    */profile         bar  "Profile"                 -> "My profile"
-    /communications   rail "Announcements"           -> "Communications"
-    /appearance       bar  "Appearance & theme"      -> "Appearance"
+Driving the composer as `roadhaul.admin` in a browser, two messages in a row
+were swallowed: the box cleared, nothing reached `chat_messages`, no error, and
+`list_network_requests` showed **no POST at all** across 215 requests. That is a
+serious-looking fault and it was written up as one in my head before it was
+checked.
 
-Two were the "names the neighbour" fault rather than two reasonable names: bar
-"Security" sits a group from the real destination "Account & security", and bar
-"Profile" a leaf from "Company". Three surfaces carried a THIRD name and came
-in with it — the appearance page's own heading, `_legacyTabLabels`, and the mine
-dashboard's "Recon tables" shortcut, which named the SIBLING route.
+It was not real. The page had been loaded into a **Chrome profile carried over
+from the previous session**, and the disk cache was serving a `main.dart.js`
+built before the send fix. The evidence that settled it, in order:
 
-⚠️ `PortalTabItem('Profile')` and the driver's bottom-nav "Profile" are
-deliberately untouched: the first is a LEGACY TAB LABEL that `_legacyTabLabels`
-maps onto "My profile" (renaming it breaks tab selection silently — the same
-trap tried and reverted for 'Trucks On Route'), and the second is the settled
-driver-mobile bar, Dashboard · Trip · Profile.
+1. The identical insert, issued from the page's own JS with the signed-in
+   user's token, returned **201**. So RLS, the payload and the room were all
+   fine.
+2. `debugPrint` reaches the browser console **even in a release web build**
+   (the app's own "Presence status" lines are visible), so a temporary probe
+   was added and the build redeployed.
+3. The probes printed the whole chain — `_sendMessage enter` → `calling
+   onSendMessage` → `notifier.sendMessage` → `about to insert` → `insert
+   returned` — and the row landed.
 
-**The render harness was typing the top bar by hand.** `subtitle:` is a string
-on every `shootPortal`/`shootShared` call, so 225 pictures could show a bar the
-app never draws — and this rename proved it: three fixtures went on
-photographing names that no longer existed. The fixture's string is now CHECKED
-against `mlRouteTitle`. That check found **nine more mismatches across fifteen
-shots**, including **five renders shot at routes that do not exist**
-(`/portal/*/trucks`, `/portal/transporter/fuel` — the router mounts
-`truck-locations` and `fuel-costs`), so the rail highlighted nothing in them.
+**The lesson is in §5 and it is not a new one:** a hash-only navigation does not
+re-fetch `main.dart.js`, and neither does a reload without `ignoreCache`. What
+was new is that a *stale bundle* can look exactly like a *silent failure*.
 
-**And three routes read "Workspace" in the real app.**
-`every_portal_route_is_named_test.dart` walks the RAIL, and the rail is a menu,
-not the router; every detail page and deep link was invisible to it. The
-console has had a router sweep since 2026-08-21 and the portal never got one.
-`every_portal_router_route_is_named_test.dart` is that sweep, and it found
-`accept-route/:routeId`, `allocate-fleet/:routeId` (the transporter's
-accept-and-crew deep links, the busiest in the product) and
-`drop-off/:tripId`. It also found the family `/employees/…/details` was fixed
-for once: `/portal/mine/trips/t-1` is ONE trip and read "Trips".
+Both directions were then driven for real:
 
-### 3.2 MessagesScreen is NOT dead code (commit `3daaa6f`)
+    Admin Test  "probe run three"                  13:10 SAST
+    Driver Test "Driver here, loaded and rolling."  13:17 SAST
 
-Jean agreed to delete it "as long as you're only deleting dead code". Reading
-the callers first is what stopped the deletion. It has **two live, unguarded
-callers**: `MlExpiryNotice.onMessageMineLink`, wired on EVERY portal screen bar
-`/profile`, and `ExpiredAccessScreen`'s "Message MineLink" button. Token expiry
-is enforced in Postgres, so by the time that notice appears the company's
-writes are already being refused by RLS — deleting the screen would take away
-the reply channel at the one moment it matters.
+The driver's message arrived in the admin's **already-open** thread with no
+reload, `delivered_at` was stamped 2.4 s later, the delivery ticks render, and
+the times read SAST for UTC rows. Room
+`24f1bef3-c3be-41c7-973c-6625e4fa3913`.
 
-The two `context.push('/messages')` calls in `EmployeeProfileScreen` stay too:
-the dock is mounted CONDITIONALLY (`showChatFab`), so the else branch is a live
-fallback, and removing it would make "Message" a button that silently does
-nothing whenever the dock is absent.
+### 3.2 The dock's launcher sat on the send button (commit `b9be44b`)
 
-**Nothing was deleted.** The test pins the finding so the question is settled
-rather than re-opened by the next reader who counts the lines.
+Measured off the live accessibility tree in a 1689×1277 window:
 
-### 3.3 The phone's bottom bar read "Dashboar / d" (commit `31a9c28`)
+    send button    x 1633..1677  y 1220..1264  (44×44)
+    dock launcher  x 1601..1667  y 1189..1255  (66×66)
+    overlap        x 1633..1667  y 1220..1255  = 34×35 px
 
-Photographed on Jean's SM-G780G, signed in as the platform admin. One word
-broken between two letters, painted from x=0 rather than centred.
-`bottom_nav_labels_test.dart` has forbidden exactly that since 2026-08-21 —
-and it was green, for two reasons that are both the "check you have not
-sabotaged" trap in a new hat: it swept text scales **1.0 and 1.3 and nothing
-between** (the first break at 412px is at **1.2**; at 360px with bold it is
-**1.05**), and it switched the one-word rule **off** at 1.3.
+**61% of the send button**, with the launcher painted above it. Same shape as
+the bottom-bar collision fixed on 2026-08-21: the dock wraps the whole shell
+and knows nothing about the bottom-anchored chrome underneath it.
 
-The old reasoning — that abbreviating "Dashboard", "Operations", "Stockpiles"
-and "Production" is worse than a wrapped word — was right. Its conclusion was
-wrong, because those were not the only two options. The slot is `width / 5`
-because the bar always showed four destinations plus More. **The words were
-never the problem; the FOURTH destination was.** `_bottomDestinations` now
-carries as many as fit: three plus More is 103px a tile at 412, two is 137px,
-and the one that steps out is a tap away in the drawer with its badge folded
-into More's.
+The fix is the one `/communications` has had all along — the shell does not
+mount the dock over a surface that IS the conversation. `showChatFab` is now
+the named `portalShowsChatDock(...)`, matched on the segment (`/chat/`) so a
+future `/chatter` route cannot be swept in.
 
-The arithmetic is exact, not a fudge: Flutter lays each destination in an
-`Expanded` and the label's padding is `EdgeInsets.only(top: 4)` — no horizontal
-inset at all.
+`dock_does_not_land_on_the_send_button_test.dart` pins both halves: the route
+is excluded (and ordinary pages still get their dock — without that,
+`return false` everywhere passes), AND the exclusion is load-bearing, by
+mounting the real dock over the real composer and measuring the overlap.
 
-It also fixed a fault at scale **1.0** that the old rule had accepted: the mine
-security guard's bar read "Security / gate" across two lines from x=0, hard
-against the screen edge — the exact fault that file's own header describes
-finding in August, which its fix could not reach because that tree is FLAT and
-has no groups to shorten anything.
+**And a failed ATTACHMENT was still silent.** `sendFileMessage` was three
+layers of the exact fault fixed for text — caught into a `debugPrint`, called
+fire-and-forget, panel closed regardless. More is lost here than in the text
+case: it runs from `onUploadComplete`, so the object is ALREADY in the
+`chat_files` bucket, and a swallowed failure left it there with no row pointing
+at it. `markAsRead` still swallows and is left deliberately: a read receipt is
+not the user's work and the next load repairs it.
 
-Sweep now: 3 widths × 7 scales × bold on/off = **42 combinations** over every
-tree; the one-word rule holds at every scale; the bar must keep two
-destinations plus More; and `barLabels` READS the rendered destinations instead
-of predicting `tree.take(4)`.
+### 3.3 The maps (commit `a2340ef`) — jean's first request
 
-### 3.4 The load on the road is CLOSED
+> *"for the driver side map there needs to be a button to re-center and or
+> re-focus … on the user's current location for incase he swipes on the map to
+> check something. also add more functions and features to the maps which are
+> similar to google map's mobile features and functions"*
 
-POD uploaded as `roadhaul.driver` in a browser at 412×915 with a **generated**
-POD image rather than the phone camera — same code path
-(`uploadPodPhoto` → `record_pod`), no photograph of wherever a personal phone
-happened to be pointing.
+**What was there: five `FlutterMap`s and ONE control between them** — a small
+re-centre FAB on the turn-by-turn screen that only existed once the camera had
+already been left behind. No zoom buttons anywhere, no way back to north, no
+overview, and `onLongPress` null on every map in the tree.
 
-    trip 927cbf1b   en_route_to_offload -> completed
-    net at mine     34.20 t   (authoritative)
-    delivered       34.05 t
-    variance        -0.150 t  (both figures kept, as §4 requires)
-    offloaded_at / completed_at   both 08:10:00.785942Z — the deliberate collapse
-    pod_uploads     1 row, photo in the private bucket
-    transaction     TRP-8CB20569AE -> completed
+`MlMapControls` is Google Maps' own mobile arrangement: a stack at the trailing
+edge, reading down and ending nearest the thumb — compass (only while the map
+is turned, and it turns WITH the map), overview, zoom joined into one pill with
+a hairline, then my location. **48px touch targets**, measured in the test, not
+the 40 a desktop map would use.
 
-The signed waybill regenerates: opened it and scrolled the document — **RECEIVED
-BY carries the driver's real signature**, DATE 2026-08-22, TIME **10:10**,
-which is `completed_at` read through the one clock.
+The my-location button has three states and says which: following (filled), a
+fix but not following (hollow), nothing to follow. Where there is no "me" at
+all — a fleet overview — it is **absent rather than dim**: the first render
+showed a permanently crossed-out disc, which reads as a broken control.
 
-⚠️ Two things on that waybill look like faults and are NOT. All four TRUCK SEAL
-SERIAL NO. lines are blank because `routes.seal_required` is **false** for this
-route and no seals were captured. DISPATCHED BY reads "Management" and RECEIVED
-BY "Driver" because those accounts' `profiles.display_name` genuinely ARE those
-words, and the dispatch SIGNATURE line is blank because that user has no saved
-signature and chose to proceed unsigned — which the prompt offers. Checked in
-the database before writing any of it down.
+Wired into all four maps a person can pan, plus a **scale bar** and
+**press-and-hold to drop a pin** on each. The console's company-mirror preview
+is deliberately left inert (`InteractiveFlag.none` inside an `IgnorePointer`
+inside a `GestureDetector` — the tile is a BUTTON), and the test records that
+exemption rather than leaving it looking like an oversight.
 
-### 3.5 The driver's waybill deep-link drew the chrome twice (commit `fb14950`)
+The dropped-pin sheet says only what the device knows — coordinate, distance,
+bearing — and **deliberately does not name the place**. Reverse geocoding is
+the answer that is confidently wrong here; the same ladder put "Iron Hills
+Mine, Mpumalanga" at a courier depot 460 km from the gate. It does not claim
+"of you" on a map that does not know where you are, which the live map does
+not.
 
-One navigation after the POD. `/portal/driver/trip/:id/waybill` came back with
-the account-setup banner drawn **TWICE**, one above the other, each with its own
-"Complete now" — plus the portal rail down the left AND the driver's own
-Dashboard · Trip · Profile bar underneath. Photographed before and after.
+⚠️ **The driver's navigation map had NO OpenStreetMap attribution** — four of
+five maps called `mlMapAttribution()`; the fullscreen one a driver looks at for
+an hour did not. Added, and moved to the bottom-LEFT after measuring the first
+render: the credit sat at x 334..352 and the my-location disc at x 350..397.
 
-`DriverAppScreen` is a complete shell, so `PortalShellLayout` returns it bare —
-decided by an exact-match set of three path literals, and that route is not one
-of them. It is `driverAppOwnsChrome(path)` now, and
-`driver_app_owns_its_chrome_test.dart` reads the ROUTER and asserts the
-predicate agrees in BOTH directions: a route that renders `DriverAppScreen`
-must be bare, and one that does not must keep the shell
-(`/portal/driver/notifications` needs it — it has no chrome of its own).
+### 3.4 Tap and hold (same commit) — jean's second request
 
-### 3.6 Every sign-in cried wolf (commit `0acaa70`)  ⚠️ THE BIG ONE
+`MlPlatePill` is where it earns most, because of what it holds: every plate,
+waybill number, ticket and serial in the product — the strings a person has to
+move somewhere else. On a phone the alternative is reading `TRP-8CB20569AE` off
+the glass one character at a time, and a waybill number transcribed wrong is a
+load that cannot be reconciled. **29 call sites, no per-site edit** — the value
+names itself.
 
-A clean sign-in as `roadhaul.admin` put SEVEN failure states on the
-transporter's landing screen at once — four KPIs and three panels, all saying
-the feed was unavailable or could not be read — and then filled in by itself
-with no reload and no retry: 235 t, R184,611, 2 trucks on route, 67%
-utilisation.
+⚠️ **The first version swallowed the row's tap, and this test caught it on the
+run it was written.** An `InkWell` given only `onLongPress` still becomes
+`enabled`, and an enabled `InkResponse` registers a TAP recogniser too — it
+needs one for its splash. That recogniser wins the arena against the ancestor's,
+so a plate inside a trip row stopped opening the trip. It is a
+`GestureDetector` now. Same family as the `Semantics`-inside-`InkWell` trap
+recorded in `chat_widget.dart`.
 
-Nothing had gone wrong. **Both RPCs were captured from the network panel
-returning HTTP 200 with real rows**, against the correct `p_company_id`. That
-is what turned it from a backend blip into a defect worth chasing.
+### 3.5 The sidebar starts collapsed (commit `b353543`) — jean's third request
 
-`feed.valueOrNull` collapses "still reading" and "could not read" into the same
-null. The dashboards' own source has carried a comment naming this trap since
-2026-08-21 — written when the MINE's stockpile ring did it to a mine owner —
-and the fix at the time was applied to that one card. The KPI band of all
-three dashboards and six more panels were left in it, so the mine has been
-showing "Reading stockpiles…" in one band and "stockpiles unavailable" in the
-band directly above it, for the same feed, in the same frame.
+> *"the sidebar menu nav should always be collapsed by default and each of the
+> parents in it should also be collapsed by default on all devices and
+> platforms please, windows, mobile, where ever and what ever"*
 
-`PortalKpi.loading` and `portalFeedPending(what)` are the split, wired at
-eleven sites off `AsyncValue.isFirstLoad` (which already existed in the kit and
-is what the action queues use).
+**FOUR places had to agree.** `AppSidebarPrefs.readPortalExpanded` and
+`readSuperAdminExpanded` both answered `?? true`. The other two are the
+in-memory values used for the frames BEFORE that read resolves —
+`_portalSidebarExpanded` and `_railExpanded` — and they have to match the
+preference's own default or the rail opens at 280px and snaps shut a frame
+later, a flash of the wrong layout on every app start. That is the half that
+would have been missed by changing only the obvious file.
 
-**Verified live** with the network throttled to Slow 3G so the window could be
-sampled at all: across ten ticks the band read `checking…` on all four tiles
-and there were **zero** failure strings.
+`_MlNavRailState._isOpen` returned `?? true`. Its own doc argued for that —
+groups starting closed "makes the tree look smaller than it is" — and that
+reasoning was not wrong, it was outweighed: the mine rail alone opened with
+five groups and twenty-one destinations at once.
 
-⚠️ **Getting the test to bite took four attempts, and all four are traps worth
-knowing.** It passed over fixture DATA (duplicate overrides in one list are not
-"last wins" — the feed overrides are in a NESTED `ProviderScope` now). It
-passed over a BLANK PAGE (without the auth/company/employee gates the
-dashboards render "Company not loaded" and nothing else — dumped the empty
-widget tree to prove it). Overriding `FlutterError.onError` trips the binding's
-own assertion — `tester.takeException()` in a drain loop is the supported way.
-And `isNotEmpty` on the throwing case survived a sabotage that silenced the KPI
-band while the panels still spoke, so there is now a symmetric assertion: a
-failed feed must not claim to be loading.
+**The group holding the CURRENT ROUTE still opens**, deliberately: it opens
+exactly one group, the one you are standing in, and without it the rail can be
+put into a state where nothing is highlighted while you are plainly on a page.
 
-### 3.7 The /chat/:id URL opened the dashboard (commit `da91b0d`)
+**What this makes load-bearing:** with groups shut, a closed group's badge SUM
+is often the only thing saying there is work behind it. The mine rail reads
+`Logistics 2` and `Settings 5`; the console reads `Requests 16`,
+`Reconciliation 2`, `Communications 7`.
 
-    final chatArgs = state.extra as ChatScreenArgs?;
-    if (chatArgs == null) return const HomeTabBodyScreen();
+### 3.6 Everything has a parent (commit `04a61d5`) — jean's fourth request
 
-`extra` does not survive a page load, so `:chatRoomId` was parsed and thrown
-away and every arrival that was not the one tap in the Communications hub got
-the WORKSPACE DASHBOARD under a top bar reading **Chat**. A refresh, a
-bookmark, a pasted link and a notification deep link all land there.
+> *"none of them shouldn't have a parent, all should have a parent"*
 
-`ChatRoomRoute` resolves the room through the SAME provider the hub reads, so
-access stays enforced by that query and RLS rather than by the widget. Verified
-on the running app: the thread now opens from the URL alone, with the driver's
-real message in it.
+The console carried EIGHT loose leaves under a comment calling them "the flat,
+high-traffic destinations". Every portal tree opened with a bare `Dashboard`.
+The restricted roles were entirely flat.
 
-**And a failed send looked exactly like a sent one.** Three layers, none of
-which could report a failure: the composer cleared the box without awaiting,
-`ChatScreen`'s callback was `async` and unawaited, and the notifier wrapped the
-whole insert in `catch (e) { debugPrint(...) }` — a log that goes nowhere a
-user can see and nowhere at all in a release web build. The draft is now handed
-over and only forgotten if that worked; a failure puts it back with the caret
-where they left off and says what happened.
+| tree | new group | holds |
+|---|---|---|
+| console | Overview | Dashboard, Live map |
+| console | Reconciliation | Recon tables, Margin ledger History, Disputes |
+| console | Routes | Available routes, Route marketplace |
+| console | Communications | Chat links, Notifications |
+| mine · security | Gate | the gate IS that role's whole job |
+| mine · controller | Weighbridge | likewise |
+| mine · supervisor | Overview / Operations / Logistics / Reconciliation | the FULL tree's own four names |
+| driver | My trip | Trip, Live map |
+| every role | My account | Compliance, My profile |
+| all portals | Overview | Dashboard |
 
-⚠️ **The send button's label is a `Tooltip`, and must stay one.** A
-`Semantics(button: true, label: …)` inside the `InkWell` was tried first and it
-**swallowed the tap** — the InkWell's node carries the tap ACTION, and the
-inner node merged over it as a button with nothing behind it. The control
-announced itself perfectly and did nothing at all. Found by a probe in
-`_sendMessage` that never printed.
+**"Overview" rather than a group called "Dashboard"** because that is already
+what the top bar calls these routes.
+
+**Three consequences, stated rather than discovered later:**
+
+1. Dashboard is one level deeper in the rail, because a rail group header
+   TOGGLES rather than navigates. That is the cost of the rule.
+2. The bottom bar's first tile reads **"Overview"** instead of "Dashboard" — it
+   takes the first four TOP-LEVEL nodes, and a group navigates to its first
+   child, so the destination is unchanged. **The DRIVER's bar is untouched**:
+   `Dashboard · Trip · Profile` is built explicitly in `portal_shell_layout`,
+   not read off this tree.
+3. Landing routes are unaffected — both resolvers read the first LEAF of the
+   first node.
+
+`every_destination_has_a_parent_test.dart` sweeps **every tree the product can
+build** — three org types × every role, plus the console, 94 assertions — and
+the symmetric halves: no EMPTY group, every landing route still resolves, and
+the console kept all eight destinations rather than losing one in the move.
+
+### 3.7 The period pills had no Material (commit `736a8b8`)
+
+Found while reading a test log for something else: **132 "No Material widget
+found" assertions in one run, all from one line, and not one failing test** —
+the assertion is thrown while BUILDING and the framework carries on. It was in
+the previous green run's log too, which is how it survived: a green suite that
+prints the same complaint 132 times reads as noise.
+
+`PortalPeriodSelector` is the Today / 7 days / 30 days / 12 months control on
+all three org dashboards, and its `InkWell`s had nowhere to put their ink — the
+most-tapped control on those pages responded with no ripple at all.
+`Material(type: MaterialType.transparency)` paints nothing, so all 261 renders
+pass with goldens UNCHANGED and the count goes 132 → 0.
+
+### 3.8 What was verified on Jean's actual phone
+
+Current APK installed on the SM-G780G (SHA-256 checked against the local build
+before and after the copy). Photographed, then every screenshot deleted:
+
+- **the console's bottom bar** reads `Dashboard · Insights · Requests · More`,
+  four tiles, every word whole — the 2026-08-22 "Dashboar / d" fix, proven on
+  hardware for the first time
+- **the drawer's groups are collapsed** — Insights, Requests and Tokens & Seats
+  all shut, where before Insights and Requests were expanded into a wall
+- **the live map's controls** — overview, zoom pill, centre-on-truck, and a
+  `1 km` scale bar, over real OSM tiles
+- **hold-to-copy** — holding the plate pill produced our own
+  `Copied — KVK007MP` **and** Android's own "Copied to clipboard" toast, which
+  is what proves the clipboard really received it
+- **the dropped-pin sheet** — long-pressing the map returned
+  `-26.019021, 27.988375` with Copy coordinates / Open in maps
+
+The phone was left on `home`, signed in as the platform admin, as it was found.
 
 ---
 
 ## 4. What is NOT done — PICK UP HERE
 
-### 4.1 A live chat between two real accounts is STILL not driven
-
-Not for want of trying, and the reason is now measured rather than guessed.
-
-**The composer cannot be driven through CDP.** `type_text` sets Flutter's
-hidden textarea and the Dart controller — the semantics node shows the value —
-but never fires `onChanged`, so `hasDraft` stays false and the send button's
-semantics node has **no tap action** (`flt-tappable` absent, measured). Real key
-events via `press_key` DO fire it and the button becomes tappable, but the
-draft does not survive to the next tool call on that screen.
-
-That is the same wall the previous session hit from the DOCK by a different
-route, and it is why the one real message in that room — "hi", 04:21 — was
-typed by hand on the phone. **It is a tooling limit, not a proven app fault**,
-and it is recorded as unproven rather than claimed either way.
-
-**Ten seconds of thumb settles it.** Ask Jean to open the app on his phone as
-`roadhaul.driver`, or sign in as `roadhaul.admin` on any browser he is holding,
-and send one message in the Driver Test room. Room
-`24f1bef3-c3be-41c7-973c-6625e4fa3913`; check it landed with:
-
-```sql
-select sender_name, content, timestamp, delivered_at, read_at
-from chat_messages where chat_room_id = '24f1bef3-c3be-41c7-973c-6625e4fa3913'
-order by timestamp;
-```
-
-### 4.2 The phone was not driven this session
-
-`CtrlBridge` host mode went **off** partway through (Jean took a WhatsApp call
-and the app backgrounded), and `phone_agent.py status` has answered
-"no phone at a known address" since. Nothing on the phone was changed.
-
-**A current APK is staged and hash-verified, ready to install:**
-
-```
-\\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk
-SHA-256  B33B58B0B2DAE7C3024D02879C6FC737997A239DC2E1A6C31A1A72991DF56E3D
-```
-
-That build is the current tip. Installing it verifies **§3.3 on real hardware**
-— the console's bottom bar should read `Dashboard · Insights · Requests · More`
-(four tiles, one destination fewer) with no word broken in half. Jean turns
-host mode back on: **CtrlBridge → Let my PC control this phone → Host mode on.**
-
-⚠️ The app on the phone is currently signed in as the **platform admin**, not
-the driver, and I had begun signing out when the call arrived. It may be at the
-login screen or still on the console. Nothing was left half-done in the
-database.
-
-### 4.3 One decision still outstanding, and it needs an ELEVATED shell
+### 4.1 One decision still outstanding, and it needs an ELEVATED shell
 
 The leftover firewall rule from a much earlier session's `serve_apk.ps1` is
 still present and Enabled. Nothing is listening on port 8000 and the NAS route
@@ -432,36 +421,51 @@ makes that script unnecessary. **Jean, in an admin PowerShell:**
 Remove-NetFirewallRule -DisplayName 'CtrlBridge APK download (TCP in)'
 ```
 
-### 4.4 What a handset still cannot prove at a desk
+### 4.2 What a handset still cannot prove at a desk
 
-Unchanged from the previous handoff. What is genuinely left needs the phone to
-physically move: GPS fixes changing along a road over distance, auto-reroute on
-going off-route, the Android foreground service surviving a long backgrounding,
-and battery over a real trip.
+Unchanged. What is genuinely left needs the phone to physically move: GPS fixes
+changing along a road over distance, auto-reroute on going off-route, the
+Android foreground service surviving a long backgrounding, and battery over a
+real trip.
 
 ⚠️ The EMULATOR can fake movement (`adb emu geo fix`) and the 2026-07-17 run
 already proved the navigation stack that way — a real handset cannot be
-teleported, so do not try it there.
+teleported, so do not try it there. **An emulator is currently running**
+(`emulator-5554`, visible to `adb devices`), so that route is one command away
+if it is wanted.
 
-### 4.5 Closed, do not redo
+### 4.3 Two judgement calls Jean may want to reverse
 
+Both are one-line reverts and both are recorded here rather than buried:
+
+1. **Dashboard now sits inside an "Overview" group**, so it is one level deeper
+   in the rail and the bottom bar's first tile reads "Overview". That follows
+   "all should have a parent" literally. If Dashboard should stay a top-level
+   destination, `_overview(...)` goes back to a bare leaf in
+   `portal_nav.dart` and `console_nav.dart`.
+2. **The dock is not mounted on `/chat/:id`.** It was covering the send button;
+   suppressing it matches `/communications`. If the dock should stay there
+   instead, the fix has to become geometric — the dock would need to reserve
+   space for a bottom composer the way it already does for the bottom bar.
+
+### 4.4 Closed, do not redo
+
+- **A live chat between two real accounts is DRIVEN** — §3.1. The previous
+  handoff's §4.1 is closed.
+- **The phone was driven** and the current build is installed — §3.8. The
+  previous handoff's §4.2 is closed.
 - **Contrast is closed app-wide AND for chat.** 1,812 low-contrast strings → 0,
   and `test/renders/low_contrast_baseline.json` is `{}`: a missing entry reads
   as zero, so it is a FLOOR, not a ratchet. **If it ever fails, do not add a
   baseline entry** — the failure message names the token to change.
 - **All eighteen chat palettes are covered by arithmetic**
-  (`test/design/chat_palette_contrast_test.dart`), which renders cannot do — a
-  render only ever photographs the ONE palette that happens to be selected.
-- **The chat is the dock**, on Jean's explicit call. The invisible reply is
-  fixed end to end, the dock has renders, mention tokens no longer render raw,
-  and a driver can reach chat on both driver branches.
-- **All twelve route names are settled** — the four from 2026-08-22 morning and
-  the eight in §3.1. `every_portal_route_is_named_test.dart`'s allow-list is
-  down to the eight that are divergent BY DESIGN (four dashboard roots, four
-  `/operations`), both groups for the same cause: the resolver has no role and
-  no session.
+  (`test/design/chat_palette_contrast_test.dart`), which renders cannot do.
+- **All twelve route names are settled.**
+- **MessagesScreen is NOT dead code** — two live, unguarded callers on the
+  licence-expiry path. Settled; do not reopen.
 - **The due-diligence gate** and **the driver's whole mobile lifecycle** were
-  driven end to end last session.
+  driven end to end in earlier sessions, and **the load on the road is closed**
+  (trip `927cbf1b`, 34.05 t delivered against a 34.20 t mine net).
 
 ---
 
@@ -471,7 +475,7 @@ teleported, so do not try it there.
 cd "/c/Users/Somebody Someone/Music/SHOWME!/MineLink-M3"
 
 flutter analyze                                  # must be clean
-flutter test                                     # 2229 passing, 1 skipped
+flutter test                                     # 2397 passing, 1 skipped
 dart tool/release_guards.dart                    # 40/40
 dart tool/release_guards.dart --selftest         # every guard must BITE
 py -3 tool/_sabotage.py                          # every instrument fix must BITE
@@ -485,23 +489,15 @@ flutter build web --release
 flutter build apk --debug
 ```
 
-### Working the contrast report
+### What "sabotage" means here, because the word alarms people
 
-```bash
-flutter test test/renders/redesign_renders_test.dart > out.txt 2>&1   # NEVER | tail
-py -3 tool/rank_low_contrast.py out.txt              # by pair / widget / render
-py -3 tool/attribute_low_contrast.py out.txt         # by TOKEN — start here
-py -3 tool/contrast_calc.py solve-tint '#6B7A9C' '#1C2C46' 4.6
-```
-
-⚠️ **`solve-tint` moves the INK.** When the ink is white there is nowhere
-lighter for it to go and it answers "UNREACHABLE on this ground at all" — that
-is telling you to deepen the FILL, not that the pairing is impossible.
-
-⚠️ **Count app-screen low contrast as
-`grep "LOW CONTRAST \[" out.txt | grep -vc "\[unit\]"`.** The `[unit]` lines
-are the reporter's own self-tests, which paint faint text on purpose. A raw
-count reads 11 and means 0.
+It is a controlled, seconds-long loop, and it never leaves the working tree:
+copy the file to `/tmp`, change **one line** back to the buggy version, run the
+test, confirm it **fails**, restore from the backup, re-run, confirm green. A
+green test proves nothing on its own — it is green either because the code is
+right or because the test does not check the thing it claims to, and those look
+identical from outside. It only ever touches local Dart source; never the
+database, the phone, or the original worktree, and it is never committed.
 
 ### Driving the built app in a browser
 
@@ -515,92 +511,87 @@ cd build/web && py -3 -m http.server 8123 --bind 127.0.0.1
   --no-first-run --no-default-browser-check "http://127.0.0.1:8123/"
 ```
 
+- 🚨 **USE A FRESH `--user-data-dir` AFTER A REBUILD, or reload with
+  `ignoreCache`.** This cost most of an hour this session and produced a
+  convincing false bug report — see §3.1. A stale `main.dart.js` looks exactly
+  like a silent failure: the UI reacts, nothing reaches the database, and there
+  is no error anywhere.
+- **A fresh `--user-data-dir` is also how you test a DEFAULT.** SharedPreferences
+  on web is `localStorage`, so "what a user who has never touched this sees" is
+  only observable in a profile that has never stored it.
 - **Flutter web publishes no accessibility tree until you ask.** Click the
   hidden placeholder — `document.querySelector('flt-semantics-placeholder')
   .click()`. **After every reload**, and it can take a second attempt.
-- **A hash-only navigation does NOT reload the document.** Going from
-  `#/a` to `#/b` never re-fetches `main.dart.js`, so a fresh build is not
-  picked up. Reload with `ignoreCache` after every rebuild — this cost real
-  time before it was written down.
-- **Drive SIX ACCOUNTS AT ONCE with isolated browser contexts.** One `new_page`
-  per role with a distinct `isolatedContext` gives each its own storage. Do NOT
-  try to do it with tabs.
-- ⚠️ **`type_text` does not fire Flutter's `onChanged`.** It reaches the Dart
-  controller (the semantics node shows the value) but the widget never
-  rebuilds, so anything gated on "is there a draft" stays disabled and its
-  semantics node has no tap action. `press_key` sends real key events and does
-  fire it. This is what stopped the live chat — §4.1.
+- ⚠️ **`document.body.innerText` is EMPTY on a canvas-rendered app.** Read the
+  semantics instead: `flt-semantics` elements, filtered to LEAVES
+  (`e.children.length === 0`), reading `aria-label || textContent`. A parent's
+  `textContent` swallows all its descendants, which is how a naive reader
+  reports 17 nodes on a 135-node page.
+- ⚠️ **`performance.getEntriesByType('resource')` caps at 250 entries.** Once
+  the buffer is full NOTHING new is recorded, so "no new requests" is a lie on
+  any page that has been open a while. `list_network_requests` is CDP-based and
+  has no such cap — use it, and remember it PAGES (the interesting request is
+  on the LAST page).
+- ⚠️ **`debugPrint` DOES reach the browser console in a release web build.**
+  The app's own "Presence status" lines prove it. That makes a temporary probe
+  the fastest way to settle "did this code even run".
+- **A hash-only navigation does NOT reload the document.**
+- **Drive several accounts at once with isolated browser contexts** — one
+  `new_page` per role with a distinct `isolatedContext`. Not tabs.
+- ⚠️ **`type_text` DOES fire Flutter's `onChanged`** on both the login form and
+  the chat composer — the previous handoff recorded it as not working, and that
+  finding did not reproduce. Click the field first, then type.
 - **Chrome will not resize below ~500px.** Use CDP emulation
   (`412x915x2,mobile,touch`).
-- ⚠️ **Throttle the network to see a loading state at all.** The §3.6 fault
-  lives in a window of about a second; `Slow 3G` is what made it samplable.
+- ⚠️ **Throttle the network to see a loading state at all.** `Slow 3G`.
 - ⚠️ **The accessibility uid churns.** Snapshot and click in the tightest pair
-  you can, and on "no longer exists" take a fresh snapshot rather than reaching
-  for coordinates.
-- ⚠️ **`performance.getEntriesByType('resource')` is how you prove a request
-  did or did not happen.** It is what established that the chat send issued no
-  POST at all, which is a different fault from one that was refused.
-- ⚠️ **`list_network_requests` pages.** The interesting request is usually on
-  the LAST page, not the first.
-- ⚠️ **The devtools MCP server can disconnect mid-session.** Chrome survives it.
+  you can.
+- ⚠️ **The devtools MCP server can disconnect mid-session.** Chrome survives
+  it; relaunch Chrome if not.
 
 ### Driving Jean's real phone
 
 **Invoke the `driving-jeans-phone` skill FIRST.**
 
-⚠️ **Host mode is currently OFF** — see §4.2. `status` answers "no phone at a
-known address". Only Jean can turn it back on.
-
 🚨 **IF THE PHONE DOES NOT ANSWER, STOP AND ASK — DO NOT WORK AROUND IT.**
 Jean's standing instruction, 2026-08-22. When `phone_agent.py status` reports
 `no phone at a known address - broadcasting`, or the display is asleep
 (`probe` under 0.1 bits/pixel), **pause the whole task right there and say so**.
-Only he can turn host mode back on and only he can wake the screen; there is no
-way to do either from this PC. Wait for him to reply that the phone is awake
-and reachable, then retry from where you stopped.
+Only he can turn host mode back on and only he can wake the screen. Wait for him
+to reply that the phone is awake and reachable, then retry from where you
+stopped. This is not "note it and carry on with something else".
 
-This is not "note it and carry on with something else". The phone step is the
-step — it is the only thing that proves a fix on real hardware — so a session
-that skips past it and reports everything else green has reported a half-done
-job. Ask, wait, resume.
-
-The install route, proven three times, about six minutes:
+**It answered this session** (`sharing=True control=True`, `probe` 0.76
+bits/pixel) and the install route worked exactly as documented, in about six
+minutes:
 
 ```
 1. flutter build apk --debug
 2. copy build/app/outputs/flutter-apk/app-debug.apk  ->
      \\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk
-3. On the phone: My Files -> (search "My Files" in the app drawer) ->
-   scroll past Recent files -> Network storage -> jean -> Shared ->
+3. On the phone: My Files -> Network storage -> jean -> Shared ->
    PhoneRemote -> minelink-m3.apk -> ~2.5 min download -> Update -> Open
 ```
 
-🚨 **THE NAS CLOCK IS ABOUT 2 h 36 m SLOW. DO NOT TRUST ITS TIMESTAMP.**
-**Compare the SHA-256 instead:**
+🚨 **THE NAS CLOCK IS ABOUT 2 h 36 m SLOW. Compare the SHA-256 instead.**
 
-```powershell
-(Get-FileHash 'build\app\outputs\flutter-apk\app-debug.apk' -Algorithm SHA256).Hash
-(Get-FileHash '\\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk' -Algorithm SHA256).Hash
-```
+⚠️ **My Files caches the folder listing** — after re-staging, back out of
+`PhoneRemote` and re-enter it, or you will tap yesterday's APK. It showed the
+old timestamp until backed out this session.
 
-⚠️ **My Files caches the folder listing.** After re-staging, back out of
-`PhoneRemote` and re-enter it.
-
-⚠️ **Only Jean can wake a sleeping display.** `probe` reports
-`0.061 bits/pixel` when asleep and about `0.771` when awake.
+⚠️ **Only Jean can wake a sleeping display.**
 
 ⚠️ **The applicationId is `org.minelink.m3`**, deliberately different from the
 shipping app's. They install side by side.
 
-It is his **personal** phone: prefer `sig`/`changed`/`waitstable`, delete every
-screenshot immediately, do not read what you did not come for, back out of
-anything opened by mistake and say so, and leave it on `home; waitstable; home`.
+It is his **personal** phone: prefer `sig`/`changed`/`waitstable` over `shot`,
+delete every screenshot immediately, do not read what you did not come for,
+back out of anything opened by mistake and say so, and leave it on
+`home; waitstable; home`.
 
-⚠️ **A call can come in mid-session.** One did, and WhatsApp brought its own
-screen to the foreground while a sign-out was in progress. **Stop driving
-immediately** — an injected tap on that screen can hang up on somebody. Press
-`home` (which backgrounds the call without ending it), delete the screenshot,
-and say what happened.
+⚠️ **A call can come in mid-session.** Stop driving immediately — an injected
+tap can hang up on somebody — press `home`, delete the screenshot, say what
+happened.
 
 🚨 **Turning on live-location sharing writes JEAN'S REAL POSITION** to
 `vehicle_positions` on production, every 30 seconds. Turn it off afterwards and
@@ -612,56 +603,60 @@ confirm the card reads "Live tracking turned off."
 `BuRG3rJ3@n1995@#` is the platform admin; everything `@mineralguide.com` is
 `MineralGuide123!`.
 
-⚠️ **The console stores theme and accent PER ADMIN.** Switching Jean's mode to
-Light writes to his account. Put it back.
+⚠️ **The console stores theme and accent PER ADMIN.** Put it back if you
+change it.
 
 ⚠️ **Every account's setup gate is incomplete. Dismiss it with "Later".** It
-re-fires on every reload and on some navigations, so expect to dismiss it more
-than once per session.
+re-fires on reloads and some navigations.
 
 ### Things that have already gone wrong here — do not repeat them
 
-- 🚨 **A POWER CUT DESTROYED A FILE MID-WRITE.** **Commit often; copy to the
-  scratchpad before any long edit.**
-- 🚨 **A BASH HEREDOC EATS BACKSLASHES EVEN WHEN QUOTED**, and a Python string
-  inside one eats them again. It bit twice more this session — a `\n` inside a
-  Dart string literal came out as a real newline and broke the file. **Write
-  any script containing a backslash with the Write tool, or use Edit.**
+- 🚨 **A STALE CACHED BUNDLE LOOKS EXACTLY LIKE A SILENT FAILURE.** §3.1. The
+  single most expensive thing this session.
+- 🚨 **A POWER CUT DESTROYED A FILE MID-WRITE.** Commit often.
+- 🚨 **A BASH HEREDOC EATS BACKSLASHES EVEN WHEN QUOTED**, and quoting a Python
+  script inside one is worse. It bit twice more this session — once on a `'` in
+  a comment, once on nested quote escaping. **Write any script with the Write
+  tool and run it with `py -3`.**
+- 🚨 **`dart format` RUNS BETWEEN YOUR EDITS AND REFLOWS THE FILE**, so a
+  patch script must not depend on indentation. Locate a block by a unique
+  LABEL and walk back to the opening constructor.
 - 🚨 **NEVER READ A LONG TEST RUN THROUGH `tail`.** Redirect and grep the file.
 - 🚨 **`git checkout -- <dir>` THREW AWAY UNCOMMITTED WORK.**
 - 🚨 **A LONG `&&` CHAIN ENDING IN `git commit -F <heredoc>` TIMES OUT.**
+- 🚨 **A PIPE HIDES A FAILING EXIT CODE.** `py -3 script.py | tail -3 && dart
+  format …` runs the format even when the script threw, because the pipeline's
+  status is `tail`'s. That is how a half-applied edit got formatted.
 - 🚨 **Python's stdout is cp1252 here.** Set `PYTHONIOENCODING=utf-8`.
-- 🚨 **A CHECK YOU HAVE NOT SABOTAGED IS A CHECK YOU DO NOT HAVE**, and the
-  scene must be FAITHFUL. Four fresh proofs in §3.6 alone, plus §3.3's
-  unswept scale band.
-- 🚨 **A SOURCE-READING TEST CAN MATCH ITS OWN EXPLANATION.** A `contains`
-  check for `HomeTabBodyScreen()` matched the COMMENT describing the bug it
-  was written for. Strip comments before asserting on source.
-- 🚨 **A FIXTURE THAT SAYS LESS THAN THE SERVICE HIDES REAL FAULTS**, and a
-  fixture that says what the CODE computes hides drift — the render harness
-  typed its own top bar for 225 pictures.
-- 🚨 **ONE SURFACE AT A TIME PROVES ONE SURFACE.**
-- 🚨 **A NEW TEST MUST PASS `theme: AppTheme.build(...)` to `MaterialApp`.**
-- 🚨 **A NEW TEST THAT USES `portalCaptureOverrides()` MUST FREEZE THE CLOCK**
-  (`freezeCaptureClock()` from `test_helpers/frozen_clock.dart`). The
-  `capture-fixture-without-a-frozen-clock` guard caught this session's new
-  sweep on the run it was written.
-- 🚨 **CHECK WHETHER A "FAULT" IS THE DATA.** Two things on the waybill looked
-  wrong and were faithful — §3.4. Query the row before writing anything down.
-- 🚨 **A background task holding a file blocks a later copy to it.** **Two
-  long-running `pwsh` processes on this machine are Jean's VS Code terminals;
-  check `CommandLine` before killing anything.**
-- **A `Semantics` wrapper INSIDE an `InkWell` can swallow its tap** — §3.7.
-  Use `Tooltip` to name an ink-well control.
+- 🚨 **A CHECK YOU HAVE NOT SABOTAGED IS A CHECK YOU DO NOT HAVE.**
+- 🚨 **AND A SABOTAGE THAT LEAVES THE STRING BEHIND PROVES NOTHING.** A
+  source-reading test was declared non-biting this session because the sabotage
+  renamed an argument and left `MlMapControls(` in the file. The test was fine;
+  the sabotage was wrong. Check what your sabotage actually removed.
+- 🚨 **A SOURCE-READING TEST CAN MATCH ITS OWN EXPLANATION.** Strip comments
+  before asserting on source — every such test here does.
+- 🚨 **CHECK WHETHER A "FAULT" IS THE DATA.** Query the row first.
+- 🚨 **CHECK WHETHER A TEST ALREADY PINS THE BEHAVIOUR YOU ARE ABOUT TO
+  CHANGE**, and when it does, UPDATE it with the reason rather than deleting
+  it. Five tests were reversed this session, each carrying why.
+- 🚨 **A NEW TEST MUST PASS `theme: AppTheme.build(...)` to `MaterialApp`**, and
+  if it uses `portalCaptureOverrides()` it MUST call `freezeCaptureClock()`.
+- **An `InkWell` with only `onLongPress` still steals the TAP.** §3.4.
+- **A `Semantics` wrapper INSIDE an `InkWell` can swallow its tap** — use
+  `Tooltip` to name an ink-well control.
+- **An `Align` inside a `Positioned` that names only `right`/`bottom` expands
+  to unbounded and throws.** `MlMapControls` deliberately does not wrap itself.
 - **`Flexible` defaults to `flex: 1`**, and a `Wrap` sizes to its content.
 - **A `RepaintBoundary` inside a `Scaffold` does not capture a DIALOG.**
 - **`loadRealFonts()` is not enough** — name the family.
 - **`Color.alphaBlend` keeps the BACKGROUND's alpha.**
-- **`dart format` on a directory reformats files you did not touch** — name the
-  files.
+- **`dart format` on a directory reformats files you did not touch** — name
+  them.
 - **`find.text` cannot see a `TextSpan`**, and **`toPlainText()` CANNOT SEE A
   TRUNCATION** — use `RenderParagraph.didExceedMaxLines`.
 - **Generating a waybill on web opens a print surface.**
+- **Two long-running `pwsh` processes on this machine are Jean's VS Code
+  terminals.** Check `CommandLine` before killing anything.
 
 ### Where the reasoning lives
 
@@ -691,11 +686,8 @@ are measured, not inferred.
 3. **The waybill names a person differently from every other surface.**
    `record_pod` writes `coalesce(profiles.display_name, 'Driver')` into
    `metadata.waybill.received_by`, and `record_truck_load` does the same for
-   `dispatched_by`. Where an employee record carries a fuller `first_name` +
-   `last_name` — "Driver Test" — the identity chip says one thing and the
-   document that governs the delivery says another. Not fixed here because the
-   document should record what was stamped at the time, and changing that is a
-   decision about the record, not a client tweak.
+   `dispatched_by`. Not fixed here because the document should record what was
+   stamped at the time, and changing that is a decision about the record.
 
 ---
 
@@ -708,13 +700,12 @@ are measured, not inferred.
   font proves nothing.
 - **§7** — `flutter test` renders in a fallback font unless you load the real
   ones.
-- **§7.1** — one clock, Africa/Johannesburg. Confirmed again this session: the
-  waybill's RECEIVED TIME read 10:10 SAST for an 08:10Z `completed_at`.
-- **§10.6** — Dart bitwise operators are unsigned 32-bit on the web.
+- **§7.1** — one clock, Africa/Johannesburg.
+- **§10.6** — Dart bitwise operators are unsigned 32-bit on the web. The new
+  `geo_format.dart` is arithmetic-only for that reason, and its own tests say
+  so.
 - **§1** — the package is `flutter_application_1`. Do not rename it.
 - **§5** — design tokens are law.
-- **§4** — *"The transporter only ever sees their resulting price."* True in
-  this fork's client since 2026-08-22; see §6.1 for the server half.
 
 ---
 
@@ -730,26 +721,24 @@ off. Read these TWO handoff files before doing anything else, in this order.
 
       C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
 
-   Rewritten 2026-08-22 at the end of the session that closed the load on the
-   road and then found five faults by DRIVING the app rather than reading it.
-   Read it in this order: "WHERE THIS SESSION STOPPED — READ THIS FIRST",
-   then §0 (where you are + the one rule), §2 (verified state), §3 (what was
-   done and what the drive found), §4 (what is NOT done — pick up here), §5
-   (how to work here, and the things that have already gone wrong) and §6
-   (three things owed to the SHIPPING app, not fixable in this fork).
+   Rewritten 2026-08-22 at the end of the session that did four things Jean
+   asked for mid-run and fixed four faults found on the way to them. Read it in
+   this order: "WHERE THIS SESSION STOPPED — READ THIS FIRST", then §0 (where
+   you are + the one rule), §2 (verified state), §3 (what was done), §4 (what
+   is NOT done — pick up here), §5 (how to work here, and the things that have
+   already gone wrong) and §6 (three things owed to the SHIPPING app).
 
 2. THE OLDER MACHINE-WIDE HANDOFF — BACKGROUND ONLY, DO NOT WORK FROM IT:
 
       C:\Users\Somebody Someone\Claude\HANDOFF.md
 
    Dated 2026-08-08. MCP servers, git position, the decoy folders, the phone
-   tooling. Claude Desktop reads that folder through its `claude-notes` MCP
-   server. The MineLink-M3 handoff above governs this work; where the two
+   tooling. The MineLink-M3 handoff above governs this work; where the two
    disagree, the MineLink-M3 one wins.
 
 THE PATHS THAT MATTER
 
-  Work happens here (its own git repo, branch `main`, 133 commits, clean):
+  Work happens here (its own git repo, branch `main`, 139 commits, clean):
     C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
   NEVER TOUCHED, for any reason:
@@ -775,29 +764,22 @@ handoff — CHECK IT AT THE START OF THE SESSION AND AGAIN AT THE END:
 
 WHERE I LEFT OFF, EXACTLY
 
-The tree is CLEAN. 133 commits. Nothing is half-applied and nothing is
+The tree is CLEAN. 139 commits. Nothing is half-applied and nothing is
 uncommitted. The tip is the commit carrying HANDOFF.md, so the count includes
-it. The last CODE commit under it is eb84e45, with two earlier drafts of this
-same file (539978d, 1a881b9) between them. The six code commits of the session
-are:
+it. The five code commits of the session are:
 
-    9c7dbe9  one name per destination, and three routes that announced
-             themselves as "Workspace"
-    3daaa6f  MessagesScreen is NOT dead code, and here is the proof
-    31a9c28  the phone's bottom bar showed "Dashboar / d"
-    fb14950  the driver's waybill deep-link drew the portal's chrome on top of
-             the driver app's own
-    0acaa70  every sign-in told the reader their feeds were broken while they
-             were still loading
-    da91b0d  the /chat/:id URL opened the dashboard, and a failed send looked
-             exactly like a sent one
-
-The whole gate below was run green against the tree as it stands.
+    b9be44b  the chat dock's launcher sat on the send button, and a failed
+             attachment was silent
+    a2340ef  the driver can get back to himself, and every map got the controls
+             a phone expects
+    b353543  the sidebar starts collapsed, and so does every group in it
+    04a61d5  nothing in a sidebar sits at the top level on its own any more
+    736a8b8  the dashboard period pills had no Material under them
 
 Green means EXACTLY this — compare against it rather than against a memory:
 
     flutter analyze                    no issues
-    flutter test                       2229 passed, 1 skipped
+    flutter test                       2397 passed, 1 skipped
     dart tool/release_guards.dart      40/40 PASS, 0 FAIL
     dart tool/release_guards.dart --selftest   all guards bite
     py -3 tool/_sabotage.py            all sabotages caught
@@ -811,98 +793,84 @@ Green means EXACTLY this — compare against it rather than against a memory:
     render harness — FAILURE STATE     0
     render harness — LOW CONTRAST      0   (see the [unit] caveat below)
     render harness — CUT OFF           5 RENDERS / 9 strings, all deliberate
+    render harness — "No Material widget found"   0   (was 132)
     flutter build web --release        builds
     flutter build apk --debug          builds
 
-  ⚠️ A raw `grep -c "LOW CONTRAST"` over a render run returns 11, all of them
-  tagged [unit] — the low-contrast reporter's OWN self-tests, which paint faint
-  text deliberately to prove the instrument works. Count app screens with
+  ⚠️ A raw `grep -c "LOW CONTRAST"` over a full test/renders run returns 11,
+  all tagged [unit] — the low-contrast reporter's OWN self-tests, which paint
+  faint text deliberately to prove the instrument works. Count app screens with
   `grep "LOW CONTRAST \[" out.txt | grep -vc "\[unit\]"`, which is 0.
 
-  ⚠️ CUT OFF counts RENDERS, not strings — 5 lines carrying 9 strings. The
-  previous handoff's "9" counted strings. Nothing regressed.
-
-STILL RUNNING FROM MY SESSION:
-  - `py -3 -m http.server 8123` serving build/web — verified answering 200,
-    and serving a CURRENT release build. Reuse it.
-  - Chrome IS running with --remote-debugging-port=9222, with five isolated
-    contexts signed in (a driver and four transporter admins). Reuse or close.
+  ⚠️ CUT OFF counts RENDERS, not strings — 5 lines carrying 9 strings.
 
 WHAT I DID
 
-Closed the load that was on the road, and then found five real faults by
-driving the app across several roles. Full detail in §3 of the handoff; the
-short version:
+Closed BOTH of the previous handoff's open items, and did the four things Jean
+asked for during the session.
 
-  1. THE PHONE'S BOTTOM BAR READ "Dashboar / d" — photographed on the real
-     SM-G780G. The sweep that forbids exactly that was green because it tested
-     text scales 1.0 and 1.3 AND NOTHING BETWEEN (the first break at 412px is
-     at 1.2), and switched the rule off at 1.3. The bar now carries as many
-     destinations as FIT rather than always four; nothing is abbreviated.
-  2. THREE ROUTES ANNOUNCED THEMSELVES AS "Workspace", two of them on the
-     transporter's accept-and-crew deep links. The rail walk could not see them
-     because the rail is a menu, not the router.
-  3. THE DRIVER'S WAYBILL DEEP-LINK DREW THE CHROME TWICE — two account-setup
-     banners, a rail AND the driver's own bottom bar.
-  4. EVERY SIGN-IN TOLD THE READER THEIR FEEDS WERE BROKEN. Seven failure
-     states on the transporter's landing screen, while both RPCs were returning
-     HTTP 200 with real rows. `valueOrNull` collapses "still reading" and
-     "could not read"; the dashboards' own source had named that trap in August
-     and it had been fixed for exactly one card.
-  5. THE /chat/:id URL OPENED THE DASHBOARD, and a failed send cleared the
-     composer and said nothing — three layers, none of which could report a
-     failure.
+  1. A LIVE CHAT BETWEEN TWO REAL ACCOUNTS IS DRIVEN, both directions, through
+     the app's own composer, with the second message arriving in the first
+     account's already-open thread over realtime. 🚨 On the way there, two
+     sends looked SILENTLY SWALLOWED — box cleared, no row, no error, no POST
+     in 215 requests. That was a STALE CACHED main.dart.js from a reused Chrome
+     profile, not a defect. Settled by issuing the identical insert from the
+     page's own JS (201) and then by temporary debugPrint probes, which DO
+     reach the console in a release web build.
+  2. THE PHONE WAS DRIVEN. The current APK is installed on the SM-G780G and
+     four things were verified on that hardware: the console's bottom bar reads
+     Dashboard · Insights · Requests · More with no broken word; the drawer's
+     groups are collapsed; the live map carries overview/zoom/centre and a
+     1 km scale bar over real tiles; holding a plate pill produced our
+     "Copied — KVK007MP" AND Android's own clipboard toast; long-pressing the
+     map returned a dropped-pin sheet with real coordinates.
+  3. THE MAPS. Five FlutterMaps had ONE control between them and onLongPress
+     null everywhere. MlMapControls (compass, overview, zoom pill, three-state
+     my-location, 48px targets) + a scale bar + press-and-hold-to-drop-a-pin,
+     on all four pannable maps. The console's mirror preview is deliberately
+     left inert and the test records that exemption.
+  4. TAP AND HOLD. MlPlatePill copies its code on a long press — 29 call sites,
+     every plate, waybill number and serial in the product.
+  5. THE SIDEBAR AND ITS GROUPS START COLLAPSED, in four places that all had to
+     agree (two preferences and the two in-memory values used before those
+     resolve, or the rail flashes 280px and snaps shut).
+  6. EVERYTHING IN THE SIDEBAR HAS A PARENT. Nine new groups across the console
+     and every role tree; 94 assertions sweep every org type × every role.
+  7. FOUR FAULTS FIXED ON THE WAY: the dock's launcher covered 61% of the chat
+     send button (measured); a failed ATTACHMENT was silent; the driver's
+     navigation map had NO OpenStreetMap attribution; the dashboard period
+     pills had no Material and never rippled (132 assertions per run, zero
+     failing tests).
 
-Every fix has a test that was SABOTAGED until it bit, and four of the five were
-re-verified on the running app.
-
-TWO DECISIONS JEAN SETTLED — DO NOT REOPEN:
-  * The eight remaining route-name pairs, by "the clearer of the two, per pair".
-  * MessagesScreen: he said delete it "as long as you're only deleting dead
-    code" — and it is NOT dead. It has two live, unguarded callers on the
-    licence-expiry path. NOTHING WAS DELETED, and a test now pins why.
+TWO JUDGEMENT CALLS JEAN MAY WANT TO REVERSE — both one-line reverts, both in
+§4.3: Dashboard now sits inside an "Overview" group (so it is one level deeper
+and the bottom bar's first tile reads "Overview"), and the chat dock is no
+longer mounted on /chat/:id.
 
 WHAT IS LEFT — START HERE
 
-  1. A LIVE CHAT BETWEEN TWO REAL ACCOUNTS IS STILL NOT DRIVEN, and the reason
-     is now measured: `type_text` over CDP reaches Flutter's controller but
-     NEVER FIRES `onChanged`, so the send button's semantics node has no tap
-     action (flt-tappable absent). `press_key` does fire it, but the draft does
-     not survive to the next tool call. It is a TOOLING limit, not a proven app
-     fault, and it is recorded as unproven rather than claimed either way.
-     Ten seconds of Jean's thumb settles it — room
-     24f1bef3-c3be-41c7-973c-6625e4fa3913, then check chat_messages.
-  2. THE PHONE WAS NOT DRIVEN. CtrlBridge host mode went OFF mid-session when a
-     call came in, and has not answered since. A CURRENT APK IS STAGED AND
-     HASH-VERIFIED at \\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk
-     (SHA-256 B33B58B0B2DAE7C3024D02879C6FC737997A239DC2E1A6C31A1A72991DF56E3D).
-     Installing it verifies the bottom-bar fix on real hardware: the console's
-     bar should read Dashboard · Insights · Requests · More, four tiles, with
-     no word broken in half. Jean turns it back on: CtrlBridge → Let my PC
-     control this phone → Host mode on. The app there is signed in as the
-     PLATFORM ADMIN and a sign-out was interrupted.
-     🚨 IF THE PHONE DOES NOT ANSWER AT ANY POINT — `phone_agent.py status`
-     says "no phone at a known address - broadcasting", or `probe` reports
-     under 0.1 bits/pixel because the display is asleep — PAUSE THE WHOLE TASK
-     RIGHT THERE AND TELL JEAN. Then WAIT for him to reply that the phone is
-     awake and reachable, and retry from exactly where you stopped. Only he
-     can turn host mode on and only he can wake a sleeping screen; neither is
-     possible from this PC, and injected touches cannot wake it. Do NOT work
-     around it, do NOT skip ahead to something else, and do NOT report the
-     rest green as though the phone step were optional — it is the only thing
-     that proves a fix on real hardware.
-  3. A LEFTOVER FIREWALL RULE needs an ADMIN PowerShell — only Jean can run it:
+  1. A LEFTOVER FIREWALL RULE needs an ADMIN PowerShell — only Jean can run it:
        Remove-NetFirewallRule -DisplayName 'CtrlBridge APK download (TCP in)'
-  4. THREE THINGS ARE OWED TO THE SHIPPING APP, not fixable in this fork
-     (`supabase/` is frozen): the RLS half of the rate leak, `stockpiles`
-     missing from the realtime publication, and the waybill naming a person by
-     `profiles.display_name` while every other surface uses their employee
-     name. All three are measured, not inferred — §6 of the handoff.
-  5. WHAT A HANDSET STILL CANNOT PROVE AT A DESK — needs the phone to
+  2. WHAT A HANDSET STILL CANNOT PROVE AT A DESK — needs the phone to
      physically move: GPS fixes changing along a road, auto-reroute, the
      foreground service surviving a long backgrounding, battery over a trip.
      The EMULATOR can fake movement and already proved the nav stack that way;
-     a real handset cannot be teleported, so do not try it there.
+     an emulator is running right now (emulator-5554).
+  3. THREE THINGS ARE OWED TO THE SHIPPING APP, not fixable in this fork
+     (`supabase/` is frozen): the RLS half of the rate leak, `stockpiles`
+     missing from the realtime publication, and the waybill naming a person by
+     `profiles.display_name`. All three measured, not inferred — §6.
+  4. 🚨 IF YOU NEED THE PHONE AND IT DOES NOT ANSWER — `phone_agent.py status`
+     says "no phone at a known address - broadcasting", or `probe` reports
+     under 0.1 bits/pixel because the display is asleep — PAUSE THE WHOLE TASK
+     RIGHT THERE AND TELL JEAN. Then WAIT for him to reply that the phone is
+     awake and reachable, and retry from exactly where you stopped. Only he can
+     turn host mode on and only he can wake a sleeping screen; neither is
+     possible from this PC, and injected touches cannot wake it. Do NOT work
+     around it, do NOT skip ahead to something else, and do NOT report the rest
+     green as though the phone step were optional — it is the only thing that
+     proves a fix on real hardware.
+     ⚠️ Invoke the `driving-jeans-phone` skill FIRST. It is his PERSONAL phone.
 
 HOW TO WORK — THIS IS JEAN'S INSTRUCTION, FOLLOW IT
 
@@ -930,29 +898,29 @@ WINS.
 
 AND THE LESSONS THIS SESSION ADDED:
 
-  * DRIVE IT, DON'T READ IT. All five faults were invisible to 2,229 tests and
-    225 renders. Four of them needed a real sign-in; one needed the network
-    throttled to Slow 3G before the window was even samplable.
-  * CHECK WHETHER A "FAULT" IS THE DATA. Two things on the waybill looked
-    broken and were faithful — blank seal lines on a route that requires no
-    seals, and a person whose display name really is "Driver". Query the row
-    before writing anything down.
-  * A CHECK YOU HAVE NOT SABOTAGED IS A CHECK YOU DO NOT HAVE, and this session
-    produced four fresh ways for one to be green over nothing: over fixture
-    DATA (duplicate Riverpod overrides in one list are not "last wins" — nest
-    the scopes), over a BLANK PAGE (no auth/company gates, empty widget tree),
-    over an already-resolved future, and over a NEIGHBOUR still speaking when
-    the thing under test had gone silent. Assert POSITIVE evidence of the state
-    you think you are in, before asserting the absence of anything.
-  * A SOURCE-READING TEST CAN MATCH ITS OWN EXPLANATION — a `contains` check
-    matched the comment describing the bug it was written for. Strip comments.
-  * A `Semantics` WRAPPER INSIDE AN `InkWell` CAN SWALLOW ITS TAP. Name an
-    ink-well control with a `Tooltip`.
-  * A HASH-ONLY NAVIGATION DOES NOT RELOAD THE DOCUMENT, so a fresh web build
-    is not picked up. Reload with ignoreCache after every rebuild.
-  * A CALL CAN COME IN ON THE PHONE MID-SESSION. Stop driving immediately — an
-    injected tap can hang up on somebody — press home, delete the screenshot,
-    and say what happened.
+  * 🚨 A STALE CACHED BUNDLE LOOKS EXACTLY LIKE A SILENT FAILURE. Use a fresh
+    --user-data-dir after every rebuild, or reload with ignoreCache. A fresh
+    profile is ALSO the only way to test what a first-time user sees, since
+    SharedPreferences on web is localStorage.
+  * `document.body.innerText` IS EMPTY on a canvas-rendered app — read the
+    semantics LEAVES, not a parent's textContent.
+  * `performance.getEntriesByType('resource')` CAPS AT 250 and then records
+    nothing, so "no new requests" is a lie on a long-lived page. Use
+    list_network_requests, and page to the END.
+  * `debugPrint` REACHES THE BROWSER CONSOLE in a release web build. A
+    temporary probe is the fastest way to settle "did this run at all".
+  * A SABOTAGE THAT LEAVES THE STRING BEHIND PROVES NOTHING — check what your
+    sabotage actually removed before concluding a test does not bite.
+  * `dart format` RUNS BETWEEN EDITS AND REFLOWS THE FILE, so a patch script
+    must locate blocks by label and walk back, never by indentation.
+  * A PIPE HIDES A FAILING EXIT CODE: `py script.py | tail && dart format`
+    formats even when the script threw.
+  * AN InkWell WITH ONLY onLongPress STILL STEALS THE TAP from the row it sits
+    in. Use a GestureDetector.
+  * AN Align INSIDE A Positioned that names only right/bottom expands to
+    unbounded and throws.
+  * WHEN AN EXISTING TEST PINS THE BEHAVIOUR YOU ARE CHANGING, UPDATE IT WITH
+    THE REASON. Five were reversed this session, each carrying why.
 
 BEFORE CLAIMING ANYTHING IS DONE, ALL OF THESE MUST BE GREEN:
 
@@ -976,20 +944,17 @@ READ §5 OF THE MineLink-M3 HANDOFF — the things that have already gone wrong 
 this repo — so you don't repeat them. The ones that have cost real time more
 than once:
 
-  * A POWER CUT DESTROYED A FILE MID-WRITE — it came back as 23,598 NUL bytes,
-    right size, no content. Commit often; copy to the scratchpad before any
-    long edit.
-  * A BASH HEREDOC EATS BACKSLASHES EVEN WHEN QUOTED, and a Python string
-    inside one eats them again. It bit twice more this session. WRITE ANY
-    SCRIPT CONTAINING A BACKSLASH WITH THE WRITE TOOL, or use Edit directly.
+  * A POWER CUT DESTROYED A FILE MID-WRITE. Commit often.
+  * A BASH HEREDOC EATS BACKSLASHES EVEN WHEN QUOTED, and quoting a Python
+    script inside one is worse. WRITE ANY SCRIPT WITH THE WRITE TOOL and run it
+    with `py -3`.
   * NEVER READ A LONG TEST RUN THROUGH `tail`. Redirect to a file and grep it.
   * `git checkout -- <dir>` THREW AWAY THREE FINISHED UNCOMMITTED FIXES.
   * A LONG && CHAIN ENDING IN `git commit -F <heredoc>` TIMES OUT at two
     minutes. Write the message to a file and commit with -F as its own command.
   * PYTHON'S STDOUT IS cp1252 HERE — set PYTHONIOENCODING=utf-8.
   * A NEW TEST MUST PASS `theme: AppTheme.build(...)` TO `MaterialApp`, and if
-    it uses `portalCaptureOverrides()` it MUST call `freezeCaptureClock()` —
-    the guard caught this session's new sweep on the run it was written.
+    it uses `portalCaptureOverrides()` it MUST call `freezeCaptureClock()`.
   * CHECK WHETHER A TEST ALREADY PINS THE BEHAVIOUR YOU ARE ABOUT TO "FIX".
   * `loadRealFonts()` IS NOT ENOUGH — name the family.
   * `Color.alphaBlend` KEEPS THE BACKGROUND'S ALPHA.
@@ -1000,9 +965,14 @@ than once:
   * TWO LONG-RUNNING pwsh PROCESSES ON THIS MACHINE ARE JEAN'S VS CODE
     TERMINALS. Check CommandLine before killing anything.
   * THE CONSOLE STORES THEME AND ACCENT PER ADMIN. Put it back if you change it.
+  * EVERY ACCOUNT'S SETUP GATE IS INCOMPLETE — dismiss it with "Later".
   * GENERATING A WAYBILL ON WEB OPENS A PRINT SURFACE.
   * THE DEVTOOLS MCP SERVER CAN DISCONNECT MID-SESSION, and Chrome may exit
-    with it. Finish by other means rather than waiting.
+    with it.
+  * adb is at C:\Android\sdk\platform-tools.
+  * 🚨 TURNING ON LIVE-LOCATION SHARING WRITES JEAN'S REAL POSITION to
+    vehicle_positions on production, every 30 seconds. Turn it off afterwards,
+    confirm the card reads "Live tracking turned off", and TELL HIM.
 
 OPTIONAL: if the Windows build gives trouble, just carry on with web and
 mobile. It is blocked by two PRE-EXISTING faults, neither of them the redesign:
@@ -1023,9 +993,10 @@ the same way this one was written — verified state only, no intentions, ending
 with a fresh self-contained copy-paste block in §8 that carries BOTH handoff
 paths (that one and C:\Users\Somebody Someone\Claude\HANDOFF.md), the project
 root, the untouchable worktree path and its baseline, exactly where you
-stopped, what is already done so it is not redone, what is left, this same HOW
-TO WORK instruction from Jean, and the fix-as-you-go rule — and then commit it.
-State the commit count the tree WILL be at once that commit lands, and say that
-the tip is the commit carrying the file, so the handoff is self-consistent
-rather than a commit or two behind itself.
+stopped, what is already done so it is not redone, what is left, THE PHONE RULE
+above, this same HOW TO WORK instruction from Jean quoted VERBATIM, and the
+fix-as-you-go rule — and then commit it. State the commit count the tree WILL
+be at once that commit lands, and say that the tip is the commit carrying the
+file, so the handoff is self-consistent rather than a commit or two behind
+itself.
 ```
