@@ -484,7 +484,20 @@ class _ReportSection extends StatelessWidget {
                           context,
                           '${d.dispatchedTons.toStringAsFixed(2)} t',
                         ),
-                        _balanceCell(context, d.minedTons - d.dispatchedTons),
+                        // ONE notion of measurable, the same one the two
+                        // tiles above read. This cell used to subtract
+                        // directly, so a mine that records no production
+                        // got a column of amber negatives sitting under a
+                        // `Pit-to-port loss` reading `—`: the same screen
+                        // saying the window cannot be measured at the top
+                        // and quoting a figure from it eight rows down.
+                        _balanceCell(
+                          context,
+                          ProductionYield(
+                            minedTons: d.minedTons,
+                            dispatchedTons: d.dispatchedTons,
+                          ).lossTons,
+                        ),
                       ],
                   ],
                 ),
@@ -505,8 +518,12 @@ class _ReportSection extends StatelessWidget {
     ),
   );
 
-  Widget _balanceCell(BuildContext context, double v) {
-    final tone = v.abs() < 0.005
+  /// [v] is `null` when the day recorded no production, so there is nothing to
+  /// take the dispatched tonnage away FROM. A dash, in the neutral tone — not a
+  /// negative number in amber, which reads as a day that lost tonnage rather
+  /// than a day nobody logged.
+  Widget _balanceCell(BuildContext context, double? v) {
+    final tone = v == null || v.abs() < 0.005
         ? MlTone.neutral
         : (v > 0 ? MlTone.done : MlTone.warn);
     final colors = tone.colors(Theme.of(context).brightness);
@@ -519,7 +536,7 @@ class _ReportSection extends StatelessWidget {
           borderRadius: BorderRadius.circular(MlTokens.rSm),
         ),
         child: Text(
-          '${v > 0 ? '+' : ''}${v.toStringAsFixed(2)} t',
+          v == null ? '—' : '${v > 0 ? '+' : ''}${v.toStringAsFixed(2)} t',
           style: context.mlText.code(
             color: colors.fg,
             size: 12,

@@ -350,7 +350,31 @@ class LoadQualityTable extends ConsumerWidget {
 
   Widget _payableCell(BuildContext context, LoadQualityRow r) {
     if (r.payableTons == null) {
-      return _mono(context, _t(r.deliveredTons ?? r.netTons), muted: true);
+      // A DASH, not the delivered tonnage under a Payable heading.
+      //
+      // `list_load_quality` returns NULL for `payable_tons` whenever the load
+      // has no moisture reading — no certificate, no penalty, nothing to
+      // compute. This cell used to fill that gap with `deliveredTons ?? netTons`
+      // and mute it, which is a DIFFERENT QUANTITY wearing the same heading and
+      // the same format.
+      //
+      // Photographed on the live mine Quality screen, 2026-08-23, under a
+      // header reading `0 of 35 loads certified` and a Moisture column that was
+      // `—` on every row:
+      //
+      //     TRUCK      NET        MOISTURE   PAYABLE
+      //     S6W001GP   34.20 t    —          34.05 t
+      //     KVK007MP   31.80 t    —          34.90 t    <- payable ABOVE net
+      //
+      // Payable is defined as the tonnage reduced by an excess-moisture
+      // penalty, so it can never exceed the mine net. The second row is the
+      // delivered figure, and nothing on the screen said so.
+      //
+      // `exportRows` already writes an empty cell here, so the spreadsheet and
+      // the screen were telling a mine two different things about the same
+      // load. The dash is the export's answer, in the vocabulary the rest of
+      // the product uses for a figure with nothing behind it.
+      return _mono(context, '—', muted: true);
     }
     final penalised = (r.excessMoisturePct != null) || r.isBelowGradeSpec;
     final tone = penalised ? MlTone.warn : MlTone.done;
