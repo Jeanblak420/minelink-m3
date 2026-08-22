@@ -54,7 +54,9 @@ class SuperAdminShellLayout extends ConsumerStatefulWidget {
 }
 
 class _SuperAdminShellLayoutState extends ConsumerState<SuperAdminShellLayout> {
-  bool _railExpanded = true;
+  /// Collapsed until the stored preference says otherwise — see
+  /// [AppSidebarPrefs], and the note there on why this must match its default.
+  bool _railExpanded = false;
 
   @override
   void initState() {

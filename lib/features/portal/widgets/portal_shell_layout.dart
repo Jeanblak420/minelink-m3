@@ -213,7 +213,13 @@ class PortalShellLayout extends ConsumerStatefulWidget {
 class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
   bool _dialogOpen = false;
   final GlobalKey<ScaffoldState> _portalKey = GlobalKey<ScaffoldState>();
-  bool _portalSidebarExpanded = true;
+  /// Collapsed until the stored preference says otherwise (jean, 2026-08-22).
+  ///
+  /// This is the value for the frames BEFORE `readPortalExpanded` resolves,
+  /// and it has to agree with that read's own default — otherwise the rail
+  /// opens at 280px and snaps shut a frame later, which is a flash of the
+  /// wrong layout on every single app start.
+  bool _portalSidebarExpanded = false;
 
   @override
   void initState() {

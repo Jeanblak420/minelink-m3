@@ -146,19 +146,26 @@ class _MlNavRailState extends State<MlNavRail> {
 
   /// Whether [group] is showing its children.
   ///
-  /// Two rules, both from P7-03 and both deliberate:
+  /// Two rules:
   ///
-  /// 1. **Open by default.** A rail whose groups start closed hides most of the
-  ///    app behind a click and makes the tree look smaller than it is. The
-  ///    filter box exists for narrowing; the default should be "you can see
-  ///    what there is".
-  /// 2. **The group holding the current route cannot be closed.** Otherwise the
+  /// 1. **CLOSED by default.** Ruled by jean, 2026-08-22: *"each of the parents
+  ///    in it should also be collapsed by default on all devices and
+  ///    platforms"*. This used to be open-by-default, on the reasoning that a
+  ///    closed rail "makes the tree look smaller than it is" — which is true,
+  ///    and is no longer the trade being made: the mine rail alone opens with
+  ///    **five groups and twenty-one destinations** showing at once, which is a
+  ///    wall rather than a menu, and the filter box is the tool for finding
+  ///    something in it. The matching half is [AppSidebarPrefs], where the rail
+  ///    itself now starts collapsed.
+  /// 2. **The group holding the current route is still open.** Otherwise the
   ///    rail can be put into a state where nothing is highlighted while you are
-  ///    plainly on a page — you lose your place in your own navigation. The
-  ///    user's override is remembered but overruled while they are inside.
+  ///    plainly on a page — you lose your place in your own navigation. This is
+  ///    not "expanded by default": it is the rail showing you where you are,
+  ///    and it opens exactly one group, the one you are standing in. A user's
+  ///    explicit override is remembered but overruled while they are inside.
   bool _isOpen(MlNavNode group) {
     if (group.contains(_selected)) return true;
-    return _groupOverride[group.label] ?? true;
+    return _groupOverride[group.label] ?? false;
   }
 
   int _countFor(MlNavNode node) {

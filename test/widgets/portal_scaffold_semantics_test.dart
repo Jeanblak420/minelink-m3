@@ -71,8 +71,16 @@ void main() {
     await tester.pumpWidget(shell());
     await tester.pumpAndSettle();
 
-    // A top-level destination, two group headers, a leaf nested inside a group
-    // (groups are open by default), and the footer action.
+    // Groups start CLOSED as of 2026-08-22 (jean), so a leaf nested inside one
+    // has to be opened before it is in the tree at all. Opening it here is the
+    // point of the check that follows: a destination reachable only through a
+    // group must still reach the semantics tree, or it is unreachable to a
+    // screen reader.
+    await tester.tap(find.text('Operations'));
+    await tester.pumpAndSettle();
+
+    // A top-level destination, two group headers, a leaf nested inside the
+    // group just opened, and the footer action.
     // 'Logout' is no longer a rail entry. The M3 redesign moved the per-user
     // actions (profile, notifications, appearance, theme, sign out) into the
     // identity flyout at the foot of the rail, which is where the super-admin
@@ -122,18 +130,36 @@ void main() {
     await tester.pumpWidget(shell(onNavigate: taps.add));
     await tester.pumpAndSettle();
 
+    // Production lives inside Operations, which now starts closed.
+    await tester.tap(find.text('Operations'));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Production'));
     await tester.pumpAndSettle();
 
     expect(taps, ['/portal/mine/production']);
   });
 
-  testWidgets('a group collapses and hides its children', (tester) async {
+  testWidgets('a group starts closed, then opens and recloses', (tester) async {
+    // Reversed on 2026-08-22: groups now START closed, so this walks the whole
+    // cycle rather than only the closing half. The behaviour it protects is
+    // unchanged — the header is the toggle and it really hides its children.
     wide(tester);
     await tester.pumpWidget(shell());
     await tester.pumpAndSettle();
 
-    expect(find.text('Quality'), findsOneWidget);
+    expect(
+      find.text('Quality'),
+      findsNothing,
+      reason: 'a group whose children are visible before anyone opened it is '
+          'the default jean asked to reverse',
+    );
+
+    await tester.tap(find.text('Operations'));
+    await tester.pumpAndSettle();
+    expect(find.text('Quality'), findsOneWidget,
+        reason: 'the header must open the group it names');
+
     await tester.tap(find.text('Operations'));
     await tester.pumpAndSettle();
     expect(
@@ -189,11 +215,20 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // The portal's badge was a boolean 8 px dot with no count, on one entry.
+    // CLOSED, which is now the default — and this is exactly why a shut group
+    // sums its children onto its header. With the rail collapsed by default,
+    // that sum is often the ONLY thing telling somebody there is work waiting
+    // behind the group, so it is asserted before the group is opened.
+    expect(find.text('7'), findsOneWidget,
+        reason: 'Operations holds both queues; a shut group must carry the sum');
+    expect(find.text('3'), findsNothing);
+    expect(find.text('4'), findsNothing);
+
+    // And the individual counts once it is open.
+    await tester.tap(find.text('Operations'));
+    await tester.pumpAndSettle();
     expect(find.text('3'), findsOneWidget);
     expect(find.text('4'), findsOneWidget);
-    // Operations ▾ holds both, so its header carries the sum (P7-04).
-    expect(find.text('7'), findsOneWidget);
   });
 
   testWidgets('an empty queue shows no badge at all', (tester) async {

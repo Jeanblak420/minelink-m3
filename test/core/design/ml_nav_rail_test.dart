@@ -144,27 +144,44 @@ void main() {
       expect(find.text('Transporters'), findsOneWidget);
     });
 
-    testWidgets('groups start open', (tester) async {
-      // A rail whose groups start closed hides most of the app behind a click
-      // and makes the tree look smaller than it is. The filter box is for
-      // narrowing; the default is "you can see what there is" (P7-03).
+    testWidgets('groups start CLOSED', (tester) async {
+      // REVERSED on 2026-08-22, by jean: "each of the parents in it should
+      // also be collapsed by default on all devices and platforms".
+      //
+      // This test used to assert the opposite, on the P7-03 reasoning that a
+      // closed rail "makes the tree look smaller than it is". That reasoning
+      // was not wrong; it was outweighed. The mine rail alone now opens with
+      // five groups and twenty-one destinations at once, which is a wall
+      // rather than a menu, and the filter box is the tool for finding
+      // something inside it.
+      //
+      // The group HOLDING the current route is the deliberate exception, and
+      // it has its own test above — that is the rail showing you where you
+      // are, not a default.
       await tester.pumpWidget(_host(expanded: true, selected: '/dash'));
       await tester.pumpAndSettle();
-      expect(find.text('Buyers'), findsOneWidget);
+      expect(
+        find.text('Buyers'),
+        findsNothing,
+        reason: 'the Insights group does not hold /dash, so it must be shut',
+      );
+      // The group itself is still there to be opened — "closed" must not have
+      // become "gone".
+      expect(find.text('Insights'), findsOneWidget);
     });
 
-    testWidgets('tapping the header closes and reopens it', (tester) async {
+    testWidgets('tapping the header opens and recloses it', (tester) async {
       await tester.pumpWidget(_host(expanded: true, selected: '/dash'));
-      await tester.pumpAndSettle();
-      expect(find.text('Buyers'), findsOneWidget);
-
-      await tester.tap(find.text('Insights'));
       await tester.pumpAndSettle();
       expect(find.text('Buyers'), findsNothing);
 
       await tester.tap(find.text('Insights'));
       await tester.pumpAndSettle();
       expect(find.text('Buyers'), findsOneWidget);
+
+      await tester.tap(find.text('Insights'));
+      await tester.pumpAndSettle();
+      expect(find.text('Buyers'), findsNothing);
     });
 
     testWidgets('the group you are inside cannot be closed', (tester) async {
@@ -331,12 +348,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Close it, then reopen — the expand is the direction that drives
-      // AnimatedSize and the one that used to throw.
-      await tester.tap(find.text('Insights'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Insights'));
-      await tester.pumpAndSettle();
+      // Open it, close it, open it again — the EXPAND is the direction that
+      // drives AnimatedSize and the one that used to throw, and since groups
+      // now start closed (2026-08-22) the first tap is already that direction.
+      // Three taps so both directions are exercised and the group ends OPEN,
+      // which is what the assertion below can see.
+      for (var i = 0; i < 3; i++) {
+        await tester.tap(find.text('Insights'));
+        await tester.pumpAndSettle();
+      }
 
       expect(tester.takeException(), isNull);
       expect(find.text('Buyers'), findsOneWidget);
