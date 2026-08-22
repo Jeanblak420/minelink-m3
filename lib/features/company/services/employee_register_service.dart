@@ -309,7 +309,7 @@ class EmployeeRegisterService {
         byGroup[RegisterRoleGroups.supervisors] = const RegisterKpi(
           'STOCKPILES UPDATED',
           null,
-          'no stockpiles with product',
+          kNoStockpilesWithProduct,
         );
       } else {
         final touched = {
@@ -325,8 +325,10 @@ class EmployeeRegisterService {
         byGroup[RegisterRoleGroups.supervisors] = RegisterKpi(
           'STOCKPILES UPDATED',
           registerPct(touched.length, active.length),
-          '${active.length - touched.length} of ${active.length} stockpiles '
-              'untouched today',
+          stockpilesUntouchedCaption(
+            untouched: active.length - touched.length,
+            withProduct: active.length,
+          ),
         );
       }
     } catch (e) {
@@ -427,6 +429,32 @@ int? registerPct(int done, int total) =>
 
 String registerPlural(int n, String one, [String? many]) =>
     '$n ${n == 1 ? one : (many ?? '${one}s')}';
+
+/// The supervisors' STOCKPILES-UPDATED caption when the mine holds nothing.
+const String kNoStockpilesWithProduct = 'no stockpiles with product';
+
+/// The same caption when it does — and it has to name the SAME subset.
+///
+/// [withProduct] counts piles whose balance is above zero, because a pile
+/// holding nothing cannot be "untouched today" in any sense a supervisor acts
+/// on. The empty-case string beside this one already said "with product"; this
+/// one did not, so one KPI described two different sets depending on which
+/// branch it took.
+///
+/// It also read against a different total from the screen next door. Measured
+/// on Iron Hills Mining, 2026-08-23: the Supervisor screen is headed
+/// `9 stockpiles` and this caption read `7 of 7 stockpiles untouched today`.
+/// Both figures are correct — two of the nine piles are empty — and nothing on
+/// either screen said which set it meant.
+///
+/// `registerPlural` on the denominator, because a company with a single pile
+/// read "0 of 1 stockpiles".
+String stockpilesUntouchedCaption({
+  required int untouched,
+  required int withProduct,
+}) =>
+    '$untouched of ${registerPlural(withProduct, 'stockpile')} '
+    'with product untouched today';
 
 /// What `list_company_member_presence` returns for one member. The signature
 /// URL itself is never exposed — only whether there is one (P7-35).

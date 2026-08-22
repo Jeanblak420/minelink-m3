@@ -186,10 +186,19 @@ class _Body extends ConsumerWidget {
       (s, r) => s + (r.invoicedAmount ?? 0),
     );
     final withInvoice = rows.where((r) => r.hasInvoice).toList();
-    final variance = withInvoice.fold<double>(
-      0,
-      (s, r) => s + (r.invoiceVariance ?? 0),
-    );
+    // NULL, not zero, when nothing has been invoiced.
+    //
+    // A fold over an empty list is 0.0, and `0.0` in this card is `R0.00` in
+    // the GREEN tone — "your invoices balance to the cent". Photographed on the
+    // live buyer screen as `atlasbuyer.owner`, 2026-08-23, with `33 loads ·
+    // 0 invoiced` written across the card header beside it.
+    //
+    // Variance is a COMPARISON. With no invoice there is nothing to compare
+    // against, which is a different fact from the two sides agreeing — the
+    // same distinction `ProductionYield` draws for the mine's yield and loss.
+    final double? variance = withInvoice.isEmpty
+        ? null
+        : withInvoice.fold<double>(0, (s, r) => s + (r.invoiceVariance ?? 0));
     final unpriced = rows.where((r) => !r.isPriced).length;
 
     return Column(
@@ -223,11 +232,16 @@ class _Body extends ConsumerWidget {
               ),
               MlStatCard(
                 label: 'Invoice variance',
-                value: BuyerLoadsValueScreen.money(variance, currency),
+                value: variance == null
+                    ? '—'
+                    : BuyerLoadsValueScreen.money(variance, currency),
+                caption: variance == null ? 'no_invoices_captured' : null,
                 icon: Icons.compare_arrows_rounded,
-                tone: variance.abs() <= _tolerance
-                    ? MlTone.done
-                    : (variance > 0 ? MlTone.error : MlTone.warn),
+                tone: variance == null
+                    ? MlTone.neutral
+                    : (variance.abs() <= _tolerance
+                        ? MlTone.done
+                        : (variance > 0 ? MlTone.error : MlTone.warn)),
               ),
             ];
             return Wrap(
