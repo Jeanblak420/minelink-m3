@@ -41,6 +41,49 @@
 /// fingerprint is enqueued and flushed exactly as before. Only a genuine
 /// repeat — arriving while the representative row is still pending — is
 /// folded in. See [_dedupWindow] for how long a fingerprint stays open.
+///
+/// ## The send budget, and why collapsing was not enough
+///
+/// 🚨 **Collapsing bounds repeats only while a row has not been sent.** The
+/// paragraph above says so, and the note on [_dedupWindow] called that
+/// "almost entirely the offline case". Online it is the whole failure:
+/// `flush()` posts immediately, the representative leaves [_pending], and the
+/// very next identical occurrence has nothing to fold into and starts a fresh
+/// row. The rate of ROWS is then the rate of occurrences divided by however
+/// many happen to arrive during one network round trip — which is not a
+/// bound at all.
+///
+/// This was measured, not reasoned about. On 2026-08-22 three browser tabs
+/// left signed in overnight hit a CanvasKit `Aborted()` failure during
+/// `paint()` and re-threw it on every frame for four hours. They wrote
+/// **204,539 rows — 293 MB** into a `crash_reports` table this file's own doc
+/// describes as having reached 36 rows. Main is a 500 MB free-plan project
+/// (CLAUDE.md §10.2): it went from 24 MB to 319 MB, 59% of the ceiling, on
+/// telemetry about one bug. Peak was 60,680 rows in a single hour.
+///
+/// Two details make that incident immune to fingerprinting, which is why the
+/// bound has to be on rows rather than on repeats:
+///
+///   * `Bad state: RenderBox was not laid out: minified:aAN#5ab90` carries a
+///     per-instance object hash. It changed three times over the four hours,
+///     so each spell was a different fingerprint.
+///   * A fold writes ` (xN)` into the stored text, so the rows that DID reach
+///     Postgres are spread across `(x31)`, `(x32)`, `(x33)` — each one a
+///     separate row that folded ~32 occurrences before its flush completed.
+///     The folding worked perfectly and still let 17,809 rows through.
+///
+/// So [report] now also spends from a budget, and the budget is on rows
+/// LEAVING THE DEVICE, across every fingerprint:
+///
+///   * [_maxRowsPerWindow] rows per [_rateWindow], and
+///   * [_maxRowsPerSession] rows in the life of this sink, ever.
+///
+/// Nothing is silently dropped: occurrences the budget refuses are counted,
+/// and the count rides out on the next row that IS sent, as
+/// `(+N not sent)`. The magnitude survives even though the rows do not.
+/// Under those bounds the incident above costs at most 500 rows per tab
+/// instead of 204,539 — and the first twenty seconds of it, which is the part
+/// that actually tells you what broke, are unaffected.
 library;
 
 import 'dart:async';
@@ -86,21 +129,50 @@ String _clip(String s, int max) =>
 /// next occurrence starts a fresh representative row with its own window.
 const Duration _dedupWindow = Duration(seconds: 60);
 
-/// Folds an occurrence count onto an already-[_clip]ped error string,
-/// re-clipping if needed so the marker can never push the result past
-/// [_maxErrorChars] — the exact bound `crash_reports_error_length` enforces
-/// in Postgres. Takes the unmarked text every time (never a previously
-/// marked one) so repeated calls produce `(x2)`, `(x3)`, ... rather than
-/// `(x2) (x3)`.
-String _withCount(String clippedError, int count) {
-  if (count <= 1) return clippedError;
-  final marker = ' (x$count)';
-  if (clippedError.length + marker.length <= _maxErrorChars) {
-    return '$clippedError$marker';
+/// The send budget. See the library doc for the incident that set these.
+///
+/// **20 rows a minute** leaves the first seconds of a real crash fully
+/// reported — a genuine fault rarely produces twenty DISTINCT failures in a
+/// minute, and repeats are collapsed before they ever reach the budget — while
+/// making a per-frame loop cost one row every three seconds instead of
+/// thirteen a second.
+///
+/// **500 rows per session** is the backstop, and it is the one that actually
+/// bounds the damage: a client can never write more than about 700 KB no
+/// matter how long it is left running or how fast it fails. Five hundred
+/// distinct reports in one session already says more than the five hundred
+/// and first would.
+///
+/// Both are counted against the incoming report's own `at`, never the wall
+/// clock, so this is testable without faking time — the same choice
+/// [_dedupWindow] makes and for the same reason.
+const Duration _rateWindow = Duration(minutes: 1);
+const int _maxRowsPerWindow = 20;
+const int _maxRowsPerSession = 500;
+
+/// Builds the `error` value a row actually stores: the clipped text, plus an
+/// occurrence marker when repeats were folded into it, plus a note when the
+/// send budget refused rows in the run-up to this one.
+///
+/// Composed from the UNMARKED text every time — never from a previously
+/// composed string — so re-stamping a row as more occurrences fold in
+/// produces `(x2)`, `(x3)`, ... rather than `(x2) (x3)`, and can never
+/// duplicate or lose the suppressed note.
+///
+/// Re-clips if needed so no marker can push the result past [_maxErrorChars],
+/// the exact bound `crash_reports_error_length` enforces in Postgres.
+String composeErrorText(String clippedError, {int count = 1, int notSent = 0}) {
+  final marker = StringBuffer();
+  if (count > 1) marker.write(' (x$count)');
+  if (notSent > 0) marker.write(' (+$notSent not sent)');
+  final suffix = marker.toString();
+  if (suffix.isEmpty) return clippedError;
+  if (clippedError.length + suffix.length <= _maxErrorChars) {
+    return '$clippedError$suffix';
   }
-  final keep = _maxErrorChars - marker.length;
+  final keep = _maxErrorChars - suffix.length;
   final base = keep <= 3 ? '' : '${clippedError.substring(0, keep - 3)}...';
-  return '$base$marker';
+  return '$base$suffix';
 }
 
 class SupabaseReportingSink implements ReportingSink {
@@ -108,8 +180,8 @@ class SupabaseReportingSink implements ReportingSink {
     Future<void> Function(List<Map<String, dynamic>> rows)? postBatch,
     this.queueLimit = 50,
     String? appVersion,
-  })  : _postBatch = postBatch ?? _defaultPost,
-        _appVersion = appVersion;
+  }) : _postBatch = postBatch ?? _defaultPost,
+       _appVersion = appVersion;
 
   /// Injected so the queueing and truncation rules can be tested without a
   /// live database — which is the half most likely to be wrong.
@@ -133,7 +205,27 @@ class SupabaseReportingSink implements ReportingSink {
   /// See the class doc for why this exists and [_dedupWindow] for the bound.
   final Map<String, _DedupEntry> _dedup = <String, _DedupEntry>{};
 
+  /// When each row was CREATED, oldest first, pruned to [_rateWindow].
+  /// Rows, not occurrences — a fold costs nothing, because it does not add a
+  /// row.
+  final Queue<DateTime> _rowTimes = Queue<DateTime>();
+
+  /// Rows this sink has created since it was constructed, and occurrences the
+  /// budget refused since the last row that got through.
+  int _rowsThisSession = 0;
+  int _notSent = 0;
+
+  /// Set once the session ceiling is reached, after the one row that says so.
+  bool _budgetSpent = false;
+
   int get pendingCount => _pending.length;
+
+  /// Occurrences the budget has refused and not yet accounted for on a row.
+  /// Exposed so a test can prove nothing is being silently thrown away.
+  int get notSentCount => _notSent;
+
+  /// Rows created since construction, for the same reason.
+  int get rowsThisSession => _rowsThisSession;
   List<Map<String, dynamic>> get pending =>
       List.unmodifiable(_pending.map((p) => p.row));
 
@@ -194,7 +286,12 @@ class SupabaseReportingSink implements ReportingSink {
         // is re-derived from the clipped-but-unmarked text every time, so
         // repeated folding never compounds markers like "(x2) (x3)".
         existing.count++;
-        representative.row['error'] = _withCount(clippedError, existing.count);
+        representative.count = existing.count;
+        representative.row['error'] = composeErrorText(
+          representative.baseError,
+          count: representative.count,
+          notSent: representative.notSent,
+        );
         // The representative may have been enqueued while offline; nudge a
         // flush in case connectivity has since returned. Harmless to call
         // again if one is already in flight — flush() no-ops while draining.
@@ -205,23 +302,60 @@ class SupabaseReportingSink implements ReportingSink {
       // Either the first time this fingerprint has been seen, or the
       // previous representative already left the device (sent, or evicted
       // by overflow), or the window lapsed — in every case this occurrence
-      // needs its own row.
+      // needs its own row, and a row is what the budget is denominated in.
+      //
+      // Everything above this line is free: a fold changes an existing row and
+      // costs nothing. Only from here does an occurrence become a write.
+      if (_budgetSpent) {
+        _notSent++;
+        return;
+      }
+
+      _rowTimes.removeWhere((t) => r.at.difference(t).abs() > _rateWindow);
+      if (_rowTimes.length >= _maxRowsPerWindow) {
+        _notSent++;
+        return;
+      }
+
       final id = _nextId++;
-      _pending.addLast(_PendingReport(
+      final atTheCeiling = _rowsThisSession + 1 >= _maxRowsPerSession;
+      final baseError = atTheCeiling
+          ? 'Crash reporting stopped for this session: '
+                '$_maxRowsPerSession reports is the per-session ceiling. '
+                'Further errors are still handled, just not sent. '
+                'Last one was: $clippedError'
+          : clippedError;
+
+      final row = _PendingReport(
         id,
         <String, dynamic>{
           'user_id': _currentUserId(),
           'at': r.at.toUtc().toIso8601String(),
           'platform': _platform,
           'app_version': _appVersion,
-          'error': clippedError,
-          'stack':
-              r.stack == null ? null : _clip(r.stack.toString(), _maxStackChars),
+          'error': null, // composed below, so there is one code path for it
+          'stack': r.stack == null
+              ? null
+              : _clip(r.stack.toString(), _maxStackChars),
           'context': r.context,
           'fatal': r.fatal,
         },
-      ));
-      _dedup[fingerprint] = _DedupEntry(pendingId: id, firstAt: r.at);
+        baseError: _clip(baseError, _maxErrorChars),
+        notSent: _notSent,
+      );
+      row.row['error'] = composeErrorText(row.baseError, notSent: row.notSent);
+      _pending.addLast(row);
+      _notSent = 0;
+      _rowTimes.addLast(r.at);
+      _rowsThisSession++;
+      if (atTheCeiling) _budgetSpent = true;
+
+      // A ceiling row is a statement about the sink, not a recurrence of the
+      // error that triggered it, so it is deliberately NOT registered as a
+      // dedup representative: nothing should ever fold into it.
+      if (!atTheCeiling) {
+        _dedup[fingerprint] = _DedupEntry(pendingId: id, firstAt: r.at);
+      }
 
       // Oldest-first: during a storm the newest reports are the ones still
       // describing the live state of the app.
@@ -249,7 +383,9 @@ class SupabaseReportingSink implements ReportingSink {
       final sentIds = batch.map((p) => p.id).toSet();
       _pending.removeWhere((p) => sentIds.contains(p.id));
     } catch (e) {
-      debugPrint('SupabaseReportingSink.flush failed, ${_pending.length} held: $e');
+      debugPrint(
+        'SupabaseReportingSink.flush failed, ${_pending.length} held: $e',
+      );
     } finally {
       _draining = false;
     }
@@ -257,9 +393,26 @@ class SupabaseReportingSink implements ReportingSink {
 }
 
 class _PendingReport {
-  _PendingReport(this.id, this.row);
+  _PendingReport(
+    this.id,
+    this.row, {
+    required this.baseError,
+    this.notSent = 0,
+  });
+
   final int id;
   final Map<String, dynamic> row;
+
+  /// The clipped, UNMARKED error text. Kept so [composeErrorText] can be
+  /// re-run from the original every time a fold bumps the count, rather than
+  /// appending to a string that already carries a marker.
+  final String baseError;
+
+  /// Occurrences the send budget refused before this row was created. Rides
+  /// out with it so the magnitude of a suppressed burst is not lost.
+  final int notSent;
+
+  int count = 1;
 }
 
 /// Tracks one open dedup group: which pending row is the representative for
