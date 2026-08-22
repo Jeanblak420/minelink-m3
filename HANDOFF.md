@@ -1,6 +1,6 @@
 # MineLink M3 — session handoff
 
-**Rewritten 2026-08-22, at the end of the session that did four things Jean
+**Rewritten 2026-08-22, at the end of the session that did SIX things Jean
 asked for during the run and fixed four faults found on the way to them.**
 Everything below is verified state, not intention. It replaces the previous
 handoff of the same name; the parts of that one still true have been folded in.
@@ -17,9 +17,9 @@ file governs the redesign work.**
 
 ## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The tree is **clean**, **139 commits**, nothing half-applied and nothing
+The tree is **clean**, **140 commits**, nothing half-applied and nothing
 uncommitted. **The tip is the commit that carries THIS FILE**, so the count
-above includes it. The last code commit under it is `736a8b8`, and the whole
+above includes it. The last code commit under it is `1b0982c`, and the whole
 gate in §2 was run green against the tree as it stands.
 
 **The original worktree was re-checked against its §0 baseline at the start and
@@ -36,9 +36,9 @@ rather than by deciding they could not be done:
   the app's own composer, with the second message arriving in the first
   account's already-open thread over realtime and delivery ticks rendering.
 - **The phone was driven.** The current APK is installed on the SM-G780G and
-  four separate things were verified on that hardware.
+  six separate things were verified on that hardware.
 
-**Jean asked for four things during the session. All four are built, tested and
+**Jean asked for six things during the session. All six are built, tested and
 verified on the phone:**
 
     1. a re-centre / re-focus control on the driver's map, and more of what
@@ -47,6 +47,9 @@ verified on the phone:**
     3. the sidebar collapsed by default, and every parent in it collapsed,
        on every device and platform
     4. a proper parent for everything in the sidebar — no loose entries
+    5. …EXCEPT the Dashboard, which he then ruled must NOT have one
+    6. the rail reordered to the ORIGINAL app's super-admin sidebar order,
+       across the whole app, keeping the M3 look and the new groups
 
 **And four faults were found and fixed on the way there:**
 
@@ -66,7 +69,7 @@ verified on the phone:**
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **139 commits**, clean tree. |
+| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **140 commits**, clean tree. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
@@ -136,7 +139,7 @@ stands:
 
 ```
 flutter analyze                                 no issues
-flutter test                                    2397 passed, 1 skipped
+flutter test                                    2398 passed, 1 skipped
 dart tool/release_guards.dart                   40/40 PASS, 0 FAIL
 dart tool/release_guards.dart --selftest        all guards bite
 py -3 tool/_sabotage.py                         all sabotages caught
@@ -157,7 +160,7 @@ A LIVE CHAT BETWEEN TWO REAL ACCOUNTS           DRIVEN, both directions
 THE CURRENT BUILD ON JEAN'S SM-G780G            INSTALLED and verified
 ```
 
-Test count went **2229 → 2397**: a hundred and sixty-eight new, across five new
+Test count went **2229 → 2398**: a hundred and sixty-nine new, across five new
 files. Guards stayed at **40**.
 
 ⚠️ **`CUT OFF` counts RENDERS, not strings.** 5 lines, 9 strings — three
@@ -387,16 +390,61 @@ most-tapped control on those pages responded with no ripple at all.
 `Material(type: MaterialType.transparency)` paints nothing, so all 261 renders
 pass with goldens UNCHANGED and the count goes 132 → 0.
 
-### 3.8 What was verified on Jean's actual phone
+### 3.8 The Dashboard came back out, and the rail took the original's order (commit `1b0982c`)
 
-Current APK installed on the SM-G780G (SHA-256 checked against the local build
-before and after the copy). Photographed, then every screenshot deleted:
+Both corrections came from Jean after seeing §3.6 rendered.
+
+**The Dashboard is the one destination with no parent**, and that turns out to
+be what the ORIGINAL app does rather than an exception invented to please
+anybody: `minelink_sidebar_core.dart` in the shipping tree declares three
+sections — `dashboard`, `main`, `footer` — and the first holds one item, above
+everything else. Wrapping it cost a tap on the most-used destination in the
+product and made the bottom bar's first tile read "Overview". Everything else
+keeps the parent it was given.
+
+**The order now matches the original**, read out of the untouchable worktree
+rather than remembered:
+
+| original | this rail |
+|---|---|
+| Dashboard | Dashboard |
+| Insights | Insights |
+| **Tokens & Seats** | **Tokens & Seats** ← was below Requests |
+| Requests | Requests |
+| Margin ledger · Recon tables · Disputes | Reconciliation ▾ *(same order inside)* |
+| Available routes · Route marketplace | Routes ▾ |
+| Chat links | Communications ▾ |
+| Live map | Tracking ▾ |
+| Notifications · About · Settings | Settings ▾ (About is already excluded — an action, not a destination) |
+
+So the original's flat block keeps its sequence, inside the parents §3.6 gave
+it. "Tracking" is the transporter portal's own word for a live map, so nothing
+was invented to house it.
+
+The test **names** the exception instead of leaving a hole: exactly one
+top-level leaf per tree, it must be the Dashboard, and it must be FIRST — a
+Dashboard buried between groups is not the exception, it is a different bug. A
+second test pins the console order outright, including the sequence inside
+Reconciliation, because that is the half a picture cannot check.
+
+⚠️ **The bottom bar's third tile is now "Access"**, the pre-existing
+`shortLabel` for Tokens & Seats, because that group moved above Requests. Four
+tiles, every word whole — photographed on the phone.
+
+### 3.9 What was verified on Jean's actual phone
+
+The FINAL build (tip `1b0982c`) is installed on the SM-G780G, SHA-256
+`ee01e891…79f0` checked against the local build before and after the copy.
+Photographed, then every screenshot deleted:
 
 - **the console's bottom bar** reads `Dashboard · Insights · Requests · More`,
   four tiles, every word whole — the 2026-08-22 "Dashboar / d" fix, proven on
   hardware for the first time
-- **the drawer's groups are collapsed** — Insights, Requests and Tokens & Seats
-  all shut, where before Insights and Requests were expanded into a wall
+- **the drawer reads the original order, all groups shut** — Dashboard (on its
+  own, selected, no chevron), then Insights, Tokens & Seats, Requests,
+  Reconciliation, Routes, Communications, Tracking, Settings. Before this
+  session Insights and Requests were expanded into a wall and eight
+  destinations sat loose among them.
 - **the live map's controls** — overview, zoom pill, centre-on-truck, and a
   `1 km` scale bar, over real OSM tiles
 - **hold-to-copy** — holding the plate pill produced our own
@@ -434,19 +482,16 @@ teleported, so do not try it there. **An emulator is currently running**
 (`emulator-5554`, visible to `adb devices`), so that route is one command away
 if it is wanted.
 
-### 4.3 Two judgement calls Jean may want to reverse
+### 4.3 One judgement call Jean may want to reverse
 
-Both are one-line reverts and both are recorded here rather than buried:
+**The dock is not mounted on `/chat/:id`.** It was covering 61% of the send
+button; suppressing it matches what `/communications` has always done. If the
+dock should stay there instead, the fix has to become geometric — the dock
+would need to reserve space for a bottom composer the way it already does for
+the bottom bar.
 
-1. **Dashboard now sits inside an "Overview" group**, so it is one level deeper
-   in the rail and the bottom bar's first tile reads "Overview". That follows
-   "all should have a parent" literally. If Dashboard should stay a top-level
-   destination, `_overview(...)` goes back to a bare leaf in
-   `portal_nav.dart` and `console_nav.dart`.
-2. **The dock is not mounted on `/chat/:id`.** It was covering the send button;
-   suppressing it matches `/communications`. If the dock should stay there
-   instead, the fix has to become geometric — the dock would need to reserve
-   space for a bottom composer the way it already does for the bottom bar.
+(The other call from earlier in the session — Dashboard inside an "Overview"
+group — was reversed by Jean the same day and is done: §3.8.)
 
 ### 4.4 Closed, do not redo
 
@@ -475,7 +520,7 @@ Both are one-line reverts and both are recorded here rather than buried:
 cd "/c/Users/Somebody Someone/Music/SHOWME!/MineLink-M3"
 
 flutter analyze                                  # must be clean
-flutter test                                     # 2397 passing, 1 skipped
+flutter test                                     # 2398 passing, 1 skipped
 dart tool/release_guards.dart                    # 40/40
 dart tool/release_guards.dart --selftest         # every guard must BITE
 py -3 tool/_sabotage.py                          # every instrument fix must BITE
@@ -738,7 +783,7 @@ off. Read these TWO handoff files before doing anything else, in this order.
 
 THE PATHS THAT MATTER
 
-  Work happens here (its own git repo, branch `main`, 139 commits, clean):
+  Work happens here (its own git repo, branch `main`, 140 commits, clean):
     C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
   NEVER TOUCHED, for any reason:
@@ -764,9 +809,9 @@ handoff — CHECK IT AT THE START OF THE SESSION AND AGAIN AT THE END:
 
 WHERE I LEFT OFF, EXACTLY
 
-The tree is CLEAN. 139 commits. Nothing is half-applied and nothing is
+The tree is CLEAN. 140 commits. Nothing is half-applied and nothing is
 uncommitted. The tip is the commit carrying HANDOFF.md, so the count includes
-it. The five code commits of the session are:
+it. The six code commits of the session are:
 
     b9be44b  the chat dock's launcher sat on the send button, and a failed
              attachment was silent
@@ -775,11 +820,13 @@ it. The five code commits of the session are:
     b353543  the sidebar starts collapsed, and so does every group in it
     04a61d5  nothing in a sidebar sits at the top level on its own any more
     736a8b8  the dashboard period pills had no Material under them
+    1b0982c  the Dashboard comes back out, and the rail is in the ORIGINAL
+             app's order
 
 Green means EXACTLY this — compare against it rather than against a memory:
 
     flutter analyze                    no issues
-    flutter test                       2397 passed, 1 skipped
+    flutter test                       2398 passed, 1 skipped
     dart tool/release_guards.dart      40/40 PASS, 0 FAIL
     dart tool/release_guards.dart --selftest   all guards bite
     py -3 tool/_sabotage.py            all sabotages caught
