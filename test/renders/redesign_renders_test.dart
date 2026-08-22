@@ -31,6 +31,7 @@ import 'package:flutter_application_1/core/design/shell/ml_app_shell.dart';
 import 'package:flutter_application_1/core/design/shell/ml_rail_blocks.dart';
 import 'package:flutter_application_1/core/routing/ml_route_title.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
+import 'package:flutter_application_1/core/routing/route_not_found_screen.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/core/widgets/osm_tile_layer.dart';
 import 'package:flutter_map/flutter_map.dart' show NetworkTileProvider;
@@ -187,12 +188,14 @@ final Map<String, String> _consoleRouteByScreen = () {
   // `path:` then, within the same GoRoute block, the screen classes its
   // builder can return. The window stops at the next `path:` so a builder
   // never claims the following route's screens.
-  final routeStarts =
-      RegExp(r"""path:\s*'(/super-admin[^']*)'""").allMatches(src).toList();
+  final routeStarts = RegExp(
+    r"""path:\s*'(/super-admin[^']*)'""",
+  ).allMatches(src).toList();
   for (var i = 0; i < routeStarts.length; i++) {
     final m = routeStarts[i];
-    final end =
-        i + 1 < routeStarts.length ? routeStarts[i + 1].start : src.length;
+    final end = i + 1 < routeStarts.length
+        ? routeStarts[i + 1].start
+        : src.length;
     final block = src.substring(m.end, end);
     final path = m
         .group(1)!
@@ -200,7 +203,9 @@ final Map<String, String> _consoleRouteByScreen = () {
         .replaceAll(':companyId', 'c-1')
         .replaceAll(':orgId', 'o-1')
         .replaceAll(':type', 'transportation');
-    for (final s in RegExp(r'\b([A-Z][A-Za-z0-9_]*Screen)\b').allMatches(block)) {
+    for (final s in RegExp(
+      r'\b([A-Z][A-Za-z0-9_]*Screen)\b',
+    ).allMatches(block)) {
       // First route wins: a screen mounted at two paths keeps the one the
       // router declares first, which is the canonical one in every case here.
       map.putIfAbsent(s.group(1)!, () => path);
@@ -239,8 +244,10 @@ void main() {
     // quietly producing a grid of hollow squares and calling it a screenshot.
     if (!icons) {
       // ignore: avoid_print
-      print('WARNING: MaterialIcons not found in the SDK cache — every icon in '
-          'these renders will be an empty box.');
+      print(
+        'WARNING: MaterialIcons not found in the SDK cache — every icon in '
+        'these renders will be an empty box.',
+      );
     }
     SharedPreferences.setMockInitialValues({});
     // `flutter_map`'s tile cache asks path_provider for a directory before it
@@ -294,7 +301,7 @@ void main() {
     final route = body == null
         ? '/super-admin'
         : (_consoleRouteByScreen[body.runtimeType.toString()] ??
-            '/super-admin');
+              '/super-admin');
     final chrome = mlRouteTitle(Uri.parse(route));
 
     return ProviderScope(
@@ -344,7 +351,8 @@ void main() {
           // which is how fabricated platform totals could reach a real admin
           // (P9-03). A render test is a legitimate caller of sample data — so
           // it says so, out loud, at the call site.
-          child: body ??
+          child:
+              body ??
               MineLinkDashboardScreen(
                 orgAggregates: MlSampleData.orgAggregates,
                 pendingRequests: MlSampleData.pendingRequests,
@@ -400,8 +408,8 @@ void main() {
     // decide what matters.
     final captured = <String>[];
     final previousOnError = FlutterError.onError;
-    FlutterError.onError =
-        (d) => captured.add(d.exception.toString().split('\n').first);
+    FlutterError.onError = (d) =>
+        captured.add(d.exception.toString().split('\n').first);
 
     // Wrapped so the pixels can be read back. `matchesGoldenFile` captures
     // its own image internally and hands it to a comparator; the contrast
@@ -424,8 +432,10 @@ void main() {
 
     if (captured.isNotEmpty) {
       // ignore: avoid_print
-      print('RENDER NOTE [$name] ${captured.length} framework error(s) at '
-          '${size.width.toInt()}x${size.height.toInt()}:');
+      print(
+        'RENDER NOTE [$name] ${captured.length} framework error(s) at '
+        '${size.width.toInt()}x${size.height.toInt()}:',
+      );
       for (final c in captured.toSet()) {
         // ignore: avoid_print
         print('  - $c');
@@ -453,7 +463,8 @@ void main() {
     expect(
       captured,
       isEmpty,
-      reason: 'the framework threw while rendering "$name" — the picture was '
+      reason:
+          'the framework threw while rendering "$name" — the picture was '
           'still written, but it is a picture of a broken layout',
     );
 
@@ -545,8 +556,10 @@ void main() {
     });
     if (failures.isNotEmpty) {
       // ignore: avoid_print
-      print('FAILURE STATE [$name] ${failures.join(', ')} — is this render '
-          'meant to be a failure, or is a provider unstubbed?');
+      print(
+        'FAILURE STATE [$name] ${failures.join(', ')} — is this render '
+        'meant to be a failure, or is a provider unstubbed?',
+      );
     }
 
     // Keyed by string, valued by WHERE it was cut and how much room it had.
@@ -596,8 +609,10 @@ void main() {
     });
     if (cut.isNotEmpty) {
       // ignore: avoid_print
-      print('CUT OFF [$name] ${cut.length} string(s) at '
-          '${size.width.toInt()}x${size.height.toInt()}:');
+      print(
+        'CUT OFF [$name] ${cut.length} string(s) at '
+        '${size.width.toInt()}x${size.height.toInt()}:',
+      );
       for (final entry in cut.entries) {
         // ignore: avoid_print
         print('  ~ ${entry.key}');
@@ -670,9 +685,9 @@ void main() {
   /// renders were built against — keeps its value, and the tail set only fills
   /// what nothing else was answering.
   List<Override> allPortalOverrides() => [
-        ...portalTailOverrides(),
-        ...portalCaptureOverrides(),
-      ];
+    ...portalTailOverrides(),
+    ...portalCaptureOverrides(),
+  ];
 
   /// A portal shell for one org type and role.
   ///
@@ -742,12 +757,12 @@ void main() {
   /// The login screen — the only screen in the product every single user sees,
   /// and the only one that had no picture.
   Widget login(Brightness brightness) => ProviderScope(
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.build(brightness),
-          home: const LoginScreen(),
-        ),
-      );
+    child: MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.build(brightness),
+      home: const LoginScreen(),
+    ),
+  );
 
   /// One of login's neighbours, bare — these four are TOP-LEVEL routes, not
   /// leaves of either shell, so there is no rail and no top bar around them.
@@ -763,12 +778,20 @@ void main() {
 
   group('auth', () {
     testWidgets('login desktop dark', (tester) async {
-      await shoot(tester, login(Brightness.dark), const Size(1440, 1000),
-          'login-desktop-dark');
+      await shoot(
+        tester,
+        login(Brightness.dark),
+        const Size(1440, 1000),
+        'login-desktop-dark',
+      );
     });
     testWidgets('login phone dark', (tester) async {
-      await shoot(tester, login(Brightness.dark), const Size(412, 915),
-          'login-phone-dark');
+      await shoot(
+        tester,
+        login(Brightness.dark),
+        const Size(412, 915),
+        'login-phone-dark',
+      );
     });
 
     // LOGIN'S NEIGHBOURS.
@@ -778,26 +801,72 @@ void main() {
     // none of them had ever been rendered at any width.
 
     testWidgets('forgot password — phone dark', (tester) async {
-      await shoot(tester, bareAuth(const ForgotPasswordScreen()),
-          const Size(412, 915), 'screen-forgot-password-phone-dark');
+      await shoot(
+        tester,
+        bareAuth(const ForgotPasswordScreen()),
+        const Size(412, 915),
+        'screen-forgot-password-phone-dark',
+      );
     });
 
     testWidgets('forgot password — desktop dark', (tester) async {
-      await shoot(tester, bareAuth(const ForgotPasswordScreen()),
-          const Size(1440, 900), 'screen-forgot-password-desktop-dark');
+      await shoot(
+        tester,
+        bareAuth(const ForgotPasswordScreen()),
+        const Size(1440, 900),
+        'screen-forgot-password-desktop-dark',
+      );
+    });
+
+    // THE NOT-FOUND SCREEN. Until 2026-08-22 this was go_router's own default
+    // — a bare app bar and the raw text "GoException: no routes for location:
+    // /...". It is a screen a real user reaches from a stale link, and it had
+    // never been photographed because it belongs to a package rather than to
+    // a route in this app, so `unphotographed_screens.py` cannot see it.
+    testWidgets('route not found — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        bareAuth(
+          RouteNotFoundScreen(
+            location: '/portal/buyer/this-route-does-not-exist',
+            onGoBack: () {},
+          ),
+        ),
+        const Size(1440, 900),
+        'screen-route-not-found-desktop-dark',
+      );
+    });
+
+    testWidgets('route not found — phone dark', (tester) async {
+      await shoot(
+        tester,
+        bareAuth(
+          RouteNotFoundScreen(
+            location: '/portal/buyer/this-route-does-not-exist',
+            onGoBack: () {},
+          ),
+        ),
+        const Size(412, 915),
+        'screen-route-not-found-phone-dark',
+      );
     });
 
     testWidgets('whatsapp otp — phone dark', (tester) async {
       await shoot(
-          tester,
-          bareAuth(const WhatsAppOtpScreen(whatsappNumber: '+27 82 000 0001')),
-          const Size(412, 915),
-          'screen-whatsapp-otp-phone-dark');
+        tester,
+        bareAuth(const WhatsAppOtpScreen(whatsappNumber: '+27 82 000 0001')),
+        const Size(412, 915),
+        'screen-whatsapp-otp-phone-dark',
+      );
     });
 
     testWidgets('mandatory password change — phone dark', (tester) async {
-      await shoot(tester, bareAuth(const MandatoryPasswordChangeScreen()),
-          const Size(412, 915), 'screen-mandatory-password-change-phone-dark');
+      await shoot(
+        tester,
+        bareAuth(const MandatoryPasswordChangeScreen()),
+        const Size(412, 915),
+        'screen-mandatory-password-change-phone-dark',
+      );
     });
 
     // THE PAGE A CUSTOMER LANDS ON FROM A PASSWORD-RESET EMAIL.
@@ -809,44 +878,54 @@ void main() {
     // reads the whole builder now.
     testWidgets('reset password — phone dark', (tester) async {
       await shoot(
-          tester,
-          bareAuth(const ResetPasswordScreen(resetToken: 'FIXTURE-token')),
-          const Size(412, 915),
-          'screen-reset-password-phone-dark');
+        tester,
+        bareAuth(const ResetPasswordScreen(resetToken: 'FIXTURE-token')),
+        const Size(412, 915),
+        'screen-reset-password-phone-dark',
+      );
     });
 
     testWidgets('reset password — desktop dark', (tester) async {
       await shoot(
-          tester,
-          bareAuth(const ResetPasswordScreen(resetToken: 'FIXTURE-token')),
-          const Size(1440, 900),
-          'screen-reset-password-desktop-dark');
+        tester,
+        bareAuth(const ResetPasswordScreen(resetToken: 'FIXTURE-token')),
+        const Size(1440, 900),
+        'screen-reset-password-desktop-dark',
+      );
     });
 
     testWidgets('company selection — phone dark', (tester) async {
       await shoot(
-          tester,
-          bareAuth(const CompanySelectionScreen(), overrides: [
+        tester,
+        bareAuth(
+          const CompanySelectionScreen(),
+          overrides: [
             authOverride(),
             // `withDirectory` — WITHOUT it this photographs "No companies
             // found", and a screen whose whole design is a list of companies
             // is not photographed by a picture of it having none.
             employeeOverride(withDirectory: true),
-          ]),
-          const Size(412, 915),
-          'screen-company-selection-phone-dark');
+          ],
+        ),
+        const Size(412, 915),
+        'screen-company-selection-phone-dark',
+      );
     });
 
     // The empty state as well, which is a real state: an account whose
     // WhatsApp number is on no company's roster.
-    testWidgets('company selection, nothing to join — phone dark',
-        (tester) async {
+    testWidgets('company selection, nothing to join — phone dark', (
+      tester,
+    ) async {
       await shoot(
-          tester,
-          bareAuth(const CompanySelectionScreen(),
-              overrides: companyScopeOverrides()),
-          const Size(412, 915),
-          'screen-company-selection-empty-phone-dark');
+        tester,
+        bareAuth(
+          const CompanySelectionScreen(),
+          overrides: companyScopeOverrides(),
+        ),
+        const Size(412, 915),
+        'screen-company-selection-empty-phone-dark',
+      );
     });
   });
 
@@ -1279,8 +1358,9 @@ void main() {
       );
     });
 
-    testWidgets('transporter routes & dispatches — desktop dark',
-        (tester) async {
+    testWidgets('transporter routes & dispatches — desktop dark', (
+      tester,
+    ) async {
       await shoot(
         tester,
         screen(
@@ -1842,77 +1922,102 @@ void main() {
       Size size = const Size(412, 1500),
       Future<void> Function(WidgetTester tester)? act,
       List<Override> extra = const [],
-    }) =>
-        shoot(
-          tester,
-          ProviderScope(
-            overrides: [
-              ...companyScopeOverrides(role: UserRole.driver),
-              ...portalCaptureOverrides(),
-              ...portalTailOverrides(),
-              // `sharedTailOverrides` for ONE widget: the driver dashboard
-              // carries an `AnimatedNotificationBell`, and `notificationProvider`
-              // un-overridden opens a real socket. That is not a slow render —
-              // the connect attempt outlives the widget tree and fails the test
-              // with "A Timer is still pending", after the golden is written.
-              ...sharedTailOverrides(),
-              // A driver's outstanding setup is their OWN — licence, PrDP,
-              // medical. `sharedTailOverrides` supplies the company-admin
-              // state (`audience: 'company'`), and the prompt dialog keys its
-              // title off that field, so without this it told a driver to
-              // "Complete your company account setup".
-              ...driverProfileSetupOverride(),
-              ...extra,
-            ],
-            child: MaterialApp(
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.build(Brightness.dark),
-              home: DriverAppScreen(initialTab: tab),
-            ),
-          ),
-          size,
-          name,
-          act: act ?? dismissSetupPrompt,
-        );
+    }) => shoot(
+      tester,
+      ProviderScope(
+        overrides: [
+          ...companyScopeOverrides(role: UserRole.driver),
+          ...portalCaptureOverrides(),
+          ...portalTailOverrides(),
+          // `sharedTailOverrides` for ONE widget: the driver dashboard
+          // carries an `AnimatedNotificationBell`, and `notificationProvider`
+          // un-overridden opens a real socket. That is not a slow render —
+          // the connect attempt outlives the widget tree and fails the test
+          // with "A Timer is still pending", after the golden is written.
+          ...sharedTailOverrides(),
+          // A driver's outstanding setup is their OWN — licence, PrDP,
+          // medical. `sharedTailOverrides` supplies the company-admin
+          // state (`audience: 'company'`), and the prompt dialog keys its
+          // title off that field, so without this it told a driver to
+          // "Complete your company account setup".
+          ...driverProfileSetupOverride(),
+          ...extra,
+        ],
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.build(Brightness.dark),
+          home: DriverAppScreen(initialTab: tab),
+        ),
+      ),
+      size,
+      name,
+      act: act ?? dismissSetupPrompt,
+    );
 
     testWidgets('dashboard tab — phone dark', (tester) async {
-      await shootDriver(tester, 0, 'screen-driver-app-dashboard-phone-dark',
-          size: const Size(412, 1550));
+      await shootDriver(
+        tester,
+        0,
+        'screen-driver-app-dashboard-phone-dark',
+        size: const Size(412, 1550),
+      );
     });
 
     testWidgets('trip tab — phone dark', (tester) async {
-      await shootDriver(tester, 1, 'screen-driver-app-trip-phone-dark',
-          size: const Size(412, 1150));
+      await shootDriver(
+        tester,
+        1,
+        'screen-driver-app-trip-phone-dark',
+        size: const Size(412, 1150),
+      );
     });
 
     testWidgets('profile tab — phone dark', (tester) async {
-      await shootDriver(tester, 2, 'screen-driver-app-profile-phone-dark',
-          size: const Size(412, 1100));
+      await shootDriver(
+        tester,
+        2,
+        'screen-driver-app-profile-phone-dark',
+        size: const Size(412, 1100),
+      );
     });
 
     // A driver on a tablet, which is a real thing in a cab.
     testWidgets('dashboard tab — tablet dark', (tester) async {
-      await shootDriver(tester, 0, 'screen-driver-app-dashboard-tablet-dark',
-          size: const Size(1024, 1500));
+      await shootDriver(
+        tester,
+        0,
+        'screen-driver-app-dashboard-tablet-dark',
+        size: const Size(1024, 1500),
+      );
     });
 
     // The same tab for a driver who HAS delivered this week, because the
     // fixture driver has one trip and it is still en route — so the week chart
     // above photographs its empty state and its populated state is drawn by
     // nothing. Two completed loads, three and five days back.
-    testWidgets('dashboard tab, a week with deliveries — phone dark',
-        (tester) async {
+    testWidgets('dashboard tab, a week with deliveries — phone dark', (
+      tester,
+    ) async {
       await shootDriver(
-          tester, 0, 'screen-driver-app-dashboard-delivered-phone-dark',
-          size: const Size(412, 1600), extra: driverDeliveredWeekOverride());
+        tester,
+        0,
+        'screen-driver-app-dashboard-delivered-phone-dark',
+        size: const Size(412, 1600),
+        extra: driverDeliveredWeekOverride(),
+      );
     });
 
     // And the prompt itself — the first thing a driver with an outstanding
     // compliance item sees when they open the app, and one of the dialogs
     // §4.2 lists as never photographed.
     testWidgets('account setup prompt — phone dark', (tester) async {
-      await shootDriver(tester, 0, 'screen-account-setup-prompt-phone-dark',
-          size: const Size(412, 915), act: (_) async {});
+      await shootDriver(
+        tester,
+        0,
+        'screen-account-setup-prompt-phone-dark',
+        size: const Size(412, 915),
+        act: (_) async {},
+      );
     });
   });
 
@@ -2249,7 +2354,9 @@ void main() {
         console(
           brightness: Brightness.dark,
           body: const RequestReviewScreen(
-              requestType: 'transportation', origin: 'mine'),
+            requestType: 'transportation',
+            origin: 'mine',
+          ),
           extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1700),
@@ -2263,7 +2370,9 @@ void main() {
         console(
           brightness: Brightness.dark,
           body: const RequestReviewScreen(
-              requestType: 'transportation', origin: 'buyer'),
+            requestType: 'transportation',
+            origin: 'buyer',
+          ),
           extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 1700),
@@ -2308,14 +2417,17 @@ void main() {
     // transporter may be chosen — lives in the panel that appears once a row is
     // selected. The four renders above photograph the queue; this one
     // photographs the work.
-    testWidgets('a request open — the linking panel, desktop dark',
-        (tester) async {
+    testWidgets('a request open — the linking panel, desktop dark', (
+      tester,
+    ) async {
       await shoot(
         tester,
         console(
           brightness: Brightness.dark,
           body: const RequestReviewScreen(
-              requestType: 'transportation', origin: 'buyer'),
+            requestType: 'transportation',
+            origin: 'buyer',
+          ),
           extraOverrides: allPortalOverrides(),
         ),
         const Size(1600, 2000),
@@ -2335,14 +2447,17 @@ void main() {
     // resulting transporter price, then the ordered due-diligence gate) was
     // unreachable. The queue said "Approved 0" and the panel stopped at
     // Approve / Decline / Send back.
-    testWidgets('a request approved — the dispatch step, desktop dark',
-        (tester) async {
+    testWidgets('a request approved — the dispatch step, desktop dark', (
+      tester,
+    ) async {
       await shoot(
         tester,
         console(
           brightness: Brightness.dark,
           body: const RequestReviewScreen(
-              requestType: 'transportation', origin: 'buyer'),
+            requestType: 'transportation',
+            origin: 'buyer',
+          ),
           extraOverrides: [
             ...portalCaptureOverrides(),
             ...portalTailOverrides(),
@@ -2407,14 +2522,17 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('the due-diligence gate, step 1 — preview, desktop dark',
-        (tester) async {
+    testWidgets('the due-diligence gate, step 1 — preview, desktop dark', (
+      tester,
+    ) async {
       await shoot(
         tester,
         console(
           brightness: Brightness.dark,
           body: const RequestReviewScreen(
-              requestType: 'transportation', origin: 'buyer'),
+            requestType: 'transportation',
+            origin: 'buyer',
+          ),
           extraOverrides: [
             ...portalCaptureOverrides(),
             ...portalTailOverrides(),
@@ -2428,14 +2546,17 @@ void main() {
 
     // Step 3, the tick. Two dialogs further in: "Approve and send", then
     // "Yes" to the first confirm.
-    testWidgets('the due-diligence gate, step 3 — the tick, desktop dark',
-        (tester) async {
+    testWidgets('the due-diligence gate, step 3 — the tick, desktop dark', (
+      tester,
+    ) async {
       await shoot(
         tester,
         console(
           brightness: Brightness.dark,
           body: const RequestReviewScreen(
-              requestType: 'transportation', origin: 'buyer'),
+            requestType: 'transportation',
+            origin: 'buyer',
+          ),
           extraOverrides: [
             ...portalCaptureOverrides(),
             ...portalTailOverrides(),
@@ -2459,14 +2580,17 @@ void main() {
     // colour is the half a picture of the unticked state cannot show. It also
     // shows `Continue` changing from disabled to enabled, which is the gate
     // actually gating.
-    testWidgets('the due-diligence gate, step 3 ticked — desktop dark',
-        (tester) async {
+    testWidgets('the due-diligence gate, step 3 ticked — desktop dark', (
+      tester,
+    ) async {
       await shoot(
         tester,
         console(
           brightness: Brightness.dark,
           body: const RequestReviewScreen(
-              requestType: 'transportation', origin: 'buyer'),
+            requestType: 'transportation',
+            origin: 'buyer',
+          ),
           extraOverrides: [
             ...portalCaptureOverrides(),
             ...portalTailOverrides(),
@@ -2503,7 +2627,9 @@ void main() {
         console(
           brightness: Brightness.dark,
           body: const RequestReviewScreen(
-              requestType: 'transportation', origin: 'mine'),
+            requestType: 'transportation',
+            origin: 'mine',
+          ),
           extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 915),
@@ -2741,11 +2867,11 @@ void main() {
   // -------------------------------------------------------------------------
   group('the rest of the console', () {
     List<Override> tail() => [
-          ...consoleCaptureOverrides(),
-          ...portalCaptureOverrides(),
-          ...consoleTailOverrides(),
-          ...consoleLastOverrides(),
-        ];
+      ...consoleCaptureOverrides(),
+      ...portalCaptureOverrides(),
+      ...consoleTailOverrides(),
+      ...consoleLastOverrides(),
+    ];
 
     /// A console screen, dark by default.
     ///
@@ -2759,52 +2885,75 @@ void main() {
       Size size,
       String name, {
       Brightness brightness = Brightness.dark,
-    }) =>
-        shoot(
-          tester,
-          console(
-            brightness: brightness,
-            body: body,
-            extraOverrides: tail(),
-          ),
-          size,
-          name,
-        );
+    }) => shoot(
+      tester,
+      console(brightness: brightness, body: body, extraOverrides: tail()),
+      size,
+      name,
+    );
 
     testWidgets('request tracking — desktop dark', (tester) async {
-      await shootConsole(tester, const RequestTrackingScreen(),
-          const Size(1600, 1500), 'screen-request-tracking-desktop-dark');
+      await shootConsole(
+        tester,
+        const RequestTrackingScreen(),
+        const Size(1600, 1500),
+        'screen-request-tracking-desktop-dark',
+      );
     });
 
     testWidgets('request tracking — desktop light', (tester) async {
-      await shootConsole(tester, const RequestTrackingScreen(),
-          const Size(1600, 1500), 'screen-request-tracking-desktop-light',
-          brightness: Brightness.light);
+      await shootConsole(
+        tester,
+        const RequestTrackingScreen(),
+        const Size(1600, 1500),
+        'screen-request-tracking-desktop-light',
+        brightness: Brightness.light,
+      );
     });
 
     testWidgets('request tracking — phone dark', (tester) async {
-      await shootConsole(tester, const RequestTrackingScreen(),
-          const Size(412, 1343), 'screen-request-tracking-phone-dark');
+      await shootConsole(
+        tester,
+        const RequestTrackingScreen(),
+        const Size(412, 1343),
+        'screen-request-tracking-phone-dark',
+      );
     });
 
     testWidgets('platform users — desktop dark', (tester) async {
-      await shootConsole(tester, const PlatformUsersScreen(),
-          const Size(1600, 1600), 'screen-platform-users-desktop-dark');
+      await shootConsole(
+        tester,
+        const PlatformUsersScreen(),
+        const Size(1600, 1600),
+        'screen-platform-users-desktop-dark',
+      );
     });
 
     testWidgets('platform users — phone dark', (tester) async {
-      await shootConsole(tester, const PlatformUsersScreen(),
-          const Size(412, 1327), 'screen-platform-users-phone-dark');
+      await shootConsole(
+        tester,
+        const PlatformUsersScreen(),
+        const Size(412, 1327),
+        'screen-platform-users-phone-dark',
+      );
     });
 
     testWidgets('audit logs — desktop dark', (tester) async {
-      await shootConsole(tester, const AuditLogsScreen(),
-          const Size(1600, 1600), 'screen-audit-logs-desktop-dark');
+      await shootConsole(
+        tester,
+        const AuditLogsScreen(),
+        const Size(1600, 1600),
+        'screen-audit-logs-desktop-dark',
+      );
     });
 
     testWidgets('audit logs — phone dark', (tester) async {
-      await shootConsole(tester, const AuditLogsScreen(), const Size(412, 1629),
-          'screen-audit-logs-phone-dark');
+      await shootConsole(
+        tester,
+        const AuditLogsScreen(),
+        const Size(412, 1629),
+        'screen-audit-logs-phone-dark',
+      );
     });
 
     // EXPANDED, not collapsed. Every event on this screen lives inside the
@@ -2847,77 +2996,124 @@ void main() {
 
     testWidgets('organization detail — desktop dark', (tester) async {
       await shootConsole(
-          tester,
-          const OrganizationDetailScreen(organizationId: 'o4'),
-          const Size(1600, 1800),
-          'screen-organization-detail-desktop-dark');
+        tester,
+        const OrganizationDetailScreen(organizationId: 'o4'),
+        const Size(1600, 1800),
+        'screen-organization-detail-desktop-dark',
+      );
     });
 
     testWidgets('organization detail — phone dark', (tester) async {
       await shootConsole(
-          tester,
-          const OrganizationDetailScreen(organizationId: 'o4'),
-          const Size(412, 1755),
-          'screen-organization-detail-phone-dark');
+        tester,
+        const OrganizationDetailScreen(organizationId: 'o4'),
+        const Size(412, 1755),
+        'screen-organization-detail-phone-dark',
+      );
     });
 
     testWidgets('available routes — desktop dark', (tester) async {
-      await shootConsole(tester, const AvailableRoutesScreen(),
-          const Size(1600, 1500), 'screen-available-routes-desktop-dark');
+      await shootConsole(
+        tester,
+        const AvailableRoutesScreen(),
+        const Size(1600, 1500),
+        'screen-available-routes-desktop-dark',
+      );
     });
 
     testWidgets('available routes — phone dark', (tester) async {
-      await shootConsole(tester, const AvailableRoutesScreen(),
-          const Size(412, 1421), 'screen-available-routes-phone-dark');
+      await shootConsole(
+        tester,
+        const AvailableRoutesScreen(),
+        const Size(412, 1421),
+        'screen-available-routes-phone-dark',
+      );
     });
 
     testWidgets('route marketplace — desktop dark', (tester) async {
-      await shootConsole(tester, const RouteMarketplaceScreen(),
-          const Size(1600, 1300), 'screen-route-marketplace-desktop-dark');
+      await shootConsole(
+        tester,
+        const RouteMarketplaceScreen(),
+        const Size(1600, 1300),
+        'screen-route-marketplace-desktop-dark',
+      );
     });
 
     testWidgets('crash reports — desktop dark', (tester) async {
-      await shootConsole(tester, const CrashReportsScreen(),
-          const Size(1600, 1500), 'screen-crash-reports-desktop-dark');
+      await shootConsole(
+        tester,
+        const CrashReportsScreen(),
+        const Size(1600, 1500),
+        'screen-crash-reports-desktop-dark',
+      );
     });
 
     testWidgets('crash reports — phone dark', (tester) async {
-      await shootConsole(tester, const CrashReportsScreen(),
-          const Size(412, 915), 'screen-crash-reports-phone-dark');
+      await shootConsole(
+        tester,
+        const CrashReportsScreen(),
+        const Size(412, 915),
+        'screen-crash-reports-phone-dark',
+      );
     });
 
     testWidgets('crash reports — desktop light', (tester) async {
-      await shootConsole(tester, const CrashReportsScreen(),
-          const Size(1600, 1500), 'screen-crash-reports-desktop-light',
-          brightness: Brightness.light);
+      await shootConsole(
+        tester,
+        const CrashReportsScreen(),
+        const Size(1600, 1500),
+        'screen-crash-reports-desktop-light',
+        brightness: Brightness.light,
+      );
     });
 
     testWidgets('account deactivations — desktop dark', (tester) async {
-      await shootConsole(tester, const AccountDeactivationsScreen(),
-          const Size(1600, 1400), 'screen-account-deactivations-desktop-dark');
+      await shootConsole(
+        tester,
+        const AccountDeactivationsScreen(),
+        const Size(1600, 1400),
+        'screen-account-deactivations-desktop-dark',
+      );
     });
 
     testWidgets('account deactivations — phone dark', (tester) async {
-      await shootConsole(tester, const AccountDeactivationsScreen(),
-          const Size(412, 996), 'screen-account-deactivations-phone-dark');
+      await shootConsole(
+        tester,
+        const AccountDeactivationsScreen(),
+        const Size(412, 996),
+        'screen-account-deactivations-phone-dark',
+      );
     });
 
     // The tiles are blank in every render — `flutter_test` answers every HTTP
     // request with a 400, and OpenStreetMap is HTTP. The pins, the cards, the
     // status pills and the whole layout around them are real.
     testWidgets('live map — desktop dark', (tester) async {
-      await shootConsole(tester, const LiveMapScreen(), const Size(1600, 1300),
-          'screen-live-map-desktop-dark');
+      await shootConsole(
+        tester,
+        const LiveMapScreen(),
+        const Size(1600, 1300),
+        'screen-live-map-desktop-dark',
+      );
     });
 
     testWidgets('live map — desktop light', (tester) async {
-      await shootConsole(tester, const LiveMapScreen(), const Size(1600, 1300),
-          'screen-live-map-desktop-light', brightness: Brightness.light);
+      await shootConsole(
+        tester,
+        const LiveMapScreen(),
+        const Size(1600, 1300),
+        'screen-live-map-desktop-light',
+        brightness: Brightness.light,
+      );
     });
 
     testWidgets('live map — phone dark', (tester) async {
-      await shootConsole(tester, const LiveMapScreen(), const Size(412, 1177),
-          'screen-live-map-phone-dark');
+      await shootConsole(
+        tester,
+        const LiveMapScreen(),
+        const Size(412, 1177),
+        'screen-live-map-phone-dark',
+      );
     });
 
     // --- The seven the console had left ---------------------------------
@@ -2928,80 +3124,140 @@ void main() {
     // nothing had ever rendered it.
 
     testWidgets('platform dashboard v2 — desktop dark', (tester) async {
-      await shootConsole(tester, const SuperAdminDashboardV2Screen(),
-          const Size(1600, 2000), 'screen-super-admin-dashboard-v2-desktop-dark');
+      await shootConsole(
+        tester,
+        const SuperAdminDashboardV2Screen(),
+        const Size(1600, 2000),
+        'screen-super-admin-dashboard-v2-desktop-dark',
+      );
     });
 
     testWidgets('platform dashboard v2 — desktop light', (tester) async {
-      await shootConsole(tester, const SuperAdminDashboardV2Screen(),
-          const Size(1600, 2000), 'screen-super-admin-dashboard-v2-desktop-light',
-          brightness: Brightness.light);
+      await shootConsole(
+        tester,
+        const SuperAdminDashboardV2Screen(),
+        const Size(1600, 2000),
+        'screen-super-admin-dashboard-v2-desktop-light',
+        brightness: Brightness.light,
+      );
     });
 
     testWidgets('platform dashboard v2 — phone dark', (tester) async {
-      await shootConsole(tester, const SuperAdminDashboardV2Screen(),
-          const Size(412, 4695), 'screen-super-admin-dashboard-v2-phone-dark');
+      await shootConsole(
+        tester,
+        const SuperAdminDashboardV2Screen(),
+        const Size(412, 4695),
+        'screen-super-admin-dashboard-v2-phone-dark',
+      );
     });
 
     testWidgets('transporter leaderboard — desktop dark', (tester) async {
-      await shootConsole(tester, const TransporterLeaderboardScreen(),
-          const Size(1600, 1400), 'screen-transporter-leaderboard-desktop-dark');
+      await shootConsole(
+        tester,
+        const TransporterLeaderboardScreen(),
+        const Size(1600, 1400),
+        'screen-transporter-leaderboard-desktop-dark',
+      );
     });
 
     testWidgets('transporter leaderboard — desktop light', (tester) async {
-      await shootConsole(tester, const TransporterLeaderboardScreen(),
-          const Size(1600, 1400), 'screen-transporter-leaderboard-desktop-light',
-          brightness: Brightness.light);
+      await shootConsole(
+        tester,
+        const TransporterLeaderboardScreen(),
+        const Size(1600, 1400),
+        'screen-transporter-leaderboard-desktop-light',
+        brightness: Brightness.light,
+      );
     });
 
     testWidgets('transporter leaderboard — phone dark', (tester) async {
-      await shootConsole(tester, const TransporterLeaderboardScreen(),
-          const Size(412, 2007), 'screen-transporter-leaderboard-phone-dark');
+      await shootConsole(
+        tester,
+        const TransporterLeaderboardScreen(),
+        const Size(412, 2007),
+        'screen-transporter-leaderboard-phone-dark',
+      );
     });
 
     testWidgets('chat connections — desktop dark', (tester) async {
-      await shootConsole(tester, const ChatConnectionsScreen(),
-          const Size(1600, 1400), 'screen-chat-connections-desktop-dark');
+      await shootConsole(
+        tester,
+        const ChatConnectionsScreen(),
+        const Size(1600, 1400),
+        'screen-chat-connections-desktop-dark',
+      );
     });
 
     testWidgets('chat connections — phone dark', (tester) async {
-      await shootConsole(tester, const ChatConnectionsScreen(),
-          const Size(412, 2007), 'screen-chat-connections-phone-dark');
+      await shootConsole(
+        tester,
+        const ChatConnectionsScreen(),
+        const Size(412, 2007),
+        'screen-chat-connections-phone-dark',
+      );
     });
 
     testWidgets('driver limit requests — desktop dark', (tester) async {
-      await shootConsole(tester, const DriverLimitRequestsScreen(),
-          const Size(1600, 1100), 'screen-driver-limit-requests-desktop-dark');
+      await shootConsole(
+        tester,
+        const DriverLimitRequestsScreen(),
+        const Size(1600, 1100),
+        'screen-driver-limit-requests-desktop-dark',
+      );
     });
 
     testWidgets('driver limit requests — phone dark', (tester) async {
-      await shootConsole(tester, const DriverLimitRequestsScreen(),
-          const Size(412, 937), 'screen-driver-limit-requests-phone-dark');
+      await shootConsole(
+        tester,
+        const DriverLimitRequestsScreen(),
+        const Size(412, 937),
+        'screen-driver-limit-requests-phone-dark',
+      );
     });
 
     testWidgets('platform settings — desktop dark', (tester) async {
-      await shootConsole(tester, const PlatformAdminSettingsScreen(),
-          const Size(1600, 1100), 'screen-platform-settings-desktop-dark');
+      await shootConsole(
+        tester,
+        const PlatformAdminSettingsScreen(),
+        const Size(1600, 1100),
+        'screen-platform-settings-desktop-dark',
+      );
     });
 
     testWidgets('register company — desktop dark', (tester) async {
-      await shootConsole(tester, const RegisterCompanyScreen(),
-          const Size(1600, 1500), 'screen-register-company-desktop-dark');
+      await shootConsole(
+        tester,
+        const RegisterCompanyScreen(),
+        const Size(1600, 1500),
+        'screen-register-company-desktop-dark',
+      );
     });
 
     testWidgets('register company — phone dark', (tester) async {
-      await shootConsole(tester, const RegisterCompanyScreen(),
-          const Size(412, 1009), 'screen-register-company-phone-dark');
+      await shootConsole(
+        tester,
+        const RegisterCompanyScreen(),
+        const Size(412, 1009),
+        'screen-register-company-phone-dark',
+      );
     });
 
     testWidgets('user preferences — desktop dark', (tester) async {
-      await shootConsole(tester, const UserPreferencesScreen(),
-          const Size(1600, 1500), 'screen-user-preferences-desktop-dark');
+      await shootConsole(
+        tester,
+        const UserPreferencesScreen(),
+        const Size(1600, 1500),
+        'screen-user-preferences-desktop-dark',
+      );
     });
 
     testWidgets('user preferences — phone dark', (tester) async {
-      await shootConsole(tester, const UserPreferencesScreen(),
-          const Size(412, 1112), 'screen-user-preferences-phone-dark');
+      await shootConsole(
+        tester,
+        const UserPreferencesScreen(),
+        const Size(412, 1112),
+        'screen-user-preferences-phone-dark',
+      );
     });
 
     // THE COMPANY MIRROR — a platform admin looking at one company's workspace
@@ -3009,26 +3265,28 @@ void main() {
     // at all; the other (the employee register) has since been photographed.
     testWidgets('company mirror — desktop dark', (tester) async {
       await shoot(
-          tester,
-          console(
-            brightness: Brightness.dark,
-            body: const SuperAdminCompanyMirrorScreen(companyId: 'o4'),
-            extraOverrides: [...tail(), ...companyMirrorOverrides()],
-          ),
-          const Size(1600, 1800),
-          'screen-company-mirror-desktop-dark');
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const SuperAdminCompanyMirrorScreen(companyId: 'o4'),
+          extraOverrides: [...tail(), ...companyMirrorOverrides()],
+        ),
+        const Size(1600, 1800),
+        'screen-company-mirror-desktop-dark',
+      );
     });
 
     testWidgets('company mirror — phone dark', (tester) async {
       await shoot(
-          tester,
-          console(
-            brightness: Brightness.dark,
-            body: const SuperAdminCompanyMirrorScreen(companyId: 'o4'),
-            extraOverrides: [...tail(), ...companyMirrorOverrides()],
-          ),
-          const Size(412, 3830),
-          'screen-company-mirror-phone-dark');
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const SuperAdminCompanyMirrorScreen(companyId: 'o4'),
+          extraOverrides: [...tail(), ...companyMirrorOverrides()],
+        ),
+        const Size(412, 3830),
+        'screen-company-mirror-phone-dark',
+      );
     });
   });
 
@@ -3045,9 +3303,9 @@ void main() {
   // `test/fixtures/portal_tail_fixtures.dart`.
   group('the portal tail', () {
     List<Override> tail() => [
-          ...portalCaptureOverrides(),
-          ...portalTailOverrides(),
-        ];
+      ...portalCaptureOverrides(),
+      ...portalTailOverrides(),
+    ];
 
     Future<void> shootPortal(
       WidgetTester tester,
@@ -3062,23 +3320,22 @@ void main() {
       Brightness brightness = Brightness.dark,
       Future<void> Function(WidgetTester tester)? act,
       List<Override> extra = const [],
-    }) =>
-        shoot(
-          tester,
-          screen(
-            brightness: brightness,
-            child: body,
-            title: title,
-            subtitle: _barTitle(selectedRoute, subtitle),
-            orgType: orgType,
-            role: role,
-            selectedRoute: selectedRoute,
-            extraOverrides: [...tail(), ...extra],
-          ),
-          size,
-          name,
-          act: act,
-        );
+    }) => shoot(
+      tester,
+      screen(
+        brightness: brightness,
+        child: body,
+        title: title,
+        subtitle: _barTitle(selectedRoute, subtitle),
+        orgType: orgType,
+        role: role,
+        selectedRoute: selectedRoute,
+        extraOverrides: [...tail(), ...extra],
+      ),
+      size,
+      name,
+      act: act,
+    );
 
     // --- The buyer's own three -------------------------------------------
 
@@ -3283,8 +3540,9 @@ void main() {
         ProviderScope(
           overrides: [
             ...companyScopeOverrides(
-                role: UserRole.supervisorForeman,
-                orgType: OrgType.mineSupplier),
+              role: UserRole.supervisorForeman,
+              orgType: OrgType.mineSupplier,
+            ),
             ...tail(),
           ],
           child: MaterialApp(
@@ -3304,8 +3562,9 @@ void main() {
         ProviderScope(
           overrides: [
             ...companyScopeOverrides(
-                role: UserRole.supervisorForeman,
-                orgType: OrgType.mineSupplier),
+              role: UserRole.supervisorForeman,
+              orgType: OrgType.mineSupplier,
+            ),
             ...tail(),
           ],
           child: MaterialApp(
@@ -3520,7 +3779,9 @@ void main() {
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: AppTheme.build(Brightness.dark),
-            home: RequestTransportationScreen(prefill: kMyAvailableRoutes.first),
+            home: RequestTransportationScreen(
+              prefill: kMyAvailableRoutes.first,
+            ),
           ),
         ),
         const Size(412, 1837),
@@ -3539,14 +3800,15 @@ void main() {
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: AppTheme.build(Brightness.dark),
-            home: RequestTransportationScreen(prefill: kMyAvailableRoutes.first),
+            home: RequestTransportationScreen(
+              prefill: kMyAvailableRoutes.first,
+            ),
           ),
         ),
         const Size(1600, 1800),
         'screen-request-transportation-desktop-dark',
       );
     });
-
 
     // --- The last four portal leaves ---------------------------------------
 
@@ -3690,8 +3952,9 @@ void main() {
 
     // …and the same page for a company whose licence is fine, which is what
     // anybody who taps through out of curiosity gets.
-    testWidgets('expired access, in good standing — desktop dark',
-        (tester) async {
+    testWidgets('expired access, in good standing — desktop dark', (
+      tester,
+    ) async {
       await shootPortal(
         tester,
         const ExpiredAccessScreen(),
@@ -3921,10 +4184,10 @@ void main() {
     // `companyLocationsProvider`, and without it the profile photographs a red
     // "Could not load your saved locations" in the middle of the page.
     List<Override> shared() => [
-          ...portalCaptureOverrides(),
-          ...portalTailOverrides(),
-          ...sharedTailOverrides(),
-        ];
+      ...portalCaptureOverrides(),
+      ...portalTailOverrides(),
+      ...sharedTailOverrides(),
+    ];
 
     Future<void> shootShared(
       WidgetTester tester,
@@ -3939,23 +4202,22 @@ void main() {
       Brightness brightness = Brightness.dark,
       List<Override> extra = const [],
       Future<void> Function(WidgetTester tester)? act,
-    }) =>
-        shoot(
-          tester,
-          screen(
-            brightness: brightness,
-            child: body,
-            title: title,
-            subtitle: _barTitle(selectedRoute, subtitle),
-            orgType: orgType,
-            role: role,
-            selectedRoute: selectedRoute,
-            extraOverrides: [...shared(), ...extra],
-          ),
-          size,
-          name,
-          act: act,
-        );
+    }) => shoot(
+      tester,
+      screen(
+        brightness: brightness,
+        child: body,
+        title: title,
+        subtitle: _barTitle(selectedRoute, subtitle),
+        orgType: orgType,
+        role: role,
+        selectedRoute: selectedRoute,
+        extraOverrides: [...shared(), ...extra],
+      ),
+      size,
+      name,
+      act: act,
+    );
 
     // --- messages ---------------------------------------------------------
 
@@ -4206,10 +4468,10 @@ void main() {
   // prove the launcher is there, is hittable, and reaches the thread.
   group('the chat dock', () {
     List<Override> dock() => [
-          ...companyScopeOverrides(),
-          ...sharedTailOverrides(),
-          ...chatDockOverrides(),
-        ];
+      ...companyScopeOverrides(),
+      ...sharedTailOverrides(),
+      ...chatDockOverrides(),
+    ];
 
     /// Mounts a dock over an empty page, opens it, and optionally walks into a
     /// conversation.
@@ -4223,28 +4485,27 @@ void main() {
       Brightness brightness = Brightness.dark,
       String? openConversation,
       List<Override> extra = const [],
-    }) =>
-        shoot(
-          tester,
-          ProviderScope(
-            overrides: [...dock(), ...extra],
-            child: MaterialApp(
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.build(brightness),
-              home: const ChatDock(child: Scaffold(body: SizedBox.expand())),
-            ),
-          ),
-          size,
-          name,
-          act: (tester) async {
-            await tester.tap(find.byKey(const ValueKey('chat-dock-launcher')));
-            await pumpForCapture(tester);
-            if (openConversation != null) {
-              await tester.tap(find.text(openConversation).first);
-              await pumpForCapture(tester);
-            }
-          },
-        );
+    }) => shoot(
+      tester,
+      ProviderScope(
+        overrides: [...dock(), ...extra],
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.build(brightness),
+          home: const ChatDock(child: Scaffold(body: SizedBox.expand())),
+        ),
+      ),
+      size,
+      name,
+      act: (tester) async {
+        await tester.tap(find.byKey(const ValueKey('chat-dock-launcher')));
+        await pumpForCapture(tester);
+        if (openConversation != null) {
+          await tester.tap(find.text(openConversation).first);
+          await pumpForCapture(tester);
+        }
+      },
+    );
 
     // ⚠️ THREE DELIBERATE CUT-OFFS live in this group, one per list render:
     // the group conversation's preview, "Seal 4 on CK 84 RT GP would not close
@@ -4270,34 +4531,51 @@ void main() {
     });
 
     testWidgets('dock — conversations, desktop light', (tester) async {
-      await shootDock(tester, const Size(1600, 1000), 'dock-list-desktop-light',
-          brightness: Brightness.light);
+      await shootDock(
+        tester,
+        const Size(1600, 1000),
+        'dock-list-desktop-light',
+        brightness: Brightness.light,
+      );
     });
 
     // The thread. This is the picture that did not exist: reply quotes over
     // both grounds, an attachment, reactions, delivery ticks and the unread
     // separator, none of which any other render has ever shown.
     testWidgets('dock — thread, desktop dark', (tester) async {
-      await shootDock(tester, const Size(1600, 1000), 'dock-thread-desktop-dark',
-          openConversation: 'Thandi Mokoena');
+      await shootDock(
+        tester,
+        const Size(1600, 1000),
+        'dock-thread-desktop-dark',
+        openConversation: 'Thandi Mokoena',
+      );
     });
 
     testWidgets('dock — thread, phone dark', (tester) async {
-      await shootDock(tester, const Size(412, 915), 'dock-thread-phone-dark',
-          openConversation: 'Thandi Mokoena');
+      await shootDock(
+        tester,
+        const Size(412, 915),
+        'dock-thread-phone-dark',
+        openConversation: 'Thandi Mokoena',
+      );
     });
 
     testWidgets('dock — thread, desktop light', (tester) async {
       await shootDock(
-          tester, const Size(1600, 1000), 'dock-thread-desktop-light',
-          brightness: Brightness.light, openConversation: 'Thandi Mokoena');
+        tester,
+        const Size(1600, 1000),
+        'dock-thread-desktop-light',
+        brightness: Brightness.light,
+        openConversation: 'Thandi Mokoena',
+      );
     });
 
     // Someone typing. A live-only state that no still has ever caught, and the
     // one the thread's own layout is most likely to be surprised by, because
     // it appears BELOW the last bubble and pushes the composer.
-    testWidgets('dock — thread with someone typing, desktop dark',
-        (tester) async {
+    testWidgets('dock — thread with someone typing, desktop dark', (
+      tester,
+    ) async {
       await shootDock(
         tester,
         const Size(1600, 1000),
@@ -4323,11 +4601,11 @@ void main() {
   // there, is enabled, and reaches this dialog.
   group('the dialogs', () {
     List<Override> tail() => [
-          ...companyScopeOverrides(),
-          ...portalCaptureOverrides(),
-          ...portalTailOverrides(),
-          ...sharedTailOverrides(),
-        ];
+      ...companyScopeOverrides(),
+      ...portalCaptureOverrides(),
+      ...portalTailOverrides(),
+      ...sharedTailOverrides(),
+    ];
 
     /// Taps the first widget whose text is [label], then settles.
     ///
@@ -4356,23 +4634,22 @@ void main() {
       required String subtitle,
       required String selectedRoute,
       List<Override> extra = const [],
-    }) =>
-        shoot(
-          tester,
-          screen(
-            brightness: Brightness.dark,
-            child: body,
-            title: title,
-            subtitle: subtitle,
-            orgType: orgType,
-            role: role,
-            selectedRoute: selectedRoute,
-            extraOverrides: [...tail(), ...extra],
-          ),
-          size,
-          name,
-          act: tap(trigger),
-        );
+    }) => shoot(
+      tester,
+      screen(
+        brightness: Brightness.dark,
+        child: body,
+        title: title,
+        subtitle: subtitle,
+        orgType: orgType,
+        role: role,
+        selectedRoute: selectedRoute,
+        extraOverrides: [...tail(), ...extra],
+      ),
+      size,
+      name,
+      act: tap(trigger),
+    );
 
     testWidgets('log fuel — phone dark', (tester) async {
       await shootDialog(
@@ -4602,8 +4879,9 @@ void main() {
       );
     });
 
-    testWidgets('medium — the rail narrows, nothing is removed',
-        (tester) async {
+    testWidgets('medium — the rail narrows, nothing is removed', (
+      tester,
+    ) async {
       await shoot(
         tester,
         console(brightness: Brightness.dark),
@@ -4649,12 +4927,17 @@ class _PortalBodyPlaceholder extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.dashboard_customize_outlined,
-                size: 44, color: scheme.onSurfaceVariant),
+            Icon(
+              Icons.dashboard_customize_outlined,
+              size: 44,
+              color: scheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 14),
-            Text('Workspace body',
-                textAlign: TextAlign.center,
-                style: text.titleMedium?.copyWith(color: scheme.onSurface)),
+            Text(
+              'Workspace body',
+              textAlign: TextAlign.center,
+              style: text.titleMedium?.copyWith(color: scheme.onSurface),
+            ),
             const SizedBox(height: 6),
             Text(
               'These renders are of the SHELL — the rail, its grouping for '
@@ -4681,8 +4964,9 @@ class _PortalBodyPlaceholder extends StatelessWidget {
 /// one people look at.
 void _noOrphanGoldensTest() {
   test('no golden in docs/redesign/renders/ is orphaned', () {
-    final source = File('test/renders/redesign_renders_test.dart')
-        .readAsStringSync();
+    final source = File(
+      'test/renders/redesign_renders_test.dart',
+    ).readAsStringSync();
     final dir = Directory('docs/redesign/renders');
     final orphans = <String>[];
     for (final f in dir.listSync().whereType<File>()) {
@@ -4694,7 +4978,8 @@ void _noOrphanGoldensTest() {
     expect(
       orphans,
       isEmpty,
-      reason: 'These images are in docs/redesign/renders/ but nothing here '
+      reason:
+          'These images are in docs/redesign/renders/ but nothing here '
           'generates them any more, so nothing will ever update them:\n'
           '  ${orphans.join('\n  ')}\n'
           'Delete them, or restore the test that made them.',
@@ -4720,7 +5005,8 @@ void _noOrphanGoldensTest() {
 const Map<String, String> _barTitleExempt = {
   '/portal/mine': 'bar names the active tab; the resolver has no tab set',
   '/portal/buyer': 'bar names the active tab; the resolver has no tab set',
-  '/portal/transporter': 'bar names the active tab; the resolver has no tab set',
+  '/portal/transporter':
+      'bar names the active tab; the resolver has no tab set',
   '/portal/driver': 'bar names the active tab; the resolver has no tab set',
   '/home': 'bar names the active tab; the resolver has no tab set',
 };

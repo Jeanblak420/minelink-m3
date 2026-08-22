@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/core/utils/logger.dart';
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/core/routing/route_not_found_screen.dart';
 import 'package:flutter_application_1/core/routing/portal_gate_staleness.dart';
 import 'package:flutter_application_1/features/auth/services/device_verification_store.dart';
 import 'package:flutter_application_1/features/auth/utils/reverification_policy.dart';
@@ -1640,7 +1641,39 @@ class AppRouter {
         ],
       ),
     ],
+    // Given no errorBuilder, go_router supplies its own — a bare app bar, the
+    // raw text "GoException: no routes for location: /...", and a plain "Home"
+    // link. That was the app's not-found page until 2026-08-22, and it was the
+    // only surface in the product with no design system on it at all.
+    //
+    // The `no-raw-exception-in-ui` guard could never have caught it: the
+    // exception is interpolated inside the go_router package, not inside
+    // `lib/`, and the guard greps this repo's own source.
+    errorBuilder: (context, state) => RouteNotFoundScreen(
+      location: state.uri.toString(),
+      onGoBack: () => context.go(notFoundLandingRoute()),
+    ),
   );
+
+  /// Where the not-found screen's one action goes.
+  ///
+  /// A signed-in user's home is NOT `/` — every role has its own landing
+  /// route, resolved from the same nav tree the rail renders, and go_router's
+  /// default page sent a weighbridge controller to a second dead end. Reads
+  /// the redirect's own cached org type and role, so it cannot disagree with
+  /// where sign-in would have put them.
+  ///
+  /// Falls back to `/login` when there is no session, which is correct: a
+  /// signed-out user following a stale deep link has nowhere else to be.
+  static String notFoundLandingRoute() {
+    if (SupabaseConfig.client.auth.currentUser == null) return '/login';
+    final org = OrgType.tryParse(_cachedOrgType);
+    if (org == null || _cachedIsEmployeeWithoutRole) return '/home';
+    return portalLandingRoute(
+      orgType: org,
+      role: UserRole.tryParse(_cachedEmployeeRole),
+    );
+  }
 
   // Helper method to get a user-friendly title for org types
   static String _getOrgTypeTitle(OrgType orgType) {
