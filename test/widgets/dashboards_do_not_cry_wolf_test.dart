@@ -60,6 +60,7 @@ import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import '../fixtures/portal_capture_fixtures.dart';
 import '../fixtures/portal_tail_fixtures.dart';
 import '../fixtures/screen_fixtures.dart';
+import '../test_helpers/frozen_clock.dart';
 import '../test_helpers/real_fonts.dart';
 import '../test_helpers/test_supabase.dart';
 
@@ -117,6 +118,12 @@ void main() {
   // `SupabaseConfig.client`, so an instance has to exist even though nothing
   // here dials out. Pointed at a dummy host by the helper.
   setUpAll(ensureTestSupabaseInitialized);
+  // The capture fixtures date every row relative to `kCaptureNow`, and these
+  // dashboards bucket by rolling window off `MlTime.now()`. Without this the
+  // file would pass for a few days and then go off with nothing changed but
+  // the calendar — held by the `capture-fixture-without-a-frozen-clock` guard,
+  // which caught this file on the run it was written.
+  setUp(freezeCaptureClock);
 
   Future<List<String>> render(
     WidgetTester tester,
