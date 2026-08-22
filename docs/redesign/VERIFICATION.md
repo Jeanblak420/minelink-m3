@@ -509,3 +509,84 @@ phone was left on `home; waitstable; home`.
 - **The due-diligence gate** has still never been driven end to end.
 - **A second party in a live chat.** The dock was opened on the handset and its
   empty state read; no message was sent between two real accounts.
+
+---
+
+## Current state — 2026-08-22 (the driving session, and a production incident)
+
+Every line below was executed at the end of the session, against the tree as
+it stands.
+
+| | |
+|---|---|
+| `flutter analyze` | no issues |
+| `flutter test` | **2,435 passed**, 1 skipped |
+| `dart tool/release_guards.dart` | 40/40 PASS, 0 FAIL |
+| `dart tool/release_guards.dart --selftest` | all guards bite |
+| `py -3 tool/_sabotage.py` | ALL SABOTAGES CAUGHT |
+| `type_scale_codemod.py --selftest` | OK |
+| `dropdown_width_check.py` | passes |
+| `glyph_coverage_check.py` | passes |
+| `one_clock_check.py` | 0 sites off Africa/Johannesburg |
+| `unphotographed_screens.py` | **94** targets · 94 photographed · 0 not |
+| Renders | **227 files** (2 new — the not-found screen) |
+| render harness — CUT OFF | 5 renders / 9 strings, unchanged |
+| render harness — LOW CONTRAST | 0 (app screens) |
+| render harness — FAILURE STATE / RENDER NOTE | 0 / 0 |
+| Web (dart2js release) | builds |
+| Android debug APK | builds, **and was installed on the SM-G780G three times** |
+| `tool/health_probe.py` | **7/7 services answering** |
+| Original worktree | `df451d0`, 14163 files, same 3 pre-existing modified files, 2 worktree entries, 0 modified today — untouched |
+
+### Nine defects, every one found by DRIVING rather than by a test
+
+Nothing in this list came from the suite. Seven came from opening screens in
+a browser against live data, and two came from a handset.
+
+1. **disputes** — header read "1 dispute" over "No open disputes"
+2. **crash reporter** — could fill the database it reports into (below)
+3. **shells** — re-keyed by route, remounting on every navigation
+4. **mine stockpile tile** — 60 t lost between a figure and its own caption
+5. **mine production** — "pit-to-port loss −771 t", in green, with 0 mined
+6. **not-found page** — was go_router's default, printing `GoException`
+7. **fleet management** — every truck in the wrong bucket, exactly inverted
+8. **shell** — the workspace cross-faded against itself (handset)
+9. — and the two follow-ups to 3 that only the handset could see
+
+### 🚨 The production incident
+
+`crash_reports` held **204,539 rows / 293 MB**, and the main project had gone
+from 24 MB to **319 MB — 64% of the 500 MB free plan**. Three browser tabs
+left signed in overnight by the previous session's own multi-account
+technique hit a CanvasKit `Aborted()` during paint and re-threw it every
+frame for four hours; peak **60,680 rows in one hour**.
+
+Fixed at the source (a send budget: 20 rows/minute, 500/session, suppressed
+occurrences carried out as `(+N not sent)`), the leftover browsers were
+closed, and the table was reduced to 5,808 rows — every row outside the burst
+kept in full, plus up to three examples of each of the 875 distinct failures
+inside it. **319 MB → 40 MB.** Both projects then probed healthy.
+
+### What the HANDSET proved that nothing else could
+
+The Duplicate GlobalKey fault took three passes, and each pass looked
+finished until the APK went back on the phone:
+
+| build | navigations | reports |
+|---|---|---|
+| before any fix | — | 32 already recorded |
+| after the recorder key removal | startup | 1, naming a now-unkeyed recorder |
+| after keying the switcher on the route | 7 | **7** |
+| after removing the cross-fade | 6 | **0** |
+
+A widget test cannot see the last one: under the test binding `MlMotion`
+collapses to about a millisecond, so the two-subtree overlap is gone before
+the next pump. The handset is the instrument, and the test file says so
+rather than implying coverage it does not have.
+
+### Still not proven
+
+- **Physical GPS on a real road trip**, the Android foreground service
+  surviving a long backgrounding, and battery over a trip. Unchanged.
+- **iOS**, unchanged — no reachable Apple Developer account.
+- **Windows**, unchanged — two pre-existing faults, neither this project's.
