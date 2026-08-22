@@ -87,7 +87,8 @@ class _TonsOutDetailScreenState extends State<TonsOutDetailScreen> {
           MlPageHeader(
             title: 'Tons out',
             meta: mlCount(widget.entries.length, 'load'),
-            description: 'Every load dispatched, searchable by truck, '
+            description:
+                'Every load dispatched, searchable by truck, '
                 'transporter, product, customer, date and net mass.',
           ),
           const SizedBox(height: 4),
@@ -116,9 +117,9 @@ class _TonsOutDetailScreenState extends State<TonsOutDetailScreen> {
               Text(
                 '${rows.length} of ${mlCount(widget.entries.length, 'load')}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: scheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const Spacer(),
               if (_filter.hasActiveFilters)
@@ -187,7 +188,10 @@ class _SummaryStrip extends StatelessWidget {
                 // register summing to 197.70 — the same figure, said two
                 // ways, on one screen (photographed 2026-08-21).
                 child: _SummaryBox(
-                    code: it.$1, label: it.$2, value: formatTons(it.$3)),
+                  code: it.$1,
+                  label: it.$2,
+                  value: formatTons(it.$3),
+                ),
               ),
           ],
         );
@@ -200,7 +204,11 @@ class _SummaryBox extends StatelessWidget {
   final String code;
   final String label;
   final String value;
-  const _SummaryBox({required this.code, required this.label, required this.value});
+  const _SummaryBox({
+    required this.code,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +223,9 @@ class _SummaryBox extends StatelessWidget {
           colors: [
             MlSemantic.of(context).surfaceCard,
             Color.alphaBlend(
-                PortalColors.accent.withValues(alpha: 0.16), scheme.surface),
+              PortalColors.accent.withValues(alpha: 0.16),
+              scheme.surface,
+            ),
           ],
         ),
         borderRadius: MlShape.radiusLarge,
@@ -235,9 +245,13 @@ class _SummaryBox extends StatelessWidget {
                   color: PortalColors.accent.withValues(alpha: 0.16),
                   borderRadius: MlShape.radiusSmall,
                 ),
-                child: Text(code,
-                    style: textTheme.labelMedium?.copyWith(
-                        color: PortalColors.accent, fontWeight: FontWeight.w800)),
+                child: Text(
+                  code,
+                  style: textTheme.labelMedium?.copyWith(
+                    color: PortalColors.accent,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
               const SizedBox(width: 8),
               // Flexible so the caption can ellipsize. The code badge beside it
@@ -245,10 +259,13 @@ class _SummaryBox extends StatelessWidget {
               // overflowed at text scale 1.3 on a 360px phone. The badge keeps
               // its size — it is the thing that identifies the tile.
               Flexible(
-                child: Text(label,
-                    overflow: TextOverflow.ellipsis,
-                    style: textTheme.bodySmall
-                        ?.copyWith(color: scheme.onSurfaceVariant)),
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
               ),
             ],
           ),
@@ -259,7 +276,9 @@ class _SummaryBox extends StatelessWidget {
             child: Text(
               value,
               style: MlType.figure(
-                  color: scheme.onSurface, size: MlTokens.fsH1),
+                color: scheme.onSurface,
+                size: MlTokens.fsH1,
+              ),
             ),
           ),
         ],
@@ -306,14 +325,18 @@ class _FilterBar extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.filter_alt_outlined,
-                  size: 18, color: PortalColors.accent),
+              Icon(
+                Icons.filter_alt_outlined,
+                size: 18,
+                color: PortalColors.accent,
+              ),
               const SizedBox(width: 8),
-              Text('Filters',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w800)),
+              Text(
+                'Filters',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -340,8 +363,10 @@ class _FilterBar extends StatelessWidget {
                   decoration: InputDecoration(
                     isDense: true,
                     prefixIcon: const Icon(Icons.search, size: 18),
-                    prefixIconConstraints:
-                        const BoxConstraints(minWidth: 34, minHeight: 34),
+                    prefixIconConstraints: const BoxConstraints(
+                      minWidth: 34,
+                      minHeight: 34,
+                    ),
                     hintText: 'Search reg, transporter, customer…',
                     border: const OutlineInputBorder(),
                   ),
@@ -387,20 +412,20 @@ class _FilterBar extends StatelessWidget {
               Icon(Icons.scale_outlined, size: 16, color: PortalColors.accent),
               const SizedBox(width: 8),
               Flexible(
-                child: Text('Net mass',
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: scheme.onSurfaceVariant)),
+                child: Text(
+                  'Net mass',
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
               ),
               const SizedBox(width: 8),
               Text(
                 '${massRange.start.toStringAsFixed(0)}t – ${massRange.end.toStringAsFixed(0)}t',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ),
@@ -457,8 +482,9 @@ class _DropdownFilter extends StatelessWidget {
           const DropdownMenuItem<String?>(value: null, child: Text('All')),
           for (final o in options)
             DropdownMenuItem<String?>(
-                value: o,
-                child: Text(o, overflow: TextOverflow.ellipsis)),
+              value: o,
+              child: Text(o, overflow: TextOverflow.ellipsis),
+            ),
         ],
         onChanged: onChanged,
       ),
@@ -481,7 +507,12 @@ class _DateRangeField extends StatelessWidget {
         : '${_fmt.format(range!.start)} – ${_fmt.format(range!.end)}';
     return OutlinedButton.icon(
       onPressed: () async {
-        final now = DateTime.now();
+        // A picker's bounds are days a person reads and submits, so they
+        // come off the pit clock like every other date in this product. Only
+        // the year is used here, so it is the first two hours of 1 January
+        // that this would get wrong — but the rule does not have exceptions
+        // for how rarely it bites.
+        final now = MlTime.now();
         final picked = await showDateRangePicker(
           context: context,
           firstDate: DateTime(now.year - 3),
@@ -524,7 +555,11 @@ class _ResultsTable extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final massCellColor = MlTokens.waybillMassTint.withValues(alpha: 0.45);
 
-    DataColumn col(String label, TonsOutSortField field, {bool numeric = false}) {
+    DataColumn col(
+      String label,
+      TonsOutSortField field, {
+      bool numeric = false,
+    }) {
       return DataColumn(
         label: Text(label, style: const TextStyle(fontWeight: FontWeight.w800)),
         numeric: numeric,
@@ -543,11 +578,16 @@ class _ResultsTable extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(Icons.search_off_rounded,
-                size: 36, color: scheme.onSurfaceVariant),
+            Icon(
+              Icons.search_off_rounded,
+              size: 36,
+              color: scheme.onSurfaceVariant,
+            ),
             const SizedBox(height: 8),
-            Text('No loads match the current filters.',
-                style: TextStyle(color: scheme.onSurfaceVariant)),
+            Text(
+              'No loads match the current filters.',
+              style: TextStyle(color: scheme.onSurfaceVariant),
+            ),
           ],
         ),
       );
@@ -588,27 +628,33 @@ class _ResultsTable extends StatelessWidget {
             ],
             rows: [
               for (final e in rows)
-                DataRow(cells: [
-                  DataCell(Text(dateFmt.format(e.date))),
-                  DataCell(Text(e.time)),
-                  DataCell(Text(e.transporter)),
-                  DataCell(Text(e.truckReg)),
-                  DataCell(Text(e.destination)),
-                  DataCell(Text(e.product)),
-                  DataCell(Text(e.customer)),
-                  DataCell(
-                    Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: massCellColor,
-                        borderRadius: MlShape.radiusSmall,
+                DataRow(
+                  cells: [
+                    DataCell(Text(dateFmt.format(e.date))),
+                    DataCell(Text(e.time)),
+                    DataCell(Text(e.transporter)),
+                    DataCell(Text(e.truckReg)),
+                    DataCell(Text(e.destination)),
+                    DataCell(Text(e.product)),
+                    DataCell(Text(e.customer)),
+                    DataCell(
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: massCellColor,
+                          borderRadius: MlShape.radiusSmall,
+                        ),
+                        child: Text(
+                          massFmt.format(e.netMass),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
                       ),
-                      child: Text(massFmt.format(e.netMass),
-                          style: const TextStyle(fontWeight: FontWeight.w700)),
                     ),
-                  ),
-                ]),
+                  ],
+                ),
             ],
           ),
         ),

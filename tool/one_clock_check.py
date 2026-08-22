@@ -14,6 +14,12 @@ correct Dart and correct SQL, they just ask the wrong authority what day it is:
                              `MlTime.serverParam` for a wall clock.
   3. `current_date` in SQL  — a UTC calendar day, so it flips at 02:00 SAST, in
                              the middle of a night shift. Use `public.ml_today()`.
+  5. `DateTime.now().day`   — the DEVICE's calendar day, used as the boundary
+                             of a comparison whose other half is already on the
+                             pit clock. Found 2026-08-22 on the security gate:
+                             "Departed Today" compared `MlTime.sast(t.updatedAt)`
+                             against `DateTime.now()`. Right on a SAST phone,
+                             wrong on any other. Use `MlTime.now()`.
   4. `someAt.weekday`       — a calendar FIELD read straight off a UTC instant.
                              The same two-hour shift, but it survives a correct
                              MlTime filter sitting right beside it, so the total
@@ -73,6 +79,26 @@ DATE_PICKER = re.compile(r"showDatePicker\s*\(")
 PICKER_NOW = re.compile(r"DateTime\.now\(\)")
 
 # `current_date` as a word, in SQL.
+# A CALENDAR FIELD READ OFF THE DEVICE CLOCK.
+#
+# The module doc says a bare `DateTime.now()` is fine, and for a stamp or a TTL
+# it is. Reading `.year` / `.month` / `.day` / `.weekday` off it is not: that is
+# asking the device what day it is, which is the whole thing the ruling forbids.
+#
+# Scoped to a local binding and a window, the same shape as
+# NAIVE_STAMP_VIA_LOCAL, because the two halves are lines apart:
+#
+#     final now = DateTime.now();
+#     ...
+#     return d.year == now.year && d.month == now.month && d.day == now.day;
+#
+# That is the security gate's "Departed Today", where the OTHER half of the
+# comparison was correctly `MlTime.sast(...)`. A device set to SAST gets the
+# right answer, so it survives every test run on a correctly-set machine.
+DEVICE_DAY_VIA_LOCAL = re.compile(
+    r"(?:final|var|late final)\s+(\w+)\s*=\s*DateTime\.now\(\)\s*;")
+DEVICE_DAY_FIELD = "year|month|day|weekday"
+
 # A CALENDAR FIELD READ OFF A RAW INSTANT.
 #
 # `t.updatedAt.weekday`, `e.createdAt.month`. Scoped to receivers ending in
@@ -176,6 +202,17 @@ def scan_dart(root):
             for m in TO_LOCAL.finditer(code):
                 findings.append((rel, _line_of(raw, m.start()), "toLocal",
                                  "use MlTime.sast / MlTime.sastOrNull"))
+            for m in DEVICE_DAY_VIA_LOCAL.finditer(code):
+                name = m.group(1)
+                window = "\n".join(code[m.end():].split("\n")[:60])
+                hit = re.search(
+                    r"\b%s\s*\.\s*(%s)\b" % (re.escape(name), DEVICE_DAY_FIELD),
+                    window)
+                if hit:
+                    findings.append(
+                        (rel, _line_of(raw, m.start()), "device-day",
+                         "`%s.%s` asks the DEVICE what day it is: use "
+                         "MlTime.now()" % (name, hit.group(1))))
             for m in RAW_CALENDAR_FIELD.finditer(code):
                 # `MlTime.sast(x).weekday` ends in `)` before the dot, so the
                 # pattern cannot match it — no extra exclusion needed.
@@ -245,6 +282,15 @@ def scan(root, exemptions=None):
 
 
 SELFTEST_DART = [
+    ("a day decision on the device clock",
+     "class A { int f() {\n  final now = DateTime.now();\n"
+     "  return now.day;\n} }", True),
+    ("the same one on the pit clock",
+     "class A { int f() {\n  final now = MlTime.now();\n"
+     "  return now.day;\n} }", False),
+    ("a DateTime.now() used only for elapsed time, which is not a day",
+     "class A { Duration f(DateTime x) {\n  final now = DateTime.now();\n"
+     "  return now.difference(x);\n} }", False),
     ("a weekday read off a raw instant",
      "class A { int f(T t) => t.updatedAt.weekday; }", True),
     ("the same one through MlTime",

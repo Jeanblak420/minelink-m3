@@ -85,13 +85,17 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
     String? notifyTab,
   }) async {
     try {
-      await ref.read(lifecycleServiceProvider).setTripStatus(trip.tripId, status);
+      await ref
+          .read(lifecycleServiceProvider)
+          .setTripStatus(trip.tripId, status);
       ref.invalidateIfMounted(mineInboundTripsProvider(companyId));
       // The status change has already landed server-side; everything below is
       // local echo, and `ref` throws once the gate screen is gone.
       if (!mounted) return;
       if (notifyRole != null && event != null) {
-        ref.read(workflowNotificationProvider.notifier).push(
+        ref
+            .read(workflowNotificationProvider.notifier)
+            .push(
               targetRole: notifyRole,
               kind: event,
               title: notifyTitle ?? '',
@@ -107,16 +111,16 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
   }
 
   void _markArrived(String companyId, MineTrip trip) => _setStatus(
-        companyId,
-        trip,
-        TripStatus.arrivedAtMine,
-        '${trip.reg} marked on-site. Load controller notified.',
-        notifyRole: 'controller',
-        event: WorkflowEvent.checkin,
-        notifyTitle: 'Truck checked in',
-        notifyBody: 'Security checked in ${trip.reg} for loading.',
-        notifyTab: 'Controller',
-      );
+    companyId,
+    trip,
+    TripStatus.arrivedAtMine,
+    '${trip.reg} marked on-site. Load controller notified.',
+    notifyRole: 'controller',
+    event: WorkflowEvent.checkin,
+    notifyTitle: 'Truck checked in',
+    notifyBody: 'Security checked in ${trip.reg} for loading.',
+    notifyTab: 'Controller',
+  );
 
   Future<void> _markGone(String companyId, MineTrip trip) async {
     try {
@@ -133,7 +137,9 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
       // Check-out has already landed server-side; everything below is local
       // echo, and `ref` throws once the gate screen is gone.
       if (!mounted) return;
-      ref.read(workflowNotificationProvider.notifier).push(
+      ref
+          .read(workflowNotificationProvider.notifier)
+          .push(
             targetRole: 'mine',
             kind: WorkflowEvent.released,
             title: 'Truck departed',
@@ -141,7 +147,9 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
             tabLabel: 'Overview',
             reg: trip.reg,
           );
-      if (mounted) _snack('${trip.reg} marked loaded & gone — en route to offload.');
+      if (mounted) {
+        _snack('${trip.reg} marked loaded & gone — en route to offload.');
+      }
     } catch (e) {
       if (mounted) _snack('Failed. ${friendlyError(e)}');
     }
@@ -152,10 +160,9 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
   List<Widget> _orderedGateSections({
     required Widget arrivals,
     required Widget departures,
-  }) =>
-      widget.focusDepartures
-          ? [departures, const SizedBox(height: 14), arrivals]
-          : [arrivals, const SizedBox(height: 14), departures];
+  }) => widget.focusDepartures
+      ? [departures, const SizedBox(height: 14), arrivals]
+      : [arrivals, const SizedBox(height: 14), departures];
 
   @override
   Widget build(BuildContext context) {
@@ -168,9 +175,9 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => MlLoadFailure(
-          subject: 'the gate queue',
-          error: e,
-          onRetry: () => ref.invalidate(mineInboundTripsProvider(companyId)),
+        subject: 'the gate queue',
+        error: e,
+        onRetry: () => ref.invalidate(mineInboundTripsProvider(companyId)),
       ),
       data: (trips) {
         _consumePending(trips);
@@ -189,9 +196,20 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
 
         final inbound = trips.where((t) => t.isInbound).toList();
         final onSite = trips.where((t) => t.isOnSite).toList();
-        final loadedReady =
-            trips.where((t) => t.status == TripStatus.loaded).toList();
-        final now = DateTime.now();
+        final loadedReady = trips
+            .where((t) => t.status == TripStatus.loaded)
+            .toList();
+        // `MlTime.now()`, NOT `DateTime.now()`. The trip side of this
+        // comparison is already converted — `MlTime.sast(t.updatedAt)` — so
+        // the boundary has to be on the same clock or the two halves disagree.
+        //
+        // On a guard's phone set to SAST this is right, which is exactly why
+        // it survived: the emulator is Africa/Johannesburg and the count
+        // looked correct. On a device in any other zone, "Departed Today"
+        // counts against the DEVICE's today. Between midnight and 02:00 SAST
+        // on a UTC device that is yesterday — night shift, at a gate whose
+        // whole job is to say what happened today.
+        final now = MlTime.now();
         final departedToday = trips.where((t) {
           if (t.status.step < TripStatus.leftMine.step) return false;
           final d = MlTime.sast(t.updatedAt);
@@ -224,23 +242,30 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                           ),
                           borderRadius: MlShape.radiusLarge,
                         ),
-                        child: const Icon(Icons.local_shipping_rounded,
-                            size: 24, color: MlTokens.inkOnFill),
+                        child: const Icon(
+                          Icons.local_shipping_rounded,
+                          size: 24,
+                          color: MlTokens.inkOnFill,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Mine Security',
-                                style: context.mlText.titleLarge.copyWith(
-                                  color: semantic.textStrong,
-                                  fontWeight: FontWeight.w800,
-                                )),
-                            Text('Gate control — arrivals & departures',
-                                style: context.mlText.bodyMedium.copyWith(
-                                  color: semantic.textMuted,
-                                )),
+                            Text(
+                              'Mine Security',
+                              style: context.mlText.titleLarge.copyWith(
+                                color: semantic.textStrong,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              'Gate control — arrivals & departures',
+                              style: context.mlText.bodyMedium.copyWith(
+                                color: semantic.textMuted,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -339,22 +364,28 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                               Divider(height: 1, color: semantic.divider),
                             ListTile(
                               leading: const MlIconWell(
-                                  icon: Icons.local_shipping_outlined,
-                                  size: 40,
-                                  radius: 11),
-                              title: Text(matches[i].reg,
-                                  style: const TextStyle(
-                                    fontFamily: MlTokens.fontMono,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.8,
-                                    fontFeatures: [FontFeature.tabularFigures()],
-                                  )),
+                                icon: Icons.local_shipping_outlined,
+                                size: 40,
+                                radius: 11,
+                              ),
+                              title: Text(
+                                matches[i].reg,
+                                style: const TextStyle(
+                                  fontFamily: MlTokens.fontMono,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
+                                  fontFeatures: [FontFeature.tabularFigures()],
+                                ),
+                              ),
                               subtitle: Text(
-                                  '${matches[i].buyerLabel} · ${matches[i].transporterName ?? '—'}'),
-                              trailing:
-                                  MlStatusBadge.forStatus(matches[i].status.label),
+                                '${matches[i].buyerLabel} · ${matches[i].transporterName ?? '—'}',
+                              ),
+                              trailing: MlStatusBadge.forStatus(
+                                matches[i].status.label,
+                              ),
                               onTap: () => setState(
-                                  () => _selectedTripId = matches[i].tripId),
+                                () => _selectedTripId = matches[i].tripId,
+                              ),
                             ),
                           ],
                         ],
@@ -379,86 +410,102 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                     // ---- Incoming Trucks — Mark Arrival + At Mine — Mark
                     // Departure (departures lead in gate mode) ----
                     ..._orderedGateSections(
-                    arrivals: _GateSection(
-                      icon: Icons.login_rounded,
-                      iconColor: MlTokens.accent,
-                      title: 'Incoming Trucks — Mark Arrival',
-                      child: inbound.isEmpty
-                          ? _EmptyLine(
-                              'No incoming trucks right now — new arrivals appear here.')
-                          : Column(
-                              children: [
-                                for (var i = 0;
-                                    i < (inbound.length > 3 ? 3 : inbound.length);
-                                    i++) ...[
-                                  if (i > 0) const SizedBox(height: 14),
-                                  _GateTruck(
-                                    trip: inbound[i],
-                                    tone: MlTone.transit,
-                                    action: MlButton.go(
-                                      label: 'Mark Arrived',
-                                      icon: Icons.login_rounded,
-                                      expand: true,
-                                      onPressed: () =>
-                                          _markArrived(companyId, inbound[i]),
+                      arrivals: _GateSection(
+                        icon: Icons.login_rounded,
+                        iconColor: MlTokens.accent,
+                        title: 'Incoming Trucks — Mark Arrival',
+                        child: inbound.isEmpty
+                            ? _EmptyLine(
+                                'No incoming trucks right now — new arrivals appear here.',
+                              )
+                            : Column(
+                                children: [
+                                  for (
+                                    var i = 0;
+                                    i <
+                                        (inbound.length > 3
+                                            ? 3
+                                            : inbound.length);
+                                    i++
+                                  ) ...[
+                                    if (i > 0) const SizedBox(height: 14),
+                                    _GateTruck(
+                                      trip: inbound[i],
+                                      tone: MlTone.transit,
+                                      action: MlButton.go(
+                                        label: 'Mark Arrived',
+                                        icon: Icons.login_rounded,
+                                        expand: true,
+                                        onPressed: () =>
+                                            _markArrived(companyId, inbound[i]),
+                                      ),
                                     ),
-                                  ),
+                                  ],
+                                  if (inbound.length > 3)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8),
+                                      child: _EmptyLine(
+                                        '+${inbound.length - 3} more — use search or the trucklist.',
+                                      ),
+                                    ),
                                 ],
-                                if (inbound.length > 3)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8),
-                                    child: _EmptyLine(
-                                        '+${inbound.length - 3} more — use search or the trucklist.'),
-                                  ),
-                              ],
-                            ),
-                    ),
-                    departures: _GateSection(
-                      icon: Icons.shield_outlined,
-                      iconColor: MlTokens.orange600,
-                      title: 'At Mine — Mark Departure',
-                      child: (onSite.isEmpty && loadedReady.isEmpty)
-                          ? _EmptyLine('No trucks at the mine right now.')
-                          : Column(
-                              children: [
-                                for (var i = 0;
+                              ),
+                      ),
+                      departures: _GateSection(
+                        icon: Icons.shield_outlined,
+                        iconColor: MlTokens.orange600,
+                        title: 'At Mine — Mark Departure',
+                        child: (onSite.isEmpty && loadedReady.isEmpty)
+                            ? _EmptyLine('No trucks at the mine right now.')
+                            : Column(
+                                children: [
+                                  for (
+                                    var i = 0;
                                     i <
                                         (loadedReady.length > 3
                                             ? 3
                                             : loadedReady.length);
-                                    i++) ...[
-                                  if (i > 0) const SizedBox(height: 14),
-                                  _GateTruck(
-                                    trip: loadedReady[i],
-                                    tone: MlTone.atMine,
-                                    badge: MlStatusBadge.forStatus(
-                                        loadedReady[i].status.label),
-                                    action: MlButton.leave(
-                                      label: 'Mark Left',
-                                      icon: Icons.logout_rounded,
-                                      expand: true,
-                                      onPressed: () =>
-                                          _markGone(companyId, loadedReady[i]),
+                                    i++
+                                  ) ...[
+                                    if (i > 0) const SizedBox(height: 14),
+                                    _GateTruck(
+                                      trip: loadedReady[i],
+                                      tone: MlTone.atMine,
+                                      badge: MlStatusBadge.forStatus(
+                                        loadedReady[i].status.label,
+                                      ),
+                                      action: MlButton.leave(
+                                        label: 'Mark Left',
+                                        icon: Icons.logout_rounded,
+                                        expand: true,
+                                        onPressed: () => _markGone(
+                                          companyId,
+                                          loadedReady[i],
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                                for (var i = 0;
+                                  ],
+                                  for (
+                                    var i = 0;
                                     i < (onSite.length > 2 ? 2 : onSite.length);
-                                    i++) ...[
-                                  if (i > 0 || loadedReady.isNotEmpty)
-                                    const SizedBox(height: 14),
-                                  _GateTruck(
-                                    trip: onSite[i],
-                                    tone: MlTone.atMine,
-                                    badge: const MlStatusBadge(
-                                        label: 'AT MINE', tone: MlTone.atMine),
-                                    footnote:
-                                        'Waiting for the load controller to weigh & seal before release.',
-                                  ),
+                                    i++
+                                  ) ...[
+                                    if (i > 0 || loadedReady.isNotEmpty)
+                                      const SizedBox(height: 14),
+                                    _GateTruck(
+                                      trip: onSite[i],
+                                      tone: MlTone.atMine,
+                                      badge: const MlStatusBadge(
+                                        label: 'AT MINE',
+                                        tone: MlTone.atMine,
+                                      ),
+                                      footnote:
+                                          'Waiting for the load controller to weigh & seal before release.',
+                                    ),
+                                  ],
                                 ],
-                              ],
-                            ),
-                    ),
+                              ),
+                      ),
                     ),
                     const SizedBox(height: 14),
                     // ---- Recent activity ----
@@ -478,8 +525,9 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                           else
                             for (final t in recent.take(5))
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                ),
                                 child: Row(
                                   children: [
                                     Expanded(
@@ -487,28 +535,34 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Text(t.reg,
-                                              style: const TextStyle(
-                                                fontFamily: MlTokens.fontMono,
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w700,
-                                                letterSpacing: 0.6,
-                                                fontFeatures: [FontFeature.tabularFigures()],
-                                              )),
+                                          Text(
+                                            t.reg,
+                                            style: const TextStyle(
+                                              fontFamily: MlTokens.fontMono,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                              letterSpacing: 0.6,
+                                              fontFeatures: [
+                                                FontFeature.tabularFigures(),
+                                              ],
+                                            ),
+                                          ),
                                           Text(
                                             '${t.status.label} · ${t.buyerLabel}',
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: context.mlText.bodySmall.copyWith(
-                                              color: semantic.textMuted,
-                                            ),
+                                            style: context.mlText.bodySmall
+                                                .copyWith(
+                                                  color: semantic.textMuted,
+                                                ),
                                           ),
                                         ],
                                       ),
                                     ),
                                     Text(
-                                      DateFormat.Hm()
-                                          .format(MlTime.sast(t.updatedAt)),
+                                      DateFormat.Hm().format(
+                                        MlTime.sast(t.updatedAt),
+                                      ),
                                       style: context.mlText.code(
                                         color: semantic.textFaint,
                                         size: 13,
@@ -538,7 +592,9 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
   }
 
   Future<void> _showTruckList(
-      BuildContext context, List<MineTrip> trucks) async {
+    BuildContext context,
+    List<MineTrip> trucks,
+  ) async {
     final tripId = await showDialog<String>(
       context: context,
       builder: (_) => _TruckListDialog(trucks: trucks),
@@ -581,9 +637,7 @@ class _PendingGateConfirmationsState
   final Set<String> _busy = {};
 
   String _tripLabel(SecurityConfirmation c) {
-    final match = widget.trips
-        .where((t) => t.tripId == c.tripId)
-        .firstOrNull;
+    final match = widget.trips.where((t) => t.tripId == c.tripId).firstOrNull;
     if (match != null) return match.reg;
     final id = c.tripId;
     return id.length > 8 ? 'Trip ${id.substring(0, 8)}…' : 'Trip $id';
@@ -599,17 +653,25 @@ class _PendingGateConfirmationsState
           .securityConfirm(c.tripId, c.confirmationType);
       messenger
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(
+        ..showSnackBar(
+          SnackBar(
             content: Text(
-                '${c.confirmationType.label} confirmed for ${_tripLabel(c)}.')));
+              '${c.confirmationType.label} confirmed for ${_tripLabel(c)}.',
+            ),
+          ),
+        );
     } catch (e) {
       messenger
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text('Failed to confirm. ${friendlyError(e)}')));
+        ..showSnackBar(
+          SnackBar(content: Text('Failed to confirm. ${friendlyError(e)}')),
+        );
     }
     if (mounted) {
       setState(() => _busy.remove(c.id));
-      ref.invalidateIfMounted(minePendingConfirmationsProvider(widget.companyId));
+      ref.invalidateIfMounted(
+        minePendingConfirmationsProvider(widget.companyId),
+      );
     }
   }
 
@@ -618,8 +680,9 @@ class _PendingGateConfirmationsState
     final semantic = MlSemantic.of(context);
     final brightness = Theme.of(context).brightness;
     final done = MlTone.done.colors(brightness);
-    final pending =
-        ref.watch(minePendingConfirmationsProvider(widget.companyId));
+    final pending = ref.watch(
+      minePendingConfirmationsProvider(widget.companyId),
+    );
     final rows = pending.valueOrNull ?? const <SecurityConfirmation>[];
     if (rows.isEmpty) return const SizedBox.shrink();
 
@@ -650,8 +713,8 @@ class _PendingGateConfirmationsState
                 child: Row(
                   children: [
                     MlIconWell(
-                      icon: c.confirmationType ==
-                              SecurityConfirmationType.arrival
+                      icon:
+                          c.confirmationType == SecurityConfirmationType.arrival
                           ? Icons.login_rounded
                           : Icons.logout_rounded,
                       tone: c.driverConfirmed ? MlTone.done : MlTone.atMine,
@@ -663,43 +726,47 @@ class _PendingGateConfirmationsState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(_tripLabel(c),
-                              style: const TextStyle(
-                                fontFamily: MlTokens.fontMono,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.6,
-                                fontFeatures: [FontFeature.tabularFigures()],
-                              )),
-                          Row(children: [
-                            Icon(
-                              c.driverConfirmed
-                                  ? Icons.check_circle
-                                  : Icons.hourglass_top_rounded,
-                              size: 13,
-                              color: c.driverConfirmed
-                                  ? done.fg
-                                  : semantic.textFaint,
+                          Text(
+                            _tripLabel(c),
+                            style: const TextStyle(
+                              fontFamily: MlTokens.fontMono,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.6,
+                              fontFeatures: [FontFeature.tabularFigures()],
                             ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                '${c.confirmationType.label} · '
-                                '${c.driverConfirmed ? 'driver confirmed' : 'waiting for driver'}',
-                                // TWO lines. This says WHICH confirmation and
-                                // WHETHER the driver has agreed to it — at one
-                                // line, in 159px, "Gate arrival · driver
-                                // confirmed" lost the half that says the
-                                // driver confirmed, on the gate screen where
-                                // that is the question being asked.
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.mlText.bodySmall.copyWith(
-                                  color: semantic.textMuted,
+                          ),
+                          Row(
+                            children: [
+                              Icon(
+                                c.driverConfirmed
+                                    ? Icons.check_circle
+                                    : Icons.hourglass_top_rounded,
+                                size: 13,
+                                color: c.driverConfirmed
+                                    ? done.fg
+                                    : semantic.textFaint,
+                              ),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  '${c.confirmationType.label} · '
+                                  '${c.driverConfirmed ? 'driver confirmed' : 'waiting for driver'}',
+                                  // TWO lines. This says WHICH confirmation and
+                                  // WHETHER the driver has agreed to it — at one
+                                  // line, in 159px, "Gate arrival · driver
+                                  // confirmed" lost the half that says the
+                                  // driver confirmed, on the gate screen where
+                                  // that is the question being asked.
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: context.mlText.bodySmall.copyWith(
+                                    color: semantic.textMuted,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ]),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -755,25 +822,29 @@ class _MiniStat extends StatelessWidget {
         children: [
           MlIconWell(icon: icon, tone: tone, size: 34, radius: 10),
           const SizedBox(height: 6),
-          Text(value,
-              style: context.mlText.titleLarge.copyWith(
-                color: semantic.textStrong,
-                fontWeight: FontWeight.w800,
-                height: 1,
-              )),
+          Text(
+            value,
+            style: context.mlText.titleLarge.copyWith(
+              color: semantic.textStrong,
+              fontWeight: FontWeight.w800,
+              height: 1,
+            ),
+          ),
           const SizedBox(height: 2),
           // Two lines, like `MlStatCard`'s label. At one line a 117px chip on a
           // 412px phone rendered "Incoming Tod…" and "Departed Tod…" — the
           // guard could not tell "Today" from "Total", on the count they act
           // on. The bespoke chip was the only stat label in the product still
           // capped at one line.
-          Text(label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: context.mlText.bodySmall.copyWith(
-                color: semantic.textMuted,
-                height: 1.25,
-              )),
+          Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: context.mlText.bodySmall.copyWith(
+              color: semantic.textMuted,
+              height: 1.25,
+            ),
+          ),
         ],
       ),
     );
@@ -806,11 +877,13 @@ class _GateSection extends StatelessWidget {
               Icon(icon, size: 20, color: iconColor),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(title,
-                    style: context.mlText.titleMedium.copyWith(
-                      color: semantic.textStrong,
-                      fontWeight: FontWeight.w800,
-                    )),
+                child: Text(
+                  title,
+                  style: context.mlText.titleMedium.copyWith(
+                    color: semantic.textStrong,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ],
           ),
@@ -843,32 +916,36 @@ class _GateTruck extends StatelessWidget {
     final semantic = MlSemantic.of(context);
 
     Widget field(IconData icon, String label, String val) => Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Row(
-            children: [
-              Icon(icon, size: 16, color: MlTokens.accent),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(label,
-                        style: context.mlText.labelSmall.copyWith(
-                          color: semantic.textFaint,
-                          fontWeight: FontWeight.w400,
-                        )),
-                    Text(val,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: context.mlText.titleSmall.copyWith(
-                          color: semantic.textStrong,
-                        )),
-                  ],
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: MlTokens.accent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: context.mlText.labelSmall.copyWith(
+                    color: semantic.textFaint,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
-              ),
-            ],
+                Text(
+                  val,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.mlText.titleSmall.copyWith(
+                    color: semantic.textStrong,
+                  ),
+                ),
+              ],
+            ),
           ),
-        );
+        ],
+      ),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -877,10 +954,11 @@ class _GateTruck extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             MlIconWell(
-                icon: Icons.local_shipping_outlined,
-                tone: tone,
-                size: 96,
-                radius: 14),
+              icon: Icons.local_shipping_outlined,
+              tone: tone,
+              size: 96,
+              radius: 14,
+            ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -897,19 +975,22 @@ class _GateTruck extends StatelessWidget {
                   ),
                   field(Icons.apartment_rounded, 'Client', trip.buyerLabel),
                   if (trip.transporterName != null)
-                    field(Icons.groups_rounded, 'Transporter',
-                        trip.transporterName!),
-                  field(Icons.category_outlined, 'Material',
-                      trip.materialLabel),
+                    field(
+                      Icons.groups_rounded,
+                      'Transporter',
+                      trip.transporterName!,
+                    ),
+                  field(
+                    Icons.category_outlined,
+                    'Material',
+                    trip.materialLabel,
+                  ),
                 ],
               ),
             ),
           ],
         ),
-        if (action != null) ...[
-          const SizedBox(height: 14),
-          action!,
-        ],
+        if (action != null) ...[const SizedBox(height: 14), action!],
         if (footnote != null)
           Padding(
             padding: const EdgeInsets.only(top: 10),
@@ -970,10 +1051,12 @@ class _CheckinCard extends StatelessWidget {
             ],
           ),
           MlCard.heroTitleRule(),
-          Text('${trip.buyerLabel} · ${trip.materialLabel}',
-              style: context.mlText.bodyMedium.copyWith(
-                color: semantic.textMuted,
-              )),
+          Text(
+            '${trip.buyerLabel} · ${trip.materialLabel}',
+            style: context.mlText.bodyMedium.copyWith(
+              color: semantic.textMuted,
+            ),
+          ),
           const SizedBox(height: 16),
           if (trip.isInbound)
             _Question(
@@ -1043,11 +1126,12 @@ class _Question extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(text,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.w700)),
+        Text(
+          text,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
         const SizedBox(height: 12),
         Row(
           children: [
@@ -1100,8 +1184,11 @@ class _Banner extends StatelessWidget {
           Icon(icon, size: 18, color: MlTokens.accent),
           const SizedBox(width: 8),
           Expanded(
-              child: Text(text,
-                  style: const TextStyle(fontWeight: FontWeight.w600))),
+            child: Text(
+              text,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
         ],
       ),
     );
@@ -1145,7 +1232,9 @@ class _TruckListDialogState extends State<_TruckListDialog> {
               ),
               items: [
                 const DropdownMenuItem<String?>(
-                    value: null, child: Text('All buyers')),
+                  value: null,
+                  child: Text('All buyers'),
+                ),
                 for (final b in buyers)
                   DropdownMenuItem<String?>(value: b, child: Text(b)),
               ],
@@ -1165,13 +1254,17 @@ class _TruckListDialogState extends State<_TruckListDialog> {
                       Row(
                         children: const [
                           Expanded(
-                              child: Text('Reg no',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.w800))),
+                            child: Text(
+                              'Reg no',
+                              style: TextStyle(fontWeight: FontWeight.w800),
+                            ),
+                          ),
                           Expanded(
-                              child: Text('Buyer',
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.w800))),
+                            child: Text(
+                              'Buyer',
+                              style: TextStyle(fontWeight: FontWeight.w800),
+                            ),
+                          ),
                         ],
                       ),
                       const Divider(),
@@ -1183,9 +1276,13 @@ class _TruckListDialogState extends State<_TruckListDialog> {
                             child: Row(
                               children: [
                                 Expanded(
-                                    child: Text(t.reg,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w600))),
+                                  child: Text(
+                                    t.reg,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
                                 Expanded(child: Text(t.buyerLabel)),
                               ],
                             ),
