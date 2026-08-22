@@ -638,3 +638,122 @@ replaced it, and Jean's handset was used for hardware proof.
   Supervisor/Foreman, company & employee management, and the buyer/mine quality
   and value tabs.
 - Physical GPS, iOS and Windows — all unchanged.
+
+---
+
+## Current state — 2026-08-23 — the last un-driven roles, and a blind instrument
+
+Continues the session above. It began by finishing that session's interrupted
+hardware checks, then drove the four roles the sweep had never reached — Load
+Controller, Supervisor/Foreman, employee management, and the buyer/mine value
+and quality tabs — by walking one real load through the entire mine floor.
+
+| | |
+|---|---|
+| `flutter analyze` | no issues |
+| `flutter test` | **2,475 passed**, 1 skipped |
+| `dart tool/release_guards.dart` | **42/42** PASS, 0 FAIL — `no-skeleton-dateformat` is new |
+| `dart tool/release_guards.dart --selftest` | every guard bites |
+| `py -3 tool/_sabotage.py` | ALL SABOTAGES CAUGHT |
+| `py -3 tool/one_clock_check.py` | 0 sites, exit 0 — **6 patterns now, was 5** |
+| `py -3 tool/unphotographed_screens.py` | 94 targets, 94 photographed, 0 not |
+| `py -3 tool/health_probe.py` | 7/7 services answering |
+| Renders | 227 |
+| Crash reports raised all session | **0**, across the handset, the emulator and six browser accounts |
+| Original worktree | `df451d0`, 14163 files, 3 pre-existing modified, 2 entries, 0 today |
+
+### The interrupted hardware checks, finished
+
+- **The sign-out dialog copy** — read on the SM-G780G: "Sign out" / "Are you
+  sure you want to sign out?" / [Cancel] [Sign out]. Cancel was tapped; the
+  phone was left signed in as the platform admin, as it was found.
+- **No new `Duplicate GlobalKey` rows** — baseline taken, **12** navigations
+  driven on the handset, **0** new rows. The build before the fix produced
+  7 in 7. Confirmed the pipe was live by the 7 rows it wrote at 20:48–20:50 the
+  night before, from the same handset.
+- **The driver's week chart** — verified on the emulator (it needs the driver
+  account, and the handset was to stay signed in as the admin). The 33.7 t that
+  used to sit on a Sunday that had not happened is on Monday, and Sunday is
+  flat.
+
+### One real load, driven end to end
+
+Transporter accepts a dispatched route → truck and driver assigned → driver
+starts → security checks in → **weighbridge** → gate check-out. Trip
+`0d9c6792`, truck S6W001GP.
+
+The arithmetic closes at every step: tare 15.40 t, gross 49.60 t, the sheet
+computed `Net minerals loaded 34.20 t` live, `Tons loaded (auto) 34.20` agreed
+in the wayslip block below it, and `trips.net_tons` came back 34.2. The stat
+card moved to `33.025 t Avg Tons / Load` — exactly (34.2 + 33.7 + 30 + 34.2)/4.
+Four seals were demanded, numbered and photographed, matching
+`fleet_vehicles.seal_points = 4`; waybill `TRP-6C72DDAC41` was minted
+server-side with origin, destination, the gross-scale photo and the
+controller's stored signature.
+
+### Twelve defects, all found by looking
+
+1. **A wall clock converted twice** — six sites in the recon table including
+   its Excel/CSV/PDF export of the billing record, two in the chat dock, three
+   console "last active" readouts and the mine's Recent-waybills card. A no-op
+   in South Africa, +2 h on UTC, +6 h in New York. **The fixture had the same
+   error mirrored, so the two cancelled** and the rendered time was right in
+   every test and wrong in production for anyone outside SAST.
+2. **The live map's ETA came off the reader's device** — a §7.1 violation on
+   the screen whose whole subject is when a truck arrives.
+3. **An eighth date dialect on three console screens** — `Aug 22, 2026 8:50 PM`
+   against the product's `22 Aug 2026 · 20:50`.
+4. **Two lists printed a bare time for rows spanning days** — the load
+   controller's Recent Loads read `10:10, 04:51, 13:39` sorted newest first,
+   and the third was six days old.
+5. **The mine's production table contradicted its own header** — eight amber
+   negatives under a `— Pit-to-port loss`.
+6. **The quality screen printed delivered tonnage under "Payable"** — one row
+   showing a payable ABOVE the mine net, which the definition forbids.
+7. **`R0.00 Invoice variance` in green with nothing invoiced.**
+8. **The employee register counted a different set from the screen next door**
+   — "7 of 7 stockpiles" beside "9 stockpiles".
+9. **The transporter was told "Seals — Not required"** on a route the
+   weighbridge refuses without four numbered, photographed seals. Two columns,
+   `transportation_requests.seal_required` false and `routes.seal_required`
+   true, and the sheet read the one the load is NOT judged by.
+10. **A distance chip that sometimes said what it measured** — `640 km · 620 ·
+    640 · 640 km · 520 km · 120 · 120` in one column.
+11. **Two "this week" tonnages on the driver's screen** — 170.5 t loaded and
+    136.3 t delivered, one scroll apart, only one label saying which.
+12. **The driver's hero card overflowed by 44 px** at 360 px × text scale 1.3.
+
+### The instruments grew, and one was blind
+
+- **`portal_overflow_sweep_test.dart` was laying out EMPTY screens.** It
+  overrode `mirrorCompanyIdProvider` and nothing else, so every provider
+  resolved to an empty list: 27 screens × 3 widths × 5 scales × bold, of empty
+  states. Empty states are short and short things do not overflow (§10.5). It
+  runs on the real capture fixtures now, and turning the data on surfaced FOUR
+  more overflows on screens it had always covered and always passed — the load
+  controller's identity row (22 px) and its whole wide branch, and the buyer
+  reconciliation card's header (21 px) and its two buttons (32 px).
+- **`one_clock_check.py`: 5 patterns → 6.** The new one catches a
+  `DateTime.now()` that never has a calendar field read off it because it goes
+  straight into a formatter — which is exactly how the live map's ETA survived
+  five patterns.
+- **`release_guards.dart`: 41 → 42**, adding `no-skeleton-dateformat`. The
+  existing `one-vocabulary-for-a-timestamp` reads the literal inside
+  `DateFormat('…')`, and `DateFormat.yMMMd().add_jm()` has no literal to read,
+  so it reported green over three live violations. The new guard **failed on
+  the real tree** before the fix rather than only on a planted line.
+- **`MlTime.sast` now asserts it was handed a genuine instant.** Every real
+  instant here arrives UTC-flagged from Postgres, so `isUtc` is a sound test
+  for "this is not somebody's wall clock". It fires in debug, in every test and
+  in every render, and it is what found defect 1 at all. The `calendar*` family
+  is complete: `calendarDay`, `calendarStamp`, `calendarClock`,
+  `calendarListDay`, `calendarAgo`, `calendarAgoTag`.
+
+### What is NOT proven
+
+- **The handset has not run this build.** The APK (`355263585836CBDB…`) is
+  staged on the NAS. The phone's display went to sleep and only Jean can wake
+  it; the session paused and asked, per the rule.
+- **The POD leg of trip `0d9c6792` was not driven** — it is `en_route_to_offload`,
+  a normal state shared with two older trips.
+- Physical GPS on a road, iOS and Windows — all unchanged.

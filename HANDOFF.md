@@ -1,10 +1,12 @@
 # MineLink M3 — session handoff
 
-**Rewritten 2026-08-22 (late), at the end of the session that drove the live
-app as five accounts in a browser and three roles on Android, found TWELVE
-defects doing it, fixed all twelve, and stopped a production database filling
-up.** Everything below is verified state, not intention. It replaces the
-previous handoff of the same name.
+**Rewritten 2026-08-23, at the end of the session that finished the previous
+one's interrupted hardware checks, drove the last four roles nobody had ever
+opened — including one real load through the entire mine floor — found TWELVE
+more defects doing it, fixed all twelve, and discovered that the overflow sweep
+had been laying out empty screens for its whole life.** Everything below is
+verified state, not intention. It replaces the previous handoff of the same
+name.
 
 **This file lives at**
 `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md`
@@ -18,47 +20,63 @@ file governs the redesign work.**
 
 ## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The tree is **clean**, **157 commits**, nothing half-applied and nothing
+The tree is **clean**, **163 commits**, nothing half-applied and nothing
 uncommitted. **The tip is the commit that carries THIS FILE**, so the count
-above includes it. The last code commit under it is `1ffa3d2`.
+above includes it. The last code commit under it is `963ca7e`.
 
 **The original worktree was re-checked against its §0 baseline and is
 untouched** — HEAD `df451d0`, the same three pre-existing modified files,
 14163 files under the `-prune` form, two worktree entries, nothing modified
 today.
 
-### 🚨 EXACTLY WHERE IT STOPPED, AND WHAT TO DO FIRST
+### 🚨 THE ONE THING LEFT UNDONE, AND WHY
 
-The APK built at commit `1ffa3d2` (SHA-256 `EEE10B20DBF82BBCD26905D8182E335055A2CEA864697E74C543429063879A24`)
-**is installed on Jean's SM-G780G and has NOT been driven yet.** The install
-completed ("MineLink M3 — App installed"), the dialog was dismissed, and the
-phone was left on `home`, signed in as the platform admin, with every
-screenshot deleted.
+**The APK built at `963ca7e` has NOT been run on Jean's handset.** It is built,
+hashed and staged:
 
-**So the very first job in the next session is the hardware verification that
-was interrupted.** Three things, all on that already-installed build:
+```
+build/app/outputs/flutter-apk/app-debug.apk
+\\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk
+SHA-256  355263585836CBDBD11948A1690031F927E65AB070B88D7077E4ECBFF510378C   (both ends match)
+```
 
-1. **The sign-out dialog copy.** Tap the profile → Sign out. It must read
-   **"Sign out" / "Are you sure you want to sign out?" / [Cancel] [Sign out]**.
-   Before commit `3daf897` it read "Logout Confirmation / …log out? / Yes,
-   Logout". **Tap Cancel** — do not actually sign him out, the phone should be
-   left signed in as the platform admin.
-2. **No new `Duplicate GlobalKey` crash reports.** Take a baseline, navigate
-   six or seven screens, re-count. The method and the SQL are in §5.
-3. **The driver's week chart** (`6c8a4e0`) — this one needs the driver
-   account, so it is fine to verify on the EMULATOR instead rather than
-   signing Jean's phone out. See §4.1.
+**The phone's display went to sleep and stayed asleep.** `status` reports
+`sharing=True control=True` — host mode never dropped — but `probe` reports
+**0.061 bits/pixel**, which is the tool's way of saying nothing is on the
+screen. Injected touches cannot wake it and only Jean can. The session asked
+him, said what it was for, and carried on with everything that did not need the
+handset, re-probing as it went. It never came up.
 
-Everything else in this session is committed, tested, sabotaged and green.
+**So the first job next session is:** ask Jean to wake the phone, install that
+APK (route in §5), and drive the three things a handset proves and nothing else
+does —
+
+1. **The driver's hero card at a raised text size.** Settings → Display →
+   Font size, one or two notches up. `CURRENT TRIP` and the status pill must
+   sit on two lines with NO yellow-and-black stripe. At 360 px × 1.3 this
+   overflowed by 44 px before `963ca7e`. Verified on the emulator at font
+   scale 1.3 with a real trip; not yet on glass.
+2. **The load controller's truck row and the buyer's reconciliation card**, same
+   raised text size — 22 px, 21 px and 32 px overflows before this session.
+3. **No new `Duplicate GlobalKey` rows** — baseline, navigate six or seven
+   screens, re-count. SQL in §5. This build has never been on the handset at
+   all, and the last three times a "finished" fix went back on glass it was the
+   handset that had the last word.
+
+Put the phone back the way it was found: signed in as the platform admin, on
+`home`, every screenshot deleted.
 
 ### What this session did, in one paragraph
 
-It did not build features. It **drove the finished app** — as the platform
-admin, a mine owner, a buyer and a transporter in a browser, and as a driver
-and a security guard on Android — and wrote down what was actually wrong on
-the screen. Twelve defects came out of that, and **not one of them came from
-the test suite**: they are screens being *wrong*, not screens being *broken*,
-and 2,398 tests, 40 guards and 225 renders all coexisted with every one.
+It finished the previous session's interrupted hardware checks (both passed),
+then went after the four roles §4.2 had listed as never driven. Reaching the
+Load Controller meant there had to be a truck on the weighbridge, so it drove
+one real load the whole way — transporter accepts, truck and driver assigned,
+driver starts, security checks in, tare, gross, four sealed and photographed,
+waybill, gate check-out. Twelve defects came out of the sweep. **The most
+important one is not a screen at all: the portal overflow sweep had been
+running 27 screens × 3 widths × 5 text scales against EMPTY providers**, and
+turning the data on found four real overflows it had always passed.
 
 ---
 
@@ -67,7 +85,7 @@ and 2,398 tests, 40 guards and 225 renders all coexisted with every one.
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, redesigned onto Material 3. Its own git repo (`main`), **157 commits**, clean tree. |
+| What it is | A **complete, independent fork** of MineLink, redesigned onto Material 3. Its own git repo (`main`), **163 commits**, clean tree. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
@@ -99,7 +117,8 @@ find . -type f -newermt "<today>" -not -path "./.git/*" | wc -l    # must be 0
 not a directory. The `-prune` form returns **14163**. Same untouched tree.
 
 Reading that tree is fine and often necessary. Writing to it, or running any
-git command inside it, is not.
+mutating git command inside it, is not. (`git status` / `git rev-parse` /
+`git worktree list` are reads and are how the baseline is checked.)
 
 ---
 
@@ -121,8 +140,13 @@ Still standing:
 - **The sidebar and its groups start collapsed, everywhere.**
 - **Everything in the sidebar has a parent — except the Dashboard, which is
   first and has none.**
-- **If the phone does not answer, STOP and ask.** §5. Exercised twice this
-  session; both times Jean fixed it within minutes.
+- **If the phone does not answer, STOP and ask.** §5. Exercised this session
+  and NOT resolved — see the top of this file.
+- 🚨 **DO NOT MOVE JEAN'S MOUSE.** New this session, and he said it himself
+  mid-run: he works at this machine while the session runs. A helper that
+  drove real OS clicks through `SetCursorPos` was written, used twice, and
+  then disabled the moment he said so (`realclick.ps1.DISABLED-jean-is-using-
+  the-mouse` in the scratchpad). §5 has what to use instead.
 
 **`supabase/` is frozen.** Things needing a migration are REPORTED — §6.
 
@@ -132,14 +156,14 @@ Still standing:
 
 ```
 flutter analyze                                 no issues
-flutter test                                    2440 passed, 1 skipped
-dart tool/release_guards.dart                   41/41 PASS, 0 FAIL
+flutter test                                    2475 passed, 1 skipped
+dart tool/release_guards.dart                   42/42 PASS, 0 FAIL
 dart tool/release_guards.dart --selftest        all guards bite
 py -3 tool/_sabotage.py                         ALL SABOTAGES CAUGHT
 py -3 tool/type_scale_codemod.py --selftest     OK
 py -3 tool/dropdown_width_check.py              passes
 py -3 tool/glyph_coverage_check.py              passes
-py -3 tool/one_clock_check.py                   0 sites, exit 0
+py -3 tool/one_clock_check.py                   0 sites, exit 0   (6 patterns)
 py -3 tool/unphotographed_screens.py            94 targets, 94 photographed, 0 not
 py -3 tool/health_probe.py                      7/7 services answering
 flutter build web --release                     builds
@@ -148,12 +172,13 @@ docs/redesign/renders/                          227 renders
 render harness — RENDER NOTE / FAILURE STATE    0 / 0
 render harness — LOW CONTRAST                   0 (app screens; see below)
 render harness — CUT OFF                        5 renders / 9 strings, deliberate
-"Duplicate GlobalKey" in a test run             0
-APK ON JEAN'S SM-G780G                          INSTALLED (1ffa3d2), NOT yet driven
+CRASH REPORTS RAISED ALL SESSION                0
+APK ON JEAN'S SM-G780G                          NOT INSTALLED — staged on the NAS
 ```
 
-Test count **2398 → 2440**. Guards **40 → 41**. Renders **225 → 227**.
-`one_clock_check.py` went from **3 patterns to 5**.
+Test count **2440 → 2475**. Guards **41 → 42**. `one_clock_check.py` went from
+**5 patterns to 6**. Renders unchanged at 227 (twelve were regenerated; none
+added).
 
 ⚠️ **`CUT OFF` counts RENDERS, not strings** — 5 lines, 9 strings, unchanged.
 
@@ -161,193 +186,276 @@ Test count **2398 → 2440**. Guards **40 → 41**. Renders **225 → 227**.
 full run returns **11**, all tagged `[unit]` — the reporter's own self-test.
 Count `grep "LOW CONTRAST \[" out.txt | grep -vc "\[unit\]"`.
 
+⚠️ **`health_probe.py` can report 6/7 on a cold extras project and it is not
+down.** Measured this session: two consecutive attempts both hit the ~3 s
+`anon` statement timeout, then four manual calls returned 200 in 2462 ms, 342,
+722 and 355. The hourly `ping-extras-project` cron on main had run 50 minutes
+earlier and succeeded 48 times in two days. The pages simply fall out of a
+free-tier cache between pings. Warm it and re-run before concluding anything.
+
 ---
 
 ## 3. What this session did — DO NOT REDO ANY OF IT
 
-Twelve defects, all found by driving. **Read the commit messages** — they are
-long and they are the real record.
+Read the commit messages; they are long and they are the real record.
+`e080197`, `f8e815d`, `5cbaeee`, `4c5f807`, `963ca7e`.
 
-### 3.1 The disputes header said one over an empty list — `3179c1b`
+### 3.0 The previous session's interrupted checks — both PASSED
 
-Console read **"1 dispute"** above **"No open disputes"**. `meta:` counted the
-whole list; the body counted the ACTIVE subset; the platform's only dispute is
-resolved. Fixed with `visibleDisputes(...)`, read by both, and the header now
-names which count it gives.
+- **Sign-out copy on the SM-G780G**: "Sign out" / "Are you sure you want to
+  sign out?" / [Cancel] [Sign out]. Cancel tapped; phone left as found.
+- **`Duplicate GlobalKey`**: baseline, **12** navigations on the handset,
+  **0** new rows. (7 in 7 on the build before the fix.) The pipe was proven
+  live by the 7 rows that handset wrote the previous night.
+- **The driver's week chart**: verified on the emulator. The 33.7 t that used
+  to land on a Sunday that had not happened is on Monday; Sunday is flat.
 
-### 3.2 🚨 THE CRASH REPORTER COULD FILL THE DATABASE IT REPORTS INTO — `c846b15`
+### 3.1 🚨 A wall clock converted twice — `e080197`
 
-`/super-admin/crash-reports` would not load. **204,539 rows / 293 MB**, main
-project **24 MB → 319 MB, 64% of a 500 MB FREE plan**, peak **60,680 rows in
-one hour**. Three browser tabs left signed in overnight — from the previous
-session's own multi-account technique — hit a CanvasKit `Aborted()` during
-paint and re-threw it every frame for four hours.
+`MlTime.sast` returns a NON-UTC DateTime by design, so converting an
+already-converted value looks exactly like converting a fresh one:
 
-Dedup could not bound it: a fold only happens while the row is STILL QUEUED, so
-online each flush round-trip starts a fresh row. Fixed with a budget on rows
-LEAVING the device — **20/minute, 500/session** — with refused occurrences
-carried out as `(+N not sent)`.
+| the reader's device | what a second `sast` does |
+|---|---|
+| SAST (UTC+2) | nothing — it is the identity |
+| UTC | **+2 hours** |
+| New York (UTC−4) | **+6 hours** |
 
-**Space reclaimed: 319 MB → 40 MB**, keeping every row outside the burst
-(4,539) plus three examples of each of the 875 distinct failures. Staged +
-`TRUNCATE` + re-insert in one transaction, because a 197k-row DELETE is the
-shape that wedged this instance in August.
+Six sites in `raw_recon_view.dart` — **three of them in the Excel/CSV/PDF
+export of the billing record** — plus the chat dock's support notifications and
+events, the mine dashboard's Recent-waybills card, and three console "last
+active" readouts that go through `MlTime.ago`.
 
-### 3.3 / 3.4 The Duplicate GlobalKey fault — `ca0a835`, `f0bf845`, `6d95c68`
+**The fixture had the same error mirrored.** `kRawReconRows` built rows with
+raw `DateTime.utc(...)`, which is the opposite of what `RawReconRow.fromJson`
+produces, so the two errors cancelled: the rendered time was right in the test
+and wrong in production for anybody outside South Africa.
 
-**Three passes, and each looked finished until the APK went back on the phone.**
+**`MlTime.sast` now ASSERTS its input is a genuine instant.** Every real
+instant here arrives UTC-flagged, because Postgres returns `timestamptz` with
+an offset and `DateTime.parse` honours it — so `isUtc` is a sound test for
+"this is not somebody's wall clock", it costs nothing in release, and it fires
+in debug, in every test and in every render. **It is what found this at all.**
+The `calendar*` family is now complete: `calendarDay`, `calendarStamp`,
+`calendarClock`, `calendarListDay`, `calendarAgo`, `calendarAgoTag`.
 
-| build | navigations | reports |
-|---|---|---|
-| before | — | 32 recorded |
-| after the recorder key removal | startup | 1 |
-| after keying the switcher on the route | 7 | **7** |
-| after removing the cross-fade | 6 | **0** |
-
-Causes, in order: both shells re-keyed by route (remount per navigation, and it
-made `didUpdateWidget` dead code); `_Workspace` keying its `AnimatedSwitcher`
-on `child.hashCode` (a new key on ANY shell rebuild, which also threw away the
-page's State); and finally the structural one —
-
-> **An `AnimatedSwitcher` cannot wrap a subtree that holds a GlobalKey.** It
-> mounts the outgoing and incoming subtrees TOGETHER while it cross-fades, and
-> under a go_router `ShellRoute` both hold the same navigator.
-
-`_Workspace` is stateful now and fades ONE subtree. M3's fade-through is
-sequential anyway, so this is closer to spec.
-
-⚠️ **A widget test cannot see the third one** — `MlMotion` collapses to ~1ms
-under the test binding. The test file says so rather than implying coverage.
-
-⚠️ **One change was thrown away for lack of evidence**: making
-`MlAppShell.build`'s body `Row` unconditional. Sabotage showed it was not
-load-bearing and it would have altered a carefully-measured compact-height
-constraint.
-
-### 3.5 The stockpile tile lost 60 t between its figure and its caption — `6afee34`
-
-**210.3 t** over **"150.3 of 1240 t ordered · 12%"**. A pile with a NULL cap
-(60.0 t) was dropped from both sides of the ratio silently. `StockpileCover`
-now names the remainder so the arithmetic closes on screen.
-**The fixture was worse and had been photographed 227 times a run.**
-
-### 3.6 A mine was told its pit-to-port loss was −771 t, in green — `93fc99f`
-
-`0.00 t Mined · 771.32 t Dispatched · — Yield · **-771.32 t Pit-to-port loss**`,
-and the tone was `loss > 0 ? warn : done`, so it was GREEN. Both figures come
-from `ProductionYield` now, with one notion of whether the window is
-measurable at all.
-
-### 3.7 The not-found page was go_router's — `20262b1`
-
-`GoException: no routes for location: …` shown to users, with no design system
-on it. ⚠️ **The `no-raw-exception-in-ui` guard could never have caught it** —
-the string is interpolated inside the package and the guard greps `lib/`.
-`RouteNotFoundScreen` replaces it; its action resolves the user's real landing
-route (verified live: a buyer lands on `/portal/buyer`, not `/`). Two renders
-added — `unphotographed_screens.py` walks route targets and a page reached by
-NOT matching a route is not one.
-
-### 3.8 Every truck was in the wrong bucket on Fleet Management — `3487ad2`
-
-```
-dashboard          2 on route of 3 · 67%
-Trucks On Route    On Route 2 · Available 1
-Fleet Management   On Trip 1 · Available 2      <- wrong, and INVERTED
-```
-The counters read `hasAssignedDriver` under an "On Trip" label. The two trucks
-carrying loads have no driver row, so they were reported **Available to
-allocate** — the number a transporter dispatches from. Now reads
-`list_transporter_fleet_status`, the same derived source the other two use.
-
-### 3.9 The driver's week chart drew tonnage on a day that had not happened — `6c8a4e0`
-
-Found on the emulator on a **Saturday**; the chart had a bar on **Sunday**.
-`byDay[t.updatedAt.weekday - 1]` read the **UTC** weekday while `inWeek` and
-`inPrevWeek` on the lines either side correctly used `MlTime.sast`. A load
-delivered **01:29 Monday SAST = 23:29 Sunday UTC** put 33.7 t on tomorrow.
-
-**The week TOTAL was right to the kilogram** (136.3 t, agreeing with the card
-above), so only the distribution was wrong — nothing to notice unless you read
-the bars and knew what day it was. Extracted to `tonsByWeekday`. Sabotage
-reproduces the exact on-screen bars `[68.4, 0, 0, 0, 0, 34.2, 33.7]`.
-
-Also fixed: `employee_profile_screen`'s "since {Month} {Year}" read
-`e.createdAt.month` off a raw instant.
-
-### 3.10 Every "Sign out" button opened a dialog that said "Logout" — `3daf897`
-
-`LogoutService` has **TEN call sites**, every one labelled "Sign out", and the
-dialog they all open read "Logout Confirmation / …log out? / Yes, Logout".
-Two more dialogs titled "Confirm Logout" turned up once there was something
-looking. New guard `one-vocabulary-for-signing-out`, third in that family.
-Writing it found four developer-log strings too; rewording them left a rule
-with **no exceptions**.
-
-### 3.11 "Departed Today" asked the device what day it is — `1ffa3d2`
+### 3.2 The live map's ETA came off the reader's device — `e080197`
 
 ```dart
-final now = DateTime.now();                    // the DEVICE
-final d   = MlTime.sast(t.updatedAt);          // the pit
-return d.year == now.year && d.month == now.month && d.day == now.day;
+final arrive = DateTime.now().add(eta);
+parts.add('ETA ${DateFormat('HH:mm').format(arrive)}');
 ```
-The mirror image of 3.9. Right on a SAST phone — **which is why the emulator,
-set to Africa/Johannesburg, showed a plausible 2** — and wrong on any other
-device, by a whole day between midnight and 02:00 SAST. Also fixed a
-date-range picker built from `DateTime.now().year`.
 
-### 3.12 The instrument grew two patterns
+A straight §7.1 violation shown to the buyer, the mine, the transporter and the
+platform admin, on the screen whose entire subject is when a truck arrives.
+Every other timestamp in that file already went through `MlTime.sast`. The
+timeline's "Now" row did the same and also made a render of that panel
+unreproducible.
 
-`one_clock_check.py` had three patterns and passed this tree cleanly while
-**four** real faults were live. It has five now:
+**`one_clock_check.py` gained a sixth pattern for it**: a `DateTime.now()` that
+never has a calendar field read off it because it goes straight into a
+formatter. Pattern 5 is blind to exactly that. Sabotaged against the real file:
+the checker names it, line and all.
 
-4. `someAt.weekday` — a calendar field off a raw UTC instant. Scoped to
-   receivers ending in `At`; `tripDate` and friends are already
-   `MlTime.sast(...)` at parse and are deliberately not matched.
-5. `DateTime.now()` bound to a local whose `.year`/`.month`/`.day`/`.weekday`
-   is read within 60 lines — a day decision on the device clock.
+### 3.3 An eighth date dialect on three console screens — `e080197`
 
-Both have self-test cases that BITE plus negative cases that stay clean.
+`Aug 22, 2026 8:50 PM`, photographed on `/super-admin/crash-reports` against
+real rows and twice more on `/super-admin/token-requests`. Month-first,
+12-hour, in a product that is day-first and 24-hour everywhere else — and the
+exact shape `MlTime`'s own doc lists among the seven it replaced.
+
+`one-vocabulary-for-a-timestamp` could not see it: it reads the literal inside
+`DateFormat('…')` and `DateFormat.yMMMd().add_jm()` has no literal to read. New
+guard **`no-skeleton-dateformat`**, which **failed on the real tree** before the
+fix rather than only on a planted line.
+
+### 3.4 A bare time in two lists that span days — `e080197`
+
+The load controller's Recent Loads, live:
+
+```
+S6W001GP  34.2 t  Completed             10:10    <- today
+KVK007MP  33.7 t  En route to offload   04:51    <- today
+fa243ad   30 t    En route to offload   13:39    <- SIX DAYS AGO
+```
+
+Sorted newest first, so the times run out of order and the only thing that
+explains it is a day nothing on screen mentions. The security gate's Recent
+Activity did the same. New `MlTime.listStamp`: the time for today, the date for
+any other day. **Both sites were confirmed live, in both branches at once**,
+once a load was recorded at 01:00 — the column read `01:00 · 22 Aug · 22 Aug ·
+16 Aug`.
+
+### 3.5 The mine's production table contradicted its own header — `f8e815d`
+
+```
+0.00 t Mined | 771.32 t Dispatched | — Yield | — Pit-to-port loss
+
+22 Aug   0.00 t   34.20 t   -34.20 t   <- amber, and every row
+```
+
+The two tiles were fixed yesterday; the table eight rows below still subtracted
+inline and toned every negative `warn`. **The fixture already had two zero-mined
+days**, so `screen-mine-production-desktop-dark.png` had been photographing an
+amber `-34.20 t` every render for weeks.
+
+### 3.6 The quality screen printed delivered tonnage under "Payable" — `f8e815d`
+
+Under a header reading `0 of 35 loads certified`, with every moisture cell
+`—`:
+
+```
+S6W001GP   34.20 t   —   34.05 t
+KVK007MP   31.80 t   —   34.90 t   <- ABOVE its own net
+```
+
+`list_load_quality` returns NULL for `payable_tons` with no moisture reading;
+the cell filled the gap with `deliveredTons ?? netTons` and muted it. Payable
+is net REDUCED by a penalty, so it cannot exceed the net. **The exporter beside
+it already wrote an empty cell**, so screen and spreadsheet disagreed about the
+same load.
+
+### 3.7 `R0.00 Invoice variance`, in green, with nothing invoiced — `5cbaeee`
+
+On a card whose own header two lines down said `33 loads · 0 invoiced`. A fold
+over an empty list is `0.0`. A variance is a COMPARISON; with one side missing
+there is no answer, which is a different fact from the two sides agreeing.
+`Invoiced R0.00` beside it is NOT the same thing and is unchanged.
+
+### 3.8 The register counted a different set from the screen next door — `5cbaeee`
+
+`"9 stockpiles"` on the Supervisor screen, `"7 of 7 stockpiles untouched
+today"` on the employee register. Both right — two of the nine hold nothing —
+and neither said which set it meant. The tell was inside the KPI: its
+**empty-case** caption already said "no stockpiles **with product**".
+
+### 3.9 🚨 "Seals — Not required" on a route that refuses a load without four — `4c5f807`
+
+```
+transportation_requests.seal_required   false
+routes.seal_required                    true
+```
+
+`record_truck_load` reads the ROUTE. Driving it end to end, the transporter's
+sheet said "Not required" and the Load Controller's sheet opened on "Seals
+(4 on this rig) — SEALS REQUIRED … you can't complete the load without them."
+The admin had typed "Seals required on this route" into the free-text notes,
+which is the workaround the comment above that row was written to end — it
+named the right reason and read the wrong column.
+
+Fixed with one more column on an embedded select the transporter already reads.
+**Two sabotages**: ignoring the route's flag fails three cases, and dropping
+`seal_required` from the select fails a case that reads the service's SOURCE —
+because a PostgREST select string cannot be reached from a unit test, and
+without that case the fix could silently revert with everything else green.
+
+### 3.10 A distance chip that sometimes said what it measured — `4c5f807`
+
+Nine route cards, one column: `640 km · 620 · 640 · 640 km · (none) · (none) ·
+520 km · 120 · 120`. `mlDistanceText` puts `km` on a BARE NUMBER only —
+`640km`, `about 600 km` and `620 miles` are somebody's words and are left
+exactly as typed.
+
+### 3.11 Two "this week" tonnages on the driver's screen — `963ca7e`
+
+`170.5 t "Tons this week"` (loaded) and `136.3 t "Tons delivered / This week"`,
+one scroll apart, only one label saying which. The card is `Tons loaded this
+week` now.
+
+### 3.12 The driver's hero card overflowed by 44 px — `963ca7e`
+
+At 360 px × text scale 1.3 — a narrow phone with the text size turned up, which
+is a driver standing next to a truck. `CURRENT TRIP` and the status pill were
+both unflexed and neither can be ellipsised, so the pill drops to a second line
+via a `Wrap` that claims the row.
+
+**It only appears with a trip on the card.** The empty state's pill reads
+`NO ACTIVE TRIP`; a real one reads `EN ROUTE TO OFFLOAD`, five characters
+longer. Which is the whole of the next item.
+
+### 3.13 🚨 THE OVERFLOW SWEEP HAD BEEN LAYING OUT EMPTY SCREENS — `963ca7e`
+
+`portal_overflow_sweep_test.dart` overrode `mirrorCompanyIdProvider` and
+nothing else. That got it past "Company not loaded" — and then every provider
+resolved to an EMPTY LIST. 27 screens × 3 widths × 5 text scales × bold, of
+empty states. Empty states are short, and short things do not overflow (§10.5).
+
+The load controller's own source already carried a comment about a 29 px
+overflow *"that no sweep had seen because the sweep ran with no trips"* — found
+by hand, fixed by hand, and the sweep left blind to the next one.
+
+It runs on the real capture fixtures now. Turning the data on surfaced **four**
+more overflows on screens it had always covered and always passed:
+
+| | |
+|---|---|
+| load controller · truck identity row | 22 px @ 360 × 2.0 |
+| load controller · the whole wide branch | @ 800 × 2.0 |
+| buyer reconciliation card · header | 21 px @ 360 × 2.0 |
+| buyer reconciliation card · two buttons | 32 px @ 360 × 2.0 |
+
+All four are §10.4 by the letter. Note the asymmetry the fixes had to respect:
+the load controller's identity row is dropped into a **shrink-wrapped** Row, so
+`Flexible` there throws outright and it had to become a `Wrap`; the recon
+card's header Row sits in a Column of **bounded** width, so `Flexible` is
+exactly right there. Each fix names which situation it is in.
+
+The load controller's breakpoint now **scales with the text**: a fixed `640`
+asks "is the card wide enough" when the question is "does the content fit", and
+the content is text the reader can double.
+
+### 3.14 One real load, driven end to end — the point of the whole sweep
+
+Trip `0d9c6792`, truck S6W001GP. Transporter accepts → truck and driver
+assigned → driver starts → security checks in → **weighbridge** → gate
+check-out.
+
+The arithmetic closes at every step: tare 15.40, gross 49.60, `Net minerals
+loaded 34.20 t` computed live, `Tons loaded (auto) 34.20` agreeing in the
+wayslip block below it, `trips.net_tons` 34.2 after. The stat card moved to
+`33.025 t Avg Tons / Load` — exactly (34.2 + 33.7 + 30 + 34.2)/4. Four seals
+demanded, numbered and photographed, matching `fleet_vehicles.seal_points = 4`.
+Waybill `TRP-6C72DDAC41` minted server-side with origin, destination, the
+gross-scale photo and the controller's stored signature.
+
+**Zero crash reports were raised all session** — across the handset's 12
+navigations, the emulator, and hours of browser driving as six accounts.
 
 ---
 
 ## 4. What is NOT done — PICK UP HERE
 
-### 4.1 🚨 FIRST: the interrupted hardware verification
+### 4.1 🚨 FIRST: the handset
 
-See "EXACTLY WHERE IT STOPPED" at the top. The build is already installed on
-the handset. Verify the sign-out copy (then **Cancel**), and confirm no new
-`Duplicate GlobalKey` rows after navigating. Verify the driver week chart on
-the **emulator** (`emulator-5554`, already has the driver account) so Jean's
-phone stays signed in as the platform admin.
+See the top of this file. The APK is built, hashed and on the NAS; the phone
+was asleep and only Jean can wake it.
 
-### 4.2 Roles the driving sweep has NOT reached
+### 4.2 What the sweep has now reached, and what it has not
 
-Driven so far: the whole console; the mine, buyer and transporter dashboards
-plus their main sub-screens; the DRIVER (dashboard, trip, profile) and
-SECURITY (gate) on Android.
+**Driven at screen level:** the whole console; the mine, buyer and transporter
+dashboards and their sub-screens; DRIVER and SECURITY on Android; and now the
+**Load Controller** (including the Record Load sheet end to end), the
+**Supervisor/Foreman** stockpile and production screens, **employee
+management**, the **buyer's Loads & value**, and the **mine's Quality** tab.
 
-**Not yet driven, and this is where to continue:**
+**Not driven:**
 
-- **Load Controller** (`ironhills.controller@mineralguide.com`) — the
-  weighbridge, tare/gross capture, seal counts, waybill generation. This is
-  the densest arithmetic in the product and has never been driven this way.
-- **Supervisor / Foreman** (`ironhills.management@mineralguide.com` or the
-  owner) — stockpiles, production, "Add tons".
-- **Company & employee management** — the register, role assignment, seats.
-- The **buyer's Loads & value** and **quality** tabs, and the **mine's
-  Quality** tab, at screen level rather than dashboard level.
-
-That method found twelve things in one pass; there is no reason to think it is
-exhausted.
+- **The POD leg.** Trip `0d9c6792` is `en_route_to_offload`. The driver's POD
+  upload needs a photo through the Android picker; the browser route can do it
+  with `DOM.setFileInputFiles` (§5) but the driver's POD flow was not attempted.
+  Two older trips sit in the same state, so this is a normal resting place, not
+  a broken one.
+- **The super-admin request → approve → link → dispatch chain**, from the
+  requester's form to the due-diligence gate. The gate itself was driven in an
+  earlier session; the four request FORMS have not been filled in this one.
+- **Chat at length**, beyond the earlier session's two-account exchange.
 
 ### 4.3 What a handset still cannot prove at a desk
 
-GPS fixes changing along a road over distance, auto-reroute on going
-off-route, the Android foreground service surviving a long backgrounding, and
-battery over a real trip. The EMULATOR can fake movement (`adb emu geo fix`)
-and the 2026-07-17 run already proved the nav stack that way. **The handset is
-NOT on adb** — it is reachable only through CtrlBridge.
+GPS fixes changing along a road, auto-reroute, the Android foreground service
+surviving a long backgrounding, and battery over a real trip. The EMULATOR can
+fake movement (`adb emu geo fix`) and the 2026-07-17 run proved the nav stack
+that way. **The handset is NOT on adb** — CtrlBridge only.
 
 ### 4.4 One elevated-shell item for Jean
 
@@ -364,18 +472,16 @@ button. If it should stay, the fix has to become geometric.
 
 ### 4.6 Closed, do not redo
 
-- A live chat between two real accounts is DRIVEN (earlier session).
+- A live chat between two real accounts is DRIVEN.
 - Contrast is closed app-wide AND for chat. `low_contrast_baseline.json` is
   `{}` — a FLOOR, not a ratchet. **If it fails, change the token; do NOT add a
   baseline entry.**
-- All eighteen chat palettes are covered by arithmetic.
-- All twelve route names are settled.
-- MessagesScreen is NOT dead code — two live callers on the licence-expiry
-  path.
-- The due-diligence gate and the driver's whole mobile lifecycle were driven
-  end to end; the load on the road is closed (trip `927cbf1b`, 34.05 t against
-  a 34.20 t mine net).
+- All twelve route names are settled. MessagesScreen is NOT dead code.
+- The due-diligence gate and the driver's mobile lifecycle were driven end to
+  end; the load on the road is closed (trip `927cbf1b`).
 - The 20 themeless test files are converted and guarded.
+- **The transporter's route sheet does not leak the admin's margin** — checked
+  again this session while driving the accept flow.
 
 ---
 
@@ -385,16 +491,17 @@ button. If it should stay, the fix has to become geometric.
 cd "/c/Users/Somebody Someone/Music/SHOWME!/MineLink-M3"
 
 flutter analyze                                  # must be clean
-flutter test                                     # 2440 passing, 1 skipped
-dart tool/release_guards.dart                    # 41/41
+flutter test                                     # 2475 passing, 1 skipped
+dart tool/release_guards.dart                    # 42/42
 dart tool/release_guards.dart --selftest         # every guard must BITE
 py -3 tool/_sabotage.py                          # every instrument must BITE
 py -3 tool/type_scale_codemod.py --selftest
 py -3 tool/dropdown_width_check.py
 py -3 tool/glyph_coverage_check.py
 py -3 tool/one_clock_check.py                    # 0 sites, exit 0
+py -3 tool/one_clock_check.py --selftest
 py -3 tool/unphotographed_screens.py
-py -3 tool/health_probe.py                       # 7/7
+py -3 tool/health_probe.py                       # 7/7 — but see §2 on cold extras
 flutter test test/renders --update-goldens       # after any visual change
 flutter build web --release
 flutter build apk --debug
@@ -407,13 +514,70 @@ test, confirm it **FAILS**, restore, re-run, confirm green. A green test proves
 nothing on its own. It only ever touches local Dart source; never the database,
 the phone, or the original worktree, and it is never committed.
 
-**It also tells you when a fix is NOT needed** — §3.4's Row change was reverted
-because sabotaging it showed the tests stayed green without it.
+🚨 **A SABOTAGE MUST COMPILE.** Check `flutter analyze` on the sabotaged file —
+a sabotage that fails to build "fails" the test for the wrong reason and proves
+nothing. One this session (`Flexible` in a shrink-wrapped Row) threw at layout
+rather than compile time, which is still a real bite, but it had to be read to
+know that.
 
-### Driving the app on ANDROID (emulator) — the fastest surface
+🚨 **KEEP A CASE THAT STAYS GREEN UNDER SABOTAGE.** Every fix this session that
+turned a figure into a dash also has a case asserting the REAL figure survives.
+Without it, a fix that went too far and started hiding true values would look
+exactly like a fix that worked.
 
-The browser MCP dropped mid-session; the emulator replaced it and found four
-defects. `emulator-5554` is running, `adb` is at `C:\Android\sdk\platform-tools`.
+### 🚨 DRIVING A BROWSER WITHOUT TOUCHING JEAN'S MOUSE
+
+He works at this machine while the session runs. **Never move the cursor.**
+
+The session's CDP driver is in the scratchpad — `cdp.py`, `setfile.py`,
+`attach_photos.py`. Copy them forward; they are not in the repo.
+
+```bash
+flutter build web --release        # config/supabase.live.json is bundled → LIVE
+cd build/web && py -3 -m http.server 8123 --bind 127.0.0.1
+"/c/Program Files/Google/Chrome/Application/chrome.exe" \
+  --remote-debugging-port=9222 --user-data-dir="<scratch>/ml-chrome-$(date +%H%M%S)" \
+  --no-first-run --no-default-browser-check --window-size=1600,1000 \
+  "http://127.0.0.1:8123/"
+```
+
+- **Publish the semantics tree with a JS `.click()`, not a pointer event.** The
+  `flt-semantics-placeholder` sits at (−1,−1) and is 1×1, so no real click can
+  land on it. `p.click()` fires its handler and works every time.
+- **Read semantics leaves by DESCENDANT** (`!e.querySelector('flt-semantics')`),
+  and **replace newlines** — a plate pill's label is `"Hold to copy\nS6W001GP"`
+  and a naive read makes it look as if the registration is missing. It is not.
+- **Type with `Input.dispatchKeyEvent` per character**, not `Input.insertText`
+  (which does not reach Flutter) and not by setting `input.value` (the canvas
+  does not follow). Clear the field first: Ctrl+A then Backspace.
+- 🚨 **CDP CLICKS DO NOT REACH A POPUP-MENU OVERLAY.** Menu items neither
+  highlight on hover nor fire, and the barrier will not dismiss — while every
+  other click on the page works. It is the TOOL, not the app: the same menu
+  works by touch on Android. **Do not chase it as a defect.** Switch accounts
+  by clearing the session instead:
+  ```js
+  localStorage.removeItem('sb-yftazblpmicqtamyiwyb-auth-token');
+  location.href = 'http://127.0.0.1:8123/';
+  ```
+- **A file input CAN be driven**, which is how the four seal photos and the
+  scale photo were attached: `Page.setInterceptFileChooserDialog(true)`, click
+  "Take picture", then `DOM.setFileInputFiles` on the `input[type=file]` that
+  appears. Re-read the layout between each one — the card grows when a picture
+  lands and every later control moves.
+- 🚨 **CLOSE EVERY BROWSER YOU SIGN IN WITH, BEFORE YOU FINISH.** §6.
+- 🚨 **A SECOND CHROME CANNOT HAVE THE SAME `--remote-debugging-port`, AND IT
+  FAILS SILENTLY.** Confirm the owner with `Get-NetTCPConnection -LocalPort
+  9222 -State Listen`.
+- 🚨 **`ignoreCache` IS NOT ENOUGH.** `transferSize` 0 means cache; compare
+  `decodedBodySize` against the built file's byte count.
+- ⚠️ The setup gate re-fires on reloads. Dismiss with "Later".
+- ⚠️ Some screens need more than 3.5 s to swap; 5 s is safer, and a fresh
+  sign-in wants 16.
+
+### Driving the app on ANDROID (emulator)
+
+`emulator-5554`, `adb` at `C:\Android\sdk\platform-tools`. It is the second
+best surface after the handset and it does not touch Jean's desktop at all.
 
 ```bash
 export PATH="$PATH:/c/Android/sdk/platform-tools"
@@ -423,50 +587,14 @@ adb -s emulator-5554 exec-out screencap -p > shot.png     # then Read the png
 adb -s emulator-5554 shell input tap <x> <y>              # REAL pixels, 1080x2400
 adb -s emulator-5554 shell input text 'someone@example.com'
 adb -s emulator-5554 shell input keyevent KEYCODE_BACK    # hides the keyboard
+adb -s emulator-5554 shell settings put system font_scale 1.3   # PUT IT BACK to 1.0
 ```
 
 ⚠️ **A Read of a screenshot reports "displayed at 900x2000, multiply by 1.20"**
-— the tap coordinates must be the REAL 1080x2400 ones, so multiply what you
-measure off the image.
+— the tap coordinates must be the REAL 1080×2400 ones.
 
-⚠️ **The emulator is set to Africa/Johannesburg**, which is exactly why §3.11
-looked correct on it. A clock fault that only bites off-SAST will NOT show
-here — reason about it, do not just look.
-
-### Driving the app in a BROWSER
-
-```bash
-flutter build web --release        # config/supabase.live.json is bundled, so
-                                   # a plain build reaches LIVE
-cd build/web && py -3 -m http.server 8123 --bind 127.0.0.1
-"/c/Program Files/Google/Chrome/Application/chrome.exe" \
-  --remote-debugging-port=9222 --user-data-dir="<scratch>/ml-m3-chrome-$(date +%H%M%S)" \
-  --no-first-run --no-default-browser-check "http://127.0.0.1:8123/"
-```
-
-- 🚨 **CLOSE EVERY BROWSER YOU SIGN IN WITH, BEFORE YOU FINISH.** §3.2.
-- 🚨 **A SECOND CHROME CANNOT HAVE THE SAME `--remote-debugging-port`, AND IT
-  FAILS SILENTLY** — you get the OLD browser, its profile and its stale bundle.
-  Confirm the owner:
-  ```powershell
-  Get-NetTCPConnection -LocalPort 9222 -State Listen |
-    ForEach-Object { (Get-CimInstance Win32_Process -Filter "ProcessId=$($_.OwningProcess)").CommandLine }
-  ```
-- 🚨 **`ignoreCache` IS NOT ENOUGH EITHER.** `transferSize` 0 means cache;
-  compare `decodedBodySize` against the built file's byte count.
-- ⚠️ **READ SEMANTICS LEAVES BY DESCENDANT, not `children.length === 0`** —
-  Flutter puts label text in a `<span>` CHILD, so the old recipe silently drops
-  whole empty states:
-  ```js
-  [...document.querySelectorAll('flt-semantics')]
-    .filter(e => !e.querySelector('flt-semantics'))
-    .map(e => (e.getAttribute('aria-label') || e.textContent || '').trim())
-    .filter(Boolean)
-  ```
-- Click `flt-semantics-placeholder` after EVERY reload to publish the tree.
-- ⚠️ Some screens need **more than 3.5s** to swap; 5s is safer.
-- ⚠️ The setup gate re-fires on reloads. Dismiss with "Later" — a JS `.click()`
-  on the node does NOT work; use a real pointer event.
+⚠️ **The emulator is set to Africa/Johannesburg**, which is why §3.1's whole
+class is invisible on it. Reason about the zone; do not just look.
 
 ### Driving Jean's real phone
 
@@ -475,14 +603,15 @@ cd build/web && py -3 -m http.server 8123 --bind 127.0.0.1
 🚨 **IF THE PHONE DOES NOT ANSWER, STOP AND ASK — DO NOT WORK AROUND IT.**
 `status` saying `no phone at a known address - broadcasting`, or `probe` under
 0.1 bits/pixel (display asleep), means pause and say so. Only Jean can enable
-host mode or wake the screen. **Both happened this session and he fixed each
-within minutes — so ASK EARLY rather than idling.**
+host mode or wake the screen.
 
-⚠️ **Host mode staying on does NOT mean the screen is awake.** The second time,
-`status` was `sharing=True control=True` and `probe` was 0.061 bits/pixel — the
-screen had slept on its timer. Check `probe`, not just `status`.
+⚠️ **Host mode staying on does NOT mean the screen is awake.** This session:
+`sharing=True control=True` throughout and `probe` 0.061 bits/pixel for hours.
+**Check `probe`, not just `status`.** Ask EARLY — he has fixed it within
+minutes every time it happened — and keep working on what does not need the
+handset while you wait, re-probing as you go.
 
-Install route (three times this session, ~6 min each):
+Install route:
 
 ```
 1. flutter build apk --debug
@@ -494,30 +623,23 @@ Install route (three times this session, ~6 min each):
 
 🚨 **THE NAS CLOCK IS ~2 h 36 m SLOW — compare the SHA-256, not timestamps.**
 
-⚠️ **My Files CACHES the folder listing, and it bit every single time.** Back
-out to `Shared` and re-enter `PhoneRemote`, then check the TIMESTAMP moved.
-**The size is useless** — every build rounds to 207 MB.
+⚠️ **My Files CACHES the folder listing.** Back out to `Shared` and re-enter
+`PhoneRemote`, then check the TIMESTAMP moved. **The size is useless** — every
+build rounds to 207 MB.
 
-⚠️ **`home` often drops the link and IS NOT RETRIED**, so a batch beginning
-`home; …` can run its remaining steps inside the app you meant to leave. Send
-`home` as its own invocation. Long batches drift generally — prefer short ones
-and re-shoot.
+⚠️ **`home` often drops the link and IS NOT RETRIED**, so send it on its own.
+Long batches drift; prefer short ones and re-shoot.
 
 ⚠️ **The applicationId is `org.minelink.m3`**, deliberately different from the
 shipping app's. They install side by side.
 
 It is his **personal** phone: prefer `sig`/`changed`/`waitstable` over `shot`,
 **delete every screenshot immediately**, do not read what you did not come for,
-back out of anything opened by mistake and say so, and leave it on
-`home; waitstable; home`. Two screens showed his personal content in passing
-this session (WhatsApp media in My Files' recents, and his home screen);
-neither was read beyond recognising it, and both shots were deleted.
-
-⚠️ **Battery was at 23–26% and falling when the session ended.** Worth a word
-to Jean before a long drive.
+and leave it on `home; waitstable; home`. Battery was 35–37% and charging when
+this session ended.
 
 🚨 **Turning on live-location sharing writes JEAN'S REAL POSITION** to
-`vehicle_positions` every 30 s. Never switched on this session.
+`vehicle_positions` every 30 s. Never switched on.
 
 ### Counting crash reports (the hardware instrument)
 
@@ -532,45 +654,43 @@ Take a baseline, drive, re-count against `at > <baseline>`.
 
 `active user accounts.txt` in the repo root. `jean@cyberhouse.co.za` /
 `BuRG3rJ3@n1995@#` is the platform admin; everything `@mineralguide.com` is
-`MineralGuide123!`.
+`MineralGuide123!`. The five used this session: `ironhills.owner`,
+`ironhills.controller`, `ironhills.security`, `atlasbuyer.owner`,
+`roadhaul.admin`, plus `roadhaul.driver` on the emulator.
 
-⚠️ **The console stores theme and accent PER ADMIN.** Put it back if you
-change it.
+⚠️ **The console stores theme and accent PER ADMIN.** Put it back if you change
+it.
 
 ### Things that have already gone wrong here — do not repeat them
 
-- 🚨 **Browsers left signed in overnight filled a production database.** §3.2.
-- 🚨 **A second Chrome on a taken debug port silently gives you the old one.**
+- 🚨 **A helper that moved Jean's real mouse.** He was using it. Disabled.
+- 🚨 **Browsers left signed in overnight filled a production database.** §6.
+- 🚨 **`io.open(p,'w')` in Python REWRITES A FILE'S LINE ENDINGS on Windows**,
+  turning a 3-line change into a whole-file diff. This repo is mixed LF/CRLF
+  with `core.autocrlf=false`. Pass `newline=''` on BOTH the read and the write,
+  or run the scratchpad's `fix_eol.py` before committing — it compares each
+  modified file against `git show HEAD:<path>` and puts it back.
+- 🚨 **A bash heredoc eats backslashes even when quoted**, and it silently
+  mangled a regex into a literal newline this session. **Write any patch script
+  with the Write tool and run it with `py -3`.**
 - 🚨 **A stale cached bundle looks exactly like a silent failure.**
 - 🚨 **The handset found what three instruments could not, twice.** When a fault
-  is reported from hardware, re-install and re-check ON HARDWARE. Do not close
-  it on a green suite.
-- 🚨 **Check whether a "fault" is the DATA.** A truck labelled `fa243ad` on the
-  live map is a real registration somebody typed, not an id leaking.
+  is reported from hardware, re-install and re-check ON HARDWARE.
+- 🚨 **CHECK WHETHER A "FAULT" IS THE DATA — or the tool.** Three things this
+  session looked wrong and were not: a plate pill's semantics label (the
+  registration IS announced, after the tooltip), the seal note contradicting
+  the seal flag on an older route (a previous session's own test data), and
+  every popup menu in the app (CDP, not the app).
 - 🚨 **A power cut destroyed a file mid-write.** Commit often.
-- 🚨 **A bash heredoc eats backslashes even when quoted.** It produced a literal
-  NUL byte inside a Dart file this session. **Write any patch script with the
-  Write tool and run it with `py -3`.**
-- 🚨 **A regex qualifying bare identifiers will eat named arguments** —
-  `child` became `widget.child:`. Exclude a following colon.
-- 🚨 **`dart format` reflows lines you did not touch** and can expose a
-  pre-existing lint (it did: `curly_braces_in_flow_control_structures`). Run
-  `flutter analyze` on the file after formatting it.
-- 🚨 **A sabotage must COMPILE to prove anything.**
-- 🚨 **Real file I/O inside `testWidgets` never completes** — use a plain `test`
-  and `readAsStringSync`.
-- 🚨 **A pipe hides a failing exit code.** `py x.py | tail` reports `tail`'s
-  status. Redirect, then check `$?`.
+- 🚨 **A pipe hides a failing exit code.** Redirect, then check `$?`.
 - 🚨 **Never read a long test run through `tail`.** Redirect and grep.
 - 🚨 **`git checkout -- <dir>` threw away uncommitted work.**
-- 🚨 **A long `&&` chain ending in `git commit -F <heredoc>` times out.**
 - 🚨 **Python's stdout is cp1252 here.** Set `PYTHONIOENCODING=utf-8`.
-- 🚨 **A guard over your own source is blind to a dependency's default.** §3.7.
 - **A render proves a screen DREW, not that what it drew ADDS UP.** §3.5 was
   photographed 227 times a run for weeks.
+- **A green sweep over EMPTY providers proves nothing either.** §3.13.
 - **`find.text` cannot see a `TextSpan`**, and a status chip draws UPPERCASE
   where the semantics label is mixed case.
-- **An `InkWell` with only `onLongPress` still steals the TAP.**
 - **`Flexible` defaults to `flex: 1`**, and a `Wrap` sizes to its content.
 - **A `RepaintBoundary` inside a `Scaffold` does not capture a DIALOG.**
 - **Two long-running `pwsh` processes are Jean's VS Code terminals**, and his
@@ -600,13 +720,34 @@ change it.
    live-on-load only.
    `alter publication supabase_realtime add table public.stockpiles;`
 3. **The waybill names a person by `profiles.display_name`**, unlike every
-   other surface.
-4. **NOTHING SERVER-SIDE RATE-LIMITS AN INSERT INTO `crash_reports`.** §3.2
-   fixed the client, and the client is the only thing between one looping
-   browser and the 500 MB ceiling. The SHIPPING app shares this database and
-   can still do it.
+   other surface. Confirmed again this session: the load recorded by "Controller
+   Test" wrote `dispatched_by: "Controller"`.
+4. **NOTHING SERVER-SIDE RATE-LIMITS AN INSERT INTO `crash_reports`.** The
+   client is the only thing between one looping browser and the 500 MB ceiling,
+   and the SHIPPING app shares this database.
 5. **`prune_telemetry_job()` runs at 90 days** — far too slow to defend against
    a burst that reached 293 MB in four hours.
+6. 🆕 **`record_truck_load` RECORDS A LOAD IT COULD NOT DEDUCT, AND SAYS
+   NOTHING.** Measured this session on trip `0d9c6792`: the button reads
+   *"Confirm load & deduct from stockpile"*, 34.2 t was recorded, and **no
+   `stockpile_transactions` row was written** — the FIFO loop selects piles
+   `where balance_tons > 0` matching the order, route or buyer, and this order's
+   own pile held 0 t. `v_deducted` stays false and nothing is raised.
+
+   Reachable in real operation: a controller weighing a truck before the
+   supervisor has added the day's tonnage. The shortfall is known at the point
+   it happens (`v_remaining` after the loop) — a `raise warning`, a
+   `metadata.undeducted_tons` stamp, or a notification to the supervisor would
+   all beat silence. **Not fixed in Dart on purpose**: reimplementing the
+   server's pile-matching rules in the client to warn ahead of time would put a
+   second, drifting copy of that logic in the UI, which CLAUDE.md §6 forbids in
+   as many words.
+7. 🆕 **`transportation_requests.seal_required` and `routes.seal_required`
+   diverge in production and nothing reconciles them.** §3.9 fixes which one the
+   transporter is SHOWN. The two columns still disagree on route `56a1209a`,
+   and the admin's own free-text note agrees with the route. Either linking
+   should copy the flag onto the request, or the request's copy should stop
+   being a source of truth once a route exists.
 
 ---
 
@@ -614,14 +755,15 @@ change it.
 
 `CLAUDE.md` in this repo is the fork's copy of the shipping app's. Especially:
 
-- **§1** — LEAVE THE DATABASE HEALTHY. Exercised in earnest this session:
-  prove it with a probe, not a status field; throttle bulk work.
-- **§7.1** — one clock, Africa/Johannesburg. **Three of this session's twelve
-  defects were §7.1 violations that the checker could not see.**
+- **§1** — LEAVE THE DATABASE HEALTHY. Prove it with a probe, not a status
+  field; throttle bulk work.
+- **§7.1** — one clock, Africa/Johannesburg. **Four of this session's twelve
+  defects were §7.1-adjacent and none of them was visible on a SAST machine.**
 - **§10.2** — two Supabase projects, both production, both free plan; the MCP
   only reaches one.
-- **§10.4 / §10.5 / §7** — layout traps, and a green test over an empty fixture
-  or a fallback font proves nothing.
+- **§10.4 / §10.5 / §7** — layout traps, and a green test over an empty
+  fixture or a fallback font proves nothing. §3.13 is the largest instance of
+  §10.5 found so far.
 - **§10.6** — Dart bitwise operators are unsigned 32-bit on the web.
 - **§1** — the package is `flutter_application_1`. Do not rename it.
 - **§5** — design tokens are law.
@@ -641,15 +783,17 @@ off. Read these TWO handoff files before doing anything else, in this order.
 
       C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
 
-   Rewritten 2026-08-22 (late) at the end of the session that DROVE the
-   finished app as five accounts in a browser and three roles on Android,
-   found TWELVE defects doing it, fixed all twelve, and stopped a production
-   database filling up. Read it in this order: "WHERE THIS SESSION STOPPED —
-   READ THIS FIRST" (including "EXACTLY WHERE IT STOPPED, AND WHAT TO DO
-   FIRST"), then §0 (where you are + the one rule), §2 (verified state), §3
-   (what was done — §3.1 to §3.12, and DO NOT REDO ANY OF IT), §4 (what is NOT
-   done — start at §4.1, then §4.2), §5 (how to work here, and everything that
-   has already gone wrong) and §6 (five things owed to the SHIPPING app).
+   Rewritten 2026-08-23 at the end of the session that finished the previous
+   one's interrupted hardware checks, drove the last four roles nobody had ever
+   opened — including ONE REAL LOAD through the entire mine floor — found
+   TWELVE more defects doing it, fixed all twelve, and discovered that the
+   portal overflow sweep had been laying out EMPTY SCREENS its whole life.
+   Read it in this order: "WHERE THIS SESSION STOPPED — READ THIS FIRST"
+   (including "THE ONE THING LEFT UNDONE, AND WHY"), then §0 (where you are +
+   the one rule), §2 (verified state), §3 (what was done — §3.0 to §3.14, and
+   DO NOT REDO ANY OF IT), §4 (what is NOT done — start at §4.1), §5 (how to
+   work here, including how to drive a browser WITHOUT touching Jean's mouse)
+   and §6 (seven things owed to the SHIPPING app).
 
 2. THE OLDER MACHINE-WIDE HANDOFF — BACKGROUND ONLY, DO NOT WORK FROM IT:
 
@@ -661,7 +805,7 @@ off. Read these TWO handoff files before doing anything else, in this order.
 
 THE PATHS THAT MATTER
 
-  Work happens here (its own git repo, branch `main`, 157 commits, clean):
+  Work happens here (its own git repo, branch main, 163 commits, clean):
     C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
   NEVER TOUCHED, for any reason:
@@ -681,153 +825,166 @@ THE END:
     modified today    0
 
   ⚠️ The count depends on which `find` you run. `find . -type f -not -path
-  "./.git/*"` returns 14164, because in a WORKTREE `.git` is a FILE, not a
-  directory. The `-prune` form returns 14163. Same untouched tree. Reading that
-  tree is fine and often necessary; writing to it, or running any git command
-  inside it, is not.
+  "./.git/*"` returns 14164, because in a WORKTREE .git is a FILE, not a
+  directory. The -prune form returns 14163. Same untouched tree. Reading that
+  tree is fine and often necessary; writing to it, or running any MUTATING git
+  command inside it, is not.
 
-🚨 START HERE — THE EXACT POINT IT STOPPED
+🚨 START HERE — THE ONE THING LEFT UNDONE
 
-The APK built at commit 1ffa3d2 (SHA-256
-EEE10B20DBF82BBCD26905D8182E335055A2CEA864697E74C543429063879A24) IS ALREADY
-INSTALLED on Jean's SM-G780G and HAS NOT BEEN DRIVEN. The install completed
-("MineLink M3 — App installed"), the dialog was dismissed, the phone was left
-on home signed in as the platform admin, and every screenshot was deleted.
+The APK built at commit 963ca7e is BUILT, HASHED AND STAGED but has NEVER RUN
+ON JEAN'S HANDSET:
 
-Your first job is the hardware verification that was interrupted:
+    build/app/outputs/flutter-apk/app-debug.apk
+    \\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk
+    SHA-256 355263585836CBDBD11948A1690031F927E65AB070B88D7077E4ECBFF510378C
+            (both ends match)
 
-  1. Tap through to the profile and press Sign out. The dialog must read
-     "Sign out" / "Are you sure you want to sign out?" / [Cancel] [Sign out].
-     Before commit 3daf897 it read "Logout Confirmation / …log out? / Yes,
-     Logout". THEN TAP CANCEL — do not sign him out; the phone must be left
-     signed in as the platform admin, as it was found.
-  2. Take a crash_reports baseline, navigate six or seven screens, and confirm
-     ZERO new "Duplicate GlobalKey" rows. The SQL is in §5. The build before
-     this one produced 7 reports in 7 navigations; the fix produced 0 in 6.
-  3. The driver's week chart (commit 6c8a4e0) needs the driver account, so
-     verify that on the EMULATOR instead — emulator-5554 is running and already
-     has the driver signed in. Do not sign Jean's phone out for it.
+The phone's display went to sleep and stayed asleep for the whole session.
+status reported sharing=True control=True — host mode never dropped — but probe
+reported 0.061 bits/pixel, which is the tool's way of saying nothing is on the
+screen. Injected touches cannot wake it and only Jean can. He was asked, told
+what it was for, and the session carried on with everything that did not need
+the handset, re-probing as it went.
 
-Then continue with §4.2 — the roles the sweep has not reached.
+So your first job is: ask Jean to wake the phone, install that APK (route in
+§5), and drive the three things a handset proves and nothing else does —
+
+  1. THE DRIVER'S HERO CARD AT A RAISED TEXT SIZE. Settings > Display > Font
+     size, one or two notches up. "CURRENT TRIP" and the status pill must sit
+     on two lines with NO yellow-and-black stripe. At 360px x 1.3 this
+     overflowed by 44 pixels before 963ca7e. Verified on the emulator at font
+     scale 1.3 with a real trip; not yet on glass.
+  2. THE LOAD CONTROLLER'S TRUCK ROW AND THE BUYER'S RECONCILIATION CARD, same
+     raised text size — 22px, 21px and 32px overflows before this session.
+  3. NO NEW "Duplicate GlobalKey" CRASH REPORTS — baseline, navigate six or
+     seven screens, re-count. SQL in §5. This build has never been on the
+     handset at all, and the last three times a "finished" fix went back on
+     glass it was the handset that had the last word.
+
+Put the phone back the way it was found: signed in as the platform admin, on
+home, every screenshot deleted.
+
+🚨 DO NOT MOVE JEAN'S MOUSE. He works at this machine while the session runs,
+and he said so mid-run. A helper that drove real OS clicks through SetCursorPos
+was written, used twice and disabled the moment he said so. §5 has what to use
+instead: a CDP driver that never touches the cursor, and the Android emulator.
 
 VERIFIED STATE (all run at the end, against the tree as it stands)
 
-    flutter analyze                        no issues
-    flutter test                           2440 passed, 1 skipped
-    dart tool/release_guards.dart          41/41 PASS, 0 FAIL
-    dart tool/release_guards.dart --selftest   all guards bite
-    py -3 tool/_sabotage.py                ALL SABOTAGES CAUGHT
-    py -3 tool/type_scale_codemod.py --selftest  OK
-    py -3 tool/dropdown_width_check.py     passes
-    py -3 tool/glyph_coverage_check.py     passes
-    py -3 tool/one_clock_check.py          0 sites, exit 0
-    py -3 tool/unphotographed_screens.py   94 targets, 94 photographed, 0 not
-    py -3 tool/health_probe.py             7/7 services answering
-    docs/redesign/renders/                 227 renders
-    render harness — RENDER NOTE           0   (and it FAILS the test)
-    render harness — FAILURE STATE         0
-    render harness — LOW CONTRAST          0   (see the [unit] caveat below)
-    render harness — CUT OFF               5 RENDERS / 9 strings, all deliberate
-    "Duplicate GlobalKey" in a test run    0
-    flutter build web --release            builds
-    flutter build apk --debug              builds, and is INSTALLED on the phone
-
-  ⚠️ A raw `grep -c "LOW CONTRAST"` over a full test/renders run returns 11,
-  all tagged [unit] — the reporter's OWN self-tests, which paint faint text
-  deliberately. Count app screens with
-  `grep "LOW CONTRAST \[" out.txt | grep -vc "\[unit\]"`, which is 0.
+flutter analyze                        no issues
+flutter test                           2475 passed, 1 skipped
+dart tool/release_guards.dart          42/42 PASS, 0 FAIL
+dart tool/release_guards.dart --selftest   all guards bite
+py -3 tool/_sabotage.py                ALL SABOTAGES CAUGHT
+py -3 tool/type_scale_codemod.py --selftest  OK
+py -3 tool/dropdown_width_check.py     passes
+py -3 tool/glyph_coverage_check.py     passes
+py -3 tool/one_clock_check.py          0 sites, exit 0   (6 patterns now, was 5)
+py -3 tool/unphotographed_screens.py   94 targets, 94 photographed, 0 not
+py -3 tool/health_probe.py             7/7 services answering
+docs/redesign/renders/                 227 renders
+render harness — RENDER NOTE / FAILURE STATE / LOW CONTRAST   0 / 0 / 0
+render harness — CUT OFF               5 RENDERS / 9 strings, all deliberate
+CRASH REPORTS RAISED ALL SESSION       0
+flutter build web --release            builds
+flutter build apk --debug              builds
+  ⚠️ A raw grep -c "LOW CONTRAST" over a full test/renders run returns 11, all
+  tagged [unit] — the reporter's OWN self-tests. Count app screens with
+  grep "LOW CONTRAST \[" out.txt | grep -vc "\[unit\]", which is 0.
+  ⚠️ health_probe can report 6/7 on a COLD extras project and it is not down:
+  two attempts hit the ~3s anon statement timeout, then four manual calls
+  returned 200 in 2462ms, 342, 722, 355. Warm it and re-run.
 
 🚨 THE ONE THING TO READ EVEN IF YOU READ NOTHING ELSE
 
-A PRODUCTION DATABASE WAS 64% FULL OF CRASH REPORTS ABOUT ONE BUG. Three
-browser tabs left signed in overnight — by the previous session's own
-multi-account driving technique — hit a CanvasKit Aborted() during paint and
-re-threw it every frame for four hours: 204,539 rows, 293 MB, peak 60,680 rows
-in ONE HOUR, taking the main project from 24 MB to 319 MB of a 500 MB FREE
-plan. It is fixed at the source (a send budget in SupabaseReportingSink: 20
-rows/minute, 500/session) and the space is reclaimed (319 MB -> 40 MB). BUT THE
-CAUSE WAS THE WORKING METHOD, so: CLOSE EVERY BROWSER YOU SIGN IN WITH, BEFORE
-YOU FINISH.
+THE PORTAL OVERFLOW SWEEP HAD BEEN LAYING OUT EMPTY SCREENS ITS WHOLE LIFE. It
+overrode mirrorCompanyIdProvider and nothing else, so it got past "Company not
+loaded" and then EVERY PROVIDER RESOLVED TO AN EMPTY LIST — 27 screens x 3
+widths x 5 text scales x bold, of empty states. Empty states are short and
+short things do not overflow. The load controller's own source already carried
+a comment about a 29px overflow "that no sweep had seen because the sweep ran
+with no trips" — found by hand, fixed by hand, and the sweep left blind to the
+next one. It runs on the real capture fixtures now, and turning the data on
+found FOUR more real overflows on screens it had always covered and always
+passed. When a suite is green, ask what it is green OVER.
 
 WHAT IS ALREADY DONE — DO NOT REDO ANY OF THIS
 
-Twelve defects, every one found by DRIVING the app rather than by a test, every
-one fixed with a test or a guard that was SABOTAGED and watched to fail before
-being kept.
+Twelve defects, every one found by DRIVING the app or by an instrument that was
+made to see, every one fixed with a test that was SABOTAGED and watched to fail
+before being kept — and every fix that turns a figure into a dash also keeps a
+case that stays GREEN under sabotage, so over-fixing would show too.
 
-  1. DISPUTES read "1 dispute" directly above "No open disputes".
-  2. THE CRASH REPORTER could fill the database it reports into — above.
-  3. BOTH SHELLS were re-keyed by route, remounting on every navigation.
-  4. …AND THAT WAS HALF A FIX, TWICE. Second cause: _Workspace keyed its
-     AnimatedSwitcher on child.hashCode, so ANY shell rebuild minted a new key
-     and threw away the page's State. Third and real cause: AN AnimatedSwitcher
-     CANNOT WRAP A SUBTREE THAT HOLDS A GlobalKey — it mounts both subtrees at
-     once and under a ShellRoute both hold the same navigator. It fades ONE
-     subtree now. 7 navigations/7 reports became 6 navigations/0 on hardware.
-  5. THE MINE STOCKPILE TILE read 210.3 t over "150.3 of 1240 t ordered" —
-     60 t lost between a figure and its own caption.
-  6. MINE PRODUCTION told a mine its pit-to-port loss was MINUS 771 TONS, in
-     GREEN, with 0.00 t mined.
-  7. THE NOT-FOUND PAGE was go_router's default, printing "GoException: no
-     routes for location: …" with no design system on it.
-  8. FLEET MANAGEMENT had EVERY TRUCK IN THE WRONG BUCKET, exactly inverted —
-     the two carrying loads showed as "Available to allocate".
-  9. THE DRIVER'S WEEK CHART drew 33.7 t on a Sunday that had not happened yet
-     (UTC weekday vs SAST), while the week TOTAL was right to the kilogram.
- 10. EVERY "Sign out" BUTTON opened a dialog that said "Logout" — ten call
-     sites, plus two more dialogs titled "Confirm Logout".
- 11. "DEPARTED TODAY" on the security gate asked the DEVICE what day it is.
- 12. THE INSTRUMENT GREW TWO PATTERNS: one_clock_check.py had three and passed
-     cleanly while four real faults were live. It has five now.
- 13. ONE CHANGE WAS THROWN AWAY for lack of evidence — making MlAppShell's body
-     Row unconditional. Sabotage showed it was not load-bearing.
+  0. THE PREVIOUS SESSION'S TWO INTERRUPTED HARDWARE CHECKS, BOTH PASSED on the
+     handset: the sign-out dialog copy (then Cancel), and 12 navigations with
+     ZERO new Duplicate GlobalKey rows.
+  1. A WALL CLOCK CONVERTED TWICE — six sites in the recon table including its
+     Excel/CSV/PDF export of the billing record, two in the chat dock, three
+     console "last active" readouts, the mine's Recent-waybills card. A no-op
+     in South Africa, +2h on UTC, +6h in New York. THE FIXTURE HAD THE SAME
+     ERROR MIRRORED so the two cancelled. MlTime.sast now ASSERTS it was handed
+     a genuine instant, which is what found it.
+  2. THE LIVE MAP'S ETA CAME OFF THE READER'S DEVICE. one_clock_check.py grew a
+     sixth pattern for it.
+  3. AN EIGHTH DATE DIALECT on three console screens — "Aug 22, 2026 8:50 PM".
+     New guard no-skeleton-dateformat, which FAILED ON THE REAL TREE.
+  4. A BARE TIME IN TWO LISTS THAT SPAN DAYS — the load controller read 10:10,
+     04:51, 13:39 with the third six days old. New MlTime.listStamp.
+  5. THE PRODUCTION TABLE CONTRADICTED ITS OWN HEADER — eight amber negatives
+     under a "— Pit-to-port loss".
+  6. THE QUALITY SCREEN PRINTED DELIVERED TONNAGE UNDER "PAYABLE" — one row
+     showed a payable ABOVE its own mine net.
+  7. R0.00 INVOICE VARIANCE, IN GREEN, WITH NOTHING INVOICED.
+  8. THE EMPLOYEE REGISTER COUNTED A DIFFERENT SET from the screen next door.
+  9. "SEALS — NOT REQUIRED" ON A ROUTE THE WEIGHBRIDGE REFUSES WITHOUT FOUR.
+     Two columns disagree in production; the sheet read the one the load is NOT
+     judged by.
+ 10. A DISTANCE CHIP THAT SOMETIMES SAID WHAT IT MEASURED.
+ 11. TWO "THIS WEEK" TONNAGES ON THE DRIVER'S SCREEN, 170.5 t and 136.3 t.
+ 12. THE DRIVER'S HERO CARD OVERFLOWED BY 44 PIXELS at 360px x 1.3, plus the
+     four the sweep found once it had data.
+
+ALSO DONE: ONE REAL LOAD DRIVEN THROUGH THE ENTIRE MINE FLOOR (trip 0d9c6792,
+truck S6W001GP) — transporter accepts, truck and driver assigned, driver
+starts, security checks in, tare 15.40 t, gross 49.60 t, net 34.20 t computed
+live and agreeing in three places, four seals numbered and photographed against
+seal_points=4, waybill TRP-6C72DDAC41 minted with the controller's signature,
+gate check-out. The stat card moved to exactly (34.2+33.7+30+34.2)/4 = 33.025 t.
 
 ALSO SETTLED EARLIER — DO NOT REOPEN: a live chat between two real accounts is
 driven; all twelve route names are settled; MessagesScreen is NOT dead code;
 contrast is closed app-wide and for chat (the baseline file is a FLOOR, not a
 ratchet — if it fails, change the token, do NOT add a baseline entry); the
 due-diligence gate and the driver's whole mobile lifecycle were driven end to
-end; the load on the road is closed (trip 927cbf1b, 34.05 t delivered against a
-34.20 t mine net); the 20 themeless test files are converted and guarded.
+end; the 20 themeless test files are converted and guarded.
 
 WHAT IS LEFT
 
-  1. THE INTERRUPTED HARDWARE VERIFICATION — the three items under START HERE.
-  2. THE ROLES THE SWEEP HAS NOT REACHED (§4.2). Driven so far: the whole
-     console; the mine, buyer and transporter dashboards plus their main
-     sub-screens; the DRIVER and SECURITY roles on Android. NOT yet driven:
-       * Load Controller (ironhills.controller@mineralguide.com) — the
-         weighbridge, tare/gross, seal counts, waybill generation. The densest
-         arithmetic in the product and never driven this way.
-       * Supervisor / Foreman — stockpiles, production, "Add tons".
-       * Company & employee management — register, roles, seats.
-       * The buyer's Loads & value and quality tabs, and the mine's Quality
-         tab, at screen level rather than dashboard level.
-     That method found twelve things in one pass. It is not exhausted.
-  3. WHAT A HANDSET CANNOT PROVE AT A DESK: GPS along a real road, auto-reroute,
-     the foreground service surviving a long backgrounding, battery over a trip.
-     The EMULATOR can fake movement (adb emu geo fix); a real handset cannot be
-     teleported. The handset is NOT on adb — CtrlBridge only.
-  4. FIVE THINGS OWED TO THE SHIPPING APP (§6), not fixable here because
-     supabase/ is frozen: the RLS half of the rate leak; stockpiles missing
-     from the realtime publication; the waybill naming a person by
-     profiles.display_name; NOTHING server-side rate-limits an INSERT into
-     crash_reports; and prune_telemetry_job() at 90 days is far too slow.
-  5. ONE ELEVATED-SHELL ITEM FOR JEAN (§4.4) — a leftover firewall rule.
-  6. 🚨 IF YOU NEED THE PHONE AND IT DOES NOT ANSWER — `phone_agent.py status`
-     says "no phone at a known address - broadcasting", or `probe` reports
-     under 0.1 bits/pixel because the display is asleep — PAUSE THE WHOLE TASK
-     RIGHT THERE AND TELL JEAN. Then WAIT for him to reply that the phone is
-     awake and reachable, and retry from exactly where you stopped. Only he can
-     turn host mode on and only he can wake a sleeping screen; neither is
-     possible from this PC, and injected touches cannot wake it. Do NOT work
-     around it, do NOT skip ahead, and do NOT report green as though the phone
-     step were optional — it is the only thing that proves a fix on real
-     hardware, and this session it caught two "finished" fixes that were not.
-     ⚠️ HOST MODE STAYING ON DOES NOT MEAN THE SCREEN IS AWAKE: check `probe`,
-     not just `status`. Both happened this session and Jean fixed each within
-     minutes, so ASK EARLY rather than idling.
-     ⚠️ Invoke the `driving-jeans-phone` skill FIRST. It is his PERSONAL phone.
+1. THE HANDSET — the three checks under START HERE.
+2. NOT YET DRIVEN (§4.2): the POD leg of trip 0d9c6792 (it sits at
+   en_route_to_offload, which two older trips also do, so it is a normal
+   resting place); the super-admin request → approve → link → dispatch chain
+   from the requester's FORMS forward; chat at length.
+3. WHAT A HANDSET CANNOT PROVE AT A DESK: GPS along a real road, auto-reroute,
+   the foreground service surviving a long backgrounding, battery over a trip.
+   The EMULATOR can fake movement (adb emu geo fix); a real handset cannot be
+   teleported. The handset is NOT on adb — CtrlBridge only.
+4. SEVEN THINGS OWED TO THE SHIPPING APP (§6), not fixable here because
+   supabase/ is frozen. Two are new this session: record_truck_load records a
+   load it could not deduct and says nothing, and the two seal_required columns
+   diverge with nothing reconciling them.
+5. ONE ELEVATED-SHELL ITEM FOR JEAN (§4.4) — a leftover firewall rule.
+6. 🚨 IF YOU NEED THE PHONE AND IT DOES NOT ANSWER — phone_agent.py status says
+   "no phone at a known address - broadcasting", or probe reports under 0.1
+   bits/pixel because the display is asleep — PAUSE AND TELL JEAN, THEN KEEP
+   WORKING ON WHAT DOES NOT NEED IT and re-probe as you go. Only he can turn
+   host mode on and only he can wake a sleeping screen; neither is possible
+   from this PC, and injected touches cannot wake it. Do NOT work around it and
+   do NOT report green as though the phone step were optional — it is the only
+   thing that proves a fix on real hardware. ⚠️ HOST MODE STAYING ON DOES NOT
+   MEAN THE SCREEN IS AWAKE: check probe, not just status. ⚠️ Invoke the
+   driving-jeans-phone skill FIRST. It is his PERSONAL phone.
 
 HOW TO WORK — THIS IS JEAN'S INSTRUCTION, FOLLOW IT
 
@@ -852,49 +1009,32 @@ structural, then pin it with a test and prove the test bites by removing the
 fix and watching it fail. When a report and a picture disagree, THE PICTURE
 WINS. When a picture and a HANDSET disagree, the handset wins.
 
-WHAT "SABOTAGE" MEANS HERE: copy the file to /tmp, change ONE line back to the
-buggy version, run the test, confirm it FAILS, restore from the backup, re-run,
-confirm green. A green test proves nothing on its own. It only ever touches
-local Dart source; never the database, the phone, or the original worktree, and
-it is never committed. IT ALSO TELLS YOU WHEN A FIX IS NOT NEEDED — one change
-was reverted this session because sabotaging it showed the tests stayed green.
-
 THE LESSONS THIS SESSION ADDED:
 
-  * 🚨 CLOSE EVERY BROWSER YOU SIGN IN WITH.
-  * 🚨 A SECOND CHROME CANNOT HAVE THE SAME --remote-debugging-port AND FAILS
-    SILENTLY — you get the OLD browser, cache and stale bundle. Check the port
-    owner with Get-NetTCPConnection before trusting a "fresh" profile.
-  * 🚨 `ignoreCache` IS NOT ENOUGH: transferSize 0 means cache. Compare
-    decodedBodySize against the built file's byte count.
-  * 🚨 READ SEMANTICS LEAVES BY DESCENDANT, not `children.length === 0` —
-    Flutter puts label text in a <span> CHILD and the old recipe drops whole
-    empty states. Filter on `!e.querySelector('flt-semantics')`.
-  * 🚨 THE ANDROID EMULATOR IS A FINE SUBSTITUTE when the browser tooling
-    drops, and it found four defects — but it is set to Africa/Johannesburg, so
-    a clock fault that only bites off-SAST will NOT show there.
-  * 🚨 THE HANDSET FOUND WHAT THREE INSTRUMENTS COULD NOT, TWICE. A widget test
-    literally cannot see the cross-fade overlap (MlMotion collapses to ~1ms
-    under the test binding). Say so in the test file rather than implying
-    coverage you do not have.
-  * 🚨 CHECK WHETHER A "FAULT" IS THE DATA before writing it down.
-  * 🚨 A GUARD OVER YOUR OWN SOURCE IS BLIND TO A DEPENDENCY'S DEFAULT.
-  * 🚨 MY FILES CACHES ITS FOLDER LISTING — every time. Back out and re-enter,
-    and confirm the TIMESTAMP moved; the size rounds identically for every
-    build.
-  * 🚨 `home` ON THE PHONE OFTEN DROPS THE LINK AND IS NOT RETRIED. Long batches
-    drift; prefer short ones and re-shoot.
-  * 🚨 WRITE PATCH SCRIPTS WITH THE WRITE TOOL — a quoted heredoc produced a
-    literal NUL byte inside a Dart file this session.
-  * 🚨 A REGEX QUALIFYING BARE IDENTIFIERS WILL EAT NAMED ARGUMENTS.
-  * 🚨 `dart format` REFLOWS LINES YOU DID NOT TOUCH and can expose a
-    pre-existing lint. Run flutter analyze on the file after formatting it.
-  * 🚨 A SABOTAGE MUST COMPILE TO PROVE ANYTHING.
-  * 🚨 REAL FILE I/O INSIDE testWidgets NEVER COMPLETES — plain test +
-    readAsStringSync.
-  * A RENDER PROVES A SCREEN DREW, NOT THAT WHAT IT DREW ADDS UP.
-  * `find.text` CANNOT SEE A TextSpan, and a status chip draws UPPERCASE where
-    the semantics label is mixed case.
+- 🚨 NEVER MOVE JEAN'S MOUSE. Drive the browser through CDP (§5) or use the
+  Android emulator.
+- 🚨 WHEN A SUITE IS GREEN, ASK WHAT IT IS GREEN OVER. The overflow sweep ran
+  405 combinations against empty providers.
+- 🚨 CDP CLICKS CANNOT REACH A FLUTTER POPUP-MENU OVERLAY, while every other
+  click on the page works. It is the tool, not the app. Switch accounts by
+  clearing localStorage instead of using the menu.
+- 🚨 A FILE INPUT CAN BE DRIVEN: Page.setInterceptFileChooserDialog + click +
+  DOM.setFileInputFiles. That is how five photos were attached to a real load.
+- 🚨 io.open(p,'w') IN PYTHON REWRITES A FILE'S LINE ENDINGS ON WINDOWS and
+  turns a 3-line change into a whole-file diff. Pass newline='' on both ends,
+  or run fix_eol.py before committing.
+- 🚨 MEASURE BEFORE CHOOSING WORDS. "Tons loaded this week" was picked, the
+  test measured 134px beside 154px, and the answer was to fix the ROW
+  (IntrinsicHeight + stretch) rather than trim the label.
+- 🚨 THE SAME FIX IS WRONG IN TWO PLACES FOR OPPOSITE REASONS: Flexible in a
+  shrink-wrapped Row throws; Flexible in a bounded Row is exactly right. Say
+  which situation each fix is in.
+- 🚨 CHECK WHETHER A "FAULT" IS THE DATA, OR THE TOOL. Three looked wrong and
+  were not.
+- 🚨 A SABOTAGE MUST COMPILE — and keep a case that stays GREEN under it, or
+  over-fixing looks like success.
+- 🚨 A BASH HEREDOC EATS BACKSLASHES even when quoted. Write patch scripts with
+  the Write tool.
 
 BEFORE CLAIMING ANYTHING IS DONE, ALL OF THESE MUST BE GREEN:
 
@@ -907,6 +1047,7 @@ py -3 tool/type_scale_codemod.py --selftest
 py -3 tool/dropdown_width_check.py
 py -3 tool/glyph_coverage_check.py
 py -3 tool/one_clock_check.py
+py -3 tool/one_clock_check.py --selftest
 py -3 tool/unphotographed_screens.py
 py -3 tool/health_probe.py
 flutter test test/renders          (after any visual change, --update-goldens)
@@ -915,69 +1056,24 @@ flutter build apk --debug
 
 ...AND the original worktree re-checked against the baseline above.
 
-HOW TO DRIVE THE APP ON ANDROID (the fastest surface; full detail in §5):
-
-export PATH="$PATH:/c/Android/sdk/platform-tools"
-adb -s emulator-5554 install -r -d build/app/outputs/flutter-apk/app-debug.apk
-adb -s emulator-5554 shell monkey -p org.minelink.m3 -c android.intent.category.LAUNCHER 1
-adb -s emulator-5554 exec-out screencap -p > shot.png       # then Read the png
-adb -s emulator-5554 shell input tap <x> <y>                # REAL px, 1080x2400
-adb -s emulator-5554 shell input text 'someone@example.com'
-adb -s emulator-5554 shell input keyevent KEYCODE_BACK      # hides the keyboard
-
-⚠️ A Read of a screenshot says "displayed at 900x2000, multiply by 1.20" — taps
-must use the REAL 1080x2400 coordinates.
-
-HOW TO DRIVE THE BUILT APP IN A BROWSER (full detail in §5):
-
-flutter build web --release          # config/supabase.live.json is a bundled
-                                     # ASSET, so a plain build reaches live
-cd build/web && py -3 -m http.server 8123 --bind 127.0.0.1
-"/c/Program Files/Google/Chrome/Application/chrome.exe" \
-  --remote-debugging-port=9222 --user-data-dir="<scratch>/ml-m3-chrome-$(date +%H%M%S)" \
-  --no-first-run --no-default-browser-check "http://127.0.0.1:8123/"
-
-CONFIRM YOU GOT YOUR OWN BROWSER, not an older session's holding the port.
-
-HOW TO PUT A BUILD ON THE PHONE (full detail in §5; invoke the skill first):
-
-flutter build apk --debug
-copy build\app\outputs\flutter-apk\app-debug.apk to
-  \\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk     (hash-match both ends)
-On the phone: My Files > Network storage > jean > Shared > PhoneRemote >
-  minelink-m3.apk > ~2.5 min download > Update > Open
-
-🚨 THE NAS CLOCK IS ABOUT 2 h 36 m SLOW — compare the SHA-256, not timestamps.
-⚠️ My Files CACHES the folder listing: back out of PhoneRemote and re-enter it,
-and confirm the TIMESTAMP moved. The size rounds to 207 MB for every build.
-⚠️ The applicationId is org.minelink.m3, deliberately different from the
-shipping app's. They install side by side.
-⚠️ Battery was at 23–26% and falling when this session ended.
-
-OPTIONAL: if the Windows build gives trouble, carry on with web and mobile. It
-is blocked by two PRE-EXISTING faults, neither of them the redesign: the
-Flutter tool refuses the path because of the `!` in `SHOWME!`, and from a clean
-path CMake fails extracting firebase_cpp_sdk_windows_12.7.0.zip — same
-dependency, same version, in the shipping app. Jean already said to skip it.
-
 LIVE ACCOUNTS
-  `active user accounts.txt` in the repo root.
+  active user accounts.txt in the repo root.
   jean@cyberhouse.co.za / BuRG3rJ3@n1995@#   (platform admin)
   everything @mineralguide.com / MineralGuide123!
-  ironhills.controller@mineralguide.com is the Load Controller — the next role
-  to drive.
+  Used this session: ironhills.owner, ironhills.controller, ironhills.security,
+  atlasbuyer.owner, roadhaul.admin, and roadhaul.driver on the emulator.
 
 WHEN THE WORK IS DONE: rewrite
 
-    C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
+C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
 
 the same way this one was written — verified state only, no intentions, ending
 with a fresh self-contained copy-paste block in §8 that carries BOTH handoff
 paths (that one and C:\Users\Somebody Someone\Claude\HANDOFF.md), the project
 root, the untouchable worktree path and its baseline, exactly where you
 stopped, what is already done so it is not redone, what is left, THE PHONE RULE
-above, this same HOW TO WORK instruction from Jean quoted verbatim, and the
-fix-as-you-go rule — and then commit it. State the commit count the tree WILL
-be at once that commit lands, and say that the tip is the commit carrying the
-file, so the handoff is self-consistent rather than describing a tree without
-itself.
+above, THE MOUSE RULE above, this same HOW TO WORK instruction from Jean quoted
+verbatim, and the fix-as-you-go rule — and then commit it. State the commit
+count the tree WILL be at once that commit lands, and say that the tip is the
+commit carrying the file, so the handoff is self-consistent rather than
+describing a tree without itself.
