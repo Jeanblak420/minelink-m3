@@ -37,8 +37,8 @@ import 'package:flutter_application_1/core/time/ml_time.dart';
 /// same charts can render on a light page.
 MlGlass portalGlass(BuildContext context) =>
     Theme.of(context).brightness == Brightness.dark
-        ? MlGlass.dark
-        : MlGlass.light;
+    ? MlGlass.dark
+    : MlGlass.light;
 
 /// The rolling window a dashboard is being read over.
 enum PortalPeriod {
@@ -60,11 +60,11 @@ enum PortalPeriod {
   /// a seven-day movement was captioned `24h`, and on `12 months` a year would
   /// have been.
   String get deltaWindow => switch (this) {
-        PortalPeriod.day => '1d',
-        PortalPeriod.week => '7d',
-        PortalPeriod.month => '30d',
-        PortalPeriod.year => '12m',
-      };
+    PortalPeriod.day => '1d',
+    PortalPeriod.week => '7d',
+    PortalPeriod.month => '30d',
+    PortalPeriod.year => '12m',
+  };
 
   /// The start of this window, measured from midnight at the mine.
   ///
@@ -178,10 +178,10 @@ const String kPortalKpiLoadingReason = 'checking…';
 /// [what] names the feed in the reader's words, lower case: "earnings",
 /// "fleet status", "stockpile balances".
 MlEmptyState portalFeedPending(String what) => MlEmptyState(
-      icon: Icons.hourglass_bottom_rounded,
-      title: 'Reading $what…',
-      message: 'This fills in as soon as the feed answers.',
-    );
+  icon: Icons.hourglass_bottom_rounded,
+  title: 'Reading $what…',
+  message: 'This fills in as soon as the feed answers.',
+);
 
 /// The KPI band — 4-up on desktop, 2-up on tablet, stacked on a phone.
 class PortalKpiRow extends StatelessWidget {
@@ -237,8 +237,8 @@ class PortalKpiRow extends StatelessWidget {
       deltaTone: !hasDelta
           ? SaDeltaTone.flat
           : (d > 0) == k.deltaGoodWhenUp
-              ? SaDeltaTone.good
-              : SaDeltaTone.warn,
+          ? SaDeltaTone.good
+          : SaDeltaTone.warn,
       deltaPeriod: hasDelta ? period.deltaWindow : null,
       onTap: () => context.go(k.route),
     );
@@ -431,11 +431,11 @@ class _QueueRow extends StatelessWidget {
                   Text(
                     n == null
                         ? (item.loading
-                            ? 'Checking…'
-                            : 'Could not read this queue')
+                              ? 'Checking…'
+                              : 'Could not read this queue')
                         : clear
-                            ? item.clearedMessage
-                            : '$n waiting',
+                        ? item.clearedMessage
+                        : '$n waiting',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.mlText.labelSmall.copyWith(
@@ -546,21 +546,43 @@ class PortalPeriodSelector extends StatelessWidget {
         spacing: 2,
         children: [
           for (final p in options)
-            InkWell(
-              onTap: () => onChanged(p),
-              borderRadius: BorderRadius.circular(MlTokens.rSm),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                decoration: BoxDecoration(
-                  color: p == value ? accent.bg : Colors.transparent,
-                  borderRadius: BorderRadius.circular(MlTokens.rSm),
-                ),
-                child: Text(
-                  p.label,
-                  style: context.mlText.labelMedium.copyWith(
-                    color: p == value ? accent.fg : s.textMuted,
-                    fontWeight: FontWeight.w700,
+            // A `Material` of its own, because an `InkWell` needs one and this
+            // one did not have it.
+            //
+            // Every render of every dashboard logged *"No Material widget
+            // found. _InkResponseStateWidget widgets require a Material widget
+            // ancestor"* — 132 times in one test run, all from this line, and
+            // no test failed because the assertion is thrown while BUILDING
+            // and the framework carries on. What it costs in the running app
+            // is the tap feedback: the period pills are the most-tapped
+            // control on all three dashboards and they respond with no ripple
+            // at all.
+            //
+            // `MaterialType.transparency` paints nothing, so the pills look
+            // exactly as they did; it only gives the ink somewhere to land. A
+            // component in a shared kit should not depend on an ancestor it
+            // does not control — which is precisely how this survived: it
+            // works under a `Scaffold` and not under a plain container.
+            Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                onTap: () => onChanged(p),
+                borderRadius: BorderRadius.circular(MlTokens.rSm),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 7,
+                  ),
+                  decoration: BoxDecoration(
+                    color: p == value ? accent.bg : Colors.transparent,
+                    borderRadius: BorderRadius.circular(MlTokens.rSm),
+                  ),
+                  child: Text(
+                    p.label,
+                    style: context.mlText.labelMedium.copyWith(
+                      color: p == value ? accent.fg : s.textMuted,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
@@ -627,14 +649,14 @@ class PortalLiveStrip extends StatelessWidget {
               builder: (context) {
                 final tone = t.tone.colors(brightness);
                 final chip = Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 9,
+                  ),
                   decoration: BoxDecoration(
                     color: tone.bg,
                     borderRadius: BorderRadius.circular(MlTokens.rMd),
-                    border: Border.all(
-                      color: tone.fg.withValues(alpha: 0.35),
-                    ),
+                    border: Border.all(color: tone.fg.withValues(alpha: 0.35)),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -650,7 +672,9 @@ class PortalLiveStrip extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        t.detail == null ? t.status : '${t.status} · ${t.detail}',
+                        t.detail == null
+                            ? t.status
+                            : '${t.status} · ${t.detail}',
                         style: context.mlText.labelSmall.copyWith(
                           color: tone.fg,
                         ),
@@ -709,10 +733,9 @@ class PortalDashboardHeader extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           subtitle,
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(color: s.textMuted),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: s.textMuted),
         ),
       ],
     );
