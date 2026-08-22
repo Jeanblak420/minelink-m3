@@ -131,7 +131,8 @@ class Guard {
 final guards = <Guard>[
   Guard(
     id: 'no-config-asset-dir',
-    why: 'pubspec declaring config/ as an asset dir bundles every secret in it '
+    why:
+        'pubspec declaring config/ as an asset dir bundles every secret in it '
         'into the web and Windows artifacts (P11-03).',
     mode: Mode.block,
     roots: ['pubspec.yaml'],
@@ -141,17 +142,20 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-arcgis-token',
-    why: 'an Esri ArcGIS token literal committed anywhere is a live credential '
+    why:
+        'an Esri ArcGIS token literal committed anywhere is a live credential '
         '(P0-04).',
     mode: Mode.block,
     roots: ['lib', 'web', 'pubspec.yaml', 'android/app/src', 'windows/runner'],
     pattern: RegExp(r'AAPT[A-Za-z0-9_\-]{20,}'),
     plantFile: 'planted.dart',
-    plantLine: "const t = 'AAPTaYIqV1NAgHvtsROlAnWPGzwUOWVN42ZLcCbZ2V1MxH2Gzt';",
+    plantLine:
+        "const t = 'AAPTaYIqV1NAgHvtsROlAnWPGzwUOWVN42ZLcCbZ2V1MxH2Gzt';",
   ),
   Guard(
     id: 'no-raw-color-hex',
-    why: 'raw Color(0x...) bypasses MlTokens/MlSemantic and breaks light mode '
+    why:
+        'raw Color(0x...) bypasses MlTokens/MlSemantic and breaks light mode '
         '(P6-23). BLOCKING since S5-19 closed on 2026-08-15 — the only place a '
         'colour literal may live is lib/core/design/tokens/, exempted below.',
     mode: Mode.block,
@@ -170,7 +174,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-material-colors',
-    why: 'Colors.* is not theme-aware and is not in the design system (P6-23). '
+    why:
+        'Colors.* is not theme-aware and is not in the design system (P6-23). '
         'BLOCKING since S5-19 closed on 2026-08-15.',
     mode: Mode.block,
     roots: ['lib'],
@@ -198,7 +203,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'capture-fixture-without-a-frozen-clock',
-    why: 'the capture fixtures date every row relative to `kCaptureNow`, a '
+    why:
+        'the capture fixtures date every row relative to `kCaptureNow`, a '
         'FIXED instant, while the product measures its rolling windows from '
         '`MlTime.now()`, the REAL clock. A test that pumps those fixtures '
         'without freezing the clock asserts on arithmetic that changes with '
@@ -229,7 +235,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'count-without-plural-agreement',
-    why: 'a figure interpolated straight in front of a hard-coded plural noun '
+    why:
+        'a figure interpolated straight in front of a hard-coded plural noun '
         'prints "1 trucks" the moment the figure is one. Read on the live '
         'console on 2026-08-21 — the mine transport queue said "1 trucks" on '
         'two of its three requests — and it was 25 call sites across 16 '
@@ -269,12 +276,14 @@ final guards = <Guard>[
     spanLines: true,
     plantFile: 'planted.dart',
     plantLine: "const s = 'From X · \${r.numSlots} trucks · done';",
-    plantWrapped: "const s = 'From X · \${r.numSlots}\n"
+    plantWrapped:
+        "const s = 'From X · \${r.numSlots}\n"
         "    trucks · done';",
   ),
   Guard(
     id: 'no-device-clock-in-copy',
-    why: 'after CLAUDE.md §7.1 every date this product decides is an '
+    why:
+        'after CLAUDE.md §7.1 every date this product decides is an '
         'Africa/Johannesburg one, so copy telling a user that a date, a month '
         'or a day window comes from their DEVICE is simply false. The console '
         'insights header said "This month (device calendar)" for the whole '
@@ -299,7 +308,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'brand-lockup-drawn-too-small',
-    why: 'MineLinkLogo is the STACKED lockup — chain mark, "MineLink" wordmark, '
+    why:
+        'MineLinkLogo is the STACKED lockup — chain mark, "MineLink" wordmark, '
         '"TECHNOLOGIES" strapline — and the two type bands are 231 and 67 of '
         'its 991 rows. The rail drew it at height 28, which is a 6.5px wordmark '
         'and a 1.89px strapline: photographed in every console render from the '
@@ -327,14 +337,41 @@ final guards = <Guard>[
     spanLines: true,
     plantFile: 'planted.dart',
     plantLine: 'const w = MineLinkLogo(height: 28, onDark: true);',
-    plantWrapped: 'const w = MineLinkLogo(\n'
+    plantWrapped:
+        'const w = MineLinkLogo(\n'
         '  height: 28,\n'
         '  onDark: true,\n'
         ');',
   ),
   Guard(
+    id: 'one-vocabulary-for-signing-out',
+    why:
+        'the product says "Sign out" — six controls, every shell, the '
+        'driver profile. The confirmation dialog they ALL open said "Logout '
+        'Confirmation", "log out" and "Yes, Logout": three words for one '
+        'action, on the screen that asks you to confirm it. Found on a '
+        'handset, 2026-08-22. Same family as one-vocabulary-for-a-timestamp.',
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    // STRINGS ONLY, so the identifier `LogoutService`, the method `signOut`
+    // and the file name are all untouched — renaming a class is a different
+    // change and this guard is about the words, not the API.
+    //
+    // No carve-out for `debugPrint`. An earlier draft had one, then found a
+    // log string that `dart format` had wrapped onto its own line and so
+    // escaped a per-line exemption. Rewording the four log lines to "sign out"
+    // cost nothing, reads better, and leaves a rule with no exceptions to
+    // reason about.
+    pattern: RegExp(r"'[^']*\b[Ll]og ?[Oo]ut\b[^']*'"),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'planted.dart',
+    plantLine: "const s = 'Yes, Logout';",
+  ),
+  Guard(
     id: 'no-coming-soon',
-    why: 'a "coming soon" string is a dead end shipped to a paying user '
+    why:
+        'a "coming soon" string is a dead end shipped to a paying user '
         '(P0-12).',
     mode: Mode.block,
     roots: ['lib'],
@@ -349,7 +386,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-const-spark-series',
-    why: 'a const list handed to a spark: argument is a hardcoded trend — a '
+    why:
+        'a const list handed to a spark: argument is a hardcoded trend — a '
         'chart rendering invented data (P9, S3-12).',
     mode: Mode.block,
     roots: ['lib'],
@@ -360,7 +398,6 @@ final guards = <Guard>[
     // demand that a chart fabricate something to render.
     pattern: RegExp(r'spark\s*:\s*const\s*\[\s*[^\]\s]'),
     spanLines: true, // `\s*` between `spark:` and `const` can meet a newline.
-
     // Comments, like every other guard in this file. This one was the last
     // outlier, and it bit on 2026-08-16 the first time somebody wrote the
     // rule down in prose: a comment in `minelink_signin_brand.dart` explaining
@@ -374,7 +411,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-raw-exception-in-ui',
-    why: 'interpolating a caught exception into a user-facing message shows a '
+    why:
+        'interpolating a caught exception into a user-facing message shows a '
         'customer text like "PostgrestException(message: , code: 400 …)" and, '
         'on a permission failure, discloses that the row exists. Use '
         'friendlyError(e).',
@@ -423,11 +461,13 @@ final guards = <Guard>[
     exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
     plantFile: 'planted.dart',
     plantLine: "MlEmptyState(title: 'x', message: '\$e');",
-    plantWrapped: "MlEmptyState(\n    title: 'x',\n    message:\n        '\$e');",
+    plantWrapped:
+        "MlEmptyState(\n    title: 'x',\n    message:\n        '\$e');",
   ),
   Guard(
     id: 'no-sample-data-in-lib',
-    why: 'MlSampleData/MlTargetsSample are widget-test fixtures. In lib/ they '
+    why:
+        'MlSampleData/MlTargetsSample are widget-test fixtures. In lib/ they '
         'ship inside the app and carry hardcoded spark trends — invented '
         'platform figures rendered as fact (S3-11, S3-12). They live in '
         'test/fixtures/ now.',
@@ -443,7 +483,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-example-app-id',
-    why: 'com.example.* is the Flutter template identifier. Play REJECTS it, '
+    why:
+        'com.example.* is the Flutter template identifier. Play REJECTS it, '
         'and the application id is permanent after first publish (P11-01, '
         'S1-1). EVERY platform is org.minelink now — Android since the client '
         'ruling of 2026-08-13, and iOS / macOS / Linux since S1-1a was closed '
@@ -457,14 +498,17 @@ final guards = <Guard>[
     // sources. Those packages ship their own example apps, which are full of
     // `com.example.*` — none of it reaches this app and none of it is ours to
     // change. 62 hits on the widened roots, every single one under here.
-    exemptPath: RegExp(r'(^|[\\/])(ephemeral|\.plugin_symlinks|Pods|build)([\\/]|$)'),
+    exemptPath: RegExp(
+      r'(^|[\\/])(ephemeral|\.plugin_symlinks|Pods|build)([\\/]|$)',
+    ),
     pattern: RegExp(r'com\.example\b'),
     plantFile: 'build.gradle.kts',
     plantLine: '    applicationId = "com.example.flutter_application_1"',
   ),
   Guard(
     id: 'no-empty-catch',
-    why: 'an empty catch swallows the failure silently — the fault class that '
+    why:
+        'an empty catch swallows the failure silently — the fault class that '
         'hid the presence bug and the POD upload bug (P0-11, S1-7). Log via '
         'LoggerFactory or rethrow.',
     mode: Mode.block,
@@ -486,7 +530,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-widgets-in-router',
-    why: 'screen classes declared in app_router.dart make the router '
+    why:
+        'screen classes declared in app_router.dart make the router '
         'un-navigable and un-testable (P4-01…P4-07, S7-1).',
     mode: Mode.block,
     roots: ['lib/core/routing/app_router.dart'],
@@ -508,7 +553,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-demo-data-banner',
-    why: 'the "Demo Data Active — showing example content" banner told real '
+    why:
+        'the "Demo Data Active — showing example content" banner told real '
         'customers their live screens were examples. It fired whenever '
         '`showcase_data` was non-empty — i.e. always — while no widget has '
         'ever rendered `ShowcaseItem.data`, so it labelled real data as demo. '
@@ -526,7 +572,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'unreplaced-legal-placeholder',
-    why: 'a legal document still carrying the PLACEHOLDER banner has not been '
+    why:
+        'a legal document still carrying the PLACEHOLDER banner has not been '
         'reviewed by an attorney and must not ship. Placeholder legal text '
         'that reaches a customer is worse than none: the current sign-in '
         'screen already asserts "you agree to the Terms of Use and Privacy '
@@ -547,7 +594,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-hardcoded-brand-stat',
-    why: 'the sign-in screen shipped "24+ Companies · 480 Trucks live · '
+    why:
+        'the sign-in screen shipped "24+ Companies · 480 Trucks live · '
         '1.2M t Hauled" as three hardcoded `MlBrandStat` literals. Measured '
         'against production 2026-08-16: 26 companies, 7 vehicles, 1,227.9 t — '
         'the fleet overstated 68x and the tonnage by a factor of a thousand, '
@@ -588,7 +636,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'committed-db-connection-string',
-    why: 'a Postgres connection string with the password inline is the '
+    why:
+        'a Postgres connection string with the password inline is the '
         'database superuser, not an app credential: it bypasses RLS entirely. '
         'Found 2026-08-15 in FIVE tracked files at the repo root, for project '
         '`kkcseqmpgzzrogatdoqi` — including a file called `SBasEp` whose '
@@ -619,11 +668,13 @@ final guards = <Guard>[
     pattern: RegExp(r'postgres(ql)?://postgres[.:][^\s@]*:[^\s@/]+@'),
     exempt: RegExp(r'^\s*(//|///|\*|/\*|--|#)|\[YOUR-PASSWORD\]|<password>'),
     plantFile: 'planted.md',
-    plantLine: 'postgresql://postgres.abcdefghijklmnopqrst:hunter2@aws-0-eu-central-1.pooler.supabase.com:6543/postgres',
+    plantLine:
+        'postgresql://postgres.abcdefghijklmnopqrst:hunter2@aws-0-eu-central-1.pooler.supabase.com:6543/postgres',
   ),
   Guard(
     id: 'committed-test-credential',
-    why: 'the shared live test password is committed in plaintext. Measured '
+    why:
+        'the shared live test password is committed in plaintext. Measured '
         '2026-08-15 (S9-8): it opens 26 confirmed accounts on the production '
         'project — 13 of them on Iron Hills Mining / Atlas Buyer Group / '
         'Roadhaul Logistics, which are status=active with tokens valid to '
@@ -653,7 +704,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-bitwise-in-polyline-codec',
-    why: 'a bitwise operator in the polyline codec breaks navigation on the '
+    why:
+        'a bitwise operator in the polyline codec breaks navigation on the '
         'web and nowhere else. Dart bitwise ops are UNSIGNED 32-BIT on the '
         'web: `~5` is -6 on the VM and 4294967290 under dart2js, so the '
         'zig-zag step every polyline decoder is written with turned a real '
@@ -676,11 +728,13 @@ final guards = <Guard>[
     // the comment explaining the guard trips the guard.
     exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
     plantFile: 'nav_route.dart',
-    plantLine: 'final delta = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);',
+    plantLine:
+        'final delta = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);',
   ),
   Guard(
     id: 'map-states-its-background',
-    why: 'a `MapOptions` with no `backgroundColor`. flutter_map defaults to '
+    why:
+        'a `MapOptions` with no `backgroundColor`. flutter_map defaults to '
         '`0xFFE0E0E0` — near-white — and not one of the five maps in this app '
         'set it, so wherever a tile has not arrived a dark console paints a '
         'large white rectangle. That is not only the test harness (which '
@@ -707,7 +761,8 @@ final guards = <Guard>[
     plantFile: 'map.dart',
     plantLine:
         'FlutterMap(options: MapOptions(initialZoom: 5, initialCenter: p));',
-    plantWrapped: 'FlutterMap(\n'
+    plantWrapped:
+        'FlutterMap(\n'
         '  options: MapOptions(\n'
         '    initialZoom: 5,\n'
         '    initialCenter: p,\n'
@@ -716,7 +771,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'one-vocabulary-for-time-ago',
-    why: 'a hand-rolled "x ago" string. There were NINE of these in `lib/` and '
+    why:
+        'a hand-rolled "x ago" string. There were NINE of these in `lib/` and '
         'they agreed on almost nothing: `5m ago` and `5 min ago`; `3h ago` and '
         '`3 h ago`; `2d ago`, `2 d ago` and `2 days ago`; three different '
         '"just now" thresholds; one screen with a `yesterday` and eight '
@@ -755,7 +811,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-parenthesised-plural',
-    why: 'a "thing(s)" in a user-facing string. There were TWENTY-TWO — '
+    why:
+        'a "thing(s)" in a user-facing string. There were TWENTY-TWO — '
         '`load(s)`, `trip(s)`, `truck(s)`, `pile(s)`, `vehicle(s)`, `day(s)`, '
         '`source(s)`, `row(s)`, `transporter(s)` — across the buyer\'s money '
         'screen, the transporter\'s earnings, both dashboards, the dispatch '
@@ -795,7 +852,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'a-date-is-not-the-readers-locale',
-    why: '`MaterialLocalizations.formatShortDate` / `formatFullDate` / '
+    why:
+        '`MaterialLocalizations.formatShortDate` / `formatFullDate` / '
         '`formatMediumDate` / `formatTimeOfDay` render in the READER\'S '
         'locale. MineLink is a South African logistics platform whose whole '
         'subject is two parties agreeing about one load, and there were '
@@ -820,7 +878,8 @@ final guards = <Guard>[
     roots: ['lib'],
     extension: '.dart',
     pattern: RegExp(
-        r'\.format(ShortDate|FullDate|MediumDate|CompactDate|TimeOfDay)\('),
+      r'\.format(ShortDate|FullDate|MediumDate|CompactDate|TimeOfDay)\(',
+    ),
     exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
     plantFile: 'when.dart',
     plantLine:
@@ -828,7 +887,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'one-vocabulary-for-a-timestamp',
-    why: 'a hand-rolled absolute date or time. A moment in time was written '
+    why:
+        'a hand-rolled absolute date or time. A moment in time was written '
         'SEVEN ways in `lib/` — `dd MMM yyyy · HH:mm`, `MMM d, yyyy, h:mm a`, '
         '`MMM d, yyyy • h:mm a`, `MMM d • h:mm a`, `MMM d · h:mm a`, '
         '`d MMM · HH:mm` and `yyyy-MM-dd HH:mm:ss` — four of them month-first '
@@ -853,8 +913,10 @@ final guards = <Guard>[
     // agreeing with `MlTime.day`'s own output, and several of them formatting
     // a value whose provenance has to be read before it can be converted) and
     // not `HH:mm` alone (a time-only column, already one vocabulary).
-    pattern: RegExp(r"DateFormat\(\s*'[^']*(h:mm a|"
-        r"(MMM|MM|yyyy)[^']*(·|•|,)?\s*HH:mm)[^']*'"),
+    pattern: RegExp(
+      r"DateFormat\(\s*'[^']*(h:mm a|"
+      r"(MMM|MM|yyyy)[^']*(·|•|,)?\s*HH:mm)[^']*'",
+    ),
     exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
     // The one implementation, exempted by path — the same arrangement
     // `one-vocabulary-for-time-ago` has.
@@ -862,13 +924,15 @@ final guards = <Guard>[
     spanLines: true,
     plantFile: 'when.dart',
     plantLine: "final f = DateFormat('MMM d, yyyy, h:mm a');",
-    plantWrapped: 'final f = DateFormat(\n'
+    plantWrapped:
+        'final f = DateFormat(\n'
         "  'MMM d, yyyy, h:mm a',\n"
         ');',
   ),
   Guard(
     id: 'serif-declares-its-fallback',
-    why: 'a `TextStyle` that names the SERIF face without naming what draws '
+    why:
+        'a `TextStyle` that names the SERIF face without naming what draws '
         'the characters that face does not have. Fraunces is a display face '
         'and its cmap is short: measured against every non-ASCII character in '
         'a Dart string literal under `lib/`, it is missing SEVEN of them — '
@@ -913,16 +977,17 @@ final guards = <Guard>[
     exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
     spanLines: true,
     plantFile: 'title.dart',
-    plantLine:
-        'const TextStyle(fontFamily: MlTokens.fontSerif, fontSize: 20);',
-    plantWrapped: 'const TextStyle(\n'
+    plantLine: 'const TextStyle(fontFamily: MlTokens.fontSerif, fontSize: 20);',
+    plantWrapped:
+        'const TextStyle(\n'
         '  fontFamily: MlTokens.fontSerif,\n'
         '  fontSize: 20,\n'
         ');',
   ),
   Guard(
     id: 'fractional-fill-declares-its-height',
-    why: 'a `FractionallySizedBox` that declares only a `widthFactor` passes '
+    why:
+        'a `FractionallySizedBox` that declares only a `widthFactor` passes '
         'its parent\'s HEIGHT RANGE straight through, so under loose '
         'constraints a childless `DecoratedBox`/`ColoredBox` inside it takes '
         '`constraints.smallest` and comes out **0px tall**. A `Stack` lays its '
@@ -961,7 +1026,8 @@ final guards = <Guard>[
     plantFile: 'meter.dart',
     plantLine:
         'Align(child: FractionallySizedBox(widthFactor: f, child: ColoredBox(color: c)));',
-    plantWrapped: 'Align(\n'
+    plantWrapped:
+        'Align(\n'
         '  child: FractionallySizedBox(\n'
         '    widthFactor: f,\n'
         '    child: ColoredBox(color: c),\n'
@@ -970,7 +1036,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'driver-eta-is-not-the-device-clock',
-    why: 'the arrival time in the driver\'s HUD came from `DateTime.now()`, '
+    why:
+        'the arrival time in the driver\'s HUD came from `DateTime.now()`, '
         'which is the DEVICE\'s opinion of the hour. CLAUDE.md §7.1 makes '
         'every time a user reads a South African one — the rule exists '
         'because a printed waybill once said 2026-08-16 · 23:29 for a '
@@ -1001,7 +1068,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-half-point-font-size',
-    why: 'a half-point font size belongs to neither scale this app has — not '
+    why:
+        'a half-point font size belongs to neither scale this app has — not '
         'MlTokens.fs* (34/26/22/18/16/15/13/12/11) and not the M3 TextTheme '
         '(45/36/32/28/24/22/16/14/12/11). It is somebody nudging a number '
         'until one string fitted one box on one day. Measured 2026-08-20: '
@@ -1032,15 +1100,18 @@ final guards = <Guard>[
     roots: ['lib'],
     extension: '.dart',
     exemptPath: RegExp(r'lib/core/design/tokens/'),
-    pattern: RegExp(r'\b(?:fontSize|fs|textSize|size)\s*[:=]\s*'
-        r'[0-9]+\.(?!0+\b)[0-9]'),
+    pattern: RegExp(
+      r'\b(?:fontSize|fs|textSize|size)\s*[:=]\s*'
+      r'[0-9]+\.(?!0+\b)[0-9]',
+    ),
     exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
     plantFile: 'planted.dart',
     plantLine: 'style: TextStyle(fontSize: 12.5),',
   ),
   Guard(
     id: 'typeface-named-by-hand',
-    why: 'a TextStyle built from scratch carries ONLY what is written into it. '
+    why:
+        'a TextStyle built from scratch carries ONLY what is written into it. '
         '`height` and `letterSpacing` come from whatever DefaultTextStyle is in '
         'scope, which inside a Scaffold is bodyMedium — so a hand-written 15px '
         'w800 conversation title was drawn with BODY metrics: line height 1.43 '
@@ -1073,15 +1144,18 @@ final guards = <Guard>[
     roots: ['lib'],
     extension: '.dart',
     exemptPath: RegExp(r'lib/core/design/tokens/|_pdf\.dart$|exporter\.dart$'),
-    pattern: RegExp(r'fontFamily:\s*(?:MlTokens\.font|MlGlass\.|MlAuth\.|'
-        r'kConsoleSans|kEditorialSerif)'),
+    pattern: RegExp(
+      r'fontFamily:\s*(?:MlTokens\.font|MlGlass\.|MlAuth\.|'
+      r'kConsoleSans|kEditorialSerif)',
+    ),
     exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
     plantFile: 'planted.dart',
     plantLine: 'style: TextStyle(fontFamily: MlTokens.fontSans, fontSize: 14),',
   ),
   Guard(
     id: 'text-scale-sweep-reaches-the-ceiling',
-    why: 'a sweep that stops below the scale the shells actually install '
+    why:
+        'a sweep that stops below the scale the shells actually install '
         'leaves real sizes unrendered while reporting that a screen "survives '
         'every width x text scale". Since 2026-08-17 the shells COMPOSE the '
         "in-app slider with the platform's own scaler and cap the product at "
@@ -1095,14 +1169,17 @@ final guards = <Guard>[
     mode: Mode.block,
     roots: ['test'],
     extension: '.dart',
-    pattern: RegExp(r'(?:final scale in|_scales\s*=)\s*<double>\[(?![^\]]*2\.0)'),
+    pattern: RegExp(
+      r'(?:final scale in|_scales\s*=)\s*<double>\[(?![^\]]*2\.0)',
+    ),
     exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
     plantFile: 'some_sweep_test.dart',
     plantLine: 'const _scales = <double>[0.85, 1.0, 1.3];',
   ),
   Guard(
     id: 'no-off-scale-corner-radius',
-    why: 'a corner radius written as a number is a guess at the shape scale. '
+    why:
+        'a corner radius written as a number is a guess at the shape scale. '
         'Measured across lib/ on 2026-08-20: 320 sites carrying TWENTY-FOUR '
         'distinct values — 1, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, '
         '14, 15, 16, 18, 20, 24, 26, 28, 30 and 999. That is not a design '
@@ -1124,7 +1201,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'test-renders-under-the-app-theme',
-    why: 'a bare `MaterialApp` in a test renders in stock Material\'s type '
+    why:
+        'a bare `MaterialApp` in a test renders in stock Material\'s type '
         'scale and stock Material\'s font family — a measurement of text the '
         'app will never draw. That was survivable while every component '
         'hard-coded its own TextStyle; it stopped being survivable the moment '
@@ -1157,7 +1235,9 @@ final guards = <Guard>[
     //
     // spanLines because the formatter decides where the break falls.
     spanLines: true,
-    pattern: RegExp(r'MaterialApp\((?!(?:(?!MaterialApp\()[\s\S]){0,900}?theme\s*:)'),
+    pattern: RegExp(
+      r'MaterialApp\((?!(?:(?!MaterialApp\()[\s\S]){0,900}?theme\s*:)',
+    ),
     exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
     plantFile: 'some_test.dart',
     plantLine: 'await tester.pumpWidget(MaterialApp(home: SizedBox()));',
@@ -1165,7 +1245,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-row-around-a-header-that-has-an-actions-slot',
-    why: 'wrapping MlPageHeader or MlSectionTitle in a Row to put a button '
+    why:
+        'wrapping MlPageHeader or MlSectionTitle in a Row to put a button '
         'beside it hands that button UNBOUNDED width (CLAUDE.md §10.4), and a '
         'button cannot ellipsize its way out — clamping one truncates its hit '
         'target, not merely its label. Both components already have a slot '
@@ -1184,8 +1265,10 @@ final guards = <Guard>[
     // formatter decides where these break and has already blinded one guard
     // here by moving a token onto the next line.
     spanLines: true,
-    pattern: RegExp(r'Expanded\(\s*child:\s*(Column\([^)]*children:\s*\[\s*)?'
-        r'Ml(PageHeader|SectionTitle)\('),
+    pattern: RegExp(
+      r'Expanded\(\s*child:\s*(Column\([^)]*children:\s*\[\s*)?'
+      r'Ml(PageHeader|SectionTitle)\(',
+    ),
     exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
     plantFile: 'some_screen.dart',
     plantLine: 'Expanded(child: MlPageHeader(title: 1)),',
@@ -1193,7 +1276,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-hardcoded-month-in-ui',
-    why: 'a month name and a year written into a UI string is a date that '
+    why:
+        'a month name and a year written into a UI string is a date that '
         'stopped moving. Found 2026-08-20 in TWO places on screens people '
         'read daily. The console dashboard headed its "Live operations … this '
         'calendar month" section with the literal `This month · Jul 2026` — '
@@ -1226,7 +1310,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'mockito-not-in-dependencies',
-    why: 'mockito in `dependencies` ships a mocking library inside the '
+    why:
+        'mockito in `dependencies` ships a mocking library inside the '
         'consumer binary. It is tree-shaken only by luck, and it is a '
         'supply-chain surface in a released app. It belongs in '
         '`dev_dependencies` (R-4).',
@@ -1253,12 +1338,14 @@ final guards = <Guard>[
     // Proves the span is real, not just "adjacent line": several other deps
     // sit between `dependencies:` and `mockito:`, the way a real pubspec
     // reads, and the lazy `[\s\S]*?` still has to cross all of them.
-    plantWrapped: 'dependencies:\n  flutter:\n    sdk: flutter\n'
+    plantWrapped:
+        'dependencies:\n  flutter:\n    sdk: flutter\n'
         '  http: ^1.2.2\n  uuid: ^4.5.1\n  mockito: ^5.4.4',
   ),
   Guard(
     id: 'no-prerelease-sdk-constraint',
-    why: 'An sdk constraint carrying a prerelease marker (-beta, -dev) means '
+    why:
+        'An sdk constraint carrying a prerelease marker (-beta, -dev) means '
         'the app is built against a non-stable Dart. Shipping a consumer '
         'release off the beta channel is a real risk (R-4).',
     mode: Mode.block,
@@ -1269,7 +1356,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'shell-composes-the-platform-text-scale',
-    why: 'a shell that installs `TextScaler.linear(...)` REPLACES the '
+    why:
+        'a shell that installs `TextScaler.linear(...)` REPLACES the '
         'platform text scaler instead of composing with it, and silently '
         'discards the operating system accessibility setting for every user '
         'of every screen behind that shell. Recorded in docs/future-work.md '
@@ -1295,7 +1383,8 @@ final guards = <Guard>[
   ),
   Guard(
     id: 'no-star-select-on-embedded-request',
-    why: 'a `transportation_requests(*)` embed hands the reader EVERY column '
+    why:
+        'a `transportation_requests(*)` embed hands the reader EVERY column '
         'of the request, and three of them are not the reader\'s to have. '
         '`rate` is the figure the BUYER typed; `price_per_ton` is the product '
         "price on a Request Product; `admin_notes` is what the platform "
@@ -1359,9 +1448,10 @@ List<Hit> scan(Guard g, {List<String>? rootsOverride}) {
       files.add(File(root));
     } else if (type == FileSystemEntityType.directory) {
       files.addAll(
-        Directory(root).listSync(recursive: true).whereType<File>().where(
-              (f) => g.extension == null || f.path.endsWith(g.extension!),
-            ),
+        Directory(root)
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((f) => g.extension == null || f.path.endsWith(g.extension!)),
       );
     }
     for (final f in files) {
@@ -1381,7 +1471,9 @@ List<Hit> scan(Guard g, {List<String>? rootsOverride}) {
         // `exempt` is judged against, so a commented-out example stays exempt
         // however it wraps.
         for (final m in g.pattern.allMatches(content)) {
-          final lineIndex = '\n'.allMatches(content.substring(0, m.start)).length;
+          final lineIndex = '\n'
+              .allMatches(content.substring(0, m.start))
+              .length;
           final line = lines[lineIndex];
           if (g.exempt?.hasMatch(line) ?? false) continue;
           hits.add(Hit(norm, lineIndex + 1, line));
@@ -1402,8 +1494,9 @@ List<Hit> scan(Guard g, {List<String>? rootsOverride}) {
 Map<String, int> loadBaseline() {
   final f = File('tool/release_guards_baseline.json');
   if (!f.existsSync()) return {};
-  return (jsonDecode(f.readAsStringSync()) as Map<String, dynamic>)
-      .map((k, v) => MapEntry(k, v as int));
+  return (jsonDecode(f.readAsStringSync()) as Map<String, dynamic>).map(
+    (k, v) => MapEntry(k, v as int),
+  );
 }
 
 void main(List<String> args) {
@@ -1420,15 +1513,19 @@ void main(List<String> args) {
 
     if (hits.length > limit) {
       failed = true;
-      stderr.writeln('FAIL  ${g.id}: ${hits.length} violation(s), limit $limit');
+      stderr.writeln(
+        'FAIL  ${g.id}: ${hits.length} violation(s), limit $limit',
+      );
       stderr.writeln('      ${g.why}');
       for (final h in hits.take(8)) {
         stderr.writeln('      $h');
       }
       if (hits.length > 8) stderr.writeln('      … ${hits.length - 8} more');
     } else if (g.mode == Mode.ratchet && hits.length < limit) {
-      stdout.writeln('PASS  ${g.id}: ${hits.length} (baseline $limit — '
-          'ratchet down with --update-baseline)');
+      stdout.writeln(
+        'PASS  ${g.id}: ${hits.length} (baseline $limit — '
+        'ratchet down with --update-baseline)',
+      );
     } else {
       stdout.writeln('PASS  ${g.id}: ${hits.length}');
     }
@@ -1460,19 +1557,24 @@ int selftest() {
   try {
     for (final g in guards) {
       final dir = Directory('${tmp.path}/${g.id}')..createSync(recursive: true);
-      final clean = File('${dir.path}/${g.plantFile}')..writeAsStringSync('// nothing here\n');
+      final clean = File('${dir.path}/${g.plantFile}')
+        ..writeAsStringSync('// nothing here\n');
       final beforeHits = scan(g, rootsOverride: [dir.path]);
 
       clean.writeAsStringSync('// planted below\n${g.plantLine}\n');
       final afterHits = scan(g, rootsOverride: [dir.path]);
 
       if (beforeHits.isEmpty && afterHits.isNotEmpty) {
-        stdout.writeln('SELFTEST  ${g.id}: BITES '
-            '(clean ${beforeHits.length} → planted ${afterHits.length})');
+        stdout.writeln(
+          'SELFTEST  ${g.id}: BITES '
+          '(clean ${beforeHits.length} → planted ${afterHits.length})',
+        );
       } else {
         allBit = false;
-        stderr.writeln('SELFTEST  ${g.id}: DID NOT BITE '
-            '(clean ${beforeHits.length} → planted ${afterHits.length})');
+        stderr.writeln(
+          'SELFTEST  ${g.id}: DID NOT BITE '
+          '(clean ${beforeHits.length} → planted ${afterHits.length})',
+        );
         stderr.writeln('          planted: ${g.plantLine}');
       }
 
@@ -1491,8 +1593,10 @@ int selftest() {
         final wrapped = g.plantWrapped;
         if (wrapped == null) {
           allBit = false;
-          stderr.writeln('SELFTEST  ${g.id}: declares spanLines but has no '
-              'plantWrapped — the span is unproven');
+          stderr.writeln(
+            'SELFTEST  ${g.id}: declares spanLines but has no '
+            'plantWrapped — the span is unproven',
+          );
         } else {
           clean.writeAsStringSync('// planted below\n$wrapped\n');
           final wrappedHits = scan(g, rootsOverride: [dir.path]);
@@ -1500,8 +1604,10 @@ int selftest() {
             stdout.writeln('          + WRAPPED plant also caught');
           } else {
             allBit = false;
-            stderr.writeln('SELFTEST  ${g.id}: DID NOT BITE ON A WRAPPED '
-                'VIOLATION — spanLines is not doing what it claims');
+            stderr.writeln(
+              'SELFTEST  ${g.id}: DID NOT BITE ON A WRAPPED '
+              'VIOLATION — spanLines is not doing what it claims',
+            );
             stderr.writeln('          planted:\n$wrapped');
           }
         }

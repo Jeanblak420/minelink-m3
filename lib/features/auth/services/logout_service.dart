@@ -22,11 +22,18 @@ class LogoutService {
 
     try {
       // Show confirmation dialog
+      // "Sign out", because that is what every control that opens this
+      // dialog says. All TEN call sites are labelled "Sign out" — the driver's
+      // profile, both shells, the waiting-for-role screen, the approval
+      // overlay, the expired-access screen — and this dialog answered them
+      // with "Logout Confirmation", "log out" and "Yes, Logout". Three
+      // different words for one action, on the one screen where a user is
+      // being asked to confirm something.
       final confirmed = await DialogUtils.showConfirmationDialog(
         context: context,
-        title: 'Logout Confirmation',
-        message: 'Are you sure you want to log out?',
-        confirmText: 'Yes, Logout',
+        title: 'Sign out',
+        message: 'Are you sure you want to sign out?',
+        confirmText: 'Sign out',
         cancelText: 'Cancel',
         confirmColor: MlTokens.red600,
       );
@@ -56,7 +63,7 @@ class LogoutService {
       return false;
     } catch (e) {
       // Handle any errors during logout
-      debugPrint('Error during logout: $e');
+      debugPrint('Error during sign out: $e');
 
       // Show error message to user
       if (context.mounted) {

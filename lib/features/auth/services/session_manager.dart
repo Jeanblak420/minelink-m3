@@ -84,7 +84,7 @@ class SessionManager {
           _lastKnownUserId != currentUserId &&
           authState.user?.id != currentUserId) {
         debugPrint(
-          'SECURITY ALERT: User ID changed from $_lastKnownUserId to $currentUserId without proper logout!',
+          'SECURITY ALERT: User ID changed from $_lastKnownUserId to $currentUserId without a proper sign-out!',
         );
         debugPrint('Auth state user ID: ${authState.user?.id}');
 
@@ -242,13 +242,13 @@ class SessionManager {
     bool clearBrowserState = true,
   }) async {
     debugPrint(
-      'SessionManager: forcing logout${reason != null ? ' ($reason)' : ''}',
+      'SessionManager: forcing sign-out${reason != null ? ' ($reason)' : ''}',
     );
 
     try {
       await _ref.read(authStateProvider.notifier).signOut();
     } catch (e) {
-      debugPrint('SessionManager: signOut during forced logout failed: $e');
+      debugPrint('SessionManager: signOut during forced sign-out failed: $e');
       await CacheService.clearAllCache();
     }
 

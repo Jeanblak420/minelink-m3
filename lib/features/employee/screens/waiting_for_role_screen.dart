@@ -54,9 +54,8 @@ class _WaitingForRoleScreenState extends ConsumerState<WaitingForRoleScreen> {
     final company = employeeState.company;
 
     return BackButtonHandler(
-      title: 'Confirm Logout',
-      message:
-          'Are you sure you want to exit? This will log you out of the application.',
+      title: 'Sign out',
+      message: 'Going back will sign you out. Are you sure?',
       onBackConfirmed: () {
         if (context.mounted) {
           // Show logout confirmation dialog
@@ -84,9 +83,10 @@ class _WaitingForRoleScreenState extends ConsumerState<WaitingForRoleScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const MlIconWell(
-                    icon: Icons.hourglass_top_rounded,
-                    tone: MlTone.atMine,
-                    size: 80),
+                  icon: Icons.hourglass_top_rounded,
+                  tone: MlTone.atMine,
+                  size: 80,
+                ),
                 const SizedBox(height: 24),
                 Text(
                   'Waiting for Role Assignment',

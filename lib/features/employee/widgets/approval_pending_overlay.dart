@@ -57,9 +57,8 @@ class _ApprovalPendingOverlayState
     return BackButtonHandler(
       // Prevent back button from dismissing the overlay without confirmation
       enabled: true,
-      title: 'Confirm Logout',
-      message:
-          'Are you sure you want to exit? This will log you out of the application.',
+      title: 'Sign out',
+      message: 'Going back will sign you out. Are you sure?',
       onBackConfirmed: () {
         // Use a try-catch block to handle potential errors
         try {
@@ -79,9 +78,7 @@ class _ApprovalPendingOverlayState
           child: Card(
             margin: const EdgeInsets.all(24.0),
             elevation: 8,
-            shape: RoundedRectangleBorder(
-              borderRadius: MlShape.radiusLarge,
-            ),
+            shape: RoundedRectangleBorder(borderRadius: MlShape.radiusLarge),
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -104,7 +101,9 @@ class _ApprovalPendingOverlayState
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: MlTone.transit.colors(Theme.of(context).brightness).bg,
+                      color: MlTone.transit
+                          .colors(Theme.of(context).brightness)
+                          .bg,
                       borderRadius: MlShape.radiusSmall,
                       border: Border.all(
                         color: MlTone.transit
@@ -115,10 +114,12 @@ class _ApprovalPendingOverlayState
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline,
-                            color: MlTone.transit
-                                .colors(Theme.of(context).brightness)
-                                .fg),
+                        Icon(
+                          Icons.info_outline,
+                          color: MlTone.transit
+                              .colors(Theme.of(context).brightness)
+                              .fg,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -162,8 +163,9 @@ class _ApprovalPendingOverlayState
                       decoration: BoxDecoration(
                         color: MlSemantic.of(context).surfaceSunken,
                         borderRadius: MlShape.radiusSmall,
-                        border:
-                            Border.all(color: MlSemantic.of(context).borderSubtle),
+                        border: Border.all(
+                          color: MlSemantic.of(context).borderSubtle,
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,7 +300,9 @@ class _ApprovalPendingOverlayState
                     },
                     icon: const Icon(Icons.logout),
                     label: const Text('Sign Out'),
-                    style: TextButton.styleFrom(foregroundColor: MlTokens.red600),
+                    style: TextButton.styleFrom(
+                      foregroundColor: MlTokens.red600,
+                    ),
                   ),
                 ],
               ),
