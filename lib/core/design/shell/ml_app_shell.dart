@@ -202,8 +202,121 @@ class _MlAppShellState extends State<MlAppShell> {
   /// out instead put its full label in the bar, and "Mine/Supplier transport"
   /// wrapped to three lines at 412px, overlapping both neighbours and clipping
   /// at the bottom of the bar. `NavigationBar` does not ellipsize.
-  List<MlNavNode> get _bottomDestinations =>
-      widget.tree.take(4).toList(growable: false);
+  /// The fewest destinations the bar will ever show, before **More**. Two is
+  /// Material 3's own floor for a `NavigationBar`; below that it is not a bar.
+  static const int _minBottomDestinations = 2;
+
+  /// The most, per the M3 cap of five tiles including More.
+  static const int _maxBottomDestinations = 4;
+
+  /// `NavigationBar` clamps its own label scaling here
+  /// (`_kMaxLabelTextScaleFactor` in Flutter's `navigation_bar.dart`), so a
+  /// reader at 2.0 gets 1.3 and this is the widest a label can ever be.
+  static const double _labelScaleCeiling = 1.3;
+
+  List<MlNavNode> _bottomDestinations(BuildContext context) {
+    final all = widget.tree
+        .take(_maxBottomDestinations)
+        .toList(growable: false);
+    if (all.length <= _minBottomDestinations) return all;
+
+    // FEWER DESTINATIONS, NOT SMALLER OR SHORTER WORDS.
+    //
+    // Photographed on a real SM-G780G on 2026-08-22, signed in as the platform
+    // admin: the console's bar read
+    //
+    //     Dashboar
+    //     d
+    //
+    // — one word broken between two letters, which reads as a corrupted string
+    // rather than a destination. `bottom_nav_labels_test.dart` already forbids
+    // exactly that, and it did not catch this one for two reasons, both of them
+    // the "a check you have not sabotaged" trap in a new costume: it swept text
+    // scales 1.0 and 1.3 and nothing between, and it deliberately switched the
+    // one-word rule OFF at 1.3. Measured across every tree this product builds,
+    // the first break at 412px is at scale 1.2, and the band 1.05–1.2 was
+    // unswept.
+    //
+    // The old comment argued that abbreviating was worse than wrapping, and it
+    // was right — "Dashboard", "Operations", "Stockpiles" and "Production" are
+    // ordinary words with no honest short form, and a `shortLabel` for each
+    // would cost more than it bought. But those were not the only two options.
+    // The bar's problem is that five fixed tiles across 412px give each label
+    // 82px whatever the reader's type size, so the FOURTH destination is what
+    // does not fit — not the words.
+    //
+    // So the count adapts instead. Three destinations plus More is 103px a
+    // tile, two is 137px, and the destination that steps out is still one tap
+    // away in the drawer with its badge folded into More's — which is what
+    // More has always been for. Nothing is renamed, nothing shrinks, and a
+    // reader who turned their type size up gets larger text rather than a
+    // broken word.
+    //
+    // The arithmetic is exact rather than a fudge factor: Flutter lays each
+    // destination out in an `Expanded` (so a tile is exactly `width / n`) and
+    // the label carries `EdgeInsets.only(top: 4)` — no horizontal padding at
+    // all. If that ever stops being true the sweep in
+    // `bottom_nav_labels_test.dart` is what says so.
+    final width = MediaQuery.sizeOf(context).width;
+    for (var n = all.length; n > _minBottomDestinations; n--) {
+      final slot = width / (n + 1); // +1 for More
+      final labels = [
+        ...all.take(n).map((node) => node.compactLabel),
+        _moreLabel,
+      ];
+      if (labels.every((l) => _labelWidth(context, l) <= slot)) {
+        return all.take(n).toList(growable: false);
+      }
+    }
+    return all.take(_minBottomDestinations).toList(growable: false);
+  }
+
+  /// How wide [text] paints in the bar's label style, at the reader's own text
+  /// scale and bold-text setting.
+  ///
+  /// Measured against the SELECTED style as well as the resting one and the
+  /// wider of the two taken: M3 gives the selected destination its own
+  /// `labelTextStyle`, and the selected label is the one that was broken in
+  /// the photograph.
+  double _labelWidth(BuildContext context, String text) {
+    final theme = Theme.of(context);
+    final resolver = theme.navigationBarTheme.labelTextStyle;
+    final styles = <TextStyle?>[
+      resolver?.resolve(<WidgetState>{}) ?? theme.textTheme.labelMedium,
+      resolver?.resolve(<WidgetState>{WidgetState.selected}) ??
+          theme.textTheme.labelMedium,
+    ];
+    // `Text` merges FontWeight.bold itself when the platform asks for bold
+    // text, so a TextPainter that ignored it would under-measure for exactly
+    // the readers most likely to overflow.
+    final bold = MediaQuery.boldTextOf(context);
+    final scaler = MediaQuery.textScalerOf(context)
+        .clamp(maxScaleFactor: _labelScaleCeiling);
+
+    var widest = 0.0;
+    for (final style in styles) {
+      final painter = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: bold
+              ? (style ?? const TextStyle())
+                  .copyWith(fontWeight: FontWeight.bold)
+              : style,
+        ),
+        textDirection: TextDirection.ltr,
+        textScaler: scaler,
+        maxLines: 1,
+      )..layout();
+      widest = widest > painter.width ? widest : painter.width;
+      painter.dispose();
+    }
+    return widest;
+  }
+
+  /// The drawer tab's label. Named once because [_bottomDestinations] has to
+  /// measure it and [_buildBottomBar] has to draw it, and a bar that measured
+  /// one string and painted a longer one would be measuring nothing.
+  static const String _moreLabel = 'More';
 
   /// Where a bottom destination goes: itself, or its first child.
   String? _bottomRoute(MlNavNode node) =>
@@ -506,7 +619,7 @@ class _MlAppShellState extends State<MlAppShell> {
   }
 
   Widget _buildBottomBar(BuildContext context) {
-    final destinations = _bottomDestinations;
+    final destinations = _bottomDestinations(context);
     final selectedIndex = () {
       for (var i = 0; i < destinations.length; i++) {
         if (_bottomSelected(destinations[i])) return i;
@@ -539,9 +652,9 @@ class _MlAppShellState extends State<MlAppShell> {
             tooltip: node.label,
           ),
         NavigationDestination(
-          icon: _maybeBadgeTotal(const Icon(Icons.menu_rounded)),
+          icon: _maybeBadgeTotal(context, const Icon(Icons.menu_rounded)),
           selectedIcon: const Icon(Icons.menu_open_rounded),
-          label: 'More',
+          label: _moreLabel,
           tooltip: 'All destinations',
         ),
       ],
@@ -555,13 +668,13 @@ class _MlAppShellState extends State<MlAppShell> {
 
   /// The More tab carries the badge for everything the bar cannot show, so a
   /// queue hidden behind it is still visible from the phone's home screen.
-  Widget _maybeBadgeTotal(Widget icon) {
+  Widget _maybeBadgeTotal(BuildContext context, Widget icon) {
     // Everything the bar does not stand for. A bottom destination stands for
     // its whole group, so subtract by group rather than by route — counting
     // routes would re-count every sibling of a shown group's first child as
     // "hidden" and inflate the More badge.
     final shownRoutes = <String>{
-      for (final node in _bottomDestinations)
+      for (final node in _bottomDestinations(context))
         for (final leaf in node.leaves)
           if (leaf.route != null) leaf.route!,
     };
