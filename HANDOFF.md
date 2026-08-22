@@ -1,6 +1,7 @@
 # MineLink M3 — session handoff
 
-**Rewritten 2026-08-22, at the end of the contrast-and-vocabulary session.**
+**Rewritten 2026-08-22, at the end of the chat session — the one that put the
+app on a real phone for the first time.**
 Everything below is verified state, not intention. It replaces the previous
 handoff of the same name; the parts of that one still true have been folded in.
 
@@ -16,9 +17,11 @@ file governs the redesign work.**
 
 ## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The tree is **clean**, **111 commits**, nothing half-applied and nothing
+The tree is **clean**, **118 commits**, nothing half-applied and nothing
 uncommitted. The tip is
-`naming: the four routes the rail and the bar called different things, settled`.
+`docs: the handoff for the session the app first ran on a phone`; the last CODE
+commit under it is `91f77cf chat: the driver fix was half a fix, and the
+handset said so again`, and the whole gate in §2 was run green against that.
 
 **The original worktree was re-checked against its §0 baseline at the start and
 at the end and is untouched** — HEAD `df451d0`, the same three pre-existing
@@ -27,23 +30,26 @@ nothing modified today.
 
 ### What changed about this project this session
 
-The previous handoff's §4.2 said the work left was **1,812 low-contrast
-strings**, ranked, "starting with the avatar initials".
+Two things, and the second is the one that matters.
 
-**There are now ZERO**, and the ranking was the wrong instrument. The route was
-not 1,812 edits — it was measuring what each finding was *painted by* rather
-than what it looked like. That collapsed 233 `(ink, ground)` pairs into a
-handful of decisions: **six token values were 86% of it**, and one expression —
-`textFaint = onSurfaceVariant.withValues(alpha: 0.62)` — was **916 on its own**.
+**1. The chat was fixed properly** — Jean's call: the dock is the chat (the one
+that works in the super global admin portal on the untouched app), so it is not
+merged away; cover it, and give the threads whatever else they need. The
+invisible reply is fixed end to end, the dock has renders for the first time,
+and **thirteen of the eighteen chat palettes were painting text below 4.5:1** —
+including every outgoing message on the default palette. None of that was
+reachable before the dock had a picture.
 
-`test/renders/low_contrast_baseline.json` is now `{}`. A missing entry reads as
-zero, so it is no longer a ratchet, it is a **floor**: any string under WCAG AA
-on any render, in either brightness, fails the suite.
+**2. THE APP RAN ON A REAL PHONE, and that immediately found three defects
+nothing else could.** The biggest: **a driver had no chat at all.** Not "no
+button" — no chat. `PortalShellLayout` wraps every role's shell in a `ChatDock`
+at the end of its build, and the driver's shell is returned from an early
+branch ~300 lines above it.
 
-Also this session: **the instrument was wrong in three more ways** and is
-fixed; **four routes the rail and the bar named differently** were settled on
-Jean's call; and the phone was **paired and driven for the first time** —
-see §7 for exactly where that stopped.
+It had passed `flutter analyze`, 2,145 tests, 261 renders and 39 release
+guards. §4.1 of the previous handoff predicted hardware would settle GPS, the
+foreground service and battery. It settled none of those. It found a missing
+feature, an incomplete fix for that feature, and a wrong string.
 
 ---
 
@@ -52,7 +58,7 @@ see §7 for exactly where that stopped.
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **111 commits**, clean tree. |
+| What it is | A **complete, independent fork** of MineLink, being redesigned onto Material 3. Its own git repo (`main`), **118 commits**, clean tree. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
@@ -106,8 +112,14 @@ Later instructions, which still stand:
   continue with web and mobile please"* — Windows is blocked by two
   pre-existing faults (§4.4); web and Android both build.
 - **Work long, don't stop to check in.** The HOW TO WORK paragraph in §8.
+- **The chat is the dock** (2026-08-22): *"the one that needs to be used is the
+  same one thats on the untouched version of the app, the same one that runs
+  and works perfectly in the super global admin portal"*, then cover it and
+  give the threads whatever else they need. Acted on — §3.1.
 
 **`supabase/` is frozen.** No migration is created, applied or pushed here.
+(Checked again this session: the reply feature needed nothing from the database
+— see §3.1.)
 
 ---
 
@@ -117,288 +129,226 @@ Every one of these was run at the end of the session:
 
 ```
 flutter analyze                                 no issues
-flutter test                                    2107 passed, 1 skipped
+flutter test                                    2149 passed, 1 skipped
 dart tool/release_guards.dart                   39/39 PASS, 0 FAIL
 dart tool/release_guards.dart --selftest        all guards bite
+py -3 tool/_sabotage.py                         all sabotages caught
 py -3 tool/type_scale_codemod.py --selftest     OK
 py -3 tool/dropdown_width_check.py              passes
 py -3 tool/glyph_coverage_check.py              passes
 py -3 tool/one_clock_check.py                   0 sites off Africa/Johannesburg
 py -3 tool/unphotographed_screens.py            93 targets, 93 photographed, 0 not
-py -3 tool/_sabotage.py                         all sabotages caught
 flutter build web --release                     builds
 flutter build apk --debug                       builds
-docs/redesign/renders/                          220 renders
-render harness — CUT OFF                        6 strings, all deliberate
+docs/redesign/renders/                          225 renders
+render harness — CUT OFF                        9 strings, all deliberate
 render harness — FAILURE STATE                  0
 render harness — RENDER NOTE                    0  (and it FAILS the test)
-render harness — LOW CONTRAST                   0  ← was 1,812
+render harness — LOW CONTRAST                   0
+ANDROID, ON JEAN'S SM-G780G                     installed and driven
 ```
 
 Layout is swept at **8 widths (1612 → 360px) × 6 text scales (0.85 → 2.0)**,
 and again **with real rows in every table** at 360/800/1280 by 1.0/1.3.
 
+⚠️ **CUT OFF went 6 → 9.** The three new ones are the same deliberate string,
+once per dock list render: a conversation row shows one line of the last
+message and ellipsises the rest, which is what the row is for.
+
 ---
 
 ## 3. What this session did
 
-Full reasoning is in each commit message — six long ones. Read them rather
+Full reasoning is in each commit message — three long ones. Read them rather
 than trusting this summary.
 
-### 3.1 The instrument was wrong in three more ways
+### 3.1 The chat, fixed properly
 
-Before acting on 1,812 findings I went looking for the ones that were wrong.
-**Fourteen were**, in five distinct classes, and every one was found the same
-way: **by cropping the picture at the coordinates the report itself named.**
+**The reply was written and never read.** `ChatScreen` captured a reply target,
+showed "Replying to Thandi" above the composer, and wrote `reply_to_id` on the
+insert — then hand-built its `ChatMessage` from the returned row with a map
+literal that had no line for that column. The id went to Postgres, came back
+over the wire, and was dropped on the last step. The reply arrived as an
+ordinary message. Nothing threw; `.select()` had been returning the column all
+along.
 
-| class | what it was | how it is caught now |
-|---|---|---|
-| **clipped away** | a paragraph laid out at y=3000 inside a viewport that shows 400px | intersect with every ancestor's paint clip |
-| **covered** | the driver HUD under the hazard sheet's opaque button — the covering label is 98% of the way from the HUD's ground to its ink, so "closer to ink than ground" passes it | the pixel must lie ON the ground→ink line, which is what anti-aliasing IS |
-| **behind a modal** | a scrim dims ink and ground TOGETHER, so the chat composer's `Send` — a 10.43:1 pairing — measured 2.53:1 under a dialog | `ModalRoute.of(e).isCurrent` |
-| **translucent ink** | the ground exclusion matched the DECLARED colour, so `textFaint` was never excluded from its own ground | composite first, two passes, pass one anchored on the box PERIMETER |
-| **a glyph's own halo** | in a tight box over a GRADIENT fill the halo does not have to outnumber the fill, only its most common single shade — a rank badge's box held 11 white, ~20 teal split four ways, 8 halo, and the halo won | same ground→ink line rule |
+**The database half was already right and is unchanged.** Verified against
+production rather than assumed: `reply_to_id uuid`, FK to `chat_messages(id)`
+ON DELETE SET NULL, `chat_messages_reply_to_id_idx`, and RLS scoping both
+select and insert to room membership. There was no migration to write. (Worth
+knowing: there is no UPDATE or DELETE policy on `chat_messages`, so no message
+can be edited or deleted through PostgREST — and no surface offers to, so
+nothing silently fails.)
 
-`test/renders/low_contrast_report_test.dart` is 14 tests, each scene's right
-answer known by construction. `tool/_sabotage.py` reverts each fix and watches
-the matching test fail.
+The mapping is a named factory now (`ChatMessage.fromRow`), because a missing
+line in a map literal looks exactly like a field nobody wanted.
 
-⚠️ **Two of the five are NOT in the default sabotage set, and the script says
-why at each.** `ground` (translucent-ink exclusion) is unreachable with real
-fonts — surveyed, the densest glyph coverage this app can produce is 45.7%, and
-below 50% the background wins the mode either way; running all 220 renders with
-and without it returns byte-identical findings. `halo` **was** load-bearing when
-made and became unreachable when the same session deepened the light accent the
-badge is filled with. Both are kept because they are correct; neither pretends
-to be caught.
+**Thirteen of eighteen chat palettes were illegible.** The dock had no renders;
+the moment it had one it reported white on `#5E81AC` at 4.03:1 for every
+outgoing message on the DEFAULT palette. Most of it was one shape, not thirty
+values: `_ReplyQuote` filled its ground with the bubble's own text colour at
+14% and then wrote that same colour on it — a ground moved TOWARDS its ink,
+which can only cut the ratio. Tinting AWAY (`ChatPalette.quoteGround`) gives a
+property worth having: separation can only increase, so a quote is legible
+wherever its bubble is. Four fills also needed deepening for white to reach
+4.5:1 at all. `test/design/chat_palette_contrast_test.dart` asks the question
+of all eighteen as arithmetic, because a render can only ever photograph the
+one palette that happens to be selected.
 
-### 3.2 Six token values were 86% of it
+Two more were their own faults: the unread badge took the presence-dot red
+(3.76:1 under an 11px numeral — a dot is a shape at 3:1, a badge is text at
+4.5), and a reaction chip's emoji had no colour at all, so it inherited the APP
+theme's ink while the chip was painted from the CHAT palette — 1.78:1 when the
+two disagree. Colour emoji ignore the colour, which is exactly why it survived.
 
-`tool/attribute_low_contrast.py` composites each candidate token onto each
-finding's measured ground and asks which one painted it. That is the step that
-turns 233 pairs into decisions:
+I then made the same mistake in my own new quote block — accent ink on an
+accent-tinted well, 3.44:1 — and the render reported it on the next run.
 
-```
- 730  textFaint/dark            onSurfaceVariant × 0.62
- 367  MlGlass.dark.inkLo
- 186  textFaint/light           onSurfaceVariant × 0.62
- 124  MlGlass.light.inkLo
-  88  MlChrome.railSectionLabel
-  49  MlGlass.dark.inkXlo
-----
-1544  of 1798
-```
+**Raw mention tokens.** Both surfaces read `chat_messages`, and the dock writes
+mentions as `@[Display](user:id)`. `ChatScreen` rendered `content` through a
+plain `Text`, so a dock-composed message opened there read
+`Morning @[Thandi Mokoena](user:8f2c…) — 06:00?`. Chips now.
 
-**An alpha cannot be the faint rung.** 62% of the muted slate is 3.34–3.54:1 on
-every dark surface and 2.85–2.99:1 on every light one, against the 4.5:1 WCAG
-asks of text under 24px — and these are 9–13px labels. Solving for the alpha
-that WOULD reach 4.5 gives 0.87 dark and 0.83 light, at which point "faint" is
-`textMuted` and the token has stopped meaning anything. It is its own colour
-now: `#8B99AE` dark, `#5A6678` light.
+### 3.2 The first hardware drive, and the three things it found
 
-**Raising the bottom rung does not work either, and that is the interesting
-part.** `MlGlass`'s bottom two had been raised once already to "AA for LARGE
-text" (3.0) — the wrong bar for an 11px label, in a comment that said so while
-setting the value. Reaching 4.5 needs `inkLo` at `#8693AE` and `inkXlo` at
-`#8893A9`, two colours nobody can tell apart, sitting under an `inkMid` of
-`#8896AE` that is the same colour again. **Below the floor there was room for
-one rung and the ladder was asking for three**, so `inkMid` moved up and all
-three were respaced. Same on the light side, and on `MlAuth`.
+Installed from `\\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk` through My
+Files' own network-storage mount — not over HTTP, which is where the previous
+session stalled. Signed in as `roadhaul.driver@mineralguide.com` against the
+live database.
 
-### 3.3 The faults that were about SHAPE, not values
+**What rendered correctly:** the auth screen, the account-setup gate, the
+driver Dashboard with live figures (3 loads this week · 102.1 t · 5 deliveries
+· 171.32 t total), the Trip tab's empty state, and Recent Trips with four real
+completed trips.
 
-- **One token cannot be both the fill and the ink.** Four sites drew a hue
-  tuned for text on PAPER onto a console that is dark for most admins —
-  `_TxnRow`, `_Delta`, the platform-users avatar, `_DispatchStatusChip`. All
-  take both halves from ONE `MlTone` call now, because two halves fetched
-  separately are free to disagree. `MlTokens.green800` and `red700` were left
-  with no uses and are **deleted**, so the compiler is the guard.
-- **White on a mid-saturation fill does not work, measured.** White reached
-  4.5:1 on NONE of the six `avatarRamp` gradients, bottoming out at 1.89:1.
-  `MlTokens.inkOnFills` picks by MEASURING both candidates against every stop.
-  The avatar block existed twice byte-for-byte and is one `_OrgAvatar` now.
-- **The leaderboard's winner card was a window onto its own glow.** Its body
-  composited to a flat mid teal on which nothing was legible — white included,
-  at 3.81:1. The teal was not the wash: `BoxDecoration` paints its shadow
-  BEFORE its fill, so a cyan glow at 60% came through a 6%-alpha card. Lowering
-  the wash barely moved it, which is what said the wash was not the term that
-  mattered. The card gets `MlOv.accentCardGround` now. **The same fault, in a
-  second place**, is the org-insights leader row — and there the first fix
-  failed because `Color.alphaBlend` keeps the BACKGROUND's alpha and the
-  background was white at 2%.
-- **An alpha on an ink, five times.** `textFaint` itself, the pager's disabled
-  "Prev", the chat timestamp (`fg` at 75%, and `overlayLight` at 68% in the
-  other chat), the company mirror's zero. Quiet is SIZE and WEIGHT; an alpha on
-  an ink is a contrast cut wearing a hierarchy costume.
-- **The ratchet caught me making one worse.** Deepening `green600` to fix the
-  "go" button as a FILL broke `_Delta` as INK on the dark dashboard, reported
-  on that very run. That is the whole argument for the ratchet.
+**What it found:**
 
-### 3.4 What the tests pin
+1. **A driver had no chat at all** — no dock, no rail entry (the 3-tab shell
+   replaces the sidebar), and `DriverAppScreen` has no messages affordance of
+   its own.
+2. **The first fix was half a fix.** There are TWO driver branches and `/home`
+   is the wrong one: `portalLandingRoute` sends a driver to
+   `/portal/driver/home` on sign-in, so `/home` is one frame. Rebuilding and
+   reinstalling is what revealed it — the test I had written for the bug read
+   the branch I had already fixed, and passed.
+3. **The dock's empty state named a tab that does not exist** — "Open the
+   People tab" on a surface whose tabs are Conversations | Contacts. Copied
+   verbatim from `MessagesScreen`, whose tabs really are Chats | People. It is
+   the one instruction shown to somebody with no conversations.
 
-- `test/design/ink_ladder_test.dart` — 38 tests, pure arithmetic. Every rung
-  clears 4.5:1 on every ground it lands on (**the ground list comes from the
-  REPORT, not the token file**); rungs stay ORDERED and >6% apart; `MlOv`
-  equals `MlGlass` rung for rung; every `MlTone` pair reads on its own well,
-  composited, in both brightnesses; BOTH `MlChrome` variants — the light rail
-  is not the dark rail inverted, and that is how the first pass fixed one and
-  left 17 strings in the other.
-- The failure message names the measured ratio, the ground, and the
-  `contrast_calc.py solve-tint` command that derives a replacement.
+All three are fixed, guarded, and the guards sabotaged.
 
-### 3.5 Four route names settled (Jean's call, 2026-08-22)
+### 3.3 New tests, all sabotaged to prove they bite
 
-The four of fifteen divergences where the bar was not SHORTER than the rail but
-a DIFFERENT word:
-
-```
-fleet            bar "Fleet management" -> "Vehicles"
-drivers          bar "Driver"           -> "Drivers"
-trucks-on-route  bar "Trucks On Route"  -> "Trucks on route"
-trip             RAIL "My routes"       -> "Trip"
-```
-
-`fleet` goes to the rail's word because the rail's leaf sits inside a group
-already called "Fleet" — the old bar title read *Fleet › Fleet*. `trip` goes
-the other way because the driver's bottom nav is Dashboard · Trip · Profile, so
-the bar already had the word a driver taps. Fifteen routes are now eleven.
-
-⚠️ **I changed `PortalTabItem('Trucks On Route')` too and reverted it.** That
-string is a LEGACY tab label: `_legacyTabLabels` maps it onto the canonical
-form, and `_portalAliasTabLabel` must return it EXACTLY for the alias route to
-select its tab. Renaming it there alone breaks selection **silently** — nothing
-throws, the tab just stops highlighting.
-
-### 3.6 New tools, all self-testing
-
-| tool | what it does |
+| test | what it stops |
 |---|---|
-| `tool/rank_low_contrast.py` | groups the report by (ink, ground), by widget, by render |
-| `tool/attribute_low_contrast.py` | composites each candidate TOKEN onto each finding's ground and says which one painted it |
-| `tool/contrast_calc.py` | composites, and **solves** for the alpha or tint that reaches a target |
-| `tool/low_contrast_baseline_update.py` | lowers the baseline, REFUSES to raise it |
-| `tool/_sabotage.py` | reverts each instrument fix and watches the right test fail |
+| `chat_message_row_test.dart` | a column written and never read — nulls each in turn and fails if the model does not change |
+| `chat_reply_quote_test.dart` | the quote not reaching the screen: over text, over an attachment, with a dangling parent, with a mention token |
+| `chat_palette_contrast_test.dart` | any of the 18 palettes painting text under 4.5:1, quote grounds included |
+| `driver_can_reach_chat_test.dart` | **both** driver branches losing their `ChatDock` |
+| `empty_state_names_a_real_tab_test.dart` | an empty state naming a control that is not on that surface |
 
 ---
 
 ## 4. What is NOT done — PICK UP HERE
 
-### 4.1 The phone — PAIRED AND DRIVEN, stopped one tap from installed
+### 4.1 The phone — INSTALLED AND DRIVEN. What is left is a real trip.
 
-**This is the first time the phone has ever answered.** Everything below is
-verified, not hoped.
-
-- **Pairing had been CLEARED.** The skill and the old handoff both say "this PC
-  is already paired, the PIN is not needed again" — **that is stale.**
-  `phone_agent.py status` returned *"This phone no longer recognises this PC"*.
-  Jean read the PIN off the host-mode screen and
-  `py -3 phone_agent.py --pin <PIN> run "status"` paired it in one go.
-- Verified up: `SM-G780G at 192.168.88.34  screen 1080x2400  sharing=True
-  control=True`.
-- The APK is staged as **`C:\PhoneRemote\dist\minelink-m3.apk`** — a SEPARATE
-  file, deliberately not `CtrlBridge.apk`. Jean's `CtrlBridge.apk` was verified
-  byte-identical to its manifest (SHA-256 `DC98E5…4143`) **after** staging.
-- `serve_apk.ps1` is serving; `HEAD http://192.168.88.80:8000/minelink-m3.apk`
-  returns 200, length 217272400.
-- Driven on the phone: app drawer → search "chrome" → **new tab** (NOT Jean's
-  existing tab — he had his own search open and I opened a new one rather than
-  navigate his) → typed the URL → Chrome's *"File can't be downloaded
-  securely (217,27 MB)"* → **Keep**.
-- **Downloads shows `minelink-m3.apk` at 217,27 MB / 217,27 MB — the whole
-  file — but with a PAUSE icon, so Chrome has not finalised it.** Tapping the
-  filename does nothing; tapping the pause control was the last action and its
-  result was not read before the session was paused.
-
-**Where to resume — THE APK IS ALREADY ON THE NAS. Install from there, not
-over HTTP.** Jean's instruction, 2026-08-22.
+**This is no longer a blocked item.** The install route is proven end to end and
+is repeatable in about six minutes:
 
 ```
-\\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk    ← STAGED AND VERIFIED
-    217,272,400 bytes — byte-for-byte the size of
-    build/app/outputs/flutter-apk/app-debug.apk
+1. flutter build apk --debug
+2. copy build/app/outputs/flutter-apk/app-debug.apk  ->
+     \\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk
+3. On the phone: My Files -> Network storage -> jean -> Shared -> PhoneRemote
+   -> minelink-m3.apk -> (downloads ~2.5 min) -> Install/Update -> Open
 ```
 
-**Verified at the end of the session:** the NAS answers ping, `\\192.168.88.30
-\Shared` lists (`Camera-211`, `CtrlBridge`, `CtrlBridge-Development`,
-`PhoneRemote`, …), and the copy landed at the exact source size. Jean confirmed
-it directly: *"the nas copy is good, and landed well, no problems there."*
+⚠️ **My Files caches the folder listing.** After re-staging, back out of
+`PhoneRemote` and re-enter it, and CHECK THE TIMESTAMP against the file you
+just copied — otherwise you install the previous build and conclude your fix
+did not work. That happened.
 
-This route removes three problems at once: no `serve_apk.ps1`, so **no elevated
-window and no firewall rule to open or remove**; no Chrome "can't be downloaded
-securely" prompt; and no 217 MB download for Chrome to refuse to finalise,
-which is exactly where the HTTP route stalled.
+⚠️ **Do not install a stale APK.** The one staged by the previous session was
+built 25 minutes BEFORE the last code commit, so it did not contain the route
+renames. Compare the APK's mtime against `git log -1 --format=%ci`.
 
-⚠️ Earlier in the SAME session the share was **not** reachable from the shell —
-both bash and PowerShell returned "share not reachable", which is also why
-`check_versions.ps1` reported *"PUBLISHED to the phone: COULD NOT READ the
-update share"* (the staged CtrlBridge APK itself was fine: 2.7.1 build 20,
-SHA-256 verified). It came back when Jean woke the phone. **So if the share is
-missing, it is asleep, not gone — ask Jean rather than falling back to HTTP.**
+⚠️ **Only Jean can wake a sleeping display.** It slept once mid-session;
+`probe` reports `0.081 bits/pixel (under 0.1 - nothing on the screen)`. Ask.
 
-**The phone was still connected when this was written:** `SM-G780G at
-192.168.88.34  screen 1080x2400  sharing=True control=True`.
+**What a handset still has not proven, and how to reach it.** The drive stopped
+short because the driver account has no active trip, so the live-location
+toggle is disabled by design ("Available once you have an active trip") and the
+Trip screen has nothing to act on.
 
-So the whole remaining sequence is: open the share on the phone → open
-`minelink-m3.apk` → install. **Discard the stalled Chrome download first**, so
-there is no half-finalised 217 MB file left in his Downloads. Play Protect is
-already OFF, so that prompt may not appear. Then sign in and drive the driver
-flow.
+🚨 **CREATE THE LOAD YOURSELF. Jean authorised this on 2026-08-22** when he
+asked why a session could not just do it: *"the new session can run it, run it
+all and or create it with the other user's, he can do the one side of it all on
+the pc to assign what needs to be assigned and then test the mobile stuff on my
+phone"*. It also sits inside the standing permission in CLAUDE.md §1 —
+*"none of the tons in the db actually matters… if that tons recorded and or
+routes gets destroyed it would all be fine."*
 
-⚠️ **The applicationId is `org.minelink.m3`**, deliberately different from the
-shipping app's `com.example.flutter_application_1`, so both install side by
-side. Read that twice before concluding which app you are looking at.
+Every account the chain needs already exists (`active user accounts.txt`), and
+all of it is drivable in a browser against the live database:
 
-⚠️ **AN ELEVATED PowerShell WINDOW IS STILL RUNNING `serve_apk.ps1`.** It
-self-elevates, so an unelevated shell cannot stop it — killing the launcher PID
-did not stop the server. **Jean must press Ctrl-C in that window**, which also
-removes the `CtrlBridge APK download (TCP in)` firewall rule it opened. That
-rule was still Enabled when this was written.
+| # | do this | as |
+|---|---|---|
+| 1 | Raise a Request Transporter/Route | `atlasbuyer.admin@mineralguide.com` |
+| 2 | Approve → set the R margin → due-diligence gate → select Iron Hills → select Roadhaul → dispatch | `jean@cyberhouse.co.za` |
+| 3 | Accept the route, assign a truck, assign the driver | `roadhaul.admin@mineralguide.com` |
+| 4 | Supervisor adds tons to the auto-created stockpile | `ironhills.management@mineralguide.com` |
+| 5 | Security check-in, weighbridge tare/gross, check-out | `ironhills.security@` / `ironhills.controller@` |
+| 6 | Drive the trip | `roadhaul.driver@` **on the phone** |
 
-**Privacy, as the skill requires:** every screenshot taken was deleted
-immediately after being read — verified zero remain. Two showed things I did
-not come for (a calendar entry, and Jean's own open Chrome tab); I backed out
-of the tab rather than navigating it. The phone was left on `home; waitstable;
-home`.
+Step 2 also drives the **due-diligence gate**, which §4.4 records as never
+having been driven end to end — so this closes two open items at once.
 
-### 4.2 Contrast — CLOSED
+**Then the split is honest about what a desk can and cannot settle:**
 
-1,812 → **0**. `low_contrast_baseline.json` is `{}` and any finding fails.
-Sabotaged to prove it: putting `inkLo` back to its old value fails three
-renders by name. **If it ever fails, do not add a baseline entry** — the file
-can only hold zero, and the failure message names the token to change.
+| reachable once a load exists | needs the phone to physically move |
+|---|---|
+| the Trip screen showing the real load, From→To timeline | GPS fixes changing along a road |
+| the live-location toggle becoming ENABLED | the 30s ping cadence over distance |
+| Directions / Arrived at loading / Arrived at offloading / Upload POD | auto-reroute on going off-route |
+| the turn-by-turn navigation screen opening and drawing a route | the foreground service surviving a long backgrounding |
+| the whole lifecycle from the other roles' side | battery drain over a real trip |
 
-### 4.3 The chat surfaces — INVESTIGATED, decision is Jean's
+**Only the right-hand column waits on Jean actually driving somewhere.** Do the
+left-hand column without asking; report the right-hand column to him with what
+is left to check. ⚠️ The emulator can fake movement (`adb emu geo fix`) and the
+2026-07-17 emulator run already proved the navigation stack that way — a real
+handset cannot be teleported, so do not try.
 
-Jean asked for a report before deciding. It is **not two implementations** —
-it is **three thread renderers, two `ChatMessage` models, two data stacks and
-two storage buckets**.
+**iOS** is still unattempted; no reachable Apple Developer account.
 
-| | `MessagesScreen` (985 ln) | `ChatScreen` + `ChatWidget` (1,584 ln) | `chat_dock` `_ThreadView` (6,201 ln) |
-|---|---|---|---|
-| How you reach it | **No rail entry at all** — two licence-expiry buttons | **One** card tap on Communications hub | Mounted on every portal AND console screen |
-| Attachments | ✗ | ✓ bucket `chat_files` | ✓ bucket `chat-attachments` |
-| Typing indicator | ✗ | ✓ | ✓ |
-| Reply / quote | ✗ | **writes `reply_to_id` and never reads it back** | ✓ full, tap-to-scroll |
-| Reactions | ✗ | ✗ | ✓ only here |
-| End-chat / blocked banners | ✓ only here | ✗ | ✗ |
-| Render coverage | 4 shots | 2 shots | **none** |
+### 4.2 Contrast — CLOSED, and now closed for chat too
 
-Three findings:
+App-wide 1,812 → **0**, and `low_contrast_baseline.json` is `{}` — a floor, not
+a ratchet. **If it ever fails, do not add a baseline entry**; the failure names
+the token to change.
 
-1. **The coverage is inverted.** The surface every user actually touches has no
-   render and no thread-level test; the one with the fewest features and one
-   entry point has six shots.
-2. **`ChatScreen`'s reply is broken, not merely duplicated.** It writes
-   `reply_to_id` at `chat_screen.dart:131`; its reader at `:61-72` never
-   selects the column, so a reply looks sent and shows as an ordinary message.
-3. **`MessagesScreen` is 985 lines reachable only when a token is expiring.**
-   Its two employee-profile entry points are dead code — guarded on `ChatDock`
-   NOT being mounted, and the dock is mounted on both shells.
+The chat palettes are now covered by arithmetic as well
+(`chat_palette_contrast_test.dart`), which the renders cannot do: 18 palettes,
+one selected at a time.
 
-**Recommendation (not yet accepted): do not merge.** The dock is the real
-product and already wins on features. The valuable work is narrower — fix the
-invisible-reply bug and give the dock's thread the render coverage it has never
-had. Merging 8,700 lines across two data stacks and two buckets is not.
+### 4.3 The chat surfaces — DECIDED AND ACTED ON
+
+Jean's call, 2026-08-22: the dock is the chat, do not merge, cover it, fix what
+it needs. Done — §3.1.
+
+**What was deliberately NOT done:** `MessagesScreen` (985 lines) and
+`ChatScreen` + `ChatWidget` (1,584 lines) still exist. `MessagesScreen` is
+still reachable only when a licence token is expiring, and its two
+employee-profile entry points are still dead code (guarded on `ChatDock` NOT
+being mounted, and the dock is mounted on both shells — and now on the driver
+shell too, so they are deader than before). Deleting ~2,500 lines is a
+separate decision and Jean has not been asked for it.
+
+`ChatScreen` is NOT dead, though — it is the `/chat/:id` route, it is reachable
+from the Communications hub, and it is the one whose reply was broken. It is
+fixed and photographed rather than removed.
 
 ### 4.4 Known limitations, stated rather than hidden
 
@@ -406,18 +356,36 @@ had. Merging 8,700 lines across two data stacks and two buckets is not.
   the path because of the `!` in `SHOWME!`, and from a clean path CMake fails
   extracting `firebase_cpp_sdk_windows_12.7.0.zip`. Same dependency, same
   version, in the shipping app. Jean said to skip it.
-- **Six strings are still cut, on purpose** — three crash-report exception
-  messages and three chat message previews.
+- **Nine strings are cut, on purpose** — three crash-report exception messages,
+  three chat message previews, and three conversation-row previews in the dock
+  list renders (one string, three renders).
 - **Some fixtures are deliberately EMPTY.** The operations hub's ledgers are
   the documented example. Do not "fix" those by filling them.
 - **The map tiles are real in a browser and on a device**, and blank in renders
-  — `flutter_test` answers every HTTP request with 400. The tile FILTER is
-  asserted structurally instead.
+  — `flutter_test` answers every HTTP request with 400.
 - **The 127 hand-named typefaces** are held by the `typeface-named-by-hand`
-  ratchet, which can only shrink. `DESIGN.md` §9 measures each. Not a gap.
+  ratchet, which can only shrink. Not a gap.
 - **Eleven route divergences remain**, all the same shape: longer in the rail,
   shorter in the bar. Recorded with both strings in
-  `test/core/every_portal_route_is_named_test.dart`.
+  `test/core/every_portal_route_is_named_test.dart`. Four were settled on
+  Jean's call on 2026-08-22; the other eleven need the same.
+- **The due-diligence gate has never been driven end to end** — preview,
+  confirm, the green tick, the "are you 100% sure", the transporter list, the
+  final confirm. `shoot()` can interact (`act:`), so the mechanism to
+  photograph it exists; the sequence has never been run. **§4.1 step 2 goes
+  straight through it**, so creating the load closes this at the same time.
+- **A live chat between two real accounts has never been driven.** The dock was
+  opened on the handset and its empty state read; no message was sent.
+- ⚠️ **A leftover firewall rule needs an elevated shell.** `CtrlBridge APK
+  download (TCP in)` is still present and Enabled, from the previous session's
+  `serve_apk.ps1`. Nothing is listening on port 8000 any more — the server is
+  stopped — but the inbound rule was not removed, because the script only
+  removes it on a clean Ctrl-C. **Jean, in an admin PowerShell:**
+  ```powershell
+  Remove-NetFirewallRule -DisplayName 'CtrlBridge APK download (TCP in)'
+  ```
+  An unelevated shell gets "Access is denied". The NAS route makes
+  `serve_apk.ps1` unnecessary from now on, so this should not come back.
 
 ---
 
@@ -427,7 +395,7 @@ had. Merging 8,700 lines across two data stacks and two buckets is not.
 cd "/c/Users/Somebody Someone/Music/SHOWME!/MineLink-M3"
 
 flutter analyze                                  # must be clean
-flutter test                                     # 2107 passing, 1 skipped
+flutter test                                     # 2149 passing, 1 skipped
 dart tool/release_guards.dart                    # 39/39
 dart tool/release_guards.dart --selftest         # every guard must BITE
 py -3 tool/_sabotage.py                          # every instrument fix must BITE
@@ -450,6 +418,10 @@ py -3 tool/attribute_low_contrast.py out.txt         # by TOKEN — start here
 py -3 tool/contrast_calc.py solve-tint '#6B7A9C' '#1C2C46' 4.6
 ```
 
+⚠️ **`solve-tint` moves the INK.** When the ink is white there is nowhere
+lighter for it to go and it answers "UNREACHABLE on this ground at all" — that
+is telling you to deepen the FILL, not that the pairing is impossible.
+
 ### Driving the built app in a browser
 
 ```bash
@@ -464,19 +436,16 @@ cd build/web && py -3 -m http.server 8123 --bind 127.0.0.1
 
 - **Flutter web publishes no accessibility tree until you ask.** Click the
   hidden placeholder — `document.querySelector('flt-semantics-placeholder')
-  .click()`. It is the best instrument in the browser.
-- **`fill` on two different fields writes both into one.** Flutter web routes
-  all text through one hidden input. Click the field, then `type_text` with
-  `submitKey: "Tab"`.
+  .click()`.
+- **`fill` on two different fields writes both into one.** Click the field,
+  then `type_text` with `submitKey: "Tab"`.
 - **Chrome will not resize below ~500px.** Use CDP emulation
-  (`412x915x1,mobile,touch`). The ~500px band is worth testing in its own
-  right — one fault lived only there.
+  (`412x915x1,mobile,touch`).
 
-### Driving it on Android
+### Driving it on the emulator
 
 ```bash
 # adb is at C:\Android\sdk\platform-tools and is ALREADY ON PATH.
-# The old handoff said %LOCALAPPDATA%\Android\Sdk — that path does not exist.
 adb devices
 flutter emulators --launch minelink_test
 adb install -r build/app/outputs/flutter-apk/app-debug.apk
@@ -488,9 +457,22 @@ the DEVICE shell — `adb shell "input text 'MineralGuide123!'"`.
 
 ### Driving Jean's real phone
 
-**Invoke the `driving-jeans-phone` skill FIRST.** Then §4.1 above for the
-current state. `py -3 phone_agent.py --pin <PIN> run "status"` if pairing has
-been cleared again.
+**Invoke the `driving-jeans-phone` skill FIRST**, then §4.1 above for the
+install route. The phone is **paired** (`status` → `sharing=True control=True`)
+and `phone_agent.py`'s own `text` command handles `!` correctly — unlike adb.
+
+The skill says "already paired, no PIN needed"; that was stale on 2026-08-21
+and true again on 2026-08-22. If `status` says the phone no longer recognises
+this PC, ask Jean for the PIN off the host-mode screen and run
+`py -3 phone_agent.py --pin <PIN> run "status"`.
+
+It is his **personal** phone: prefer `sig`/`changed`/`waitstable`, delete every
+screenshot immediately, back out of anything opened by mistake and say so, and
+leave it on `home; waitstable; home`.
+
+⚠️ **`look` does not describe the screen** despite its help text — it prints
+frame statistics only. Navigating needs `shot`, which means screenshots, which
+means deleting them.
 
 ### Live accounts
 
@@ -501,36 +483,45 @@ and `roadhaul.driver@mineralguide.com` / `MineralGuide123!` are the seeded set.
 ⚠️ **The console stores theme and accent PER ADMIN.** Switching Jean's mode to
 Light writes to his account. Put it back.
 
+⚠️ **The driver account's setup is 14% complete on production.** The gate
+dialog lists six missing documents. Dismiss it with **Later** — "Complete now"
+would write real data to a real account.
+
 ### Things that have already gone wrong here — do not repeat them
 
 - 🚨 **A POWER CUT DESTROYED A FILE MID-WRITE.** `low_contrast_report.dart`
-  came back as 23,598 NUL bytes — right size, no content, and `git status`
-  called it binary. A scratchpad copy is what saved the work. **Commit often;
-  copy to the scratchpad before any long edit.**
+  came back as 23,598 NUL bytes — right size, no content. **Commit often; copy
+  to the scratchpad before any long edit.**
 - 🚨 **A BASH HEREDOC EATS BACKSLASHES EVEN WHEN QUOTED**, and a Python string
-  inside one eats them again. It has now broken a patch in FIVE sessions — this
-  one wrote a literal `\n` into a Python source line and a literal `\$` into a
-  Dart string. **Write any script containing a backslash with the Write tool.**
+  inside one eats them again. **It has now broken a patch in SIX sessions** —
+  this one ate the `\\` in a Python `p.split('\\')` and died on a
+  `SyntaxError`. **Write any script containing a backslash with the Write
+  tool, or use Edit directly.**
 - 🚨 **NEVER READ A LONG TEST RUN THROUGH `tail`.** Redirect to a file and grep
   the file.
 - 🚨 **`git checkout -- <dir>` THREW AWAY UNCOMMITTED WORK.**
 - 🚨 **A LONG `&&` CHAIN ENDING IN `git commit -F <heredoc>` TIMES OUT.** Write
   the message to a file and commit with `-F` as its own command.
 - 🚨 **Python's stdout is cp1252 here** — printing `−` or `·` from a script
-  dies with `UnicodeEncodeError`. Set `PYTHONIOENCODING=utf-8`.
+  dies. Set `PYTHONIOENCODING=utf-8`.
 - 🚨 **A CHECK YOU HAVE NOT SABOTAGED IS A CHECK YOU DO NOT HAVE**, and the
-  scene must be FAITHFUL. Two of this session's test scenes proved nothing: the
-  covered-text one put the two labels at x-ranges that never overlapped, and
-  the halo one used a flat fill when the mechanism needs a GRADIENT.
-- 🚨 **Check whether a test already pins the behaviour you are about to
-  "fix".** `route_title_test.dart` pinned all four route names, deliberately.
-- **A `RepaintBoundary` inside a `Scaffold` does not capture a DIALOG** — a
-  dialog renders in the Navigator's Overlay, above it. Wrap the whole app.
-- **`loadRealFonts()` is not enough** — a `TextStyle` naming no family still
-  resolves to the test fallback, whose glyphs are solid one-em boxes. Name the
-  family. CLAUDE.md §7 and §10.5.
-- **`Color.alphaBlend` keeps the BACKGROUND's alpha.** Blending onto a 2%-white
-  surface gives another 2%-alpha colour that looks solid in source.
+  scene must be FAITHFUL.
+- 🚨 **A TEST WRITTEN FOR A BUG CAN READ THE HALF YOU ALREADY FIXED.** The
+  driver-chat test passed while the app was still broken, because it asserted
+  on the branch I had changed and there were two. **When a fix is verifiable on
+  a device, verify it there before believing the test.**
+- 🚨 **A NEW TEST MUST PASS `theme: AppTheme.build(...)` to `MaterialApp`.** A
+  bare `MaterialApp` renders in stock Material's type scale and font — text the
+  app never draws. `test-renders-under-the-app-theme` caught two of mine.
+- 🚨 **A background task holding a file blocks a later copy to it.** A
+  `Get-FileHash` over SMB kept `minelink-m3.apk` open and the re-stage failed
+  with "used by another process". `TaskStop` does not always kill the
+  underlying `pwsh` — find it by `CreationDate` and `Stop-Process`. **Two
+  long-running `pwsh` processes on this machine are Jean's VS Code terminals;
+  check `CommandLine` before killing anything.**
+- **A `RepaintBoundary` inside a `Scaffold` does not capture a DIALOG.**
+- **`loadRealFonts()` is not enough** — name the family. CLAUDE.md §7, §10.5.
+- **`Color.alphaBlend` keeps the BACKGROUND's alpha.**
 - **`dart format` on a directory reformats files you did not touch.**
 - **`find.text` cannot see a `TextSpan`**, and **`toPlainText()` CANNOT SEE A
   TRUNCATION** — use `RenderParagraph.didExceedMaxLines`.
@@ -539,9 +530,10 @@ Light writes to his account. Put it back.
 
 - `docs/redesign/DESIGN.md` — decisions and what each cost.
 - `docs/redesign/VERIFICATION.md` — what was executed, and what has not been.
+  **Its 2026-08-22 section is the hardware drive.**
 - `docs/design-reference/` — the **pre-redesign** reference PNGs. **Do not
   regenerate them**; they are the before-image.
-- `docs/redesign/renders/` — 220 PNGs of the redesign.
+- `docs/redesign/renders/` — 225 PNGs of the redesign.
 - Every commit message carries its own reasoning.
 
 ---
@@ -561,28 +553,36 @@ Light writes to his account. Put it back.
 - **§10.6** — Dart bitwise operators are unsigned 32-bit on the web.
 - **§1** — the package is `flutter_application_1`. Do not rename it. (The
   Android *applicationId* is `org.minelink.m3`; those are different things.)
-- **§5** — design tokens are law. `no-raw-color-hex` caught a literal I
-  introduced for the winner card's ground, which is why it is a named token.
+- **§5** — design tokens are law. `no-material-colors` caught a
+  `Colors.black`/`Colors.white` I introduced for a quote tint; the right tokens
+  were `MlTokens.overlayDark` / `overlayLight`, which exist precisely to name
+  black and white *as a translucent layer, where the alpha is the decision*.
 
 ---
 
 ## 7. Exactly where this session stopped
 
 Nothing is in flight in the repo. The tree is clean at
-`naming: the four routes the rail and the bar called different things, settled`,
-and the whole gate in §2 was run against it, both builds included.
+`docs: the handoff for the session the app first ran on a phone`; the last CODE
+commit under it is `91f77cf chat: the driver fix was half a fix, and the
+handset said so again`, and the whole gate in §2 was run against that, both
+builds included.
 
-**Two things are mid-flight OUTSIDE the repo:**
+**Outside the repo:**
 
-1. **The phone.** Paired, screen shared, control live, APK fully downloaded
-   (217,27 MB / 217,27 MB) but Chrome has not finalised the download — it shows
-   a pause icon. The last action was tapping that control; its result was not
-   read. Resume at §4.1.
-2. **An elevated `serve_apk.ps1` window is still serving on port 8000** and its
-   firewall rule is still open. **Jean must Ctrl-C it.**
+1. **The phone is paired, awake and idle**, left on `home`. `org.minelink.m3`
+   on it is the build at commit `91f77cf` (staged 02:13). Every screenshot
+   taken was deleted; zero remain.
+2. **The NAS carries that same APK** at
+   `\\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk`, and
+   `C:\PhoneRemote\dist\minelink-m3.apk` matches it.
+3. **The `CtrlBridge APK download (TCP in)` firewall rule is still Enabled**
+   and needs an elevated shell to remove — §4.4. Nothing is listening on 8000.
 
-**Pick up at §4.1** (finish the install and drive the app on the real handset),
-then §4.3 (Jean's decision on the chat surfaces).
+**Pick up at §4.1** if a real trip can be dispatched to the driver account
+(that is the only way to reach GPS, the foreground service and battery), or
+§4.4's eleven route divergences, which need Jean's call the way the first four
+did.
 
 ---
 
@@ -592,24 +592,31 @@ Everything the next session needs is inside this block. Paste it whole.
 
 ```
 Continue the MineLink Material 3 redesign, exactly where the last session left
-off. Read these TWO handoff files before doing anything else, in this order:
+off. Read these TWO handoff files before doing anything else, in this order.
 
-1. THE CURRENT HANDOFF — this is the file that governs the work:
-   C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
-   Rewritten 2026-08-22 at the end of the contrast-and-vocabulary session. Read
-   it in this order: "WHERE THIS SESSION STOPPED — READ THIS FIRST", then §0
-   (where you are + the one rule), §2 (verified state), §3 (what was done and
-   why it was invisible before), §7 (exactly where I stopped), §4 (what is NOT
-   done — pick up here) and §5 (things that have already gone wrong here).
+1. THE CURRENT HANDOFF — THIS IS THE FILE THAT GOVERNS THE WORK:
 
-2. THE OLDER MACHINE-WIDE HANDOFF — background only, do not work from it:
-   C:\Users\Somebody Someone\Claude\HANDOFF.md
+      C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
+
+   Rewritten 2026-08-22 at the end of the chat-and-first-hardware-drive
+   session. Read it in this order: "WHERE THIS SESSION STOPPED — READ THIS
+   FIRST", then §0 (where you are + the one rule), §2 (verified state), §3
+   (what was done and what the phone found), §7 (exactly where I stopped), §4
+   (what is NOT done — pick up here) and §5 (things that have already gone
+   wrong in this repo).
+
+2. THE OLDER MACHINE-WIDE HANDOFF — BACKGROUND ONLY, DO NOT WORK FROM IT:
+
+      C:\Users\Somebody Someone\Claude\HANDOFF.md
+
    Dated 2026-08-08. MCP servers, git position, the decoy folders, the phone
-   tooling. The MineLink-M3 one above governs this redesign work.
+   tooling. Claude Desktop reads that folder through its `claude-notes` MCP
+   server. The MineLink-M3 handoff above governs this redesign work; where the
+   two disagree, the MineLink-M3 one wins.
 
 THE PATHS THAT MATTER
 
-  Work happens here (its own git repo, branch `main`):
+  Work happens here (its own git repo, branch `main`, 118 commits, clean):
     C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
   NEVER TOUCHED, for any reason:
@@ -617,172 +624,252 @@ THE PATHS THAT MATTER
 
 THE ONE RULE THAT MUST NOT BREAK: nothing whatsoever changes inside
 worktree-2026-05-05T11-53-29. Its verified baseline is in §0 of the MineLink-M3
-handoff — check it at the START of the session and again at the END. (HEAD
-df451d0, exactly three pre-existing modified files, two worktree entries,
-nothing modified today. Note the file-count footnote in §0: 14163 or 14164
-depending on which `find` you run, because in a worktree `.git` is a FILE.)
+handoff — CHECK IT AT THE START OF THE SESSION AND AGAIN AT THE END:
+
+    HEAD              df451d0
+    git status        exactly 3 modified files, all pre-existing:
+                        M .design-sync/config.json
+                        M lib/features/super_admin/screens/margin_ledger_screen.dart
+                        M test/widgets/app_sidebar_behaviour_test.dart
+    file count        14163   (with `find . -path ./.git -prune -o -type f -print | wc -l`)
+    git worktree list exactly 2 entries — the main repo and that worktree
+    modified today    0
+
+  ⚠️ The file count depends on which `find` you run and the difference is NOT a
+  new file: `find . -type f -not -path "./.git/*"` returns 14164, because in a
+  WORKTREE `.git` is a FILE, not a directory, so that pattern does not exclude
+  it. The `-prune` form returns 14163. Both describe the same untouched tree.
 
 WHERE I LEFT OFF, EXACTLY
 
-The tree is CLEAN. 112 commits. Nothing is half-applied and nothing is
-uncommitted. The tip is "docs: the handoff for the session that took contrast
-to zero"; the last CODE commit under it is "naming: the four routes the rail
-and the bar called different things, settled", and the whole gate below was run
+The tree is CLEAN. 118 commits. Nothing is half-applied and nothing is
+uncommitted. The tip is "docs: the handoff for the session the app first ran on
+a phone"; the last CODE commit under it is 91f77cf "chat: the driver fix was
+half a fix, and the handset said so again", and the whole gate below was run
 green against that, both builds included.
 
-Green, at that commit, means exactly this — compare against it rather than
-guessing what "passing" looks like here:
+Green, at that commit, means EXACTLY this — compare against it rather than
+guessing what "passing" looks like in this repo:
 
     flutter analyze                    no issues
-    flutter test                       2107 passed, 1 skipped
+    flutter test                       2149 passed, 1 skipped
     dart tool/release_guards.dart      39/39 PASS, 0 FAIL
+    dart tool/release_guards.dart --selftest   all guards bite
     py -3 tool/_sabotage.py            all sabotages caught
     py -3 tool/unphotographed_screens  93 targets, 93 photographed, 0 not
     py -3 tool/one_clock_check.py      0 sites off Africa/Johannesburg
-    docs/redesign/renders/             220 renders
+    py -3 tool/type_scale_codemod.py --selftest   OK
+    py -3 tool/dropdown_width_check.py            passes
+    py -3 tool/glyph_coverage_check.py            passes
+    docs/redesign/renders/             225 renders
     render harness — RENDER NOTE       0   (and it FAILS the test)
     render harness — FAILURE STATE     0
-    render harness — CUT OFF           6   (all deliberate, named in place)
-    render harness — LOW CONTRAST      0   ← was 1,812
+    render harness — LOW CONTRAST      0
+    render harness — CUT OFF           9   (all deliberate, named in place)
     flutter build web --release        builds
     flutter build apk --debug          builds
 
-⚠️ NOTHING IS RUNNING. The previous handoff left a web server, a Chrome with
-remote debugging and an Android emulator up, and told you to walk into them.
-THAT IS NO LONGER TRUE — none of the three was started this session, so do not
-go looking for them. §5 of the handoff has the exact commands to bring each
-back. The emulator's installed `org.minelink.m3` is from the PREVIOUS session
-and predates every commit above; `adb install -r
-build/app/outputs/flutter-apk/app-debug.apk` refreshes it, and the APK on disk
-is current.
+⚠️ NOTHING IS RUNNING. No web server, no Chrome with remote debugging, no
+emulator, no APK server. §5 of the handoff has the commands to bring each back.
 
-TWO THINGS ARE MID-FLIGHT OUTSIDE THE REPO — start here:
+THE PHONE IS INSTALLED AND WORKING — THIS IS NO LONGER A BLOCKED ITEM
 
-  1. THE PHONE IS PAIRED AND DRIVEN FOR THE FIRST TIME, and stopped ONE TAP
-     from installed. Jean's SM-G780G at 192.168.88.34, sharing=True
-     control=True. The pairing had been CLEARED (the skill's "already paired,
-     no PIN needed" is STALE) — Jean read the PIN off the host-mode screen and
-     `py -3 phone_agent.py --pin <PIN> run "status"` paired it.
+  Jean's SM-G780G at 192.168.88.34 is paired and idle on `home`.
+  `org.minelink.m3` on it is the build at commit 91f77cf. The install route is
+  proven end to end and takes about six minutes:
 
-     The APK is staged as C:\PhoneRemote\dist\minelink-m3.apk — a SEPARATE
-     file, NOT CtrlBridge.apk (his live build; verified byte-identical to its
-     manifest afterwards). serve_apk.ps1 is serving it on
-     http://192.168.88.80:8000/minelink-m3.apk (HTTP 200, 217272400 bytes).
-
-     On the phone: Chrome → new tab → the URL → "File can't be downloaded
-     securely" → Keep. Downloads now shows minelink-m3.apk at
-     217,27 MB / 217,27 MB — the WHOLE file — but with a PAUSE icon, so Chrome
-     has not finalised it. Tapping the filename does nothing. The last action
-     was tapping that pause control and its result was NOT read.
-
-     THE APK IS ALREADY ON THE NAS — install from there, not over HTTP:
-
+    1. flutter build apk --debug
+    2. copy build/app/outputs/flutter-apk/app-debug.apk  ->
          \\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk
-         217,272,400 bytes, the exact size of the source APK.
+    3. On the phone: My Files -> Network storage -> jean -> Shared ->
+       PhoneRemote -> minelink-m3.apk -> (downloads ~2.5 min) -> Install or
+       Update -> Open
 
-     Verified at the end of the session: the NAS answers ping, \Shared lists
-     (Camera-211, CtrlBridge, CtrlBridge-Development, PhoneRemote, ...), and
-     the copy landed at the source size. Jean confirmed it: "the nas copy is
-     good, and landed well, no problems there." The phone was STILL CONNECTED
-     when this was written — SM-G780G at 192.168.88.34, sharing=True
-     control=True.
+  ⚠️ My Files CACHES the folder listing. After re-staging, back out of
+  PhoneRemote and re-enter it, and CHECK THE TIMESTAMP against the file you
+  just copied — otherwise you install the PREVIOUS build and conclude your fix
+  did not work. That happened in the last session.
+  ⚠️ Do NOT install a stale APK. The one the session before had staged was
+  built 25 minutes BEFORE the last code commit. Compare the APK's mtime against
+  `git log -1 --format=%ci`.
+  ⚠️ Only Jean can wake a sleeping display. `probe` reports "0.081 bits/pixel
+  (under 0.1 - nothing on the screen)" when it is asleep. Ask him; injected
+  touches cannot wake it.
+  ⚠️ Invoke the `driving-jeans-phone` skill FIRST. It is his PERSONAL phone:
+  prefer sig/changed/waitstable over screenshots, delete every screenshot
+  immediately after reading it, do not read what you did not come for, back out
+  of anything opened by mistake and say so, and leave it on
+  `home; waitstable; home`. Note that `look` does NOT describe the screen
+  despite its help text — it prints frame statistics only, so navigating means
+  taking screenshots and deleting them.
+  ⚠️ The applicationId is `org.minelink.m3`, deliberately different from the
+  shipping app's `com.example.flutter_application_1` — read that twice before
+  concluding which app you are looking at. They install side by side.
+  ⚠️ Sign in as roadhaul.driver@mineralguide.com / MineralGuide123! . The
+  account-setup gate lists six missing documents — dismiss it with "Later".
+  "Complete now" would write real data to a real production account.
 
-     So the whole remaining sequence is: open the share on the phone → open
-     minelink-m3.apk → install. That removes three problems at once: no
-     serve_apk.ps1, so no elevated window and no firewall rule; no Chrome
-     "can't be downloaded securely" prompt; and no 217 MB download for Chrome
-     to refuse to finalise, which is exactly where the HTTP route stalled.
+  ONE THING ONLY JEAN CAN DO, in an ADMIN PowerShell:
+      Remove-NetFirewallRule -DisplayName 'CtrlBridge APK download (TCP in)'
+  It is left over from the old HTTP install route, still present and Enabled.
+  Nothing is listening on port 8000 any more — the server is stopped — but the
+  script only removes the rule on a clean Ctrl-C, and an unelevated shell gets
+  "Access is denied". The NAS route makes serve_apk.ps1 unnecessary from now
+  on, so this should not come back. Remind him; do not try to do it yourself.
 
-     ⚠️ Earlier in the SAME session that share was NOT reachable from the
-     shell — it came back when Jean woke the phone. If it is missing it is
-     ASLEEP, not gone; ask Jean rather than falling back to HTTP.
+WHAT IS ALREADY DONE — DO NOT REDO ANY OF IT
 
-     DISCARD the stalled Chrome download on the phone first, so there is no
-     half-finalised 217 MB file left in his Downloads. Then install, then sign
-     in as roadhaul.driver@mineralguide.com / MineralGuide123! and drive the
-     driver flow on real hardware. Play Protect is already OFF so that prompt
-     may not appear.
+  * CONTRAST IS CLOSED, app-wide AND for chat. 1,812 low-contrast strings -> 0,
+    and test/renders/low_contrast_baseline.json is `{}`: a missing entry reads
+    as zero, so it is a FLOOR, not a ratchet. IF IT EVER FAILS, DO NOT ADD A
+    BASELINE ENTRY — the failure message names the token to change.
+  * ALL EIGHTEEN CHAT PALETTES ARE COVERED BY ARITHMETIC
+    (test/design/chat_palette_contrast_test.dart), which renders cannot do — a
+    render only ever photographs the ONE palette that happens to be selected.
+    THIRTEEN OF EIGHTEEN were painting text under 4.5:1 before this session.
+  * THE CHAT IS THE DOCK, on Jean's explicit call. It is NOT merged away. The
+    invisible reply is fixed end to end (the column was written to Postgres and
+    never read back — the legacy ChatMessage model had nowhere to put it); the
+    dock has 7 renders where it had NONE; mention tokens no longer render raw
+    as `@[Name](user:id)`; the unread badge and a reaction chip were both
+    illegible and are fixed.
+  * THE DATABASE NEEDED NOTHING and is unchanged. `reply_to_id`, its FK
+    (ON DELETE SET NULL), its index and both RLS policies were already correct
+    — verified against production, not assumed. `supabase/` stays FROZEN: no
+    migration is created, applied or pushed in this fork.
+  * A DRIVER CAN REACH CHAT. They could not, AT ALL, until this session — no
+    dock, no rail entry (the 3-tab shell replaces the sidebar), and
+    DriverAppScreen has no messages affordance of its own. There are TWO driver
+    branches in PortalShellLayout and BOTH are wrapped now.
+  * THE APP HAS RUN ON REAL HARDWARE, and the three defects it found are fixed,
+    guarded, and the guards sabotaged to prove they bite.
+  * FOUR ROUTE NAMES SETTLED on Jean's call in an earlier session: fleet ->
+    "Vehicles", drivers -> "Drivers", trucks-on-route -> "Trucks on route",
+    trip -> the RAIL becomes "Trip". Fifteen divergences are now eleven.
+    ⚠️ Do NOT also rename PortalTabItem('Trucks On Route') — that string is a
+    LEGACY TAB LABEL, `_legacyTabLabels` maps it onto the canonical form, and
+    renaming it breaks tab selection SILENTLY. It was tried and reverted.
 
-     Invoke the `driving-jeans-phone` skill FIRST. It is his PERSONAL phone:
-     prefer sig/changed/waitstable over screenshots, delete any you take, do
-     not read what you did not come for, and leave it on `home; waitstable;
-     home`. The applicationId is `org.minelink.m3`, deliberately different from
-     the shipping app's `com.example.flutter_application_1` — read that twice
-     before concluding which app you are looking at.
+WHAT IS LEFT — START HERE, IN THIS ORDER
 
-  2. AN ELEVATED PowerShell WINDOW IS STILL RUNNING serve_apk.ps1 on port 8000,
-     and the `CtrlBridge APK download (TCP in)` firewall rule it opened is
-     still Enabled. It self-elevates, so an unelevated shell CANNOT stop it —
-     killing the launcher PID did not. Ask Jean to press Ctrl-C in that window,
-     which stops the server AND removes the rule.
+  1. CREATE A REAL LOAD FOR THE DRIVER, YOURSELF, AND DRIVE THE WHOLE CHAIN.
+     DO NOT ASK FIRST — Jean authorised this explicitly on 2026-08-22: "the new
+     session can run it, run it all and or create it with the other user's, he
+     can do the one side of it all on the pc to assign what needs to be
+     assigned and then test the mobile stuff on my phone". It also sits inside
+     the standing permission in CLAUDE.md §1: "none of the tons in the db
+     actually matters… if that tons recorded and or routes gets destroyed it
+     would all be fine."
 
-WHAT IS ALREADY DONE — do not redo any of it
+     The driver has no active trip, which is why the last drive stopped short:
+     the live-location toggle is disabled BY DESIGN until there is one
+     ("Available once you have an active trip") and the Trip screen has nothing
+     to act on. Every account the chain needs already exists — they are all in
+     `active user accounts.txt` in the repo root, and the whole thing is
+     drivable in a browser against the live database:
 
-  * CONTRAST IS CLOSED: 1,812 low-contrast strings -> ZERO. The route was not
-    1,812 edits — it was attributing each finding to the TOKEN that painted it,
-    which collapsed 233 (ink, ground) pairs into a handful of decisions. SIX
-    token values were 86% of it, and `textFaint = onSurfaceVariant × 0.62` was
-    916 on its own. test/renders/low_contrast_baseline.json is now `{}`: a
-    missing entry reads as zero, so it is a FLOOR, not a ratchet. If it fails,
-    DO NOT add an entry — the failure names the token to change.
-  * THE INSTRUMENT WAS WRONG IN FIVE WAYS and is fixed: a paragraph clipped
-    away; one COVERED by an opaque widget; one BEHIND A MODAL SCRIM (a 10.43:1
-    pairing measures 2.53:1 under a dialog); a TRANSLUCENT ink never excluded
-    from its own ground; and a glyph's own ANTI-ALIASED HALO winning the ground
-    vote in a tight box over a gradient. 14 unit tests, each scene's answer
-    known by construction, plus tool/_sabotage.py which reverts each fix and
-    watches the right test fail. TWO of the five are deliberately NOT in the
-    default sabotage set and the script says why at each — both are correct and
-    currently unreachable, and neither pretends to be caught.
-  * FOUR ROUTE NAMES SETTLED on Jean's call: fleet -> "Vehicles", drivers ->
-    "Drivers", trucks-on-route -> "Trucks on route", trip -> RAIL becomes
-    "Trip". Fifteen divergences are now eleven.
-  * THE CHAT SURFACES ARE INVESTIGATED AND REPORTED (§4.3) — it is not two
-    implementations, it is THREE thread renderers, two ChatMessage models, two
-    data stacks and two buckets. The decision is Jean's and he has NOT given it
-    yet. My recommendation is in §4.3: do not merge; fix the invisible-reply
-    bug (ChatScreen writes reply_to_id and never reads it back) and give the
-    dock's thread the render coverage it has never had.
-  * NEW SELF-TESTING TOOLS: rank_low_contrast.py, attribute_low_contrast.py,
-    contrast_calc.py, low_contrast_baseline_update.py, _sabotage.py.
+       1. Raise a Request Transporter/Route
+             as atlasbuyer.admin@mineralguide.com
+       2. Approve -> set the R margin -> due-diligence gate -> select Iron
+          Hills -> select Roadhaul -> dispatch
+             as jean@cyberhouse.co.za          (platform admin)
+       3. Accept the route, assign a truck, assign the driver
+             as roadhaul.admin@mineralguide.com
+       4. Supervisor adds tons to the auto-created capped stockpile
+             as ironhills.management@mineralguide.com
+       5. Security check-in, weighbridge tare/gross, security check-out
+             as ironhills.security@ / ironhills.controller@
+       6. Drive the trip ON THE PHONE
+             as roadhaul.driver@mineralguide.com
 
-WHAT IS LEFT — start here, in this order
+     Password for every @mineralguide.com account: MineralGuide123!
+     Password for jean@cyberhouse.co.za: BuRG3rJ3@n1995@#
 
-  1. FINISH THE PHONE INSTALL and drive the redesign on real hardware (§4.1).
-     This is the last thing an emulator and a browser cannot settle: physical
-     GPS, the foreground service surviving a real drive, battery, and the real
-     panel in the hand.
-  2. JEAN'S DECISION ON THE CHAT SURFACES (§4.3), then do whatever he decides.
-  3. THE ELEVEN REMAINING ROUTE DIVERGENCES are all the same shape (longer in
-     the rail, shorter in the bar) and are recorded, not open.
+     ⚠️ Step 2 also drives the DUE-DILIGENCE GATE, which has never been driven
+     end to end — so doing this closes two open items at once. Photograph it.
+
+     THEN BE HONEST ABOUT THE SPLIT. Reachable once a load exists, all of it
+     without Jean: the Trip screen showing the real load and its From->To
+     timeline; the live-location toggle becoming ENABLED; Directions / Arrived
+     at loading / Arrived at offloading / Upload POD; the turn-by-turn
+     navigation screen opening and drawing a real route; and the entire
+     lifecycle from the other roles' side.
+
+     NOT reachable at a desk, because a real handset cannot be teleported: GPS
+     fixes changing along a road, the 30s ping cadence over distance,
+     auto-reroute on going off-route, the foreground service surviving a long
+     backgrounding, and battery over a real trip. Do the first list without
+     asking; report the second to Jean with exactly what is left to check.
+     ⚠️ The EMULATOR can fake movement (`adb emu geo fix`) and a 2026-07-17 run
+     already proved the navigation stack that way — do not try it on the phone.
+  2. THE ELEVEN REMAINING ROUTE DIVERGENCES — all the same shape (longer in the
+     rail, shorter in the bar). Both strings for each are recorded in
+     test/core/every_portal_route_is_named_test.dart. They need Jean's call the
+     way the first four did; they are RECORDED, not open. Put the eleven in
+     front of him as a list and let him choose.
+  3. WHETHER MessagesScreen AND ChatScreen SHOULD BE DELETED. About 2,500
+     lines. MessagesScreen (985 lines) is reachable ONLY when a licence token
+     is expiring, and its two employee-profile entry points are dead code —
+     guarded on ChatDock NOT being mounted, and the dock is now mounted on the
+     driver shell too, so they are deader than before. Jean has NOT been asked.
+     ⚠️ ChatScreen is NOT dead — it is the /chat/:id route, reachable from the
+     Communications hub, and it is the surface whose reply was broken. It is
+     fixed and photographed rather than removed. Do not delete it by accident.
+  4. A LIVE CHAT BETWEEN TWO REAL ACCOUNTS has never been driven. The dock was
+     opened on the handset and its empty state read; no message has been sent
+     between two signed-in users, and no reply has been sent through the real
+     database. That is the one part of the chat work proven only by tests and
+     renders.
+
+HOW TO WORK — THIS IS JEAN'S INSTRUCTION, FOLLOW IT
+
+don't worry about me seeing anything, I'll want to see when everything is
+complete and done, so don't stop so much in between please run the task for as
+long as possible so that we can get this completley done and sorted please,
+correct your self where you make mistakes and fix the mistakes and make sure
+you don't implement anything with gaps in them make sure its full and proper
+like the original
+
+AND, EXPLICITLY: IF YOU FIND PROBLEMS ALONG THE WAY, FIX THEM AS YOU GO — then
+TEST THE FIX AND CONFIRM IT ACTUALLY WORKS AS EXPECTED before moving on. Do not
+collect a list of faults to hand back; do not leave a fix unverified. Every fix
+gets a test that BITES (remove the fix, watch the test fail, put it back), and
+where the fix is visible on a device or in a browser, GO AND LOOK AT IT THERE.
+Half-implemented work, TODOs, stubs and "this could be improved later" notes
+are not acceptable — finish each thing properly and completely, the way the
+original app does it.
 
 THE METHOD, unchanged: fixtures, regenerate, LOOK at the PNG, MEASURE it with
 PIL rather than squint, fix the SHAPE rather than the instance where the fault
 is structural, then pin it with a test and prove the test bites by removing the
-fix and watching it fail. When a report and a picture disagree, the picture
-wins — cropping at the coordinates the report named is what found five separate
-instrument faults this session.
+fix and watching it fail. When a report and a picture disagree, THE PICTURE
+WINS.
+
+AND — learned the hard way last session — WHEN A FIX IS VERIFIABLE ON THE
+DEVICE, VERIFY IT THERE BEFORE BELIEVING THE TEST. A test written specifically
+for a bug PASSED while the app was still broken, because it asserted on the one
+branch that had already been fixed and there were two of them. Only rebuilding
+and reinstalling on the handset showed it.
 
 Watch for the faults every batch has had: a screen inside a ShellRoute that
 builds its own Scaffold+AppBar; a screen that reads a service directly so no
 provider override reaches it; a FIXTURE that says less than the service it
 stands in for, or that sets two derived fields independently and prints an
 impossibility; an override list that does not reach the screen; a wire enum
-value reaching a reader; and a Row handing a non-flex child unbounded width —
-including its commonest form by far, two Flexible children (or a Flexible and
-a Spacer, which IS an Expanded) splitting a row when only one of them is long.
-
-HOW TO WORK: don't worry about me seeing anything, I'll want to see when
-everything is complete and done, so don't stop so much in between — please run
-the task for as long as possible so that we can get this completely done and
-sorted please. Correct yourself where you make mistakes and fix the mistakes,
-and make sure you don't implement anything with gaps in them — make sure it's
-full and proper like the original.
+value reaching a reader; a Row handing a non-flex child unbounded width —
+including its commonest form, two Flexible children (or a Flexible and a
+Spacer, which IS an Expanded) splitting a row when only one is long; a notifier
+that dials out from its CONSTRUCTOR so it cannot be photographed (six have
+needed a `start()` seam now); and a string copied between two surfaces that
+names a control only one of them has.
 
 OPTIONAL: if the Windows build gives trouble, just carry on with web and
-mobile.
+mobile. It is blocked by two PRE-EXISTING faults, neither this project's — the
+Flutter tool refuses the path because of the `!` in `SHOWME!`, and from a clean
+path CMake fails extracting firebase_cpp_sdk_windows_12.7.0.zip. Same
+dependency, same version, in the shipping app. Jean already said to skip it.
 
-BEFORE CLAIMING ANYTHING IS DONE, all of these must be green:
+BEFORE CLAIMING ANYTHING IS DONE, ALL OF THESE MUST BE GREEN:
 
 flutter analyze
 flutter test
@@ -794,36 +881,72 @@ py -3 tool/dropdown_width_check.py
 py -3 tool/glyph_coverage_check.py
 py -3 tool/one_clock_check.py
 py -3 tool/unphotographed_screens.py
+flutter test test/renders          (after any visual change, --update-goldens first)
 flutter build web --release
 flutter build apk --debug
 
-Read §5 of the MineLink-M3 handoff — the things that have already gone wrong in
+...AND the original worktree re-checked against the §0 baseline above.
+
+READ §5 OF THE MineLink-M3 HANDOFF — the things that have already gone wrong in
 this repo — so you don't repeat them. The ones that have cost real time more
 than once:
+
   * A POWER CUT DESTROYED A FILE MID-WRITE — it came back as 23,598 NUL bytes,
-    right size, no content. A scratchpad copy saved it. Commit often.
-  * A bash heredoc eats backslashes even when quoted, and a Python string
-    inside one eats them again — it has broken a patch in FIVE sessions now.
-    Write such scripts with the Write tool.
-  * NEVER read a long test run through `tail`. Redirect to a file and grep it.
-  * `git checkout -- <dir>` threw away three finished uncommitted fixes.
-  * A long && chain ending in a git commit heredoc times out at two minutes —
-    write the message to a file and commit with -F as its own command.
-  * Python's stdout is cp1252 here: printing `−` or `·` from a script dies.
-    Set PYTHONIOENCODING=utf-8.
-  * A check you have not sabotaged is a check you do not have — AND the scene
-    must be FAITHFUL. Two of my test scenes proved nothing: one put the two
-    labels at x-ranges that never overlapped, the other used a flat fill when
+    right size, no content, and git called it binary. A scratchpad copy is what
+    saved the work. COMMIT OFTEN; copy to the scratchpad before any long edit.
+  * A BASH HEREDOC EATS BACKSLASHES EVEN WHEN QUOTED, and a Python string
+    inside one eats them again. It has now broken a patch in SIX sessions —
+    last time it ate the `\\` in a Python `p.split('\\')` and died on a
+    SyntaxError. WRITE ANY SCRIPT CONTAINING A BACKSLASH WITH THE WRITE TOOL,
+    or use Edit directly on the file.
+  * NEVER READ A LONG TEST RUN THROUGH `tail`. Redirect to a file and grep it.
+  * `git checkout -- <dir>` THREW AWAY THREE FINISHED UNCOMMITTED FIXES.
+  * A LONG && CHAIN ENDING IN `git commit -F <heredoc>` TIMES OUT at two
+    minutes. Write the message to a file and commit with -F as its own command.
+  * PYTHON'S STDOUT IS cp1252 HERE — printing an en-dash or a middot from a
+    script dies with UnicodeEncodeError. Set PYTHONIOENCODING=utf-8.
+  * A CHECK YOU HAVE NOT SABOTAGED IS A CHECK YOU DO NOT HAVE — and the scene
+    must be FAITHFUL. Two test scenes once proved nothing: one put the two
+    labels at x-ranges that never overlapped, the other used a flat fill where
     the mechanism needs a gradient.
-  * Check whether a test already pins the behaviour you are about to "fix" —
-    route_title_test.dart pinned all four route names, deliberately.
-  * adb is at C:\Android\sdk\platform-tools and already on PATH. The old
-    handoff's %LOCALAPPDATA%\Android\Sdk path does not exist.
+  * A TEST WRITTEN FOR A BUG CAN READ THE HALF YOU ALREADY FIXED. See above.
+  * A NEW TEST MUST PASS `theme: AppTheme.build(...)` TO ITS MaterialApp. A
+    bare MaterialApp renders in stock Material's type scale and font — a
+    measurement of text this app never draws. The release guard
+    `test-renders-under-the-app-theme` catches it.
+  * A BACKGROUND TASK HOLDING A FILE BLOCKS A LATER COPY TO IT. A Get-FileHash
+    over SMB kept minelink-m3.apk open and the re-stage failed with "used by
+    another process". Stopping the harness task did not kill the underlying
+    pwsh — find it by CreationDate and Stop-Process. ⚠️ TWO long-running pwsh
+    processes on this machine are JEAN'S VS CODE TERMINALS. Check CommandLine
+    before killing anything.
+  * CHECK WHETHER A TEST ALREADY PINS THE BEHAVIOUR YOU ARE ABOUT TO "FIX" —
+    route_title_test.dart deliberately pins all four settled route names.
+  * `loadRealFonts()` IS NOT ENOUGH — a TextStyle naming no family still
+    resolves to the test fallback, whose glyphs are solid one-em boxes. Name
+    the family. CLAUDE.md §7 and §10.5.
+  * `Color.alphaBlend` KEEPS THE BACKGROUND'S ALPHA. Blending onto a 2%-white
+    surface gives another 2%-alpha colour that looks solid in source.
+  * `find.text` CANNOT SEE A TextSpan, and `toPlainText()` CANNOT SEE A
+    TRUNCATION — use RenderParagraph.didExceedMaxLines.
+  * A RepaintBoundary INSIDE A Scaffold DOES NOT CAPTURE A DIALOG — a dialog
+    renders in the Navigator's Overlay, above it. Wrap the whole app.
+  * `dart format` ON A DIRECTORY REFORMATS FILES YOU DID NOT TOUCH.
+  * adb is at C:\Android\sdk\platform-tools and is ALREADY ON PATH. The old
+    machine-wide handoff's %LOCALAPPDATA%\Android\Sdk path does not exist.
+  * THE CONSOLE STORES THEME AND ACCENT PER ADMIN. Switching Jean's mode to
+    Light writes to his account. Put it back.
 
 WHEN THE WORK IS DONE: rewrite
-C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md the same way
-this one was written — verified state only, nothing aspirational, with a fresh
-self-contained copy-paste block in §8 that carries BOTH handoff paths, the
-project root, the untouchable worktree path, exactly where you stopped, what is
-done, what is left, and this same HOW TO WORK paragraph — and commit it.
+
+    C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
+
+the same way this one was written — verified state only, nothing aspirational,
+with a fresh self-contained copy-paste block in §8 that carries BOTH handoff
+paths (this one and C:\Users\Somebody Someone\Claude\HANDOFF.md), the project
+root, the untouchable worktree path and its baseline, exactly where you
+stopped, what is already done so it is not redone, what is left, this same HOW
+TO WORK instruction from Jean, and the fix-as-you-go-and-test-it rule — and
+commit it. Update the commit count and the tip in it so the file does not
+describe a state two commits behind itself.
 ```

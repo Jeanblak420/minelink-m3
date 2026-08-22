@@ -147,11 +147,11 @@ quietly cropped out of the screenshots.
 Stated plainly. None of the following should be read as implied by the table
 above.
 
-- **Nothing has been run on a physical Android phone.** The APK identity is set
-  up so it installs alongside the real MineLink (`org.minelink.m3`, "MineLink
-  M3") and cannot replace it. A **debug APK now builds** (180 MB,
-  `build/app/outputs/flutter-apk/app-debug.apk`, 2026-08-20) — but it has not
-  been installed on a handset and nothing has been driven on one.
+- ~~**Nothing has been run on a physical Android phone.**~~ **SUPERSEDED
+  2026-08-22 — see the last section of this file.** It has now been installed
+  on Jean's SM-G780G and driven as a real driver, and it found three defects.
+  The APK identity is still as described: it installs alongside the real
+  MineLink (`org.minelink.m3`, "MineLink M3") and cannot replace it.
 - **Nothing has been run on iOS.** No reachable Apple Developer account, same
   as the shipping app.
 - **The app has not been driven against the live database in a browser.** The
@@ -395,8 +395,10 @@ Every line below was executed at the end of the Phase 4 session, in this order.
 
 Unchanged from Phase 3 except where noted:
 
-- **Nothing has run on real hardware.** No APK on a handset, nothing driven in a
-  browser against the live database, no iOS build.
+- ~~**Nothing has run on real hardware.**~~ **NO LONGER TRUE — see the
+  2026-08-22 section at the end of this file.** The debug APK was installed on
+  Jean's SM-G780G from the NAS share and driven signed in as the real driver
+  account. iOS is still not attempted (no reachable Apple Developer account).
 - **The map tiles are blank in every render.** `flutter_test` answers every HTTP
   request with a 400, so the canvas under the route line is the empty-tile
   colour. Everything drawn on top of it is real.
@@ -413,3 +415,97 @@ Unchanged from Phase 3 except where noted:
   `TargetsPage`'s half-viewport cap exists *because* the org-type band once
   overflowed by 60px.
 - **Windows** — two pre-existing faults, neither this project's.
+
+---
+
+## Current state — 2026-08-22 (the chat session, and the first hardware drive)
+
+Every line below was executed at the end of the session, in this order.
+
+| | |
+|---|---|
+| `flutter analyze` | no issues |
+| `flutter test` | **2,149 passed**, 1 skipped |
+| `dart tool/release_guards.dart` | **39/39 PASS, 0 FAIL** |
+| `dart tool/release_guards.dart --selftest` | all guards bite |
+| `py -3 tool/_sabotage.py` | all sabotages caught |
+| `type_scale_codemod.py --selftest` | OK |
+| `dropdown_width_check.py` | passes |
+| `glyph_coverage_check.py` | passes |
+| `one_clock_check.py` | 0 sites off Africa/Johannesburg |
+| `unphotographed_screens.py` | 93 targets · 93 photographed · 0 not |
+| Renders | **225 files** (220 + 5 net new; 7 dock shots added) |
+| render harness — LOW CONTRAST | **0** |
+| render harness — FAILURE STATE | 0 |
+| render harness — RENDER NOTE | 0 |
+| render harness — CUT OFF | **9** (was 6; the 3 new are one deliberate conversation-row preview, per list render) |
+| Web (dart2js release) | builds |
+| Android debug APK | builds |
+| **Android, ON A REAL HANDSET** | **installed and driven** — see below |
+| Windows | blocked, pre-existing |
+| iOS | not attempted; no reachable Apple Developer account |
+| Original worktree | `df451d0`, 14163 files, the same 3 pre-existing modified files, 2 worktree entries, 0 modified today — **untouched**, verified at the start AND the end |
+
+### THE FIRST HARDWARE DRIVE — what it proved, and what it found
+
+The APK was staged to `\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk` and
+installed on Jean's **SM-G780G** through My Files' own network-storage mount —
+not over HTTP, which is where the previous session stalled. Signed in as
+`roadhaul.driver@mineralguide.com` against the live database.
+
+**Rendered correctly on real hardware:** the auth screen (Fraunces italic
+accent, gradient Sign in), the account-setup gate, the driver Dashboard with
+live figures (3 loads this week · 102.1 t · 5 deliveries · 171.32 t total), the
+Trip tab's empty state, and Recent Trips with four real completed trips, POD
+icons and status chips.
+
+**Three defects it found that nothing else could:**
+
+1. **A driver had no chat at all.** `PortalShellLayout` wraps every role's
+   shell in a `ChatDock` at the end of its build; the driver's shell is
+   returned from an early branch ~300 lines above that. No dock, no rail entry,
+   and `DriverAppScreen` has no messages affordance of its own.
+2. **The first fix was half a fix** — there are TWO driver branches, and
+   `/home` is the wrong one. `portalLandingRoute` sends a driver to
+   `/portal/driver/home` on sign-in, so `/home` is one frame. Rebuilding and
+   reinstalling is what revealed it; the test written for the bug had read the
+   branch that was already fixed and passed.
+3. **The dock's empty state named a tab that does not exist** — "Open the
+   People tab" on a surface whose tabs are Conversations | Contacts. Copied
+   verbatim from `MessagesScreen`, whose tabs really are Chats | People.
+
+**Note what class these are.** §4.1 predicted hardware would settle GPS,
+foreground-service survival and battery. It settled none of those; it found a
+missing feature, an incomplete fix and a wrong string — all of which had passed
+`flutter analyze`, 2,145 tests, 261 renders and 39 release guards.
+
+**Privacy:** every screenshot taken was read and deleted immediately; zero
+remain. Two showed things not come for (Jean's WhatsApp media in My Files'
+Recent, and a CtrlBridge pairing PIN) and neither was used or recorded. The
+phone was left on `home; waitstable; home`.
+
+### What is newly PROVEN
+
+- **The reply feature works end to end.** `chat_message_row_test.dart` proves
+  the column survives Postgres → model (and nulls each column in turn to prove
+  each is genuinely read); `chat_reply_quote_test.dart` proves the model
+  reaches the screen, over text and over an attachment, with a dangling parent
+  and with a mention token; the chat-thread renders show it drawn on both
+  bubble grounds.
+- **All eighteen chat palettes are legible**, as arithmetic rather than as a
+  picture — `chat_palette_contrast_test.dart`. Thirteen were not. A render can
+  only ever photograph the one palette that happens to be selected.
+- **The dock has renders at all** — seven, including the thread, which had
+  never been photographed despite being mounted on every portal and console
+  screen.
+
+### What is STILL not proven
+
+- **Physical GPS on a real road trip**, the Android foreground service
+  surviving a long backgrounding, and battery behaviour. The handset drive did
+  not cover these: the driver account has no active trip, so the live-location
+  toggle is disabled by design ("Available once you have an active trip").
+- **iOS**, unchanged.
+- **The due-diligence gate** has still never been driven end to end.
+- **A second party in a live chat.** The dock was opened on the handset and its
+  empty state read; no message was sent between two real accounts.
