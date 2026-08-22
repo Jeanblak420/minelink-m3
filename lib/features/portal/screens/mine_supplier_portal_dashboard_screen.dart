@@ -7,6 +7,7 @@ import 'package:flutter_application_1/features/operations/models/operations_mode
 import 'package:flutter_application_1/features/portal/models/mine_trip.dart';
 import 'package:flutter_application_1/features/portal/models/recon_dispute.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_entry.dart';
+import 'package:flutter_application_1/features/portal/utils/mine_supplier_overview_metrics.dart';
 import 'package:flutter_application_1/features/portal/models/transportation_request.dart';
 import 'package:flutter_application_1/features/portal/models/trip_status.dart';
 import 'package:flutter_application_1/features/portal/providers/lifecycle_provider.dart';
@@ -66,7 +67,8 @@ class _MineSupplierPortalDashboardScreenState
       return const MlEmptyState(
         icon: Icons.domain_disabled_outlined,
         title: 'Company not loaded',
-        message: 'Your account is not linked to a mine yet, so there is '
+        message:
+            'Your account is not linked to a mine yet, so there is '
             'nothing to report on.',
       );
     }
@@ -82,19 +84,14 @@ class _MineSupplierPortalDashboardScreenState
         action: MlButton.tonal(
           label: 'Try again',
           icon: Icons.refresh_rounded,
-          onPressed: () =>
-              ref.invalidate(logisticsSnapshotProvider(companyId)),
+          onPressed: () => ref.invalidate(logisticsSnapshotProvider(companyId)),
         ),
       ),
       data: (snap) => _body(context, companyId, snap),
     );
   }
 
-  Widget _body(
-    BuildContext context,
-    String companyId,
-    LogisticsSnapshot snap,
-  ) {
+  Widget _body(BuildContext context, String companyId, LogisticsSnapshot snap) {
     // The pit clock, not the reader's laptop — every figure below
     // is bucketed against this.
     final now = MlTime.now();
@@ -130,32 +127,11 @@ class _MineSupplierPortalDashboardScreenState
     final requests = requestsAsync.valueOrNull;
     final disputes = disputesAsync.valueOrNull;
 
-    // Total tons on the ground, every pile — the honest headline figure.
-    final balance = stockpiles?.fold<double>(0, (a, s) => a + s.tons);
-
-    // Capacity only counts piles that HAVE a cap — a production pile has none,
-    // and folding it in as zero would report the mine as over capacity.
-    final capped = stockpiles?.where((s) => s.maxCapTons != null).toList();
-    final capacity = capped == null || capped.isEmpty
-        ? null
-        : capped.fold<double>(0, (a, s) => a + s.maxCapTons!);
-
-    // The NUMERATOR has to be scoped the same way the denominator above
-    // already is, and it was not. `balance` sums every pile, including ROM
-    // production piles, and it was being divided by a cap that counts only
-    // order piles — so a mine with a 400 t ROM pile against a 200 t order read
-    // "300% of ordered cap". The comment three lines up shows the exclusion was
-    // understood; it was applied to one side of the ratio only.
-    //
-    // Found by rendering the screen. It was invisible for as long as the
-    // capture produced an error card, and it is invisible in production TODAY
-    // only because no live pile has `max_cap_tons` set (checked 2026-08-15:
-    // 3 piles across 2 mines, every cap null) — so the ratio never runs. It
-    // fires the first time an order is dispatched, since `link_and_dispatch_
-    // request` mints the pile WITH a cap.
-    final cappedBalance = capped == null || capped.isEmpty
-        ? null
-        : capped.fold<double>(0, (a, s) => a + s.tons);
+    // Stockpile figures, all three from one place — see [StockpileCover] for
+    // why the headline and its caption have to be able to disagree, and why
+    // the difference between them has to be named rather than dropped.
+    final cover = stockpiles == null ? null : StockpileCover.of(stockpiles);
+    final balance = cover?.totalTons;
 
     final arrivals = inbound?.where((t) => t.isInbound).length;
     final awaitingWeigh = inbound?.where((t) => t.isOnSite).length;
@@ -166,7 +142,8 @@ class _MineSupplierPortalDashboardScreenState
         children: [
           PortalDashboardHeader(
             title: 'Mine overview',
-            subtitle: 'Tons out, stockpile cover and the mine floor — live, '
+            subtitle:
+                'Tons out, stockpile cover and the mine floor — live, '
                 'over the last ${_period.label.toLowerCase()}.',
             period: _period,
             onPeriodChanged: (p) => setState(() => _period = p),
@@ -203,10 +180,11 @@ class _MineSupplierPortalDashboardScreenState
                 label: 'Stockpile balance',
                 value: balance == null ? null : _tons(balance),
                 unit: 't',
-                sublabel: capacity == null || capacity <= 0
-                    ? 'No capped order piles'
-                    : '${_tons(cappedBalance ?? 0)} of ${_tons(capacity)} t '
-                        'ordered · ${((cappedBalance ?? 0) / capacity * 100).round()}%',
+                // Unchanged fallback: before the stockpiles read resolves
+                // there is no cover to describe, and the tile's own
+                // `loading:` flag below is what distinguishes that from a
+                // failed read.
+                sublabel: cover?.caption(_tons) ?? 'No capped order piles',
                 icon: Icons.inventory_2_outlined,
                 tone: MlTone.atMine,
                 route: '/portal/mine/stockpiles',
@@ -256,9 +234,13 @@ class _MineSupplierPortalDashboardScreenState
               // 193% of the same quantity: two widgets on one screen
               // disagreeing, with the clamp hiding which was wrong.
               final ring = _stockpileBand(
-                  context, stockpiles, cappedBalance, capacity,
-                  totalOnGround: balance,
-                  loading: stockpilesAsync.isFirstLoad);
+                context,
+                stockpiles,
+                cover?.cappedTons,
+                cover?.capacityTons,
+                totalOnGround: cover?.totalTons,
+                loading: stockpilesAsync.isFirstLoad,
+              );
               if (c.maxWidth < 980) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -315,9 +297,11 @@ class _MineSupplierPortalDashboardScreenState
               PortalQueueItem(
                 label: 'Open reconciliation disputes',
                 count: disputes
-                    ?.where((d) =>
-                        d.status == DisputeStatus.open ||
-                        d.status == DisputeStatus.underReview)
+                    ?.where(
+                      (d) =>
+                          d.status == DisputeStatus.open ||
+                          d.status == DisputeStatus.underReview,
+                    )
                     .length,
                 route: '/portal/mine/reconciliations',
                 icon: Icons.gavel_outlined,
@@ -336,7 +320,7 @@ class _MineSupplierPortalDashboardScreenState
             meta: inbound == null
                 ? null
                 : '${inbound.where((t) => t.isInbound || t.isOnSite).length} '
-                    'active',
+                      'active',
             viewRoute: '/portal/mine/truck-locations',
             viewLabel: 'Truck locations',
             child: PortalLiveStrip(
@@ -344,8 +328,8 @@ class _MineSupplierPortalDashboardScreenState
               emptyMessage: inbound != null
                   ? 'No trucks are inbound or on site right now.'
                   : inboundAsync.isFirstLoad
-                      ? 'Reading the inbound queue…'
-                      : 'The inbound queue could not be read.',
+                  ? 'Reading the inbound queue…'
+                  : 'The inbound queue could not be read.',
             ),
           ),
           const SizedBox(height: 26),
@@ -412,12 +396,15 @@ class _MineSupplierPortalDashboardScreenState
     } else if (targets.isLoading && !targets.hasValue) {
       targetMeta = 'Checking target…';
     } else {
-      targetMeta = pace == null ? 'No target set' : 'Target ${pace.round()} t/day';
+      targetMeta = pace == null
+          ? 'No target set'
+          : 'Target ${pace.round()} t/day';
     }
 
     return PortalDashboardSection(
       title: 'Tons out',
-      subtitle: 'Daily weighbridge net mass against the previous '
+      subtitle:
+          'Daily weighbridge net mass against the previous '
           '${_period.label.toLowerCase()}.',
       meta: targetMeta,
       viewRoute: '/portal/mine/tons-out',
@@ -474,7 +461,8 @@ class _MineSupplierPortalDashboardScreenState
         title: totalOnGround == null || totalOnGround == 0
             ? 'No product on the ground'
             : '${_tons(totalOnGround)} t on the ground',
-        message: 'No order stockpile has been created yet. One is minted '
+        message:
+            'No order stockpile has been created yet. One is minted '
             'automatically when the platform links an order to this mine.',
       );
     } else {
@@ -487,11 +475,7 @@ class _MineSupplierPortalDashboardScreenState
       body = Center(
         child: MlDonut(
           segments: [
-            MlDonutSegment(
-              'Filled',
-              filled,
-              MlTone.done.colors(brightness).fg,
-            ),
+            MlDonutSegment('Filled', filled, MlTone.done.colors(brightness).fg),
             MlDonutSegment(
               'Remaining',
               (capacity - filled).clamp(0, capacity).toDouble(),
@@ -580,7 +564,8 @@ class _MineSupplierPortalDashboardScreenState
         child: MlEmptyState(
           icon: Icons.receipt_long_outlined,
           title: 'No waybills yet',
-          message: 'A waybill is generated automatically the moment the load '
+          message:
+              'A waybill is generated automatically the moment the load '
               'controller records a gross weigh.',
         ),
       );
@@ -588,23 +573,24 @@ class _MineSupplierPortalDashboardScreenState
 
     // Cancellations are not loads that shipped. `list_raw_recon_rows` already
     // excludes anything without a trip, so this is the only status to drop.
-    final recent = waybills
-        .where((w) => w.tripStatus != TripStatus.cancelled.wire)
-        .toList()
-      ..sort((a, b) => b.tripDate.compareTo(a.tripDate));
+    final recent =
+        waybills
+            .where((w) => w.tripStatus != TripStatus.cancelled.wire)
+            .toList()
+          ..sort((a, b) => b.tripDate.compareTo(a.tripDate));
     final rows = recent.take(10).toList();
 
     Widget text(String v, {bool mono = false, bool strong = false}) => Text(
-          v,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontFamily: mono ? MlTokens.fontMono : MlTokens.fontSans,
-            fontSize: MlTokens.fsBodySm,
-            fontWeight: strong ? FontWeight.w700 : FontWeight.w500,
-            color: strong ? s.textStrong : s.textBody,
-          ),
-        );
+      v,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        fontFamily: mono ? MlTokens.fontMono : MlTokens.fontSans,
+        fontSize: MlTokens.fsBodySm,
+        fontWeight: strong ? FontWeight.w700 : FontWeight.w500,
+        color: strong ? s.textStrong : s.textBody,
+      ),
+    );
 
     return MlCard(
       padding: EdgeInsets.zero,
@@ -665,10 +651,7 @@ class _MineSupplierPortalDashboardScreenState
     DateTime now,
     int days,
     int offset,
-  ) =>
-      [
-        for (var i = days - 1; i >= 0; i--) byDay[i + offset] ?? 0.0,
-      ];
+  ) => [for (var i = days - 1; i >= 0; i--) byDay[i + offset] ?? 0.0];
 
   List<PortalLiveTruck> _liveTrucks(List<MineTrip>? trips) {
     if (trips == null) return const [];

@@ -12,6 +12,89 @@ import 'package:flutter_application_1/core/time/ml_time.dart';
 /// `quantity` — matching the recon table and the server-side super-admin
 /// dashboard (migration 20260714000000_dashboard_tons_from_net_mass.sql).
 
+/// How full the mine's ORDER piles are, and how much tonnage that ratio
+/// cannot speak for.
+///
+/// ## Why a type rather than three local sums
+///
+/// The mine overview shows a headline "Stockpile balance" over a caption
+/// giving cover against ordered caps. Those are two different sets, because a
+/// pile with no `max_cap_tons` cannot appear in a ratio — and on 2026-08-22 the
+/// live screen read **210.3 t** with **"150.3 of 1240 t ordered · 12%"**
+/// directly underneath. Both were correct. The 60.0 t between them was one real
+/// pile ("C Grade Blue Coal - Atlas Buyer", cap null) that the caption silently
+/// dropped from both sides of its fraction.
+///
+/// Scoping both sides of the ratio to capped piles is right, and was itself a
+/// fix: counting every pile in the numerator against a capped denominator once
+/// reported a mine at "300% of ordered cap". What was missing is that the
+/// exclusion has to be VISIBLE, because the reader is looking at the excluded
+/// tonnage in the number immediately above.
+///
+/// So this returns all three figures together and the caller states the
+/// uncapped remainder whenever there is one. The arithmetic then closes on
+/// screen: 150.3 + 60 = 210.3, which is the headline.
+///
+/// The note the previous fix left — "invisible in production TODAY because no
+/// live pile has a cap" — expired. Seven of Iron Hills' nine piles carry caps
+/// now, exactly as predicted for the first dispatch.
+class StockpileCover {
+  const StockpileCover({
+    required this.totalTons,
+    required this.cappedTons,
+    required this.capacityTons,
+  });
+
+  /// Every pile on the ground. The honest headline.
+  final double totalTons;
+
+  /// Only the piles that have a cap — the numerator of the ratio.
+  final double cappedTons;
+
+  /// Sum of the caps. Null when no pile has one, so there is no ratio at all.
+  final double? capacityTons;
+
+  /// Tonnage that is real, is in [totalTons], and CANNOT be in the ratio.
+  /// Zero is the ordinary case; anything else has to be said out loud.
+  double get uncappedTons => totalTons - cappedTons;
+
+  bool get hasRatio => capacityTons != null && capacityTons! > 0;
+
+  /// Percent full, rounded. Only meaningful when [hasRatio].
+  int get percent => hasRatio ? (cappedTons / capacityTons! * 100).round() : 0;
+
+  /// The caption that sits under the "Stockpile balance" figure.
+  ///
+  /// Lives here, next to the arithmetic, rather than in the screen, because
+  /// the whole fault was a caption that could not be checked against the
+  /// number above it. A string built beside the figures it describes can be
+  /// tested against them; one built inline in a `sublabel:` cannot.
+  ///
+  /// [tons] is the screen's own formatter, passed in so the caption reads in
+  /// exactly the same units as the headline it has to reconcile with.
+  String caption(String Function(double) tons) {
+    if (!hasRatio) return 'No capped order piles';
+    final base =
+        '${tons(cappedTons)} of ${tons(capacityTons!)} t '
+        'ordered \u00b7 $percent%';
+    // Below a rounding crumb there is nothing worth saying, and "0 t uncapped"
+    // would be noise on the ordinary case.
+    if (uncappedTons <= 0.05) return base;
+    return '$base \u00b7 ${tons(uncappedTons)} t uncapped';
+  }
+
+  static StockpileCover of(List<StockpileEntry> piles) {
+    final capped = piles.where((p) => p.maxCapTons != null);
+    return StockpileCover(
+      totalTons: piles.fold<double>(0, (a, p) => a + p.tons),
+      cappedTons: capped.fold<double>(0, (a, p) => a + p.tons),
+      capacityTons: capped.isEmpty
+          ? null
+          : capped.fold<double>(0, (a, p) => a + p.maxCapTons!),
+    );
+  }
+}
+
 /// Tons shipped over rolling time windows (overlapping: yearly includes
 /// monthly includes weekly includes daily), plus the all-time total.
 class TonsOutWindows {
@@ -130,14 +213,17 @@ abstract final class MineSupplierOverviewMetrics {
       if (id == null || id.isEmpty) continue;
       totals[id] = (totals[id] ?? 0) + w.netTonsOut;
     }
-    final result = totals.entries
-        .map((e) => BuyerTons(
-              companyId: e.key,
-              name: nameById[e.key] ?? _shortId(e.key),
-              tons: e.value,
-            ))
-        .toList()
-      ..sort((a, b) => b.tons.compareTo(a.tons));
+    final result =
+        totals.entries
+            .map(
+              (e) => BuyerTons(
+                companyId: e.key,
+                name: nameById[e.key] ?? _shortId(e.key),
+                tons: e.value,
+              ),
+            )
+            .toList()
+          ..sort((a, b) => b.tons.compareTo(a.tons));
     return result;
   }
 
@@ -175,8 +261,7 @@ abstract final class MineSupplierOverviewMetrics {
         tons: companyId == null ? 0 : (deliveredByCompany[companyId] ?? 0),
       );
     }
-    return rows.values.toList()
-      ..sort((a, b) => b.tons.compareTo(a.tons));
+    return rows.values.toList()..sort((a, b) => b.tons.compareTo(a.tons));
   }
 
   /// Convenience: build an id -> name map from partner company pins.
