@@ -1364,7 +1364,7 @@ void main() {
           subtitle: 'Trucks on route',
           orgType: OrgType.transporter,
           role: UserRole.admin,
-          selectedRoute: '/portal/transporter/trucks',
+          selectedRoute: '/portal/transporter/trucks-on-route',
           extraOverrides: allPortalOverrides(),
         ),
         const Size(412, 1044),
@@ -3069,7 +3069,7 @@ void main() {
             brightness: brightness,
             child: body,
             title: title,
-            subtitle: subtitle,
+            subtitle: _barTitle(selectedRoute, subtitle),
             orgType: orgType,
             role: role,
             selectedRoute: selectedRoute,
@@ -3175,7 +3175,7 @@ void main() {
         orgType: OrgType.buyer,
         title: 'Fixture Metals',
         subtitle: 'Truck locations',
-        selectedRoute: '/portal/buyer/trucks',
+        selectedRoute: '/portal/buyer/truck-locations',
       );
     });
 
@@ -3188,7 +3188,7 @@ void main() {
         orgType: OrgType.buyer,
         title: 'Fixture Metals',
         subtitle: 'Truck locations',
-        selectedRoute: '/portal/buyer/trucks',
+        selectedRoute: '/portal/buyer/truck-locations',
       );
     });
 
@@ -3201,7 +3201,7 @@ void main() {
         orgType: OrgType.mineSupplier,
         title: 'Fixture Minerals',
         subtitle: 'Truck locations',
-        selectedRoute: '/portal/mine/trucks',
+        selectedRoute: '/portal/mine/truck-locations',
       );
     });
 
@@ -3214,7 +3214,7 @@ void main() {
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
         subtitle: 'Truck locations',
-        selectedRoute: '/portal/transporter/trucks',
+        selectedRoute: '/portal/transporter/truck-locations',
       );
     });
 
@@ -3359,7 +3359,7 @@ void main() {
         orgType: OrgType.buyer,
         title: 'Fixture Metals',
         subtitle: 'Trip',
-        selectedRoute: '/portal/buyer/trips',
+        selectedRoute: '/portal/buyer/trips/t-2',
       );
     });
 
@@ -3372,7 +3372,7 @@ void main() {
         orgType: OrgType.buyer,
         title: 'Fixture Metals',
         subtitle: 'Trip',
-        selectedRoute: '/portal/buyer/trips',
+        selectedRoute: '/portal/buyer/trips/t-2',
       );
     });
 
@@ -3413,7 +3413,7 @@ void main() {
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
         subtitle: 'Fuel & costs',
-        selectedRoute: '/portal/transporter/fuel',
+        selectedRoute: '/portal/transporter/fuel-costs',
       );
     });
 
@@ -3426,7 +3426,7 @@ void main() {
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
         subtitle: 'Fuel & costs',
-        selectedRoute: '/portal/transporter/fuel',
+        selectedRoute: '/portal/transporter/fuel-costs',
       );
     });
 
@@ -3474,8 +3474,8 @@ void main() {
         'screen-drop-off-phone-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
-        subtitle: 'Drop-off',
-        selectedRoute: '/portal/transporter/trips',
+        subtitle: 'Drop-off point',
+        selectedRoute: '/portal/transporter/drop-off/t-2',
       );
     });
 
@@ -3487,7 +3487,7 @@ void main() {
         'screen-own-company-desktop-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
-        subtitle: 'Company profile',
+        subtitle: 'Company',
         selectedRoute: '/portal/transporter/company',
       );
     });
@@ -3500,7 +3500,7 @@ void main() {
         'screen-own-company-phone-dark',
         orgType: OrgType.transporter,
         title: 'Fixture Haulage',
-        subtitle: 'Company profile',
+        subtitle: 'Company',
         selectedRoute: '/portal/transporter/company',
       );
     });
@@ -3946,7 +3946,7 @@ void main() {
             brightness: brightness,
             child: body,
             title: title,
-            subtitle: subtitle,
+            subtitle: _barTitle(selectedRoute, subtitle),
             orgType: orgType,
             role: role,
             selectedRoute: selectedRoute,
@@ -4012,7 +4012,7 @@ void main() {
         const Size(1600, 1000),
         'screen-chat-thread-desktop-dark',
         subtitle: 'Chat',
-        selectedRoute: '/communications',
+        selectedRoute: '/chat/fixture-room-1',
       );
     });
 
@@ -4028,7 +4028,7 @@ void main() {
         const Size(412, 915),
         'screen-chat-thread-phone-dark',
         subtitle: 'Chat',
-        selectedRoute: '/communications',
+        selectedRoute: '/chat/fixture-room-1',
       );
     });
 
@@ -4063,7 +4063,7 @@ void main() {
         const Size(1600, 1400),
         'screen-notification-manager-desktop-dark',
         subtitle: 'All notifications',
-        selectedRoute: '/notifications',
+        selectedRoute: '/notifications/manage?title=All%20notifications',
       );
     });
 
@@ -4074,7 +4074,7 @@ void main() {
         const Size(412, 1398),
         'screen-notification-manager-phone-dark',
         subtitle: 'All notifications',
-        selectedRoute: '/notifications',
+        selectedRoute: '/notifications/manage?title=All%20notifications',
       );
     });
 
@@ -4086,7 +4086,7 @@ void main() {
         const ProfileScreen(),
         const Size(412, 3955),
         'screen-profile-phone-dark',
-        subtitle: 'Profile',
+        subtitle: 'My profile',
         selectedRoute: '/profile',
       );
     });
@@ -4097,7 +4097,7 @@ void main() {
         const ProfileScreen(),
         const Size(1600, 2600),
         'screen-profile-desktop-dark',
-        subtitle: 'Profile',
+        subtitle: 'My profile',
         selectedRoute: '/profile',
       );
     });
@@ -4139,7 +4139,7 @@ void main() {
         'screen-appearance-phone-dark',
         orgType: OrgType.mineSupplier,
         title: 'Fixture Chrome Mine',
-        subtitle: 'Appearance & theme',
+        subtitle: 'Appearance',
         selectedRoute: '/appearance',
         extra: [portalWorkspaceOverride(isMineSupplier: true)],
       );
@@ -4153,7 +4153,7 @@ void main() {
         'screen-appearance-desktop-light',
         orgType: OrgType.mineSupplier,
         title: 'Fixture Chrome Mine',
-        subtitle: 'Appearance & theme',
+        subtitle: 'Appearance',
         selectedRoute: '/appearance',
         brightness: Brightness.light,
         extra: [portalWorkspaceOverride(isMineSupplier: true)],
@@ -4168,7 +4168,7 @@ void main() {
         const PortalEmployeeRegisterScreen(),
         const Size(412, 3910),
         'screen-employee-register-phone-dark',
-        subtitle: 'Register',
+        subtitle: 'Employee register',
         selectedRoute: '/portal/transporter/register',
       );
     });
@@ -4179,7 +4179,7 @@ void main() {
         const PortalEmployeeRegisterScreen(),
         const Size(1600, 2600),
         'screen-employee-register-desktop-dark',
-        subtitle: 'Register',
+        subtitle: 'Employee register',
         selectedRoute: '/portal/transporter/register',
       );
     });
@@ -4385,7 +4385,7 @@ void main() {
         role: UserRole.admin,
         title: 'Fixture Haulage',
         subtitle: 'Fuel & costs',
-        selectedRoute: '/portal/transporter/fuel',
+        selectedRoute: '/portal/transporter/fuel-costs',
       );
     });
 
@@ -4400,7 +4400,7 @@ void main() {
         role: UserRole.admin,
         title: 'Fixture Haulage',
         subtitle: 'Fuel & costs',
-        selectedRoute: '/portal/transporter/fuel',
+        selectedRoute: '/portal/transporter/fuel-costs',
       );
     });
 
@@ -4700,4 +4700,41 @@ void _noOrphanGoldensTest() {
           'Delete them, or restore the test that made them.',
     );
   });
+}
+
+/// The top bar a render photographs must be the one the router would draw.
+///
+/// Every `shootPortal` / `shootShared` call types its bar title by hand, and a
+/// hand-typed copy of something the code computes drifts the moment the code
+/// changes. It did: the 2026-08-22 route-name pass renamed eight destinations,
+/// and three fixtures went on photographing the old names — a picture that
+/// says a screen is called something it is no longer called is worse than no
+/// picture, because it reads as evidence.
+///
+/// So the fixture's string is now CHECKED against `mlRouteTitle`, the resolver
+/// the real top bar uses, and the render is evidence of the actual name.
+///
+/// [_barTitleExempt] is for the routes whose real title depends on session
+/// state the resolver is not given — the section dashboards, whose bar names
+/// the active TAB. Each one names the reason.
+const Map<String, String> _barTitleExempt = {
+  '/portal/mine': 'bar names the active tab; the resolver has no tab set',
+  '/portal/buyer': 'bar names the active tab; the resolver has no tab set',
+  '/portal/transporter': 'bar names the active tab; the resolver has no tab set',
+  '/portal/driver': 'bar names the active tab; the resolver has no tab set',
+  '/home': 'bar names the active tab; the resolver has no tab set',
+};
+
+String _barTitle(String selectedRoute, String subtitle) {
+  if (_barTitleExempt.containsKey(selectedRoute)) return subtitle;
+  final resolved = mlRouteTitle(Uri.parse(selectedRoute)).title;
+  expect(
+    subtitle,
+    resolved,
+    reason:
+        'the fixture photographs "$subtitle" in the top bar of $selectedRoute, '
+        'but the router resolves that route to "$resolved". Change the '
+        'fixture, or add $selectedRoute to _barTitleExempt with a reason.',
+  );
+  return resolved;
 }

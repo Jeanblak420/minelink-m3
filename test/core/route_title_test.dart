@@ -139,7 +139,10 @@ void main() {
 
   group('portal routes keep the titles the portal table gave them', () {
     const aliases = <String, String>{
-      '/portal/mine/security': 'Security',
+      // "Security gate" since 2026-08-22, not bare "Security": that word
+      // sits a group away from the real destination "Account & security", and
+      // `_legacyTabLabels` already had to map the old tab name onto it.
+      '/portal/mine/security': 'Security gate',
       '/portal/mine/gate': 'Gate control',
       // "Load controller" since 2026-08-21, not "Weighbridge" — the rail's own
       // label for this destination, and the bar's old one was the word the
@@ -160,7 +163,9 @@ void main() {
       '/portal/mine/employees': 'Employees',
       '/portal/mine/company': 'Company',
       '/portal/mine/notifications': 'Notifications',
-      '/portal/mine/profile': 'Profile',
+      // "My profile" since 2026-08-22 — the rail's word, and the only thing
+      // separating it from "Company" one leaf away.
+      '/portal/mine/profile': 'My profile',
       '/portal/buyer/waybills': 'Waybills',
       // Settled 2026-08-22: the bar now uses the RAIL's word for these four.
       // "Vehicles" because the rail leaf sits inside a group already called
@@ -181,11 +186,13 @@ void main() {
     });
 
     const plain = <String, String>{
-      '/profile': 'Profile',
+      '/profile': 'My profile',
       '/company-employees': 'Employees',
       '/notifications': 'Notifications',
       '/fleet-management': 'Fleet management',
-      '/appearance': 'Appearance & theme',
+      // "Appearance" since 2026-08-22: "& theme" named one control on a page
+      // that also carries text scale, density and reduce-motion.
+      '/appearance': 'Appearance',
       '/communications': 'Communications',
       '/company-selection': 'Choose company',
       '/expired-access': 'Access expired',

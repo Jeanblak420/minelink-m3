@@ -64,24 +64,34 @@ const _allowedDivergence = <String, String>{
   '/portal/transporter/operations': 'same screen, same reason',
   '/portal/driver/operations': 'same screen, same reason',
 
-  // Two reasonable names for one page. Longer in the rail, shorter in the bar,
-  // in every case — the rail has a whole column and the bar shares a line.
-  '/portal/mine/stockpiles': 'rail "Supervisor & stockpiles" / bar "Stockpiles"',
-  '/portal/mine/security': 'rail "Security gate" / bar "Security"',
-  '/portal/mine/locations': 'rail "Mine locations" / bar "Locations"',
-  '/portal/mine/tons-out': 'rail "Recon tables (tons out)" / bar "Tons out"',
-  '/portal/buyer/tons-out': 'rail "Recon tables (tons out)" / bar "Tons out"',
-  '/portal/transporter/tons-out':
-      'rail "Recon tables (tons out)" / bar "Tons out"',
-  '/portal/mine/company': 'rail "Company profile" / bar "Company"',
-  '/portal/buyer/company': 'rail "Company profile" / bar "Company"',
-  '/portal/transporter/company': 'rail "Company profile" / bar "Company"',
-  '/portal/mine/profile': 'rail "My profile" / bar "Profile"',
-  '/portal/buyer/profile': 'rail "My profile" / bar "Profile"',
-  '/portal/transporter/profile': 'rail "My profile" / bar "Profile"',
-  '/portal/driver/profile': 'rail "My profile" / bar "Profile"',
-  '/communications': 'rail "Announcements" / bar "Communications"',
-  '/appearance': 'rail "Appearance" / bar "Appearance & theme"',
+  // ── The eleven "longer in the rail, shorter in the bar" routes are GONE
+  //    too — settled by Jean on 2026-08-22, the same way the four below were.
+  //
+  //    The rule he chose was "the clearer of the two strings, per pair", so
+  //    the winner is sometimes the rail's and sometimes the bar's rather than
+  //    one side always yielding:
+  //
+  //      mine/stockpiles   rail "Supervisor & stockpiles" -> "Stockpiles"
+  //      mine/security     bar  "Security"                -> "Security gate"
+  //      mine/locations    rail "Mine locations"          -> "Locations"
+  //      */tons-out        rail "Recon tables (tons out)" -> "Tons out"
+  //      */company         rail "Company profile"         -> "Company"
+  //      */profile         bar  "Profile"                 -> "My profile"
+  //      /communications   rail "Announcements"           -> "Communications"
+  //      /appearance       bar  "Appearance & theme"      -> "Appearance"
+  //
+  //    Two of them were the "names the neighbour" fault this file's header
+  //    describes, not merely two reasonable names: bar "Security" sits a group
+  //    away from the real destination "Account & security", and bar "Profile"
+  //    sits a leaf away from "Company". Three surfaces carried a third name
+  //    for a route on this list and were brought in too — the appearance
+  //    page's own heading, the mine dashboard's "Recon tables" shortcut (which
+  //    named the SIBLING route "Reconciliations"), and `_legacyTabLabels`.
+  //
+  //    What is left below is divergent BY DESIGN, and both groups are the same
+  //    cause: the resolver has no role and no session. It cannot know which
+  //    tab a dashboard is showing, and it cannot know which of three names a
+  //    role gives `/operations`.
 
   // The four where the bar was not shorter but a DIFFERENT word are GONE —
   // decided by Jean on 2026-08-22 and made to agree rather than recorded:

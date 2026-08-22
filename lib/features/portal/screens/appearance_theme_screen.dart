@@ -38,8 +38,11 @@ class AppearanceThemeScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // "Appearance" — the rail's word and, since 2026-08-22, the top
+          // bar's. Three names for one destination is the fault the route-name
+          // pass exists to end, and this page had two of them stacked.
           const MlPageHeader(
-            title: 'Appearance & theme',
+            title: 'Appearance',
             description:
                 'Personalise how MineLink looks. Light or dark applies '
                 'everywhere; the dashboard theme and density apply to your '

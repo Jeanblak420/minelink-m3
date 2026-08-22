@@ -171,8 +171,12 @@ class _MineSupplierPortalDashboardScreenState
             period: _period,
             onPeriodChanged: (p) => setState(() => _period = p),
             actions: [
+              // "Tons out" — what the rail and the bar both call the route
+              // this opens (2026-08-22). It said "Recon tables", which is a
+              // DIFFERENT destination in the same group ("Reconciliations"),
+              // so the shortcut named the neighbour.
               MlButton.tonal(
-                label: 'Recon tables',
+                label: 'Tons out',
                 icon: Icons.table_chart_outlined,
                 compact: true,
                 onPressed: () => context.go('/portal/mine/tons-out'),

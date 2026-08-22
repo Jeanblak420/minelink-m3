@@ -21,7 +21,7 @@ const Map<String, String> _legacyTabLabels = {
   'Overview': 'Dashboard',
   'Controller': 'Load controller',
   'Security': 'Security gate',
-  'Supervisor': 'Supervisor & stockpiles',
+  'Supervisor': 'Stockpiles',
   'Fleet / routes': 'Routes & dispatches',
   'Trucks On Route': 'Trucks on route',
   'Tracking': 'Request tracking',

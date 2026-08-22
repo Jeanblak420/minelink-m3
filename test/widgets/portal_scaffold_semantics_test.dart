@@ -83,7 +83,7 @@ void main() {
       'Dashboard',
       'Operations',
       'Logistics',
-      'Supervisor & stockpiles',
+      'Stockpiles',
       'Iron Hills Mining',
     ]) {
       expect(

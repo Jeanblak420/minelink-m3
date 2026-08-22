@@ -98,6 +98,25 @@ String? mlPortalAliasSegment(String path) {
   return null;
 }
 
+/// Everything after `/portal/{org}/{segment}`, without its leading slash, or
+/// '' when the segment is the whole path.
+///
+/// This is what separates a LIST from an item on it. Without it every detail
+/// page takes the name of the screen it was opened from — the fault
+/// `/employees/…/details` was already fixed for once, when a page about one
+/// person announced itself as "Team grid". `/portal/mine/trips/t-1` is one
+/// trip and read "Trips" until 2026-08-22.
+String mlPortalAliasRest(String path) {
+  for (final prefix in mlPortalSectionPrefixes) {
+    if (path.startsWith('$prefix/')) {
+      final rest = path.substring(prefix.length + 1);
+      final slash = rest.indexOf('/');
+      return slash < 0 ? '' : rest.substring(slash + 1);
+    }
+  }
+  return '';
+}
+
 /// Resolves [uri] to its title, and its subtitle where the shell draws one.
 ///
 /// [tabs] is only consulted for the portal's `/home` and section-dashboard
@@ -377,8 +396,36 @@ String _portalTitle(Uri uri, MlPortalTabs tabs) {
           ? 'Routes & mines'
           : 'Routes & dispatches';
     }
+
+    // ── Item pages, before the list names below claim them ────────────────
+    //
+    // A page about ONE thing must not be named after the list it was reached
+    // from. That was already judged wrong once here — `/employees/1/2/details`
+    // read "Team grid", the name of the widget, on a page about one person —
+    // and the portal's own detail routes had the same fault, invisible to
+    // `every_portal_route_is_named_test.dart` because none of them is in the
+    // rail. Swept out of the ROUTER on 2026-08-22.
+    final rest = mlPortalAliasRest(path);
+    if (rest.isNotEmpty) {
+      switch (segment) {
+        // `…/trips/:id` and `…/trips/:id/waybill` are both the trip detail
+        // screen — the waybill route wraps that child and opens the document
+        // as a MODAL over it, so the bar behind belongs to the trip.
+        case 'trips':
+          return 'Trip';
+        case 'employees':
+          return 'Employee profile';
+        case 'stockpiles':
+          return 'Stockpile';
+      }
+    }
     return switch (segment) {
-      'security' => 'Security',
+      // "Security gate", the rail's own label. Bare "Security" is ambiguous
+      // between the mine's gate and account security — which is a real
+      // destination one group away, titled "Account & security" — and
+      // `_legacyTabLabels` already had to map the old tab name 'Security' onto
+      // 'Security gate' for exactly that reason. Settled 2026-08-22.
+      'security' => 'Security gate',
       'gate' => 'Gate control',
       // "Load controller", which is what the rail calls it, NOT "Weighbridge".
       //
@@ -410,7 +457,10 @@ String _portalTitle(Uri uri, MlPortalTabs tabs) {
       'compliance' => 'Compliance',
       'company' => 'Company',
       'notifications' => 'Notifications',
-      'profile' => 'Profile',
+      // "My profile", the rail's label. The same tree carries "Company" one
+      // leaf away, and bare "Profile" beside it loses the only thing that
+      // distinguishes them: whose record this is. Settled 2026-08-22.
+      'profile' => 'My profile',
       'waybills' => 'Waybills',
       // ── Four names settled 2026-08-22 (Jean's call) ──────────────────
       //
@@ -439,20 +489,44 @@ String _portalTitle(Uri uri, MlPortalTabs tabs) {
       'request-tracking' => 'Request tracking',
       'home' => 'Dashboard', // /portal/driver/home
       'trip' => 'Trip', // /portal/driver/trip[...]
+      // ── Three routes that read "Workspace" until 2026-08-22 ──────────────
+      //
+      // None is in any rail, so the rail walk could not see them; each was
+      // found by sweeping the ROUTER
+      // (`every_portal_router_route_is_named_test.dart`). Two of them are on
+      // the transporter's accept-and-crew path, which is the busiest deep-link
+      // in the product.
+      //
+      // The two ML-link aliases keep the name of the screen they actually
+      // land on, because that is what the reader is looking at: `accept-route`
+      // drops its :routeId and shows the transporter DASHBOARD, and
+      // `allocate-fleet` drops its :routeId and shows the fleet screen, which
+      // `/portal/transporter/fleet` already calls "Vehicles".
+      'accept-route' => tabs.landingLabel ?? 'Overview',
+      'allocate-fleet' => 'Vehicles',
+      // The page under it is headed "Drop-off point"; the bar says the same
+      // rather than a third thing.
+      'drop-off' => 'Drop-off point',
       _ => 'Workspace',
     };
   }
   switch (path) {
+    // Same name as `/portal/{org}/profile` above. This is the route the
+    // waiting rail points its "My profile" leaf at, so the two disagreed for
+    // exactly the sessions that have nothing else on their rail.
     case '/profile':
-      return 'Profile';
+      return 'My profile';
     case '/company-employees':
       return 'Employees';
     case '/notifications':
       return 'Notifications';
     case '/fleet-management':
       return 'Fleet management';
+    // "Appearance", the rail's label. Settled 2026-08-22: "& theme" names one
+    // of the controls on the page rather than the page, and the page also
+    // carries text scale, density and reduce-motion.
     case '/appearance':
-      return 'Appearance & theme';
+      return 'Appearance';
     case '/communications':
       return 'Communications';
     case '/company-selection':

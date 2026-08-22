@@ -296,12 +296,12 @@ List<PortalNavNode> _mineTree(UserRole? role) {
         route: '/portal/mine',
       ),
       const PortalNavNode.leaf(
-        label: 'Supervisor & stockpiles',
-        // Same three-line clipping as "Incidents & gate checks" above.
-        // "Stockpiles" rather than "Supervisor": it names the thing this
-        // destination is for, and the person reading it already is the
-        // supervisor.
-        shortLabel: 'Stockpiles',
+        // "Stockpiles" rather than "Supervisor & stockpiles": it names the
+        // thing this destination is for, and the person reading it already is
+        // the supervisor. It is also what the top bar has always called this
+        // route — settled on Jean's call, 2026-08-22, so the two agree and the
+        // label no longer needs a `shortLabel` to survive the phone's bar.
+        label: 'Stockpiles',
         icon: Icons.supervisor_account_outlined,
         route: '/portal/mine/stockpiles',
       ),
@@ -342,7 +342,7 @@ List<PortalNavNode> _mineTree(UserRole? role) {
       icon: Icons.precision_manufacturing_outlined,
       children: [
         PortalNavNode.leaf(
-          label: 'Supervisor & stockpiles',
+          label: 'Stockpiles',
           icon: Icons.supervisor_account_outlined,
           route: '/portal/mine/stockpiles',
         ),
@@ -409,7 +409,10 @@ List<PortalNavNode> _mineTree(UserRole? role) {
         // resolves the collection point from here, and the screen has been
         // routed but unreachable since it was built (P4-20).
         PortalNavNode.leaf(
-          label: 'Mine locations',
+          // "Locations", not "Mine locations": this tree is the mine's, so the
+          // qualifier only repeats the portal the reader is already in, and it
+          // is what the top bar calls the route (Jean's call, 2026-08-22).
+          label: 'Locations',
           icon: Icons.place_outlined,
           route: '/portal/mine/locations',
         ),
@@ -425,8 +428,8 @@ List<PortalNavNode> _mineTree(UserRole? role) {
       // this tree. "Recon" is not an abbreviation invented for the bar:
       // it is the word this product already uses for the thing
       // (CLAUDE.md §4 — "recon table", "recon rows"), and
-      // "Recon tables (tons out)" is a leaf of this very group. The full
-      // label stays on the long-press tooltip and in the drawer.
+      // and "Reconciliations" is a leaf of this very group. The full label
+      // stays on the long-press tooltip and in the drawer.
       shortLabel: 'Recon',
       icon: Icons.balance_outlined,
       children: [
@@ -436,7 +439,11 @@ List<PortalNavNode> _mineTree(UserRole? role) {
           route: '/portal/mine/reconciliations',
         ),
         PortalNavNode.leaf(
-          label: 'Recon tables (tons out)',
+          // "Tons out" — the top bar's name for this route, and the product's
+          // own word for the movement it lists (CLAUDE.md §4). Settled on
+          // Jean's call, 2026-08-22; it was the longest label in the tree and
+          // the only one whose parenthesis had to carry the real name.
+          label: 'Tons out',
           icon: Icons.table_chart_outlined,
           route: '/portal/mine/tons-out',
         ),
@@ -535,8 +542,8 @@ List<PortalNavNode> _buyerTree(UserRole? role) {
       // this tree. "Recon" is not an abbreviation invented for the bar:
       // it is the word this product already uses for the thing
       // (CLAUDE.md §4 — "recon table", "recon rows"), and
-      // "Recon tables (tons out)" is a leaf of this very group. The full
-      // label stays on the long-press tooltip and in the drawer.
+      // and "Reconciliations" is a leaf of this very group. The full label
+      // stays on the long-press tooltip and in the drawer.
       shortLabel: 'Recon',
       icon: Icons.balance_outlined,
       children: [
@@ -546,7 +553,11 @@ List<PortalNavNode> _buyerTree(UserRole? role) {
           route: '/portal/buyer/reconciliations',
         ),
         PortalNavNode.leaf(
-          label: 'Recon tables (tons out)',
+          // "Tons out" — the top bar's name for this route, and the product's
+          // own word for the movement it lists (CLAUDE.md §4). Settled on
+          // Jean's call, 2026-08-22; it was the longest label in the tree and
+          // the only one whose parenthesis had to carry the real name.
+          label: 'Tons out',
           icon: Icons.table_chart_outlined,
           route: '/portal/buyer/tons-out',
         ),
@@ -724,8 +735,8 @@ List<PortalNavNode> _transporterTree(UserRole? role) {
       // this tree. "Recon" is not an abbreviation invented for the bar:
       // it is the word this product already uses for the thing
       // (CLAUDE.md §4 — "recon table", "recon rows"), and
-      // "Recon tables (tons out)" is a leaf of this very group. The full
-      // label stays on the long-press tooltip and in the drawer.
+      // and "Reconciliations" is a leaf of this very group. The full label
+      // stays on the long-press tooltip and in the drawer.
       shortLabel: 'Recon',
       icon: Icons.balance_outlined,
       children: [
@@ -735,7 +746,11 @@ List<PortalNavNode> _transporterTree(UserRole? role) {
           route: '/portal/transporter/reconciliations',
         ),
         PortalNavNode.leaf(
-          label: 'Recon tables (tons out)',
+          // "Tons out" — the top bar's name for this route, and the product's
+          // own word for the movement it lists (CLAUDE.md §4). Settled on
+          // Jean's call, 2026-08-22; it was the longest label in the tree and
+          // the only one whose parenthesis had to carry the real name.
+          label: 'Tons out',
           icon: Icons.table_chart_outlined,
           route: '/portal/transporter/tons-out',
         ),
@@ -789,13 +804,19 @@ PortalNavNode _company(String org) => PortalNavNode.group(
         // 920 built lines that no route reached: `/communications` and
         // `/messages` both rendered `MessagesScreen`, so company announcements
         // were unreachable in their entirety (P4-18).
+        // "Communications", not "Announcements": the screen behind it is the
+        // Communications hub, which carries announcements AND chat, and it is
+        // what the top bar calls `/communications`. Settled 2026-08-22.
         const PortalNavNode.leaf(
-          label: 'Announcements',
+          label: 'Communications',
           icon: Icons.campaign_outlined,
           route: '/communications',
         ),
+        // "Company", matching the bar. The group this leaf sits in is already
+        // the company's, and "profile" is the word the SAME tree uses for the
+        // user's own record ("My profile").
         PortalNavNode.leaf(
-          label: 'Company profile',
+          label: 'Company',
           icon: Icons.business_outlined,
           route: '/portal/$org/company',
         ),
