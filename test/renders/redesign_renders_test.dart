@@ -146,6 +146,8 @@ import '../fixtures/nav_fixtures.dart';
 import '../fixtures/portal_capture_fixtures.dart';
 import '../fixtures/portal_tail_fixtures.dart';
 import '../fixtures/shared_tail_fixtures.dart';
+import 'package:flutter_application_1/features/portal/providers/request_provider.dart';
+
 import '../fixtures/screen_fixtures.dart';
 import '../test_helpers/fake_geolocator.dart';
 import '../test_helpers/fake_path_provider.dart';
@@ -3388,6 +3390,54 @@ void main() {
         title: 'Fixture Metals',
         subtitle: 'Requests',
         selectedRoute: '/portal/buyer/requests',
+      );
+    });
+
+    // THE MINE'S OWN Requests screen, which had never been photographed.
+    //
+    // `BuyerRequestsScreen` is named in this file, so `unphotographed_screens`
+    // counted it — that check is name-based and says so in its own header.
+    // But every picture of it was `isMine: false`, and the two things that
+    // differ are exactly where the drift was: the description (a mine raises
+    // transportation and BUYER requests, never product ones) and the second
+    // action.
+    //
+    // The fixture is the shared transportation list PLUS the mine's buyer
+    // request from `kAdminBuyerRequests`, so the picture shows both types a
+    // mine can actually raise. That also photographs `_RequestCard`'s
+    // `'buyer'` branch (title "Chrome · buyers", type label "Buyers") and its
+    // attachment chips for the first time on this screen.
+    testWidgets('mine requests — desktop dark', (tester) async {
+      await shootPortal(
+        tester,
+        const BuyerRequestsScreen(isMine: true),
+        const Size(1600, 2200),
+        'screen-mine-requests-desktop-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Chrome Mine',
+        subtitle: 'Requests',
+        selectedRoute: '/portal/mine/requests',
+        extra: [
+          companyRequestsProvider.overrideWith(
+              (ref, _) async => [...kRequests, ...kAdminBuyerRequests]),
+        ],
+      );
+    });
+
+    testWidgets('mine requests — phone dark', (tester) async {
+      await shootPortal(
+        tester,
+        const BuyerRequestsScreen(isMine: true),
+        const Size(412, 2200),
+        'screen-mine-requests-phone-dark',
+        orgType: OrgType.mineSupplier,
+        title: 'Fixture Chrome Mine',
+        subtitle: 'Requests',
+        selectedRoute: '/portal/mine/requests',
+        extra: [
+          companyRequestsProvider.overrideWith(
+              (ref, _) async => [...kRequests, ...kAdminBuyerRequests]),
+        ],
       );
     });
 

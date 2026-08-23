@@ -53,44 +53,53 @@ class BuyerRequestsScreen extends ConsumerWidget {
                 MlPageHeader(
                   title: 'Requests',
                   meta: mlCount(requests.length, 'request'),
-                  description:
-                      'Raise transportation and product requests to the MineLink '
-                      'representative and track their review.',
-                ),
-                if (!mirror) ...[
-                  const SizedBox(height: 14),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      FilledButton.tonalIcon(
-                        onPressed: () => _openForm(context, ref, companyId),
-                        icon: const Icon(
-                          Icons.local_shipping_outlined,
-                          size: 18,
-                        ),
-                        label: const Text('Request transportation'),
-                      ),
-                      if (isMine)
-                        FilledButton.icon(
-                          onPressed: () =>
-                              showBuyersRequestDialog(context, ref, companyId),
-                          icon: const Icon(Icons.group_add_outlined, size: 18),
-                          label: const Text('Request buyers'),
-                        )
-                      else
-                        FilledButton.icon(
-                          onPressed: () =>
-                              showProductRequestDialog(context, ref, companyId),
-                          icon: const Icon(
-                            Icons.add_shopping_cart_outlined,
-                            size: 18,
+                  // A MINE DOES NOT REQUEST PRODUCTS. This sentence had no
+                  // `isMine` branch, so the mine's own Requests screen
+                  // named a request type it cannot raise and omitted the
+                  // one it can — while the class doc four lines above says
+                  // "buyers request products, mines request buyers" and the
+                  // button under it said the same. §4 Request 2 is buyer
+                  // only; Request 3 is mine/supplier only.
+                  description: isMine
+                      ? 'Raise transportation and buyer requests to the MineLink '
+                          'representative and track their review.'
+                      : 'Raise transportation and product requests to the MineLink '
+                          'representative and track their review.',
+                  // The screen's own actions belong to its header. They sat
+                  // in a left `Wrap` BELOW it as stock Material — a
+                  // `FilledButton.tonalIcon` next to a `FilledButton.icon`,
+                  // two button languages side by side and neither of them
+                  // the product's — with the header's own right end empty.
+                  // Quieter first, so the org-specific action keeps the
+                  // right edge it already had and matches the Buyers page.
+                  actions: mirror
+                      ? const []
+                      : [
+                          MlButton.tonal(
+                            label: 'Request transportation',
+                            icon: Icons.local_shipping_outlined,
+                            compact: true,
+                            onPressed: () =>
+                                _openForm(context, ref, companyId),
                           ),
-                          label: const Text('Request products'),
-                        ),
-                    ],
-                  ),
-                ],
+                          if (isMine)
+                            MlButton.primary(
+                              label: 'Request buyers',
+                              icon: Icons.group_add_outlined,
+                              compact: true,
+                              onPressed: () => showBuyersRequestDialog(
+                                  context, ref, companyId),
+                            )
+                          else
+                            MlButton.primary(
+                              label: 'Request products',
+                              icon: Icons.add_shopping_cart_outlined,
+                              compact: true,
+                              onPressed: () => showProductRequestDialog(
+                                  context, ref, companyId),
+                            ),
+                        ],
+                ),
                 const SizedBox(height: 16),
                 AvailableRoutesSection(companyId: companyId, enabled: !mirror),
                 if (requests.isEmpty)
