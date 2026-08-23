@@ -154,7 +154,7 @@ class CommunicationsHubScreen extends ConsumerWidget {
                     icon: Icon(Icons.campaign_outlined),
                     text: 'Announcements',
                   ),
-                  Tab(icon: Icon(Icons.forum_outlined), text: 'Chat Rooms'),
+                  Tab(icon: Icon(Icons.forum_outlined), text: 'Chat rooms'),
                 ],
               ),
             ),
@@ -519,7 +519,7 @@ class _ChatRoomsTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               MlSectionTitle(
-                'Chat Rooms',
+                'Chat rooms',
                 meta: mlCount(state.chatRooms.length, 'room'),
                 icon: Icons.forum_outlined,
                 margin: EdgeInsets.only(bottom: 8),

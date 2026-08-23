@@ -4321,7 +4321,7 @@ void main() {
     testWidgets('notification manager — desktop dark', (tester) async {
       await shootShared(
         tester,
-        const NotificationManagementScreen(title: 'All Notifications'),
+        const NotificationManagementScreen(title: 'All notifications'),
         const Size(1600, 1400),
         'screen-notification-manager-desktop-dark',
         subtitle: 'All notifications',
@@ -4332,7 +4332,7 @@ void main() {
     testWidgets('notification manager — phone dark', (tester) async {
       await shootShared(
         tester,
-        const NotificationManagementScreen(title: 'All Notifications'),
+        const NotificationManagementScreen(title: 'All notifications'),
         const Size(412, 1398),
         'screen-notification-manager-phone-dark',
         subtitle: 'All notifications',

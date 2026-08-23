@@ -112,7 +112,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
                     onPressed: () {
                       context.go(
                         NotificationsManageRoute.location(
-                          title: 'All Notifications',
+                          title: 'All notifications',
                           filterRole: _getUserRole(),
                           useSuperAdminShell: inSuperAdminShell,
                         ),
@@ -285,7 +285,7 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear All Notifications?'),
+        title: const Text('Clear all notifications?'),
         content: const Text(
           'This will remove all notifications from this view. They will still be available in the notification management screen.',
         ),

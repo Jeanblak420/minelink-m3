@@ -189,11 +189,13 @@ class _ChatConnectionsScreenState extends ConsumerState<ChatConnectionsScreen> {
     ],
   );
 
+  // The reference's section heading — Fraunces, as MlSectionTitle draws it
+  // — not 16px sans bold. The four section headings on this screen all go
+  // through here. Phase 3 pass, 2026-08-23.
   Widget _sectionTitle(MlSemantic semantic, String text) => Text(
     text,
-    style: context.mlText.titleMedium.copyWith(
+    style: context.mlText.editorialMedium.copyWith(
       color: semantic.textStrong,
-      fontWeight: FontWeight.w700,
     ),
   );
 

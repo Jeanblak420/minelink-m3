@@ -30,6 +30,7 @@ import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/features/super_admin/screens/account_deactivations_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/audit_logs_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/chat_connections_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/available_routes_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/driver_limit_requests_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/organization_detail_screen.dart';
@@ -357,6 +358,16 @@ void main() {
             .style
             ?.fontFamily,
         MlTokens.fontSerif);
+  });
+
+  testWidgets('chat connections heads its sections in the display face',
+      (tester) async {
+    // "Connect two companies" and its three sibling headings were 16px
+    // sans bold; the reference heads a section in Fraunces. Phase 3 pass,
+    // 2026-08-23.
+    await pump(tester, const ChatConnectionsScreen(), width: 1600, height: 1400);
+    final h = tester.widget<Text>(find.text('Connect two companies').first);
+    expect(h.style?.fontFamily, MlTokens.fontSerif);
   });
 
   testWidgets('platform users name the role in English', (tester) async {
