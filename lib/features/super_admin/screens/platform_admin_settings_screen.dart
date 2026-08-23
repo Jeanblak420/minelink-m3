@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
@@ -30,21 +29,14 @@ class PlatformAdminSettingsScreen extends ConsumerWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Platform settings',
-                  style: context.mlText.titleLarge.copyWith(
-                    color: MlSemantic.of(context).textStrong,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Both super-admins have identical, full rights. There are '
-                  'no delegated-admin controls to configure.',
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                // The shared page header — Fraunces, as every other console
+                // screen opens — not a hand-rolled sans ExtraBold title.
+                // Phase 3 pass, 2026-08-23.
+                const MlPageHeader(
+                  title: 'Platform settings',
+                  description:
+                      'Both super-admins have identical, full rights. There '
+                      'are no delegated-admin controls to configure.',
                 ),
               ],
             );

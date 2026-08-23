@@ -33,6 +33,7 @@ import 'package:flutter_application_1/features/super_admin/screens/audit_logs_sc
 import 'package:flutter_application_1/features/super_admin/screens/available_routes_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/driver_limit_requests_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/organization_detail_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/platform_admin_settings_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/platform_users_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/super_admin_company_mirror_screen.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_control_room_palette.dart';
@@ -339,6 +340,23 @@ void main() {
     expect(deco.border!.top.color.toARGB32() & 0xFFFFFF,
         MlControlRoom.violet.toARGB32() & 0xFFFFFF,
         reason: 'the BUYER badge is not violet');
+  });
+
+  testWidgets('platform settings opens in the shared page header',
+      (tester) async {
+    // A hand-rolled sans ExtraBold title — the same drift as platform users,
+    // audit logs and crash reports. Phase 3 pass, 2026-08-23.
+    await pump(tester, const PlatformAdminSettingsScreen(),
+        width: 1600, height: 900);
+    final header = find.byType(MlPageHeader);
+    expect(header, findsOneWidget);
+    expect(
+        tester
+            .widget<Text>(find.descendant(
+                of: header, matching: find.text('Platform settings')))
+            .style
+            ?.fontFamily,
+        MlTokens.fontSerif);
   });
 
   testWidgets('platform users name the role in English', (tester) async {
