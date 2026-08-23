@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_application_1/core/utils/ml_figures.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/fuel_models.dart';
@@ -18,14 +19,18 @@ import 'package:flutter_application_1/core/time/ml_time.dart';
 class EarningsScreen extends ConsumerWidget {
   const EarningsScreen({super.key});
 
-  static final _num = NumberFormat('#,##0');
   static final _dateFmt = DateFormat('dd MMM yyyy');
 
-  static String _money(double? v, String currency) {
-    if (v == null) return '—';
-    final sym = currency == 'ZAR' ? 'R' : '$currency ';
-    return '$sym${_num.format(v)}';
-  }
+  /// R61,023 · −R61,023 · —
+  ///
+  /// This used to be `'$sym${_num.format(v)}'`, which puts the sign AFTER the
+  /// currency and writes it as a hyphen: **`R-61,023`**, on the one figure
+  /// that tells a transporter it lost money on a load.
+  /// `PortalKpiRow.formatDelta` had already settled the convention — U+2212
+  /// MINUS SIGN, before the symbol — and this is now the same code, in
+  /// `ml_figures.dart`, rather than a second opinion.
+  static String _money(double? v, String currency) =>
+      mlRand(v, currency: currency);
 
   static String _tons(double v) => '${v.toStringAsFixed(2)} t';
 

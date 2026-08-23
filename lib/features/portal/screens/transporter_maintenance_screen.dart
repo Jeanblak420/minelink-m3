@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_application_1/core/utils/ml_figures.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_status.dart';
 import 'package:flutter_application_1/features/fleet/models/maintenance_record.dart';
@@ -771,9 +772,12 @@ class _OpenRecordCard extends StatelessWidget {
                 'Since ${MlTime.calendarDay(record.startedAt!)}',
               if (record.expectedBackAt != null)
                 'expected back ${MlTime.calendarDay(record.expectedBackAt!)}',
-              if (record.costZar != null)
-                'R ${record.costZar!.toStringAsFixed(2)}',
-              if (record.odometerKm != null) '${record.odometerKm} km',
+              // Grouped, through the shared formatter. `R ${cost}` with no
+              // grouping printed a real repair bill as `R 128500.00`, and the
+              // odometer beside it was bare digits while the fleet register
+              // one screen away has grouped them as `412 300 km` all along.
+              if (record.costZar != null) mlRand(record.costZar, decimals: 2),
+              if (record.odometerKm != null) mlKm(record.odometerKm),
             ].join(' · '),
             style:
                 Theme.of(context).textTheme.bodySmall?.copyWith(color: muted),
@@ -845,8 +849,8 @@ class _ScheduleCard extends StatelessWidget {
             [
               if (s.dueDate != null) 'Due ${MlTime.calendarDay(s.dueDate!)}',
               if (s.dueOdometerKm != null)
-                'due at ${s.dueOdometerKm} km'
-                    '${s.vehicleOdometerKm != null ? ' (now ${s.vehicleOdometerKm} km)' : ''}',
+                'due at ${mlKm(s.dueOdometerKm)}'
+                    '${s.vehicleOdometerKm != null ? ' (now ${mlKm(s.vehicleOdometerKm)})' : ''}',
               if (s.repeatMonths != null) 'every ${s.repeatMonths} mo',
               if (s.repeatKm != null) 'every ${s.repeatKm} km',
               if (s.lastDoneAt != null)
@@ -947,8 +951,7 @@ class _HistorySectionState extends State<_HistorySection> {
                       ),
                       Text(
                         [
-                          if (r.costZar != null)
-                            'R ${r.costZar!.toStringAsFixed(0)}',
+                          if (r.costZar != null) mlRand(r.costZar),
                           if (r.closedAt != null)
                             MlTime.calendarDay(r.closedAt!),
                         ].join(' · '),
