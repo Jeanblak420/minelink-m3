@@ -1132,6 +1132,53 @@ captions wrapping at a `·`; dialog titles in sans (`dialogTheme`, app-wide);
 blank map tiles (the harness). The hub's empty ledger is the fixture's stated
 intent (`screen_fixtures.dart`), not a lie.
 
+### Buyer portal — DONE 2026-08-23 (fifth session)
+
+Same method. The reviewer's 23 findings (`report_buyer.md`) were each checked in
+the render and the code before anything was touched, and **twelve of them were
+already fixed** by the console and mine passes' shared-component commits —
+verified in the picture, not taken from the report: the KPI delta chip
+(`16fcfac`), the chart's unconditional `Target` key (`0057ef8`, and `'This
+period'` is a fallback with a comment saying so — not drift), the Requests
+buttons (`8b9e71e`, this session), `MlSectionTitle`'s stacked action
+(`bb0de74`), "2 certificates" (`8dc3500`), the Operations Hub (`6752683`), the
+whole tons-out family (`249106f`), the employees register (`db9912d`), the
+company labels (`6762b65`, this session), the employee-profile delta
+(`90a82c1`), and trip detail (`6ee7d68`, this session). Finding #20 is marked
+(Shared) by the reviewer and belongs to the Shared task.
+
+**Nine fixes, one commit each, every one pinned by a test that was sabotaged
+and bit.** Two of them were found by this session rather than by a reviewer,
+and both came from making a picture that did not exist.
+
+| route target | verdict | commit |
+|---|---|---|
+| shared `SaSectionHeader` (every portal dashboard **and** the console) | stacked its tools whenever its column was under a hard-coded 560px, into a plain `Wrap` — which starts its run at the LEFT. The buyer's "Invoice cover" band is a 497px column on a 1600px SCREEN and its title + `View →` fit with room to spare: it stacked anyway and put the action at the left margin, beside a band that had meta and action on the title's row at the right edge. Third header in the family to learn that a width rule is not a fit rule, so `MlPageHeader`'s measuring layout became the shared `MlHeaderLayout` rather than being written again. Six goldens, all three dashboards | `88492d2` |
+| `/portal/buyer` dashboard (desktop light, phone light) | "Trucks inbound" toned `atMine` (amber = at the mine) under a sublabel reading "Left the mine, not yet offloaded" — while the live strip 80 lines below toned the same trips `transit` and the mine dashboard's KPI of the same name is `transit` | `cda2922` |
+| `/portal/buyer/routes` (desktop, phone) | opened with a SECTION head + hand-rolled `Text` instead of `MlPageHeader`; "Routes & Mines" the last title-case spelling in the product; every route card's icon well cycling `accent → atMine → done → transit` BY INDEX, so route 2 was amber — "pending at the mine", about a route | `a95cce5` |
+| `/portal/buyer/loads-value` (desktop light; **desktop and phone dark added**) | `Source` declared `minWidth: 124` at `flex: 2` of 20, and `_effectiveMinWidth` solves `need × totalFlex / flex` for the whole table — so one column demanded a 1376px table inside a ~1224px card, pushing it into a horizontal scroll and carrying the invoice button off the right edge | `bfcf8c5` |
+| shared `AvailableRoutesSection` (both Requests screens, both dashboards — 4 phone goldens) | the chip label cut mid-word at "perm" with no ellipsis. **NOT the `Wrap` trap it looks like**: `RenderWrap` bounds its children already (measured — 33..379 in a card at 16..396 with or without a `ConstrainedBox`, and the first version of the fix was a no-op that its own test passed without). `Chip` clips a label with no `maxLines`/`overflow`, silently | `5127fe0` |
+| `/portal/buyer/reconciliations` (phone; **desktop added**) | a stat card and a hero tile labelled "Tons Delivered" over a sum of `TripRecord.netTons`, which is the MINE's weight at load — collapsing the one distinction the screen exists to make, two thousand pixels below a card that spells it out; "Total Records" title case; two dropdowns reading "All Source" / "All Product" | `0bbf5ef` |
+| shared `WeightReconciliationView` (buyer, mine, transporter) | **found by looking at the desktop render this session created.** The three cross-check figures covered TWO populations: `103.22 t Loaded · 70.70 t Delivered · 0.42 t Net variance` over three trips, one still Pending. The caption invites the subtraction, and 103.22 − 70.70 = 32.52 — seventy-seven times the real variance, on the screen that says whether mass went missing. The file already computed the right figure as `deliveredLoaded` for the severity denominator. Now 71.12 − 70.70 = 0.42 | `8e01b67` |
+| shared `LiveTripMapView` (buyer, mine, transporter, console — 5 goldens) | the status pill in `SizedBox(112)` + `FittedBox(scaleDown)`, so `EN ROUTE TO OFFLOAD` drew in smaller type than the `LOADING` below it, and a raised text scale was scaled straight back down. Two further shapes failed before the right one — dropping the `FittedBox` alone cut the PLATE to `JD 22 …`, and per-row measuring made two adjacent rows with the SAME status lay out differently. The pill takes its own right-aligned line, always | `27acc6f` |
+| `/portal/buyer/waybills`, `/truck-locations`, `/compliance`, `/tons-out`, `/trips`, `/requests`, notifications, register | reviewed, no drift (the register's italic title is flagged to the client, not drift; notification wording is database text) | — |
+
+**Renders added, because a screen with no picture is a screen nobody looked at:**
+`screen-buyer-loads-value-desktop-dark`, `screen-buyer-loads-value-phone-dark`,
+`screen-buyer-reconciliations-desktop-dark`. 265 → 268. Both new Loads & value
+pictures were read for drift and carry none — its money figures come straight
+from the RPC's own `delivered_value` / `payable_value`, so the labels match
+what they sum. The third is what found `8e01b67`.
+
+**Kept on purpose / not drift:** `'This period'` (a fallback behind
+`latestLabel`, with a comment); the buyer's own "Delivered" figure in the
+weight-reconciliation card (that one really IS the offload weight — a
+word-ban would have taken it out, and the test says so); `Total Tons=`
+(CLAUDE.md §4); the `Routes & Mines` KEY in `_legacyTabLabels`, which is the
+legacy tab label and the seam, not the copy; `Daily (D)` / `Weekly (W)`;
+requester-typed tonnages printed as typed (`mlCountText`, `mlDistanceText`).
+
+
 **Found by the session's own instruments, not a reviewer:** the power cut
 zeroed four files mid-write (restored from HEAD); the one-clock guard refused
 `MlTime.sast` on a calendar day in the first draft of the Search loads date
