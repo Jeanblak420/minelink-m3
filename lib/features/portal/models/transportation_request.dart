@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
+
 /// Status of a request through the super-admin review lifecycle (CLAUDE.md §4):
 /// `requested → sent_back → resubmitted → approved → linked`, plus the
 /// terminal `declined`. The `sent_back ⇄ resubmitted` pair is the revision
@@ -277,12 +279,10 @@ class RequestCompanyInfo {
     return n.isEmpty ? '—' : n;
   }
 
-  String get orgTypeLabel => switch (orgType) {
-        'mineSupplier' => 'Mine / Supplier',
-        'buyer' => 'Buyer',
-        'transporter' => 'Transporter',
-        _ => orgType ?? '—',
-      };
+  /// `OrgType.labelFor` — the one spelling. This carried its own switch
+  /// returning "Mine / Supplier" beside screens saying "Mine/Supplier"
+  /// (2026-08-23, the fourth such site).
+  String get orgTypeLabel => OrgType.labelFor(orgType);
 
   static String? _s(dynamic v) {
     final s = v?.toString().trim();

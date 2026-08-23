@@ -6,19 +6,13 @@ import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/chat/providers/messaging_providers.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
 
-String companyOrgTypeLabel(String? orgType) {
-  switch (orgType) {
-    case 'mineSupplier':
-      return 'Mine / Supplier';
-    case 'buyer':
-      return 'Buyer';
-    case 'transporter':
-      return 'Transporter';
-    default:
-      return 'Company';
-  }
-}
+/// The org type's human label, or "Company" for a value the enum does not
+/// know. `OrgType.label` is the one spelling — this used to say
+/// "Mine / Supplier" beside screens saying "Mine/Supplier" (2026-08-23).
+String companyOrgTypeLabel(String? orgType) =>
+    OrgType.tryParse(orgType)?.label ?? 'Company';
 
 const _orgTypeOrder = ['mineSupplier', 'buyer', 'transporter'];
 

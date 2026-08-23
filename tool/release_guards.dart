@@ -1475,6 +1475,24 @@ final guards = <Guard>[
     plantLine:
         "        .select('*, transportation_requests!inner(*), routes(route_number)')",
   ),
+  Guard(
+    id: 'one-spelling-for-mine-supplier',
+    why:
+        "an org type is DISPLAYED through OrgType.label ('Mine/Supplier'), "
+        "never through a private switch. Four sites carried their own "
+        "'Mine / Supplier' — the chat profile panel, the request model, the "
+        "company-link builder and the waybill fallback — and the chat one "
+        "matched 'mine'/'supplier', neither of which the database stores, so "
+        "every mine contact's profile read the wire value 'mineSupplier' in a "
+        "sentence (driven 2026-08-23). One spelling, one place: OrgType.",
+    mode: Mode.block,
+    roots: ['lib'],
+    extension: '.dart',
+    pattern: RegExp(r"'Mine / Supplier'"),
+    exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
+    plantFile: 'planted.dart',
+    plantLine: "const label = 'Mine / Supplier';",
+  ),
 ];
 
 class Hit {

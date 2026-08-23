@@ -4,6 +4,7 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/chat/services/attachment_url.dart';
 import 'dart:math' as math;
 
@@ -3981,21 +3982,14 @@ class _ProfileView extends StatelessWidget {
     required this.onMessage,
   });
 
-  String get _orgTypeLabel {
-    switch (contact.orgType) {
-      case 'transporter':
-        return 'Transporter';
-      case 'buyer':
-        return 'Buyer';
-      case 'mine':
-      case 'supplier':
-        return 'Mine / Supplier';
-      default:
-        return contact.orgType == null || contact.orgType!.isEmpty
-            ? '—'
-            : contact.orgType!;
-    }
-  }
+  // `OrgType.labelFor`, not a private switch. This panel used to carry its
+  // own mapping, and it matched 'mine' and 'supplier' — neither of which the
+  // database stores. `companies.org_type` is `mineSupplier`, so every mine
+  // contact's profile read "Organisation type | mineSupplier": the wire value,
+  // in camelCase, in a sentence. Seen on 2026-08-23 while driving a chat
+  // between two Iron Hills accounts. Same class as the three sites
+  // `OrgType.labelFor` was written to close, and now the fourth.
+  String get _orgTypeLabel => OrgType.labelFor(contact.orgType);
 
   @override
   Widget build(BuildContext context) {

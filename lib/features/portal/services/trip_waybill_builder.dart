@@ -7,6 +7,7 @@ import 'package:flutter_application_1/features/portal/models/waybill_data.dart';
 import 'package:flutter_application_1/features/portal/providers/lifecycle_provider.dart';
 import 'package:flutter_application_1/features/profile/services/signature_service.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
 
 /// Builds a [WaybillData] for a trip from the authoritative `get_trip_waybill`
 /// RPC (both dispatch and received blocks) and resolves the two signature PNGs.
@@ -53,7 +54,7 @@ Future<WaybillData?> buildTripWaybill(WidgetRef ref, String tripId) async {
   }
 
   return WaybillData(
-    sourceMine: (data['source_mine'] as String?) ?? 'Mine / Supplier',
+    sourceMine: (data['source_mine'] as String?) ?? OrgType.mineSupplier.label,
     waybillNumber: (data['waybill_number'] as String?) ?? '',
     transporter: (data['transporter'] as String?) ?? '—',
     fleetReg: (data['fleet_reg'] as String?) ?? '—',
