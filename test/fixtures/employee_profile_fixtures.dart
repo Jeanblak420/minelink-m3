@@ -16,6 +16,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_profile_provider.dart';
 import 'package:flutter_application_1/features/employee/services/employee_profile_service.dart';
+import 'package:flutter_application_1/features/profile_setup/models/profile_setup.dart';
+import 'package:flutter_application_1/features/profile_setup/providers/profile_setup_provider.dart';
 
 import 'screen_fixtures.dart';
 
@@ -185,4 +187,56 @@ List<Override> employeeProfileOverrides() => [
       employeeProfileRealtimeProvider.overrideWith((ref, employeeId) {}),
       employeeProfileSyncedAtProvider
           .overrideWith((ref, employeeId) => _ago(const Duration(seconds: 4))),
+      // The employer's setup card. Without this the provider errored and
+      // `ProfileSetupEmployerCard` returned `SizedBox.shrink()` — a failure
+      // that photographed as nothing, on every profile golden ever taken
+      // (Phase 3 mine pass, 2026-08-23). One item missing and one expiring,
+      // so the card has something to say.
+      // The ITEMS too, consistent with the summary: the card itemises
+      // `setup.items` ("Nothing outstanding" is what it says over an empty
+      // list), and a fixture with a summary and no items is a fixture that
+      // lies.
+      employeeProfileSetupProvider('FIXTURE-employee').overrideWith(
+        (ref) async => const ProfileSetup(
+          audience: 'employee',
+          items: [
+            ProfileSetupItem(
+              itemKey: 'drivers_licence',
+              label: "Driver's licence",
+              category: SetupCategory.licences,
+              kind: SetupItemKind.document,
+              isRequired: true,
+              requiresExpiry: true,
+              requiresFile: true,
+              sortOrder: 1,
+              status: SetupItemStatus.missing,
+              filePresent: false,
+            ),
+            ProfileSetupItem(
+              itemKey: 'prdp',
+              label: 'Professional driving permit',
+              category: SetupCategory.licences,
+              kind: SetupItemKind.document,
+              isRequired: true,
+              requiresExpiry: true,
+              requiresFile: true,
+              sortOrder: 2,
+              status: SetupItemStatus.expiring,
+              filePresent: true,
+              daysToExpiry: 19,
+            ),
+          ],
+          summary: ProfileSetupSummary(
+            totalItems: 10,
+            completeItems: 7,
+            requiredTotal: 5,
+            requiredComplete: 4,
+            completionPercent: 70,
+            missingRequired: ["Driver's licence"],
+            missingCount: 1,
+            expiringCount: 1,
+            expiredCount: 0,
+          ),
+        ),
+      ),
     ];

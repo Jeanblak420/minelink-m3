@@ -555,40 +555,33 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
       decoration: BoxDecoration(
         border: Border(top: BorderSide(color: s.borderCard)),
       ),
-      // A Wrap, and the sentence claims the row.
+      // Sentence LEFT, button RIGHT, at every width.
       //
-      // It was a Row with a `Flexible` sentence and a `Spacer` — an
-      // `Expanded(flex: 1)` each, splitting the free space EQUALLY, so on a
-      // desktop half the row sat empty while the sentence ellipsised. On a
-      // phone even the full half is not enough beside a 190px "Export profile
-      // PDF" button, so the button drops to its own line.
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 12,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          SizedBox(
-            width: MediaQuery.sizeOf(context).width < 560
-                ? double.infinity
-                : 420,
-            child: Row(
-              children: [
-                const Icon(Icons.check_rounded, size: 15, color: _green),
-                const SizedBox(width: 7),
-                Expanded(
-                  child: Text(
-                    'Live profile · Auto-updates on any change · Synced ${_ago(syncedAt)}',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.mlText.bodySmall.copyWith(
-                      color: s.textFaint,
-                    ),
+      // Until 2026-08-23 this was a `Wrap` with no alignment and no claimed
+      // width: on a desktop the 420px sentence and the 190px button sat
+      // side by side at the START of the row, the button stranded mid-row
+      // (x≈740–927 in a column ending at 1570) — the console pass's class 2.
+      // A Row with the sentence `Expanded` puts the button at the edge;
+      // under 560px the button drops to its own line, right-aligned.
+      child: LayoutBuilder(
+        builder: (context, c) {
+          final sentence = Row(
+            children: [
+              const Icon(Icons.check_rounded, size: 15, color: _green),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  'Live profile · Auto-updates on any change · Synced ${_ago(syncedAt)}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.mlText.bodySmall.copyWith(
+                    color: s.textFaint,
                   ),
                 ),
-              ],
-            ),
-          ),
-          OutlinedButton.icon(
+              ),
+            ],
+          );
+          final button =           OutlinedButton.icon(
             onPressed: () => _exportPdf(b),
             icon: const Icon(Icons.download_rounded, size: 16),
             label: const Text('Export profile PDF'),
@@ -602,8 +595,25 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
               ),
               shape: RoundedRectangleBorder(borderRadius: MlShape.radiusMedium),
             ),
-          ),
-        ],
+          );
+          if (c.maxWidth < 560) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                sentence,
+                const SizedBox(height: 12),
+                Align(alignment: Alignment.centerRight, child: button),
+              ],
+            );
+          }
+          return Row(
+            children: [
+              Expanded(child: sentence),
+              const SizedBox(width: 12),
+              button,
+            ],
+          );
+        },
       ),
     );
   }
@@ -918,13 +928,24 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                   Expanded(
                     child: SizedBox(
                       height: 46,
-                      child: FilledButton.icon(
+                      child: LayoutBuilder(
+                        builder: (context, c) => FilledButton.icon(
                         onPressed: () => _message(b),
                         icon: const Icon(
                           Icons.chat_bubble_outline_rounded,
                           size: 18,
                         ),
-                        label: Text('Message  ${e.firstName}'),
+                        // One space (it had two), one line, and the NAME is
+                        // dropped when the button is narrow: beside three
+                        // 46px icon buttons at 1600px the label wrapped to
+                        // two lines inside its 46px button, and an ellipsis
+                        // read "Message F…" — a half-name is worse than no
+                        // name. Phase 3 mine pass, 2026-08-23.
+                        label: Text(
+                          c.maxWidth < 200 ? 'Message' : 'Message ${e.firstName}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         style: FilledButton.styleFrom(
                           backgroundColor: _cta,
                           foregroundColor: MlTokens.inkOnAccent,
@@ -937,6 +958,7 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                             borderRadius: MlShape.radiusMedium,
                           ),
                         ),
+                      ),
                       ),
                     ),
                   ),
@@ -2180,18 +2202,22 @@ class _DocTile extends StatelessWidget {
       ),
       child: Row(
         children: [
+          // The well carries the document's own status tone — `statusColor`
+          // was computed and then ignored, so a "Verified" identity document
+          // sat in a RED well beside its green badge. Phase 3 mine pass,
+          // 2026-08-23.
           Container(
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: _red.withValues(alpha: 0.12),
-              border: Border.all(color: _red.withValues(alpha: 0.3)),
+              color: statusColor.withValues(alpha: 0.12),
+              border: Border.all(color: statusColor.withValues(alpha: 0.3)),
               borderRadius: MlShape.radiusMedium,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.description_outlined,
               size: 18,
-              color: _red,
+              color: statusColor,
             ),
           ),
           const SizedBox(width: 12),
@@ -2275,7 +2301,10 @@ class _MetricTile extends StatelessWidget {
     final s = semantic;
     final m = metric;
     final color = _toneColor(m.tone, s);
-    final deltaColor = m.deltaUp ? _green : _red;
+    // A fall is AMBER, not red: the reference makes negative deltas amber and
+    // keeps red for a fault (design-reference §4). "▼ −3 tons moved" is a
+    // downward trend, not an error. Phase 3 mine pass, 2026-08-23.
+    final deltaColor = m.deltaUp ? _green : _amber;
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 13, 14, 10),
       decoration: BoxDecoration(
