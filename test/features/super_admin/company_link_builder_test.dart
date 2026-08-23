@@ -6,7 +6,7 @@ import 'package:flutter_application_1/features/super_admin/widgets/company_link_
 
 void main() {
   test('companyOrgTypeLabel maps org types to display labels', () {
-    expect(companyOrgTypeLabel('mineSupplier'), 'Mine / Supplier');
+    expect(companyOrgTypeLabel('mineSupplier'), 'Mine/Supplier');
     expect(companyOrgTypeLabel('buyer'), 'Buyer');
     expect(companyOrgTypeLabel('transporter'), 'Transporter');
     expect(companyOrgTypeLabel('weird'), 'Company');

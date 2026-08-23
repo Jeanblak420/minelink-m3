@@ -887,3 +887,45 @@ about DRIVERLESS trucks. A driver already on the allocated truck is told
 nothing about the new scheduled trip — measured: S6W001GP accepted with
 Driver Test on it, 0 driver notifications. The order-aware notice exists but
 fires only from `add_vehicle_driver`. Added to Phase 5.
+
+### The chat, half driven — and what it found
+
+Two headless Chromes (`CDP_PORT` 9222 / 9223), `ironhills.owner` and
+`ironhills.admin`. Proven: presence both ways (`Online` on the contact
+profile and on the conversation row), a DM started from a contact's profile,
+a text and an image attachment arriving on the other side (`Sent a file:
+product-photo.jpg`, a `2 unread messages` divider in the room), the
+conversation row's preview and unread badge. NOT yet driven: a reply with a
+quote, an @mention, the phone-width layout.
+
+It stopped there because the admin's dock closed by itself — three times in
+ninety seconds — and that was the defect, not the tool:
+
+- **An admin's whole portal was torn down and rebuilt every 45 seconds**
+  (`f225278`). `CompanyNotifier` wiped its context on every `AuthState`
+  emission from an employee user; the auth notifier re-syncs on every change
+  to the user's own `profiles` row; the chat presence heartbeat writes
+  `last_seen_at` there every 45 s. Semantics node count 142 → 6 → 31 → 129 at
+  05:26:47, 05:27:32 and 05:28:16, each with a `Synced auth state` console
+  line, the access token unchanged, `last_seen_at` 37 s old — and the owner's
+  dock open for twenty minutes beside it. Pinned by
+  `company_context_survives_auth_resync_test.dart` (sabotaged: the re-sync
+  case fails alone).
+- **"Organisation type | mineSupplier"** on the contact profile (`56df087`),
+  and with it the second spelling of Mine/Supplier in three more files; now
+  `OrgType.labelFor` everywhere, held by the `one-spelling-for-mine-supplier`
+  guard (43 guards, all bite).
+
+Neither is re-seen in a browser yet: `build/web` predates every fix this
+session made. The APK on the handset (`1ad4c725`) carries the first three.
+
+### What is NOT proven
+
+- The chat's reply quotes, @mentions and phone-width layout.
+- `f225278` and `56df087` in a running browser; the `Manage drivers` control
+  and the "Mine asked for" line as pixels rather than tests.
+- The end-of-session gate was not run in full (Jean paused the session at
+  05:31): `flutter analyze` clean, the four new test files 12/12, guards
+  43/43 + selftest; everything else on the Phase 0 list is owed first thing
+  next session, including both builds.
+- Phases 3–7 are untouched, as before.

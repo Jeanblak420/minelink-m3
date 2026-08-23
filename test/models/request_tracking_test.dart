@@ -83,7 +83,7 @@ void main() {
         },
       });
       expect(r.requesterCompany?.name, 'Duma Mine');
-      expect(r.requesterCompany?.orgTypeLabel, 'Mine / Supplier');
+      expect(r.requesterCompany?.orgTypeLabel, 'Mine/Supplier');
       expect(r.isFromMine, isTrue);
     });
   });
