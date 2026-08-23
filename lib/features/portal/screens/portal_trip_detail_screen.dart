@@ -84,24 +84,32 @@ class PortalTripDetailScreen extends ConsumerWidget {
     final status = TripStatus.parse(trip.status);
     final tone = tripStatusTone(status);
     final meta = txn?.metadata ?? const <String, dynamic>{};
-    final facts = <(String, String)>[
-      if (txn != null) ('Waybill number', txn.referenceNumber),
+    // (label, value, isCode) — a CODE or a FIGURE is mono, everything
+    // else is the body face. `docs/design-reference.md` §5.3: Fraunces for
+    // display numerals, JetBrainsMono for figures in columns,
+    // PlusJakartaSans elsewhere. `TRP-000123` and `34.90 t` were both
+    // PlusJakartaSans w600 here — the same drift `4ef7ee1` fixed on
+    // `MetricBreakdownRow`, and the plate two lines above this table is
+    // already `MlType.code`. A waybill number that reads in one face on
+    // the recon table and another here is one reference, two products.
+    final facts = <(String, String, bool)>[
+      if (txn != null) ('Waybill number', txn.referenceNumber, true),
       // NOT "Truck registration". The plate is the hero at the top of this
       // screen, in 32px mono; repeating it as the second row of the fact table
       // spent a line saying what the reader had already read.
       if (meta['commodity'] is String && (meta['commodity'] as String).isNotEmpty)
-        ('Product', meta['commodity'] as String),
+        ('Product', meta['commodity'] as String, false),
       // SOURCE and DESTINATION, not destination alone. The recon table names
       // both for every load and this screen named half of it, so a trip could
       // be read here without knowing which mine it came out of.
       if (meta['loading_point'] is String &&
           (meta['loading_point'] as String).isNotEmpty)
-        ('Source', meta['loading_point'] as String),
+        ('Source', meta['loading_point'] as String, false),
       if (meta['offloading_point'] is String &&
           (meta['offloading_point'] as String).isNotEmpty)
-        ('Destination', meta['offloading_point'] as String),
+        ('Destination', meta['offloading_point'] as String, false),
       if (trip.netTons != null)
-        ('Net mass', '${trip.netTons!.toStringAsFixed(2)} t'),
+        ('Net mass', '${trip.netTons!.toStringAsFixed(2)} t', true),
       // THE DATE CAME FROM UTC AND THE TIME FROM SAST.
       //
       // `formatShortDate(trip.updatedAt)` formatted the raw instant while the
@@ -111,7 +119,7 @@ class PortalTripDetailScreen extends ConsumerWidget {
       // when a load moved. It was also the READER'S LOCALE: an American
       // buyer's screen said `8/15/2026 9:30 AM` where a South African's said
       // `15/08/2026 09:30`, for the same load.
-      ('Updated', MlTime.stamp(trip.updatedAt)),
+      ('Updated', MlTime.stamp(trip.updatedAt), false),
     ];
     return MlPageBody(
       child: Column(
@@ -137,18 +145,29 @@ class PortalTripDetailScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: semantic.surfaceCard,
-              borderRadius: BorderRadius.circular(MlTokens.rLg),
-              border: Border.all(color: semantic.borderCard),
-            ),
+          // A CARD, AND A CARD SAYS WHAT IT IS.
+          //
+          // This was a hand-rolled `Container` repainting `MlCard`'s own
+          // surface, radius and border by hand, with no heading at all —
+          // so the one panel on the screen floated under the plate
+          // unlabelled. `MlCard` + `MlSectionTitle` is what every other
+          // panel in the portal is.
+          //
+          // NO META, deliberately. §5.4 asks every section for one, and 15
+          // of the 63 section titles in this product correctly have none:
+          // there is no count here, and every fact worth putting in a meta
+          // is already a row below it. This pass has found a meta that
+          // counted the wrong thing four times; inventing one here would
+          // be the fifth.
+          MlCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (final (label, value) in facts)
+                const MlSectionTitle(
+                  'Trip facts',
+                  margin: EdgeInsets.only(bottom: 14),
+                ),
+                for (final (label, value, isCode) in facts)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: Row(
@@ -174,25 +193,35 @@ class PortalTripDetailScreen extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             value,
-                            style: TextStyle(
-                              color: semantic.textStrong,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: isCode
+                                ? MlType.code(
+                                    color: semantic.textStrong,
+                                    size: MlTokens.fsBody,
+                                    weight: FontWeight.w600,
+                                  )
+                                : context.mlText.bodyMedium.copyWith(
+                                    color: semantic.textStrong,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                           ),
                         ),
                       ],
                     ),
                   ),
                 const SizedBox(height: 6),
-                FilledButton.icon(
+                // Stock Material on a redesigned screen — the same drift
+                // the Requests screen's two buttons carried, in the same
+                // pass. `MlButton` is the product's button.
+                MlButton.primary(
+                  label: 'View waybill',
+                  icon: Icons.receipt_long_outlined,
+                  compact: true,
                   onPressed: () => showWaybillModal(
                     context,
                     ref,
                     tripId: trip.id,
                     waybillNumber: txn?.referenceNumber,
                   ),
-                  icon: const Icon(Icons.receipt_long_outlined, size: 18),
-                  label: const Text('View waybill'),
                 ),
               ],
             ),
