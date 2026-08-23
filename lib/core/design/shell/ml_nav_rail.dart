@@ -118,7 +118,7 @@ class MlNavRail extends StatefulWidget {
   static const double collapsedWidth = 80;
 
   /// Expanded width. M3 puts an expanded rail between 220 and 360; 280 is what
-  /// fits this app's longest label ("Transporter Driver limits") at the default
+  /// fits this app's longest label ("Transporter driver limits") at the default
   /// text scale without truncation.
   static const double expandedWidth = 280;
 

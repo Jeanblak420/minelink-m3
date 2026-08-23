@@ -181,7 +181,7 @@ List<MlNavNode> consoleNavTree() => <MlNavNode>[
         route: '/super-admin/request-tracking',
       ),
       MlNavNode.leaf(
-        label: 'Transporter Driver limits',
+        label: 'Transporter driver limits',
         icon: Icons.groups_outlined,
         selectedIcon: Icons.groups_rounded,
         route: '/super-admin/driver-limits',

@@ -76,7 +76,7 @@ class _DriverLimitRequestsScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           MlPageHeader(
-            title: 'Transporter Driver limits',
+            title: 'Transporter driver limits',
             meta: async.valueOrNull == null
                 ? null
                 : mlCount(async.value!.length, 'request'),
@@ -174,57 +174,92 @@ class _RequestCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(MlTokens.rXl),
         border: Border.all(color: semantic.borderCard),
       ),
-      child: Wrap(
-        spacing: 20,
-        runSpacing: 12,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          MlPlatePill(r.registration, fontSize: 13),
-          Text(
-            r.companyName ?? '—',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: semantic.textStrong,
+      child: Builder(builder: (context) {
+        // Identity on the left, the decision on the right — the reference's
+        // placement for a row's actions (§4). These all rode in one Wrap, so
+        // Approve / Decline and the status pill floated mid-row wherever the
+        // text happened to end. Found 2026-08-23 in the Phase 3 pass. Under
+        // 820px the trailing block drops under the identity.
+        final identity = Wrap(
+          spacing: 20,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            MlPlatePill(r.registration, fontSize: 13),
+            Text(
+              r.companyName ?? '—',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: semantic.textStrong,
+              ),
             ),
-          ),
-          Text(
-            '${r.currentLimit} → ${mlCount(r.requestedLimit, 'driver')}',
-            style: TextStyle(
-              fontFamily: MlTokens.fontMono,
-              fontWeight: FontWeight.w700,
-              color: semantic.textStrong,
+            Text(
+              '${r.currentLimit} → ${mlCount(r.requestedLimit, 'driver')}',
+              style: TextStyle(
+                fontFamily: MlTokens.fontMono,
+                fontWeight: FontWeight.w700,
+                color: semantic.textStrong,
+              ),
             ),
-          ),
-          Text(
-            // No name means DROP the clause, not print "by —". An em dash in
-            // a table cell reads as "we do not know this"; in the middle of a
-            // sentence it reads as a mistake. The timestamp still stands on
-            // its own.
-            r.requestedByName == null
-                ? MlTime.stamp(r.createdAt)
-                : 'by ${r.requestedByName} · ${MlTime.stamp(r.createdAt)}',
-            style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint),
-          ),
-          if (r.isPending) ...[
-            MlButton.go(
-              label: 'Approve',
-              icon: Icons.check_rounded,
-              compact: true,
-              onPressed: busy ? null : onApprove,
+            Text(
+              // No name means DROP the clause, not print "by —". An em dash
+              // in a table cell reads as "we do not know this"; in the
+              // middle of a sentence it reads as a mistake. The timestamp
+              // still stands on its own.
+              r.requestedByName == null
+                  ? MlTime.stamp(r.createdAt)
+                  : 'by ${r.requestedByName} · ${MlTime.stamp(r.createdAt)}',
+              style:
+                  context.mlText.bodyMedium.copyWith(color: semantic.textFaint),
             ),
-            MlButton.danger(
-              label: 'Decline',
-              icon: Icons.close_rounded,
-              compact: true,
-              onPressed: busy ? null : onDecline,
-            ),
-          ] else
-            MlStatusBadge(
-              label: r.status == 'approved' ? 'Approved' : 'Declined',
-              tone: tone,
-            ),
-        ],
-      ),
+          ],
+        );
+        final wide = MediaQuery.sizeOf(context).width >= 820;
+        final trailing = Wrap(
+          alignment: wide ? WrapAlignment.end : WrapAlignment.start,
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            if (r.isPending) ...[
+              MlButton.go(
+                label: 'Approve',
+                icon: Icons.check_rounded,
+                compact: true,
+                onPressed: busy ? null : onApprove,
+              ),
+              MlButton.danger(
+                label: 'Decline',
+                icon: Icons.close_rounded,
+                compact: true,
+                onPressed: busy ? null : onDecline,
+              ),
+            ] else
+              MlStatusBadge(
+                label: r.status == 'approved' ? 'Approved' : 'Declined',
+                tone: tone,
+              ),
+          ],
+        );
+        if (wide) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(child: identity),
+              const SizedBox(width: 12),
+              trailing,
+            ],
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            identity,
+            const SizedBox(height: 10),
+            SizedBox(width: double.infinity, child: trailing),
+          ],
+        );
+      }),
     );
   }
 }

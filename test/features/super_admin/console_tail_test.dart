@@ -31,6 +31,7 @@ import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/features/super_admin/screens/account_deactivations_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/audit_logs_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/available_routes_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/driver_limit_requests_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/organization_detail_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/platform_users_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/token_history_screen.dart';
@@ -90,6 +91,7 @@ void main() {
         ...consoleCaptureOverrides(),
         ...portalCaptureOverrides(),
         ...consoleTailOverrides(),
+        ...consoleLastOverrides(),
       ],
       child: MaterialApp(
         theme: AppTheme.darkTheme,
@@ -279,6 +281,33 @@ void main() {
     final title = tester.getRect(find.text('RT-0042'));
     expect(title.top, closeTo(transit.top, 14),
         reason: 'at 1600px the title and the actions share the top row');
+  });
+
+  testWidgets('a driver-limit request puts its decision on the right',
+      (tester) async {
+    // Identity, timestamp, Approve / Decline and the status pill all rode
+    // in one Wrap, so the decision floated mid-row wherever the text ended.
+    // Phase 3 pass, 2026-08-23. Also the title: "Transporter driver
+    // limits", not a capital D mid-label.
+    await pump(tester, const DriverLimitRequestsScreen(),
+        width: 1600, height: 1200);
+    expect(find.text('Transporter driver limits'), findsOneWidget);
+    final card = find
+        .ancestor(of: find.text('Roadhaul Logistics'),
+            matching: find.byType(Container))
+        .first;
+    final cardRect = tester.getRect(card);
+    final decline = tester.getRect(find.widgetWithText(MlButton, 'Decline'));
+    expect(decline.right, closeTo(cardRect.right - 16, 1.5),
+        reason: 'the decision is not right-aligned inside its row');
+    final badge = tester.getRect(find.text('APPROVED'));
+    final badgeCard = tester.getRect(find
+        .ancestor(of: find.text('Northline Carriers'),
+            matching: find.byType(Container))
+        .first);
+    expect(badge.right, lessThan(badgeCard.right - 16 + 1.5));
+    expect(badge.right, greaterThan(badgeCard.right - 40),
+        reason: 'the status pill is not at the right edge of its row');
   });
 
   testWidgets('platform users name the role in English', (tester) async {

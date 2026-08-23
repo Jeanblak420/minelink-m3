@@ -210,7 +210,7 @@ String _consoleTitle(String path) {
   // '/request-tracking' has no '/requests/' in it, so it never collided with
   // the block above — it simply was not listed.
   if (path.contains('/request-tracking')) return "Request's Tracking Logs";
-  if (path.contains('/driver-limits')) return 'Transporter Driver limits';
+  if (path.contains('/driver-limits')) return 'Transporter driver limits';
   if (path.contains('/margin-ledger')) return 'Margin ledger history';
   if (path.contains('/recon-tables')) return 'Recon tables';
   if (path.contains('/disputes')) return 'Disputes';
