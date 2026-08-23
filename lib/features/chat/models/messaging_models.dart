@@ -2,6 +2,8 @@
 /// Backed by chat_rooms / chat_messages / org_connections / get_chat_contacts.
 library;
 
+import 'package:flutter_application_1/features/auth/models/user_type.dart';
+
 
 /// Which contact group a [ChatContact] belongs to (drives section headers).
 enum ContactGroupKind { myCompany, mineLink, connected, organization, unknown }
@@ -57,6 +59,29 @@ class ChatContact {
 
   /// True when the chat hierarchy, not a fault, is what stands in the way.
   bool get isBlockedByHierarchy => blockReason == 'hierarchy';
+
+  /// What the profile panel's "Role" row reads.
+  ///
+  /// `get_chat_contacts` returns [role] for every contact — `owner` for a
+  /// company account, the employee's `employees.role` otherwise, `member` when
+  /// that is null — and the panel used to throw it away: everyone who was not
+  /// a super admin read "Company member", under a row labelled *Role*. Seen on
+  /// 2026-08-23 opening Controller Test's profile as ironhills.admin: a
+  /// weighbridge controller, described as a member. The contacts list beside
+  /// it had already grouped the same person under CONTROLLERS from the same
+  /// field.
+  ///
+  /// Employee roles go through [UserRole.labelFor], so `controllerWB` reads
+  /// "Load Controller" here exactly as it does on every other screen; an
+  /// unknown wire value shows raw, by that helper's rule. `member` is the
+  /// server's own "no role recorded", and keeps the old wording.
+  String get roleLabel {
+    if (isSuperAdmin) return 'Super Global Admin';
+    final r = role?.trim() ?? '';
+    if (r.isEmpty || r == 'member') return 'Company member';
+    if (r == 'owner') return 'Company owner';
+    return UserRole.labelFor(r);
+  }
 
   /// What the pill next to the contact should read.
   String get blockedLabel {

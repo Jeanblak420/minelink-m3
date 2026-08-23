@@ -4092,9 +4092,7 @@ class _ProfileView extends StatelessWidget {
                   pal: pal,
                   icon: Icons.badge_outlined,
                   label: 'Role',
-                  value: contact.isSuperAdmin
-                      ? 'Super Global Admin'
-                      : 'Company member'),
+                  value: contact.roleLabel),
               _InfoRow(
                   pal: pal,
                   icon: Icons.apartment_outlined,
