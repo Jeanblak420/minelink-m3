@@ -2,9 +2,9 @@
 
 **Rewritten 2026-08-23, at the end of the session that finished the previous
 one's interrupted hardware checks, drove the last four roles nobody had ever
-opened — including one real load through the entire mine floor — found TWELVE
-more defects doing it, fixed all twelve, and discovered that the overflow sweep
-had been laying out empty screens for its whole life.** Everything below is
+opened — including one real load through the entire mine floor — found THIRTEEN
+more defects doing it, fixed all thirteen, and discovered that the overflow
+sweep had been laying out empty screens for its whole life.** Everything below is
 verified state, not intention. It replaces the previous handoff of the same
 name.
 
@@ -20,51 +20,75 @@ file governs the redesign work.**
 
 ## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The tree is **clean**, **163 commits**, nothing half-applied and nothing
+The tree is **clean**, **165 commits**, nothing half-applied and nothing
 uncommitted. **The tip is the commit that carries THIS FILE**, so the count
-above includes it. The last code commit under it is `963ca7e`.
+above includes it. The last code commit under it is `2b235c4`.
 
 **The original worktree was re-checked against its §0 baseline and is
 untouched** — HEAD `df451d0`, the same three pre-existing modified files,
 14163 files under the `-prune` form, two worktree entries, nothing modified
 today.
 
-### 🚨 THE ONE THING LEFT UNDONE, AND WHY
+### 🚨 WHAT THE HANDSET DID AND DID NOT SEE
 
-**The APK built at `963ca7e` has NOT been run on Jean's handset.** It is built,
-hashed and staged:
+**The handset DID run this session's work.** Jean woke it, the APK built at
+`963ca7e` was installed over the NAS, and it was driven as the platform admin.
+What that proved, on glass:
+
+- The build installs and runs, and the console reads live data — Transporters
+  went 45 -> 46 trips and 1,405 -> 1,439 t, picking up the load driven earlier.
+- **The timestamp vocabulary**: `/super-admin/crash-reports` reads
+  `22 Aug 2026 . 20:50`, not `Aug 22, 2026 8:50 PM`.
+- **The recon table's figures**: 49 rows, and `Day 102.10 t` — exactly the
+  three loads inside 24 hours (34.2 + 33.7 + 34.2).
+- **And it found a defect nothing else could.** Jean's phone runs a raised
+  system font size, and the TIME-IN column rendered `12:35` as `12:3` over `5`.
+  That is section 3.15, and it reproduced deterministically the moment it was
+  measured.
+
+**What it has NOT seen is the fix for that**, plus everything committed after
+`963ca7e`. A newer APK is built, hashed and staged:
 
 ```
 build/app/outputs/flutter-apk/app-debug.apk
 \\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk
-SHA-256  355263585836CBDBD11948A1690031F927E65AB070B88D7077E4ECBFF510378C   (both ends match)
+SHA-256  6BCAE044229625FB32E770DC5CFA62D38EA6A3E584AF8F07BDA54F0663D82422   (both ends match)
 ```
 
-**The phone's display went to sleep and stayed asleep.** `status` reports
-`sharing=True control=True` — host mode never dropped — but `probe` reports
-**0.061 bits/pixel**, which is the tool's way of saying nothing is on the
-screen. Injected touches cannot wake it and only Jean can. The session asked
-him, said what it was for, and carried on with everything that did not need the
-handset, re-probing as it went. It never came up.
+The phone's screen went to sleep again — between one `probe` and the next — and
+only Jean can wake it. It was 02:15 and he had almost certainly turned in. The
+session asked twice, said what it was for, and finished everything that did not
+need the handset.
 
-**So the first job next session is:** ask Jean to wake the phone, install that
-APK (route in §5), and drive the three things a handset proves and nothing else
-does —
+⚠️ **The screen timeout is SHORT — short enough to sleep during the ~2.5 minute
+download.** Ask him to keep it awake, or to lengthen the timeout, before
+starting the install.
 
-1. **The driver's hero card at a raised text size.** Settings → Display →
-   Font size, one or two notches up. `CURRENT TRIP` and the status pill must
-   sit on two lines with NO yellow-and-black stripe. At 360 px × 1.3 this
-   overflowed by 44 px before `963ca7e`. Verified on the emulator at font
-   scale 1.3 with a real trip; not yet on glass.
-2. **The load controller's truck row and the buyer's reconciliation card**, same
+**So the first job next session is:** install that APK and drive the four
+things a handset proves and nothing else does —
+
+1. **The recon table at his font size.** `/super-admin/recon-tables`, scroll
+   into the table. `TIME-IN` must read `12:35` on ONE line. This is the one the
+   handset itself found.
+2. **The driver's hero card at a raised text size.** `CURRENT TRIP` and the
+   status pill on two lines with NO yellow-and-black stripe. Overflowed by
+   44 px before `963ca7e`. Emulator-verified at font scale 1.3 with a real
+   trip; not yet on glass.
+3. **The load controller's truck row and the buyer's reconciliation card**, same
    raised text size — 22 px, 21 px and 32 px overflows before this session.
-3. **No new `Duplicate GlobalKey` rows** — baseline, navigate six or seven
-   screens, re-count. SQL in §5. This build has never been on the handset at
-   all, and the last three times a "finished" fix went back on glass it was the
-   handset that had the last word.
+4. **No new `Duplicate GlobalKey` rows** — baseline, navigate six or seven
+   screens, re-count. SQL in section 5. **Zero were raised all session** from
+   the handset, the emulator and six browser accounts, but this exact build has
+   not been on glass.
 
 Put the phone back the way it was found: signed in as the platform admin, on
 `home`, every screenshot deleted.
+
+⚠️ **One thing was answered on his behalf and he should know:** installing
+raised a Google Play Protect prompt — *"Turn on Play Protect?"* — which is a
+device-wide setting, not a step in the install. It was **Declined**, because
+declining leaves his configuration exactly as he had it. Accepting would have
+turned on a service he has off.
 
 ### What this session did, in one paragraph
 
@@ -73,7 +97,7 @@ then went after the four roles §4.2 had listed as never driven. Reaching the
 Load Controller meant there had to be a truck on the weighbridge, so it drove
 one real load the whole way — transporter accepts, truck and driver assigned,
 driver starts, security checks in, tare, gross, four sealed and photographed,
-waybill, gate check-out. Twelve defects came out of the sweep. **The most
+waybill, gate check-out. Thirteen defects came out of the sweep. **The most
 important one is not a screen at all: the portal overflow sweep had been
 running 27 screens × 3 widths × 5 text scales against EMPTY providers**, and
 turning the data on found four real overflows it had always passed.
@@ -85,7 +109,7 @@ turning the data on found four real overflows it had always passed.
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, redesigned onto Material 3. Its own git repo (`main`), **163 commits**, clean tree. |
+| What it is | A **complete, independent fork** of MineLink, redesigned onto Material 3. Its own git repo (`main`), **165 commits**, clean tree. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
@@ -156,7 +180,7 @@ Still standing:
 
 ```
 flutter analyze                                 no issues
-flutter test                                    2475 passed, 1 skipped
+flutter test                                    2478 passed, 1 skipped
 dart tool/release_guards.dart                   42/42 PASS, 0 FAIL
 dart tool/release_guards.dart --selftest        all guards bite
 py -3 tool/_sabotage.py                         ALL SABOTAGES CAUGHT
@@ -173,11 +197,11 @@ render harness — RENDER NOTE / FAILURE STATE    0 / 0
 render harness — LOW CONTRAST                   0 (app screens; see below)
 render harness — CUT OFF                        5 renders / 9 strings, deliberate
 CRASH REPORTS RAISED ALL SESSION                0
-APK ON JEAN'S SM-G780G                          NOT INSTALLED — staged on the NAS
+APK ON JEAN'S SM-G780G                          963ca7e RAN AND WAS DRIVEN; 2b235c4 staged, not installed
 ```
 
-Test count **2440 → 2475**. Guards **41 → 42**. `one_clock_check.py` went from
-**5 patterns to 6**. Renders unchanged at 227 (twelve were regenerated; none
+Test count **2440 → 2478**. Guards **41 → 42**. `one_clock_check.py` went from
+**5 patterns to 6**. Renders unchanged at 227 (fourteen were regenerated; none
 added).
 
 ⚠️ **`CUT OFF` counts RENDERS, not strings** — 5 lines, 9 strings, unchanged.
@@ -421,6 +445,39 @@ gross-scale photo and the controller's stored signature.
 **Zero crash reports were raised all session** — across the handset's 12
 navigations, the emulator, and hours of browser driving as six accounts.
 
+### 3.15 🚨 "12:35" rendered as "12:3" over "5" on the billing table — `2b235c4`
+
+**Found on the handset, by the handset, and by nothing else.** Jean's phone runs
+a raised system font size; the recon table's TIME-IN column broke a clock time
+in half.
+
+The table's minimum width is a MEASURED 1480 px, and the session that measured
+it wrote down exactly why: at 1120 the fourteen columns squeezed until Flutter
+broke inside words rather than between them — "DELIVER / ED", "VARIAN / CE",
+"PO / D". That fix was right. It was measured **at text scale 1.0** and then
+left as a fixed pixel figure under a type size the reader controls, which is
+the trap `MlDataTable._effectiveMinWidth` documents in as many words, having
+fallen into it once already and overflowed six screens at 1.3.
+
+Measured at the table's own minimum:
+
+| text scale | time cells wrapped |
+|---|---|
+| 1.0 | 0 |
+| 1.3 | **16** |
+| 2.0 | **16** |
+
+A wrapped cell is a cell that FITS, so no sweep, no overflow capture and no
+render could ever have seen it — the same reason the broken header words
+shipped. The minimum scales with the text now, because the minimum is a
+statement ABOUT the text.
+
+`recon_table_legibility_test.dart` runs at 1.0, 1.3 and 2.0 and asserts on
+values with NO legal break point in them (a clock time, a tonnage), so more
+than one line can only be a break inside the value. 2.0 is included because
+Android's platform text size goes past the console's own 0.85—1.3 slider and
+this table is read on a phone.
+
 ---
 
 ## 4. What is NOT done — PICK UP HERE
@@ -491,7 +548,7 @@ button. If it should stay, the fix has to become geometric.
 cd "/c/Users/Somebody Someone/Music/SHOWME!/MineLink-M3"
 
 flutter analyze                                  # must be clean
-flutter test                                     # 2475 passing, 1 skipped
+flutter test                                     # 2478 passing, 1 skipped
 dart tool/release_guards.dart                    # 42/42
 dart tool/release_guards.dart --selftest         # every guard must BITE
 py -3 tool/_sabotage.py                          # every instrument must BITE
@@ -786,11 +843,11 @@ off. Read these TWO handoff files before doing anything else, in this order.
    Rewritten 2026-08-23 at the end of the session that finished the previous
    one's interrupted hardware checks, drove the last four roles nobody had ever
    opened — including ONE REAL LOAD through the entire mine floor — found
-   TWELVE more defects doing it, fixed all twelve, and discovered that the
+   THIRTEEN more defects doing it, fixed all thirteen, and discovered that the
    portal overflow sweep had been laying out EMPTY SCREENS its whole life.
    Read it in this order: "WHERE THIS SESSION STOPPED — READ THIS FIRST"
-   (including "THE ONE THING LEFT UNDONE, AND WHY"), then §0 (where you are +
-   the one rule), §2 (verified state), §3 (what was done — §3.0 to §3.14, and
+   (including "WHAT THE HANDSET DID AND DID NOT SEE"), then §0 (where you are +
+   the one rule), §2 (verified state), §3 (what was done — §3.0 to §3.15, and
    DO NOT REDO ANY OF IT), §4 (what is NOT done — start at §4.1), §5 (how to
    work here, including how to drive a browser WITHOUT touching Jean's mouse)
    and §6 (seven things owed to the SHIPPING app).
@@ -805,7 +862,7 @@ off. Read these TWO handoff files before doing anything else, in this order.
 
 THE PATHS THAT MATTER
 
-  Work happens here (its own git repo, branch main, 163 commits, clean):
+  Work happens here (its own git repo, branch main, 165 commits, clean):
     C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
   NEVER TOUCHED, for any reason:
@@ -830,37 +887,54 @@ THE END:
   tree is fine and often necessary; writing to it, or running any MUTATING git
   command inside it, is not.
 
-🚨 START HERE — THE ONE THING LEFT UNDONE
+🚨 START HERE — WHAT THE HANDSET DID AND DID NOT SEE
 
-The APK built at commit 963ca7e is BUILT, HASHED AND STAGED but has NEVER RUN
-ON JEAN'S HANDSET:
+THE HANDSET DID RUN THIS SESSION'S WORK. Jean woke it, the APK built at 963ca7e
+was installed over the NAS, and it was driven as the platform admin. On glass
+that proved the build installs and runs against live data (Transporters 45 -> 46
+trips, 1,405 -> 1,439 t), that /super-admin/crash-reports reads
+"22 Aug 2026 . 20:50" rather than "Aug 22, 2026 8:50 PM", and that the recon
+table shows 49 rows with Day = 102.10 t (exactly the three loads inside 24
+hours). AND IT FOUND A DEFECT NOTHING ELSE COULD — his phone runs a raised
+system font size, and the TIME-IN column rendered "12:35" as "12:3" over "5".
+
+WHAT IT HAS NOT SEEN IS THE FIX FOR THAT, plus everything committed after
+963ca7e. A newer APK is BUILT, HASHED AND STAGED:
 
     build/app/outputs/flutter-apk/app-debug.apk
     \\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk
-    SHA-256 355263585836CBDBD11948A1690031F927E65AB070B88D7077E4ECBFF510378C
+    SHA-256 6BCAE044229625FB32E770DC5CFA62D38EA6A3E584AF8F07BDA54F0663D82422
             (both ends match)
 
-The phone's display went to sleep and stayed asleep for the whole session.
-status reported sharing=True control=True — host mode never dropped — but probe
-reported 0.061 bits/pixel, which is the tool's way of saying nothing is on the
-screen. Injected touches cannot wake it and only Jean can. He was asked, told
-what it was for, and the session carried on with everything that did not need
-the handset, re-probing as it went.
+The phone's screen went to sleep again — between one probe and the next — and
+only Jean can wake it. It was 02:15 and he had almost certainly turned in. The
+session asked twice, said what it was for, and finished everything that did not
+need the handset.
 
-So your first job is: ask Jean to wake the phone, install that APK (route in
-§5), and drive the three things a handset proves and nothing else does —
+WARNING: THE SCREEN TIMEOUT IS SHORT — short enough to sleep during the ~2.5
+minute download. Ask him to keep it awake, or to lengthen the timeout, before
+starting the install.
 
-  1. THE DRIVER'S HERO CARD AT A RAISED TEXT SIZE. Settings > Display > Font
-     size, one or two notches up. "CURRENT TRIP" and the status pill must sit
-     on two lines with NO yellow-and-black stripe. At 360px x 1.3 this
-     overflowed by 44 pixels before 963ca7e. Verified on the emulator at font
-     scale 1.3 with a real trip; not yet on glass.
-  2. THE LOAD CONTROLLER'S TRUCK ROW AND THE BUYER'S RECONCILIATION CARD, same
+ALSO TELL HIM: installing raised a Google Play Protect prompt, "Turn on Play
+Protect?", which is a device-wide setting rather than a step in the install. It
+was DECLINED, because declining leaves his configuration exactly as he had it.
+
+So your first job is: install that APK and drive the four things a handset
+proves and nothing else does —
+
+  1. THE RECON TABLE AT HIS FONT SIZE. /super-admin/recon-tables, scroll into
+     the table. TIME-IN must read "12:35" on ONE line. This is the one the
+     handset itself found.
+  2. THE DRIVER'S HERO CARD AT A RAISED TEXT SIZE. "CURRENT TRIP" and the
+     status pill must sit on two lines with NO yellow-and-black stripe. At
+     360px x 1.3 this overflowed by 44 pixels before 963ca7e. Verified on the
+     emulator at font scale 1.3 with a real trip; not yet on glass.
+  3. THE LOAD CONTROLLER'S TRUCK ROW AND THE BUYER'S RECONCILIATION CARD, same
      raised text size — 22px, 21px and 32px overflows before this session.
-  3. NO NEW "Duplicate GlobalKey" CRASH REPORTS — baseline, navigate six or
-     seven screens, re-count. SQL in §5. This build has never been on the
-     handset at all, and the last three times a "finished" fix went back on
-     glass it was the handset that had the last word.
+  4. NO NEW "Duplicate GlobalKey" CRASH REPORTS — baseline, navigate six or
+     seven screens, re-count. SQL in §5. ZERO were raised all session from the
+     handset, the emulator and six browser accounts, but this exact build has
+     not been on glass.
 
 Put the phone back the way it was found: signed in as the platform admin, on
 home, every screenshot deleted.
@@ -873,7 +947,7 @@ instead: a CDP driver that never touches the cursor, and the Android emulator.
 VERIFIED STATE (all run at the end, against the tree as it stands)
 
 flutter analyze                        no issues
-flutter test                           2475 passed, 1 skipped
+flutter test                           2478 passed, 1 skipped
 dart tool/release_guards.dart          42/42 PASS, 0 FAIL
 dart tool/release_guards.dart --selftest   all guards bite
 py -3 tool/_sabotage.py                ALL SABOTAGES CAUGHT
@@ -911,10 +985,10 @@ passed. When a suite is green, ask what it is green OVER.
 
 WHAT IS ALREADY DONE — DO NOT REDO ANY OF THIS
 
-Twelve defects, every one found by DRIVING the app or by an instrument that was
-made to see, every one fixed with a test that was SABOTAGED and watched to fail
-before being kept — and every fix that turns a figure into a dash also keeps a
-case that stays GREEN under sabotage, so over-fixing would show too.
+Thirteen defects, every one found by DRIVING the app or by an instrument that
+was made to see, every one fixed with a test that was SABOTAGED and watched to
+fail before being kept — and every fix that turns a figure into a dash also
+keeps a case that stays GREEN under sabotage, so over-fixing would show too.
 
   0. THE PREVIOUS SESSION'S TWO INTERRUPTED HARDWARE CHECKS, BOTH PASSED on the
      handset: the sign-out dialog copy (then Cancel), and 12 navigations with
@@ -944,6 +1018,11 @@ case that stays GREEN under sabotage, so over-fixing would show too.
  11. TWO "THIS WEEK" TONNAGES ON THE DRIVER'S SCREEN, 170.5 t and 136.3 t.
  12. THE DRIVER'S HERO CARD OVERFLOWED BY 44 PIXELS at 360px x 1.3, plus the
      four the sweep found once it had data.
+ 13. "12:35" RENDERED AS "12:3" OVER "5" on the recon table — found ON THE
+     HANDSET, because Jean's phone runs a raised system font size. The table's
+     minimum width was MEASURED at text scale 1.0 and then left fixed under a
+     type size the reader controls. 0 wrapped cells at 1.0, SIXTEEN at 1.3 and
+     at 2.0. A wrapped cell is a cell that FITS, so nothing could have seen it.
 
 ALSO DONE: ONE REAL LOAD DRIVEN THROUGH THE ENTIRE MINE FLOOR (trip 0d9c6792,
 truck S6W001GP) — transporter accepts, truck and driver assigned, driver

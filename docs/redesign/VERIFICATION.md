@@ -651,7 +651,7 @@ and quality tabs — by walking one real load through the entire mine floor.
 | | |
 |---|---|
 | `flutter analyze` | no issues |
-| `flutter test` | **2,475 passed**, 1 skipped |
+| `flutter test` | **2,478 passed**, 1 skipped |
 | `dart tool/release_guards.dart` | **42/42** PASS, 0 FAIL — `no-skeleton-dateformat` is new |
 | `dart tool/release_guards.dart --selftest` | every guard bites |
 | `py -3 tool/_sabotage.py` | ALL SABOTAGES CAUGHT |
@@ -660,6 +660,7 @@ and quality tabs — by walking one real load through the entire mine floor.
 | `py -3 tool/health_probe.py` | 7/7 services answering |
 | Renders | 227 |
 | Crash reports raised all session | **0**, across the handset, the emulator and six browser accounts |
+| APK on the SM-G780G | `963ca7e` **RAN AND WAS DRIVEN**; `2b235c4` staged, not installed |
 | Original worktree | `df451d0`, 14163 files, 3 pre-existing modified, 2 entries, 0 today |
 
 ### The interrupted hardware checks, finished
@@ -691,7 +692,7 @@ Four seals were demanded, numbered and photographed, matching
 server-side with origin, destination, the gross-scale photo and the
 controller's stored signature.
 
-### Twelve defects, all found by looking
+### Thirteen defects, all found by looking
 
 1. **A wall clock converted twice** — six sites in the recon table including
    its Excel/CSV/PDF export of the billing record, two in the chat dock, three
@@ -722,6 +723,11 @@ controller's stored signature.
 11. **Two "this week" tonnages on the driver's screen** — 170.5 t loaded and
     136.3 t delivered, one scroll apart, only one label saying which.
 12. **The driver's hero card overflowed by 44 px** at 360 px × text scale 1.3.
+13. **`12:35` rendered as `12:3` over `5`** on the recon table — found ON THE
+    HANDSET, whose system font size is raised. The table's minimum width was
+    measured at text scale 1.0 and then left fixed under a type size the reader
+    controls: 0 wrapped cells at 1.0, **16** at 1.3 and 16 at 2.0. A wrapped
+    cell is a cell that FITS, so nothing else could have seen it.
 
 ### The instruments grew, and one was blind
 
@@ -751,9 +757,11 @@ controller's stored signature.
 
 ### What is NOT proven
 
-- **The handset has not run this build.** The APK (`355263585836CBDB…`) is
-  staged on the NAS. The phone's display went to sleep and only Jean can wake
-  it; the session paused and asked, per the rule.
+- **The handset ran `963ca7e` and was driven on it** — the build, the timestamp
+  vocabulary, the recon figures, and the defect above. **It has not run
+  `2b235c4`**, which carries that defect's fix; the APK (`6BCAE044…`) is staged
+  on the NAS. The phone's screen slept again and only Jean can wake it; the
+  session asked twice, per the rule, and finished everything else.
 - **The POD leg of trip `0d9c6792` was not driven** — it is `en_route_to_offload`,
   a normal state shared with two older trips.
 - Physical GPS on a road, iOS and Windows — all unchanged.
