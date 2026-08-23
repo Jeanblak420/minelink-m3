@@ -62,7 +62,7 @@ class _CompanyEmployeesScreenState
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
           child: MlPageHeader(
-            title: 'Company Employees',
+            title: 'Company employees',
             description: 'Everyone with a login under this company.',
             meta: mlCount(state.employees.length, 'user'),
             actions: [
@@ -95,7 +95,7 @@ class _CompanyEmployeesScreenState
   Widget _buildRestrictedState(BuildContext context) {
     return const MlEmptyState(
       icon: Icons.lock_outline,
-      title: 'Management Access Required',
+      title: 'Management access required',
       message:
           'Only company owners, admins, and management can add, edit, or remove company users.',
     );
@@ -269,7 +269,7 @@ class _CompanyEmployeesScreenState
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Remove User'),
+        title: const Text('Remove user'),
         content: Text(
           'Remove ${employee.fullName} from this company? This will remove their role and company access, but it will not delete their auth account.',
         ),
@@ -348,10 +348,10 @@ class _CompanyEmployeesScreenState
   Widget _buildEmptyState(BuildContext context, OrgType orgType) {
     return MlEmptyState(
       icon: Icons.people_outline,
-      title: 'No Employees Found',
+      title: 'No employees found',
       message: "Your company doesn't have any employees yet.",
       action: MlButton.primary(
-        label: 'Add User',
+        label: 'Add user',
         icon: Icons.person_add_alt_1,
         onPressed: () => _showCreateUserDialog(context, orgType),
       ),
@@ -362,7 +362,7 @@ class _CompanyEmployeesScreenState
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Accept Employee Request'),
+        title: const Text('Accept employee request'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -441,7 +441,7 @@ class _CompanyEmployeesScreenState
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Confirm Role Change'),
+        title: const Text('Confirm role change'),
         content: Text(
           'Change ${employee.fullName}\'s role from $currentRoleText to ${newRole.label}. Are you sure?',
         ),
@@ -500,7 +500,7 @@ class _CompanyEmployeesScreenState
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Decline Request'),
+        title: const Text('Decline request'),
         content: Text(
           'Are you sure you want to decline ${employee.fullName}\'s request to join your company? This action cannot be undone.',
         ),
@@ -562,13 +562,13 @@ class _CompanyEmployeesScreenState
       runSpacing: 8,
       children: [
         MlButton.tonal(
-          label: 'Edit User',
+          label: 'Edit user',
           icon: Icons.edit_outlined,
           compact: true,
           onPressed: () => _showEditUserDialog(context, employee, orgType),
         ),
         MlButton.outline(
-          label: 'Remove User',
+          label: 'Remove user',
           icon: Icons.person_remove_alt_1_outlined,
           compact: true,
           onPressed: () => _showRemoveConfirmationDialog(context, employee),
@@ -632,7 +632,7 @@ class _CompanyEmployeesScreenState
             children: [
               const Expanded(
                 child: Text(
-                  'Pending Request',
+                  'Pending request',
                   style: TextStyle(
                     fontFamily: MlTokens.fontSans,
                     fontWeight: FontWeight.w800,
@@ -689,7 +689,7 @@ class _CompanyEmployeesScreenState
           _buildManagementButtons(context, employee, orgType),
           const SizedBox(height: 12),
           Text(
-            'Select Role:',
+            'Select role:',
             style: context.mlText.titleSmall.copyWith(
               color: MlSemantic.of(context).textStrong,
               fontWeight: FontWeight.w700,
@@ -724,7 +724,7 @@ class _CompanyEmployeesScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Manage User And Role',
+            'Manage user and role',
             style: context.mlText.titleMedium.copyWith(
               color: MlSemantic.of(context).textStrong,
               fontWeight: FontWeight.w800,
@@ -861,11 +861,20 @@ class _CompanyEmployeesScreenState
     final awaitingRole = employees
         .where((e) => e.status == 'pending_role' && e.role == null)
         .toList(growable: false);
+    // "Other" also catches an ACTIVE employee whose role is not one this
+    // org type has. The role groups below iterate `getRolesForOrgType`, so
+    // a weighbridge controller at a transporter matched no group — and
+    // `other` only caught `role == null` — so he was counted in "3 PEOPLE ·
+    // 3 ACTIVE" and drawn nowhere. An employee who silently vanishes from
+    // the register is the worst outcome a register can have; an unusual
+    // state is what this group is for. Phase 3 mine pass, 2026-08-23.
+    final orgRoles = UserRole.getRolesForOrgType(orgType).toSet();
     final other = employees
         .where((e) =>
-            e.role == null &&
-            e.status != 'pending_company' &&
-            !(e.status == 'pending_role'))
+            (e.role == null &&
+                e.status != 'pending_company' &&
+                !(e.status == 'pending_role')) ||
+            (e.role != null && !orgRoles.contains(e.role)))
         .toList(growable: false);
 
     final sections = <Widget>[
