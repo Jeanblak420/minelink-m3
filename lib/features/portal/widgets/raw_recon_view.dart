@@ -622,7 +622,21 @@ class _ExcelReconTable extends StatelessWidget {
     // as on a phone, and that is the right trade: `MlWideTable`'s own doc says a
     // wide register "cannot be made to fit a laptop and should not be truncated
     // to try", and a scrollbar that says so beats a header nobody can read.
-    return MlWideTable(minWidth: 1480, child: table);
+    // 🚨 AND IT SCALES WITH THE TEXT. 1480 is measured AT TEXT SCALE 1.0, and
+    // a fixed pixel floor under a user-controlled type size is the same fault
+    // `MlDataTable._effectiveMinWidth` documents in as many words — it took
+    // `kPlateColumnMinWidth` literally once and overflowed six screens at 1.3.
+    //
+    // Measured 2026-08-23, this table at its own minimum: at scale 1.0 no time
+    // cell wraps; at 1.3 and at 2.0, SIXTEEN of them do, and `12:35` renders as
+    // `12:3` over `5`. Found on Jean's own handset, which runs a raised font
+    // size — the header fix of 2026-08-20 solved the same class one size up and
+    // left the figure fixed.
+    //
+    // Same conservative direction as the sibling: over-paying a little on width
+    // costs a few pixels of horizontal scroll on a table that already scrolls.
+    final scale = MediaQuery.textScalerOf(context).scale(16) / 16;
+    return MlWideTable(minWidth: 1480 * scale, child: table);
   }
 
   TableRow _row(

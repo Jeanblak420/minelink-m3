@@ -45,7 +45,8 @@ void main() {
     );
   });
 
-  Future<void> pumpRecon(WidgetTester tester, double width) async {
+  Future<void> pumpRecon(WidgetTester tester, double width,
+      {double textScale = 1.0}) async {
     tester.view.physicalSize = Size(width, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -54,10 +55,16 @@ void main() {
       overrides: [...companyScopeOverrides(), ...portalCaptureOverrides()],
       child: MaterialApp(
         theme: AppTheme.darkTheme,
-        home: const Scaffold(
-          body: SingleChildScrollView(
-            padding: EdgeInsets.all(16),
-            child: RawReconView(companyId: null),
+        home: MediaQuery(
+          data: MediaQueryData(
+            size: Size(width, 2400),
+            textScaler: TextScaler.linear(textScale),
+          ),
+          child: const Scaffold(
+            body: SingleChildScrollView(
+              padding: EdgeInsets.all(16),
+              child: RawReconView(companyId: null),
+            ),
           ),
         ),
       ),
@@ -128,6 +135,58 @@ void main() {
               "_ExcelReconTable's minWidth so it scrolls instead. A broken "
               'word is not an overflow, so nothing else in this suite will '
               'ever tell you.\n  ${broken.join('\n  ')}');
+    });
+  }
+
+  // 3. AND A FIGURE MUST NOT BREAK EITHER, AT ANY TEXT SIZE.
+  //
+  // The header fix of 2026-08-20 raised `minWidth` to a MEASURED 1480 — measured
+  // at text scale 1.0, and then left as a fixed pixel figure under a type size
+  // the reader controls. `MlDataTable._effectiveMinWidth` documents that exact
+  // trap in as many words, having fallen into it once already.
+  //
+  // Found on Jean's own handset on 2026-08-23, which runs a raised font size:
+  // the TIME-IN column read
+  //
+  //     12:3
+  //     5
+  //
+  // Measured at the table's own minimum: 0 wrapped time cells at scale 1.0,
+  // SIXTEEN at 1.3 and sixteen at 2.0. A wrapped cell is a cell that FITS, so
+  // no sweep and no overflow capture could ever have seen it — the same reason
+  // the broken header words shipped.
+  //
+  // 2.0 is included because the platform text size on Android goes past the
+  // console's own 0.85–1.3 slider, and this table is read on a phone.
+  for (final scale in const [1.0, 1.3, 2.0]) {
+    testWidgets('no recon figure breaks in half at text scale $scale',
+        (tester) async {
+      // 500px: narrow enough that the scroll view sizes the table to exactly
+      // its minimum, so the BOUNDARY is what gets measured.
+      await pumpRecon(tester, 500, textScale: scale);
+
+      final broken = <String>[];
+      for (final e in find.byType(Text).evaluate()) {
+        final data = (e.widget as Text).data ?? '';
+        // A clock time and a tonnage: two values with no legal break point in
+        // them at all, so more than one line can only be a break inside one.
+        if (!RegExp(r'^\d\d:\d\d$').hasMatch(data) &&
+            !RegExp(r'^\d+\.\d\d$').hasMatch(data)) {
+          continue;
+        }
+        final p = e.renderObject as RenderParagraph;
+        if (p.size.height > p.getMinIntrinsicHeight(double.infinity) * 1.6) {
+          broken.add(data);
+        }
+      }
+
+      expect(broken, isEmpty,
+          reason: 'at text scale $scale these figures are drawn across two '
+              'lines: $broken. There is no space or hyphen in any of them, so '
+              'the break is INSIDE the value — "12:35" reads as "12:3" over '
+              '"5" on the table this product exists to produce. The minimum '
+              'width has to scale with the text, because the minimum is a '
+              'statement ABOUT the text.');
     });
   }
 
