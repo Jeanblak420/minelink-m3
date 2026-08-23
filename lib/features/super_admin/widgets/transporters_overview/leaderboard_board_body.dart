@@ -630,7 +630,7 @@ class _LeaderCard extends StatelessWidget {
                                 style: t.m(
                                   size: 12,
                                   weight: FontWeight.w500,
-                                  color: entry.deltaUp ? t.good : t.bad,
+                                  color: t.tone(entry.deltaTone),
                                 ),
                               ),
                             ),
@@ -755,7 +755,7 @@ class _RunnerUpCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.right,
-                    style: t.m(size: 12, color: entry.deltaUp ? t.good : t.bad),
+                    style: t.m(size: 12, color: t.tone(entry.deltaTone)),
                   ),
                 ),
             ],

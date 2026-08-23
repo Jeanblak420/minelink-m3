@@ -202,9 +202,16 @@ class MlGlass {
     //     inkMid  #5A697F   -> #455368       7.81        6.42
     //     inkLo   #6F7E94   -> #525F76       6.45        5.30
     //     inkXlo  #7C8AA0   -> #5C6980       5.54        4.56
+    //
+    // inkXlo once more, 2026-08-23: #5C6980 -> #566379. The worst ground
+    // above was the page; the leaderboard's runner-up card in the light
+    // console composites to #DEE6ED, and a 12px "unchanged" in this ink
+    // measured 4.40:1 there — the render's own contrast gate refused it.
+    // #566379 is 4.82 on that card, 5.41 on the canvas, 6.08 on white, and
+    // still lighter than inkLo, so the ladder keeps its order.
     inkMid: Color(0xFF455368),
     inkLo: Color(0xFF525F76),
-    inkXlo: Color(0xFF5C6980),
+    inkXlo: Color(0xFF566379),
     // ── THE LIGHT HUE SET, DEEPENED 2026-08-21 ──────────────────────────
     //
     // These are used as INK far more than as a fill, and the light surface

@@ -227,7 +227,7 @@ class MlOv {
     // pinned by `test/design/ink_ladder_test.dart` rather than by this note.
     inkMid: Color(0xFF455368),
     inkLo: Color(0xFF525F76),
-    inkXlo: Color(0xFF5C6980),
+    inkXlo: Color(0xFF566379),
     // ── THE LIGHT HUE SET, DEEPENED 2026-08-21 ──────────────────────────
     //
     // These are used as INK far more than as a fill, and the light surface

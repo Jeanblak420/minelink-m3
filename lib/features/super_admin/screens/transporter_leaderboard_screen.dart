@@ -176,6 +176,7 @@ class _Error extends StatelessWidget {
 /// database can actually answer, and the footnote says what the table did.
 abstract final class TransporterLeaderboardMapper {
   static const String _dash = '—';
+  static const String _unchanged = 'unchanged';
 
   // ---- export projection --------------------------------------------------
   //
@@ -277,13 +278,20 @@ abstract final class TransporterLeaderboardMapper {
       // "▲ ∞%" and "▲ 0.0%" would both be inventions.
       if (was == null || was <= 0) return _dash;
       final pct = (c.tonsMoved - was) / was * 100;
+      // A true zero is "unchanged", as the dashboard's stat cards say it —
+      // not "▲ 0.0%" in green, a rising arrow on a figure that did not
+      // rise. Phase 3 pass, 2026-08-23.
+      if (pct.abs() < 0.05) return _unchanged;
       return '${pct < 0 ? '▼' : '▲'} ${_pct(pct.abs())}';
     }
 
-    OvTone deltaToneFor(String delta) => delta == _dash
+    // docs/design-reference.md §4: "Negative deltas are amber, not red. Red
+    // is reserved for a fault (expired, variance, missing POD); a downward
+    // trend is a warning, not an error." It was OvTone.bad.
+    OvTone deltaToneFor(String delta) => delta == _dash || delta == _unchanged
         ? OvTone.muted
         : delta.startsWith('▼')
-            ? OvTone.bad
+            ? OvTone.warn
             : OvTone.good;
 
     // ---- KPI row ----------------------------------------------------------
@@ -331,7 +339,7 @@ abstract final class TransporterLeaderboardMapper {
               : null,
           barFraction: leaderTons <= 0 ? 0 : c.tonsMoved / leaderTons,
           delta: delta == _dash ? null : delta,
-          deltaUp: !delta.startsWith('▼'),
+          deltaTone: deltaToneFor(delta),
         ),
       );
     }

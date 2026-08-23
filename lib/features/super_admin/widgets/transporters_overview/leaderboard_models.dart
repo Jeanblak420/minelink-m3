@@ -47,7 +47,7 @@ class OvPodiumEntry {
     required this.barFraction,
     this.metaSuffix,
     this.delta,
-    this.deltaUp = true,
+    this.deltaTone = OvTone.good,
   });
 
   final int rank;
@@ -64,10 +64,16 @@ class OvPodiumEntry {
   /// using the share here is the drop's listed way to make every bar short.
   final double barFraction;
 
-  /// "▲ 12.4%" / "▼ 2.8%". Null when there is no prior period to compare
-  /// against, which renders as nothing rather than as "0.0%".
+  /// "▲ 12.4%" / "▼ 2.8%" / "unchanged". Null when there is no prior period
+  /// to compare against, which renders as nothing rather than as "0.0%".
   final String? delta;
-  final bool deltaUp;
+
+  /// The delta's tone — the same one the ranking rows carry. This was a
+  /// `deltaUp` boolean, which could only say green or red: a true zero
+  /// painted "▲ 0.0%" in green, and a fall was red where the reference
+  /// reserves red for a fault (§4: "negative deltas are amber, not red").
+  /// Phase 3 pass, 2026-08-23.
+  final OvTone deltaTone;
 }
 
 /// One row of the full ranking table.

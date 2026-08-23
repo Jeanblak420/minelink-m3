@@ -236,7 +236,26 @@ void main() {
       expect(byName['Up']!.delta, '▲ 100.0%');
       expect(byName['Up']!.deltaTone, OvTone.good);
       expect(byName['Down']!.delta, '▼ 50.0%');
-      expect(byName['Down']!.deltaTone, OvTone.bad);
+      // Amber, not red: docs/design-reference.md §4 reserves red for a fault;
+      // a downward trend is a warning. It was OvTone.bad.
+      expect(byName['Down']!.deltaTone, OvTone.warn);
+    });
+
+    test('no change is "unchanged" in the muted tone, not a green ▲ 0.0%', () {
+      // The fixture carried the same tonnage both months, and the board drew
+      // a rising green arrow on a figure that did not rise. Phase 3 pass,
+      // 2026-08-23; the dashboard's stat cards already say "unchanged".
+      final d = map(
+        [company('Same', tons: 100, trips: 2)],
+        previous: [company('Same', tons: 100, trips: 2)],
+      );
+      expect(d.rows.single.delta, 'unchanged');
+      expect(d.rows.single.deltaTone, OvTone.muted);
+      expect(d.rows.single.delta, isNot(contains('▲')));
+      // The podium carries the same tone as the row — it used to have only
+      // a boolean, so it painted the same "unchanged" green.
+      expect(d.podium.single.delta, 'unchanged');
+      expect(d.podium.single.deltaTone, OvTone.muted);
     });
 
     test('the column header follows the period, instead of always "vs. Jul"',
