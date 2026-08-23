@@ -483,14 +483,10 @@ class _OverviewTab extends ConsumerWidget {
                   );
                 }),
               const SizedBox(height: 20),
-              Text(
+              const MlSectionTitle(
                 'Company',
-                style: context.mlText.titleMedium.copyWith(
-                  color: MlSemantic.of(context).textStrong,
-                  fontWeight: FontWeight.w800,
-                ),
+                margin: EdgeInsets.only(bottom: 8),
               ),
-              const SizedBox(height: 8),
               _InfoRow(
                   label: 'Company Name',
                   value: org['company_name'] as String? ?? '—'),
@@ -513,26 +509,18 @@ class _OverviewTab extends ConsumerWidget {
                             .trim(),
               ),
               const Divider(height: 32),
-              Text(
+              const MlSectionTitle(
                 'Account owner (login)',
-                style: context.mlText.titleMedium.copyWith(
-                  color: MlSemantic.of(context).textStrong,
-                  fontWeight: FontWeight.w800,
-                ),
+                margin: EdgeInsets.only(bottom: 8),
               ),
-              const SizedBox(height: 8),
               _InfoRow(label: 'Owner name', value: _ownerName(org)),
               _InfoRow(label: 'Owner email', value: _ownerEmail(org)),
               _InfoRow(label: 'Owner contact No.', value: ownerContact),
               const Divider(height: 32),
-              Text(
+              const MlSectionTitle(
                 'Seats',
-                style: context.mlText.titleMedium.copyWith(
-                  color: MlSemantic.of(context).textStrong,
-                  fontWeight: FontWeight.w800,
-                ),
+                margin: EdgeInsets.only(bottom: 8),
               ),
-              const SizedBox(height: 8),
               _InfoRow(label: 'Seat Limit', value: '$seatLimit'),
               _InfoRow(label: 'Seats Used', value: '$seatsUsed'),
               _InfoRow(
@@ -590,17 +578,17 @@ class _ChatConnectionsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        // The reference's section header — Fraunces title, one calm line
+        // under it — through MlSectionTitle, as the four headings above it.
+        // These five were PlusJakartaSans ExtraBold set by hand, the
+        // portal's pre-reference vocabulary (ml_section_title.dart), on a
+        // console screen. Found 2026-08-23 in the Phase 3 pass.
+        const MlSectionTitle(
           'Chat connections',
-          style: context.mlText.titleMedium.copyWith(
-            color: semantic.textStrong,
-            fontWeight: FontWeight.w800,
-          ),
+          subtitle:
+              'Companies this organization can message in MineLink Messenger.',
+          margin: EdgeInsets.only(bottom: 12),
         ),
-        const SizedBox(height: 4),
-        Text('Companies this organization can message in MineLink Messenger.',
-            style: context.mlText.bodyMedium.copyWith(color: semantic.textFaint)),
-        const SizedBox(height: 12),
         if (mine.isEmpty)
           Text('No chat links yet.',
               style: context.mlText.bodyMedium.copyWith(
@@ -686,15 +674,25 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The same rhythm as the rows TokenAccessDetailsSection draws under
+    // "Access token" on this very screen: 168px label column, 8px vertical,
+    // w600 value. They differed (160 / 6 / w500), so the value column
+    // jumped 8px to the right between "Seats" and "Access token" and the
+    // rows below sat 4px further apart. Measured on the render, 2026-08-23.
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 160,
-            child: Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            width: 168,
+            child: Text(label,
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant)),
           ),
-          Expanded(child: Text(value.isEmpty ? '-' : value, style: const TextStyle(fontWeight: FontWeight.w500))),
+          Expanded(
+              child: Text(value.isEmpty ? '-' : value,
+                  style: const TextStyle(fontWeight: FontWeight.w600))),
         ],
       ),
     );

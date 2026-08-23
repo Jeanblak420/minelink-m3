@@ -282,6 +282,47 @@ void main() {
             'explaining nothing.');
   });
 
+  testWidgets('and its section headings are the reference section title',
+      (tester) async {
+    // Company · Account owner · Seats · Access token · Chat connections were
+    // PlusJakartaSans ExtraBold set by hand — the portal's pre-reference
+    // heading — on a console screen whose neighbours head every section in
+    // Fraunces through MlSectionTitle. Found 2026-08-23 in the Phase 3 pass.
+    await pump(tester, const OrganizationDetailScreen(organizationId: 'o4'),
+        width: 1600, height: 1800);
+    for (final title in const [
+      'Company',
+      'Account owner (login)',
+      'Seats',
+      'Access token',
+      'Chat connections',
+    ]) {
+      final heading = find.descendant(
+          of: find.byType(MlSectionTitle), matching: find.text(title));
+      expect(heading, findsOneWidget,
+          reason: '"$title" is not an MlSectionTitle heading');
+      expect(tester.widget<Text>(heading).style?.fontFamily,
+          MlTokens.fontSerif,
+          reason: '"$title" is not in the display face');
+    }
+  });
+
+  testWidgets('and every key/value row shares one value column',
+      (tester) async {
+    // Two private _InfoRow copies — the screen's own and the shared token
+    // widget's — had 160px and 168px label columns, so the value column
+    // stepped 8px right between "Seats" and "Access token". Geometry, not
+    // overflow: nothing threw.
+    await pump(tester, const OrganizationDetailScreen(organizationId: 'o4'),
+        width: 1600, height: 1800);
+    double valueX(String value) =>
+        tester.getTopLeft(find.text(value).first).dx;
+    final company = valueX('Johannes Oosthuizen');
+    expect(valueX('365 days'), closeTo(company, 0.5),
+        reason: 'the Access token rows start their values at a different x '
+            'from the Company rows');
+  });
+
   testWidgets('and the countdown is not measured against the device clock',
       (tester) async {
     // The fixture token expires 314 days after `kCaptureNow`. Read off

@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
+
 import 'package:flutter_application_1/features/super_admin/data/models/serial_token.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
-import 'package:flutter_application_1/core/utils/ml_count.dart';
 
 /// Prefer the newest active token when multiple exist.
 SerialToken? pickActiveSerialToken(List<SerialToken> tokens) {
@@ -107,13 +108,12 @@ class TokenAccessDetailsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        // The same section heading as the four above it on the organisation
+        // detail screen (MlSectionTitle, the reference's Fraunces title).
+        const MlSectionTitle(
           'Access token',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          margin: EdgeInsets.only(bottom: 8),
         ),
-        const SizedBox(height: 8),
         _InfoRow(
           label: 'Token Assigned',
           value: assigned != null ? formatAccessTimestamp(assigned) : '—',
