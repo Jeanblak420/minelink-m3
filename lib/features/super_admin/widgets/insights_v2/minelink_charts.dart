@@ -554,11 +554,27 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
                 spacing: 16,
                 runSpacing: 6,
                 children: [
-                  bounded(legend('This period', swatch(t.accent))),
+                  // The key names the series the way the pill does ("7
+                  // days"), not a generic "This period" beside a "Previous
+                  // 7 days" that IS specific.
+                  bounded(legend(
+                      widget.latestLabel.isNotEmpty
+                          ? widget.latestLabel
+                          : 'This period',
+                      swatch(t.accent))),
                   bounded(legend(_priorLabel,
                       swatch(t.inkMid.withValues(alpha: 0.7), dashed: true))),
-                  bounded(legend('Target',
-                      swatch(t.accent2.withValues(alpha: 0.6), dashed: true))),
+                  // NO KEY FOR A LINE THAT IS NOT DRAWN. The painter and the
+                  // caption already guard on `target != null`; the legend
+                  // did not, so every dashboard with no target set carried a
+                  // "Target" key for nothing — a target nobody chose,
+                  // rendering as a thing (CLAUDE.md §4, the 28,000 t rule;
+                  // design-reference §5.7). Found by two reviewers,
+                  // 2026-08-23.
+                  if (widget.target != null)
+                    bounded(legend('Target',
+                        swatch(t.accent2.withValues(alpha: 0.6),
+                            dashed: true))),
                 ],
               );
             },

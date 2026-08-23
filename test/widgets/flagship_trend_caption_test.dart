@@ -93,13 +93,61 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     final caption = tester.getRect(find.text('TARGET 903 T/DAY'));
-    final pill = tester.getRect(find.text('7 days'));
+    // `.first`: the pill sits in the plot's Stack, ahead of the legend key
+    // that now also reads "7 days".
+    final pill = tester.getRect(find.text('7 days').first);
     expect(caption.overlaps(pill), isFalse,
         reason: 'caption $caption sits under the period pill $pill');
     // Not merely "not overlapping by luck" — it is at the LEFT end.
     final plot = tester.getRect(find.byType(MlFlagshipTrend));
     expect(caption.left, lessThan(plot.left + 40),
         reason: 'caption should be at the left end, is at ${caption.left}');
+  });
+
+  testWidgets('the legend has no Target key when no target is drawn',
+      (tester) async {
+    tester.view.physicalSize = const Size(1000, 600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(brightness: Brightness.dark),
+      home: Scaffold(
+        body: Center(
+          child: SizedBox(
+            width: 740,
+            child: Builder(
+              builder: (context) => MlFlagshipTrend(
+                current: const [34, 36, 0, 35],
+                previous: const [30, 31, 0, 32],
+                tokens: MlGlass.of(context),
+                latestLabel: '7 days',
+                priorLabel: 'Previous 7 days',
+                xLabels: const {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Target'), findsNothing,
+        reason: 'a Target key for a line that is not drawn');
+    // The first key names the series the way the pill does.
+    expect(find.text('7 days'), findsNWidgets(2)); // the pill and the key
+    expect(find.text('This period'), findsNothing);
+  });
+
+  testWidgets('the legend keeps its Target key when a target is drawn',
+      (tester) async {
+    tester.view.physicalSize = const Size(1000, 600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(_chart(
+      current: const [34, 36, 0, 35, 33, 0, 37],
+      target: 903,
+    ));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Target'), findsOneWidget);
   });
 
   testWidgets('a target inside the data band keeps the caption at the right',
@@ -117,7 +165,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     final caption = tester.getRect(find.text('TARGET 900 T/DAY'));
-    final pill = tester.getRect(find.text('7 days'));
+    // `.first`: the pill sits in the plot's Stack, ahead of the legend key
+    // that now also reads "7 days".
+    final pill = tester.getRect(find.text('7 days').first);
     expect(caption.overlaps(pill), isFalse);
     final plot = tester.getRect(find.byType(MlFlagshipTrend));
     expect(caption.right, greaterThan(plot.right - 40),
