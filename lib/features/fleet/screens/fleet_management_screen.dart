@@ -59,6 +59,11 @@ class FleetManagementScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddVehicleDialog(context, ref, companyId),
+        tooltip: 'Add Vehicle',
+        child: const Icon(Icons.add),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -69,6 +74,17 @@ class FleetManagementScreen extends ConsumerWidget {
               description:
                   'Every vehicle registered to this company, and '
                   'whether it is available, on route or in maintenance.',
+              // THE PRIMARY ACTION BELONGS IN THE HEADER, not in a
+              // `FloatingActionButton` over the bottom-right corner.
+              //
+              // No other screen in this product has one. A FAB is Material's
+              // own answer, but this console's answer — the reference's, and
+              // every other register's — is a primary button in the page
+              // header beside the page's name, where the reader is already
+              // looking when they decide to add something. The FAB also sat
+              // ON TOP of the last row of the register at phone width, and
+              // its only label was a tooltip, which a touch device never
+              // shows.
               actions: [
                 MlButton.ghost(
                   label: 'Refresh',
@@ -85,11 +101,6 @@ class FleetManagementScreen extends ConsumerWidget {
             child: _buildBody(context, ref, fleetProviderInstance, companyId),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddVehicleDialog(context, ref, companyId),
-        tooltip: 'Add Vehicle',
-        child: const Icon(Icons.add),
       ),
     );
   }
@@ -173,79 +184,76 @@ class FleetManagementScreen extends ConsumerWidget {
                 final inMaintenance = rows
                     ?.where((v) => v.inMaintenance)
                     .length;
-                return LayoutBuilder(
-                  builder: (context, c) {
-                    final w = c.maxWidth;
-                    const gap = 14.0;
-                    final cols = w > 900 ? 4 : 2;
-                    final itemW = (w - gap * (cols - 1)) / cols;
-                    return Wrap(
-                      spacing: gap,
-                      runSpacing: gap,
-                      children: [
-                        SizedBox(
-                          width: itemW,
-                          child: MlStatCard(
-                            label: 'Total fleet',
-                            value: '${fleetState.vehicles.length}',
-                            icon: Icons.local_shipping_outlined,
-                            tone: MlTone.accent,
-                            caption: 'all_vehicles',
-                          ),
-                        ),
-                        // ON ROUTE AND AVAILABLE ARE DERIVED FROM ACTIVE TRIPS, not
-                        // from whether a driver happens to be rostered. They used to
-                        // read `hasAssignedDriver`, under the labels "On Trip /
-                        // Assigned" and "Available", and on 2026-08-22 that put every
-                        // one of Roadhaul's three trucks in the WRONG bucket: the two
-                        // carrying loads to Johannesburg have no driver row, so they
-                        // counted as Available, while the one parked truck has a
-                        // driver and counted as On Trip. "Available" is the number an
-                        // admin allocates from.
-                        //
-                        // `fleetStatusProvider` is the same server-derived source the
-                        // Trucks On Route screen and the dashboard already read
-                        // (`list_transporter_fleet_status`, CLAUDE.md §4), so all
-                        // three now agree by construction rather than by coincidence.
-                        SizedBox(
-                          width: itemW,
-                          child: MlStatCard(
-                            label: 'On route',
-                            value: onRoute == null ? '—' : '$onRoute',
-                            icon: Icons.bolt_outlined,
-                            tone: MlTone.transit,
-                            caption: 'carrying_a_load',
-                          ),
-                        ),
-                        SizedBox(
-                          width: itemW,
-                          child: MlStatCard(
-                            label: 'Available',
-                            value: available == null ? '—' : '$available',
-                            icon: Icons.check_circle_outline,
-                            tone: MlTone.done,
-                            // A truck in maintenance is active, not on a route,
-                            // and NOT allocatable. Without saying so the four
-                            // cards stop adding up to the total and the reader
-                            // has no way to see why.
-                            caption: (inMaintenance ?? 0) > 0
-                                ? 'excludes_${inMaintenance}_in_maintenance'
-                                : 'ready_to_allocate',
-                          ),
-                        ),
-                        SizedBox(
-                          width: itemW,
-                          child: MlStatCard(
-                            label: 'Inactive',
-                            value: '${fleetState.inactiveVehicles.length}',
-                            icon: Icons.do_not_disturb_on_outlined,
-                            tone: MlTone.warn,
-                            caption: 'not_in_service',
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                // `MlTileGrid`, NOT a seventeenth hand-rolled ladder.
+                //
+                // This one read `cols = w > 900 ? 4 : 2` and therefore NEVER
+                // REACHED ONE COLUMN. On a 412px phone that leaves each card
+                // 183px, of which `MlStatCard` spends ~92 on its tone bar,
+                // icon well and padding — so the mono captions broke inside
+                // the token: `carrying_a_lo / ad`, `excludes_1_in /
+                // _maintenance`, `not_in_servic / e`. Nothing overflowed, so
+                // no sweep saw it; photographed on `screen-fleet-phone-dark`.
+                //
+                // The component's own doc names this exact shape as duplicated
+                // in sixteen files with breakpoints that disagree screen to
+                // screen (980/620 here, 900/560 there) for tiles of the same
+                // size. A MINIMUM TILE WIDTH says the thing that is actually
+                // true — a stat card needs ~260px to hold a figure and a
+                // caption — and has no arbitrary breakpoint to disagree with
+                // anyone else's.
+                return MlTileGrid(
+                  minTileWidth: 260,
+                  children: [
+                    MlStatCard(
+                      label: 'Total fleet',
+                      value: '${fleetState.vehicles.length}',
+                      icon: Icons.local_shipping_outlined,
+                      tone: MlTone.accent,
+                      caption: 'all_vehicles',
+                    ),
+                    // ON ROUTE AND AVAILABLE ARE DERIVED FROM ACTIVE TRIPS, not
+                    // from whether a driver happens to be rostered. They used to
+                    // read `hasAssignedDriver`, under the labels "On Trip /
+                    // Assigned" and "Available", and on 2026-08-22 that put every
+                    // one of Roadhaul's three trucks in the WRONG bucket: the two
+                    // carrying loads to Johannesburg have no driver row, so they
+                    // counted as Available, while the one parked truck has a
+                    // driver and counted as On Trip. "Available" is the number an
+                    // admin allocates from.
+                    //
+                    // `fleetStatusProvider` is the same server-derived source the
+                    // Trucks on route screen and the dashboard already read
+                    // (`list_transporter_fleet_status`, CLAUDE.md §4), so all
+                    // three now agree by construction rather than by coincidence
+                    // — and since 2026-08-23 the REGISTER'S OWN ROWS read it too.
+                    MlStatCard(
+                      label: 'On route',
+                      value: onRoute == null ? '—' : '$onRoute',
+                      icon: Icons.bolt_outlined,
+                      tone: MlTone.transit,
+                      caption: 'carrying_a_load',
+                    ),
+                    MlStatCard(
+                      label: 'Available',
+                      value: available == null ? '—' : '$available',
+                      icon: Icons.check_circle_outline,
+                      tone: MlTone.done,
+                      // A truck in maintenance is active, not on a route,
+                      // and NOT allocatable. Without saying so the four
+                      // cards stop adding up to the total and the reader
+                      // has no way to see why.
+                      caption: (inMaintenance ?? 0) > 0
+                          ? 'excludes_${inMaintenance}_in_maintenance'
+                          : 'ready_to_allocate',
+                    ),
+                    MlStatCard(
+                      label: 'Inactive',
+                      value: '${fleetState.inactiveVehicles.length}',
+                      icon: Icons.do_not_disturb_on_outlined,
+                      tone: MlTone.warn,
+                      caption: 'not_in_service',
+                    ),
+                  ],
                 );
               },
             ),
