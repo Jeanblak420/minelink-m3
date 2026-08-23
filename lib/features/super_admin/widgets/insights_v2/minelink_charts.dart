@@ -318,9 +318,32 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
                       // down has always had a ground; this one had none, and
                       // the two are the same kind of thing over the same kind
                       // of paint.
+                      //
+                      // AT THE LEFT END WHEN THE LINE RUNS NEAR THE TOP — the
+                      // same rule as the reference's `tons_moved_card.dart`.
+                      // The period pill (`7 days`) lives at the top-right
+                      // corner, and a target that outruns the data — the
+                      // normal case, since a monthly target's daily pace is
+                      // set against the busiest day, not the average — puts
+                      // the target line in the top tenth of the plot. Right-
+                      // anchored, the caption sat under the pill and the mine
+                      // dashboard read "TARGET 9▮7 days". Found in the Phase 3
+                      // mine-portal pass, 2026-08-23; pinned by
+                      // `flagship_trend_caption_test.dart`.
                       if (widget.target != null)
                         Positioned(
-                          right: 6,
+                          right: flagshipCaptionAnchorsLeft(
+                            _yFor(widget.target!, widget.height),
+                            widget.height,
+                          )
+                              ? null
+                              : 6,
+                          left: flagshipCaptionAnchorsLeft(
+                            _yFor(widget.target!, widget.height),
+                            widget.height,
+                          )
+                              ? 0
+                              : null,
                           top: _yFor(widget.target!, widget.height) - 20,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
@@ -564,6 +587,17 @@ class _MlFlagshipTrendState extends State<MlFlagshipTrend> {
     return buf.toString();
   }
 }
+
+/// Whether the flagship chart's target caption sits at the LEFT end of its
+/// line rather than the right.
+///
+/// [lineY] is the target line's y inside a plot [height] tall, measured from
+/// the top. The top-right corner belongs to the period pill, so a line in the
+/// top 30% of the plot — where a daily-pace target normally runs — sends the
+/// caption to the left end, as `tons_moved_card.dart` already does. Public so
+/// a test can ask it directly.
+bool flagshipCaptionAnchorsLeft(double lineY, double height) =>
+    height > 0 && lineY / height < 0.3;
 
 class _LatestPill extends StatelessWidget {
   const _LatestPill({required this.label, required this.tokens});
