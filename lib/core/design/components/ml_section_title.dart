@@ -122,15 +122,30 @@ class MlSectionTitle extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: hasTrailing
-                          ? _trailing(context, glass,
-                              cap: maxWidth, alignEnd: false)
-                          : const SizedBox.shrink(),
-                    ),
+                    // The meta is a BOUNDED non-flex child (content-sized,
+                    // at most half the row) and the action takes the rest,
+                    // aligned right. Not `Flexible` for the meta: a loose
+                    // Flexible keeps its unused allotment instead of handing
+                    // it on, so the action ended at x=231 of 360. And not
+                    // an unflexed action: that got unbounded width and a
+                    // two-button Wrap overflowed the row by 2.6px at text
+                    // scale 2.0 (the portal overflow sweep, 2026-08-23).
+                    if (hasTrailing)
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: action == null ? maxWidth : maxWidth * 0.5,
+                        ),
+                        child: _trailing(context, glass,
+                            cap: maxWidth, alignEnd: false),
+                      ),
                     if (action != null) ...[
-                      const SizedBox(width: 10),
-                      action!,
+                      if (hasTrailing) const SizedBox(width: 10),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: action!,
+                        ),
+                      ),
                     ],
                   ],
                 ),

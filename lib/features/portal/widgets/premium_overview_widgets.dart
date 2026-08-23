@@ -230,14 +230,23 @@ class MetricBreakdownRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: textTheme.bodyMedium?.copyWith(
-              color: emphasize ? scheme.onSurface : scheme.onSurfaceVariant,
-              fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
+          // The LABEL is the long child and takes the give: a mono figure is
+          // wider than the sans one it replaced, and at text scale 2.0 on a
+          // 360px phone the two unflexed texts overflowed the row by 5.7px
+          // (the portal overflow sweep, 2026-08-23). The figure stays whole;
+          // the words wrap.
+          Expanded(
+            child: Text(
+              label,
+              style: textTheme.bodyMedium?.copyWith(
+                color: emphasize ? scheme.onSurface : scheme.onSurfaceVariant,
+                fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
+              ),
             ),
           ),
+          const SizedBox(width: 10),
           // MONO. A figure in a column is JetBrainsMono so the digits align
           // down the list (design-reference §3); these were PlusJakartaSans
           // ExtraBold at 20 call sites. Phase 3 mine pass, 2026-08-23.
