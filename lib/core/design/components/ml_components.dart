@@ -59,6 +59,7 @@ export 'ml_tile_grid.dart';
 
 // ---- Page structure ----
 export 'ml_page_body.dart';
+export 'ml_header_layout.dart';
 export 'ml_page_header.dart';
 export 'ml_section_title.dart';
 export 'ml_meta.dart';

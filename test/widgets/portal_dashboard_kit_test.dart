@@ -415,4 +415,122 @@ void main() {
     expect(find.text('Mine overview'), findsNothing);
     expect(find.text('x'), findsOneWidget);
   });
+
+  // ---------------------------------------------------------------------
+  // The band head places its tools BY FIT, not by width.
+  //
+  // Buyer pass, 2026-08-23 (reviewer finding #2, seen in
+  // `dash-buyer-desktop-light`). `SaSectionHeader` stacked whenever its
+  // column was under a hard-coded 560px, into a plain `Wrap` — which starts
+  // its run at the LEFT. The buyer dashboard's "Invoice cover" band is a
+  // 497px column on a 1600px SCREEN, and "Invoice cover" + "View →" fits
+  // there with room to spare: it stacked anyway, and put its action at the
+  // left margin while "Delivered vs payable" beside it had meta and action on
+  // the title's row at the right edge. Two bands of one dashboard, side by
+  // side, in two layouts.
+  //
+  // `MlPageHeader` already paid 43 goldens to learn that a width rule is not
+  // a fit rule (`bcb0fdb`), so its measuring layout moved to
+  // `MlHeaderLayout` and this header shares it rather than repeating the
+  // mistake in a third place.
+
+  Future<void> pumpHead(
+    WidgetTester tester, {
+    required double width,
+    required String title,
+    String? meta,
+    Widget? action,
+  }) async {
+    tester.view.physicalSize = const Size(1600, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: width,
+              child: SaSectionHeader(
+                title: title,
+                subtitle: 'One calm sentence under the title.',
+                meta: meta,
+                action: action,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+  }
+
+  testWidgets('a narrow band whose tools FIT keeps them on the title\'s row',
+      (tester) async {
+    // The buyer's "Invoice cover" column, to the pixel. Under the old 560px
+    // rule this stacked; it fits.
+    await pumpHead(
+      tester,
+      width: 497,
+      title: 'Invoice cover',
+      action: TextButton(onPressed: () {}, child: const Text('View →')),
+    );
+
+    final titleRect = tester.getRect(find.text('Invoice cover'));
+    final actionRect =
+        tester.getRect(find.widgetWithText(TextButton, 'View →'));
+    final description =
+        tester.getRect(find.text('One calm sentence under the title.'));
+
+    expect(
+      actionRect.center.dy,
+      inInclusiveRange(titleRect.top, titleRect.bottom),
+      reason: 'the action shares the title\'s row — it fits',
+    );
+    expect(
+      actionRect.right,
+      closeTo(497, 1.5),
+      reason: 'and it is flush with the band\'s right edge, '
+          'ends at ${actionRect.right}',
+    );
+    expect(
+      description.top,
+      greaterThan(titleRect.bottom - 1),
+      reason: 'the description belongs directly under its own title',
+    );
+  });
+
+  testWidgets('a band whose tools do NOT fit stacks them flush RIGHT',
+      (tester) async {
+    // Long title, long tools, narrow band: this genuinely cannot share a row.
+    await pumpHead(
+      tester,
+      width: 300,
+      title: 'Delivered versus payable value',
+      meta: 'Peak R40,920/day',
+      action: TextButton(onPressed: () {}, child: const Text('View →')),
+    );
+
+    final titleRect = tester.getRect(find.text('Delivered versus payable value'));
+    final actionRect =
+        tester.getRect(find.widgetWithText(TextButton, 'View →'));
+
+    expect(
+      actionRect.top,
+      greaterThan(titleRect.bottom),
+      reason: 'these cannot share a row at 300px',
+    );
+    expect(
+      actionRect.right,
+      closeTo(300, 1.5),
+      reason: 'a stacked run lands at the LEFT unless it is told otherwise, '
+          'and that is the whole fault — ends at ${actionRect.right}',
+    );
+    // The meta rides just before it, not at the left margin either.
+    expect(
+      tester.getRect(find.text('Peak R40,920/day')).left,
+      greaterThan(1.0),
+      reason: 'the meta is part of the right-aligned run',
+    );
+  });
 }

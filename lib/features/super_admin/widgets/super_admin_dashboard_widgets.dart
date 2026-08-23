@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/design/charts/ml_sparkline.dart';
+import 'package:flutter_application_1/core/design/components/ml_header_layout.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_console_palettes.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_rail_tokens.dart';
 
@@ -90,13 +91,8 @@ class SaSectionHeader extends StatelessWidget {
             style: context.mlText.bodySmall.copyWith(color: s.textFaint),
           );
 
-    // The head tools were three non-flex children after a `Spacer`, which is
-    // fine at console widths and overflows by ~39px on a 430px portal viewport
-    // at 1.3 text scale — now that the portal dashboards use this header, it
-    // gets rendered narrow for the first time. Below the breakpoint the tools
-    // drop to their own line; above it they keep the design's single row.
-    //
-    // THE META IS CAPPED, NOT FLEXED — and there is no Spacer.
+    // THE TOOLS ARE PLACED BY FIT, NOT BY WIDTH — and this is the third
+    // header in the family to learn it.
     //
     // Until 2026-08-23 the wide row was `Flexible(title) · Spacer() ·
     // Flexible(meta) · action`. `Flexible` defaults to `flex: 1` and a
@@ -107,86 +103,56 @@ class SaSectionHeader extends StatelessWidget {
     // right edge the reference puts every meta line at. On the mine
     // dashboard at 1600px that put "4 queues with work" at x≈860 inside a
     // band ending at 1570, on all five bands, on all three portal dashboards.
-    // CLAUDE.md §10.4 records this exact trap, and the portal's own
-    // `MlSectionTitle` already carries the right shape: the title is the long
-    // child and takes the free space (`Expanded`); the meta is a non-flex
-    // child, so the title pushes it to the right edge, but BOUNDED to half
-    // the row so a long one ellipsises instead of running off. Seen in the
-    // Phase 3 mine-portal pass; pinned by `portal_dashboard_kit_test.dart`
-    // ("the head's meta and link sit at the right edge").
-    return LayoutBuilder(
-      builder: (context, c) {
-        final stack = c.maxWidth < 560;
-        final metaCap =
-            c.maxWidth.isFinite ? c.maxWidth * 0.5 : double.infinity;
-        final tools = <Widget>[
-          if (metaText != null)
-            stack
-                ? metaText
-                : ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: metaCap),
-                    child: metaText,
-                  ),
-          if (action != null) ...[
-            SizedBox(width: metaText == null ? 0 : 14),
-            action!,
-          ],
-        ];
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (stack) ...[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Flexible(child: titleText),
-                  if (badge != null) ...[const SizedBox(width: 10), badge!],
-                ],
-              ),
-              if (tools.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Wrap(
-                    spacing: 12,
-                    runSpacing: 4,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      if (metaText != null) metaText,
-                      if (action != null) action!,
-                    ],
-                  ),
-                ),
-            ] else
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // The title owns the free space; the badge rides right
-                  // after it. The inner Row is bounded by the Expanded, so
-                  // the Flexible title ellipsises instead of throwing.
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Flexible(child: titleText),
-                        if (badge != null) ...[
-                          const SizedBox(width: 10),
-                          badge!,
-                        ],
-                      ],
-                    ),
-                  ),
-                  if (tools.isNotEmpty) const SizedBox(width: 12),
-                  ...tools,
-                ],
-              ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: context.mlText.bodyMedium.copyWith(color: s.textMuted),
+    // CLAUDE.md §10.4 records that trap. Fixed in `8ef16b1`.
+    //
+    // What `8ef16b1` did NOT fix, and the buyer pass found: below a
+    // hard-coded `maxWidth < 560` the tools dropped into a plain `Wrap` under
+    // the title — which starts its run at the LEFT. The buyer dashboard's
+    // "Invoice cover" band is a 497px column on a 1600px screen, so it took
+    // that branch: `View →` sat on its own line at the left margin while
+    // "Delivered vs payable" in the column beside it had meta and action on
+    // the title's row at the right edge. Two bands of the same dashboard,
+    // side by side, in two layouts.
+    //
+    // A WIDTH RULE IS NOT A FIT RULE — the lesson `bcb0fdb` paid 43 goldens
+    // to learn on `MlPageHeader`, which is why the measurement it produced
+    // now lives in `MlHeaderLayout` and is shared rather than re-written.
+    // "Invoice cover" + "View →" fits in 497px with room to spare, so it
+    // stays on one row; a band that genuinely cannot fit its tools still
+    // stacks them, and they land flush RIGHT, which is where the wide form
+    // and both sibling headers put them.
+    return MlHeaderLayout(
+      title: badge == null
+          ? titleText
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Flexible(child: titleText),
+                const SizedBox(width: 10),
+                badge!,
+              ],
             ),
-          ],
-        );
-      },
+      description: Text(
+        subtitle,
+        style: context.mlText.bodyMedium.copyWith(color: s.textMuted),
+      ),
+      tools: metaText == null && action == null
+          ? null
+          : Wrap(
+              // `MlHeaderLayout` hands this the full width when it stacks, so
+              // `end` has room to work in (CLAUDE.md §10.4: a `Wrap` sizes to
+              // its content, and an alignment with no free space does
+              // nothing).
+              alignment: WrapAlignment.end,
+              spacing: 14,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (metaText != null) metaText,
+                if (action != null) action!,
+              ],
+            ),
     );
   }
 }
