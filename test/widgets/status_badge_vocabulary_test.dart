@@ -125,6 +125,55 @@ void main() {
     });
   });
 
+  group('the four states a fleet register draws', () {
+    // Transporter pass, 2026-08-23. Both of these were MEASURED off
+    // `toneForStatus`, not guessed, and both are substring traps.
+
+    test('ON ROUTE is a truck in transit, not an unknown', () {
+      // `on route` is not `en route`, and nothing else in the map contains it.
+      expect(MlStatusBadge.toneForStatus('On route'), MlTone.transit);
+      expect(MlStatusBadge.toneForStatus('Driver on route'), MlTone.transit);
+      expect(
+        MlStatusBadge.toneForStatus('On route'),
+        MlStatusBadge.toneForStatus('En route to offload'),
+        reason: 'the same truck, on two screens, in two colours',
+      );
+    });
+
+    test('INACTIVE is not ACTIVE, however the string is matched', () {
+      // "inactive".contains("active") is true, so this returned MlTone.done:
+      // a truck taken out of the fleet drawn in the same green as one
+      // standing ready to load.
+      expect(
+        MlStatusBadge.toneForStatus('Inactive'),
+        MlTone.neutral,
+        reason: 'a decommissioned truck is inert, not good and not a fault',
+      );
+      expect(MlStatusBadge.toneForStatus('Not in service'), MlTone.neutral);
+      expect(MlStatusBadge.toneForStatus('Out of service'), MlTone.neutral);
+    });
+
+    // The GREEN case: `ACTIVE` on its own is still a real status and still
+    // green. Fixing the substring by deleting the branch would have taken it.
+    test('ACTIVE on its own is still green', () {
+      expect(MlStatusBadge.toneForStatus('Active'), MlTone.done);
+      expect(MlStatusBadge.toneForStatus('ACTIVE'), MlTone.done);
+      expect(MlStatusBadge.toneForStatus('Available'), MlTone.done);
+    });
+
+    test('the four fleet states are four different tones', () {
+      final tones = {
+        for (final s in ['On route', 'Available', 'In maintenance', 'Inactive'])
+          s: MlStatusBadge.toneForStatus(s),
+      };
+      expect(
+        tones.values.toSet().length,
+        4,
+        reason: 'a register that draws two states alike cannot be read: $tones',
+      );
+    });
+  });
+
   group('TokenRequest', () {
     test('names the org type the way a person does', () {
       final r = _request('mineSupplier');

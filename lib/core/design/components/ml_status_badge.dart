@@ -48,6 +48,15 @@ class MlStatusBadge extends StatelessWidget {
         s.contains('transit') ||
         s.contains('on trip') ||
         s.contains('en route') ||
+        // ON ROUTE, which is not EN ROUTE and matched nothing.
+        // `Trucks on route` and `Driver on route` are the fleet's own
+        // words for a truck and a driver out working — the state
+        // `list_transporter_fleet_status` returns, and the whole
+        // subject of the Trucks on route screen — and every pill
+        // carrying them fell through to neutral GREY, beside `EN ROUTE
+        // TO OFFLOAD` in blue for the same truck on the live map.
+        // Transporter pass, 2026-08-23.
+        s.contains('on route') ||
         s.contains('in_progress') ||
         s.contains('in progress') ||
         s.contains('pending')) {
@@ -74,12 +83,34 @@ class MlStatusBadge extends StatelessWidget {
         s.endsWith(' loading')) {
       return MlTone.atMine;
     }
+    // OUT OF SERVICE, MATCHED BEFORE `active` — BECAUSE
+    // "inactive".contains("active") IS TRUE.
+    //
+    // Measured 2026-08-23: `toneForStatus('Inactive')` returned
+    // `MlTone.done`. A truck taken out of the fleet would draw the same
+    // GREEN as one standing ready to load. Nothing had shipped it only
+    // because no caller passed the word through this map — the fleet
+    // register kept a third status vocabulary of its own — and the
+    // moment one did, the worst state in the list would have read as
+    // the best.
+    //
+    // Neutral, not error: a decommissioned truck is inert, not a fault.
+    if (s.contains('inactive') ||
+        s.contains('not in service') ||
+        s.contains('out of service') ||
+        s.contains('decommissioned')) {
+      return MlTone.neutral;
+    }
     if (s.contains('loaded') ||
         s.contains('available') ||
         s.contains('approved') ||
         s.contains('confirmed') ||
         s.contains('completed') ||
-        s.contains('active') ||
+        // WORD-BOUNDED. This was `s.contains('active')`, which is the
+        // fault above. The branch stays because `ACTIVE` is a real
+        // status on its own; bounding it is what makes the two
+        // separable at all.
+        RegExp(r'\bactive\b').hasMatch(s) ||
         s.contains('done')) {
       return MlTone.done;
     }
