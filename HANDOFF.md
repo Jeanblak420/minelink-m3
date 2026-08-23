@@ -20,75 +20,67 @@ file governs the redesign work.**
 
 ## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The tree is **clean**, **234 commits**, nothing half-applied and
-nothing uncommitted. **The tip is the commit that carries THIS FILE**, so the
-count above includes it. The last code commit under it is `9740420` (the
-employee register's accent); the last shared-component fix is `bcb0fdb`.
+The tree is **clean**, **257 commits**, nothing half-applied and nothing
+uncommitted. **The tip is the commit that carries THIS FILE**, so the count
+above includes it. The last code commit under it is `20f8a77` (two guard-caught
+fixes to this session's own work); the last shared-component fix is `ac190e0`
+(the status-tone map).
 
 **The original worktree was re-checked against its §0 baseline at the end of
 the session and is untouched** — HEAD `df451d0`, the same three pre-existing
 modified files, 14163 files under the `-prune` form, two worktree entries,
 nothing modified today.
 
-**Jean paused the session** with: *"please pause here and give me a full
-proper correct copy paste message…"*. So: `M3-TASKS.md` has **15 ticks** —
-Phase 0's four items are all ticked with this session's evidence — the
-whole gate ran green at the tip, builds included (§2) — Phases 1 and 2 are
-DONE from before, **Phase 3's console task is DONE from
-before and its Mine task is `- [ ]` with a `▶ IN PROGRESS` line listing all
-23 fixes and the five findings still open** — it is NOT ticked because five
-reviewer findings on four screens are not fixed and the per-screen table is
-not complete. Buyer, Transporter, Driver and Shared are untouched `- [ ]`,
-but their reviewer reports are already written and in the repo (§4.1).
+**Jean paused the session** with: *"please pause here and give me a full proper
+correct copy paste message…"*. So: `M3-TASKS.md` has **17 ticks**, the whole
+gate ran green at the tip with both builds (§2), and **Phase 3 is three of six
+tasks done — console, Mine and Buyer**. The Transporter task is `- [ ]` with a
+`▶ IN PROGRESS` line naming its one fix, the ten findings that need no work,
+and the nineteen that are left. Driver and Shared are untouched `- [ ]`; their
+reviewer reports are already written and in the repo.
 
 ### What this session did, in one paragraph
 
-It reviewed the mine dashboard, gate, weighbridge and operations hub by hand
-against the reference, then — on Jean's instruction to "deploy your best
-agents" — launched five read-only reviewer agents in parallel, one per
-remaining Phase 3 scope, each reporting drift by the console pass's nine
-classes with code locations and an "is it also in the original?" check. It
-kept a single writer: every fix was verified in the render and the code,
-made one commit at a time, pinned by a test that was sabotaged and bit, its
-goldens measured with `golden_diff.py` and looked at. Twenty-three fixes
-landed (§3.26): six in shared components (`SaSectionHeader`, `MlSectionTitle`
-twice, `MlPageHeader`, the KPI tile, the flagship chart's caption and legend,
-the status-tone map) that moved up to 58 goldens each, and seventeen on mine
-screens — the largest being the Search loads screen rebuilt in the
-vocabulary, where a real bug was found ("Last 24h" windowed on the midnight
-date and read 71.12 t against 103.22 t for the same loads). A power cut hit
-after `cf3608f`: `.git/index` was corrupt (rebuilt, fsck clean), four files
-mid-write were zeroed to NUL bytes (restored from HEAD) and the in-flight
-edit was redone. Three of the session's own fixes were caught by its own
-instruments before they shipped (§3.26, "found by the instruments").
+It closed the Mine task's five open findings (six commits — the employee grid's
+head turned out to have a real paging bug behind it), then did the whole Buyer
+task, then started the Transporter task. Twelve of the Buyer reviewer's 23
+findings were ALREADY FIXED by the console and mine passes; each was checked in
+the render rather than taken from the report, and the nine that remained were
+fixed one commit at a time, each pinned by a test that was sabotaged and bit
+while a green case stayed green. **Five renders were created for screens that
+had never been photographed**, and TWO real defects were found purely by making
+them. Four more faults were found that no reviewer had raised. Three of the
+session's own mistakes were caught by its own instruments and fixed before the
+tick — including a "fix" that measurement proved was a no-op, and whose first
+test passed with it removed.
 
 ### 🚨 WHAT IS OWED FIRST
 
-1. **Finish the Mine portal task** — five findings still open, all small,
-   all located (file:line in `docs/redesign/VERIFICATION.md`'s Mine table and
-   `docs/redesign/reviews/2026-08-23-phase3/report_mine.md` #40–#45):
-   employee grid title; Buyers (every card takes the accent wash — pass
-   `muted: true` on `BuyerOverviewCard`'s tile and drop the decorative
-   shadow when muted; the page head → `MlPageHeader`); the mine's Requests
-   copy ("transportation and **buyer** requests" for `isMine`) and its two
-   actions into `MlPageHeader.actions` as `MlButton`s; trip detail (codes in
-   `MlType.code`, facts in an `MlCard` + `MlSectionTitle`); company
-   information labels (sentence case, single-word labels so they stop
-   wrapping in the 130px column, the reference in mono). Then the
-   VERIFICATION.md rows flip from *open* to a commit, the Mine task is
-   ticked with an evidence line naming every fix and every "reviewed, no
-   drift" screen, and `M3-TASKS.md` is committed with it.
-2. **Then Buyer, Transporter, Driver, Shared — in that order, one at a
-   time, each ticked before the next starts.** Their reports are written:
-   `docs/redesign/reviews/2026-08-23-phase3/report_{buyer,transporter,
-   driver,shared}.md`. Several of their findings are ALREADY FIXED by this
-   session's shared-component commits — check each against §3.26 before
-   touching it (the KPI delta chip, the legend's Target key, the section-title
-   stacking, the page-header wrap, the recon counts, the status-tone map, the
-   employees register, the company labels once done).
-3. Nothing else. The whole gate is green at the tip (§2); `build/web` and
-   the APK on disk (`34157bcf…`) are FRESH. The phone still runs `1ad4c725`;
-   installing is not owed unless a Phase 3 fix needs glass.
+1. **Finish the Transporter portal task.** `M3-TASKS.md`'s `▶ IN PROGRESS`
+   line under it is the authoritative list; `docs/redesign/reviews/2026-08-23-phase3/report_transporter.md`
+   has every finding with file:line. Ten need no work (seven already fixed and
+   verified, three deferred to Shared and named). **Nineteen are left**, and
+   the big one is the FLEET REGISTER (#4–#9): it is the one transporter screen
+   still entirely in the pre-redesign vocabulary — a Material `DataTable` with
+   a filled heading band and sans title-case heads, plates in plain sans, `-`
+   and `—` both used for "empty", and a solid-gradient `_statusChip` painting
+   **RED for "Unassigned"** when a truck with no driver is simply available.
+   **#7 is the sharpest**: that table derives its status from
+   `assignedDriverId` while the stat cards directly above it read
+   `fleetStatusProvider`, so the cards and the rows answer the same question
+   differently — and the comment above those cards says in as many words that
+   reading `hasAssignedDriver` "put every one of Roadhaul's three trucks in the
+   WRONG bucket". A render-test comment also claims the picture shows the three
+   derived fleet states; it does not. Treat the reviewer's MISSING RENDERS list
+   as part of the task, not an extra: this session found two real defects
+   purely by creating a render that did not exist.
+2. **Then Driver, then Shared — one at a time, each ticked before the next
+   starts.** Their reports are written. Check every finding against §3.26 and
+   §3.27 before touching it; a report is a lead, not a verdict.
+3. Nothing else. The whole gate is green at the tip (§2); `build/web` and the
+   APK on disk (`61861FA9…`) are FRESH. The phone still runs `1ad4c725` and was
+   not touched this session; installing is not owed unless a Phase 3 fix needs
+   glass.
 
 
 ## 0. Where you are
@@ -191,45 +183,52 @@ Still standing:
 
 ```
 flutter analyze                                 No issues (whole tree, after the last commit)
-flutter test (full)                             2578 passed · 1 skipped · 0 failed (after 9740420)
-dart tool/release_guards.dart                   43/43 PASS
-dart tool/release_guards.dart --selftest        43/43 PASS_SELF
+flutter test (full)                             2647 passed · 1 skipped · 0 failed (after 20f8a77)
+dart tool/release_guards.dart                   43/43 PASS — it FAILED first, on this session's own
+                                                work (see §3.27); fixed in 20f8a77
+dart tool/release_guards.dart --selftest        all 43 bite
 py -3 tool/_sabotage.py                         ALL SABOTAGES CAUGHT
 type_scale_codemod --selftest                   OK
 dropdown_width_check                            every dropdown states isExpanded
-glyph_coverage_check                            every character drawable (the ▲/▼ lines are its usual note, not failures)
+glyph_coverage_check                            every character drawable
 one_clock_check (+ --selftest)                  PASS · selftest: every check bites
 unphotographed_screens                          94 route-target screens · 94 named · 0 not
-health_probe                                    7/7 — the extras project's search_place_index answered on the RETRY
-                                                (2.66 s, cold after idling — the same pattern as every day so far);
-                                                main 6/6 first time
-flutter test test/renders                       263 passed — the PLAIN run (no --update-goldens)
-                                                after 9740420; goldens current
-flutter build web --release                     √ 76.9 s — build/web is FRESH (tip code)
-flutter build apk --debug                       √ — SHA-256 34157bcf…, on disk only, NOT on the phone
-APK on the handset                              1ad4c725 (2026-08-23 04:50); carries none of this
-                                                session's fixes
-M3-TASKS.md                                     15 ticks; Phase 0 all four ticked with this session's
-                                                evidence; Phases 1, 2 DONE; Phase 3 console DONE,
-                                                Mine ▶ IN PROGRESS (23 fixes, 5 findings open)
-browsers                                        NONE opened this session; nothing on 9222/9223;
-                                                the idle py -3 -m http.server 8123 over build/web
-                                                (now FRESH) may still be running — harmless
-phone                                           NOT touched this session (platform admin on home,
-                                                0 screenshots, as the previous session left it)
+                                                (NAME-BASED — see §3.27, it counted a screen whose
+                                                every picture was the wrong variant)
+health_probe                                    7/7 — the extras project's search_place_index
+                                                answered on the RETRY, cold after idling, as on
+                                                every day so far; main 6/6 first time
+flutter test test/renders                       268 passed — the PLAIN run (no --update-goldens)
+                                                after 20f8a77; goldens current. 263 → 268 this
+                                                session (five screens photographed for the
+                                                first time)
+flutter build web --release                     √ — build/web is FRESH (tip code)
+flutter build apk --debug                       √ — SHA-256 61861FA9C8CA45D1F9ECFFE8AB95BEA6
+                                                3F96FB30F98578C1F4ECC392EE15A7CE, on disk only,
+                                                NOT on the phone
+APK on the handset                              1ad4c725 (2026-08-23 04:50); carries none of the
+                                                last two sessions' fixes
+M3-TASKS.md                                     17 ticks. Phase 0 all four ticked with THIS
+                                                session's evidence; Phases 1, 2 DONE; Phase 3
+                                                console + Mine + Buyer DONE, Transporter
+                                                ▶ IN PROGRESS, Driver and Shared untouched
+browsers                                        NONE opened this session at any point; 0
+                                                ml-chrome-*, nothing on 9222/9223
+phone                                           NOT touched this session
+original worktree                               df451d0 · 3 pre-existing modified · 14163 · 2
+                                                worktree entries · 0 modified today
 ```
 
-Test count: 2531 at the start of the session's work (after the first five
-fixes) → 2578. New test files: `flagship_trend_caption_test`,
-`security_gate_heads_test`, `load_controller_copy_test`,
-`operations_hub_heads_test`, `mine_figure_faces_test`,
-`stockpile_audit_heads_test`, `recon_meta_counts_test`,
-`quality_table_cells_test`, `search_loads_vocabulary_test`,
-`mine_locations_heads_test`, `map_panels_test`,
-`company_employees_register_test`, `employee_profile_tones_test`; cases added
-to `portal_dashboard_kit_test`, `portal_section_header_test`,
-`portal_page_header_test`, `status_badge_vocabulary_test`,
-`tons_out_filter_test`, `employee_register_sweep_test`. Guards stay at 43.
+Test count: 2578 at the session's start → 2647. New test files:
+`employee_roster_paging_test`, `employee_grid_head_test`,
+`mine_buyers_head_and_cards_test`, `requests_screen_copy_and_actions_test`,
+`trip_detail_faces_and_card_test`, `company_information_labels_test`,
+`buyer_dashboard_tones_test`, `buyer_routes_mines_head_and_tone_test`,
+`buyer_loads_value_table_fits_test`, `buyer_reconciliations_copy_test`,
+`available_routes_chip_fits_test`, `live_map_status_pill_test`,
+`weight_reconciliation_totals_test`; cases added to
+`portal_dashboard_kit_test` and `status_badge_vocabulary_test`. Guards stay
+at 43.
 
 ---
 
@@ -357,6 +356,133 @@ one-per-bucket roster under a transporter (deliberate); `OverviewHeroTile`'s
 sans card titles (card titles, not section heads); `Total Tons=` (CLAUDE.md
 §4 mandates the literal); dialog titles in sans (`dialogTheme`, app-wide);
 captions wrapping at a `·`; the 520px gate column (the original's).
+
+---
+
+### 3.27 The fifth session — Mine closed, Buyer done, Transporter started
+
+Header note for the whole section: **the fourth session's §3.26 stands
+unchanged below.** Nothing in it was redone.
+
+**Mine — the five findings that were open (six commits):**
+
+- `bf40afc` the employee grid's paging. Found by asking whether a header meta
+  counting that roster would be TRUE. `EmployeeRepository.getByCompanyId`
+  returned its cache VERBATIM — no `orderBy`, no `limit`, no `offset` — so
+  every `InfiniteGrid` page after the one that primed the cache was that page
+  again, and never short; and it cached the twenty-row SLICE under the
+  company's key, so a paged company told every reader it had twenty people for
+  five minutes. `SupabaseRepository.supabase` became a getter in the same
+  commit, because a field initialiser meant NO repository in this product could
+  be built in a test at all.
+- `4a4558f` the grid's head: `'$companyName Employees'` (the shipping app's
+  `AppBar` title moved into an `MlPageHeader` unchanged) → sentence case, plus
+  the meta §5.4 asks for, at no extra round trip.
+- `06ecf4b` Buyers: the last portal page opening with a SECTION head + a
+  hand-rolled `Text`. Measured at 412px, the meta moved from L16 under a title
+  at L48 to L179 on the title's row, and the header is 34px shorter. And every
+  buyer card in the `Wrap` was taking `OverviewHeroTile`'s accent wash AND cyan
+  glow — `muted` existed, was passed by NOBODY, and thinned only the wash.
+- `8b9e71e` the mine's Requests: the description had no `isMine` branch, so a
+  mine was told it raises "transportation and product" requests — the one type
+  §4 forbids it — directly above a button offering the one it omitted. Both
+  actions moved from a left `Wrap` of stock Material into `MlPageHeader.actions`.
+  **And the `isMine` screen had never been photographed** (see below).
+- `6ee7d68` trip detail: `TRP-000123` and `34.90 t` in sans while the plate
+  above them and the same reference on the buyer's Loads & value are mono; the
+  facts in a hand-rolled `Container` with no heading; `View waybill` stock
+  Material. Per-row `isCode`, not a blanket face — the names are not codes.
+- `6762b65` company information: six title-case labels, three WRAPPING in the
+  130px column at 1600px. Shortened rather than widening the column, because
+  the words repeated the heading above them and the avatar above that.
+
+**Buyer — nine fixes.** Twelve of the reviewer's 23 findings were already
+closed by earlier passes and were checked IN THE RENDER; #20 is marked (Shared).
+`88492d2` `SaSectionHeader` (the third header in the family to learn that a
+width rule is not a fit rule — `MlPageHeader`'s measurement became the shared
+`MlHeaderLayout`); `cda2922` "Trucks inbound" amber under a caption saying it
+had left the mine; `a95cce5` Routes & mines (a section head as a page title;
+route cards coloured BY INDEX); `bfcf8c5` a table demanding 1376px in a 1224px
+card, carrying the invoice button off-screen; `5127fe0` a chip cut mid-word;
+`0bbf5ef` "Tons Delivered" over a sum of the MINE's own weight; `8e01b67` the
+three cross-check figures over two populations; `27acc6f` the live map's status
+pill shrunk by a `FittedBox`.
+
+**Transporter — one fix.** `ac190e0`: `toneForStatus` matched `'on route'`
+nowhere (it is not `'en route'`), so `Trucks on route`'s pills and `DRIVER ON
+ROUTE` drew neutral GREY beside `EN ROUTE TO OFFLOAD` in blue for the same
+truck. **And, measured beside it, `toneForStatus('Inactive')` returned
+`MlTone.done`** — GREEN — because `"inactive".contains("active")` is true.
+
+**🚨 FOUR FAULTS NO REVIEWER RAISED, AND HOW EACH WAS FOUND**
+
+1. The employee-grid paging (`bf40afc`) — found by asking whether a number the
+   fix was about to print would be true.
+2. **The mine's Requests screen had never been photographed** (`8b9e71e`).
+   `unphotographed_screens.py` said 94/94 because it counts the class NAME in
+   the render file — the name-based limit stated in its own header — and every
+   picture of `BuyerRequestsScreen` was `isMine: false`. First time that limit
+   has cost anything.
+3. **The weight reconciliation's three figures covered two populations**
+   (`8e01b67`) — found by LOOKING at a desktop render this session had to create
+   first. `103.22 t Loaded · 70.70 t Delivered · 0.42 t Net variance` over three
+   trips, one still Pending. The caption invites the subtraction; 103.22 − 70.70
+   is 32.52, seventy-seven times the stated variance, on the screen that exists
+   to say whether mass went missing en route. The file already computed the
+   right figure as `deliveredLoaded` for the severity denominator.
+4. `toneForStatus('Inactive')` → green (`ac190e0`), measured.
+
+**FIVE RENDERS CREATED FOR SCREENS THAT HAD NO PICTURE** — and two of the four
+faults above came out of making them: `screen-mine-requests-{desktop,phone}-dark`,
+`screen-buyer-loads-value-{desktop,phone}-dark`,
+`screen-buyer-reconciliations-desktop-dark`. 263 → 268.
+
+**🚨 THREE OF THIS SESSION'S OWN MISTAKES, CAUGHT BY ITS OWN INSTRUMENTS**
+
+- **A "fix" that was a NO-OP, and a test that passed without it.** The
+  available-route chip (`5127fe0`) looked like CLAUDE.md §10.4 — a child laid
+  out against unbounded width — so the first version added a `ConstrainedBox`
+  per chip inside a `LayoutBuilder`, and a test asserting the chip's geometry.
+  **Sabotaging it passed.** Probing the real widget at the real width showed
+  why: `RenderWrap` bounds its children already (33..379 in a card at 16..396,
+  with or without the constraint). The actual fault was `Chip` clipping a label
+  that had no `maxLines`/`overflow`, silently. Twenty lines became two, and the
+  test now asserts `didExceedMaxLines` — a rendered fact — rather than a
+  rectangle that was always correct.
+- **A header measured in the wrong font** (`20f8a77`). The two cases added to
+  `portal_dashboard_kit_test.dart` measure whether a title and its tools FIT,
+  and hosted `SaSectionHeader` in a bare `MaterialApp`: stock Material's type
+  scale. Caught by `test-renders-under-the-app-theme` on the end-of-session
+  gate. Both cases and both sabotages were re-run under the real theme.
+- **Two tests that did not bite, in `live_map_status_pill_test`.** Comparing
+  the pills' declared `fontSize` passes with a `FittedBox` in place — it scales
+  the PAINTED result and leaves the style alone — and checking
+  `paragraph.parent` is not a `RenderFittedBox` passes too, because the badge
+  puts several render objects in between. Height, and the whole ancestor chain.
+
+**🚨 `mypatch.py` DESTROYED A SOURCE FILE, AND IS NOW HARDENED.**
+`io.open(p, 'w')` TRUNCATES the target the moment it is called; the encode
+happens on `.write()`. A patch carrying an unpaired surrogate (a
+`\ud83d\udea8` escape written to keep a patch script ASCII) emptied
+`ml_status_badge.dart` to ZERO BYTES and only then raised `UnicodeEncodeError`.
+It encodes first and writes through a temp file and a rename now; proven by
+driving the same bad patch at it again and diffing the target. Two smaller
+lessons in its docstring: **`flutter analyze` reports "No issues found!" for a
+zero-byte Dart file**, and a bash heredoc still eats backslashes (it ate
+`\'` out of a Dart string in the same hour).
+
+**A POWER CUT** hit mid-session and zeroed
+`mine_supplier_buyers_detail_screen.dart` (18,362 bytes, not one non-NUL byte).
+`.git/index` was intact this time, `git fsck` clean, one other zeroed file (a
+gradle build artifact). Restored from HEAD, the edit redone, and a stray `~`
+that had landed on line 4 of `M3-TASKS.md` in the open editor reverted.
+
+**Reviewer findings checked and NOT applied:** the buyer's own "Delivered"
+figure in the weight-reconciliation card (that one really IS the offload
+weight — a word-ban would have taken it out, and the test says so);
+`'This period'` (a fallback behind `latestLabel`, with a comment); the
+`Routes & Mines` KEY in `_legacyTabLabels` (the seam, not the copy);
+requester-typed tonnages printed as typed.
 
 ---
 
@@ -712,34 +838,46 @@ Not yet seen as pixels.
 
 ## 4. What is NOT done — PICK UP HERE
 
-### 4.1 Phase 3 — the Mine task is open with five findings; four tasks untouched
+### 4.1 Phase 3 — three of six tasks done; Transporter in progress
 
-**Mine portal (`- [ ]`, `▶ IN PROGRESS`)** — five findings left, all small,
-all located (`docs/redesign/VERIFICATION.md` Mine table, rows marked *open*;
-`docs/redesign/reviews/2026-08-23-phase3/report_mine.md` #40–#45):
+**Done and ticked:** the console pass, the Mine portal (29 fixes over two
+sessions), the Buyer portal (9 fixes; 12 findings already closed by earlier
+passes). Their per-screen tables in `docs/redesign/VERIFICATION.md` carry a
+commit or the words "reviewed, no drift" on every row. **Do not redo any of
+it.**
 
-| screen | finding | where |
-|---|---|---|
-| employee grid | `'$companyName Employees'` title case; no meta | `lib/features/employee/screens/employee_grid_screen.dart:40` |
-| Buyers | every `BuyerOverviewCard` takes `OverviewHeroTile`'s accent gradient + cyan shadow — pass `muted: true` and draw no shadow when muted (the tile has 9 call sites; do not re-skin the others); page head is `MlSectionTitle` + hand `Text` → `MlPageHeader(title, description, meta, actions: [Request buyers])` | `lib/features/portal/widgets/premium_overview_widgets.dart:36–46, 98–116, 268–300`; `lib/features/portal/screens/mine_supplier_buyers_detail_screen.dart:171–192` |
-| Requests (`isMine: true`) — **no render exists** | description says "transportation and product requests" for a mine that raises transportation and **buyer** requests; the two actions sit in a left `Wrap` under the header as `FilledButton.tonalIcon` (blue) + `FilledButton.icon` (cyan) → `MlPageHeader.actions` with `MlButton.secondary` / `MlButton.primary`; add a mine-org render | `lib/features/portal/screens/buyer_requests_screen.dart:53–92` |
-| trip detail | `TRP-000123`, `34.90 t` in sans w600 → `MlType.code`; the facts in a bare `Container` → `MlCard` + `MlSectionTitle('Trip facts', meta: …)` | `lib/features/portal/screens/portal_trip_detail_screen.dart:84–184` |
-| company (`/portal/mine/company`, shared) | "Company Information" + "Company Name", "MineLink Reference", "WhatsApp Number", "Organization Type", "Created At", "Last Updated" — title case AND they wrap in the 130px label column at 1600px → sentence case, single-word labels ("Name", "Reference", "WhatsApp", "Org type", "Created", "Updated"); the reference code in `MlType.code` | `lib/features/company/screens/company_list_screen.dart:247–322` |
+**Transporter portal (`- [ ]`, `▶ IN PROGRESS`).** `M3-TASKS.md`'s progress
+line under the task is the authoritative list. In summary, of the reviewer's 30
+findings in `report_transporter.md`:
 
-When those five are committed (each with a biting test, goldens looked at),
-flip their VERIFICATION.md rows to the commit, add the "reviewed, no drift"
-screens you also looked at, tick the Mine task with an evidence line naming
-every fix, and commit `M3-TASKS.md` with it.
+- **7 already fixed** and verified, not taken from the report: #1 (`16fcfac`),
+  #2 (`0057ef8`), #17 (`bcb0fdb`), #19 (`bb0de74`), #21 (`8dc3500`),
+  #22 (`db9912d`), #23 (`6762b65`).
+- **3 are (Shared)** and belong to the Shared task: #24, #25, #26.
+- **1 fixed this session:** #11, in `ac190e0`.
+- **19 left.** The largest by far is the FLEET REGISTER (#4–#9) — see §0's
+  "WHAT IS OWED FIRST" for why #7 is the sharp one. The rest: #3 donut legends
+  (also mine and buyer); #10 'Trucks On Route' / 'On Route' title case;
+  #12–#13 and #30 fixtures that contradict each other about which truck is on
+  route and set `driverName` where `fleet_vehicle_status.dart` reads `drivers`;
+  #14 the drivers screen's hand-rolled `_Stat`; #15 maintenance costs and
+  odometers ungrouped; #16 earnings printing `R-61,023` instead of
+  `−R61,023`; #18 request tracking repeating its page title as a section title
+  with the same meta; #20 "Reconciliation batches" as a bare sans heading;
+  #27 the dispatch sheet's sans title and accent metrics; #28 trip status as
+  muted subtitle text instead of a badge; #29 the compliance document list with
+  no section head.
+- **The MISSING RENDERS list at the bottom of that report is part of the
+  task.** This session found two real defects purely by creating a render that
+  did not exist (§3.27), and `unphotographed_screens.py` cannot see the gap
+  because it counts class names.
 
-**Then, in order, one at a time:** Buyer → Transporter → Driver → Shared.
-Each has a reviewer report in `docs/redesign/reviews/2026-08-23-phase3/`
-(file:line, class, original-same-or-differs, suggested fix, and a "not
-drift" list). **Check each finding against §3.26 first — many are already
-fixed by this session's shared-component commits**: Buyer #1/#3/#7/#11/#12/
-#13–#16/#18/#19/#21 and Transporter #1/#2/#17/#19/#21/#22/#23 map onto
-`16fcfac`, `0057ef8`, `bb0de74`, `8dc3500`, `6752683`, `249106f`, `db9912d`,
-`90a82c1`, `bcb0fdb` and the open company-labels item. Verify in the render
-before closing any of them; a report is a lead, not a verdict.
+**Then Driver, then Shared — one at a time, each ticked before the next.**
+Their reports are `report_driver.md` and `report_shared.md` in the same folder.
+
+**A report is a lead, not a verdict.** Check every finding against §3.26 and
+§3.27 first, and verify it in the render before touching anything: twelve of
+the buyer's 23 and seven of the transporter's 30 were already fixed.
 
 ### 4.2 The Phase 0 gate
 
@@ -765,8 +903,10 @@ Phase 4 (a real road), Phase 5 (seven server-side items, §6), Phase 6
 
 ### 4.5 Closed, do not redo
 
-Phases 1 and 2 entirely. The console pass. The 23 fixes in §3.26 and every
-row of the Mine table in VERIFICATION.md that carries a commit.
+Phases 1 and 2 entirely. The console pass. **The Mine portal and the Buyer
+portal, both ticked.** The 23 fixes in §3.26 and the 16 in §3.27, and every
+row of the Mine and Buyer tables in VERIFICATION.md — every one of them now
+carries a commit or the words "reviewed, no drift".
 
 
 ## 5. How to work in this repo
@@ -1105,6 +1245,62 @@ Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'chrome.exe' -and $_.
   the render after every fix, not only at the test.
 
 
+### Lessons added 2026-08-23 (fifth session)
+
+- 🚨 **A FIX THAT CHANGES NOTHING WILL PASS ITS OWN TEST. SABOTAGE FIRST,
+  AND IF THE SABOTAGE PASSES, THE FIX IS THE SUSPECT.** The available-route
+  chip looked exactly like CLAUDE.md §10.4, so it got a `ConstrainedBox` and a
+  geometry test. Removing the `ConstrainedBox` left every case green.
+  `RenderWrap` bounds its children already — 33..379 inside a card at 16..396,
+  measured, with and without. The real fault was one `Chip` clipping a label
+  with no `maxLines`. Twenty lines became two.
+- 🚨 **PROBE THE REAL WIDGET AT THE REAL WIDTH.** The first probe for that
+  chip used a synthetic `SizedBox(width: 380)` and reproduced nothing. Mounting
+  the actual section inside the horizontal padding `MlPageBody` gives it is
+  what produced the numbers above. A synthetic reproduction that disagrees with
+  the golden is evidence about the reproduction.
+- 🚨 **`unphotographed_screens.py` COUNTS CLASS NAMES, AND IT SAYS SO.**
+  It reported 94/94 while every picture of `BuyerRequestsScreen` was the buyer's
+  half and the mine's `isMine: true` variant had never been drawn. Creating it
+  found a real copy fault; creating a desktop render of the buyer's
+  reconciliations found a much worse one. **When a task's report lists missing
+  renders, they are part of the task.**
+- **A count is only as honest as the query under it.** Before printing a meta,
+  ask what the number is summed over. The employee grid's would have been a lie
+  because the repository cached a page under the roster's key; the weight
+  reconciliation's three cards were two populations side by side.
+- **Substring matching in a tone map is a trap in both directions.**
+  `'on route'` is not `'en route'` and matched nothing; `'inactive'` CONTAINS
+  `'active'` and came out green. Word-bound the short words, and put the
+  negative case above the positive one.
+- **A `FittedBox` scales the PAINTED result.** The declared `fontSize` does not
+  change, so a test comparing font sizes passes with the fault in place. Compare
+  drawn HEIGHT. And when checking for an ancestor widget type, walk the whole
+  chain — `paragraph.parent` was not it.
+- **Three shapes can each be wrong in a different direction.** The live map's
+  pill: a `FittedBox` shrank it; removing the `FittedBox` cut the PLATE instead;
+  measuring per row made two adjacent rows with the same status lay out
+  differently. Uniform-and-stacked was the fourth try. Keep the failures in the
+  comment — each is a plausible "simplification" for the next reader.
+- 🚨 **`mypatch.py` TRUNCATES BEFORE IT ENCODES — it did not, now.** An
+  unpaired surrogate in a patch emptied a Dart file to zero bytes and only then
+  raised. It encodes first and renames a temp file into place now. **And
+  `flutter analyze` reports "No issues found!" for a zero-byte Dart file**, so
+  analyze passing is not evidence a file still has anything in it.
+- **The bash heredoc still eats backslashes**, even quoted (`<<'PYEOF'`). It ate
+  `\'` out of a Dart string literal and produced a syntax error forty lines
+  away. Write patch scripts with the Write tool.
+- **`code.cmd` is STABLE VS Code, and Jean runs INSIDERS.** It exits 0 and the
+  running window never changes tab, so the Phase 0 tick was being earned by an
+  exit code rather than by a window. The CLI that reaches his window is
+  `C:\Program Files\Microsoft VS Code Insiders\bin\code-insiders.cmd
+  --reuse-window "<file>"`. Check the title with `Get-Process`, not the exit code.
+- **Run the guards BEFORE claiming a task is done, not only at the session's
+  end.** They caught two of this session's own edits on work committed hours
+  earlier — a header test measuring in stock Material's font, and a false
+  positive worth exempting properly rather than bending the copy around.
+
+
 ## 6. For the SHIPPING app, not this fork
 
 `supabase/` is frozen here, so these are reported. All measured, not inferred.
@@ -1183,138 +1379,215 @@ Everything between the rules is the message. It is self-contained.
 
 Continue the MineLink Material 3 redesign, exactly where the last session left off. The work is driven by ONE MARKABLE FILE. Read these in this order before doing anything else.
 
-1. THE MARKABLE TASK FILE — THE SINGLE SOURCE OF WHAT IS DONE AND WHAT IS LEFT:
+**1. THE MARKABLE TASK FILE — THE SINGLE SOURCE OF WHAT IS DONE AND WHAT IS LEFT:**
 
-      C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\M3-TASKS.md
+    C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\M3-TASKS.md
 
-   Seven phases, checkboxes, evidence lines, a session log. Open it in Jean's IDE THE MOMENT YOU START and keep it open the whole session:
+Seven phases, checkboxes, evidence lines, a session log. Open it in Jean's IDE THE MOMENT YOU START and keep it open all session. **Jean runs VS Code INSIDERS**, so the `code.cmd` older handoffs name does nothing visible — it exits 0 and his window never changes tab. Use:
 
-      code "C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\M3-TASKS.md"
+    & "C:\Program Files\Microsoft VS Code Insiders\bin\code-insiders.cmd" --reuse-window "C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\M3-TASKS.md"
 
-   (the code CLI is `C:\Users\Somebody Someone\AppData\Local\Programs\Microsoft VS Code\bin\code.cmd`). Jean watches this tab and sometimes EDITS it himself; keep his wording, commit it with your next change. VS Code reloads it on every save.
+then CHECK IT WORKED with `Get-Process | Where-Object { $_.ProcessName -match 'Code' -and $_.MainWindowTitle -ne '' }` — the title must read `M3-TASKS.md - MineLink-M3 - …`. Do not trust the exit code. Jean watches this tab and sometimes EDITS it himself; keep his wording and commit it with your next change.
 
-2. THE PROJECT HANDOFF — how the redesign got here, how to drive a browser WITHOUT touching Jean's mouse (§5), how to drive his phone (§5), the Phase 3 METHOD and the nine classes of drift (§3.25), what this session fixed and must not be redone (§3.26), the five Mine findings still open and where each one is (§4.1), what is owed to the SHIPPING app (§6):
+**2. THE PROJECT HANDOFF** — how the redesign got here, how to drive a browser WITHOUT touching Jean's mouse (§5), how to drive his phone (§5), the Phase 3 METHOD and the nine classes of drift (§5), what the last two sessions fixed and must not be redone (§3.26 and §3.27), exactly what is left (§4.1), what is owed to the SHIPPING app (§6):
 
-      C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
+    C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
 
-   Read "WHERE THIS SESSION STOPPED", §0, §1, §2, §3 (§3.26 first, then §3.25), §4, §5 (including "Lessons added 2026-08-23 (fourth session)"), §6. Where HANDOFF.md and M3-TASKS.md disagree about what is left, M3-TASKS.md wins.
+Read "WHERE THIS SESSION STOPPED", §0, §1, §2, §3.27 then §3.26, §4, §5 (including "Lessons added 2026-08-23 (fifth session)"), §6. **Where HANDOFF.md and M3-TASKS.md disagree about what is left, M3-TASKS.md wins.**
 
-3. THE REVIEWER REPORTS — five read-only agents reviewed every route target of the five remaining Phase 3 scopes on 2026-08-23 and reported drift by class with file:line. They are in the repo:
+**3. THE REVIEWER REPORTS** — five read-only agents reviewed every route target of the five remaining Phase 3 scopes on 2026-08-23 and reported drift by class with file:line:
 
-      C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\docs\redesign\reviews\2026-08-23-phase3\report_mine.md  (and report_buyer.md, report_transporter.md, report_driver.md, report_shared.md; agent_brief.md is the brief they were given)
+    C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\docs\redesign\reviews\2026-08-23-phase3\
+      report_mine.md · report_buyer.md · report_transporter.md · report_driver.md · report_shared.md · brief.md
 
-   A report is a LEAD, not a verdict: verify every finding in the render and the code before fixing it, and check it against HANDOFF §3.26 — many Buyer/Transporter findings are ALREADY FIXED by this session's shared-component commits.
+**A report is a LEAD, not a verdict.** Verify every finding in the render AND the code before fixing it, and check it against §3.26/§3.27 first: twelve of the buyer's 23 findings and seven of the transporter's 30 were ALREADY FIXED by earlier passes. Check the render, not the report.
 
-4. THE OLDER MACHINE-WIDE HANDOFF — BACKGROUND ONLY, DO NOT WORK FROM IT:
+**4. THE OLDER MACHINE-WIDE HANDOFF — BACKGROUND ONLY, DO NOT WORK FROM IT:**
 
-      C:\Users\Somebody Someone\Claude\HANDOFF.md
+    C:\Users\Somebody Someone\Claude\HANDOFF.md
 
-   Dated 2026-08-08: MCP servers, the decoy folders, the phone tooling. Nothing in it is a task.
+Dated 2026-08-08: MCP servers, the decoy folders, the phone rig. Read it only if Jean asks about that setup.
 
-THE PATHS THAT MATTER
+---
 
-  Work happens here (its own git repo, branch main, 234 commits, clean, NO remote):
-      C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
+### THE PATHS THAT MATTER
 
-  NEVER TOUCHED, for any reason:
-      C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29
+Work happens here (its own git repo, branch `main`, no remote):
 
-THE ONE RULE THAT MUST NOT BREAK — Jean's words: "NO CHANGES WHAT SO EVER INSIDE OF "C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29" then I'm happy". CHECK IT AT THE START OF THE SESSION AND AGAIN AT THE END, and tick Phase 0 with it:
+    C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
-  HEAD              df451d0
-  git status        exactly 3 modified files, all pre-existing:
-                      M .design-sync/config.json
-                      M lib/features/super_admin/screens/margin_ledger_screen.dart
-                      M test/widgets/app_sidebar_behaviour_test.dart
-  file count        14163   (find . -path ./.git -prune -o -type f -print | wc -l)
-  git worktree list exactly 2 entries — the main repo and that worktree
-  modified today    0
+NEVER TOUCHED, for any reason:
 
-  (The plain find . -type f -not -path "./.git/*" returns 14164 because in a WORKTREE .git is a FILE — same untouched tree.) Reading it is fine; writing to it, or running any MUTATING git command inside it, is not. supabase/ inside MineLink-M3 is frozen too — anything needing a migration is REPORTED under Phase 5 / HANDOFF §6, never applied. Re-checked at the end of this session: all five figures exactly as above.
+    C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29
 
-HOW THE MARKABLE FILE WORKS
+### THE ONE RULE THAT MUST NOT BREAK
 
-- Work the phases IN ORDER. Phase 0 start items → Phase 3 in the file's order: Mine portal (OPEN, ▶ IN PROGRESS — finish it first) → Buyer portal → Transporter portal → Driver app → Shared. Phases 4, 5, 6, 7 and the "Decisions only Jean can make" are BLOCKED ON JEAN: do not start them, do not tick them, leave their ⏸ lines in place and name them in your report.
-- AFTER EACH TASK IS COMPLETED, MARK IT COMPLETED IMMEDIATELY: change `- [ ]` to `- [x]` and put an evidence line directly under it:
-    ✅ <date> · commit <sha> · proven by <what was run / seen / measured>
-  Then COMMIT M3-TASKS.md together with the work it records. Never batch ticks. Never increment a count — recount with `grep -c '^- \[x\]' M3-TASKS.md` (it is 15 right now).
-- Jean's rule, verbatim: "FROM HERE ON FORWARD WITH WHAT YOU'RE BUSY WITH, NO NEW TASK SHOULD BE STARTED UNLESS THE PREVIOUS TASK WAS FULLY AND PROPERLY MARKED OFF TRUTHFULLY!"
-- And this session, verbatim: "you're not marking your tasks as you should, AFTER ANY AND EVERY TASK IS COMPLETED IT SHOULD BE MARKED RIGHT AFTER THAT! ONLY IF IT'S 100% TRUE!" — so: tick the moment a thing is proven; REOPEN a tick that is no longer true (the previous session's end-of-session ticks must not stand in a new session); record progress on an open task as a ▶ IN PROGRESS line under it and commit the file with the work; a task that cannot move keeps `- [ ]` and gets ⏸ BLOCKED — <on what> — <what unblocks it>. A blocked or in-progress task is never a done task.
-- A phase gets `Status: DONE <date>` only when every task in it is ticked (Phases 1 and 2 are DONE; Phase 3 is OPEN with its console task ticked and its Mine task in progress).
+Jean's words: *"NO CHANGES WHAT SO EVER INSIDE OF "C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29" then I'm happy"*. CHECK IT AT THE START OF THE SESSION AND AGAIN AT THE END, and tick Phase 0 with it:
+
+    HEAD              df451d0
+    git status        exactly 3 modified files, all pre-existing:
+                        M .design-sync/config.json
+                        M lib/features/super_admin/screens/margin_ledger_screen.dart
+                        M test/widgets/app_sidebar_behaviour_test.dart
+    file count        14163   (find . -path ./.git -prune -o -type f -print | wc -l)
+    git worktree list exactly 2 entries — the main repo and that worktree
+    modified today    0
+
+(The plain `find . -type f -not -path "./.git/*"` returns 14164 because in a WORKTREE `.git` is a FILE — same untouched tree.) Reading it is fine; writing to it, or running any MUTATING git command in it, is not. `supabase/` inside MineLink-M3 is frozen too — anything needing a migration is REPORTED under Phase 5 / HANDOFF §6, never applied. **Re-checked at the end of this session: all five figures exactly as above.**
+
+---
+
+### HOW THE MARKABLE FILE WORKS
+
+Work the phases IN ORDER. Phase 0 start items → Phase 3's remaining tasks → nothing else. Phases 4, 5, 6, 7 and the "Decisions only Jean can make" are BLOCKED ON JEAN: do not start them, do not tick them, leave their ⏸ lines in place and name them in your report.
+
+- **AFTER EACH TASK IS COMPLETED, MARK IT COMPLETED IMMEDIATELY:** change `- [ ]` to `- [x]` and put an evidence line directly under it:
+  `✅ <date> · commit <sha> · proven by <what was run / seen / measured>`
+  Then COMMIT M3-TASKS.md together with the work it records. Never increment a count by hand — recount with `grep -c '^- \[x\]' M3-TASKS.md` (**it is 17 right now**).
+- Jean's rule, verbatim: *"FROM HERE ON FORWARD WITH EVERY TASK, NO TASK SHOULD BE STARTED UNLESS THE PREVIOUS TASK WAS FULLY AND PROPERLY MARKED OFF TRUTHFULLY!"*
+- And, verbatim: *"you're not marking your tasks as you should, AFTER ANY AND EVERY TASK IS COMPLETED IT SHOULD BE MARKED OFF RIGHT AFTER THAT! ONLY IF IT'S 100% TRUE!"* — so: tick the moment it is proven; REOPEN a tick that is no longer true (**the previous session's end-of-session ticks must not stand in a new session**); record progress on an open task as a `▶ IN PROGRESS` line under it and commit the file with the work; a task that cannot move keeps `- [ ]` and gets `⏸ BLOCKED — <on what> — <what unblocks it>`. A blocked or in-progress task is never a done task.
+- A phase gets `Status: DONE <date>` only when every task in it is ticked.
 - Update the "Last updated" line (date · commit count · tip) every time you commit the file, and add ONE line to the Session log at the end of the session.
-- Everything already ticked was proven before being ticked. DO NOT REDO IT. Everything under "Deliberately NOT on this list" stays off the list.
+- Everything already ticked was proven before being ticked. Anything under "Deliberately NOT on this list" stays off the list.
 
-VERIFIED STATE AT THE MOMENT THIS MESSAGE WAS WRITTEN
+---
 
-  MineLink-M3                       234 commits, clean, no remote; the last code commit is 9740420 (the register's accent); the tip is the docs commit carrying this message; M3-TASKS.md has 15 ticks
-  flutter analyze                   No issues (whole tree)
-  flutter test (full)               2578 passed · 1 skipped · 0 failed (after 9740420)
-  dart tool/release_guards.dart     43/43 PASS; --selftest: all 43 bite
-  py -3 tool/_sabotage.py           ALL SABOTAGES CAUGHT
-  the seven Python checks           all green (type_scale_codemod selftest OK · dropdown_width clean · glyph_coverage clean · one_clock PASS + selftest · unphotographed 94/94 · health_probe 7/7 — the EXTRAS project's search_place_index answered on the RETRY after idling, as on every day so far; main 6/6 first time)
-  flutter test test/renders         263 passed, PLAIN run (no --update-goldens) after 9740420 — goldens current
-  build/web                         FRESH (flutter build web --release √ 76.9 s at the tip code)
-  APK on disk                       build/app/outputs/flutter-apk/app-debug.apk, SHA-256 34157bcf…, FRESH — NOT on the phone, NOT on the NAS
-  APK on the phone                  1ad4c725 (from 2026-08-23 04:50; carries NONE of this session's 23 fixes). Installing is only owed if a Phase 3 fix needs to be seen on glass.
-  Jean's phone (SM-G780G)           NOT touched this session; left as the previous session left it: platform admin on home, 0 screenshots. Check probe before any use.
-  Android emulator                  NOT running (AVD minelink_test; adb at C:\Android\sdk\platform-tools)
-  Browsers                          NONE opened this session (0 ml-chrome-*, nothing on 9222/9223). The idle py -3 -m http.server 8123 over build/web may still be running — harmless.
-  Helpers                           committed under MineLink-M3\tool\phase3_helpers\ (README there): mypatch.py (line-ending-aware exact patching — import it), mypair.py (HEAD-vs-working crop of a golden), golden_diff.py (measure every moved golden; copy it to a scratch dir first, it writes crops beside itself), fix_eol.py (run before every commit), plus the browser driver cdp.py/setfile.py/takepic.py/attach_photos.py/hover.py/emulate.py from earlier sessions (unused this session).
-  Original worktree                 df451d0, 3 pre-existing modified, 14163, 2 entries, 0 today
-  Live data left behind             nothing new this session (no browser, no phone, no database writes). The previous sessions' test rows (the approved-not-dispatched mine request, the Iron Hills DM rows, trip b9189cd5 …) are still there; all test data.
+### VERIFIED STATE AT THE MOMENT THIS MESSAGE WAS WRITTEN
 
-WHAT TO DO, IN ORDER
+    MineLink-M3                 257 commits, clean tree. Last CODE commit 20f8a77; the tip is the
+                                docs commit carrying this message. M3-TASKS.md has 17 ticks.
+    flutter analyze             No issues (whole tree)
+    flutter test (full)         2647 passed · 1 skipped · 0 failed
+    dart tool/release_guards    43/43 PASS — it FAILED first, catching two of this session's own
+                                edits; both fixed in 20f8a77. --selftest: all 43 bite.
+    py -3 tool/_sabotage.py     ALL SABOTAGES CAUGHT
+    the seven Python checks     all green (type_scale --selftest OK · dropdown_width clean ·
+                                glyph_coverage clean · one_clock PASS + selftest · unphotographed
+                                94/94 · health_probe 7/7 — the EXTRAS project's search_place_index
+                                answered on the RETRY after idling, as on every day so far)
+    flutter test test/renders   268 passed, PLAIN run (no --update-goldens) — goldens current.
+                                263 → 268: five screens photographed for the first time.
+    build/web                   FRESH (flutter build web --release at the tip code)
+    APK on disk                 build/app/outputs/flutter-apk/app-debug.apk, SHA-256 61861FA9…,
+                                FRESH — NOT on the phone, NOT on the NAS
+    APK on the phone            1ad4c725 — carries none of the last two sessions' fixes.
+                                Installing is only owed if a Phase 3 fix needs to be seen on glass.
+    Jean's phone (SM-G780G)     NOT touched this session. Left as the previous session left it:
+                                platform admin on home, 0 screenshots. Check `probe` before any use.
+    Android emulator            NOT running (AVD minelink_test; adb at C:\Android\sdk\platform-tools)
+    Browsers                    NONE opened this session at any point. 0 ml-chrome-*, nothing on
+                                9222/9223.
+    Helpers                     committed under tool/phase3_helpers/ (README there): mypatch.py
+                                (line-ending-aware exact patching — IMPORT IT, and it is now
+                                truncation-safe), mypair.py (HEAD-vs-working crop of a golden),
+                                golden_diff.py (measure every moved golden; copy it to a scratch
+                                dir first, it writes crops beside itself), fix_eol.py (run before
+                                every commit), plus cdp.py/setfile.py/takepic.py/attach_photos.py/
+                                hover.py/emulate.py (the browser driver, unused these two sessions).
+    Original worktree           df451d0 · 3 pre-existing modified · 14163 · 2 entries · 0 today
+    Live data left behind       nothing new this session (no browser, no phone, no database writes).
 
-0. Tick Phase 0's start-of-session items (baseline check, `code M3-TASKS.md`) with fresh evidence, and REOPEN the two end-of-session items — their ticks describe THIS session's end, not yours; they are earned again only by your own full gate.
-1. FINISH PHASE 3, TASK TWO — the Mine portal. Five reviewer findings are open, all small, all located in HANDOFF §4.1 (a table with file:line) and in docs/redesign/VERIFICATION.md's Mine table (rows marked *open*): the employee grid title; the Buyers cards' accent wash + the page head; the mine's Requests copy and its two actions (and that screen has NO render — add a mine-org one); trip detail faces/head; the company-information labels. THE METHOD (HANDOFF §5 "The Phase 3 method"): LOOK at the render beside docs/design-reference/*.png and §4–§5 of docs/design-reference.md; fix drift at its CAUSE (the shared component where one exists); regenerate with `flutter test test/renders --update-goldens` (the WHOLE suite — never `--name "a|b"`, this shell eats the `|`); LOOK again (tool/phase3_helpers/golden_diff.py + mypair.py); pin with a test; SABOTAGE it (stash the lib file → the test must FAIL → pop; keep a case that stays GREEN); one commit per fix; then flip the VERIFICATION.md row from *open* to the commit; when all five are in, tick the Mine task in M3-TASKS.md with an evidence line naming every fix and every "reviewed, no drift" screen, and commit the file with it.
-2. Then Buyer portal, Transporter portal, Driver app, Shared — the same way, one task at a time, each ticked before the next starts. Start each from its report in docs/redesign/reviews/2026-08-23-phase3/, verify every finding, skip the ones §3.26 already fixed (check the render, not the report), and record "looked at and NOT drift" in VERIFICATION.md so nobody re-derives it.
-3. Phases 4–7 and the Decisions: blocked on Jean. Do not tick, do not start. (Three new decisions surfaced by the reviewers — the chat dock's Nord palette, dialog titles in sans, the login's gold — go onto the Decisions list when the Shared task is reached.)
+---
 
-REVIEWER AGENTS — Jean asked for them and they worked; keep the shape: read-only, one per scope, reporting by the nine classes with file:line and an "original: same/differs" check; the session stays the SINGLE WRITER (one tree, one golden suite, shared components that move 58 goldens at once). They never edit, never run flutter/dart, never open a browser or touch the phone, and never write a scratchpad file under a name you use. Verify everything they say before acting on it.
+### WHAT TO DO, IN ORDER
 
-🚨 IF YOU NEED THE PHONE AND IT DOES NOT ANSWER — `status` says "no phone at a known address" or `probe` is under 0.1 bits/pixel (display asleep) — PAUSE THAT STEP RIGHT THERE AND TELL JEAN, THEN KEEP WORKING ON WHAT DOES NOT NEED IT and re-probe as you go. Jean's words: "if you need to use my phone via ctrl bridge and the phone is not responding that you should pause the process right there so that I'll respond to you that the phone is no longer asleep and that you can try again". Only he can enable host mode and only he can wake the screen; injected touches cannot. Do NOT work around it and do NOT report green as though the phone step were optional. HOST MODE STAYING ON DOES NOT MEAN THE SCREEN IS AWAKE: check probe, not just status. Invoke the driving-jeans-phone skill FIRST the moment you need to touch the phone. It is his PERSONAL phone: prefer sig/changed/waitstable over shot, delete every screenshot immediately, never switch on live-location sharing (it writes his real position), leave it signed in as the platform admin on home. Installing over the NAS: My Files → Network storage → jean → Shared → PhoneRemote → minelink-m3.apk → Update → Open; back out of PhoneRemote and re-enter to refresh the cached listing; compare the SHA-256, not timestamps (the NAS clock is ~2h36m slow); keep the screen alive with status-bar taps in batches under 30 s (a long wait drops the link); decline "Turn on Play Protect".
+**0.** Tick Phase 0's start-of-session items (baseline check + the IDE) with FRESH evidence, and **REOPEN the two end-of-session items** — their ticks describe the FIFTH session's end, not yours; they are earned again only by your own full gate.
 
-DO NOT MOVE JEAN'S MOUSE. He works at this machine while you run. His words: "bro make a nother plan for a mouse, I'm using mine". Drive the browser through CDP (HANDOFF §5) or use the Android emulator. Switch accounts by clearing localStorage('sb-yftazblpmicqtamyiwyb-auth-token') and reloading, never by a menu (CDP clicks do not reach popup menus).
+**1. FINISH PHASE 3, TASK FOUR — the Transporter portal.** It is `- [ ]` with a `▶ IN PROGRESS` line that is the authoritative list. Of the reviewer's 30 findings: **7 are already fixed** (#1 `16fcfac`, #2 `0057ef8`, #17 `bcb0fdb`, #19 `bb0de74`, #21 `8dc3500`, #22 `db9912d`, #23 `6762b65`) — verify in the render, do not redo; **3 are (Shared)** (#24, #25, #26) and wait for the Shared task; **1 was fixed this session** (#11, `ac190e0`); **19 are left.**
 
-🚨 DO NOT COOK HIS CPU. One headless Chrome only for the minutes a flow needs (two, on 9222 and 9223, only for a two-account flow); Stop-Process every chrome.exe whose command line contains ml-chrome- the moment it is done (HANDOFF §5 has the one-liner). Never leave one running while you write code or docs.
+The big one is the **FLEET REGISTER (#4–#9)** — the one transporter screen still entirely in the pre-redesign vocabulary, the same shape the mine's "Search loads" was before `249106f`:
+  - a Material `DataTable` with a filled heading band and sans title-case heads, where the product uses uppercase overline heads on a plain surface;
+  - plates in plain sans, not `MlPlatePill`;
+  - `-` and `—` both used for "empty", in the same row;
+  - `_statusChip` a solid gradient pill painting **RED for "Unassigned"** — a truck with no driver is available, not an error;
+  - "Add vehicle" as a FAB instead of an `MlPageHeader` action;
+  - a column count that never reaches 1, so the mono captions break mid-token on a phone.
+  - **#7 IS THE SHARPEST.** The table derives its status from `assignedDriverId` while the stat cards directly above it read `fleetStatusProvider` — so the cards and the rows answer the same question differently. The comment above those cards says in as many words that reading `hasAssignedDriver` *"put every one of Roadhaul's three trucks in the WRONG bucket"*. A comment in `redesign_renders_test.dart` also claims the picture shows the three derived fleet states; **it does not.** (`ac190e0` already made `MlStatusBadge` able to tone ON ROUTE / AVAILABLE / IN MAINTENANCE / INACTIVE as four different colours, so the badge side is ready.)
 
-HOW TO WORK — THIS IS JEAN'S INSTRUCTION, FOLLOW IT
+The rest: #3 donut legends (also mine and buyer); #10 'Trucks On Route' / 'On Route' title case; #12–#13 and #30 fixtures that contradict each other about which truck is on route and set `driverName` where `fleet_vehicle_status.dart` reads `drivers`; #14 the drivers screen's hand-rolled `_Stat`; #15 maintenance costs and odometers ungrouped; #16 earnings printing `R-61,023` instead of `−R61,023`; #18 request tracking repeating its page title as a section title with the same meta; #20 "Reconciliation batches" as a bare sans heading; #27 the dispatch sheet's sans title and accent metrics; #28 trip status as muted subtitle text instead of a badge; #29 the compliance document list with no section head.
 
-"don't worry about me seeing anything, I'll want to see when everything is complete and done, so don't stop so much in between please run the task for as long as possible so that we can get this completley done and sorted please, correct your self where you make mistakes and fix the mistakes and make sure you don't implement anything with gaps in them make sure its full and proper like the original"
+**The MISSING RENDERS list at the bottom of that report is part of the task, not an extra.** This session found TWO real defects purely by creating a render that did not exist, and `unphotographed_screens.py` cannot see the gap because it counts class NAMES.
 
-AND, EXPLICITLY: IF YOU FIND PROBLEMS ALONG THE WAY, FIX THEM AS YOU GO AND TEST THAT THE FIX WORKS AS EXPECTED. Do not merely note or collect a list of faults to hand back; do not leave a fix unverified. Every fix gets a test that BITES (remove the fix, watch the test fail, restore — and keep a case that stays GREEN under sabotage), and where the fix is visible on a device or in a browser, LOOK AT IT THERE TOO. Half-implemented work, TODOs, stubs, "later" notes are not acceptable — finish each thing.
+**THE METHOD (HANDOFF §5, "The Phase 3 method"):** LOOK at the render beside `docs/design-reference/*.png` and §4–§5 of `docs/design-reference.md`; fix drift at its CAUSE (the shared component where one exists); regenerate with `flutter test test/renders --update-goldens` (**the WHOLE suite — never `--name "a|b"`, this shell eats the `|`**); LOOK again (`tool/phase3_helpers/golden_diff.py` + `mypair.py`); pin with a test; **SABOTAGE it** (stash the lib file → the test must FAIL → pop; keep a case that stays GREEN); one commit per fix; then flip the row in `docs/redesign/VERIFICATION.md`. When every finding is in, tick the Transporter task with an evidence line naming every fix and every "reviewed, no drift" screen, and commit `M3-TASKS.md` with it.
 
-THE GATE (Phase 0, end of session — run it in FULL before the end-of-session tick, and redirect every run to a file, then grep; a pipe hides a failing exit code and `tail` hides [E]):
+**2. Then Driver app, then Shared** — one task at a time, each ticked before the next starts. Start each from its report, verify every finding, skip the ones already fixed (check the render, not the report), and record "reviewed, no drift" in VERIFICATION.md so nobody re-derives it.
 
-  flutter analyze
-  flutter test
-  dart tool/release_guards.dart
-  dart tool/release_guards.dart --selftest
-  py -3 tool/_sabotage.py
-  py -3 tool/type_scale_codemod.py --selftest
-  py -3 tool/dropdown_width_check.py
-  py -3 tool/glyph_coverage_check.py
-  py -3 tool/one_clock_check.py
-  py -3 tool/one_clock_check.py --selftest
-  py -3 tool/unphotographed_screens.py
-  py -3 tool/health_probe.py          (retry once if the extras project is cold)
-  flutter test test/renders           (after any visual change; then LOOK at each moved PNG — golden_diff.py measures them)
-  flutter build web --release
-  flutter build apk --debug
+**3. Phases 4–7 and the Decisions: blocked on Jean.** Do not tick, do not start. Three decisions the reviewers surfaced (the chat dock's Nord palette, dialog titles in sans, the login page's gold) are still to be added to the decisions list when the Shared task is reached.
 
-...AND the original worktree re-checked against the baseline above, AND every Claude-owned browser closed (one left signed in overnight once filled a production database), AND M3-TASKS.md ticked only where it is earned.
+---
 
-THE RIG — things that already went wrong; do not re-learn them:
-- A POWER CUT destroyed every file that was mid-write (pure NUL bytes) and corrupted .git/index this session; HANDOFF §5 "Lessons (fourth session)" has the recovery. Commit after every fix.
-- `--name "a|b"` is eaten by this shell (the `|` becomes a pipe): run the whole render suite, or one `--name` at a time.
-- A bash heredoc eats backslashes and apostrophe escapes even when quoted; write patch scripts with the Write tool and run them with py -3, through tool/phase3_helpers/mypatch.py (half the repo is CRLF and a naive replace misses). Python's stdout is cp1252 here: set PYTHONIOENCODING=utf-8.
-- A pipe hides a failing exit code; redirect, then check $?. Never read a long test run through tail — redirect and grep for [E].
-- A second Chrome cannot share --remote-debugging-port and fails silently; use 9223 and CDP_PORT. A stale cached bundle looks like a silent failure: check the http.server log for 200 vs 304 on main.dart.js.
-- An off-screen (--window-position) Chrome is visibilityState=hidden, 0 rAF/s: Flutter never paints. Use --headless=new.
-- Flexible defaults to flex 1 and a Spacer IS an Expanded — three of them split a row in thirds (the meta at two-thirds, the delta chip at the midpoint). A loose Flexible KEEPS its unused allotment. A Wrap's second run starts at the LEFT. A width rule is not a fit rule — measure. Every one of these bit this session.
-- A meta line that counts rows lies when the rows are not the thing it names; a fixture with a summary and no items lies the same way. Look at the render after every fix, not only at the test.
-- A golden that moves with no code change is a CACHE or an async thing. The flutter_map logo was one; it is fixed.
+### REVIEWER AGENTS
 
-WHEN JEAN SAYS "PAUSE HERE": STOP READING AND PRODUCE THE MESSAGE. Rewrite C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md the same way this one was written — verified state only, no intentions — ending with a fresh self-contained copy-paste block in §8 that carries ALL THREE paths (M3-TASKS.md, MineLink-M3\HANDOFF.md and C:\Users\Somebody Someone\Claude\HANDOFF.md) plus the reviewer reports' path, the untouchable worktree path and its baseline, exactly where you stopped, what is already ticked so it is not redone, HOW THE MARKABLE FILE WORKS, THE PHONE RULE, THE MOUSE RULE, THE CPU RULE, the reviewer-agent rule, this same HOW TO WORK instruction quoted verbatim, the one-task-at-a-time rule, and the fix-as-you-go rule. Add the session's line to M3-TASKS.md's Session log. Commit both. State the commit count the tree WILL be at once that commit lands, and say that the tip is the commit carrying the file, so the handoff describes a tree that includes itself. Put the message in the chat as well, whole. Before producing it, make sure every task that is truly proven is ticked and nothing unproven is.
+Jean asked for them and they worked; keep the shape: read-only, one per scope, reporting by the nine classes with file:line and an "original: same/differs" check; **the session stays the SINGLE WRITER** (one tree, one golden suite, shared components that move 58 goldens at once). They never edit, never run flutter/dart, never open a browser or touch the phone, and never write a scratchpad file under a name you use. Verify everything they report before acting on it.
+
+---
+
+### 🚨 IF YOU NEED THE PHONE AND IT DOES NOT ANSWER
+
+Stop. If `status` says "no address", or `probe` is under 0.1 bits/pixel (display asleep) — **PAUSE THAT STEP RIGHT THERE AND TELL JEAN, THEN KEEP WORKING ON WHAT DOES NOT NEED IT** and re-probe as you go. Jean's words: *"if you need to use my phone via ctrl bridge and the phone is not responding that you should pause the process right there so that I'll respond to you that the phone is no longer asleep and that you can try again"*. Only he can enable host mode and only he can wake the screen; injected touches cannot. Do NOT work around it and do NOT report green as though the phone step were optional. **HOST MODE STAYING ON DOES NOT MEAN THE SCREEN IS AWAKE: check `probe`, not just `status`.** Invoke the `driving-jeans-phone` skill FIRST the moment you need to touch the phone. It is his PERSONAL phone: prefer `sig`/`changed`/`waitstable` over `shot`, delete every screenshot you take, never switch on live-location sharing (it writes his real position), and leave it signed in as the platform admin on `home`. Installing over the NAS: My Files → Network storage → jean → Shared → PhoneRemote → minelink-m3.apk → Update → Open; back out and re-enter the folder to refresh the cached listing; compare the SHA-256 (the phone's clock is ~2h36m slow); keep the screen alive with status-bar taps in batches under 30 s (a long wait drops the link); decline "Turn on Play Protect".
+
+### 🚨 DO NOT MOVE JEAN'S MOUSE
+
+He works at this machine while you run. His words: *"bro make a nother plan for a mouse, I'm using mine"*. Drive the browser through CDP (HANDOFF §5) or use the Android emulator. Switch accounts by clearing `localStorage('sb-yftazblpmicqtamyiwyb-auth-token')` and reloading (CDP clicks do not reach popup menus).
+
+### 🚨 DO NOT COOK HIS CPU
+
+One headless Chrome only for the minutes a flow needs (two, on 9222 and 9223, only for a two-account flow); `Stop-Process` every `chrome.exe` whose command line contains `ml-chrome-` the moment it is done (HANDOFF §5 has the one-liner). Never leave one running while you write code or docs.
+
+---
+
+### HOW TO WORK — THIS IS JEAN'S INSTRUCTION, FOLLOW IT
+
+*"don't worry about me seeing anything, I'll want to see when everything is complete and done, so don't stop so much in between please run the task for as long as possible so that we can get this completley done and sorted please, correct your self where you make mistakes and fix the mistakes and make sure you don't implement anything with gaps in them make sure its full and proper like the original"*
+
+**AND, EXPLICITLY: IF YOU FIND PROBLEMS ALONG THE WAY, FIX THEM AS YOU GO AND TEST THAT THE FIX WORKS AS EXPECTED.** Do not merely note or collect a list of faults to hand back; do not leave a fix unverified. **Every fix gets a test that BITES** (remove the fix, watch the test fail, restore — and keep a case that stays GREEN under the sabotage). If a fix is visible on a device or in a browser, LOOK AT IT THERE TOO. Half-implemented work, TODOs, stubs, "later" notes are not acceptable — finish each thing.
+
+---
+
+### THE GATE (Phase 0, end of session — run it in FULL before the end-of-session tick, and redirect every run to a file, then grep; a pipe hides a failing exit code and `tail` hides `[E]`)
+
+    flutter analyze
+    flutter test
+    dart tool/release_guards.dart
+    dart tool/release_guards.dart --selftest
+    py -3 tool/_sabotage.py
+    py -3 tool/type_scale_codemod.py --selftest
+    py -3 tool/dropdown_width_check.py
+    py -3 tool/glyph_coverage_check.py
+    py -3 tool/one_clock_check.py
+    py -3 tool/one_clock_check.py --selftest
+    py -3 tool/unphotographed_screens.py
+    py -3 tool/health_probe.py          (retry once if the extras project is cold)
+    flutter test test/renders           (plain, after any visual change; golden_diff.py measures moved PNGs)
+    flutter build web --release
+    flutter build apk --debug
+
+…AND the original worktree re-checked against the baseline above, AND every Claude-owned browser closed (one left signed in overnight once filled a production database), AND M3-TASKS.md ticked only where it is earned. **Run the guards BEFORE claiming a task done, not only at the end** — this session's caught two of its own edits hours after they were committed.
+
+---
+
+### THE RIG — things that already went wrong; do not re-learn them
+
+- **A POWER CUT destroys every file that is mid-write** (pure NUL bytes) and has corrupted `.git/index` once. HANDOFF §5 has the recovery. **Commit after every fix**; an edit in flight is the only thing a cut can take.
+- **`mypatch.py` used to TRUNCATE its target before encoding** — an unpaired surrogate emptied a Dart file to zero bytes. It is fixed (encode, temp file, rename). **And `flutter analyze` reports "No issues found!" for a zero-byte Dart file**, so analyze passing is not evidence a file still has content.
+- **`--name "a|b"` is eaten by this shell** (the `|` becomes a pipe): run the whole render suite, or one `--name` at a time.
+- **A bash heredoc eats backslashes and apostrophe escapes** — even quoted. Write patch scripts with the Write tool and run them with `py -3`, through `tool/phase3_helpers/mypatch.py` (half the repo is CRLF and a naive replace misses). Python's stdout is cp1252 here: set `PYTHONIOENCODING=utf-8`.
+- **A pipe hides a failing exit code**; redirect, then grep. Never read a test run through `tail` — grep for `[E]`.
+- **A fix that changes nothing will pass its own test.** Sabotage first; if the sabotage passes, the FIX is the suspect. A `ConstrainedBox` this session was a measured no-op.
+- **Probe the REAL widget at the REAL width.** A synthetic reproduction that disagrees with the golden is evidence about the reproduction.
+- **`unphotographed_screens.py` counts class NAMES**, and says so in its own header. A screen whose every picture is the wrong variant reads as photographed.
+- **A `FittedBox` scales the painted result**, so a test comparing declared `fontSize` passes with the fault in place. Compare drawn height, and walk the whole ancestor chain rather than `.parent`.
+- **Substring matching is a trap in both directions**: `'on route'` is not `'en route'`; `'inactive'` CONTAINS `'active'`.
+- **A second Chrome cannot share `--remote-debugging-port`** and fails silently; use 9223 and `CDP_PORT`. A stale cached bundle looks like a silent failure: check the http.server log for 200 vs 304 on `main.dart.js`.
+- **An off-screen (`--window-position`) Chrome is `visibilityState=hidden`**, so Flutter never paints. Use `--headless=new`.
+- **`Flexible` defaults to flex 1 and a `Spacer` IS an `Expanded`.** A loose `Flexible` KEEPS its unused allotment. A `Wrap`'s second run starts at the LEFT and a `Wrap` sizes to its content, so an alignment with no free space does nothing. **A width rule is not a fit rule — measure** (`MlHeaderLayout` is the shared measurement).
+- **A meta line that counts rows lies when the rows are not the thing it names**; a fixture with a summary and no items lies the same way. **Look at the render after every fix, not only at the test.**
+- **A golden that moves with no code change is a CACHE or an async thing.**
+
+---
+
+### WHEN JEAN SAYS "PAUSE HERE"
+
+STOP READING AND PRODUCE THE MESSAGE. Rewrite `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md` the same way — verified state only, no intentions — ending with a fresh self-contained copy-paste block in §8 that carries ALL THREE paths (M3-TASKS.md, MineLink-M3\HANDOFF.md and C:\Users\Somebody Someone\Claude\HANDOFF.md) plus the reviewer reports' path, the untouchable worktree path and its baseline, exactly where you stopped, what is already ticked so it is not redone, HOW THE MARKABLE FILE WORKS, THE PHONE RULE, THE MOUSE RULE, THE CPU RULE, the reviewer-agent rule, this same HOW TO WORK instruction quoted verbatim, the one-task-at-a-time rule, and the fix-as-you-go rule. Add the session's line to M3-TASKS.md's Session log. Commit both. State the commit count the tree WILL be at once that commit lands, and say that the tip is the commit carrying the file, so that includes itself. Put the message in the chat as well, whole. Before producing it, make sure every task that is truly proven is ticked and nothing unproven is.
 
 ---
