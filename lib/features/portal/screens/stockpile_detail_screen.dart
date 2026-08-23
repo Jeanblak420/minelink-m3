@@ -106,11 +106,14 @@ class StockpileDetailScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 10),
+                  // Fraunces, as the three pile cards under it draw their
+                  // figures — this headline was the one sans numeral on the
+                  // screen. Phase 3 mine pass, 2026-08-23.
                   Text(
                     formatTons(totalBalance),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
+                    style: MlType.figure(
                       color: PortalColors.accent,
+                      size: MlTokens.fsH2,
                     ),
                   ),
                 ],

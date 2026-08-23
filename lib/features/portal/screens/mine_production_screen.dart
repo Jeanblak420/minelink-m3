@@ -13,6 +13,7 @@ import 'package:flutter_application_1/features/portal/services/production_servic
 import 'package:flutter_application_1/features/portal/services/recon_exporter.dart';
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/features/portal/widgets/premium_overview_widgets.dart';
 import 'package:flutter_application_1/features/portal/widgets/stockpile_widgets.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
@@ -596,12 +597,15 @@ class _ProductionPileCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
+          // The same pile is a Fraunces `412.6 t` on the Supervisor tab and
+          // the stockpile levels; here it was a mono `412.60 t` — one entity,
+          // two faces and two precisions. `formatTons` + the display numeral,
+          // as `StockpileCard` does. Phase 3 mine pass, 2026-08-23.
           Text(
-            '${pile.tons.toStringAsFixed(2)} t',
-            style: context.mlText.code(
+            formatTons(pile.tons),
+            style: MlType.figure(
               color: semantic.textStrong,
-              size: 22,
-              weight: FontWeight.w800,
+              size: MlTokens.fsH2,
             ),
           ),
           if (pile.mineral != null || pile.grade != null) ...[

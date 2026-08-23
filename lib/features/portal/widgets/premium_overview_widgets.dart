@@ -238,11 +238,14 @@ class MetricBreakdownRow extends StatelessWidget {
               fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
             ),
           ),
+          // MONO. A figure in a column is JetBrainsMono so the digits align
+          // down the list (design-reference §3); these were PlusJakartaSans
+          // ExtraBold at 20 call sites. Phase 3 mine pass, 2026-08-23.
           Text(
             formatTons(value),
-            style: (emphasize ? textTheme.titleMedium : textTheme.bodyLarge)
-                ?.copyWith(
-              fontWeight: FontWeight.w800,
+            style: context.mlText.code(
+              size: emphasize ? MlTokens.fsBody + 1 : MlTokens.fsBody,
+              weight: emphasize ? FontWeight.w700 : FontWeight.w600,
               color: emphasize ? PortalColors.accent : scheme.onSurface,
             ),
           ),
