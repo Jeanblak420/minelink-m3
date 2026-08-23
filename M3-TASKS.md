@@ -1,4 +1,4 @@
-  ✅ 2026-08-23 (end of session) · this commit · `Get-CimInstance Win32_Process` shows 0 `chrome.exe` with `ml-chrome-` in the command line and nothing listening on 9222/9223 (the idle `py -3 -m http.server 8123` over the FRESH `build/web` is the only thing left); HANDOFF.md rewritten to the verified state with a fresh §8 block, committed with this file.# MineLink M3 — what is left, and nothing else
+# MineLink M3 — what is left, and nothing else
 
 **Last updated:** 2026-08-23 (end of session) · M3 at **206 commits** · tip = the commit carrying this line (parent `20e9128`) · worktree baseline `df451d0` intact
 **Open this file in the IDE:** `code "C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\M3-TASKS.md"`
