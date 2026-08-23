@@ -1,6 +1,6 @@
 # MineLink M3 — what is left, and nothing else
 
-**Last updated:** 2026-08-23 · M3 at **165 commits** · tip `bb80505` · worktree baseline `df451d0` intact
+**Last updated:** 2026-08-23 · M3 at **166 commits** · tip `8d92de4` · worktree baseline `df451d0` intact
 **Open this file in the IDE:** `code "C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\M3-TASKS.md"`
 **Progress:** recount with `grep -c '^- \[x\]' M3-TASKS.md` — never increment by hand.
 
@@ -21,8 +21,10 @@
 
 ## Phase 0 — every session, at the start and at the end  *(repeats; never marked DONE)*
 
-- [ ] Worktree baseline re-checked: HEAD `df451d0` · 3 pre-existing modified files · 14163 files (`find . -path ./.git -prune -o -type f -print | wc -l`) · 2 worktree entries · 0 modified today
-- [ ] `code M3-TASKS.md` run, so this file is open in the IDE
+- [x] Worktree baseline re-checked: HEAD `df451d0` · 3 pre-existing modified files · 14163 files (`find . -path ./.git -prune -o -type f -print | wc -l`) · 2 worktree entries · 0 modified today
+  ✅ 2026-08-23 (session start) · `git rev-parse` = df451d0 · `git status --porcelain` = the same 3 files · find = 14163 · `git worktree list` = 2 entries · 0 files newer than today
+- [x] `code M3-TASKS.md` run, so this file is open in the IDE
+  ✅ 2026-08-23 · commit 8d92de4 · VS Code window title reads "M3-TASKS.md - Visual Studio Code"
 - [ ] Full gate green at session end: `flutter analyze` · `flutter test` · `dart tool/release_guards.dart` (+ `--selftest`) · `py -3 tool/_sabotage.py` · `type_scale_codemod.py --selftest` · `dropdown_width_check.py` · `glyph_coverage_check.py` · `one_clock_check.py` (+ `--selftest`) · `unphotographed_screens.py` · `health_probe.py` · `flutter test test/renders` (after any visual change) · `flutter build web --release` · `flutter build apk --debug`
 - [ ] Every Claude-owned browser closed; `HANDOFF.md` §8 rewritten to the verified state and committed together with this file
 
