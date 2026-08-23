@@ -652,4 +652,57 @@ void main() {
     expect(find.text('Could not load the employee register'), findsOneWidget);
     expect(find.text('TOTAL STAFF'), findsNothing);
   });
+
+  // Phase 3 mine-portal pass, 2026-08-23. The register spent a SECOND accent:
+  // its eyebrow, the italic word in the title, the company name and the
+  // selected chip were the in-transit blue on a product with one accent
+  // (design-reference §5 rule 2). Offline took the red/error dot where
+  // offline is inert (the profile already drew it faint). And the hero read
+  // "Employee Register" under a shell bar reading "Employee register".
+  testWidgets('the editorial accent is THE accent, offline is inert, and the '
+      'title is sentence case', (tester) async {
+    tester.view.physicalSize = const Size(1600, 3600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await pumpRegister(
+      tester,
+      company: _company(OrgType.mineSupplier),
+      brightness: Brightness.dark,
+      embedded: true,
+    );
+
+    // The italic "register" span carries the accent ink, not the blue tone.
+    final hero = find.byWidgetPredicate((w) =>
+        w is RichText && w.text.toPlainText().startsWith('Employee '));
+    expect(hero, findsOneWidget);
+    final heroSpan = (hero.evaluate().single.widget as RichText).text as TextSpan;
+    final italic = heroSpan.children!
+        .whereType<TextSpan>()
+        .firstWhere((s) => s.style?.fontStyle == FontStyle.italic);
+    expect(italic.text, 'register', reason: 'the hero is title case again');
+    final blue = MlTone.transit.colors(Brightness.dark).fg;
+    expect(italic.style?.color, isNot(blue),
+        reason: 'the hero word is the in-transit blue — a second accent');
+    expect(find.text('Live employee register'), findsNothing); // it is a span
+    expect(find.textContaining('Live Employee Register'), findsNothing,
+        reason: '"Live Employee Register" is title case again');
+
+    // The Offline stat's dot is not the fault colour.
+    final red = MlTone.error.colors(Brightness.dark).fg;
+    final dots = find.byWidgetPredicate((w) =>
+        w is Container &&
+        w.decoration is BoxDecoration &&
+        (w.decoration as BoxDecoration).shape == BoxShape.circle &&
+        (w.decoration as BoxDecoration).color == red);
+    // Red dots may legitimately mark other things (an expired document); the
+    // Offline cell's own dot is found by its neighbour.
+    final offlineCell = find.ancestor(
+      of: find.text('OFFLINE'),
+      matching: find.byType(Column),
+    ).first;
+    final offlineRedDot =
+        find.descendant(of: offlineCell, matching: dots);
+    expect(offlineRedDot, findsNothing,
+        reason: 'the Offline stat carries a red dot');
+  });
 }

@@ -57,8 +57,16 @@ class _Pal {
   Color get borderCard => _s.borderCard;
   Color get textStrong => _s.textStrong;
   Color get textMuted => _s.textMuted;
+  Color get textFaint => _s.textFaint;
 
-  Color get blue => tone(MlTone.transit);
+  /// The register's editorial accent — the eyebrow rule, the italic word in
+  /// the title, the company name in the copy, the selected chip. It was the
+  /// in-transit BLUE, a second accent on a screen whose product has one
+  /// (design-reference §5 rule 2; `#22D3EE` / `#0891B2`). Kept as a named
+  /// role so the sixteen sites read as "the accent" rather than a hue; the
+  /// transit tone is still `tone(MlTone.transit)` where it means in transit.
+  /// Phase 3 mine pass, 2026-08-23.
+  Color get blue => _s.accentInk;
   Color get green => tone(MlTone.done);
   Color get amber => tone(MlTone.atMine);
   Color get red => tone(MlTone.error);
@@ -560,8 +568,10 @@ class _EmployeeRegisterScreenState
             ),
             children: [
               const TextSpan(text: 'Employee '),
+              // Sentence case, as the shell bar above it already reads
+              // "Employee register" and every title on the reference does.
               TextSpan(
-                text: 'Register',
+                text: 'register',
                 style: TextStyle(fontStyle: FontStyle.italic, color: _p.blue),
               ),
             ],
@@ -576,7 +586,7 @@ class _EmployeeRegisterScreenState
             ),
             children: [
               const TextSpan(
-                text: 'Live Employee Register · A read-only view of each '
+                text: 'Live employee register · A read-only view of each '
                     'employee/user registered under ',
               ),
               TextSpan(
@@ -756,7 +766,8 @@ class _EmployeeRegisterScreenState
       cell(
         'Offline',
         '${byPresence[_Presence.offline] ?? 0}',
-        dotColor: _p.red,
+        // Offline is INERT, not a fault: slate, as the profile draws it.
+        dotColor: _p.textFaint,
         sub: 'Offline',
       ),
     ];
@@ -1562,7 +1573,7 @@ class _MemberCard extends ConsumerWidget {
   Color get _presenceColor => switch (presence) {
         _Presence.online => p.green,
         _Presence.away => p.amber,
-        _Presence.offline => p.red,
+        _Presence.offline => p.textFaint,
       };
 
   String get _presenceLabel {
