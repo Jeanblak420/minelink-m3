@@ -128,7 +128,7 @@ class _BuyerReconciliationsScreenState
                     SizedBox(
                         width: itemW,
                         child: MlStatCard(
-                            label: 'Total Records',
+                            label: 'Total records',
                             value: '${snap.reconciliations.length}',
                             icon: Icons.receipt_long_outlined,
                             tone: MlTone.accent)),
@@ -149,7 +149,25 @@ class _BuyerReconciliationsScreenState
                     SizedBox(
                         width: itemW,
                         child: MlStatCard(
-                            label: 'Tons Delivered',
+                            // THIS FIGURE IS THE MINE'S NET, NOT THE
+                            // DELIVERED TONS.
+                            //
+                            // `_windows` sums `TripRecord.netTons`, which
+                            // CLAUDE.md §4 defines as the weight loaded at
+                            // source and calls the authoritative figure for
+                            // recon and billing; the delivered tonnage is a
+                            // SEPARATE field, stored so the variance between
+                            // them is visible. Labelling the loaded figure
+                            // "delivered" collapses the one distinction this
+                            // screen exists to make — and it did so directly
+                            // below a card that spells it out: "Loaded (mine
+                            // net) 103.22 t" over "Delivered 70.70 t" over
+                            // "Net variance". Same screen, same scroll.
+                            //
+                            // So the label moves to the figure rather than
+                            // the figure to the label, and it borrows the
+                            // words `WeightReconciliationView` already uses.
+                            label: 'Loaded (mine net)',
                             value: formatTons(tons.total),
                             icon: Icons.trending_up_rounded,
                             tone: MlTone.done)),
@@ -161,15 +179,17 @@ class _BuyerReconciliationsScreenState
                 spacing: 12,
                 runSpacing: 12,
                 children: [
-                  _filter('Source', _source, sources,
+                  _filter('Source', 'All sources', _source, sources,
                       (v) => setState(() => _source = v)),
-                  _filter('Product', _product, products,
+                  _filter('Product', 'All products', _product, products,
                       (v) => setState(() => _product = v)),
                 ],
               ),
               const SizedBox(height: 18),
               OverviewHeroTile(
-                title: 'Tons delivered',
+                // The same figure as the stat card above, and the same
+                // correction — `tons` is mine net throughout this screen.
+                title: 'Loaded (mine net)',
                 icon: Icons.scale_outlined,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,8 +237,12 @@ class _BuyerReconciliationsScreenState
     );
   }
 
-  Widget _filter(String label, String? value, List<String> options,
-      ValueChanged<String?> onChanged) {
+  /// A filter dropdown. [all] names the "no filter" option — passed in
+  /// rather than composed, because `'All $label'` produced "All Source"
+  /// and "All Product". `raw_recon_view.dart`, on this same screen, has
+  /// said "All products" since it was written.
+  Widget _filter(String label, String all, String? value,
+      List<String> options, ValueChanged<String?> onChanged) {
     return SizedBox(
       width: 240,
       child: DropdownButtonFormField<String?>(
@@ -230,7 +254,7 @@ class _BuyerReconciliationsScreenState
           isDense: true,
         ),
         items: [
-          DropdownMenuItem<String?>(value: null, child: Text('All $label')),
+          DropdownMenuItem<String?>(value: null, child: Text(all)),
           for (final o in options)
             DropdownMenuItem<String?>(value: o, child: Text(o)),
         ],
