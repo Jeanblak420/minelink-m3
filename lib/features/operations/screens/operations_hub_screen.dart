@@ -313,34 +313,30 @@ class _OperationsSummaryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
+    // The company card, in the portal's card vocabulary. Until 2026-08-23 it
+    // was a stock `Card` headed by a 24px sans ExtraBold company name, and —
+    // inside a `CrossAxisAlignment.start` column — it sized to its content,
+    // so it ended at x≈1040 on a 1600px canvas while every card under it
+    // spanned the column. Fraunces via `MlSectionTitle`, full width via the
+    // `SizedBox`. Phase 3 mine-portal pass.
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Card(
-            child: Padding(
+          SizedBox(
+            width: double.infinity,
+            child: MlCard(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  MlSectionTitle(
                     access.company.companyName,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+                    subtitle:
+                        'Live operational records, entry forms, and realtime updates for ${access.operatorName}.',
+                    margin: const EdgeInsets.only(bottom: 16),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Live operational records, entry forms, and realtime updates for ${access.operatorName}.',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -431,40 +427,22 @@ class _OperationsTabView extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(config.icon, color: theme.colorScheme.primary),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          config.title,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    config.description,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton.icon(
-                    onPressed: canCreate ? onCreatePressed : null,
-                    icon: const Icon(Icons.add_circle_outline),
-                    label: Text(config.createLabel),
-                  ),
-                ],
+          // The tab's heading: Fraunces section title with its icon, the
+          // description as the subtitle, and the create action RIGHT-ALIGNED
+          // in the heading's action slot — not a 20px sans ExtraBold row with
+          // the button stacked under it (HANDOFF §3.25 classes 1 and 2).
+          MlCard(
+            padding: const EdgeInsets.all(20),
+            child: MlSectionTitle(
+              config.title,
+              icon: config.icon,
+              subtitle: config.description,
+              margin: EdgeInsets.zero,
+              action: MlButton.primary(
+                label: config.createLabel,
+                icon: Icons.add_circle_outline,
+                compact: true,
+                onPressed: canCreate ? onCreatePressed : null,
               ),
             ),
           ),
@@ -632,7 +610,7 @@ class _OperationsTabConfig {
     switch (tab) {
       case OperationsTab.minerals:
         return const _OperationsTabConfig(
-          title: 'Mineral Catalogue',
+          title: 'Mineral catalogue',
           description:
               'Maintain live mineral definitions, grades, and measurement units for operational use.',
           createLabel: 'Add mineral',
@@ -665,7 +643,7 @@ class _OperationsTabConfig {
         );
       case OperationsTab.loads:
         return const _OperationsTabConfig(
-          title: 'Mineral Loads',
+          title: 'Mineral loads',
           description:
               'Track loading activity against vehicles, minerals, and transaction records in real time.',
           createLabel: 'Record load',
@@ -675,7 +653,7 @@ class _OperationsTabConfig {
         );
       case OperationsTab.security:
         return const _OperationsTabConfig(
-          title: 'Security Incidents',
+          title: 'Security incidents',
           description:
               'Log real incidents, severity, and status so the security workflow stays current for the team.',
           createLabel: 'Report incident',
@@ -686,7 +664,7 @@ class _OperationsTabConfig {
         );
       case OperationsTab.gate:
         return const _OperationsTabConfig(
-          title: 'Gate Checks',
+          title: 'Gate checks',
           description:
               'Track entry and exit checks with responsible staff, vehicle context, and gate status.',
           createLabel: 'Record gate check',
@@ -712,33 +690,13 @@ class _OperationsEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 48, color: theme.colorScheme.primary),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+    // The shared empty state, framed in the portal card. It was a stock
+    // `Card` with a 48px accent icon and a 22px sans ExtraBold title — the
+    // hub's own empty-state vocabulary beside the one every other portal
+    // screen uses. Phase 3 mine-portal pass, 2026-08-23.
+    return MlCard(
+      padding: EdgeInsets.zero,
+      child: MlEmptyState(icon: icon, title: title, message: message),
     );
   }
 }
@@ -834,7 +792,7 @@ Future<void> _showMineralDialog(
     context: context,
     builder: (dialogContext) {
       return AlertDialog(
-        title: Text(existing == null ? 'Add Mineral' : 'Edit Mineral'),
+        title: Text(existing == null ? 'Add mineral' : 'Edit mineral'),
         content: Form(
           key: formKey,
           child: ConstrainedBox(
@@ -944,7 +902,7 @@ Future<void> _showTransactionDialog(
         builder: (dialogContext, setState) {
           return AlertDialog(
             title: Text(
-              existing == null ? 'Add Transaction' : 'Edit Transaction',
+              existing == null ? 'Add transaction' : 'Edit transaction',
             ),
             content: Form(
               key: formKey,
@@ -1120,8 +1078,8 @@ Future<void> _showWeighbridgeDialog(
   final didSubmit = await _showStatefulDialog(
     context,
     title: existing == null
-        ? 'Record Weighbridge Entry'
-        : 'Edit Weighbridge Entry',
+        ? 'Record weighbridge entry'
+        : 'Edit weighbridge entry',
     builder: (dialogContext, setState) {
       return Form(
         key: formKey,
@@ -1207,7 +1165,7 @@ Future<void> _showLoadDialog(
 
   final didSubmit = await _showStatefulDialog(
     context,
-    title: existing == null ? 'Record Mineral Load' : 'Edit Mineral Load',
+    title: existing == null ? 'Record mineral load' : 'Edit mineral load',
     builder: (dialogContext, setState) {
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -1311,8 +1269,8 @@ Future<void> _showSecurityDialog(
   final didSubmit = await _showStatefulDialog(
     context,
     title: existing == null
-        ? 'Report Security Incident'
-        : 'Edit Security Incident',
+        ? 'Report security incident'
+        : 'Edit security incident',
     builder: (dialogContext, setState) {
       return Form(
         key: formKey,
@@ -1423,7 +1381,7 @@ Future<void> _showGateDialog(
 
   final didSubmit = await _showStatefulDialog(
     context,
-    title: existing == null ? 'Record Gate Check' : 'Edit Gate Check',
+    title: existing == null ? 'Record gate check' : 'Edit gate check',
     builder: (dialogContext, setState) {
       return Column(
         mainAxisSize: MainAxisSize.min,

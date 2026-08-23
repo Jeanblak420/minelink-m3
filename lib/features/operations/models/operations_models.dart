@@ -41,7 +41,7 @@ extension OperationsTabX on OperationsTab {
       case OperationsTab.security:
         return 'Security';
       case OperationsTab.gate:
-        return 'Gate Checks';
+        return 'Gate checks';
     }
   }
 
