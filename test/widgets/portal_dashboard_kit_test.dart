@@ -23,6 +23,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/features/portal/widgets/dashboard/portal_dashboard_kit.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/super_admin_dashboard_widgets.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/theme/app_theme.dart';
 
 Future<void> _loadFont(String family, List<String> files) async {
   final loader = FontLoader(family);
@@ -446,6 +447,13 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       MaterialApp(
+        // THE APP'S THEME. Without it this measures `SaSectionHeader`
+        // in stock Material's type scale and font family — a
+        // measurement of text the app will never draw — and the whole
+        // point of these two cases is whether a title and its tools FIT
+        // on one row. Caught by `test-renders-under-the-app-theme` the
+        // first time this file was gated after the cases were added.
+        theme: AppTheme.darkTheme,
         home: Scaffold(
           body: Align(
             alignment: Alignment.topLeft,

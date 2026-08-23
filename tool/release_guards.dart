@@ -270,7 +270,20 @@ final guards = <Guard>[
     //
     // `.label` is a CATEGORY name, not a count: "Mine/Supplier companies" is
     // the org type followed by a noun, and there is no figure to agree with.
-    exempt: RegExp(r"^\s*(//|///|\*|/\*)|\.label\}\s"),
+    //
+    // An interpolation ENDING IN `Name` is the same class, and the employee
+    // grid's title is the case that found it: `'$companyName employees'`
+    // reads "Fixture Haulage employees" and has no figure in it at all.
+    // Kept as narrow as the `.label` carve-out rather than widened to any
+    // identifier — a variable holding a COUNT is never called `…Name`, so
+    // this cannot swallow the fault the guard exists for, and the guard's
+    // own planted violation (`${r.numSlots} trucks`) is untouched by it.
+    exempt: RegExp(
+      r"^\s*(//|///|\*|/\*)"
+      r"|\.label\}\s"
+      r"|Name\}\s"
+      r"|\$[A-Za-z_][A-Za-z0-9_]*Name\s",
+    ),
     // `\s` before the noun, and a formatter is free to break a long
     // interpolation across it.
     spanLines: true,
