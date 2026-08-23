@@ -49,6 +49,10 @@ import 'package:flutter_application_1/features/profile_setup/providers/profile_s
 /// lying.
 final DateTime _fixtureDate = DateTime.utc(2024, 3, 18, 7, 40);
 
+/// A licence-disk expiry for the fixture fleet. FIXED, like every other date
+/// in this file: a relative one would move the golden every day.
+final DateTime _fixtureDiskExpiry = DateTime.utc(2027, 3, 31);
+
 /// A transporter by default, because that org type unlocks the most tabs and
 /// therefore the widest layouts — the ones most likely to overflow.
 ///
@@ -543,6 +547,12 @@ List<FleetVehicle> fixtureFleet() => [
         vehicleType: 'Interlink',
         vehicleYearModel: 2021,
         vehicleOdometerKm: 412300,
+        // A DISK EXPIRY AND A DRIVER'S PAPERWORK, because until 2026-08-23 no
+        // fixture vehicle carried either — so the register's `Disk expiry`
+        // column and the whole driver-documents block had only ever been
+        // photographed as a column of em dashes, and no test could measure
+        // whether a date or a document chip fits its column.
+        vehicleRegistrationExpiryDate: _fixtureDiskExpiry,
         firstTrailerRegs: 'CK 85 RT GP',
         secondTrailerRegs: 'CK 86 RT GP',
         // `assignedDriverId` AND the name. The fleet register's Assigned /
@@ -555,6 +565,9 @@ List<FleetVehicle> fixtureFleet() => [
         assignedDriverId: 'emp-1',
         driverFirstName: 'Sipho',
         driverLastName: 'Ndlovu',
+        driverIdNumber: '8801015800083',
+        driverIdDocumentUrl: 'https://example.invalid/fixture-id.pdf',
+        driverLicenseDocumentUrl: 'https://example.invalid/fixture-licence.pdf',
       ),
       FleetVehicle(
         id: 'veh-2',
@@ -565,6 +578,7 @@ List<FleetVehicle> fixtureFleet() => [
         vehicleType: 'Side tipper',
         vehicleYearModel: 2019,
         vehicleOdometerKm: 688140,
+        vehicleRegistrationExpiryDate: _fixtureDiskExpiry,
         firstTrailerRegs: 'JD 23 PL MP',
         assignedDriverId: 'emp-2',
         driverFirstName: 'Thandi',

@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,9 +41,15 @@ void main() {
       expect(find.text('ABC123GP'), findsOneWidget);
       expect(find.text('Volvo · Truck · 2020'), findsOneWidget);
       expect(find.byType(DataTable), findsNothing);
+      expect(find.byType(MlDataTable), findsNothing);
     });
 
-    testWidgets('uses DataTable at wide width', (tester) async {
+    // WAS `uses DataTable at wide width`, asserting a Material `DataTable`.
+    // The register was the last one in the product and moved onto
+    // `MlDataTable` on 2026-08-23 — uppercase overline heads on a plain
+    // surface, plate pills, one empty marker. The assertion is inverted rather
+    // than deleted, so a return to the Material widget fails here.
+    testWidgets('uses the design system table at wide width', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.darkTheme,
@@ -59,7 +66,8 @@ void main() {
       );
 
       expect(find.text('XYZ999GP'), findsOneWidget);
-      expect(find.byType(DataTable), findsOneWidget);
+      expect(find.byType(MlDataTable), findsOneWidget);
+      expect(find.byType(DataTable), findsNothing);
     });
   });
 }

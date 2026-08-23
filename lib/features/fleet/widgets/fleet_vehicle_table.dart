@@ -1,5 +1,5 @@
-import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/layout/app_breakpoints.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -104,15 +104,15 @@ class FleetVehicleTable extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    vehicle.vehicleRegistrationNumber,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
-                  ),
+                // A plate pill, like every other registration in the
+                // product. `Flexible`, because a non-flex child of a Row is
+                // laid out against unbounded width (CLAUDE.md §10.4) and the
+                // pill's own ellipsis would never engage.
+                Flexible(
+                  child: MlPlatePill(vehicle.vehicleRegistrationNumber,
+                      fontSize: 14),
                 ),
+                const SizedBox(width: 10),
                 _statusBadge(vehicle),
               ],
             ),
@@ -143,9 +143,10 @@ class FleetVehicleTable extends StatelessWidget {
             if (vehicle.secondTrailerRegs != null &&
                 vehicle.secondTrailerRegs!.isNotEmpty)
               _compactDetailRow('2nd trailer', vehicle.secondTrailerRegs!),
-            if (showDriver && isAssigned) ...[
+            if (showDriver && _driversOf(vehicle) != null) ...[
               const SizedBox(height: 4),
-              _compactDetailRow('Driver', vehicle.driverFullName),
+              // Plural: a truck carries up to two drivers by default.
+              _compactDetailRow('Drivers', _driversOf(vehicle)!),
             ],
             const SizedBox(height: 8),
             _buildActionButtons(context, vehicle, scheme, isAssigned),
@@ -174,372 +175,38 @@ class FleetVehicleTable extends StatelessWidget {
     );
   }
 
-  Widget _buildWideTable(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Card(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      child: ClipRRect(
-        borderRadius: MlShape.radiusExtraLarge,
-        // Thirteen columns do not fit a laptop and should not be truncated to
-        // try — but a bare horizontal scroll view draws no bar, so what a
-        // reader saw was "Passport Num…" cut off at the edge and no reason to
-        // think there was anything past it.
-        child: MlWideTable(
-          child: DataTable(
-            headingRowColor: WidgetStateProperty.all(
-              scheme.surfaceContainerHighest,
-            ),
-            dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
-              if (states.contains(WidgetState.selected)) {
-                return scheme.secondaryContainer.withAlpha(160);
-              }
-              return scheme.surface;
-            }),
-            columnSpacing: 16, // Reduced from 24 to save space
-            horizontalMargin: 12, // Reduced from 16 to save space
-            columns: [
-              const DataColumn(
-                label: SizedBox(
-                  width: 108,
-                  child: Text(
-                    'Registration',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              _headerColumn('Make', 88),
-              _headerColumn('Type', 96),
-              _headerColumn('Year', 64),
-              _headerColumn('Odometer', 96),
-              const DataColumn(
-                label: SizedBox(
-                  width: 100,
-                  child: Text(
-                    'Disk expiry',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              const DataColumn(
-                label: SizedBox(
-                  // A REGISTRATION, so it needs a registration's width.
-                  //
-                  // 80 cut `CK 85 RT GP` to `CK 85 RT …` at 1600px, in a table
-                  // that already scrolls horizontally and had empty space to
-                  // the right of it. A plate is the row's identity and the
-                  // whole reason the column exists; `kPlateColumnMinWidth` is
-                  // the measured figure and was named precisely so this stops
-                  // being guessed per table.
-                  width: kPlateColumnMinWidth,
-                  child: Text(
-                    '1st Trailer',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              const DataColumn(
-                label: SizedBox(
-                  width: kPlateColumnMinWidth,
-                  child: Text(
-                    '2nd Trailer',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              if (showDriver)
-                const DataColumn(
-                  label: SizedBox(
-                    width: 120,
-                    child: Text(
-                      'Assigned Driver',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              if (showDriver)
-                const DataColumn(
-                  label: SizedBox(
-                    width: 100,
-                    child: Text(
-                      'ID Number',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              if (showDriver)
-                const DataColumn(
-                  label: SizedBox(
-                    width: 80,
-                    child: Text(
-                      'ID Doc',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              if (showDriver)
-                const DataColumn(
-                  label: SizedBox(
-                    width: 100,
-                    child: Text(
-                      'Passport Number',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              if (showDriver)
-                const DataColumn(
-                  label: SizedBox(
-                    width: 80,
-                    child: Text(
-                      'Passport Doc',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              if (showDriver)
-                const DataColumn(
-                  label: SizedBox(
-                    width: 100,
-                    child: Text(
-                      'Work Permit Doc',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              if (showDriver)
-                const DataColumn(
-                  label: SizedBox(
-                    width: 80,
-                    child: Text(
-                      'License Doc',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              const DataColumn(
-                label: SizedBox(
-                  width: 80,
-                  child: Text(
-                    'Status',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              const DataColumn(
-                label: SizedBox(
-                  width: 80,
-                  child: Text(
-                    'Actions',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
-            rows: vehicles.map((vehicle) {
-              final isAssigned = vehicle.assignedDriverId != null;
-              return DataRow(
-                cells: [
-                  DataCell(
-                    SizedBox(
-                      width: 108,
-                      child: Text(
-                        vehicle.vehicleRegistrationNumber,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ),
-                  DataCell(_cellText(vehicle.vehicleMake, width: 88)),
-                  DataCell(_cellText(vehicle.vehicleType, width: 96)),
-                  DataCell(
-                    _cellText(
-                      vehicle.vehicleYearModel?.toString(),
-                      width: 64,
-                    ),
-                  ),
-                  DataCell(
-                    SizedBox(
-                      width: 96,
-                      child: Text(
-                        vehicle.vehicleOdometerKm == null
-                            ? '—'
-                            : vehicle.formattedOdometer.replaceAll(' km', ''),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  DataCell(
-                    SizedBox(
-                      width: 100,
-                      child: Text(
-                        vehicle.vehicleRegistrationExpiryDate != null
-                            ? DateFormat(
-                                'yyyy-MM-dd',
-                              ).format(vehicle.vehicleRegistrationExpiryDate!)
-                            : '—',
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  DataCell(
-                    SizedBox(
-                      width: kPlateColumnMinWidth,
-                      child: Text(
-                        vehicle.firstTrailerRegs ?? '-',
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  DataCell(
-                    SizedBox(
-                      width: kPlateColumnMinWidth,
-                      child: Text(
-                        vehicle.secondTrailerRegs ?? '-',
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  if (showDriver)
-                    DataCell(
-                      SizedBox(
-                        width: 120,
-                        child: Text(
-                          isAssigned ? vehicle.driverFullName : '-',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  if (showDriver)
-                    DataCell(
-                      SizedBox(
-                        width: 100,
-                        child: Text(
-                          isAssigned ? (vehicle.driverIdNumber ?? '-') : '-',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  if (showDriver)
-                    DataCell(
-                      SizedBox(
-                        width: 80,
-                        child: isAssigned && vehicle.driverIdDocumentUrl != null
-                            ? TextButton(
-                                onPressed: () {
-                                  // Open the ID document URL in a browser
-                                  _openDocumentUrl(
-                                    context,
-                                    vehicle.driverIdDocumentUrl!,
-                                  );
-                                },
-                                child: const Text(
-                                  'View Doc',
-                                  style: TextStyle(color: MlTokens.accent),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              )
-                            : const Text('-'),
-                      ),
-                    ),
-                  if (showDriver)
-                    DataCell(
-                      SizedBox(
-                        width: 100,
-                        child: Text(
-                          isAssigned
-                              ? (vehicle.driverPassportNumber ?? '-')
-                              : '-',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  if (showDriver)
-                    DataCell(
-                      SizedBox(
-                        width: 80,
-                        child:
-                            isAssigned &&
-                                vehicle.driverPassportDocumentUrl != null
-                            ? TextButton(
-                                onPressed: () {
-                                  // Open the passport document URL in a browser
-                                  _openDocumentUrl(
-                                    context,
-                                    vehicle.driverPassportDocumentUrl!,
-                                  );
-                                },
-                                child: const Text(
-                                  'View Doc',
-                                  style: TextStyle(color: MlTokens.accent),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              )
-                            : const Text('-'),
-                      ),
-                    ),
-                  if (showDriver)
-                    DataCell(
-                      SizedBox(
-                        width: 100,
-                        child:
-                            isAssigned &&
-                                vehicle.driverWorkVisaDocumentUrl != null
-                            ? TextButton(
-                                onPressed: () {
-                                  // Open the work visa document URL in a browser
-                                  _openDocumentUrl(
-                                    context,
-                                    vehicle.driverWorkVisaDocumentUrl!,
-                                  );
-                                },
-                                child: const Text(
-                                  'View Doc',
-                                  style: TextStyle(color: MlTokens.accent),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              )
-                            : const Text('-'),
-                      ),
-                    ),
-                  if (showDriver)
-                    DataCell(
-                      SizedBox(
-                        width: 80,
-                        child:
-                            isAssigned &&
-                                vehicle.driverLicenseDocumentUrl != null
-                            ? TextButton(
-                                onPressed: () {
-                                  // Open the license document URL in a browser
-                                  _openDocumentUrl(
-                                    context,
-                                    vehicle.driverLicenseDocumentUrl!,
-                                  );
-                                },
-                                child: const Text(
-                                  'View Doc',
-                                  style: TextStyle(color: MlTokens.accent),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              )
-                            : const Text('-'),
-                      ),
-                    ),
-                  DataCell(_statusBadge(vehicle)),
-                  DataCell(
-                    _buildActionButtons(context, vehicle, scheme, isAssigned),
-                  ),
-                ],
-              );
-            }).toList(),
-          ),
-        ),
-      ),
-    );
-  }
-
+  // THIS TABLE USED TO BE A MATERIAL `DataTable`, AND IT WAS THE LAST ONE.
+  //
+  // Transporter pass, 2026-08-23 (reviewer finding #5). It carried a filled
+  // heading band (`headingRowColor: surfaceContainerHighest`) and bold
+  // sans title-case heads, where every other register in this product draws
+  // uppercase letter-spaced overline heads on a plain surface; it drew
+  // registrations in plain sans while the same plates are `MlPlatePill`
+  // everywhere else; and it used BOTH `-` and `—` for "empty", in the same
+  // row — `—` for a missing odometer and `-` for a missing trailer, one cell
+  // apart.
+  //
+  // ## Seventeen columns, and Status was the fifteenth
+  //
+  // The rebuild is not only a re-skin. At seventeen columns the table was
+  // wider than a 1600px desktop, so the STATUS column — the whole subject of
+  // the screen, and of the four cards above it — was off the right-hand edge
+  // and had NEVER BEEN PHOTOGRAPHED. `screen-fleet-desktop-dark` shows the
+  // register from Registration to `ID Doc` and stops.
+  //
+  // Two changes fix that without losing a single fact:
+  //
+  //  * **Status is second**, next to the identity it describes.
+  //  * **The driver's four document links became one `Documents` cell.** They
+  //    are four columns of the word "View Doc" — 360px of chrome to say
+  //    nothing about which document is which — and they belong to a PERSON,
+  //    not to the truck the row is about. As chips they name themselves (ID,
+  //    Passport, Permit, Licence) and take one column.
+  //
+  // Thirteen columns, all of them on a laptop, and the table still scrolls
+  // rather than compresses when the text is scaled — `MlColumn.minWidth` on
+  // the three plate columns, which `_effectiveMinWidth` scales with the
+  // reader's type size.
   /// The truck's derived fleet state, as the rest of the product draws a
   /// status: [MlStatusBadge], toned through the one shared status map.
   ///
@@ -569,6 +236,240 @@ class FleetVehicleTable extends StatelessWidget {
     if (status.inMaintenance) return MlStatusBadge.forStatus('In maintenance');
     if (status.onRoute) return MlStatusBadge.forStatus('On route');
     return MlStatusBadge.forStatus('Available');
+  }
+
+  Widget _buildWideTable(BuildContext context) {
+    return MlCard(
+      padding: const EdgeInsets.all(18),
+      child: MlDataTable(
+        // MEASURED BY RENDERING IT, not by arithmetic. The first draft kept
+        // thirteen columns at `minWidth: 1180`, and the register at 1600px has
+        // only ~1250px to lay them out in — so the table COMPRESSED instead of
+        // scrolling and Flutter broke inside the words: the header read
+        // `YEA / R`, a four-digit year rendered `202…`, `Freightliner` became
+        // `Freightlin…` and the status pill itself read `IN MAINTENA…`.
+        // Nothing overflowed — a wrapped cell is a cell that fits — so no
+        // sweep would ever have caught it. Exactly the fault
+        // `raw_recon_view.dart` documents at length for the recon table.
+        //
+        // The floor SCALES WITH THE TEXT, because a fixed pixel floor under a
+        // user-controlled type size is the fault `MlDataTable._effectiveMinWidth`
+        // was written about. The three plate columns and the status column
+        // declare their own `minWidth`, which that method scales; this figure
+        // is the floor for everything else.
+        minWidth: 1180,
+        columns: [
+          const MlColumn('Registration',
+              flex: 4, minWidth: kPlateColumnMinWidth),
+          const MlColumn('Status', flex: 5, minWidth: 140),
+          // ONE COLUMN, because make, type and year are one fact: what the
+          // truck IS. Three columns of two words each cost ~90px of gutter and
+          // heading to say what the compact card already says on one line as
+          // `Freightliner · Interlink · 2021`.
+          const MlColumn('Vehicle', flex: 4),
+          // Flex 3, not 2. At 2 the head itself broke: `ODOMETE / R`, the
+          // moment the actions column went to 184 and took the width back out
+          // of the flex pool. A figure column is sized by its HEAD here, not
+          // by its digits — `ODOMETER` is longer than `412 300`.
+          const MlColumn('Odometer', flex: 3, align: TextAlign.right),
+          const MlColumn('Disk expiry', flex: 3),
+          // Likewise: a rig has trailers, and it usually has none or one. Two
+          // 120px plate columns to hold, on average, half a plate.
+          const MlColumn('Trailers', flex: 4, minWidth: kPlateColumnMinWidth),
+          // ONE PERSON, ONE BLOCK: who is on the truck, their ID number, and
+          // their documents. Those were four columns of the words "View Doc"
+          // plus a name plus an ID — six columns and ~560px to describe a
+          // PERSON, on a row whose subject is a TRUCK.
+          //
+          // "Drivers", plural: a truck carries up to two by default and five
+          // with the super-admin's approval (CLAUDE.md §4), and the old
+          // `Assigned Driver` column showed only the primary one — so the
+          // second driver on a truck appeared nowhere in the register at all.
+          if (showDriver) const MlColumn('Drivers', flex: 5),
+          // 204 — MEASURED, not read off the code. Each of these buttons
+          // declares `BoxConstraints(maxWidth: 40)` and RENDERS AT 48: an
+          // IconButton keeps Material's 48px padded tap target whatever its
+          // own constraints say, which is correct and is not what the number in
+          // the source says. Four of them are 192, plus the cell's 12px right
+          // gutter. At 168 and again at 184 the fourth button wrapped onto a
+          // second row and took the whole row's height with it, on exactly the
+          // two rows that have a driver to unassign.
+          const MlColumn('', width: 204, align: TextAlign.right),
+        ],
+        rows: [
+          for (final vehicle in vehicles)
+            [
+              MlPlatePill(vehicle.vehicleRegistrationNumber),
+              _statusBadge(vehicle),
+              _text(context, _describe(vehicle), maxLines: 2),
+              _mono(
+                context,
+                vehicle.vehicleOdometerKm == null
+                    ? null
+                    : vehicle.formattedOdometer.replaceAll(' km', ''),
+                align: TextAlign.right,
+              ),
+              _mono(
+                context,
+                vehicle.vehicleRegistrationExpiryDate == null
+                    ? null
+                    : DateFormat('yyyy-MM-dd')
+                        .format(vehicle.vehicleRegistrationExpiryDate!),
+              ),
+              _trailers(context, vehicle),
+              if (showDriver) _driverBlock(context, vehicle),
+              _buildActionButtons(
+                context,
+                vehicle,
+                Theme.of(context).colorScheme,
+                vehicle.assignedDriverId != null,
+              ),
+            ],
+        ],
+      ),
+    );
+  }
+
+  /// What the truck is: `Freightliner · Interlink · 2021`. The same sentence
+  /// the compact card has always drawn, now in the wide table too.
+  static String? _describe(FleetVehicle vehicle) {
+    final parts = <String>[
+      if (vehicle.vehicleMake != null && vehicle.vehicleMake!.trim().isNotEmpty)
+        vehicle.vehicleMake!.trim(),
+      if (vehicle.vehicleType != null && vehicle.vehicleType!.trim().isNotEmpty)
+        vehicle.vehicleType!.trim(),
+      if (vehicle.vehicleYearModel != null) '${vehicle.vehicleYearModel}',
+    ];
+    return parts.isEmpty ? null : parts.join(' · ');
+  }
+
+  /// Both trailer plates, stacked. Most rigs have one or none.
+  static Widget _trailers(BuildContext context, FleetVehicle vehicle) {
+    final regs = <String>[
+      if (vehicle.firstTrailerRegs != null &&
+          vehicle.firstTrailerRegs!.trim().isNotEmpty)
+        vehicle.firstTrailerRegs!.trim(),
+      if (vehicle.secondTrailerRegs != null &&
+          vehicle.secondTrailerRegs!.trim().isNotEmpty)
+        vehicle.secondTrailerRegs!.trim(),
+    ];
+    if (regs.isEmpty) return _dash(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < regs.length; i++) ...[
+          if (i > 0) const SizedBox(height: 4),
+          MlPlatePill(regs[i], fontSize: 12),
+        ],
+      ],
+    );
+  }
+
+  /// Everybody rostered on the truck, or the primary driver if the derived
+  /// feed has not arrived.
+  String? _driversOf(FleetVehicle vehicle) {
+    final derived = statusByVehicleId?[vehicle.id];
+    if (derived != null && derived.hasDriver) return derived.drivers;
+    return vehicle.assignedDriverId == null ? null : vehicle.driverFullName;
+  }
+
+  /// Who is on the truck, their ID number, and their documents — one block,
+  /// because they are one person.
+  Widget _driverBlock(BuildContext context, FleetVehicle vehicle) {
+    final drivers = _driversOf(vehicle);
+    final idNumber =
+        vehicle.assignedDriverId == null ? null : vehicle.driverIdNumber;
+    final documents = _documents(context, vehicle);
+    if (drivers == null && idNumber == null) return _dash(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _text(context, drivers, maxLines: 2),
+        if (idNumber != null && idNumber.trim().isNotEmpty) ...[
+          const SizedBox(height: 2),
+          _mono(context, idNumber),
+        ],
+        const SizedBox(height: 6),
+        documents,
+      ],
+    );
+  }
+
+  /// The driver's documents, named. Four columns of "View Doc" said which
+  /// document only by which column it was in, and three of those columns were
+  /// off the edge of a 1600px screen.
+  Widget _documents(BuildContext context, FleetVehicle vehicle) {
+    if (vehicle.assignedDriverId == null) return _dash(context);
+    final links = <(String, String)>[
+      if (vehicle.driverIdDocumentUrl != null)
+        ('ID', vehicle.driverIdDocumentUrl!),
+      if (vehicle.driverPassportDocumentUrl != null)
+        ('Passport', vehicle.driverPassportDocumentUrl!),
+      if (vehicle.driverWorkVisaDocumentUrl != null)
+        ('Permit', vehicle.driverWorkVisaDocumentUrl!),
+      if (vehicle.driverLicenseDocumentUrl != null)
+        ('Licence', vehicle.driverLicenseDocumentUrl!),
+    ];
+    if (links.isEmpty) return _dash(context);
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      children: [
+        for (final (label, url) in links)
+          MlButton.ghost(
+            label: label,
+            icon: Icons.description_outlined,
+            compact: true,
+            onPressed: () => _openDocumentUrl(context, url),
+          ),
+      ],
+    );
+  }
+
+  /// ONE empty marker, an em dash. This file used `—` for a missing
+  /// odometer and `-` for a missing trailer one cell to its right.
+  static Widget _dash(BuildContext context) => Text(
+        '\u2014',
+        style: context.mlText.bodyMedium
+            .copyWith(color: MlSemantic.of(context).textFaint),
+      );
+
+  static Widget _text(BuildContext context, String? value,
+      {int maxLines = 1}) {
+    final s = value?.trim();
+    if (s == null || s.isEmpty) return _dash(context);
+    return Text(
+      s,
+      maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
+      style: context.mlText.bodyMedium
+          .copyWith(color: MlSemantic.of(context).textBody),
+    );
+  }
+
+  /// Years, odometers and ID numbers are CODES — figures read digit by digit
+  /// and compared down a column — so they are set in the mono face, like every
+  /// other figure in this product's tables.
+  static Widget _mono(
+    BuildContext context,
+    String? value, {
+    TextAlign align = TextAlign.left,
+  }) {
+    final s = value?.trim();
+    if (s == null || s.isEmpty) return _dash(context);
+    return Text(
+      s,
+      textAlign: align,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: context.mlText.code(
+        color: MlSemantic.of(context).textStrong,
+        size: 13,
+        weight: FontWeight.w600,
+      ),
+    );
   }
 
   Widget _buildActionButtons(
@@ -635,29 +536,6 @@ class FleetVehicleTable extends StatelessWidget {
             padding: EdgeInsets.zero,
           ),
       ],
-    );
-  }
-
-  static DataColumn _headerColumn(String label, double width) {
-    return DataColumn(
-      label: SizedBox(
-        width: width,
-        child: Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  static Widget _cellText(String? value, {required double width}) {
-    final display = (value == null || value.trim().isEmpty) ? '—' : value.trim();
-    return SizedBox(
-      width: width,
-      child: Text(
-        display,
-        overflow: TextOverflow.ellipsis,
-      ),
     );
   }
 

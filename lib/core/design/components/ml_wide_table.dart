@@ -67,7 +67,19 @@ class _MlWideTableState extends State<MlWideTable> {
       builder: (context, constraints) {
         // Wide enough already: no scroll view, and therefore no bar. A
         // scrollbar over content that cannot scroll is a promise of more.
-        if (widget.minWidth != null && constraints.maxWidth >= widget.minWidth!) {
+        //
+        // ⚠ `isFinite` MATTERS. An INFINITE maxWidth satisfies
+        // `>= minWidth` trivially, so this branch used to hand the child
+        // unbounded width and call it "wide enough" — and a table laid out
+        // with `Expanded` cells then threw *RenderFlex children have non-zero
+        // flex but incoming width constraints are unbounded*. It is the exact
+        // opposite of wide enough: unbounded means no width was offered at
+        // all. Reachable from any horizontally scrollable parent, and reached
+        // on 2026-08-23 the moment the fleet register moved onto
+        // `MlDataTable` inside a test harness that already scrolled.
+        if (widget.minWidth != null &&
+            constraints.maxWidth.isFinite &&
+            constraints.maxWidth >= widget.minWidth!) {
           return widget.child;
         }
         return Scrollbar(
