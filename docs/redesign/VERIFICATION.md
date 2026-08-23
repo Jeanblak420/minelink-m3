@@ -1066,3 +1066,58 @@ names.
 company mirror still speak the v1 analytics language (`design-reference.md` §6
 records this; the router says "until their own versions land"). Migrating them
 onto the v2 overview is a feature, and is listed in `M3-TASKS.md`.
+
+### Mine / supplier portal — IN PROGRESS, 2026-08-23 (fourth session; paused by Jean)
+
+Same method as the console pass. Five read-only reviewer agents looked at every
+route target of all five remaining Phase 3 scopes and reported drift by the
+nine classes (reports in `docs/redesign/reviews/2026-08-23-phase3/`); every
+finding below was verified in the render and the code before it was fixed, one
+commit per fix, each pinned by a test that was sabotaged and bit. **The task is
+not done** — the rows marked *open* are the reviewer's findings still to be
+fixed; the screens not listed are not yet reviewed by this session.
+
+| route target | verdict | commit |
+|---|---|---|
+| `/portal/mine` dashboard (desktop dark, phone dark) | every band's meta / `View →` sat at two-thirds of the row (`SaSectionHeader`: Flexible·Spacer·Flexible); the chart's TARGET caption under the `7 days` pill; the KPI delta chip at the tile's midpoint; a "Target" legend key for a line not drawn | `8ef16b1` `6dbfb7e` `16fcfac` `0057ef8` |
+| portal shell for the mine (`portal-mine-desktop-dark`) | reviewed, no drift — the chrome the console pass reviewed | — |
+| `/portal/mine/security`, `/gate` (desktop dark gate mode, phone dark) | hand-rolled sans title with a gradient chip; two sans section headings; title-case labels | `5ddb862` |
+| `/portal/mine/weighbridge` (desktop dark/light, phone dark, record-load slide-over) | title case on four stat labels, two headings, the action and the slide-over title; the LOADING pill neutral grey (shared tone map) | `bf25042` `e911fd4` |
+| `/portal/mine/operations` (+ `/minerals` `/loads` `/transactions`; rendered as the transporter fixture) | stock-Material company card (sans title, sized to content), tab card (sans heading, button under it), hand-rolled empty state; title-case tab and dialog titles. The empty ledger is the fixture's stated intent. The mine-only tabs are unphotographed (no mine-org render) | `6752683` `166571c` |
+| shared `MlSectionTitle` (every portal section) | stacked action stranded left; an icon action hanging below its meta; then a stacked action unbounded (sweep) | `bb0de74` `31586a9` |
+| shared `MlPageHeader` (every portal page) | wrapped tools landing LEFT on a phone, description under the buttons — a width rule tried and reverted (43 goldens); the header now MEASURES and stacks only when the tools do not fit | `bcb0fdb` |
+| `/portal/mine/stockpiles` (desktop dark) | breakdown-row figures in sans → mono (`MetricBreakdownRow`, 20 sites); then its label given the flex (sweep) | `4ef7ee1` `31586a9` |
+| `/portal/mine/stockpiles/:id` (desktop, phone) | "Remaining on hand" headline in sans beside Fraunces cards | `4ef7ee1` |
+| stockpile audit (desktop, phone) | two sans headings; a load-out in the error tone; the plate breaking on a phone; sans column figures | `cf3608f` |
+| `/portal/mine/production` (desktop dark) | ROM pile card figure mono `412.60 t` vs Fraunces `412.6 t` elsewhere | `4ef7ee1` |
+| `/portal/mine/quality` (desktop dark; two dialogs) | `38.0% / 42.0%` pill wrapping at its slash; MOISTURE/SIZING heads abutting; "2 certificates" counting loads | `ce2e10d` `8dc3500` |
+| `/portal/mine/reconciliations` (desktop dark) + shared recon tables (desktop dark/light, phone) | "3 delivered loads" over a Pending row; the POD link in accent FILL as ink (1.81:1 on white) | `8dc3500` |
+| `/portal/mine/tons-out` (desktop, phone) | reviewed, no drift | — |
+| `/portal/mine/tons-out-search` (desktop, phone) | rebuilt in the vocabulary: five reference stat cards, uppercase heads, plate pills, mono mass, "Search loads" title, Fraunces Filters, "Time out", the table filling its card — and a real bug, "Last 24h" windowed on the midnight date (71.12 t vs Tons out's 103.22 t for the same loads) | `249106f` |
+| `/portal/mine/locations` (desktop, phone) + the shared Locations section | both card headings hand-rolled; "Add location" stranded left on a phone; "Main Gate" / "Loading Point"; a meta that counted rows, not pinned anchors | `e64212a` `a74f0f0` |
+| `/portal/mine/truck-locations`, `/live-map` (shared panels) | a nine-hour-old GPS sample reading like a fresh one; desktop lists with no hairline and no head; the highlighted marker in the fault colour | `da9571e` |
+| `/portal/mine/employees` (transporter render) | an active employee with an off-org role counted and drawn nowhere; twelve title-case labels | `db9912d` |
+| `/portal/mine/employees/:id` (desktop, phone) | a fall in red; every document well red; the footer button mid-row; "Message  Thandi" wrapping; the employer setup card absent from every golden (no fixture) | `90a82c1` |
+| `/portal/mine/register` (desktop, phone) | a second (blue) accent at 16 sites; Offline in the fault colour; "Employee Register" | `9740420` |
+| `/portal/mine/compliance`, `/trips` | reviewed, no drift | — |
+| employee grid (`/employees/:companyId`) | *open* — "Fixture Haulage Employees" title case, no meta (`employee_grid_screen.dart:40`) | — |
+| `/portal/mine/buyers` | *open* — every buyer card takes the accent wash + shadow (`OverviewHeroTile`, `BuyerOverviewCard`); the page head is an `MlSectionTitle` + hand Text, not `MlPageHeader` (`mine_supplier_buyers_detail_screen.dart:171–192`) | — |
+| `/portal/mine/requests` (`BuyerRequestsScreen(isMine: true)`, **no render exists**) | *open* — description says "transportation and product requests" for a mine that raises transportation and BUYER requests; actions in a left Wrap under the header, `FilledButton.tonalIcon` (blue) beside cyan (`buyer_requests_screen.dart:56–92`) | — |
+| `/portal/mine/trips/:id` | *open* — codes/tonnage in sans, facts in a bare container with no section head (`portal_trip_detail_screen.dart:84–184`) | — |
+| `/portal/mine/company` (`company_list_screen.dart`) | *open* — "Company Information" + six title-case labels that wrap in a 130px column even at 1600px; the reference code in sans (`:247–322`) | — |
+
+**Kept on purpose / not drift:** "Mine Control", "Mine Security", "Operations
+Hub" as screen names; the gate's 520px phone-first column (the original's);
+`OverviewHeroTile`'s sans card titles (card titles, not section heads); the
+register's one-per-bucket fixture roster; `Total Tons=` (CLAUDE.md §4);
+captions wrapping at a `·`; dialog titles in sans (`dialogTheme`, app-wide);
+blank map tiles (the harness). The hub's empty ledger is the fixture's stated
+intent (`screen_fixtures.dart`), not a lie.
+
+**Found by the session's own instruments, not a reviewer:** the power cut
+zeroed four files mid-write (restored from HEAD); the one-clock guard refused
+`MlTime.sast` on a calendar day in the first draft of the Search loads date
+cell; the overflow sweep caught two 2–6px overflows that two of this session's
+fixes introduced (`31586a9`); a `--name "a|b"` filter is eaten by this shell
+(the `|` became a pipe) and a golden was committed a digit stale until the
+full suite was re-run (`a74f0f0`).
