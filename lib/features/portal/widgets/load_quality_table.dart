@@ -94,9 +94,14 @@ class LoadQualityTable extends ConsumerWidget {
           // drops the action under the title instead.
           MlSectionTitle(
             'Load quality certificates',
+            // Counts certificates, not loads: "2 certificates" used to sit
+            // directly above "1 of 2 loads certified" (Phase 3, 2026-08-23).
             meta: async.valueOrNull == null
                 ? null
-                : mlCount(async.value!.length, 'certificate'),
+                : mlCount(
+                    async.value!.where((r) => r.hasCert).length,
+                    'certificate',
+                  ),
             icon: Icons.science_outlined,
             margin: EdgeInsets.zero,
             action: Wrap(

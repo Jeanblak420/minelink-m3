@@ -764,6 +764,11 @@ class _ExcelReconTable extends StatelessWidget {
   }
 
   Widget _podLink(BuildContext context, String value, RawReconRow r) {
+    // `accentInk`, for the reason written on `_waybillLink` above: the
+    // accent is a FILL, and as ink on white it is 1.81:1. The waybill cell
+    // was fixed on 2026-08-21; this link beside it was not (Phase 3 pass,
+    // 2026-08-23).
+    final semantic = MlSemantic.of(context);
     return InkWell(
       onTap: () => onPodTap!(r),
       borderRadius: MlShape.radiusExtraSmall,
@@ -771,11 +776,11 @@ class _ExcelReconTable extends StatelessWidget {
         value,
         softWrap: true,
         style: context.mlText.titleSmall.copyWith(
-          color: MlTokens.accent,
+          color: semantic.accentInk,
           fontWeight: FontWeight.w700,
           height: 1.25,
           decoration: TextDecoration.underline,
-          decorationColor: MlTokens.accent,
+          decorationColor: semantic.accentInk,
         ),
       ),
     );

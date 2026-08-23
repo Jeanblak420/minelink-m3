@@ -86,9 +86,15 @@ class WeightReconciliationView extends ConsumerWidget {
           // squeeze the title to whatever was left.
           MlSectionTitle(
             'Weight reconciliation',
+            // Counts the rows that ARE delivered, not every row. With one
+            // trip still pending the head read "3 delivered loads" over a
+            // table whose third row said Pending (Phase 3, 2026-08-23).
             meta: async.valueOrNull == null
                 ? null
-                : mlCount(async.value!.length, 'delivered load'),
+                : mlCount(
+                    async.value!.where((r) => r.isDelivered).length,
+                    'delivered load',
+                  ),
             icon: Icons.compare_arrows_rounded,
             margin: EdgeInsets.zero,
             action: Wrap(spacing: 8, runSpacing: 8, children: [
