@@ -94,14 +94,39 @@ class SaSectionHeader extends StatelessWidget {
     // fine at console widths and overflows by ~39px on a 430px portal viewport
     // at 1.3 text scale — now that the portal dashboards use this header, it
     // gets rendered narrow for the first time. Below the breakpoint the tools
-    // drop to their own line; above it they keep the design's single row, with
-    // `meta` flexible so a long one ellipsises instead of pushing the link out.
+    // drop to their own line; above it they keep the design's single row.
+    //
+    // THE META IS CAPPED, NOT FLEXED — and there is no Spacer.
+    //
+    // Until 2026-08-23 the wide row was `Flexible(title) · Spacer() ·
+    // Flexible(meta) · action`. `Flexible` defaults to `flex: 1` and a
+    // `Spacer` IS an `Expanded(flex: 1)`, so the row's free space was split
+    // three ways and the meta was handed the middle-to-right third: a loose
+    // child sizes to its content at the START of its allotment, so "Target
+    // 903 t/day · View →" rendered at two-thirds of the row, nowhere near the
+    // right edge the reference puts every meta line at. On the mine
+    // dashboard at 1600px that put "4 queues with work" at x≈860 inside a
+    // band ending at 1570, on all five bands, on all three portal dashboards.
+    // CLAUDE.md §10.4 records this exact trap, and the portal's own
+    // `MlSectionTitle` already carries the right shape: the title is the long
+    // child and takes the free space (`Expanded`); the meta is a non-flex
+    // child, so the title pushes it to the right edge, but BOUNDED to half
+    // the row so a long one ellipsises instead of running off. Seen in the
+    // Phase 3 mine-portal pass; pinned by `portal_dashboard_kit_test.dart`
+    // ("the head's meta and link sit at the right edge").
     return LayoutBuilder(
       builder: (context, c) {
         final stack = c.maxWidth < 560;
+        final metaCap =
+            c.maxWidth.isFinite ? c.maxWidth * 0.5 : double.infinity;
         final tools = <Widget>[
           if (metaText != null)
-            stack ? metaText : Flexible(child: metaText),
+            stack
+                ? metaText
+                : ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: metaCap),
+                    child: metaText,
+                  ),
           if (action != null) ...[
             SizedBox(width: metaText == null ? 0 : 14),
             action!,
@@ -136,10 +161,21 @@ class SaSectionHeader extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Flexible(child: titleText),
-                  if (badge != null) ...[const SizedBox(width: 10), badge!],
-                  const Spacer(),
-                  if (metaText != null) const SizedBox(width: 12),
+                  // The title owns the free space; the badge rides right
+                  // after it. The inner Row is bounded by the Expanded, so
+                  // the Flexible title ellipsises instead of throwing.
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Flexible(child: titleText),
+                        if (badge != null) ...[
+                          const SizedBox(width: 10),
+                          badge!,
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (tools.isNotEmpty) const SizedBox(width: 12),
                   ...tools,
                 ],
               ),

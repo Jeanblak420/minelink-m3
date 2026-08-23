@@ -328,6 +328,49 @@ void main() {
     expect(find.text('No disputes open against your loads'), findsNothing);
   });
 
+  // A section head's meta and `View →` sit at the RIGHT EDGE of the band, as
+  // every section header on the reference does. Until 2026-08-23 the head
+  // was `Flexible(title) · Spacer() · Flexible(meta) · action` — three
+  // flex-1 children splitting the free space in thirds — so the meta landed
+  // at two-thirds of the row ("4 queues with work" at x≈860 in a 1570-wide
+  // band), on every band of every portal dashboard. Asserting on geometry,
+  // not on the absence of overflow: nothing overflowed, which is why three
+  // width × scale sweeps never saw it (CLAUDE.md §10.4).
+  testWidgets("the head's meta and link sit at the right edge of the band",
+      (tester) async {
+    tester.view.physicalSize = const Size(1600, 2600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      _app(brightness: Brightness.dark, scale: 1.0, boldText: false),
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+
+    // The page pads 16, so every band ends at 1584.
+    const bandRight = 1600.0 - 16;
+
+    // Meta with no action: flush with the band's right edge.
+    final queueMeta = tester.getRect(find.text('1 queue with work'));
+    expect(queueMeta.right, closeTo(bandRight, 1.5),
+        reason: 'action-queue meta should end at the band edge, '
+            'ends at ${queueMeta.right}');
+
+    // Meta beside a link: the link is flush right, the meta 14px before it.
+    final link = tester.getRect(
+      find.widgetWithText(TextButton, 'Truck locations →'),
+    );
+    expect(link.right, closeTo(bandRight, 1.5),
+        reason: 'View link should end at the band edge, ends at ${link.right}');
+    final meta = tester.getRect(find.text('2 active'));
+    expect(meta.right, closeTo(link.left - 14, 1.5),
+        reason: 'meta should sit 14px before the link, '
+            'ends at ${meta.right} with the link at ${link.left}');
+    // And the title still starts at the band's left edge, unmoved.
+    expect(tester.getRect(find.text('On the mine floor')).left,
+        closeTo(16, 1.5));
+  });
+
   testWidgets('every KPI tile and queue row navigates to its screen',
       (tester) async {
     tester.view.physicalSize = const Size(1600, 2600);
