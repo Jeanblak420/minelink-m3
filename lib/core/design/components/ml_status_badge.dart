@@ -60,9 +60,18 @@ class MlStatusBadge extends StatelessWidget {
     if (s == 'open' || s.startsWith('open ') || s.endsWith(' open')) {
       return MlTone.warn;
     }
+    // LOADING is a truck AT THE MINE, mid-load — the status between "Arrived
+    // at mine" (amber) and "Loaded" (green). It fell through to neutral, so
+    // the weighbridge's truck list drew the one truck being worked on in
+    // grey beside an amber one that had only just arrived: the row with the
+    // most happening read as the most inert. Matched before the `loaded`
+    // branch below, which would otherwise not catch it anyway ("loading"
+    // does not contain "loaded"). Seen 2026-08-23 in the Phase 3 mine pass.
     if (s.contains('at mine') ||
         s.contains('arrived') ||
-        s.contains('waiting')) {
+        s.contains('waiting') ||
+        s == 'loading' ||
+        s.endsWith(' loading')) {
       return MlTone.atMine;
     }
     if (s.contains('loaded') ||

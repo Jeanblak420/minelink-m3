@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/token_request.dart';
+import 'package:flutter_application_1/features/portal/models/trip_status.dart';
 
 import '../test_helpers/real_fonts.dart';
 
@@ -90,6 +91,28 @@ void main() {
       // Statuses that were already toned keep their tone.
       expect(MlStatusBadge.toneForStatus('expired'), MlTone.error);
       expect(MlStatusBadge.toneForStatus('approved'), MlTone.done);
+    });
+
+    test('a truck LOADING is at the mine (amber), not inert', () {
+      // Between "Arrived at mine" (amber) and "Loaded" (green) on the
+      // weighbridge; it fell through to neutral and the truck being worked
+      // on read as the most inert row. Phase 3 mine pass, 2026-08-23.
+      expect(MlStatusBadge.toneForStatus('Loading'), MlTone.atMine);
+      expect(MlStatusBadge.toneForStatus('loading'), MlTone.atMine);
+      // The neighbours keep their tones.
+      for (final status in TripStatus.values) {
+        final tone = MlStatusBadge.toneForStatus(status.label);
+        if (status == TripStatus.scheduled || status == TripStatus.cancelled) {
+          continue; // not yet moving / never will: inert is honest
+        }
+        expect(tone, isNot(MlTone.neutral),
+            reason: '"${status.label}" falls to neutral');
+      }
+      expect(MlStatusBadge.toneForStatus(TripStatus.loaded.label), MlTone.done);
+      expect(MlStatusBadge.toneForStatus(TripStatus.arrivedAtMine.label),
+          MlTone.atMine);
+      expect(MlStatusBadge.toneForStatus(TripStatus.enRouteToLoad.label),
+          MlTone.transit);
     });
 
     test('the tone still comes from the RAW string', () {
