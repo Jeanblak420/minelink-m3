@@ -1,6 +1,6 @@
 # MineLink M3 — what is left, and nothing else
 
-**Last updated:** 2026-08-23 09:25 · M3 at **183 commits** · tip = the commit carrying this line (parent `164e768`) · worktree baseline `df451d0` intact
+**Last updated:** 2026-08-23 · M3 at **205 commits** · tip = the commit carrying this line (parent `351b029`) · worktree baseline `df451d0` intact
 **Open this file in the IDE:** `code "C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\M3-TASKS.md"`
 **Progress:** recount with `grep -c '^- \[x\]' M3-TASKS.md` — never increment by hand.
 
@@ -71,7 +71,8 @@ Done when: each flow has been driven end to end against live data and its record
 
 The redesign so far is the theme, the shell, the components, the shape/type scales, and every defect found by driving. No screen has been reviewed one by one against `docs/design-reference/` and the super-admin console. That is the remaining design work.
 
-- [ ] Console (super-admin) screens — all of them, at desktop / medium / phone, dark and light
+- [x] M3 version of Console (super-admin) screens — all of them, at desktop / medium / phone, dark and light
+  ✅ 2026-08-23 · this commit · every console route target looked at against `docs/design-reference/` and §4–§5 of `docs/design-reference.md` (the shell at desktop dark/light, medium, rail-collapsed and phone dark/light; every screen at the widths its renders exist for); the per-screen table is in `docs/redesign/VERIFICATION.md` ("Phase 3 — Console"). Twenty-one fixes, one commit each, every one pinned by a test that was sabotaged and bit and re-rendered: organizations (`368665f`), platform users (`f7a49f2`), organisation detail (`ad1dc5a`), token requests + the status-tone map (`af5fab6`), token history + its lying fixture (`8e0bb19`), audit logs (`a37776f`), crash reports (`a388658`), account deactivations (`f4812a1`), margin ledger (`0e5950c`), recon tables (`f57b84c`), available routes (`0225e95`), driver limits (`d5dd1c1`), org insights chart (`19200e6`), leaderboard + the light `inkXlo` token (`b8f33ab`), company mirror (`ee3e213`), platform settings (`da85f81`), the communications group (`4676106`), request tracking / appearance / the widened spelling guard (`3a0d212`), and the flutter_map logo that made twelve map goldens non-deterministic (`fde2fad`). Reviewed with no drift: the shell, the v2 dashboard, the four request inboxes and the review/dispatch/due-diligence screens, disputes, route marketplace, live map, the transporters overview (the reference itself), the three targets scopes, register company, user preferences, expired access, messages, employee register. Recurring causes: hand-rolled 16px sans titles where `MlPageHeader` exists (6 screens), a card's actions riding in the title Wrap instead of right-aligned (3), title-case or a misplaced possessive in a label (6), and a `Wrap` sizing to its content (§10.4, twice).
 - [ ] Mine portal — dashboard, operations tabs (security, weighbridge, loads, gate), supervisor stockpiles, production, quality, reconciliations, locations, employees
 - [ ] Buyer portal — dashboard, requests, loads & value, reconciliations, live map
 - [ ] Transporter portal — dashboard, routes, fleet management, maintenance, trucks on route, reconciliations, live map
@@ -127,6 +128,7 @@ The emulator's `adb emu geo fix` drives have already proved the navigation stack
 ## Decisions only Jean can make *(not tasks until answered)*
 
 - The chat dock is **not** mounted on `/chat/:id` because it covered 61% of the send button. Keep it that way, or make the fix geometric?
+- The buyer and mine/supplier insights (`/super-admin/insights/buyer`, `/mineSupplier`) and the company mirror still speak the **v1 analytics language** — `docs/design-reference.md` §6 records it, and the router says "until their own versions land". Migrating them onto the v2 transporters-overview language is a feature (org-specific figures: orders/tons/value for buyers, tons/loads/users for mines), not drift. Do it here, or leave it?
 - The fork inherited the shipping app's v1.0 checklists (`To-Do's.md` 413 items at 109 done; `COMPLETION-CHECKLIST.md` 157 gates at 107). They have never been updated in M3. **Assumed here: that work belongs to the shipping app, not to the redesign.** Say so if that is wrong.
 
 ## Deliberately NOT on this list *(so nobody re-adds them)*

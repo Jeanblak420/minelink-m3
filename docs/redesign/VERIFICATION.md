@@ -1008,3 +1008,61 @@ cannot start a DM with the owner (`Message an admin`) by the P10-07 hierarchy.
 - Phases 4–7 remain blocked on Jean, as before.
 - The approved request above is live test data awaiting a dispatch nobody has
   asked for.
+
+## Phase 3 — per-screen design pass, reviewed against `docs/design-reference/`
+
+Method, per screen: the render is looked at beside the reference captures
+(`super-admin-dashboard-dark.png`, `transporters-overview-dark.png`) and the
+rules in `docs/design-reference.md` §4–§5 — placement, hierarchy, spacing,
+type faces, tone — drift is fixed at its cause, the render regenerated and
+looked at again, and the fix pinned by a test that was sabotaged and bit.
+"Reviewed, no drift" below means the screen was looked at at the widths its
+renders exist for and nothing was found; it is not a claim that the screen is
+finished in every respect.
+
+### Console (super-admin) — reviewed 2026-08-23
+
+| route target | verdict | commit |
+|---|---|---|
+| console shell (desktop dark/light, medium, rail collapsed, phone dark/light) | reviewed, no drift | — |
+| `/super-admin` dashboard v2 (desktop dark/light, phone) | matches the reference section for section | — |
+| `/super-admin/organizations` | footer hairline shrink-wrapped to the pager; header had no description | `368665f` |
+| `/super-admin/users` (platform users) | hand-rolled 16px sans title, no count → MlPageHeader | `f7a49f2` |
+| `/super-admin/organization/:id` | five hand-rolled sans headings → MlSectionTitle; two `_InfoRow` copies 8 px apart | `ad1dc5a` |
+| `/super-admin/token-requests` | no page header; `open` / `in_progress` pills neutral → warn / transit | `af5fab6` |
+| `/super-admin/token-history` | fixture gave every log one org id and ignored the tab's org type; "Mines / suppliers" | `8e0bb19` |
+| `/super-admin/audit-logs` | hand-rolled title, title-cased, bare download icon → MlPageHeader + Export | `a37776f` |
+| `/super-admin/crash-reports` | hand-rolled title → MlPageHeader | `a388658` |
+| `/super-admin/account-deactivations` | hand-rolled title; Approve / Reject at the card's far left → right | `f4812a1` |
+| `/super-admin/requests/*` (four inboxes), request detail, dispatch, due-diligence gate | reviewed, no drift | — |
+| `/super-admin/margin-ledger` | "Margin ledger History" → sentence case | `0e5950c` |
+| `/super-admin/recon-tables` (and the shared RawReconView) | "TIME-IN" broke at its hyphen, plates at their spaces; "All Transporter" | `f57b84c` |
+| `/super-admin/disputes` | reviewed, no drift (its OPEN pill now amber from `af5fab6`) | — |
+| `/super-admin/available-routes` | actions inline after the title, Unassign stranded → right-aligned action row | `0225e95` |
+| `/super-admin/route-marketplace` | reviewed, no drift | — |
+| `/super-admin/live-map` | reviewed, no drift | — |
+| `/super-admin/driver-limits` | decision floated mid-row → right; "Transporter Driver limits" | `d5dd1c1` |
+| `/super-admin/insights/transporter` | is the reference; intact | — |
+| `/super-admin/insights/{buyer,mineSupplier}` (v1 language) | last axis tick collided with "Today"; TARGET caption on the spike | `19200e6` |
+| `/super-admin/insights/transporter/leaderboard` | "▲ 0.0%" green for no change; red for a fall; light `inkXlo` 4.40:1 | `b8f33ab` |
+| `/super-admin/targets`, `/targets/org-type/:t`, `/targets/company/:id` | reviewed, no drift | — |
+| `/super-admin/insights/:t/company/:id` (mirror) | sans title/headings; sky-blue second accent; BUYER badge blue, TRANSPORTER green | `ee3e213` |
+| `/super-admin/settings` | hand-rolled title → MlPageHeader | `da85f81` |
+| `/super-admin/register-company`, `/preferences`, expired access | reviewed, no drift ("User Preferences" casing in `3a0d212`) | — |
+| `/super-admin/chat-connections`, communications hub, messages, notifications manager | "Chat Rooms" / "All Notifications" casing; chat-connections sans headings | `4676106` |
+| `/super-admin/request-tracking` | "Request's Tracking Logs" → "Request tracking logs" | `3a0d212` |
+| appearance (portal, found on the way) | "Mine / Supplier" inside two sentences; the guard now matches the phrase anywhere | `3a0d212` |
+| employee register | reviewed, no drift | — |
+
+Also from this pass: the flutter_map logo was the one non-deterministic pixel
+across twelve map renders (`fde2fad`).
+
+**Kept on purpose:** the recon table's full gridlines (an Excel-style grid, by
+design); the mono snake_case stat-card captions (`design-reference.md` §3, "a
+deliberate texture, not a bug"); `Operations Hub` and `Global Admin` as product
+names.
+
+**Decision for Jean, not drift:** the buyer and mine/supplier insights and the
+company mirror still speak the v1 analytics language (`design-reference.md` §6
+records this; the router says "until their own versions land"). Migrating them
+onto the v2 overview is a feature, and is listed in `M3-TASKS.md`.
