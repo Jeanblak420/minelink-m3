@@ -765,3 +765,66 @@ controller's stored signature.
 - **The POD leg of trip `0d9c6792` was not driven** — it is `en_route_to_offload`,
   a normal state shared with two older trips.
 - Physical GPS on a road, iOS and Windows — all unchanged.
+
+## Current state — 2026-08-23 (second session) — the handset runs `2b235c4`, and the POD leg is driven
+
+Worked from `M3-TASKS.md`, the markable list; every tick there carries its own
+evidence line and this section only records what was executed.
+
+### The handset
+
+- **APK `2b235c4` (`6BCAE044…`) is on the SM-G780G.** Installed over the NAS
+  route (My Files → Network storage → jean → Shared → PhoneRemote), hashes
+  matched on both ends before the tap, "Update" → the app opened straight
+  into the Global Admin Dashboard. No Play Protect prompt this time.
+- **`12:35` reads on ONE line** on `/super-admin/recon-tables` at Jean's
+  raised font size — the `20 Jul 2026` row, the one the handset itself found
+  broken on `963ca7e`. Every other TIME-IN on the table is one line too.
+- The driver's hero card (`roadhaul.driver`) rendered `CURRENT TRIP` with a
+  `NO ACTIVE TRIP` pill and no overflow stripe — but that is the SHORT pill,
+  because the POD below had just closed the driver's only active trip. The
+  long-pill case is still owed and will be re-checked the moment a new trip
+  reaches this driver.
+- The Load Controller (`ironhills.controller`) had no truck on site to draw a
+  truck row for; the Recent Loads table rendered cleanly. **Found on glass:**
+  the portal app-bar title wraps MID-WORD at the raised text size — `Load co`
+  over `ntroller` — between the hamburger and four action icons. Open, to be
+  fixed in this session.
+
+### The POD leg of trip `0d9c6792`, driven
+
+As `roadhaul.driver`, in a headless Chrome driven over CDP (no mouse):
+
+1. `Arrived at offloading` → `mark_trip_arrived_at_offload` stamped
+   `metadata.arrived_at_offload_at = 2026-08-23T01:40:40Z`; status stays
+   `en_route_to_offload`, which is the designed behaviour (the POD is what
+   writes `offloaded`).
+2. `Upload POD` → the signature prompt was skipped because the driver already
+   has one → the Proof-of-delivery dialog, pre-filled with the mine net
+   `34.20`, changed to `33.9`; the photo attached through
+   `Page.setInterceptFileChooserDialog` + `DOM.setFileInputFiles`.
+3. `Submit POD` → `record_pod`: `trips.status = completed`,
+   `delivered_tons = 33.9`, `variance_tons = 0.3`,
+   `offloaded_at = completed_at = 2026-08-23 01:43:47Z`, one `pod_uploads`
+   row, and a 9,329-byte object in the private `pod_photos` bucket.
+4. The driver's own screen: Delivered 6 → 7, "No active trip", Recent Trips
+   `23 Aug 2026 · 03:43 · COMPLETED` with a POD icon.
+5. Side B as `ironhills.owner`: `S6W001GP · 34.20 t · 33.90 t · 0.30 t`,
+   POD icon, Dispute action.
+
+**The buyer half does not apply to this trip.** Its request `4a0403a8` was
+raised by the mine with `buyer_company_id = NULL`, so transaction
+`TRP-6C72DDAC41` has no buyer — no buyer can see it, and that is the data, not
+a defect. The buyer's Loads & value was opened as `atlasbuyer.owner` anyway
+and carries the latest buyer-linked POD (`927cbf1b`, delivered 34.05 t,
+R32,347.50).
+
+### A rig lesson, so nobody chases it as an app defect
+
+A CDP Chrome launched with `--window-position=2000,2000` to keep it off Jean's
+desktop reports `document.visibilityState = "hidden"` and **0 rAF/s**. Flutter
+web renders on `requestAnimationFrame`, so nothing paints, and every screen
+looks like an endless spinner while its network requests complete normally.
+Measured before any app code was suspected. `--headless=new` (same profile,
+so the session survives) renders at 39 rAF/s and the Trip tab appeared in
+8 s.

@@ -1,6 +1,6 @@
 # MineLink M3 — what is left, and nothing else
 
-**Last updated:** 2026-08-23 · M3 at **166 commits** · tip `8d92de4` · worktree baseline `df451d0` intact
+**Last updated:** 2026-08-23 · M3 at **169 commits** · tip = the commit carrying this line (parent `7426840`) · worktree baseline `df451d0` intact
 **Open this file in the IDE:** `code "C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\M3-TASKS.md"`
 **Progress:** recount with `grep -c '^- \[x\]' M3-TASKS.md` — never increment by hand.
 
@@ -34,8 +34,10 @@
 
 The phone last ran the APK built at `963ca7e`. The APK carrying the TIME-IN fix is built, hashed and staged: `build/app/outputs/flutter-apk/app-debug.apk` = `\\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk`, SHA-256 `6BCAE044229625FB32E770DC5CFA62D38EA6A3E584AF8F07BDA54F0663D82422`, both ends match.
 
-- [ ] Install APK `2b235c4` on the SM-G780G (My Files → Network storage → jean → Shared → PhoneRemote → minelink-m3.apk → Update → Open)
-- [ ] `/super-admin/recon-tables` at Jean's raised font size: the TIME-IN column reads `12:35` on ONE line
+- [x] Install APK `2b235c4` on the SM-G780G (My Files → Network storage → jean → Shared → PhoneRemote → minelink-m3.apk → Update → Open)
+  ✅ 2026-08-23 · this commit (parent 7426840) · proven by My Files → Network storage → jean → Shared → PhoneRemote → `minelink-m3.apk` (listed 23 Aug 02:09; SHA-256 `6BCAE044…` re-hashed on both ends before the tap) → download 0→100% → "Do you want to update this app?" → Update → the app opened straight into the Global Admin Dashboard (Transporters 46 trips · 1,439 t). No Play Protect prompt this time.
+- [x] `/super-admin/recon-tables` at Jean's raised font size: the TIME-IN column reads `12:35` on ONE line
+  ✅ 2026-08-23 · this commit · proven on the SM-G780G at Jean's raised font size: scrolled the combined table to the `20 Jul 2026` row — TIME-IN reads `12:35` on ONE line; every other TIME-IN seen (00:50, 04:27, 14:11, 07:27, 01:15, 22:45, 23:31, 15:05 … 07:40) is one line too. Screenshots viewed and deleted.
 - [ ] Driver hero card (`roadhaul.driver`): `CURRENT TRIP` and the status pill sit on two lines with NO yellow-and-black stripe
 - [ ] Load controller truck row (`ironhills.controller`) and the buyer reconciliation card (`atlasbuyer.owner`): no overflow at the raised text size
 - [ ] `Duplicate GlobalKey`: baseline count → six or seven navigations → re-count = 0 new rows (SQL in HANDOFF §5)
@@ -47,7 +49,8 @@ Done when: all six ticked with what was seen; any defect found is fixed, tested,
 
 ## Phase 2 — the flows nobody has ever driven   **Status: OPEN** *(CDP browser or emulator; no phone needed)*
 
-- [ ] **POD leg** of trip `0d9c6792` as `roadhaul.driver`: POD photo attached (`DOM.setFileInputFiles`), delivered tons entered, trip → `offloaded` / `completed`; Reconciliations Side B shows the mine-net vs delivered variance; the buyer's Loads & value updates
+- [x] **POD leg** of trip `0d9c6792` as `roadhaul.driver`: POD photo attached (`DOM.setFileInputFiles`), delivered tons entered, trip → `offloaded` / `completed`; Reconciliations Side B shows the mine-net vs delivered variance; the buyer's Loads & value updates
+  ✅ 2026-08-23 · this commit · proven by driving it as `roadhaul.driver` in a headless CDP Chrome: `Arrived at offloading` → `metadata.arrived_at_offload_at = 2026-08-23T01:40:40Z` (status stays `en_route_to_offload`, by design); `Upload POD` → delivered tons `33.9` + `pod.jpg` through `DOM.setFileInputFiles` → `Submit POD` → `trips.status = completed`, `delivered_tons 33.9`, `variance_tons 0.3`, `offloaded_at = completed_at = 01:43:47Z`, one `pod_uploads` row and a 9,329-byte object in `pod_photos`; the driver's screen went Delivered 6→7, "No active trip", Recent Trips `23 Aug 2026 · 03:43 · COMPLETED`. Side B as `ironhills.owner`: `S6W001GP · 34.20 t · 33.90 t · 0.30 t` with the POD icon. **The buyer half does not apply to this trip**: its request `4a0403a8` was raised by the mine with `buyer_company_id = NULL`, so transaction `TRP-6C72DDAC41` has no buyer and no buyer can see it — that is the data, not a defect. The buyer's Loads & value was checked as `atlasbuyer.owner` and carries the latest buyer-linked POD (`927cbf1b`, 34.05 t, R32,347.50). Rig lesson: a CDP Chrome launched with `--window-position` off-screen reports `visibilityState=hidden` and 0 rAF/s, so Flutter never paints and every screen looks like an endless spinner — use `--headless=new`.
 - [ ] **Request → approve → link → dispatch, FROM THE FORMS**: Request Transporter/Routes (buyer AND mine, Ongoing and Single request), Request Product, Request Buyer (multi-PDF lab results, image, FOB/FOT, map picker); the `sent_back ⇄ resubmitted` revision loop; the four super-admin inboxes; pricing/margin; the due-diligence gate; transporter accept; fleet + driver allocation; the auto-created capped stockpile and all three dispatch notifications
 - [ ] **Chat at length**: two real accounts, both directions, attachments, reply quotes, mentions, presence, on phone width and desktop
 - [ ] Every defect found in this phase fixed in M3, pinned by a test that bites, seen in the browser/emulator, committed one per fix
