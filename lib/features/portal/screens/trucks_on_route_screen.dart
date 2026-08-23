@@ -294,6 +294,28 @@ class _OnRouteCard extends ConsumerWidget {
                 ),
               );
 
+        // A truck that already has a driver still needs a way to the same
+        // dialog: it is the only place a SECOND driver (two by default, five
+        // with the super-admin's approval — CLAUDE.md §4) can be added from,
+        // and until 2026-08-23 this card offered the dialog only while the
+        // truck had nobody on it, and the Fleet row only offered Unassign.
+        // Driven and measured: "1/2 drivers assigned" could not be reached
+        // from any screen once the first driver was on.
+        final manage = status.hasDriver
+            ? Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: MlButton.outline(
+                    label: 'Manage drivers',
+                    icon: Icons.manage_accounts_outlined,
+                    compact: true,
+                    onPressed: () => _assignDriver(context, ref),
+                  ),
+                ),
+              )
+            : null;
+
         if (narrow) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +328,7 @@ class _OnRouteCard extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               fields,
-              if (warning != null) warning,
+              if (warning != null) warning else if (manage != null) manage,
             ],
           );
         }
@@ -322,7 +344,7 @@ class _OnRouteCard extends ConsumerWidget {
                 badge,
               ],
             ),
-            if (warning != null) warning,
+            if (warning != null) warning else if (manage != null) manage,
           ],
         );
       }),

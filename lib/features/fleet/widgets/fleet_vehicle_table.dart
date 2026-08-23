@@ -567,10 +567,24 @@ class FleetVehicleTable extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 40, maxHeight: 40),
             padding: EdgeInsets.zero,
           ),
-        if (!isAssigned && onAssignDriver != null && vehicle.isActive)
+        // Offered whether or not a driver is already on the truck. The
+        // dialog behind it manages UP TO `fleet_vehicles.max_drivers` (two by
+        // default, five with the super-admin's approval) and is the only
+        // place the second driver, or the "request more" path, can be added
+        // from — and until 2026-08-23 it was only reachable while the truck
+        // had NO driver, so the multi-driver rule in §4 had no entry point at
+        // all once the first driver was assigned. Driven and measured: the
+        // Fleet row offered Edit + Unassign, the Trucks-on-route card offered
+        // nothing, and `DriverAssignmentDialog` could never show its
+        // "1/2 drivers assigned" state from the UI.
+        if (onAssignDriver != null && vehicle.isActive)
           IconButton(
-            icon: const Icon(Icons.person_add, color: MlTokens.emerald500, size: 20),
-            tooltip: 'Assign Driver',
+            icon: Icon(
+              isAssigned ? Icons.group_add_outlined : Icons.person_add,
+              color: MlTokens.emerald500,
+              size: 20,
+            ),
+            tooltip: isAssigned ? 'Manage drivers' : 'Assign Driver',
             onPressed: () => onAssignDriver!(vehicle),
             constraints: const BoxConstraints(maxWidth: 40, maxHeight: 40),
             padding: EdgeInsets.zero,
