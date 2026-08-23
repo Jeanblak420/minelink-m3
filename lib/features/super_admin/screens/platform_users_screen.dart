@@ -30,49 +30,43 @@ class _PlatformUsersScreenState extends ConsumerState<PlatformUsersScreen> {
   @override
   Widget build(BuildContext context) {
     final usersAsync = ref.watch(allPlatformUsersProvider);
-    final cs = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // The shared page header, not a hand-rolled title. This screen set
+        // 'Platform users' in 16px PlusJakartaSans ExtraBold while every
+        // other console screen opens in the Fraunces display face through
+        // MlPageHeader — the one drilldown on the console speaking the
+        // portal's old type language (the ml_page_header.dart note: "thirty-
+        // six screens in PlusJakartaSans ExtraBold"). Seen 2026-08-23 in the
+        // Phase 3 pass. The count on the right and the refresh in the actions
+        // slot are where the reference puts them (docs/design-reference.md
+        // §4's section header).
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Platform users',
-                      style: context.mlText.titleMedium.copyWith(
-                        color: MlSemantic.of(context).textStrong,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Every employee on the platform, grouped by company. '
-                      'Tap a user or company to drill into the organization.',
-                      style: context.mlText.bodyMedium.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                tooltip: 'Refresh',
-                icon: const Icon(Icons.refresh_rounded),
-                onPressed: () =>
-                    ref.invalidate(allPlatformUsersProvider),
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+          child: MlPageHeader(
+            title: 'Platform users',
+            description:
+                'Every employee on the platform, grouped by company. '
+                'Tap a user or company to drill into the organization.',
+            meta: usersAsync.valueOrNull == null
+                ? null
+                : mlCount(usersAsync.value!.length, 'user', 'users'),
+            padding: EdgeInsets.zero,
+            actions: [
+              MlButton.ghost(
+                label: 'Refresh',
+                icon: Icons.refresh,
+                compact: true,
+                onPressed: () => ref.invalidate(allPlatformUsersProvider),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
           child: SearchBar(
             hintText: 'Search by name, email, or company…',
             leading: const Icon(Icons.search),
@@ -147,7 +141,7 @@ class _PlatformUsersScreenState extends ConsumerState<PlatformUsersScreen> {
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(allPlatformUsersProvider),
       child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
         itemCount: sortedBuckets.length,
         itemBuilder: (context, i) =>
             _CompanyUsersSection(bucket: sortedBuckets[i]),

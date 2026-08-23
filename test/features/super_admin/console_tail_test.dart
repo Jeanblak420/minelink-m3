@@ -24,6 +24,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/features/super_admin/screens/account_deactivations_screen.dart';
@@ -216,6 +218,25 @@ void main() {
     expectNoWireVocabulary(tester, 'the platform users list');
     expect(find.textContaining('Load Controller'), findsWidgets);
     expect(find.textContaining('Supervisor/Foreman'), findsWidgets);
+  });
+
+  testWidgets('and the platform-users title is the shared page header',
+      (tester) async {
+    // This screen set its title in 16px PlusJakartaSans ExtraBold by hand
+    // while every other console screen opens in the Fraunces display face
+    // through MlPageHeader — found 2026-08-23 in the Phase 3 pass against
+    // the reference's section-header pattern. The header also carries the
+    // count on the right, where the reference puts it.
+    await pump(tester, const PlatformUsersScreen(), width: 1600, height: 1600);
+    final header = find.byType(MlPageHeader);
+    expect(header, findsOneWidget,
+        reason: 'the title is hand-rolled again instead of MlPageHeader');
+    final title = tester.widget<Text>(find.descendant(
+        of: header, matching: find.text('Platform users')));
+    expect(title.style?.fontFamily, MlTokens.fontSerif,
+        reason: 'the page title is not in the display face');
+    expect(tester.widget<MlPageHeader>(header).meta, matches(r'^\d+ users?$'),
+        reason: 'the user count is missing from the header meta');
   });
 
   testWidgets('token history names the action in English, and no database key',
