@@ -1,6 +1,6 @@
 # MineLink M3 — what is left, and nothing else
 
-**Last updated:** 2026-08-23 · M3 at **169 commits** · tip = the commit carrying this line (parent `7426840`) · worktree baseline `df451d0` intact
+**Last updated:** 2026-08-23 · M3 at **172 commits** · tip = the commit carrying this line (parent `705843a`) · worktree baseline `df451d0` intact
 **Open this file in the IDE:** `code "C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\M3-TASKS.md"`
 **Progress:** recount with `grep -c '^- \[x\]' M3-TASKS.md` — never increment by hand.
 
@@ -38,9 +38,12 @@ The phone last ran the APK built at `963ca7e`. The APK carrying the TIME-IN fix 
   ✅ 2026-08-23 · this commit (parent 7426840) · proven by My Files → Network storage → jean → Shared → PhoneRemote → `minelink-m3.apk` (listed 23 Aug 02:09; SHA-256 `6BCAE044…` re-hashed on both ends before the tap) → download 0→100% → "Do you want to update this app?" → Update → the app opened straight into the Global Admin Dashboard (Transporters 46 trips · 1,439 t). No Play Protect prompt this time.
 - [x] `/super-admin/recon-tables` at Jean's raised font size: the TIME-IN column reads `12:35` on ONE line
   ✅ 2026-08-23 · this commit · proven on the SM-G780G at Jean's raised font size: scrolled the combined table to the `20 Jul 2026` row — TIME-IN reads `12:35` on ONE line; every other TIME-IN seen (00:50, 04:27, 14:11, 07:27, 01:15, 22:45, 23:31, 15:05 … 07:40) is one line too. Screenshots viewed and deleted.
-- [ ] Driver hero card (`roadhaul.driver`): `CURRENT TRIP` and the status pill sit on two lines with NO yellow-and-black stripe
-- [ ] Load controller truck row (`ironhills.controller`) and the buyer reconciliation card (`atlasbuyer.owner`): no overflow at the raised text size
-- [ ] `Duplicate GlobalKey`: baseline count → six or seven navigations → re-count = 0 new rows (SQL in HANDOFF §5)
+- [x] Driver hero card (`roadhaul.driver`): `CURRENT TRIP` and the status pill sit on two lines with NO yellow-and-black stripe
+  ✅ 2026-08-23 · this commit · proven on the SM-G780G as `roadhaul.driver` on APK `2b235c4`: the Dashboard hero rendered `CURRENT TRIP` + `SCHEDULED`, then — after `Start route` was tapped on the phone itself — `CURRENT TRIP` + `EN ROUTE TO LOAD` (the long pill) with NO yellow-and-black stripe; at Jean's current font size label and pill share one line rather than two, and the Trip tab's `Current Trip` card wrapped its heading onto two lines beside the same pill, also clean. The trip is `b9189cd5`, minted by this session's own dispatch.
+- [x] Load controller truck row (`ironhills.controller`) and the buyer reconciliation card (`atlasbuyer.owner`): no overflow at the raised text size
+  ✅ 2026-08-23 · this commit · proven on the SM-G780G at the raised text size: as `ironhills.controller`, Mine Control read `1 truck on site · 4 loaded` and the truck card `S6W001GP · No buyer linked yet · Roadhaul Logistics · Chrome Ore 42% Cr2O3 lumpy 1… · ARRIVED AT MINE · Record Load` with no stripe (the truck checked in by `ironhills.security` on the web minutes earlier); as `atlasbuyer.owner`, the Weight reconciliation card — heading, `33 delivered loads`, Export + refresh, the three stat cards and the Side B table — rendered with no stripe. **Found on glass on the way:** the app-bar title broke MID-WORD (`Load co`/`ntroller`, `Compli`/`ance`, `Reconci`/`liations`); fixed in `705843a` (M3 medium top app bar), pinned by `phone_title_never_breaks_a_word_test.dart`, NOT yet rebuilt and re-seen — the phase stays open for that.
+- [x] `Duplicate GlobalKey`: baseline count → six or seven navigations → re-count = 0 new rows (SQL in HANDOFF §5)
+  ✅ 2026-08-23 · this commit · baseline at 01:27:47Z = 46 `Duplicate GlobalKey` rows / 5,863 total, last Android row 2026-08-22 18:50:45Z; then four sign-ins (admin, driver, controller, buyer) and ~15 navigations on the handset (recon tables, drawer groups, Trip/Profile tabs, Compliance, Mine Control, Loads & value, Reconciliations); re-count at 02:45:24Z = 46, **0 new Android rows of any kind**.
 - [ ] Phone left signed in as the platform admin, on `home`, every screenshot deleted
 
 Done when: all six ticked with what was seen; any defect found is fixed, tested, rebuilt, re-installed and re-seen on glass.
