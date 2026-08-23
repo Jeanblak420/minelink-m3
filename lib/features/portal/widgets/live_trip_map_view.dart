@@ -468,6 +468,43 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // THE PLATE IS THE TRUCK; THE PILL IS THE TYPE SCALE'S SIZE;
+              // AND EVERY ROW IN THIS LIST HAS THE SAME SHAPE.
+              //
+              // This row was `[well] [Expanded(identity)] [SizedBox(112) >
+              // FittedBox(scaleDown, badge)]`. Three shapes were tried before
+              // this one, and each failure is why the next was needed:
+              //
+              //  1. The `FittedBox` SHRANK a pill whose label did not fit
+              //     112px, so `screen-live-trip-map-desktop-dark` drew `EN
+              //     ROUTE TO OFFLOAD` in visibly smaller type than the
+              //     `LOADING` beneath it — two pills, one list, two type
+              //     sizes, decided by how long the words are. It also undid
+              //     the reader's own text scale: raise it and the box stays
+              //     112px (§5.6; CLAUDE.md §10.4, a fixed width around text).
+              //     `ml_empty_state.dart` records the same verdict about
+              //     `FittedBox`.
+              //  2. Taking the `FittedBox` away on its own then cost the
+              //     IDENTITY instead: in this ~330px panel a full-size pill
+              //     left the `Expanded` too little and the plate ellipsised to
+              //     `JD 22 …`. A plate cut in half is worse than a small pill
+              //     — it is WHICH TRUCK this is.
+              //  3. `MlHeaderLayout` fixed both by measuring per row, and then
+              //     TWO ROWS WITH THE SAME STATUS LAID OUT DIFFERENTLY. The
+              //     arithmetic says why: well 34 + gap 10 + identity ≈110 +
+              //     gap 12 + `EN ROUTE TO OFFLOAD` ≈150 lands within a few
+              //     pixels of the panel's width, so whether a row shares its
+              //     line comes down to how wide the transporter's NAME is.
+              //     `RH 128 GP / Roadhaul Logistics` stacked and `NL 004 MP /
+              //     Northline Carriers` did not, in adjacent rows, both `EN
+              //     ROUTE TO OFFLOAD`.
+              //
+              // A list of like things should not change shape on a few pixels
+              // of somebody's company name. The pill takes its own line,
+              // always, flush right: uniform, the plate never cut, the pill
+              // never shrunk, and one line taller only on the rows that could
+              // have fitted — which the measurement showed are the minority
+              // and the marginal ones.
               Row(
                 children: [
                   MlIconWell(
@@ -505,17 +542,21 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
                       ],
                     ),
                   ),
-                  SizedBox(
-                    width: 112,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: MlStatusBadge.forStatus(t.status.label),
-                      ),
-                    ),
-                  ),
                 ],
+              ),
+              const SizedBox(height: 6),
+              // `SizedBox(width: infinity)` because a `Wrap` sizes to its
+              // content, and an alignment with no free space does nothing
+              // (CLAUDE.md §10.4). `Wrap` rather than `Align` so a future
+              // second pill wraps rather than overflows.
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [MlStatusBadge.forStatus(t.status.label)],
+                ),
               ),
               const SizedBox(height: 6),
               Text(
