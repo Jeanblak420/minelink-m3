@@ -210,7 +210,14 @@ class _BuyerPortalDashboardScreenState
                 value: inbound.length.toString(),
                 sublabel: 'Left the mine, not yet offloaded',
                 icon: Icons.moving_rounded,
-                tone: MlTone.atMine,
+                // TRANSIT, not atMine. `inbound` is every trip at or past
+                // `leftMine` and before `offloaded` — a truck on the road,
+                // which is what the sublabel says. `MlTone.atMine` is the
+                // amber that means AT THE MINE (CLAUDE.md §5), so this tile
+                // said the opposite of its own caption. The live strip 80
+                // lines below tones the SAME trips `transit`, and the mine
+                // dashboard's identically-named KPI is `transit` too.
+                tone: MlTone.transit,
                 route: '/portal/buyer/truck-locations',
               ),
             ],
