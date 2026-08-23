@@ -185,13 +185,27 @@ class LoadQualityTable extends ConsumerWidget {
                       // its cell and was cut anyway.
                       const MlColumn('Product', flex: 3),
                       const MlColumn('Net', flex: 2, align: TextAlign.right),
-                      const MlColumn('Cr₂O₃', flex: 2, align: TextAlign.right),
+                      // minWidth 112: the pill reads `38.0% / 42.0%` — a
+                      // figure, its spec, and a slash between — and at
+                      // flex 2 on a 1600px desktop the column was 96px, so
+                      // the pill wrapped at the slash and read as two
+                      // numbers on two lines. Phase 3, 2026-08-23.
+                      const MlColumn(
+                        'Cr₂O₃',
+                        flex: 2,
+                        align: TextAlign.right,
+                        minWidth: 112,
+                      ),
                       const MlColumn(
                         'Moisture',
                         flex: 2,
                         align: TextAlign.right,
+                        minWidth: 112,
                       ),
-                      const MlColumn('Sizing', flex: 2),
+                      // Right-aligned like its neighbours: `0–6mm` is a
+                      // figure, and left-aligned its head sat 8px from the
+                      // right-aligned MOISTURE head and read as one word.
+                      const MlColumn('Sizing', flex: 2, align: TextAlign.right),
                       const MlColumn(
                         'Payable',
                         flex: 2,
@@ -342,7 +356,9 @@ class LoadQualityTable extends ConsumerWidget {
           borderRadius: BorderRadius.circular(MlTokens.rSm),
         ),
         child: Text(
-          '${_p(actual)}${spec != null ? ' / ${_p(spec)}' : ''}',
+          // No-break spaces around the slash: the pill is one token.
+          '${_p(actual)}${spec != null ? ' / ${_p(spec)}' : ''}',
+          softWrap: false,
           style: context.mlText.code(
             color: colors.fg,
             size: 12,
