@@ -168,6 +168,15 @@ Widget mlMapAttribution({
     RichAttributionWidget(
       animationConfig: const ScaleRAWA(),
       alignment: alignment,
+      // No flutter_map logo. It is an `Image.asset` the library loads
+      // asynchronously, so whether it had decoded by the time a render was
+      // captured depended on whether an earlier test had warmed the image
+      // cache — the company mirror's golden moved by the same 518 px on
+      // three of four runs on 2026-08-23 with no change to the screen. The
+      // tile attribution below is the part the OSM licence requires; the
+      // library's own logo is optional and it was the only thing that
+      // varied between runs.
+      showFlutterMapAttribution: false,
       attributions: const [
         TextSourceAttribution(_kTileAttribution, prependCopyright: false),
       ],

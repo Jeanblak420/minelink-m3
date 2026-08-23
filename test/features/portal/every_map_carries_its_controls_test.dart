@@ -140,4 +140,17 @@ void main() {
       expect(src, contains('mlMapAttribution('));
     });
   });
+
+  test('the shared attribution shows no library logo', () {
+    // flutter_map's logo is an Image.asset it loads asynchronously, so a
+    // render captured it or not depending on whether an earlier test had
+    // warmed the image cache — the company mirror's golden flaked by 518 px
+    // on three of four runs (2026-08-23). The OSM credit stays; the
+    // library's optional logo goes, and with it the only pixel that varied.
+    final src = File('lib/core/widgets/osm_tile_layer.dart').readAsStringSync();
+    final attribution = src.substring(src.indexOf('Widget mlMapAttribution('));
+    expect(attribution, contains('showFlutterMapAttribution: false'),
+        reason: 'the async library logo is back, and with it a golden that '
+            'moves between runs');
+  });
 }
