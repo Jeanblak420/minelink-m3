@@ -1,5 +1,15 @@
 # MineLink M3 — session handoff
 
+> **Addendum 2026-08-23 (verification session, no feature work).** A fresh session
+> audited this file, every commit and every chat transcript since the redesign began,
+> re-ran every instrument (all green, figures in §8 below), and created
+> **`M3-TASKS.md`** — the single markable list of what is left. From now on that file
+> is the source of truth for what is done and what is not; this file is the record of
+> how the work got here and how to do it. Where the two disagree about what is left,
+> `M3-TASKS.md` wins. Commits since the previous handoff: `8d92de4`, `ad0f8f7`, and the
+> one carrying this addendum. Nothing else changed. The phone was asleep throughout.
+
+
 **Rewritten 2026-08-23, at the end of the session that finished the previous
 one's interrupted hardware checks, drove the last four roles nobody had ever
 opened — including one real load through the entire mine floor — found THIRTEEN
@@ -833,44 +843,50 @@ Everything the next session needs is inside this block. Paste it whole.
 
 ---
 
-Continue the MineLink Material 3 redesign, exactly where the last session left
-off. Read these TWO handoff files before doing anything else, in this order.
+Continue the MineLink Material 3 redesign, exactly where the last session left off — and this time the work is driven by ONE MARKABLE FILE. Read these in this order before doing anything else.
 
-1. THE CURRENT HANDOFF — THIS IS THE FILE THAT GOVERNS THE WORK:
+1. THE MARKABLE TASK FILE — THIS IS THE SINGLE SOURCE OF WHAT IS DONE AND WHAT IS LEFT:
+
+      C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\M3-TASKS.md
+
+   Seven phases, checkboxes, evidence lines, a session log. It was created on
+   2026-08-23 from a verified audit of the tree, every commit, and every chat
+   transcript since the redesign began. Open it in Jean's IDE THE MOMENT YOU START
+   and keep it open the whole session:
+
+      code "C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\M3-TASKS.md"
+
+   (the `code` CLI is at C:\Users\Somebody Someone\AppData\Local\Programs\Microsoft VS Code\bin\code.cmd).
+   Jean watches this tab. VS Code reloads it from disk on every save, so every tick
+   you write is seen the moment you write it.
+
+2. THE PROJECT HANDOFF — the full record of how the redesign got here, how to drive
+   a browser WITHOUT touching Jean's mouse (§5), how to drive his phone (§5), and the
+   seven things owed to the SHIPPING app (§6):
 
       C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
 
-   Rewritten 2026-08-23 at the end of the session that finished the previous
-   one's interrupted hardware checks, drove the last four roles nobody had ever
-   opened — including ONE REAL LOAD through the entire mine floor — found
-   THIRTEEN more defects doing it, fixed all thirteen, and discovered that the
-   portal overflow sweep had been laying out EMPTY SCREENS its whole life.
-   Read it in this order: "WHERE THIS SESSION STOPPED — READ THIS FIRST"
-   (including "WHAT THE HANDSET DID AND DID NOT SEE"), then §0 (where you are +
-   the one rule), §2 (verified state), §3 (what was done — §3.0 to §3.15, and
-   DO NOT REDO ANY OF IT), §4 (what is NOT done — start at §4.1), §5 (how to
-   work here, including how to drive a browser WITHOUT touching Jean's mouse)
-   and §6 (seven things owed to the SHIPPING app).
+   Read "WHERE THIS SESSION STOPPED", §0, §2, §3 (DO NOT REDO ANY OF §3.0–§3.15),
+   §4, §5, §6. Where HANDOFF.md and M3-TASKS.md disagree about what is left,
+   M3-TASKS.md wins.
 
-2. THE OLDER MACHINE-WIDE HANDOFF — BACKGROUND ONLY, DO NOT WORK FROM IT:
+3. THE OLDER MACHINE-WIDE HANDOFF — BACKGROUND ONLY, DO NOT WORK FROM IT:
 
       C:\Users\Somebody Someone\Claude\HANDOFF.md
 
-   Dated 2026-08-08. MCP servers, git position, the decoy folders, the phone
-   tooling. The MineLink-M3 handoff above governs this work; where the two
-   disagree, the MineLink-M3 one wins.
+   Dated 2026-08-08: MCP servers, the decoy folders, the phone tooling.
 
 THE PATHS THAT MATTER
 
-  Work happens here (its own git repo, branch main, 165 commits, clean):
+  Work happens here (its own git repo, branch main, 168 commits, clean, NO remote):
     C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
   NEVER TOUCHED, for any reason:
     C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29
 
-THE ONE RULE THAT MUST NOT BREAK: nothing whatsoever changes inside
-worktree-2026-05-05T11-53-29. CHECK IT AT THE START OF THE SESSION AND AGAIN AT
-THE END:
+THE ONE RULE THAT MUST NOT BREAK — Jean's words: "NO CHANGES WHAT SO EVER INSIDE OF
+"C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29" then I'm happy".
+CHECK IT AT THE START OF THE SESSION AND AGAIN AT THE END, and tick Phase 0 with it:
 
     HEAD              df451d0
     git status        exactly 3 modified files, all pre-existing:
@@ -881,241 +897,173 @@ THE END:
     git worktree list exactly 2 entries — the main repo and that worktree
     modified today    0
 
-  ⚠️ The count depends on which `find` you run. `find . -type f -not -path
-  "./.git/*"` returns 14164, because in a WORKTREE .git is a FILE, not a
-  directory. The -prune form returns 14163. Same untouched tree. Reading that
-  tree is fine and often necessary; writing to it, or running any MUTATING git
-  command inside it, is not.
+  The plain `find . -type f -not -path "./.git/*"` returns 14164 because in a
+  WORKTREE .git is a FILE. Same untouched tree. Reading it is fine and often
+  necessary; writing to it, or running any MUTATING git command inside it, is not.
+  supabase/ inside MineLink-M3 is frozen too — anything needing a migration is
+  REPORTED under Phase 5 / HANDOFF §6, never applied.
 
-🚨 START HERE — WHAT THE HANDSET DID AND DID NOT SEE
+HOW THE MARKABLE FILE WORKS — THIS IS THE WHOLE POINT OF THIS SESSION
 
-THE HANDSET DID RUN THIS SESSION'S WORK. Jean woke it, the APK built at 963ca7e
-was installed over the NAS, and it was driven as the platform admin. On glass
-that proved the build installs and runs against live data (Transporters 45 -> 46
-trips, 1,405 -> 1,439 t), that /super-admin/crash-reports reads
-"22 Aug 2026 . 20:50" rather than "Aug 22, 2026 8:50 PM", and that the recon
-table shows 49 rows with Day = 102.10 t (exactly the three loads inside 24
-hours). AND IT FOUND A DEFECT NOTHING ELSE COULD — his phone runs a raised
-system font size, and the TIME-IN column rendered "12:35" as "12:3" over "5".
+  - Work the phases IN ORDER: Phase 0 → Phase 2 (while the phone is asleep) →
+    Phase 1 (the MOMENT the phone answers) → Phase 3. Phases 4, 5, 6 and 7 and the
+    "Decisions only Jean can make" are BLOCKED ON JEAN: do not start them, do not
+    tick them, leave their ⏸ lines in place and name them in your report.
+  - AFTER EACH TASK IS COMPLETED, MARK IT COMPLETED IN M3-TASKS.md IMMEDIATELY:
+    change `- [ ]` to `- [x]` and put an evidence line directly under it:
+        ✅ <date> · commit <sha> · proven by <what was run / seen / measured>
+    Then COMMIT M3-TASKS.md together with the work it records. Never batch ticks
+    for later. Never tick without evidence. Never increment a count — recount with
+    `grep -c '^- \[x\]' M3-TASKS.md`.
+  - A task that cannot move keeps `- [ ]` and gets
+        ⏸ BLOCKED — <on what> — <what unblocks it>
+    under it. A blocked task is never a done task.
+  - A phase gets `Status: DONE <date>` only when every task in it is ticked.
+  - Update the "Last updated" line (date · commit count · tip) every time you
+    commit the file, and add ONE line to the Session log at the bottom at the end
+    of the session.
+  - Everything already ticked in the file was proven before being ticked. DO NOT
+    REDO IT. Everything under "Deliberately NOT on this list" stays off the list.
 
-WHAT IT HAS NOT SEEN IS THE FIX FOR THAT, plus everything committed after
-963ca7e. A newer APK is BUILT, HASHED AND STAGED:
+VERIFIED STATE AT THE MOMENT THIS MESSAGE WAS WRITTEN (2026-08-23, all run on the tree)
 
-    build/app/outputs/flutter-apk/app-debug.apk
-    \\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk
-    SHA-256 6BCAE044229625FB32E770DC5CFA62D38EA6A3E584AF8F07BDA54F0663D82422
-            (both ends match)
+  MineLink-M3                          168 commits, clean; the tip is the commit carrying
+                                       this message in HANDOFF.md §8; M3-TASKS.md is
+                                       committed (8d92de4, ad0f8f7)
+  flutter analyze                      no issues
+  flutter test                         2478 passed, 1 skipped
+  dart tool/release_guards.dart        42/42 PASS, 0 FAIL
+  py -3 tool/one_clock_check.py        0 sites, exit 0 (6 patterns); --selftest: all bite
+  py -3 tool/unphotographed_screens.py 94 targets, 94 photographed, 0 not
+  py -3 tool/dropdown_width_check.py   passes
+  py -3 tool/glyph_coverage_check.py   passes
+  py -3 tool/type_scale_codemod.py --selftest   OK
+  py -3 tool/health_probe.py           7/7 services answering (extras DEGRADED on the
+                                       first call — cold pages — answered on retry; that
+                                       is normal, see HANDOFF §2)
+  docs/redesign/renders/               227 renders
+  flutter build web --release          built on 2026-08-23 at this tip → build/web is
+                                       current; rebuild if lib/ changes before you serve it
+  APK 2b235c4                          build/app/outputs/flutter-apk/app-debug.apk =
+                                       \\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk
+                                       SHA-256 6BCAE044229625FB32E770DC5CFA62D38EA6A3E584AF8F07BDA54F0663D82422
+                                       both ends match; NOT YET INSTALLED on the phone
+                                       (the phone last ran 963ca7e)
+  Jean's phone (SM-G780G)              link up, host mode on, DISPLAY OFF — every probe
+                                       reads 0.061 bits/pixel. Only Jean can wake it.
+  Android emulator                     NOT running. AVD name: minelink_test
+                                       (C:\Android\sdk\emulator\emulator.exe -avd minelink_test;
+                                       adb at C:\Android\sdk\platform-tools)
+  CDP helpers                          cdp.py, setfile.py, attach_photos.py, fix_eol.py are
+                                       in the SHARED scratchpad
+                                       C:\Users\SOMEBO~1\AppData\Local\Temp\claude\scratchpad\
+                                       (NOT the per-session one). Copy them into your own
+                                       scratchpad. realclick.ps1.DISABLED-jean-is-using-the-mouse
+                                       is there too — it stays disabled.
+  Browsers / servers                   none left open; nothing on ports 9222, 8123, 8000
+  Original worktree                    df451d0, 3 pre-existing modified, 14163, 2 entries, 0 today
 
-The phone's screen went to sleep again — between one probe and the next — and
-only Jean can wake it. It was 02:15 and he had almost certainly turned in. The
-session asked twice, said what it was for, and finished everything that did not
-need the handset.
+WHAT TO DO, IN ORDER
 
-WARNING: THE SCREEN TIMEOUT IS SHORT — short enough to sleep during the ~2.5
-minute download. Ask him to keep it awake, or to lengthen the timeout, before
-starting the install.
+  0. Tick Phase 0's start-of-session items (baseline check, `code M3-TASKS.md`).
 
-ALSO TELL HIM: installing raised a Google Play Protect prompt, "Turn on Play
-Protect?", which is a device-wide setting rather than a step in the install. It
-was DECLINED, because declining leaves his configuration exactly as he had it.
+  1. TELL JEAN, FIRST THING: "Your phone's screen is off (probe 0.061 bits/pixel).
+     Please wake it and keep it awake — or lengthen the screen timeout — for about six
+     minutes so the APK download survives." Then DO NOT WAIT: go to Phase 2 and
+     re-probe the phone as you go (`py -3 phone_agent.py run "probe"` from
+     C:\PhoneRemote\tool; under 0.1 bits/pixel = still asleep). Invoke the
+     driving-jeans-phone skill FIRST the moment you touch the phone.
 
-So your first job is: install that APK and drive the four things a handset
-proves and nothing else does —
+  2. PHASE 2 while the phone sleeps — the flows nobody has ever driven, against the
+     LIVE database, via CDP (never the mouse) or the emulator. Build the rig exactly
+     as HANDOFF §5 says: serve build/web on 127.0.0.1:8123, Chrome with
+     --remote-debugging-port=9222 and a fresh --user-data-dir under your scratchpad,
+     sign in with the accounts below, switch accounts by clearing
+     localStorage('sb-yftazblpmicqtamyiwyb-auth-token'), attach photos with
+     Page.setInterceptFileChooserDialog + DOM.setFileInputFiles.
+       a. The POD leg of trip 0d9c6792 as roadhaul.driver — POD photo, delivered tons,
+          → offloaded/completed; Side B shows the variance; buyer Loads & value updates.
+       b. Request → approve → link → dispatch FROM THE FOUR REQUESTER FORMS forward —
+          every field, the sent_back ⇄ resubmitted loop, the four inboxes, pricing,
+          the due-diligence gate, transporter accept, fleet + driver allocation, the
+          auto-created capped stockpile and its three notifications. Create whatever
+          data this needs YOURSELF from the PC — Jean said: "the new session can run it,
+          run it all and or create it with the other user's" — never defer it to him.
+       c. Chat at length between two real accounts, both directions, attachments,
+          reply, mentions, presence, phone width and desktop.
+     Every defect found: fix in MineLink-M3 only, pin it with a test that BITES
+     (sabotage it, watch it fail, restore — and keep a case that stays GREEN under
+     sabotage), look at it in the browser/emulator, one commit per fix, then tick.
 
-  1. THE RECON TABLE AT HIS FONT SIZE. /super-admin/recon-tables, scroll into
-     the table. TIME-IN must read "12:35" on ONE line. This is the one the
-     handset itself found.
-  2. THE DRIVER'S HERO CARD AT A RAISED TEXT SIZE. "CURRENT TRIP" and the
-     status pill must sit on two lines with NO yellow-and-black stripe. At
-     360px x 1.3 this overflowed by 44 pixels before 963ca7e. Verified on the
-     emulator at font scale 1.3 with a real trip; not yet on glass.
-  3. THE LOAD CONTROLLER'S TRUCK ROW AND THE BUYER'S RECONCILIATION CARD, same
-     raised text size — 22px, 21px and 32px overflows before this session.
-  4. NO NEW "Duplicate GlobalKey" CRASH REPORTS — baseline, navigate six or
-     seven screens, re-count. SQL in §5. ZERO were raised all session from the
-     handset, the emulator and six browser accounts, but this exact build has
-     not been on glass.
+  3. PHASE 1 THE MOMENT THE PHONE ANSWERS — install APK 2b235c4 from the NAS (My Files
+     → Network storage → jean → Shared → PhoneRemote → minelink-m3.apk → Update →
+     Open; ~2.5 min; the NAS clock is 2h36m slow, compare the SHA-256 not timestamps;
+     My Files caches the listing, back out and re-enter) and drive the four checks a
+     handset proves and nothing else does:
+       1. /super-admin/recon-tables at Jean's raised font size: TIME-IN reads "12:35"
+          on ONE line.
+       2. Driver hero card (roadhaul.driver): "CURRENT TRIP" and the status pill on two
+          lines, NO yellow-and-black stripe.
+       3. Load controller truck row (ironhills.controller) and buyer reconciliation
+          card (atlasbuyer.owner): no overflow at the raised text size.
+       4. No new "Duplicate GlobalKey" crash reports: baseline, six or seven
+          navigations, re-count (SQL in HANDOFF §5).
+     If installing raises "Turn on Play Protect?" DECLINE it — it is a device-wide
+     setting Jean has off. Put the phone back as found: signed in as the platform
+     admin, on home, every screenshot deleted. It is his PERSONAL phone: prefer
+     sig/changed/waitstable over shot, delete every screenshot immediately, never
+     switch on live-location sharing (it writes his real position).
 
-Put the phone back the way it was found: signed in as the platform admin, on
-home, every screenshot deleted.
+  4. PHASE 3 — the per-screen design pass against docs/design-reference/ and the
+     super-admin console, group by group as the file lists them: render → compare
+     placement, hierarchy, spacing → fix drift → regenerate → pin with a test → tick
+     with a dated "reviewed against reference" line in docs/redesign/VERIFICATION.md.
 
-🚨 DO NOT MOVE JEAN'S MOUSE. He works at this machine while the session runs,
-and he said so mid-run. A helper that drove real OS clicks through SetCursorPos
-was written, used twice and disabled the moment he said so. §5 has what to use
-instead: a CDP driver that never touches the cursor, and the Android emulator.
+  5. Phases 4–7 and the two Decisions: blocked on Jean. Name them in your report.
+     Do not tick, do not start.
 
-VERIFIED STATE (all run at the end, against the tree as it stands)
+🚨 IF YOU NEED THE PHONE AND IT DOES NOT ANSWER — status says "no phone at a known
+address - broadcasting", or probe reports under 0.1 bits/pixel (display asleep) —
+PAUSE THAT STEP RIGHT THERE AND TELL JEAN, THEN KEEP WORKING ON WHAT DOES NOT NEED
+IT and re-probe as you go. Jean's words: "if you need to use my phone via ctrl bridge
+and the phone is not responding that you should pause the process right there so that
+I'll respond to you that the phone is no longer asleep and that you can try again".
+Only he can turn host mode on and only he can wake the screen; injected touches
+cannot. Do NOT work around it and do NOT report green as though the phone step were
+optional — it has found defects three separate times that nothing else could. HOST
+MODE STAYING ON DOES NOT MEAN THE SCREEN IS AWAKE: check probe, not just status.
 
-flutter analyze                        no issues
-flutter test                           2478 passed, 1 skipped
-dart tool/release_guards.dart          42/42 PASS, 0 FAIL
-dart tool/release_guards.dart --selftest   all guards bite
-py -3 tool/_sabotage.py                ALL SABOTAGES CAUGHT
-py -3 tool/type_scale_codemod.py --selftest  OK
-py -3 tool/dropdown_width_check.py     passes
-py -3 tool/glyph_coverage_check.py     passes
-py -3 tool/one_clock_check.py          0 sites, exit 0   (6 patterns now, was 5)
-py -3 tool/unphotographed_screens.py   94 targets, 94 photographed, 0 not
-py -3 tool/health_probe.py             7/7 services answering
-docs/redesign/renders/                 227 renders
-render harness — RENDER NOTE / FAILURE STATE / LOW CONTRAST   0 / 0 / 0
-render harness — CUT OFF               5 RENDERS / 9 strings, all deliberate
-CRASH REPORTS RAISED ALL SESSION       0
-flutter build web --release            builds
-flutter build apk --debug              builds
-  ⚠️ A raw grep -c "LOW CONTRAST" over a full test/renders run returns 11, all
-  tagged [unit] — the reporter's OWN self-tests. Count app screens with
-  grep "LOW CONTRAST \[" out.txt | grep -vc "\[unit\]", which is 0.
-  ⚠️ health_probe can report 6/7 on a COLD extras project and it is not down:
-  two attempts hit the ~3s anon statement timeout, then four manual calls
-  returned 200 in 2462ms, 342, 722, 355. Warm it and re-run.
-
-🚨 THE ONE THING TO READ EVEN IF YOU READ NOTHING ELSE
-
-THE PORTAL OVERFLOW SWEEP HAD BEEN LAYING OUT EMPTY SCREENS ITS WHOLE LIFE. It
-overrode mirrorCompanyIdProvider and nothing else, so it got past "Company not
-loaded" and then EVERY PROVIDER RESOLVED TO AN EMPTY LIST — 27 screens x 3
-widths x 5 text scales x bold, of empty states. Empty states are short and
-short things do not overflow. The load controller's own source already carried
-a comment about a 29px overflow "that no sweep had seen because the sweep ran
-with no trips" — found by hand, fixed by hand, and the sweep left blind to the
-next one. It runs on the real capture fixtures now, and turning the data on
-found FOUR more real overflows on screens it had always covered and always
-passed. When a suite is green, ask what it is green OVER.
-
-WHAT IS ALREADY DONE — DO NOT REDO ANY OF THIS
-
-Thirteen defects, every one found by DRIVING the app or by an instrument that
-was made to see, every one fixed with a test that was SABOTAGED and watched to
-fail before being kept — and every fix that turns a figure into a dash also
-keeps a case that stays GREEN under sabotage, so over-fixing would show too.
-
-  0. THE PREVIOUS SESSION'S TWO INTERRUPTED HARDWARE CHECKS, BOTH PASSED on the
-     handset: the sign-out dialog copy (then Cancel), and 12 navigations with
-     ZERO new Duplicate GlobalKey rows.
-  1. A WALL CLOCK CONVERTED TWICE — six sites in the recon table including its
-     Excel/CSV/PDF export of the billing record, two in the chat dock, three
-     console "last active" readouts, the mine's Recent-waybills card. A no-op
-     in South Africa, +2h on UTC, +6h in New York. THE FIXTURE HAD THE SAME
-     ERROR MIRRORED so the two cancelled. MlTime.sast now ASSERTS it was handed
-     a genuine instant, which is what found it.
-  2. THE LIVE MAP'S ETA CAME OFF THE READER'S DEVICE. one_clock_check.py grew a
-     sixth pattern for it.
-  3. AN EIGHTH DATE DIALECT on three console screens — "Aug 22, 2026 8:50 PM".
-     New guard no-skeleton-dateformat, which FAILED ON THE REAL TREE.
-  4. A BARE TIME IN TWO LISTS THAT SPAN DAYS — the load controller read 10:10,
-     04:51, 13:39 with the third six days old. New MlTime.listStamp.
-  5. THE PRODUCTION TABLE CONTRADICTED ITS OWN HEADER — eight amber negatives
-     under a "— Pit-to-port loss".
-  6. THE QUALITY SCREEN PRINTED DELIVERED TONNAGE UNDER "PAYABLE" — one row
-     showed a payable ABOVE its own mine net.
-  7. R0.00 INVOICE VARIANCE, IN GREEN, WITH NOTHING INVOICED.
-  8. THE EMPLOYEE REGISTER COUNTED A DIFFERENT SET from the screen next door.
-  9. "SEALS — NOT REQUIRED" ON A ROUTE THE WEIGHBRIDGE REFUSES WITHOUT FOUR.
-     Two columns disagree in production; the sheet read the one the load is NOT
-     judged by.
- 10. A DISTANCE CHIP THAT SOMETIMES SAID WHAT IT MEASURED.
- 11. TWO "THIS WEEK" TONNAGES ON THE DRIVER'S SCREEN, 170.5 t and 136.3 t.
- 12. THE DRIVER'S HERO CARD OVERFLOWED BY 44 PIXELS at 360px x 1.3, plus the
-     four the sweep found once it had data.
- 13. "12:35" RENDERED AS "12:3" OVER "5" on the recon table — found ON THE
-     HANDSET, because Jean's phone runs a raised system font size. The table's
-     minimum width was MEASURED at text scale 1.0 and then left fixed under a
-     type size the reader controls. 0 wrapped cells at 1.0, SIXTEEN at 1.3 and
-     at 2.0. A wrapped cell is a cell that FITS, so nothing could have seen it.
-
-ALSO DONE: ONE REAL LOAD DRIVEN THROUGH THE ENTIRE MINE FLOOR (trip 0d9c6792,
-truck S6W001GP) — transporter accepts, truck and driver assigned, driver
-starts, security checks in, tare 15.40 t, gross 49.60 t, net 34.20 t computed
-live and agreeing in three places, four seals numbered and photographed against
-seal_points=4, waybill TRP-6C72DDAC41 minted with the controller's signature,
-gate check-out. The stat card moved to exactly (34.2+33.7+30+34.2)/4 = 33.025 t.
-
-ALSO SETTLED EARLIER — DO NOT REOPEN: a live chat between two real accounts is
-driven; all twelve route names are settled; MessagesScreen is NOT dead code;
-contrast is closed app-wide and for chat (the baseline file is a FLOOR, not a
-ratchet — if it fails, change the token, do NOT add a baseline entry); the
-due-diligence gate and the driver's whole mobile lifecycle were driven end to
-end; the 20 themeless test files are converted and guarded.
-
-WHAT IS LEFT
-
-1. THE HANDSET — the three checks under START HERE.
-2. NOT YET DRIVEN (§4.2): the POD leg of trip 0d9c6792 (it sits at
-   en_route_to_offload, which two older trips also do, so it is a normal
-   resting place); the super-admin request → approve → link → dispatch chain
-   from the requester's FORMS forward; chat at length.
-3. WHAT A HANDSET CANNOT PROVE AT A DESK: GPS along a real road, auto-reroute,
-   the foreground service surviving a long backgrounding, battery over a trip.
-   The EMULATOR can fake movement (adb emu geo fix); a real handset cannot be
-   teleported. The handset is NOT on adb — CtrlBridge only.
-4. SEVEN THINGS OWED TO THE SHIPPING APP (§6), not fixable here because
-   supabase/ is frozen. Two are new this session: record_truck_load records a
-   load it could not deduct and says nothing, and the two seal_required columns
-   diverge with nothing reconciling them.
-5. ONE ELEVATED-SHELL ITEM FOR JEAN (§4.4) — a leftover firewall rule.
-6. 🚨 IF YOU NEED THE PHONE AND IT DOES NOT ANSWER — phone_agent.py status says
-   "no phone at a known address - broadcasting", or probe reports under 0.1
-   bits/pixel because the display is asleep — PAUSE AND TELL JEAN, THEN KEEP
-   WORKING ON WHAT DOES NOT NEED IT and re-probe as you go. Only he can turn
-   host mode on and only he can wake a sleeping screen; neither is possible
-   from this PC, and injected touches cannot wake it. Do NOT work around it and
-   do NOT report green as though the phone step were optional — it is the only
-   thing that proves a fix on real hardware. ⚠️ HOST MODE STAYING ON DOES NOT
-   MEAN THE SCREEN IS AWAKE: check probe, not just status. ⚠️ Invoke the
-   driving-jeans-phone skill FIRST. It is his PERSONAL phone.
+🚨 DO NOT MOVE JEAN'S MOUSE. He works at this machine while you run. His words: "bro
+make a nother plan for a mouse, I'm using mine". Drive the browser through CDP
+(HANDOFF §5) or use the Android emulator. CDP clicks cannot reach a Flutter
+popup-menu overlay — that is the tool, not the app; switch accounts by clearing
+localStorage, never by the menu.
 
 HOW TO WORK — THIS IS JEAN'S INSTRUCTION, FOLLOW IT
 
-don't worry about me seeing anything, I'll want to see when everything is
-complete and done, so don't stop so much in between please run the task for as
-long as possible so that we can get this completley done and sorted please,
-correct your self where you make mistakes and fix the mistakes and make sure
-you don't implement anything with gaps in them make sure its full and proper
-like the original
+don't worry about me seeing anything, I'll want to see when everything is complete
+and done, so don't stop so much in between please run the task for as long as
+possible so that we can get this completley done and sorted please, correct your
+self where you make mistakes and fix the mistakes and make sure you don't implement
+anything with gaps in them make sure its full and proper like the original
 
-AND, EXPLICITLY: IF YOU FIND PROBLEMS ALONG THE WAY, FIX THEM AS YOU GO — then
-TEST THE FIX AND CONFIRM IT ACTUALLY WORKS AS EXPECTED. Do not merely note or
-collect a list of faults to hand back; do not leave a fix unverified. Every fix
-gets a test that BITES (remove the fix, watch the test fail), and where the fix
-is visible on a device or in a browser, LOOK AT IT THERE TOO. Half-implemented
-work, TODOs, stubs and "this could be improved later" notes are not acceptable
-— finish each thing properly and fully, the way the original app does it.
+AND, EXPLICITLY: IF YOU FIND PROBLEMS ALONG THE WAY, FIX THEM AS YOU GO — then TEST
+THE FIX AND CONFIRM IT ACTUALLY WORKS AS EXPECTED. Do not merely note or collect a
+list of faults to hand back; do not leave a fix unverified. Every fix gets a test
+that BITES (remove the fix, watch the test fail), and where the fix is visible on a
+device or in a browser, LOOK AT IT THERE TOO. Half-implemented work, TODOs, stubs and
+"this could be improved later" notes are not acceptable — finish each thing properly
+and fully, the way the original app does it. Do not ask Jean questions you can answer
+by reading the tree or the database.
 
-THE METHOD, unchanged: fixtures, regenerate, LOOK at the picture, measure with
-PIL rather than squint, fix the SHAPE rather than the symptom when the fault is
-structural, then pin it with a test and prove the test bites by removing the
-fix and watching it fail. When a report and a picture disagree, THE PICTURE
-WINS. When a picture and a HANDSET disagree, the handset wins.
+THE METHOD, unchanged: fixtures, regenerate, LOOK at the picture, measure with PIL
+rather than squint, fix the SHAPE rather than the symptom when the fault is
+structural, then pin it with a test and prove the test bites. When a report and a
+picture disagree, THE PICTURE WINS. When a picture and a HANDSET disagree, the
+handset wins. When a suite is green, ask what it is green OVER.
 
-THE LESSONS THIS SESSION ADDED:
-
-- 🚨 NEVER MOVE JEAN'S MOUSE. Drive the browser through CDP (§5) or use the
-  Android emulator.
-- 🚨 WHEN A SUITE IS GREEN, ASK WHAT IT IS GREEN OVER. The overflow sweep ran
-  405 combinations against empty providers.
-- 🚨 CDP CLICKS CANNOT REACH A FLUTTER POPUP-MENU OVERLAY, while every other
-  click on the page works. It is the tool, not the app. Switch accounts by
-  clearing localStorage instead of using the menu.
-- 🚨 A FILE INPUT CAN BE DRIVEN: Page.setInterceptFileChooserDialog + click +
-  DOM.setFileInputFiles. That is how five photos were attached to a real load.
-- 🚨 io.open(p,'w') IN PYTHON REWRITES A FILE'S LINE ENDINGS ON WINDOWS and
-  turns a 3-line change into a whole-file diff. Pass newline='' on both ends,
-  or run fix_eol.py before committing.
-- 🚨 MEASURE BEFORE CHOOSING WORDS. "Tons loaded this week" was picked, the
-  test measured 134px beside 154px, and the answer was to fix the ROW
-  (IntrinsicHeight + stretch) rather than trim the label.
-- 🚨 THE SAME FIX IS WRONG IN TWO PLACES FOR OPPOSITE REASONS: Flexible in a
-  shrink-wrapped Row throws; Flexible in a bounded Row is exactly right. Say
-  which situation each fix is in.
-- 🚨 CHECK WHETHER A "FAULT" IS THE DATA, OR THE TOOL. Three looked wrong and
-  were not.
-- 🚨 A SABOTAGE MUST COMPILE — and keep a case that stays GREEN under it, or
-  over-fixing looks like success.
-- 🚨 A BASH HEREDOC EATS BACKSLASHES even when quoted. Write patch scripts with
-  the Write tool.
-
-BEFORE CLAIMING ANYTHING IS DONE, ALL OF THESE MUST BE GREEN:
+BEFORE CLAIMING ANYTHING IS DONE, ALL OF THESE MUST BE GREEN (they are Phase 0's
+end-of-session tick):
 
 flutter analyze
 flutter test
@@ -1133,26 +1081,43 @@ flutter test test/renders          (after any visual change, --update-goldens)
 flutter build web --release
 flutter build apk --debug
 
-...AND the original worktree re-checked against the baseline above.
+...AND the original worktree re-checked against the baseline above, AND every
+Claude-owned browser closed (browsers left signed in overnight once filled a
+production database), AND M3-TASKS.md committed with every tick you earned.
 
 LIVE ACCOUNTS
-  active user accounts.txt in the repo root.
+  active user accounts.txt in the MineLink-M3 root.
   jean@cyberhouse.co.za / BuRG3rJ3@n1995@#   (platform admin)
   everything @mineralguide.com / MineralGuide123!
-  Used this session: ironhills.owner, ironhills.controller, ironhills.security,
-  atlasbuyer.owner, roadhaul.admin, and roadhaul.driver on the emulator.
+  Used so far: ironhills.owner, ironhills.controller, ironhills.security,
+  atlasbuyer.owner, roadhaul.admin, roadhaul.driver.
+  The console stores theme and accent PER ADMIN — put it back if you change it.
 
-WHEN THE WORK IS DONE: rewrite
+LESSONS ALREADY PAID FOR — DO NOT REPEAT
+- io.open(p,'w') in Python rewrites line endings on Windows; pass newline='' on
+  both ends or run fix_eol.py before committing.
+- A bash heredoc eats backslashes even when quoted; write patch scripts with the
+  Write tool and run them with py -3. Python's stdout is cp1252 here: set
+  PYTHONIOENCODING=utf-8.
+- A pipe hides a failing exit code; redirect, then check $?. Never read a long test
+  run through tail.
+- A second Chrome cannot share --remote-debugging-port and fails silently; check
+  the port owner. ignoreCache is not enough: compare decodedBodySize to the file.
+- Flexible in a shrink-wrapped Row throws; Flexible in a bounded Row is right. A
+  fixed pixel floor under a user-controlled text size is a trap that has bitten
+  three times. Measure before choosing words.
+- Check whether a "fault" is the data, or the tool, before fixing the app.
+- A power cut destroyed a file mid-write: commit often. M3 has NO remote.
 
-C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md
-
-the same way this one was written — verified state only, no intentions, ending
-with a fresh self-contained copy-paste block in §8 that carries BOTH handoff
-paths (that one and C:\Users\Somebody Someone\Claude\HANDOFF.md), the project
-root, the untouchable worktree path and its baseline, exactly where you
-stopped, what is already done so it is not redone, what is left, THE PHONE RULE
-above, THE MOUSE RULE above, this same HOW TO WORK instruction from Jean quoted
-verbatim, and the fix-as-you-go rule — and then commit it. State the commit
+WHEN JEAN SAYS "PAUSE HERE": STOP READING AND PRODUCE THE MESSAGE. Rewrite
+C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md the same way this one
+was written — verified state only, no intentions — ending with a fresh
+self-contained copy-paste block in §8 that carries ALL THREE paths (M3-TASKS.md,
+MineLink-M3\HANDOFF.md and C:\Users\Somebody Someone\Claude\HANDOFF.md), the
+untouchable worktree path and its baseline, exactly where you stopped, what is
+already ticked so it is not redone, what is left, THE PHONE RULE, THE MOUSE RULE,
+this same HOW TO WORK instruction quoted verbatim, and the fix-as-you-go rule. Add
+the session's line to M3-TASKS.md's Session log. Commit both. State the commit
 count the tree WILL be at once that commit lands, and say that the tip is the
-commit carrying the file, so the handoff is self-consistent rather than
-describing a tree without itself.
+commit carrying the file, so the handoff describes a tree that includes itself.
+Give Jean the block in the chat as well, whole.
