@@ -168,27 +168,34 @@ class _MineSupplierBuyersDetailScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              MlSectionTitle(
-                'Buyers',
+              // A PAGE opens with `MlPageHeader`. This one opened with a
+              // SECTION head and a hand-rolled `Text` under it — the
+              // shape `MlPageHeader` exists to end (see its own doc
+              // comment): a smaller editorial title indented by a
+              // section icon, a description that is not part of the
+              // header and therefore not laid out with it, and tools
+              // that follow `MlSectionTitle`'s rules rather than the
+              // measuring header's — which on a phone stranded the meta
+              // at the LEFT margin under the title. Every other portal
+              // page in this pass reads title · description · meta ·
+              // actions.
+              MlPageHeader(
+                title: 'Buyers',
+                description:
+                    'Tonnage shipped per buyer, with recons and invoicing.',
                 meta: rows.length == all.length
                     ? mlCount(all.length, 'buyer')
                     : '${rows.length} of ${all.length} shown',
-                icon: Icons.handshake_outlined,
-                margin: EdgeInsets.zero,
-                action: MlButton.primary(
-                  label: 'Request buyers',
-                  icon: Icons.group_add_outlined,
-                  compact: true,
-                  onPressed: () =>
-                      showBuyersRequestDialog(context, ref, companyId),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Tonnage shipped per buyer, with recons and invoicing.',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                actions: [
+                  MlButton.primary(
+                    label: 'Request buyers',
+                    icon: Icons.group_add_outlined,
+                    compact: true,
+                    onPressed: () =>
+                        showBuyersRequestDialog(context, ref, companyId),
+                  ),
+                ],
+                padding: EdgeInsets.zero,
               ),
               const SizedBox(height: 16),
               TextField(

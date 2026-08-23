@@ -105,13 +105,24 @@ class OverviewHeroTile extends StatelessWidget {
         ),
         borderRadius: radius,
         border: Border.all(color: MlSemantic.of(context).borderCard),
-        boxShadow: [
-          BoxShadow(
-            color: PortalColors.accent.withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        // A MUTED TILE DOES NOT GLOW.
+        //
+        // `muted` already thins the accent wash (0.16 → 0.05), but the
+        // cyan cast shadow was drawn either way — so a grid of muted
+        // tiles still had a cyan halo under every one of them, which is
+        // the loudest half of the treatment. This is a HERO tile: the
+        // wash and the glow together say "this one". Repeated down a
+        // list of equals they say nothing, and §5.5 asks that a tone
+        // mean something.
+        boxShadow: muted
+            ? null
+            : [
+                BoxShadow(
+                  color: PortalColors.accent.withValues(alpha: 0.06),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: onTap == null
           ? content
@@ -290,6 +301,13 @@ class BuyerOverviewCard extends StatelessWidget {
     return OverviewHeroTile(
       title: name,
       icon: Icons.handshake_outlined,
+      // ONE OF MANY, not the one. `/portal/mine/buyers` draws this card
+      // once per buyer in a three-column `Wrap`, and every one of them
+      // was taking the hero wash and the cyan glow — an emphasis that
+      // cannot distinguish anything when everything has it. The other
+      // eight call sites of `OverviewHeroTile` really are single tiles
+      // on their screens and keep the full treatment.
+      muted: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
