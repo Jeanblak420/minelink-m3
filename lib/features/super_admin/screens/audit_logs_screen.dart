@@ -53,28 +53,34 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // The shared page header, not a hand-rolled title: 'Audit Logs' was
+        // 16px PlusJakartaSans ExtraBold (and title-cased, against the app
+        // bar's 'Audit logs'), with a bare download icon beside it and no
+        // description or count — while every other console screen opens in
+        // the Fraunces display face through MlPageHeader. Found 2026-08-23
+        // in the Phase 3 pass.
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Audit Logs',
-                  style: context.mlText.titleMedium.copyWith(
-                    color: MlSemantic.of(context).textStrong,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+          child: MlPageHeader(
+            title: 'Audit logs',
+            description:
+                'Who did what, and when — every administrative action on the '
+                'platform, newest first.',
+            meta: logsAsync.valueOrNull == null
+                ? null
+                : mlCount(logsAsync.value!.length, 'entry', 'entries'),
+            padding: EdgeInsets.zero,
+            actions: [
               if (canExport)
-                logsAsync.when(
-                  data: (logs) => IconButton(
-                    icon: const Icon(Icons.download_rounded),
-                    tooltip: 'Export Logs',
-                    onPressed: () => AuditLogExporter.pickFormatAndExport(context, logs),
+                logsAsync.maybeWhen(
+                  data: (logs) => MlButton.outline(
+                    label: 'Export',
+                    icon: Icons.download_outlined,
+                    compact: true,
+                    onPressed: () =>
+                        AuditLogExporter.pickFormatAndExport(context, logs),
                   ),
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
+                  orElse: () => const SizedBox.shrink(),
                 ),
             ],
           ),
@@ -84,7 +90,7 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
           height: 52,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             children: _actionTypes.map((type) {
               final isSelected =
                   type == 'All' ? _selectedActionType == null || _selectedActionType == 'All' : _selectedActionType == type;
@@ -125,7 +131,7 @@ class _AuditLogsScreenState extends ConsumerState<AuditLogsScreen> {
                 );
               }
               return ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                 itemCount: logs.length,
                 itemBuilder: (context, i) => _AuditLogCard(log: logs[i]),
               );

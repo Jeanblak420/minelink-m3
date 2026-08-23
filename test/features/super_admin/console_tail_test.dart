@@ -168,6 +168,22 @@ void main() {
     });
   }
 
+  testWidgets('and the audit log opens in the shared page header',
+      (tester) async {
+    // 'Audit Logs' was 16px PlusJakartaSans ExtraBold set by hand, title-
+    // cased against the app bar's 'Audit logs', with a bare download icon
+    // and no description or count. Found 2026-08-23 in the Phase 3 pass.
+    await pump(tester, const AuditLogsScreen(), width: 1600, height: 1600);
+    final header = find.byType(MlPageHeader);
+    expect(header, findsOneWidget);
+    final title = tester.widget<Text>(
+        find.descendant(of: header, matching: find.text('Audit logs')));
+    expect(title.style?.fontFamily, MlTokens.fontSerif);
+    expect(find.text('Audit Logs'), findsNothing,
+        reason: 'the title is title-cased again');
+    expect(tester.widget<MlPageHeader>(header).meta, matches(r'^\d+ entr'));
+  });
+
   testWidgets('and the organisation on an audit entry ellipsises',
       (tester) async {
     await pump(tester, const AuditLogsScreen(), height: 2600);
