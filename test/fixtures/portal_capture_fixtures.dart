@@ -976,32 +976,75 @@ final List<TripEarning> kTripEarnings = [
 // Fleet
 // ---------------------------------------------------------------------------
 
+/// **`onRoute` here follows the TRIPS, because that is what the server does.**
+///
+/// `list_transporter_fleet_status` derives on-route from a trip that is not
+/// completed or cancelled (CLAUDE.md §4). Until 2026-08-23 this fixture said
+/// the opposite of the two fixtures next to it: `veh-1` was `onRoute: true`
+/// while its only trip (`t-1`) is **completed** and its own driver assignment
+/// (`va-2`) says `onRoute: false`, and `veh-2` was `onRoute: false` while
+/// `t-2` is **en route to offload** and `va-1` says `onRoute: true`. Three
+/// fixtures, two answers, and the screens picked whichever one they happened
+/// to read.
+///
+/// **And `drivers` is set, not just `driverName`.** `driversLabel` and
+/// `hasDriver` read `drivers` only — the multi-driver field — so setting the
+/// legacy single name alone photographed an on-route truck as "No driver
+/// assigned", under a whole warning panel offering to fix it, while three
+/// other fixtures named its driver. Seen on `screen-trucks-on-route-phone-dark`.
+///
+/// `veh-2` carries TWO drivers on purpose: `fixtureFleet` makes Thandi Mokoena
+/// its primary and `kVehicleDrivers` adds the fixture operator, which is the
+/// up-to-two rule in §4 and the only fixture that exercises it.
 final List<FleetVehicleStatus> kFleetStatus = const [
+  // Available WITH a driver — t-1 is completed, so the truck is back in the
+  // pool. This is the truck an admin allocates from.
   FleetVehicleStatus(
     vehicleId: 'veh-1',
     registration: 'CK 84 RT GP',
     isActive: true,
-    onRoute: true,
+    onRoute: false,
     make: 'Freightliner',
     driverEmployeeId: 'emp-1',
     driverName: 'Sipho Ndlovu',
+    drivers: 'Sipho Ndlovu',
+    driverCount: 1,
   ),
+  // ON ROUTE, two drivers, and carrying the route details the on-route card
+  // draws — customer, product and loading → offloading. Without them that
+  // card renders one field and reads as a design that forgot the route.
   FleetVehicleStatus(
     vehicleId: 'veh-2',
     registration: 'JD 22 PL MP',
     isActive: true,
-    onRoute: false,
+    onRoute: true,
     make: 'Scania',
     driverEmployeeId: 'emp-2',
     driverName: 'Thandi Mokoena',
+    drivers: 'Thandi Mokoena, Fixture Operator',
+    driverCount: 2,
+    activeTripId: 't-2',
+    tripStatus: 'en_route_to_offload',
+    buyerName: 'Atlas Buyer Group',
+    commodity: 'Chrome',
+    loadingPoint: 'Iron Hills Mining',
+    offloadingPoint: 'Richards Bay',
   ),
-  // Available with nobody assigned — a real state the fleet screen must show.
+  // ON ROUTE WITH NOBODY ROSTERED — `t-3` is loading. Nothing in
+  // `accept_request_dispatch` requires a driver, so this is a real state, and
+  // it is the one the on-route card's warning panel exists for.
   FleetVehicleStatus(
     vehicleId: 'veh-3',
     registration: 'BX 09 LM NW',
     isActive: true,
-    onRoute: false,
+    onRoute: true,
     make: 'Volvo',
+    activeTripId: 't-3',
+    tripStatus: 'loading',
+    buyerName: 'Northvale Alloys',
+    commodity: 'Chrome',
+    loadingPoint: 'Iron Hills Mining',
+    offloadingPoint: 'Maputo',
   ),
   // IN MAINTENANCE — the third fleet state, and the one that had no fixture at
   // all until 2026-08-20. `CLAUDE.md` §4 makes it a derived state: a truck is
