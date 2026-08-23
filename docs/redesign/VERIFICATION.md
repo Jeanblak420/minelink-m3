@@ -1067,15 +1067,33 @@ company mirror still speak the v1 analytics language (`design-reference.md` §6
 records this; the router says "until their own versions land"). Migrating them
 onto the v2 overview is a feature, and is listed in `M3-TASKS.md`.
 
-### Mine / supplier portal — IN PROGRESS, 2026-08-23 (fourth session; paused by Jean)
+### Mine / supplier portal — DONE 2026-08-23 (fourth session, then fifth)
 
 Same method as the console pass. Five read-only reviewer agents looked at every
 route target of all five remaining Phase 3 scopes and reported drift by the
 nine classes (reports in `docs/redesign/reviews/2026-08-23-phase3/`); every
 finding below was verified in the render and the code before it was fixed, one
-commit per fix, each pinned by a test that was sabotaged and bit. **The task is
-not done** — the rows marked *open* are the reviewer's findings still to be
-fixed; the screens not listed are not yet reviewed by this session.
+commit per fix, each pinned by a test that was sabotaged and bit.
+
+**Twenty-nine fixes over two sessions.** The fourth session landed 23 and left
+five findings open; the fifth closed all five (`bf40afc` `4a4558f` `06ecf4b`
+`8b9e71e` `6ee7d68` `6762b65` — six commits, because the employee grid's head
+turned out to have a real paging bug behind it). Every row below carries a
+commit or the words "reviewed, no drift". No row is open.
+
+**Two things the fifth session found that no reviewer had:**
+
+- `EmployeeRepository.getByCompanyId` returned its cache VERBATIM, so every
+  `InfiniteGrid` page after the one that primed it was that page again and
+  never short; and it cached the twenty-row SLICE under the company's key, so
+  for five minutes every reader of that roster was told the company had twenty
+  people. Found by asking whether a header meta counting that roster would be
+  telling the truth. `bf40afc`.
+- **The mine's Requests screen had never been photographed.**
+  `unphotographed_screens.py` said 94/94 because it counts the class NAME in
+  the render file — the name-based limit stated in its own header — and every
+  picture of `BuyerRequestsScreen` was `isMine: false`. That is the first time
+  that limit has cost something. `8b9e71e` adds the two renders.
 
 | route target | verdict | commit |
 |---|---|---|
@@ -1102,9 +1120,9 @@ fixed; the screens not listed are not yet reviewed by this session.
 | `/portal/mine/compliance`, `/trips` | reviewed, no drift | — |
 | employee grid (`/employees/:companyId`) (desktop, phone) | "Fixture Haulage Employees" — the shipping app's `AppBar` title moved into an `MlPageHeader` unchanged — and no meta line (§5.4). **And a real bug behind it:** `getByCompanyId` returned the cache VERBATIM, so every `InfiniteGrid` page after the one that primed it was that page again and never short; and it cached the twenty-row SLICE under the company's key, so for five minutes every reader of that roster — a header counting it included — was told the company had twenty people | `bf40afc` `4a4558f` |
 | `/portal/mine/buyers` (desktop, phone) | the last portal page still opening with a SECTION head + a hand-rolled `Text` — section face, indented by an icon well, a description nothing laid out with the title, and tools by `MlSectionTitle`'s rules, which on a phone stranded the meta at the LEFT margin (L16 under a title at L48; now L179 on the title's row, header 34px shorter); and every buyer card in the three-column `Wrap` taking `OverviewHeroTile`'s accent wash AND cyan glow — `muted` existed, was passed by nobody, and thinned only the wash | `06ecf4b` |
-| `/portal/mine/requests` (`BuyerRequestsScreen(isMine: true)`, **no render exists**) | *open* — description says "transportation and product requests" for a mine that raises transportation and BUYER requests; actions in a left Wrap under the header, `FilledButton.tonalIcon` (blue) beside cyan (`buyer_requests_screen.dart:56–92`) | — |
-| `/portal/mine/trips/:id` | *open* — codes/tonnage in sans, facts in a bare container with no section head (`portal_trip_detail_screen.dart:84–184`) | — |
-| `/portal/mine/company` (`company_list_screen.dart`) | *open* — "Company Information" + six title-case labels that wrap in a 130px column even at 1600px; the reference code in sans (`:247–322`) | — |
+| `/portal/mine/requests` (`BuyerRequestsScreen(isMine: true)`) — **render created here** | the description had no `isMine` branch, so a mine was told it raises "transportation and product" requests — the one type CLAUDE.md §4 forbids it — directly above a button offering the one it omitted; and both actions sat in a left `Wrap` below the header as stock Material (`FilledButton.tonalIcon` beside `FilledButton.icon`) while the header's right end held only the meta. Now `MlPageHeader.actions`, `MlButton.tonal` then `.primary`. **The `isMine` screen had never been photographed** — `unphotographed_screens.py` counts the class NAME, its own documented limit — so `screen-mine-requests-{desktop,phone}-dark` were added, with a fixture carrying the mine's buyer request as well, which also photographs `_RequestCard`'s `'buyer'` branch for the first time. 263 renders → 265 | `8b9e71e` |
+| `/portal/mine/trips/:id` (desktop, phone) | the plate at the top is `MlType.code` under a comment saying why, and two rows below it `TRP-000123` and `34.90 t` were PlusJakartaSans — the buyer's Loads & value prints the same reference and the same tonnage in mono one route over; the facts sat in a hand-rolled `Container` repainting `MlCard`'s surface, radius and border with no heading at all; `View waybill` was a stock `FilledButton.icon`. Per-row `isCode`, not a blanket face — "Chrome", "Iron Hills Mining", "Richards Bay" are names. NO meta on the new section title, deliberately: no count exists and every fact worth one is a row below it | `6ee7d68` |
+| `/portal/mine/company` (shared with every own-company page and the registry detail — five goldens) | "Company Information" and six title-case labels, three of them WRAPPING onto two lines in the 130px column at 1600px with the screen empty to the right. Widening the column was the wrong repair: the words carried the card's own subject, already said by the heading above them and the avatar above that ("Fixture Haulage · Transporter · FXH001"). Name · Reference · WhatsApp · Org type · CEO · Created · Updated — nothing wraps at 1600 or 412px, at scale 1.0 or 1.3, and the card is ~55px shorter; `FXH001` moves to `MlType.code` | `6762b65` |
 
 **Kept on purpose / not drift:** "Mine Control", "Mine Security", "Operations
 Hub" as screen names; the gate's 520px phone-first column (the original's);
