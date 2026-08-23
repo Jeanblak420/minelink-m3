@@ -108,13 +108,32 @@ class MlSectionTitle extends StatelessWidget {
               _row(context, semantic, glass,
                   hasTrailing: false, maxWidth: maxWidth, withAction: false),
               const SizedBox(height: 8),
-              if (hasTrailing)
-                _trailing(context, glass,
-                    cap: maxWidth, alignEnd: false),
-              if (action != null) ...[
-                if (hasTrailing) const SizedBox(height: 8),
-                Align(alignment: Alignment.centerLeft, child: action!),
-              ],
+              // THE META STAYS LEFT, THE ACTION GOES RIGHT — on one row.
+              //
+              // Until 2026-08-23 the stacked form put the action under the
+              // meta in an `Align(centerLeft)`, so on a phone a lone refresh
+              // icon, an "Add location" button or "Add transaction" sat
+              // stranded at the far left between the meta and the subtitle
+              // — the console pass's class 2 ("actions riding in the title
+              // Wrap instead of right-aligned"), found by three reviewers on
+              // three screens. An action is right-aligned in the wide form;
+              // wrapping must not move it to the other edge.
+              if (hasTrailing || action != null)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: hasTrailing
+                          ? _trailing(context, glass,
+                              cap: maxWidth, alignEnd: false)
+                          : const SizedBox.shrink(),
+                    ),
+                    if (action != null) ...[
+                      const SizedBox(width: 10),
+                      action!,
+                    ],
+                  ],
+                ),
             ],
           );
         },
@@ -135,7 +154,15 @@ class MlSectionTitle extends StatelessWidget {
     final trailingCap = maxWidth.isFinite ? maxWidth * 0.5 : double.infinity;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      // CENTRED when the heading is one line — otherwise a 48px icon action
+      // hangs 18px below a 14px meta beside it (the quality screen's "2
+      // routes" over its refresh glyph, the maintenance screen's "Log
+      // maintenance" under its meta). With a subtitle the block is taller
+      // than any action and top-alignment keeps the action on the title's
+      // line, which is where it reads.
+      crossAxisAlignment: subtitle == null
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
       children: [
         if (icon != null) ...[
           Icon(icon, size: 22, color: MlTokens.accent),

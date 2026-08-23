@@ -212,4 +212,61 @@ void main() {
       expect(_styleOf(tester, 'Production').color, expected);
     });
   }
+
+  // Phase 3 mine-portal pass, 2026-08-23. Two alignment faults no overflow
+  // sweep can see, found by three reviewers on three screens each.
+  testWidgets('stacked on a phone, the action goes RIGHT and the meta stays '
+      'left', (tester) async {
+    // 360px is under the stacking floor, so the trailing block goes under
+    // the title. It used to carry the action in an `Align(centerLeft)`:
+    // a lone refresh icon / "Add location" button stranded at the far left.
+    await _pump(
+      tester,
+      MlSectionTitle(
+        'Contract quality specs',
+        meta: '2 routes',
+        action: IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: () {},
+        ),
+      ),
+      width: 360,
+    );
+    final meta = tester.getRect(find.text('2 routes'));
+    final title = tester.getRect(find.text('Contract quality specs'));
+    final action = tester.getRect(find.byType(IconButton));
+    expect(meta.top, greaterThan(title.bottom - 1),
+        reason: 'the meta should be under the title at 360px');
+    expect(action.right, closeTo(360, 1),
+        reason: 'action should reach the right edge, ends at ${action.right}');
+    expect(meta.left, closeTo(0, 1));
+    // And on the SAME line as the meta, not a third row.
+    expect((action.center.dy - meta.center.dy).abs(), lessThan(4));
+  });
+
+  testWidgets('an icon action is level with its meta on a one-line heading',
+      (tester) async {
+    // With `CrossAxisAlignment.start` a 48px IconButton hung 18px below a
+    // 14px meta: the quality screen's "2 routes" sat above its refresh glyph.
+    await _pump(
+      tester,
+      MlSectionTitle(
+        'Contract quality specs',
+        meta: '2 routes',
+        action: IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: () {},
+        ),
+      ),
+      width: 1000,
+    );
+    final meta = tester.getRect(find.text('2 routes'));
+    final glyph = tester.getRect(find.byIcon(Icons.refresh));
+    expect((glyph.center.dy - meta.center.dy).abs(), lessThan(3),
+        reason: 'meta centre ${meta.center.dy} vs glyph centre '
+            '${glyph.center.dy}');
+    // The meta still sits immediately left of the action.
+    expect(meta.right, lessThan(glyph.left));
+    expect(meta.right, greaterThan(glyph.left - 60));
+  });
 }
