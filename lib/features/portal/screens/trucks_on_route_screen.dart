@@ -46,7 +46,11 @@ class TrucksOnRouteScreen extends ConsumerWidget {
               // 10.4) and squeezes the Expanded title to whatever is left. The
               // slot drops the action under the title instead.
               MlPageHeader(
-                title: 'Trucks On Route',
+                // Sentence case, like the rest of the product — and like
+                // the app bar directly above it, which already read
+                // `Trucks on route`. The screen spelled its own name two
+                // ways in one picture.
+                title: 'Trucks on route',
                 meta: '${mlCount(onRoute.length, 'truck')} on route · '
                     '$availableCount available',
                 description:
@@ -70,7 +74,7 @@ class TrucksOnRouteScreen extends ConsumerWidget {
                     : (c.maxWidth - gap * (cols - 1)) / cols;
                 final tiles = [
                   MlStatCard(
-                    label: 'On Route',
+                    label: 'On route',
                     value: '${onRoute.length}',
                     icon: Icons.local_shipping_outlined,
                     tone: MlTone.transit,

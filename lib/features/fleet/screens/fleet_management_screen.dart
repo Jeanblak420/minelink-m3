@@ -35,9 +35,9 @@ class FleetManagementScreen extends ConsumerWidget {
     if (!isAuthorized) {
       return const MlEmptyState(
         icon: Icons.lock_outline_rounded,
-        title: 'Fleet Management',
+        title: 'Fleet management',
         message:
-            'You are not authorized to access the Fleet Management system. '
+            'You are not authorized to access the fleet management system. '
             'Only Transporter companies with Admin or Management roles can '
             'access this feature.',
       );
@@ -49,7 +49,7 @@ class FleetManagementScreen extends ConsumerWidget {
     if (companyId == null) {
       return const MlEmptyState(
         icon: Icons.domain_disabled_outlined,
-        title: 'Fleet Management',
+        title: 'Fleet management',
         message: 'Company information not available.',
       );
     }
@@ -65,7 +65,7 @@ class FleetManagementScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
             child: MlPageHeader(
-              title: 'Fleet Management',
+              title: 'Fleet management',
               description:
                   'Every vehicle registered to this company, and '
                   'whether it is available, on route or in maintenance.',
@@ -129,7 +129,7 @@ class FleetManagementScreen extends ConsumerWidget {
         message:
             'Register your first truck to upload its truck pack, driver details and documents.',
         action: MlButton.primary(
-          label: 'Register Truck',
+          label: 'Register truck',
           icon: Icons.add_rounded,
           onPressed: () => _showAddVehicleDialog(context, ref, companyId),
         ),
@@ -186,7 +186,7 @@ class FleetManagementScreen extends ConsumerWidget {
                         SizedBox(
                           width: itemW,
                           child: MlStatCard(
-                            label: 'Total Fleet',
+                            label: 'Total fleet',
                             value: '${fleetState.vehicles.length}',
                             icon: Icons.local_shipping_outlined,
                             tone: MlTone.accent,
@@ -257,7 +257,7 @@ class FleetManagementScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 MlSectionTitle(
-                  'Fleet Register',
+                  'Fleet register',
                   icon: Icons.local_shipping_outlined,
                   meta: mlCount(
                     fleetState.activeVehicles.length,
@@ -307,7 +307,7 @@ class FleetManagementScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   MlSectionTitle(
-                    'Inactive Vehicles',
+                    'Inactive vehicles',
                     icon: Icons.do_not_disturb_on_outlined,
                     meta: mlCount(
                       fleetState.inactiveVehicles.length,
@@ -392,7 +392,7 @@ class FleetManagementScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Unassign Driver'),
+        title: const Text('Unassign driver'),
         content: Text(
           'Are you sure you want to unassign ${vehicle.driverFullName} from this vehicle?',
         ),
@@ -432,7 +432,7 @@ class FleetManagementScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Mark Vehicle as Inactive'),
+        title: const Text('Mark vehicle as inactive'),
         content: hasDriver
             ? Text(
                 'Are you sure you want to mark vehicle ${vehicle.vehicleRegistrationNumber} as inactive? By marking this vehicle as inactive, you will remove $driverName from this vehicle.',
@@ -480,7 +480,7 @@ class FleetManagementScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reactivate Vehicle'),
+        title: const Text('Reactivate vehicle'),
         content: Text(
           'Are you sure you want to reactivate vehicle ${vehicle.vehicleRegistrationNumber}?',
         ),

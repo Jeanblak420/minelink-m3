@@ -506,7 +506,7 @@ class FleetVehicleTable extends StatelessWidget {
               color: MlTokens.emerald500,
               size: 20,
             ),
-            tooltip: isAssigned ? 'Manage drivers' : 'Assign Driver',
+            tooltip: isAssigned ? 'Manage drivers' : 'Assign driver',
             onPressed: () => onAssignDriver!(vehicle),
             constraints: const BoxConstraints(maxWidth: 40, maxHeight: 40),
             padding: EdgeInsets.zero,
@@ -514,7 +514,7 @@ class FleetVehicleTable extends StatelessWidget {
         if (isAssigned && onUnassignDriver != null && vehicle.isActive)
           IconButton(
             icon: const Icon(Icons.person_remove, color: MlTokens.red400, size: 20),
-            tooltip: 'Unassign Driver',
+            tooltip: 'Unassign driver',
             onPressed: () => onUnassignDriver!(vehicle),
             constraints: const BoxConstraints(maxWidth: 40, maxHeight: 40),
             padding: EdgeInsets.zero,
@@ -522,7 +522,7 @@ class FleetVehicleTable extends StatelessWidget {
         if (onRemoveVehicle != null && vehicle.isActive)
           IconButton(
             icon: const Icon(Icons.delete, color: MlTokens.red600, size: 20),
-            tooltip: 'Mark as Inactive',
+            tooltip: 'Mark as inactive',
             onPressed: () => onRemoveVehicle!(vehicle),
             constraints: const BoxConstraints(maxWidth: 40, maxHeight: 40),
             padding: EdgeInsets.zero,
@@ -530,7 +530,7 @@ class FleetVehicleTable extends StatelessWidget {
         if (onReactivateVehicle != null && !vehicle.isActive)
           IconButton(
             icon: const Icon(Icons.restore, color: MlTokens.green600, size: 20),
-            tooltip: 'Reactivate Vehicle',
+            tooltip: 'Reactivate vehicle',
             onPressed: () => onReactivateVehicle!(vehicle),
             constraints: const BoxConstraints(maxWidth: 40, maxHeight: 40),
             padding: EdgeInsets.zero,

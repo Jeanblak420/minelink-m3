@@ -85,7 +85,7 @@ void main() {
       final manage = find.byTooltip('Manage drivers');
       expect(manage, findsOneWidget,
           reason: 'the second driver can only be added from this dialog');
-      expect(find.byTooltip('Unassign Driver'), findsOneWidget,
+      expect(find.byTooltip('Unassign driver'), findsOneWidget,
           reason: 'the quick unassign stays beside it');
 
       await tester.ensureVisible(manage);
@@ -94,12 +94,12 @@ void main() {
       expect(opened?.id, 'v1');
     });
 
-    testWidgets('a truck with nobody on it still says Assign Driver',
+    testWidgets('a truck with nobody on it still says Assign driver',
         (tester) async {
       await _pumpTable(tester, _vehicle(), (_) {});
-      expect(find.byTooltip('Assign Driver'), findsOneWidget);
+      expect(find.byTooltip('Assign driver'), findsOneWidget);
       expect(find.byTooltip('Manage drivers'), findsNothing);
-      expect(find.byTooltip('Unassign Driver'), findsNothing);
+      expect(find.byTooltip('Unassign driver'), findsNothing);
     });
   });
 
