@@ -11,7 +11,7 @@ import 'package:flutter_application_1/core/design/components/ml_components.dart'
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
-/// Super-admin "Request's Tracking Logs": platform-wide request tracking with
+/// Super-admin 'Request tracking logs': platform-wide request tracking with
 /// stat cards, filter pills and a full-width table. Rows open a detail dialog
 /// with every field in full; truncated cells reveal themselves on hover. All
 /// hues come from [MlTokens]/[MlSemantic]/[MlTone].
@@ -85,7 +85,7 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
   Future<void> _export(List<RequestTrackingRow> rows) =>
       ReconExporter.pickFormatAndExport(
         context,
-        title: "Request's Tracking Logs",
+        title: 'Request tracking logs',
         filenameBase: 'requests_tracking_logs',
         headers: const [
           'Type',
@@ -287,7 +287,7 @@ class _RequestTrackingScreenState extends ConsumerState<RequestTrackingScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Request's Tracking Logs",
+                            'Request tracking logs',
                             style: context.mlText.titleMedium.copyWith(
                               color: semantic.textStrong,
                               fontWeight: FontWeight.w700,
@@ -661,12 +661,17 @@ class _Header extends StatelessWidget {
               child: Text.rich(
                 TextSpan(
                   children: [
+                    // "Request tracking logs", not 'Request tracking logs':
+                    // the possessive was misplaced and the title case sat
+                    // against every sentence-case label on the console. Not
+                    // from any client drop — searched 2026-08-23. The drop's
+                    // italic accent word stays.
                     TextSpan(
-                      text: "Request's ",
+                      text: 'Request ',
                       style: TextStyle(color: semantic.textStrong),
                     ),
                     TextSpan(
-                      text: 'Tracking Logs',
+                      text: 'tracking logs',
                       style: TextStyle(
                         fontStyle: FontStyle.italic,
                         color: accentColors.fg,

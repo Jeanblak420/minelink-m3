@@ -28,7 +28,7 @@ class MineSupplierTabScreen extends ConsumerWidget {
       );
 
     return OperationsWorkspace(
-      title: 'Mine / Supplier Workspace',
+      title: 'Mine/Supplier workspace',
       subtitle: companyState.company == null
           ? 'Production and mineral workflows will appear here once your company profile is loaded.'
           : 'Manage the real operating team behind ${companyState.company!.companyName}.',

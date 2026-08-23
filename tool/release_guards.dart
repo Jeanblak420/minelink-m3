@@ -1488,7 +1488,11 @@ final guards = <Guard>[
     mode: Mode.block,
     roots: ['lib'],
     extension: '.dart',
-    pattern: RegExp(r"'Mine / Supplier'"),
+    // Anywhere in a string, not only as the whole literal: the appearance
+    // screen carried "…your Mine / Supplier dashboard." inside two sentences
+    // and the tab screen a 'Mine / Supplier Workspace' title, and the
+    // whole-literal pattern saw none of them (2026-08-23).
+    pattern: RegExp(r'Mine / Supplier'),
     exempt: RegExp(r'^\s*(//|///|\*|/\*)'),
     plantFile: 'planted.dart',
     plantLine: "const label = 'Mine / Supplier';",

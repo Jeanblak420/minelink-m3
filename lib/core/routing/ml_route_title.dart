@@ -209,7 +209,7 @@ String _consoleTitle(String path) {
 
   // '/request-tracking' has no '/requests/' in it, so it never collided with
   // the block above — it simply was not listed.
-  if (path.contains('/request-tracking')) return "Request's Tracking Logs";
+  if (path.contains('/request-tracking')) return 'Request tracking logs';
   if (path.contains('/driver-limits')) return 'Transporter driver limits';
   if (path.contains('/margin-ledger')) return 'Margin ledger history';
   if (path.contains('/recon-tables')) return 'Recon tables';
@@ -224,7 +224,7 @@ String _consoleTitle(String path) {
   if (path.contains('/token-history')) return 'Token history';
   if (path.contains('/notifications')) return 'Notifications';
   if (path.contains('/account-security')) return 'Account security';
-  if (path.contains('/preferences')) return 'User Preferences';
+  if (path.contains('/preferences')) return 'User preferences';
   if (path.endsWith('/settings')) return 'Platform settings';
   return 'Platform Admin';
 }

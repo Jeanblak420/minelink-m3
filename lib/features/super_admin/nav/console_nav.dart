@@ -175,7 +175,7 @@ List<MlNavNode> consoleNavTree() => <MlNavNode>[
         badge: MlNavBadge.pendingRequests,
       ),
       MlNavNode.leaf(
-        label: "Request's Tracking Logs",
+        label: 'Request tracking logs',
         icon: Icons.track_changes_outlined,
         selectedIcon: Icons.track_changes_rounded,
         route: '/super-admin/request-tracking',
@@ -292,7 +292,7 @@ List<MlNavNode> consoleNavTree() => <MlNavNode>[
         route: '/super-admin/account-security',
       ),
       MlNavNode.leaf(
-        label: 'User Preferences',
+        label: 'User preferences',
         icon: Icons.palette_outlined,
         selectedIcon: Icons.palette_rounded,
         route: '/super-admin/preferences',

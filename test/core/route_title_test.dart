@@ -98,12 +98,19 @@ void main() {
         'Update your email sign-in password'
       ),
       '/super-admin/preferences': (
-        'User Preferences',
+        'User preferences',
         'Appearance, display & accessibility · saved to your account only'
       ),
       '/super-admin/settings': (
         'Platform settings',
         'Platform-wide configuration'
+      ),
+      // "Request tracking logs", not "Request's Tracking Logs" — the
+      // possessive was misplaced and the title case sat against every
+      // sentence-case label on the console (Phase 3 pass, 2026-08-23).
+      '/super-admin/request-tracking': (
+        'Request tracking logs',
+        'Every request, and where it has got to'
       ),
       '/super-admin/anything-unmapped': (
         'Platform Admin',

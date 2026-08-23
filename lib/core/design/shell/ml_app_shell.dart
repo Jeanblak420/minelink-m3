@@ -475,7 +475,7 @@ class _MlAppShellState extends State<MlAppShell> {
     //       ~ Global Admin · Dashboard   180px  _AppBarTitleBox
     //
     // It is not one title, either. `Mine/Supplier transport`,
-    // `Account deactivations` and `Request's Tracking Logs` are all about that
+    // `Account deactivations` and `Request tracking logs` are all about that
     // long, and the page title is the one thing on a phone that says where you
     // are — the subtitle is already dropped at this width.
     //

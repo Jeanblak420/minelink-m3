@@ -46,7 +46,7 @@ class AppearanceThemeScreen extends ConsumerWidget {
             description:
                 'Personalise how MineLink looks. Light or dark applies '
                 'everywhere; the dashboard theme and density apply to your '
-                'Mine / Supplier dashboard.',
+                'Mine/Supplier dashboard.',
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +86,7 @@ class AppearanceThemeScreen extends ConsumerWidget {
                 _SectionCard(
                   title: 'Mine theme',
                   subtitle:
-                      'Applies across your whole Mine / Supplier workspace — '
+                      'Applies across your whole Mine/Supplier workspace — '
                       'sidebar, pages and dashboard.',
                   child: Column(
                     children: [
