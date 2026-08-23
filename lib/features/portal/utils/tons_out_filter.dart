@@ -178,10 +178,12 @@ abstract final class TonsOutQuery {
     double d = 0, w = 0, m = 0, y = 0, t = 0;
     for (final e in entries) {
       t += e.netMass;
-      if (e.date.isAfter(yearAgo)) y += e.netMass;
-      if (e.date.isAfter(monthAgo)) m += e.netMass;
-      if (e.date.isAfter(weekAgo)) w += e.netMass;
-      if (e.date.isAfter(dayAgo)) d += e.netMass;
+      // `instant`, not the midnight `date` — see `TonsOutEntry.at`.
+      final at = e.instant;
+      if (at.isAfter(yearAgo)) y += e.netMass;
+      if (at.isAfter(monthAgo)) m += e.netMass;
+      if (at.isAfter(weekAgo)) w += e.netMass;
+      if (at.isAfter(dayAgo)) d += e.netMass;
     }
     return TonsOutSummary(daily: d, weekly: w, monthly: m, yearly: y, total: t);
   }

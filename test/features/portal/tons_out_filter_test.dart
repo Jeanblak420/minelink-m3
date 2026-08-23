@@ -90,4 +90,34 @@ void main() {
     expect(s.monthly, 105); // now rows + 10-day-old row
     expect(s.yearly, 155); // 200-day row still < 365
   });
+
+  test('the rolling windows are measured on the instant, not the midnight date',
+      () {
+    // A load that left at 17:22 yesterday, "now" being 10:00 today. Its
+    // calendar DATE is yesterday's midnight — 34 hours ago — so windowing on
+    // `date` put it outside "Last 24h" while the Tons out screen, which
+    // windows on `timeOut`, counted it: 71.12 t against 103.22 t for the
+    // same eight loads (Phase 3 mine pass, 2026-08-23).
+    final now = DateTime(2026, 8, 15, 10, 0);
+    final yesterdayAfternoon = DateTime(2026, 8, 14, 17, 22);
+    final entry = TonsOutEntry(
+      date: DateTime(2026, 8, 14),
+      at: yesterdayAfternoon,
+      time: '17:22',
+      transporter: 'T1',
+      truckReg: 'REG1',
+      destination: 'BAYHEAD',
+      product: 'COAL',
+      customer: 'TRITON',
+      netMass: 32.1,
+    );
+    final s = TonsOutQuery.summarise([entry], now: now);
+    expect(s.daily, 32.1, reason: 'a load 16h40 ago is inside the last 24h');
+    // And one genuinely older than a day stays outside it.
+    final older = TonsOutQuery.summarise(
+      [entry],
+      now: DateTime(2026, 8, 15, 18, 0),
+    );
+    expect(older.daily, 0);
+  });
 }

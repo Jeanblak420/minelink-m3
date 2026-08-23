@@ -7,6 +7,7 @@ import 'package:flutter_application_1/features/portal/utils/tons_out_filter.dart
 import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 
 /// Premium drill-down for the overview "Tons out" tile: rolling-window summary
 /// boxes plus a fully filterable / sortable dispatch table.
@@ -27,7 +28,6 @@ class _TonsOutDetailScreenState extends State<TonsOutDetailScreen> {
   late final double _massCeil;
   late RangeValues _massRange;
 
-  static final _dateFmt = DateFormat('dd/MM/yyyy');
   static final _massFmt = NumberFormat('#,##0.00');
 
   @override
@@ -85,7 +85,9 @@ class _TonsOutDetailScreenState extends State<TonsOutDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           MlPageHeader(
-            title: 'Tons out',
+            // The rail entry and the app bar both say "Search loads"; this
+            // header said "Tons out", the name of the screen next door.
+            title: 'Search loads',
             meta: mlCount(widget.entries.length, 'load'),
             description:
                 'Every load dispatched, searchable by truck, '
@@ -135,7 +137,6 @@ class _TonsOutDetailScreenState extends State<TonsOutDetailScreen> {
             rows: rows,
             filter: _filter,
             onSort: _onSort,
-            dateFmt: _dateFmt,
             massFmt: _massFmt,
           ),
           const SizedBox(height: 60),
@@ -159,12 +160,20 @@ class _SummaryStrip extends StatelessWidget {
     // 277.52 t — a manager reading "Monthly" on the 16th is out by 2.4x. The
     // recon view was fixed (S6-21); this screen still carried the old labels
     // because nothing could reach it to notice.
+    //
+    // THE REFERENCE STAT CARD, as `RawReconView` draws these same five
+    // windows one rail entry up — full-word label, mono caption, left tone
+    // bar, icon well. Until 2026-08-23 this screen drew its own
+    // `_SummaryBox`: a cyan gradient on all five tiles, a 24px letter badge
+    // and no tone bar — a second stat-card vocabulary, and the accent spent
+    // five times on a screen where the reference spends it once
+    // (design-reference §4, §5.5). Found by two reviewers.
     final items = <(String, String, double)>[
-      ('D', 'Last 24h', summary.daily),
-      ('W', 'Last 7 days', summary.weekly),
-      ('M', 'Last 30 days', summary.monthly),
-      ('Y', 'Last 365 days', summary.yearly),
-      ('T', 'All time', summary.total),
+      ('Day', 'net_mass · last_24h', summary.daily),
+      ('Week', 'net_mass · last_7_days', summary.weekly),
+      ('Month', 'net_mass · last_30_days', summary.monthly),
+      ('Year', 'net_mass · last_365_days', summary.yearly),
+      ('Total', 'net_mass · all_time', summary.total),
     ];
     return LayoutBuilder(
       builder: (context, c) {
@@ -187,102 +196,19 @@ class _SummaryStrip extends StatelessWidget {
                 // decimals away, so the All-time card read 198 for a
                 // register summing to 197.70 — the same figure, said two
                 // ways, on one screen (photographed 2026-08-21).
-                child: _SummaryBox(
-                  code: it.$1,
-                  label: it.$2,
+                child: MlStatCard(
+                  label: it.$1,
+                  caption: it.$2,
                   value: formatTons(it.$3),
+                  icon: it.$1 == 'Total'
+                      ? Icons.functions_rounded
+                      : Icons.scale_outlined,
+                  tone: it.$1 == 'Total' ? MlTone.accent : MlTone.done,
                 ),
               ),
           ],
         );
       },
-    );
-  }
-}
-
-class _SummaryBox extends StatelessWidget {
-  final String code;
-  final String label;
-  final String value;
-  const _SummaryBox({
-    required this.code,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            MlSemantic.of(context).surfaceCard,
-            Color.alphaBlend(
-              PortalColors.accent.withValues(alpha: 0.16),
-              scheme.surface,
-            ),
-          ],
-        ),
-        borderRadius: MlShape.radiusLarge,
-        border: Border.all(color: MlSemantic.of(context).borderCard),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: PortalColors.accent.withValues(alpha: 0.16),
-                  borderRadius: MlShape.radiusSmall,
-                ),
-                child: Text(
-                  code,
-                  style: textTheme.labelMedium?.copyWith(
-                    color: PortalColors.accent,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Flexible so the caption can ellipsize. The code badge beside it
-              // is a fixed 24px, so without this the Row had no give at all and
-              // overflowed at text scale 1.3 on a 360px phone. The badge keeps
-              // its size — it is the thing that identifies the tile.
-              Flexible(
-                child: Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              style: MlType.figure(
-                color: scheme.onSurface,
-                size: MlTokens.fsH1,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -323,23 +249,12 @@ class _FilterBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.filter_alt_outlined,
-                size: 18,
-                color: PortalColors.accent,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Filters',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-              ),
-            ],
+          // A section heading, not a 14px sans ExtraBold row.
+          const MlSectionTitle(
+            'Filters',
+            icon: Icons.filter_alt_outlined,
+            margin: EdgeInsets.only(bottom: 12),
           ),
-          const SizedBox(height: 12),
           Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -537,31 +452,45 @@ class _ResultsTable extends StatelessWidget {
   final List<TonsOutEntry> rows;
   final TonsOutFilter filter;
   final ValueChanged<TonsOutSortField> onSort;
-  final DateFormat dateFmt;
   final NumberFormat massFmt;
 
   const _ResultsTable({
     required this.rows,
     required this.filter,
     required this.onSort,
-    required this.dateFmt,
     required this.massFmt,
   });
+
+  /// A figure or a clock in a column: JetBrainsMono (design-reference §3).
+  Widget _mono(BuildContext context, String text) => Text(
+        text,
+        style: context.mlText.code(
+          color: MlSemantic.of(context).textStrong,
+          size: MlTokens.fsBody - 1,
+        ),
+      );
 
   int _sortIndex() => TonsOutSortField.values.indexOf(filter.sortField);
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final massCellColor = MlTokens.waybillMassTint.withValues(alpha: 0.45);
+    final semantic = MlSemantic.of(context);
 
+    // Column heads in the reference's vocabulary — uppercase, letterspaced,
+    // muted (the same `overline` `MlDataTable` uses) — on a plain surface,
+    // not a sans-ExtraBold title-case head on an accent-tinted band. The
+    // sort affordance is what keeps this a `DataTable`.
     DataColumn col(
       String label,
       TonsOutSortField field, {
       bool numeric = false,
     }) {
       return DataColumn(
-        label: Text(label, style: const TextStyle(fontWeight: FontWeight.w800)),
+        label: Text(
+          label.toUpperCase(),
+          style: context.mlText.overline.copyWith(color: semantic.textMuted),
+        ),
         numeric: numeric,
         onSort: (_, __) => onSort(field),
       );
@@ -601,64 +530,70 @@ class _ResultsTable extends StatelessWidget {
         border: Border.all(color: MlSemantic.of(context).borderCard),
       ),
       clipBehavior: Clip.antiAlias,
-      child: MlWideTable(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: MediaQuery.of(context).size.width - 64,
-          ),
-          child: DataTable(
-            sortColumnIndex: _sortIndex(),
-            sortAscending: filter.ascending,
-            headingRowColor: WidgetStatePropertyAll(
-              PortalColors.accent.withValues(alpha: 0.12),
+      // The table fills ITS CARD, measured by a LayoutBuilder — not
+      // `MediaQuery.size.width - 64`, which is the WINDOW, sidebar included:
+      // that forced the table ~276px wider than its card on a 1600px desktop
+      // and scrolled the Net mass column — the figure the screen exists for
+      // — out of the golden. `MlWideTable` still scrolls it on a phone.
+      child: LayoutBuilder(
+        builder: (context, c) => MlWideTable(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: c.maxWidth.isFinite ? c.maxWidth : 0,
             ),
-            headingTextStyle: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: scheme.onSurface,
-            ),
-            columns: [
-              col('Date', TonsOutSortField.date),
-              col('Time', TonsOutSortField.time),
-              col('Transporter', TonsOutSortField.transporter),
-              col('Truck Reg No', TonsOutSortField.truckReg),
-              col('Destination', TonsOutSortField.destination),
-              col('Product', TonsOutSortField.product),
-              col('Customer', TonsOutSortField.customer),
-              col('Net Mass', TonsOutSortField.netMass, numeric: true),
-            ],
-            rows: [
-              for (final e in rows)
-                DataRow(
-                  cells: [
-                    DataCell(Text(dateFmt.format(e.date))),
-                    DataCell(Text(e.time)),
-                    DataCell(Text(e.transporter)),
-                    DataCell(Text(e.truckReg)),
-                    DataCell(Text(e.destination)),
-                    DataCell(Text(e.product)),
-                    DataCell(Text(e.customer)),
-                    DataCell(
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: massCellColor,
-                          borderRadius: MlShape.radiusSmall,
-                        ),
-                        child: Text(
-                          massFmt.format(e.netMass),
-                          style: const TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-            ],
+            child: _table(context, scheme, col),
           ),
         ),
       ),
     );
+  }
+
+  Widget _table(
+    BuildContext context,
+    ColorScheme scheme,
+    DataColumn Function(String, TonsOutSortField, {bool numeric}) col,
+  ) {
+    return DataTable(
+          sortColumnIndex: _sortIndex(),
+          sortAscending: filter.ascending,
+          headingRowColor: WidgetStatePropertyAll(scheme.surface),
+          dividerThickness: 1,
+          columns: [
+            col('Date', TonsOutSortField.date),
+            // It is the check-OUT clock (`timeOut ?? timeIn`), and the recon
+            // table beside this screen heads its columns TIME-IN / TIME-OUT;
+            // a bare "Time" here read 34–57 minutes later than the recon
+            // table's TIME-IN for the same waybill, with nothing to say why.
+            col('Time out', TonsOutSortField.time),
+            col('Transporter', TonsOutSortField.transporter),
+            col('Truck reg', TonsOutSortField.truckReg),
+            col('Destination', TonsOutSortField.destination),
+            col('Product', TonsOutSortField.product),
+            col('Customer', TonsOutSortField.customer),
+            col('Net mass', TonsOutSortField.netMass, numeric: true),
+          ],
+          rows: [
+            for (final e in rows)
+              DataRow(
+                cells: [
+                  // `15 Aug 2026`, as the Tons out table beside it — not
+                  // `15/08/2026` on one screen and `15 Aug 2026` on the next.
+                  // `calendarDay`: `e.date` is already a South African
+                  // calendar day (CLAUDE.md §7.1), FORMATTED, never converted.
+                  DataCell(Text(MlTime.calendarDay(e.date))),
+                  DataCell(_mono(context, e.time)),
+                  DataCell(Text(e.transporter)),
+                  // The plate as the product prints every plate.
+                  DataCell(MlPlatePill(e.truckReg, fontSize: 12)),
+                  DataCell(Text(e.destination)),
+                  DataCell(Text(e.product)),
+                  DataCell(Text(e.customer)),
+                  // Mono, untinted: the peach `waybillMassTint` was a second
+                  // accent on the one figure column (design-reference §5.2).
+                  DataCell(_mono(context, '${massFmt.format(e.netMass)} t')),
+                ],
+              ),
+          ],
+        );
   }
 }

@@ -44,8 +44,21 @@ class TonsOutEntry {
 
   final String? tripId;
 
+  /// The instant the load left, when the row knows it — `timeOut ??
+  /// tripDate`, the same basis `RawReconView._rowTime` windows on.
+  ///
+  /// [date] is the calendar day (midnight), and the rolling windows used to
+  /// compare THAT against `now − 24h`: a load at 17:22 yesterday fell
+  /// outside "Last 24h" here while the Tons out screen one rail entry up
+  /// counted it — 71.12 t against 103.22 t for the same eight loads, same
+  /// clock (Phase 3 mine pass, 2026-08-23). `instant` falls back to [date]
+  /// for entries built without one.
+  final DateTime? at;
+  DateTime get instant => at ?? date;
+
   const TonsOutEntry({
     required this.date,
+    this.at,
     required this.time,
     required this.transporter,
     required this.truckReg,
@@ -72,6 +85,7 @@ class TonsOutEntry {
     final at = r.timeOut ?? r.timeIn;
     return TonsOutEntry(
       date: DateTime(when.year, when.month, when.day),
+      at: when,
       // `calendarClock`, not hand-rolled padding: `at` is already a South
       // African wall clock (see the note above), so it is FORMATTED, never
       // converted — and it now says so in the product's one vocabulary.
