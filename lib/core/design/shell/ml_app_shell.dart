@@ -494,10 +494,95 @@ class _MlAppShellState extends State<MlAppShell> {
     final compactLine =
         (compactTitleStyle?.fontSize ?? 16) *
         (compactTitleStyle?.height ?? 1.25);
+    final textScaler = MediaQuery.textScalerOf(context);
     final compactToolbarHeight = math.max(
       MlTokens.appBarHeight,
-      MediaQuery.textScalerOf(context).scale(compactLine) * 2 + 20,
+      textScaler.scale(compactLine) * 2 + 20,
     );
+
+    // ── …and when even two lines cannot hold a WORD, the title gets its own
+    //    row: Material 3's medium top app bar ──────────────────────────────
+    //
+    // Two lines fix the titles that are long; they do nothing for the ones
+    // whose single longest word is wider than the column the title is given.
+    // On Jean's SM-G780G at his raised system font, the Load Controller's
+    // bar — drawer, title, FOUR actions — left the title a column narrower
+    // than "controller", and Flutter did the only thing it can do with a
+    // word that does not fit: it broke it. The bar read
+    //
+    //     Load co
+    //     ntroller
+    //
+    // and, on the next screen, `Compli` over `ance`. Found on glass on
+    // 2026-08-23; every render and every sweep had passed, because none of
+    // them ran a phone at that scale with four actions in the bar.
+    //
+    // Shrinking the type is what `type_scale_codemod.py` forbids, and an
+    // ellipsis on the one label that names the screen is worse than a wrap.
+    // M3 has a layout for exactly this: the MEDIUM top app bar, whose
+    // headline sits on its own full-width row under the icons. So the title
+    // is MEASURED against the room it would get beside the icons — with the
+    // reader's text scale — and only when it would have to split a word, or
+    // needs more than two lines, does it drop to that row. Short titles keep
+    // the 72px bar they have always had.
+    final titleNeedsOwnRow = compact &&
+        _titleBreaksBesideTheIcons(
+          _resolvedTitle,
+          style: compactTitleStyle,
+          scaler: textScaler,
+          room: MediaQuery.sizeOf(context).width -
+              // The leading box: drawer alone, or drawer + back.
+              (widget.leading != null ? 112 : 56) -
+              // Each action is a 48dp icon button, plus the trailing gap.
+              (widget.actions.length * 48 + 8) -
+              // `titleSpacing`, both sides of the title.
+              (leading == null ? 20 : 8) * 2,
+        );
+    final ownRowStyle = compactTitleStyle;
+    final ownRowLines = titleNeedsOwnRow
+        ? _lineCount(
+            _resolvedTitle,
+            style: ownRowStyle,
+            scaler: textScaler,
+            maxWidth: MediaQuery.sizeOf(context).width - 32,
+          )
+        : 0;
+    final ownRowHeight = titleNeedsOwnRow
+        ? textScaler.scale(compactLine) * ownRowLines + 12
+        : 0.0;
+
+    if (titleNeedsOwnRow) {
+      return AppBar(
+        backgroundColor: chrome.topBarSurface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        toolbarHeight: MlTokens.appBarHeight,
+        shape: Border(bottom: BorderSide(color: chrome.topBarBorder)),
+        titleSpacing: leading == null ? 20 : 8,
+        leading: leading,
+        leadingWidth: widget.leading != null ? 112 : null,
+        automaticallyImplyLeading: leading == null,
+        // Nothing beside the icons: the headline is the row below.
+        title: const SizedBox.shrink(),
+        actions: [...widget.actions, const SizedBox(width: 8)],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(ownRowHeight),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Text(
+                _resolvedTitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: ownRowStyle,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return AppBar(
       backgroundColor: chrome.topBarSurface,
@@ -543,6 +628,65 @@ class _MlAppShellState extends State<MlAppShell> {
       ),
       actions: [...widget.actions, const SizedBox(width: 8)],
     );
+  }
+
+  /// Whether [title], set in [style] at [scaler], could sit in a column
+  /// [room] wide on at most two lines WITHOUT splitting a word.
+  ///
+  /// Measured rather than assumed, because the answer depends on the reader's
+  /// text scale, the number of actions in the bar and the longest word in
+  /// the title — three things no fixed breakpoint can know.
+  static bool _titleBreaksBesideTheIcons(
+    String title, {
+    required TextStyle? style,
+    required TextScaler scaler,
+    required double room,
+  }) {
+    if (title.trim().isEmpty) return false;
+    if (room <= 0) return true;
+    // Every word on its own: a word wider than the column is the one case
+    // Flutter resolves by breaking INSIDE it.
+    for (final word in title.split(RegExp(r'\s+'))) {
+      if (word.isEmpty) continue;
+      if (_measure(word, style: style, scaler: scaler).width > room) {
+        return true;
+      }
+    }
+    return _lineCount(title, style: style, scaler: scaler, maxWidth: room) >
+        2;
+  }
+
+  /// How many lines [text] takes at [maxWidth], unbounded.
+  static int _lineCount(
+    String text, {
+    required TextStyle? style,
+    required TextScaler scaler,
+    required double maxWidth,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      textScaler: scaler,
+    )..layout(maxWidth: math.max(1, maxWidth));
+    final lines = painter.computeLineMetrics().length;
+    painter.dispose();
+    return math.max(1, lines);
+  }
+
+  static Size _measure(
+    String text, {
+    required TextStyle? style,
+    required TextScaler scaler,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      textScaler: scaler,
+      maxLines: 1,
+    )..layout();
+    final size = painter.size;
+    painter.dispose();
+    return size;
   }
 
   Widget _buildDrawer(MlChrome chrome) {
