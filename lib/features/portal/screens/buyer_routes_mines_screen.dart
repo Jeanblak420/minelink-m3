@@ -16,13 +16,6 @@ import 'package:flutter_application_1/core/time/ml_time.dart';
 class BuyerRoutesMinesScreen extends ConsumerWidget {
   const BuyerRoutesMinesScreen({super.key});
 
-  static const _tones = [
-    MlTone.accent,
-    MlTone.atMine,
-    MlTone.done,
-    MlTone.transit,
-  ];
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final companyId = resolvePortalCompanyId(ref);
@@ -39,8 +32,24 @@ class BuyerRoutesMinesScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          MlSectionTitle(
-            'Routes & Mines',
+          // A PAGE HEADER, and the product's own spelling.
+          //
+          // This page opened with a SECTION head carrying a section
+          // icon, and a hand-rolled `Text` under it that nothing laid
+          // out with the title — the shape `MlPageHeader` exists to end,
+          // and the same one the mine's Buyers page carried until
+          // `06ecf4b`. The section head below it ("Linked mines &
+          // suppliers") is a real section head and stays one.
+          //
+          // "Routes & Mines" was also the only title-case spelling left:
+          // the nav label, `ml_route_title.dart` and the legacy-label
+          // alias map all say "Routes & mines". (The alias map's KEY is
+          // the legacy tab label and stays as it is — it is the seam,
+          // not the copy.)
+          MlPageHeader(
+            title: 'Routes & mines',
+            description:
+                'All your purchase routes across mines and delivery points.',
             // `routes`, not `waybills`.
             //
             // This counted the snapshot's TRANSACTIONS and called them route
@@ -52,14 +61,7 @@ class BuyerRoutesMinesScreen extends ConsumerWidget {
             meta: routesAsync.valueOrNull == null
                 ? null
                 : mlCount(routesAsync.value!.routes.length, 'route'),
-            icon: Icons.alt_route_rounded,
-            margin: const EdgeInsets.only(bottom: 4),
-          ),
-          Text(
-            'All your purchase routes across mines and delivery points.',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+            padding: EdgeInsets.zero,
           ),
           const SizedBox(height: 16),
           routesAsync.when(
@@ -95,9 +97,23 @@ class BuyerRoutesMinesScreen extends ConsumerWidget {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              MlIconWell(
+                              // ONE TONE, because every card here is
+                              // the same kind of thing.
+                              //
+                              // The well used to cycle a four-tone
+                              // list BY INDEX — route 1 cyan, route 2
+                              // amber, route 3 green, route 4 blue —
+                              // so the colour carried no meaning at
+                              // all, and `atMine`'s amber said
+                              // "pending at the mine" about a route
+                              // that was nothing of the kind
+                              // (§5.2 one accent, §5.5 a tone must mean
+                              // something). The "Linked mines &
+                              // suppliers" list directly below this one
+                              // already draws every partner in the same
+                              // well.
+                              const MlIconWell(
                                 icon: Icons.conveyor_belt,
-                                tone: _tones[i % _tones.length],
                                 size: 48,
                                 radius: 14,
                               ),
