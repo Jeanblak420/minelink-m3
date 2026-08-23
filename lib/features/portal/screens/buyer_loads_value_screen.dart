@@ -290,7 +290,21 @@ class _Body extends ConsumerWidget {
                   // 124: "Iron Hills Mining" is 105px and "Atlas Buyer Group"
                   // 118px at this table's body size, and 96 cut the first of
                   // them.
-                  MlColumn('Source', flex: 2, minWidth: 124),
+                  //
+                  // FLEX 3, NOT 2 — a column's weight has to be able to pay
+                  // for what the column declares it needs. `_effectiveMinWidth`
+                  // solves `need × totalFlex / flex` for the whole table, so
+                  // 124px at flex 2 of 20 demanded a **1376px** table. The card
+                  // is ~1224px on a 1600px screen, so this one column pushed
+                  // the table 152px into a horizontal scroll and carried the
+                  // LAST column — the ghost button that captures an invoice,
+                  // the reason a buyer opens this screen — off the right edge.
+                  // At flex 3 of 21 the same 124px costs 968px and the widest
+                  // demand becomes the money columns' 1108px, which fits.
+                  // (At text scale 1.3 the table still scrolls; at 1.3 the
+                  // figures genuinely need the room, and that is what the
+                  // scrollbar is for.)
+                  MlColumn('Source', flex: 3, minWidth: 124),
                   MlColumn('Delivered', flex: 2, align: TextAlign.right),
                   // The four money columns declare what their FIGURES need.
                   // A flex weight cannot know how big a number is: at flex 2
