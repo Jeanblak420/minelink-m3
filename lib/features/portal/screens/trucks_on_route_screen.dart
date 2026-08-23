@@ -320,11 +320,34 @@ class _OnRouteCard extends ConsumerWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(child: identity),
-                  badge,
-                ],
+              // MEASURED, NOT SPLIT BY FLEX — because the badge is not short.
+              //
+              // This was `Row(Expanded(identity), badge)`, and an unflexed
+              // child of a Row takes its natural width FIRST: the badge was
+              // served before the plate, and the plate got the remainder.
+              // With `ON ROUTE` in it that was invisible; the moment the
+              // fixture stopped lying about which truck was on route the
+              // badge read `EN ROUTE TO OFFLOAD`, and on a 412px phone at
+              // text scale 1.0 the plate rendered `JD 22 PL …` — the row's
+              // identity, ellipsised, to make room for its own subtitle. At
+              // 360 × 1.6 the identity Row was squeezed to 41.3px and
+              // overflowed by 21.
+              //
+              // `MlHeaderLayout` is the same fit rule the two page headers
+              // use: share a row when `identity + gap + badge` fits, and
+              // otherwise give the badge its own row underneath. A plate is
+              // never traded for a status word again, and a status word is
+              // never truncated to keep a plate.
+              MlHeaderLayout(
+                title: identity,
+                tools: Align(
+                  // `widthFactor: 1` so the loose measuring pass sees the
+                  // badge's own width; without it an Align expands to the
+                  // constraint and the fit test could never pass.
+                  alignment: Alignment.centerLeft,
+                  widthFactor: 1,
+                  child: badge,
+                ),
               ),
               const SizedBox(height: 12),
               fields,
