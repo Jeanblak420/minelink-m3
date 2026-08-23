@@ -244,7 +244,7 @@ class CompanyDetailsScreen extends StatelessWidget {
 
           // Company information
           MlSectionTitle(
-            'Company Information',
+            'Company information',
             icon: Icons.business_outlined,
           ),
           MlCard(
@@ -252,20 +252,38 @@ class CompanyDetailsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildInfoItem(context, 'Company Name', company.companyName),
+                // ONE WORD WHERE ONE WORD WILL DO.
+                //
+                // These read "Company Name", "MineLink Reference",
+                // "WhatsApp Number", "Organization Type", "Created At",
+                // "Last Updated" — title case, in a product that cases
+                // every label as a sentence, AND three of them wrapped onto
+                // two lines inside the 130px label column at 1600px, with
+                // the rest of the screen empty to the right. Widening the
+                // column would have been the wrong repair: the words were
+                // carrying the card's own subject. The card is already
+                // under a heading that says "Company information", beneath
+                // an avatar reading "Fixture Haulage · Transporter ·
+                // FXH001", so "Company" and "MineLink" were said three
+                // times before a reader reached them.
+                _buildInfoItem(context, 'Name', company.companyName),
           // S8-11. The permanent, system-issued reference. Shown first
           // because it is the thing to quote in a support call — and shown
           // read-only because it is issued and immutable in the database
           // (company_reg_ref_guard), not typed by anyone. Renders nothing
           // for a company that predates the column rather than an empty row.
           if (company.regRef != null)
-            _buildInfoItem(context, 'MineLink Reference', company.regRef!),
-          _buildInfoItem(context, 'WhatsApp Number', company.whatsappNumber),
+            // The reference is a machine identifier — the string to quote
+            // in a support call — so it reads in the code face, like every
+            // other reference in the product (§5.3).
+            _buildInfoItem(context, 'Reference', company.regRef!,
+                isCode: true),
+          _buildInfoItem(context, 'WhatsApp', company.whatsappNumber),
           // `OrgType.label`, not a fourth private switch. This file carried
           // its own `_getOrgTypeLabel`, the organisation detail screen carried
           // another, and the two did not even agree on the spacing around the
           // slash.
-          _buildInfoItem(context, 'Organization Type', company.orgType.label),
+          _buildInfoItem(context, 'Org type', company.orgType.label),
           if (company.ceoFirstName != null || company.ceoLastName != null)
             _buildInfoItem(
               context,
@@ -278,10 +296,10 @@ class CompanyDetailsScreen extends StatelessWidget {
           // instant with no conversion to the mine's clock, and it did not pad
           // the hour — so a company created at 09:05 SAST read "7:5".
                 _buildInfoItem(
-                    context, 'Created At', MlTime.stamp(company.createdAt)),
+                    context, 'Created', MlTime.stamp(company.createdAt)),
                 if (company.updatedAt != null)
                   _buildInfoItem(
-                      context, 'Last Updated', MlTime.stamp(company.updatedAt!)),
+                      context, 'Updated', MlTime.stamp(company.updatedAt!)),
               ],
             ),
           ),
@@ -291,7 +309,8 @@ class CompanyDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoItem(BuildContext context, String label, String value) {
+  Widget _buildInfoItem(BuildContext context, String label, String value,
+      {bool isCode = false}) {
     final semantic = MlSemantic.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
@@ -319,9 +338,15 @@ class CompanyDetailsScreen extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: context.mlText.titleMedium.copyWith(
-                color: semantic.textStrong,
-              ),
+              style: isCode
+                  ? MlType.code(
+                      color: semantic.textStrong,
+                      size: MlTokens.fsBody,
+                      weight: FontWeight.w600,
+                    )
+                  : context.mlText.titleMedium.copyWith(
+                      color: semantic.textStrong,
+                    ),
             ),
           ),
         ],
