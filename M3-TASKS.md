@@ -1,6 +1,6 @@
 # MineLink M3 — what is left, and nothing else
 
-**Last updated:** 2026-08-23 05:45 · M3 at **177 commits** · tip = the commit carrying this line (parent `56df087`) · worktree baseline `df451d0` intact
+**Last updated:** 2026-08-23 05:45 · M3 at **178 commits** · tip = the commit carrying this line (parent `f8d8839`) · worktree baseline `df451d0` intact
 **Open this file in the IDE:** `code "C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\M3-TASKS.md"`
 **Progress:** recount with `grep -c '^- \[x\]' M3-TASKS.md` — never increment by hand.
 
@@ -144,4 +144,4 @@ The emulator's `adb emu geo fix` drives have already proved the navigation stack
 ## Session log
 
 - 2026-08-23 · 165 commits · file created from the verified state of the tree; nothing marked yet. Phone: reachable, host mode on, display OFF (probe 0.061 bits/pixel).
-- 2026-08-23 03:20–05:45 · 166 → 177 commits · Phase 1 DONE on glass (APK `2b235c4` then `1ad4c725`; the phone found the mid-word title break, fixed, rebuilt, re-seen); Phase 2: POD leg and the whole request → dispatch chain driven from the four forms, chat driven half-way; five defects fixed and pinned (`69f6738` `705843a` `22eb90b` `f225278` `56df087`), one server-side gap added to Phase 5; ticks 5 → 12. Paused by Jean at 05:31 before the end gate and the web rebuild. Phone: awake, platform admin, on home, 0 screenshots. No Claude browser left open.
+- 2026-08-23 03:20–05:45 · 166 → 178 commits · Phase 1 DONE on glass (APK `2b235c4` then `1ad4c725`; the phone found the mid-word title break, fixed, rebuilt, re-seen); Phase 2: POD leg and the whole request → dispatch chain driven from the four forms, chat driven half-way; five defects fixed and pinned (`69f6738` `705843a` `22eb90b` `f225278` `56df087`), one server-side gap added to Phase 5; ticks 5 → 11. Paused by Jean at 05:31 before the end gate and the web rebuild. Phone: awake, platform admin, on home, 0 screenshots. No Claude browser left open.

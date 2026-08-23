@@ -37,9 +37,9 @@ file governs the redesign work.**
 
 ## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The tree is **clean**, **177 commits**, nothing half-applied and nothing
+The tree is **clean**, **178 commits**, nothing half-applied and nothing
 uncommitted. **The tip is the commit that carries THIS FILE**, so the count
-above includes it. The last code commit under it is `56df087`.
+above includes it. The last code commit under it is `56df087`; `f8d8839` and this commit are docs and two re-pointed test expectations.
 
 **The original worktree was re-checked against its §0 baseline at 05:33 and is
 untouched** — HEAD `df451d0`, the same three pre-existing modified files,
@@ -50,7 +50,7 @@ today.
 full proper correct copy paste message"*, then: *"make sure that everything
 that should be marked off has been marked and check properly and truly before
 u give me the copy paste ready message"*. So: every task that is proven is
-ticked in `M3-TASKS.md` (12 ticks), the two half-done ones carry `▶ IN
+ticked in `M3-TASKS.md` (11 ticks), the two half-done ones carry `▶ IN
 PROGRESS` lines, and the end-of-session gate carries a `⏸ NOT RUN IN FULL`
 line that lists exactly what was and was not run. The phone was put back as
 the platform admin on `home` with 0 screenshots before this was written.
@@ -85,8 +85,8 @@ fixes have not been seen in a browser — that is where it stopped.
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, redesigned onto Material 3. Its own git repo (`main`), **177 commits**, clean tree, **no remote**. |
-| **The task list** | `MineLink-M3\M3-TASKS.md` — the single markable source of what is done. 12 ticks. |
+| What it is | A **complete, independent fork** of MineLink, redesigned onto Material 3. Its own git repo (`main`), **178 commits**, clean tree, **no remote**. |
+| **The task list** | `MineLink-M3\M3-TASKS.md` — the single markable source of what is done. 11 ticks. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
 ### The one rule that must not be broken
@@ -182,7 +182,7 @@ NOT run after the last five commits             _sabotage.py · type_scale_codem
 build/web                                       STALE (03:07, before every fix this session)
 APK on the handset                              1ad4c725 — carries 69f6738, 705843a, 22eb90b only
 crash_reports since the 01:27Z baseline         0 rows of any kind (re-counted 03:38Z, after the new APK)
-M3-TASKS.md                                     12 ticks; Phase 1 DONE; two ▶ IN PROGRESS; one ⏸ gate line
+M3-TASKS.md                                     11 ticks; Phase 1 DONE; two ▶ IN PROGRESS; one ⏸ gate line
 browsers                                        none open; nothing on 9222/9223
 phone                                           awake, platform admin, on home, 0 screenshots
 ```
@@ -945,7 +945,7 @@ Continue the MineLink Material 3 redesign, exactly where the last session left o
 
 THE PATHS THAT MATTER
 
-  Work happens here (its own git repo, branch main, 177 commits, clean, NO remote):
+  Work happens here (its own git repo, branch main, 178 commits, clean, NO remote):
     C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
   NEVER TOUCHED, for any reason:
@@ -969,7 +969,7 @@ HOW THE MARKABLE FILE WORKS
 - Work the phases IN ORDER. Phase 0 start items → finish Phase 2 (chat, then the browser look at the five fixes) → Phase 3. Phases 4, 5, 6, 7 and the "Decisions only Jean can make" are BLOCKED ON JEAN: do not start them, do not tick them, leave their ⏸ lines in place and name them in your report.
 - AFTER EACH TASK IS COMPLETED, MARK IT COMPLETED IN M3-TASKS.md IMMEDIATELY: change - [ ] to - [x] and put an evidence line directly under it:
     ✅ <date> · commit <sha> · proven by <what was run / seen / measured>
-  Then COMMIT M3-TASKS.md together with the work it records. Never batch ticks. Never tick without evidence. Never increment a count — recount with grep -c '^- \[x\]' M3-TASKS.md (it is 12 right now).
+  Then COMMIT M3-TASKS.md together with the work it records. Never batch ticks. Never tick without evidence. Never increment a count — recount with grep -c '^- \[x\]' M3-TASKS.md (it is 11 right now).
 - Jean's rule, verbatim, given mid-run on 2026-08-23: "FROM HERE ON FORWARD WITH WHAT YOU'RE BUSY WITH, NO NEW TASK SHOULD BE STARTED UNLESS THE PREVIOUS TASK WAS FULLY AND PROPERLY MARKED OFF TRUTHFULLY!"
 - A task that cannot move keeps - [ ] and gets ⏸ BLOCKED — <on what> — <what unblocks it> under it. A task half-driven keeps - [ ] and a ▶ IN PROGRESS line (two carry one now). A blocked or in-progress task is never a done task.
 - A phase gets Status: DONE <date> only when every task in it is ticked (Phase 1 is DONE as of this session).
@@ -978,7 +978,7 @@ HOW THE MARKABLE FILE WORKS
 
 VERIFIED STATE AT THE MOMENT THIS MESSAGE WAS WRITTEN (2026-08-23 05:45)
 
-  MineLink-M3                       177 commits, clean; the tip is the commit carrying this message (parent 56df087); M3-TASKS.md has 12 ticks
+  MineLink-M3                       178 commits, clean; the tip is the commit carrying this message (parent 56df087); M3-TASKS.md has 11 ticks
   flutter analyze                   No issues (whole tree, 05:38, after the last code commit)
   the four new test files           12/12 pass (second_driver_is_reachable, phone_title_never_breaks_a_word, link_step_names_the_requester, company_context_survives_auth_resync); each was sabotaged and bit
   dart tool/release_guards.dart     43/43 PASS; --selftest: all guards bite (new: one-spelling-for-mine-supplier)
