@@ -30,6 +30,7 @@ import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/features/super_admin/screens/account_deactivations_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/audit_logs_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/available_routes_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/organization_detail_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/platform_users_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/token_history_screen.dart';
@@ -254,6 +255,30 @@ void main() {
     // The last control sits inside the card's 14px padding, flush right.
     expect(reject.right, closeTo(cardRect.right - 14, 1.5),
         reason: 'the action row is not right-aligned inside its card');
+  });
+
+  testWidgets('an available route puts its actions on the right of the title',
+      (tester) async {
+    // The actions rode inline after the title in one Wrap and Unassign sat
+    // alone at the bottom left; the reference places a card's actions on
+    // the right. Phase 3 pass, 2026-08-23. Geometry: the last action's
+    // right edge is the card's content edge, and the title is not beside
+    // it on the narrow layout.
+    await pump(tester, const AvailableRoutesScreen(), width: 1600, height: 1600);
+    final card = find
+        .ancestor(of: find.text('RT-0042'), matching: find.byType(Container))
+        .first;
+    final cardRect = tester.getRect(card);
+    final transit = tester.getRect(find.widgetWithText(MlButton, 'Transit 18 h'));
+    // Unassign is the last control on an assigned route — in the action
+    // row, not stranded below the card text.
+    final unassign = tester.getRect(find.widgetWithText(MlButton, 'Unassign'));
+    expect(unassign.right, closeTo(cardRect.right - 16, 1.5),
+        reason: 'the actions are not right-aligned inside the card');
+    expect(unassign.top, closeTo(transit.top, 1));
+    final title = tester.getRect(find.text('RT-0042'));
+    expect(title.top, closeTo(transit.top, 14),
+        reason: 'at 1600px the title and the actions share the top row');
   });
 
   testWidgets('platform users name the role in English', (tester) async {

@@ -725,100 +725,130 @@ class _AvailableRoutesScreenState extends ConsumerState<AvailableRoutesScreen> {
                         borderRadius: BorderRadius.circular(MlTokens.rXl),
                         border: Border.all(color: semantic.borderCard),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Wrap(
-                            spacing: 16,
-                            runSpacing: 8,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              Text(
-                                r.routeNumber,
-                                style: TextStyle(
-                                  fontFamily: MlTokens.fontMono,
-                                  fontWeight: FontWeight.w700,
-                                  color: semantic.textStrong,
-                                ),
+                      child: Builder(builder: (context) {
+                        // The reference places a card's actions on the right
+                        // (docs/design-reference.md §4: notice bar, data rows).
+                        // These rode inline after the title in one Wrap, and
+                        // Unassign sat alone at the bottom left. Found
+                        // 2026-08-23 in the Phase 3 pass. Title group left,
+                        // actions right; under 820px the actions drop under
+                        // the title — a Wrap, so they wrap rather than clip.
+                        final titleGroup = Wrap(
+                          spacing: 16,
+                          runSpacing: 8,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              r.routeNumber,
+                              style: TextStyle(
+                                fontFamily: MlTokens.fontMono,
+                                fontWeight: FontWeight.w700,
+                                color: semantic.textStrong,
                               ),
-                              Text(
-                                r.routeLabel,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: semantic.textStrong,
-                                ),
+                            ),
+                            Text(
+                              r.routeLabel,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: semantic.textStrong,
                               ),
-                              if (r.commodity != null)
-                                Text(
-                                  r.commodity!,
-                                  style: context.mlText.bodyMedium.copyWith(
-                                    color: semantic.textFaint,
-                                  ),
-                                ),
+                            ),
+                            if (r.commodity != null)
                               Text(
-                                _dateFmt.format(MlTime.sast(r.createdAt)),
+                                r.commodity!,
                                 style: context.mlText.bodyMedium.copyWith(
                                   color: semantic.textFaint,
                                 ),
                               ),
-                              MlButton.outline(
-                                label: 'Assign to org',
-                                icon: Icons.person_add_alt_outlined,
-                                compact: true,
-                                onPressed: _busy ? null : () => _assign(r),
-                              ),
-                              MlButton.outline(
-                                label: r.expectedTransitHours == null
-                                    ? 'Set transit time'
-                                    : 'Transit ${r.transitLabel}',
-                                icon: Icons.timer_outlined,
-                                compact: true,
-                                onPressed: _busy
-                                    ? null
-                                    : () => _setTransitExpectation(r),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            [
-                              if (r.supplierName != null)
-                                'Mine: ${r.supplierName}',
-                              if (r.buyerName != null)
-                                'Requester: ${r.buyerName}',
-                              if (r.numTrucks != null) mlCountText(r.numTrucks, 'truck'),
-                              if (r.tons != null) mlCountText(r.tons, 'ton'),
-                              if (r.paymentTerms != null) r.paymentTerms!,
-                            ].join(' · '),
-                            style: context.mlText.bodyMedium.copyWith(
-                              color: semantic.textFaint,
-                            ),
-                          ),
-                          if (r.assignedCompanies != null) ...[
-                            const SizedBox(height: 6),
                             Text(
-                              'Assigned to: ${r.assignedCompanies}',
-                              style: context.mlText.titleSmall.copyWith(
-                                color: semantic.textBody,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            // Only offered where there IS an assignment to
-                            // remove — the RPC existed with no call site, so
-                            // an admin who assigned to the wrong org had no
-                            // way back.
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: MlButton.outline(
-                                label: 'Unassign',
-                                icon: Icons.link_off_outlined,
-                                compact: true,
-                                onPressed: _busy ? null : () => _unassign(r),
+                              _dateFmt.format(MlTime.sast(r.createdAt)),
+                              style: context.mlText.bodyMedium.copyWith(
+                                color: semantic.textFaint,
                               ),
                             ),
                           ],
-                        ],
-                      ),
+                        );
+                        final actions = <Widget>[
+                          MlButton.outline(
+                            label: 'Assign to org',
+                            icon: Icons.person_add_alt_outlined,
+                            compact: true,
+                            onPressed: _busy ? null : () => _assign(r),
+                          ),
+                          MlButton.outline(
+                            label: r.expectedTransitHours == null
+                                ? 'Set transit time'
+                                : 'Transit ${r.transitLabel}',
+                            icon: Icons.timer_outlined,
+                            compact: true,
+                            onPressed:
+                                _busy ? null : () => _setTransitExpectation(r),
+                          ),
+                          // Only offered where there IS an assignment to
+                          // remove — the RPC existed with no call site, so an
+                          // admin who assigned to the wrong org had no way
+                          // back.
+                          if (r.assignedCompanies != null)
+                            MlButton.outline(
+                              label: 'Unassign',
+                              icon: Icons.link_off_outlined,
+                              compact: true,
+                              onPressed: _busy ? null : () => _unassign(r),
+                            ),
+                        ];
+                        final wide = MediaQuery.sizeOf(context).width >= 820;
+                        final actionRow = Wrap(
+                          alignment:
+                              wide ? WrapAlignment.end : WrapAlignment.start,
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: actions,
+                        );
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (wide)
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(child: titleGroup),
+                                  const SizedBox(width: 12),
+                                  actionRow,
+                                ],
+                              )
+                            else ...[
+                              titleGroup,
+                              const SizedBox(height: 10),
+                              SizedBox(width: double.infinity, child: actionRow),
+                            ],
+                            const SizedBox(height: 6),
+                            Text(
+                              [
+                                if (r.supplierName != null)
+                                  'Mine: ${r.supplierName}',
+                                if (r.buyerName != null)
+                                  'Requester: ${r.buyerName}',
+                                if (r.numTrucks != null)
+                                  mlCountText(r.numTrucks, 'truck'),
+                                if (r.tons != null) mlCountText(r.tons, 'ton'),
+                                if (r.paymentTerms != null) r.paymentTerms!,
+                              ].join(' · '),
+                              style: context.mlText.bodyMedium.copyWith(
+                                color: semantic.textFaint,
+                              ),
+                            ),
+                            if (r.assignedCompanies != null) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                'Assigned to: ${r.assignedCompanies}',
+                                style: context.mlText.titleSmall.copyWith(
+                                  color: semantic.textBody,
+                                ),
+                              ),
+                            ],
+                          ],
+                        );
+                      }),
                     ),
                     const SizedBox(height: 10),
                   ],

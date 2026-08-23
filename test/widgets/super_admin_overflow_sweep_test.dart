@@ -65,6 +65,7 @@ import 'package:flutter_application_1/features/super_admin/widgets/transporters_
 import 'package:flutter_application_1/core/layout/text_scale.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import '../fixtures/console_capture_fixtures.dart';
+import '../fixtures/console_tail_fixtures.dart';
 import '../fixtures/ml_sample_data.dart';
 import '../fixtures/portal_capture_fixtures.dart';
 import '../fixtures/screen_fixtures.dart';
@@ -397,6 +398,9 @@ void main() {
       'margin ledger',
       'dispute inbox',
       'request tracking',
+      // Its cards now put the actions on the right of the title at width
+      // and under it below 820px — both halves need the rows to exist.
+      'available routes',
     ];
     for (final key in withData) {
       testWidgets('$key survives every width x text scale, WITH ROWS',
@@ -409,6 +413,7 @@ void main() {
             ...companyScopeOverrides(),
             ...consoleCaptureOverrides(),
             ...portalCaptureOverrides(),
+            ...consoleTailOverrides(),
           ],
           scales: const [1.0, 1.3],
         );
