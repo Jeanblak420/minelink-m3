@@ -136,6 +136,18 @@ class FleetManagementScreen extends ConsumerWidget {
       );
     }
 
+    // READ ONCE, USED TWICE — by the stat cards and by the register's rows.
+    //
+    // It used to be watched inside a `Builder` that wrapped the cards alone,
+    // and the table decided each row's status from `assignedDriverId`
+    // instead. Two sources, one question, and they disagreed on this very
+    // screen (see `FleetVehicleTable.statusByVehicleId`). Reading it here is
+    // what makes them agree by construction rather than by coincidence.
+    final fleetStatuses = ref.watch(fleetStatusProvider(companyId)).valueOrNull;
+    final statusByVehicleId = fleetStatuses == null
+        ? null
+        : {for (final s in fleetStatuses) s.vehicleId: s};
+
     return RefreshIndicator(
       onRefresh: () async {
         await ref.read(fleetProvider(companyId).notifier).loadFleetVehicles();
@@ -155,8 +167,7 @@ class FleetManagementScreen extends ConsumerWidget {
             // as "—" rather than as a confident zero.
             Builder(
               builder: (context) {
-                final statuses = ref.watch(fleetStatusProvider(companyId));
-                final rows = statuses.valueOrNull;
+                final rows = fleetStatuses;
                 final onRoute = rows?.where((v) => v.onRoute).length;
                 final available = rows?.where((v) => v.available).length;
                 final inMaintenance = rows
@@ -257,6 +268,7 @@ class FleetManagementScreen extends ConsumerWidget {
                   width: double.infinity,
                   child: FleetVehicleTable(
                     vehicles: fleetState.activeVehicles,
+                    statusByVehicleId: statusByVehicleId,
                     onEditVehicle: (vehicle) => _showEditVehicleDialog(
                       context,
                       ref,

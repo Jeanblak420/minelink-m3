@@ -4,10 +4,34 @@ import 'package:flutter_application_1/core/layout/app_breakpoints.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/fleet_vehicle_model.dart';
+import '../models/fleet_vehicle_status.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 class FleetVehicleTable extends StatelessWidget {
   final List<FleetVehicle> vehicles;
+
+  /// The DERIVED fleet state per vehicle id, from `fleetStatusProvider`.
+  ///
+  /// ⚠ THE ROWS AND THE STAT CARDS ABOVE THEM MUST ANSWER THE SAME
+  /// QUESTION. Until 2026-08-23 this table decided a truck's status from
+  /// `assignedDriverId` — "Assigned" or "Unassigned" — while the four cards
+  /// directly above it read `fleetStatusProvider`, and the comment beside
+  /// those cards says in as many words that reading `hasAssignedDriver` "put
+  /// every one of Roadhaul's three trucks in the WRONG bucket": the two
+  /// carrying loads had no driver row and counted as available, while the one
+  /// parked truck had a driver and counted as on trip.
+  ///
+  /// So the cards read `1 On route · 2 Available` and the rows underneath them
+  /// read `Assigned · Assigned · Unassigned · Unassigned`, of the same four
+  /// trucks, on the same screen. Availability in this product is derived
+  /// server-side from active trips and open maintenance records (CLAUDE.md
+  /// §4); whether anybody is rostered is a DIFFERENT fact, and it has its own
+  /// column.
+  ///
+  /// Null while the read is in flight, which renders as "—" rather than as a
+  /// confident wrong answer — the same choice the cards make.
+  final Map<String, FleetVehicleStatus>? statusByVehicleId;
+
   final bool showDriver;
   final void Function(FleetVehicle vehicle)? onAssignDriver;
   final void Function(FleetVehicle vehicle)? onUnassignDriver;
@@ -18,6 +42,7 @@ class FleetVehicleTable extends StatelessWidget {
   const FleetVehicleTable({
     super.key,
     required this.vehicles,
+    this.statusByVehicleId,
     this.showDriver = true,
     this.onAssignDriver,
     this.onUnassignDriver,
@@ -88,7 +113,7 @@ class FleetVehicleTable extends StatelessWidget {
                     ),
                   ),
                 ),
-                _statusChip(vehicle, isAssigned),
+                _statusBadge(vehicle),
               ],
             ),
             if (details.isNotEmpty) ...[
@@ -502,7 +527,7 @@ class FleetVehicleTable extends StatelessWidget {
                             : const Text('-'),
                       ),
                     ),
-                  DataCell(_statusChip(vehicle, isAssigned)),
+                  DataCell(_statusBadge(vehicle)),
                   DataCell(
                     _buildActionButtons(context, vehicle, scheme, isAssigned),
                   ),
@@ -515,39 +540,35 @@ class FleetVehicleTable extends StatelessWidget {
     );
   }
 
-  Widget _statusChip(FleetVehicle vehicle, bool isAssigned) {
-    // Named once, so the fill and the ink chosen FOR that fill cannot end up
-    // describing two different pills.
-    final fill = !vehicle.isActive
-        ? const [MlTokens.slate400, MlTokens.slate500]
-        : isAssigned
-            ? const [MlTokens.emerald400, MlTokens.emerald500]
-            : const [MlTokens.red400, MlTokens.red500];
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        borderRadius: MlShape.pill,
-        gradient: LinearGradient(colors: fill),
-      ),
-      child: Text(
-        !vehicle.isActive
-            ? 'Inactive'
-            : isAssigned
-                ? 'Assigned'
-                : 'Unassigned',
-        style: TextStyle(
-          // Measured against THIS pill's own gradient, not assumed white.
-          // These are mid-saturation status hues and white lost on both of
-          // the ones that matter: 2.09:1 on the emerald ("Assigned") and
-          // 3.44:1 on the red ("Unassigned").
-          color: MlTokens.inkOnFills(fill),
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
-        ),
-        textAlign: TextAlign.center,
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
+  /// The truck's derived fleet state, as the rest of the product draws a
+  /// status: [MlStatusBadge], toned through the one shared status map.
+  ///
+  /// This replaced a hand-rolled solid-gradient pill that read
+  /// Assigned / Unassigned / Inactive — a fourth status vocabulary, and the
+  /// only one in the product that painted **RED for "Unassigned"**. A truck
+  /// with no driver is not an error; it is the truck an admin allocates from.
+  /// Red is this design system's declined/error tone (§5), so the register
+  /// drew the fleet's most useful state in the colour reserved for its worst.
+  ///
+  /// The four states it draws now are the three derived ones plus Inactive,
+  /// and they tone as transit / done / warn / neutral. `toneForStatus` could
+  /// only tell them apart from 2026-08-23: `'on route'` matched nothing (it is
+  /// not `'en route'`) and `'Inactive'` came out GREEN, because
+  /// `"inactive".contains("active")` is true.
+  Widget _statusBadge(FleetVehicle vehicle) {
+    // Asked of the vehicle row, not of the derived feed: a truck taken out of
+    // service is inactive whatever a stale status row says, and the inactive
+    // table is built from vehicles the feed may not carry at all.
+    if (!vehicle.isActive) return MlStatusBadge.forStatus('Inactive');
+
+    final status = statusByVehicleId?[vehicle.id];
+    // In flight. The cards say "—" here and so does this; a status is a claim
+    // about a truck on a road, and there is nothing yet to claim.
+    if (status == null) return const Text('—');
+
+    if (status.inMaintenance) return MlStatusBadge.forStatus('In maintenance');
+    if (status.onRoute) return MlStatusBadge.forStatus('On route');
+    return MlStatusBadge.forStatus('Available');
   }
 
   Widget _buildActionButtons(
