@@ -27,75 +27,24 @@ class CompanyLocationsSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // "Add location" is unflexed, so it takes its natural width from an
-          // unbounded constraint (CLAUDE.md 10.4) and pushed this header over
-          // on a phone. Below the floor it moves underneath rather than being
-          // clipped -- clamping a button truncates its hit target, not just
-          // its label.
-          LayoutBuilder(
-            builder: (context, c) {
-              final scale = MediaQuery.textScalerOf(context).scale(12.5) / 12.5;
-              final stacked = c.maxWidth < 420 * scale;
-
-              final title = Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Locations',
-                    style: context.mlText.titleMedium.copyWith(
-                      color: semantic.textStrong,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    'Drivers are routed to the primary location automatically.',
-                    style: context.mlText.bodyMedium.copyWith(
-                      color: semantic.textMuted,
-                    ),
-                  ),
-                ],
-              );
-
-              final addButton = MlButton.tonal(
-                label: 'Add location',
-                icon: Icons.add_location_alt_outlined,
-                onPressed: () => _addOrEdit(context, ref),
-              );
-
-              const well = MlIconWell(
-                icon: Icons.location_on_outlined,
-                tone: MlTone.accent,
-                size: 40,
-                radius: 12,
-              );
-
-              if (stacked) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        well,
-                        const SizedBox(width: 12),
-                        Expanded(child: title),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Align(alignment: Alignment.centerLeft, child: addButton),
-                  ],
-                );
-              }
-              return Row(
-                children: [
-                  well,
-                  const SizedBox(width: 12),
-                  Expanded(child: title),
-                  addButton,
-                ],
-              );
-            },
+          // The section heading in the reference's vocabulary — Fraunces,
+          // a subtitle and the action in the heading's own slot (no meta:
+          // the mine Locations page header already counts the saved points
+          // above this card), which right-aligns it beside the title
+          // and, on a phone, keeps it at the RIGHT of its own row. The hand-
+          // built version was a 16px sans ExtraBold row that, below 420px,
+          // dropped "Add location" to the far LEFT (Phase 3 mine pass,
+          // 2026-08-23; three reviewers).
+          MlSectionTitle(
+            'Locations',
+            icon: Icons.location_on_outlined,
+            subtitle: 'Drivers are routed to the primary location automatically.',
+            margin: EdgeInsets.zero,
+            action: MlButton.tonal(
+              label: 'Add location',
+              icon: Icons.add_location_alt_outlined,
+              onPressed: () => _addOrEdit(context, ref),
+            ),
           ),
           const SizedBox(height: 14),
           async.when(

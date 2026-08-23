@@ -21,11 +21,11 @@ enum MineLocationType {
   String get label {
     switch (this) {
       case MineLocationType.mainGate:
-        return 'Main Gate';
+        return 'Main gate';
       case MineLocationType.weighbridge:
         return 'Weighbridge';
       case MineLocationType.loadingPoint:
-        return 'Loading Point';
+        return 'Loading point';
     }
   }
 

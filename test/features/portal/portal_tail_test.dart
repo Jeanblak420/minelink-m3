@@ -277,9 +277,9 @@ void main() {
     // of this test pass.
     final cut = truncated(tester)
         .where((l) =>
-            l.contains('Main Gate') ||
+            l.contains('Main gate') ||
             l.contains('Weighbridge') ||
-            l.contains('Loading Point') ||
+            l.contains('Loading point') ||
             l.contains('Beside the workshop') ||
             l.contains('R37'))
         .toList();
@@ -400,7 +400,9 @@ void main() {
             'already drawn a top bar — its own `AppBar` landed directly under '
             'it, two bars and two titles deep into the scarcest 150px on a '
             'phone.');
-    expect(painted(tester).any((l) => l == 'Tons out'), isTrue,
+    // 'Search loads' since 2026-08-23: the rail and the app bar already
+    // named it that, and the header said 'Tons out' — the screen next door.
+    expect(painted(tester).any((l) => l == 'Search loads'), isTrue,
         reason: 'the page lost its title along with the app bar.');
   });
 

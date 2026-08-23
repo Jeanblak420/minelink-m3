@@ -84,7 +84,6 @@ class _MineAnchorsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final semantic = MlSemantic.of(context);
     final async = ref.watch(mineLocationsProvider(companyId));
 
     return MlCard(
@@ -92,32 +91,26 @@ class _MineAnchorsSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            const MlIconWell(
-                icon: Icons.route_outlined,
-                tone: MlTone.transit,
-                size: 40,
-                radius: 12),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Mine anchor points',
-                      style: context.mlText.titleMedium.copyWith(
-                        color: semantic.textStrong,
-                        fontWeight: FontWeight.w800,
-                      )),
-                  Text(
-                      'Main Gate, Weighbridge and Loading Point — used to '
-                      'auto-generate each trip\'s waypoint sequence.',
-                      style: context.mlText.bodyMedium.copyWith(
-                        color: semantic.textMuted,
-                      )),
-                ],
-              ),
-            ),
-          ]),
+          // The section heading in the reference's vocabulary. It was a
+          // hand-built icon-well row with a 16px sans ExtraBold title and no
+          // meta line (Phase 3 mine pass, 2026-08-23). The meta says how many
+          // of the three anchors are set, which is the one fact the card is
+          // for.
+          MlSectionTitle(
+            'Mine anchor points',
+            icon: Icons.route_outlined,
+            subtitle: 'Main gate, weighbridge and loading point — used to '
+                'auto-generate each trip\'s waypoint sequence.',
+            // "Set" as the rows decide it — a PIN, not a row: the fixture's
+            // weighbridge has a name and an address and no coordinate, and
+            // its row reads NOT SET. Counting rows said "2 of 3 set" over
+            // one CONFIGURED badge (caught looking at the render).
+            meta: async.valueOrNull == null
+                ? null
+                : '${async.value!.where((l) => l.hasCoordinates).map((l) => l.locationType).toSet().length} '
+                    'of ${_anchors.length} set',
+            margin: EdgeInsets.zero,
+          ),
           const SizedBox(height: 14),
           async.when(
             loading: () => const Padding(
