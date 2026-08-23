@@ -211,7 +211,7 @@ String _consoleTitle(String path) {
   // the block above — it simply was not listed.
   if (path.contains('/request-tracking')) return "Request's Tracking Logs";
   if (path.contains('/driver-limits')) return 'Transporter Driver limits';
-  if (path.contains('/margin-ledger')) return 'Margin ledger History';
+  if (path.contains('/margin-ledger')) return 'Margin ledger history';
   if (path.contains('/recon-tables')) return 'Recon tables';
   if (path.contains('/disputes')) return 'Disputes';
   if (path.contains('/tons-out')) return 'Tons out';

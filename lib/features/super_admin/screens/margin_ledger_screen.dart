@@ -161,7 +161,7 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           MlPageHeader(
-            title: 'Margin ledger History',
+            title: 'Margin ledger history',
             meta: async.valueOrNull == null
                 ? null
                 : mlCount(

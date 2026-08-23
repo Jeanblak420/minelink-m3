@@ -8,7 +8,7 @@
 //    of them shouldn't have a parent, all should have a parent"
 //
 // Before this, every tree in the product mixed the two: the console had eight
-// loose leaves — Recon tables, Margin ledger History, Disputes, Available
+// loose leaves — Recon tables, Margin ledger history, Disputes, Available
 // routes, Route marketplace, Chat links, Live map, Notifications — sitting at
 // the same level as Insights ▾ and Requests ▾, and every portal tree opened
 // with a bare `Dashboard` leaf above its groups. A rail where some entries
@@ -114,7 +114,7 @@ void main() {
       // lib/features/super_admin/widgets/sidebar/minelink_sidebar_core.dart:
       // its "dashboard" section alone, then "main" = Insights, Tokens &
       // Seats, Requests,
-      // then the flat block Margin ledger History / Recon tables / Disputes /
+      // then the flat block Margin ledger history / Recon tables / Disputes /
       // Available routes / Route marketplace / Chat links / Live map, then the
       // footer's Notifications and Settings.
       //
@@ -139,7 +139,7 @@ void main() {
           consoleNavTree().firstWhere((n) => n.label == 'Reconciliation');
       expect(
         recon.leaves.map((l) => l.label).toList(),
-        const ['Margin ledger History', 'Recon tables', 'Disputes'],
+        const ['Margin ledger history', 'Recon tables', 'Disputes'],
       );
     });
 

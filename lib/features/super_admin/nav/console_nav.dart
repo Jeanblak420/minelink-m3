@@ -201,7 +201,11 @@ List<MlNavNode> consoleNavTree() => <MlNavNode>[
     selectedIcon: Icons.balance_rounded,
     children: [
       MlNavNode.leaf(
-        label: 'Margin ledger History',
+        // Sentence case, as every other console label. The shipping app
+        // renamed 'Margin ledger' to 'Margin ledger History' inside an
+        // unrelated commit with no reason given; the words are kept, the
+        // mid-label capital is not. Phase 3 pass, 2026-08-23.
+        label: 'Margin ledger history',
         shortLabel: 'Margins',
         icon: Icons.receipt_long_outlined,
         selectedIcon: Icons.receipt_long_rounded,
