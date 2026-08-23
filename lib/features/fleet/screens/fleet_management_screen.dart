@@ -59,11 +59,6 @@ class FleetManagementScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddVehicleDialog(context, ref, companyId),
-        tooltip: 'Add Vehicle',
-        child: const Icon(Icons.add),
-      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -93,6 +88,13 @@ class FleetManagementScreen extends ConsumerWidget {
                   onPressed: () => ref
                       .read(fleetProvider(companyId).notifier)
                       .loadFleetVehicles(),
+                ),
+                MlButton.primary(
+                  label: 'Add vehicle',
+                  icon: Icons.add_rounded,
+                  compact: true,
+                  onPressed: () =>
+                      _showAddVehicleDialog(context, ref, companyId),
                 ),
               ],
             ),

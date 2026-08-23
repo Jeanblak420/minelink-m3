@@ -4954,9 +4954,26 @@ void main() {
         const Size(412, 915),
         'dialog-add-vehicle-phone-dark',
         act: (tester) async {
-          // A FAB with a tooltip, not a labelled button.
-          final f = find.byTooltip('Add Vehicle');
-          if (f.evaluate().isEmpty) return;
+          // The labelled header action — it was a FAB with a tooltip until
+          // 2026-08-23.
+          //
+          // 🚨 THIS GUARD ASSERTS INSTEAD OF RETURNING, and it is the only
+          // one in this file that does. Every other `act` here bails quietly
+          // when its control is missing, and when the FAB was replaced this
+          // one bailed too: the suite stayed green and
+          // `dialog-add-vehicle-phone-dark` silently became a picture of the
+          // FLEET SCREEN, under a name that says dialog. A render that
+          // photographs the wrong thing is worse than a missing one, because
+          // it reads as covered.
+          //
+          // Probed on 2026-08-23 by making all fifteen guards in this file
+          // report: this was the ONLY one tripping. The rest are genuinely
+          // doing their act, which is why only this one is hardened rather
+          // than all of them.
+          final f = find.text('Add vehicle');
+          expect(f, findsOneWidget,
+              reason: 'the control that opens the add-vehicle dialog is gone, '
+                  'so this render would photograph the screen behind it');
           await tester.tap(f.first, warnIfMissed: false);
           await tester.pumpAndSettle();
         },
