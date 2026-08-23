@@ -191,7 +191,7 @@ class _MirrorSearchBox extends ConsumerWidget {
           style: context.mlText.bodyMedium.copyWith(
             color: MlControlRoom.textStrong,
           ),
-          cursorColor: MlControlRoom.blue,
+          cursorColor: MlControlRoom.cyan,
           decoration: InputDecoration(
             isDense: true,
             hintText: 'Search assets, routes, users',
@@ -211,7 +211,7 @@ class _MirrorSearchBox extends ConsumerWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: MlShape.pill,
-              borderSide: BorderSide(color: MlControlRoom.blue.withValues(alpha: 0.55)),
+              borderSide: BorderSide(color: MlControlRoom.cyan.withValues(alpha: 0.55)),
             ),
           ),
         ),
@@ -250,7 +250,7 @@ class _MirrorSearchBox extends ConsumerWidget {
                         ),
                         child: Row(
                           children: [
-                            Icon(h.icon, size: 17, color: MlControlRoom.blue),
+                            Icon(h.icon, size: 17, color: MlControlRoom.cyan),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(
@@ -517,9 +517,16 @@ class _HeroHeader extends StatelessWidget {
     required this.onExport,
   });
 
+  // The reference's badge tones (docs/design-reference.md §2): MINE amber,
+  // BUYER violet, TRANSPORTER cyan. Buyer was sky blue here — the series hue
+  // the mirror plots trips in — and the screen's interactive chrome (cursor,
+  // focus ring, tab indicator, icon wells, spinner) used the same blue as a
+  // second accent beside the console's cyan. One accent (§5 rule 2); the
+  // blue stays for the tons series and the drivers chip. Phase 3 pass,
+  // 2026-08-23.
   Color _orgChipColor(Brightness b) => switch (company.orgType) {
-    OrgType.transporter => MlControlRoom.green,
-    OrgType.buyer => MlControlRoom.blue,
+    OrgType.transporter => MlControlRoom.cyan,
+    OrgType.buyer => MlControlRoom.violet,
     OrgType.mineSupplier => MlControlRoom.amber,
   };
 
@@ -544,13 +551,14 @@ class _HeroHeader extends StatelessWidget {
           spacing: 12,
           runSpacing: 6,
           children: [
+            // The display face, as every console page title (MlPageHeader,
+            // docs/design-reference.md §3). This was 32px PlusJakartaSans
+            // ExtraBold — the mirror's own mock, transcribed before the
+            // reference was designated. Phase 3 pass, 2026-08-23.
             Text(
               company.companyName,
-              style: TextStyle(
-                fontFamily: MlTokens.fontSans,
-                fontWeight: FontWeight.w800,
+              style: context.mlText.editorialLarge.copyWith(
                 fontSize: narrow ? 24 : 32,
-                letterSpacing: -0.5,
                 height: 1.05,
                 color: MlControlRoom.textStrong,
               ),
@@ -775,8 +783,8 @@ class _PillTabBar extends StatelessWidget {
           indicatorSize: TabBarIndicatorSize.tab,
           indicator: BoxDecoration(
             borderRadius: MlShape.pill,
-            color: MlControlRoom.blue.withValues(alpha: 0.16),
-            border: Border.all(color: MlControlRoom.blue.withValues(alpha: 0.5)),
+            color: MlControlRoom.cyan.withValues(alpha: 0.16),
+            border: Border.all(color: MlControlRoom.cyan.withValues(alpha: 0.5)),
           ),
           labelColor: MlControlRoom.textStrong,
           unselectedLabelColor: MlControlRoom.textMuted,
@@ -1029,9 +1037,10 @@ class _DashboardBody extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: context.mlText.titleMedium.copyWith(
+            // The reference's section heading — Fraunces, as MlSectionTitle
+            // draws it — not 16px sans ExtraBold.
+            style: context.mlText.editorialMedium.copyWith(
               color: MlControlRoom.textStrong,
-              fontWeight: FontWeight.w800,
             ),
           ),
         ),
@@ -1161,9 +1170,8 @@ class _DashboardBody extends StatelessWidget {
                 children: [
                   Text(
                     'Operational snapshot',
-                    style: context.mlText.titleMedium.copyWith(
+                    style: context.mlText.editorialMedium.copyWith(
                       color: MlControlRoom.textStrong,
-                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -1354,8 +1362,8 @@ class _DashboardBody extends StatelessWidget {
                 child: CustomPaint(
                   painter: _DonutPainter(
                     progress: completion ?? 0,
-                    track: MlControlRoom.blue.withValues(alpha: 0.18),
-                    fill: MlControlRoom.blue,
+                    track: MlControlRoom.cyan.withValues(alpha: 0.18),
+                    fill: MlControlRoom.cyan,
                   ),
                   child: Center(
                     child: Text(
@@ -1614,7 +1622,7 @@ class _DashboardBody extends StatelessWidget {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: MlControlRoom.blue,
+                  color: MlControlRoom.cyan,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -1692,19 +1700,18 @@ class _DashboardBody extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(MlControlRoom.rTile),
-                  color: MlControlRoom.blue.withValues(alpha: 0.12),
-                  border: Border.all(color: MlControlRoom.blue.withValues(alpha: 0.4)),
+                  color: MlControlRoom.cyan.withValues(alpha: 0.12),
+                  border: Border.all(color: MlControlRoom.cyan.withValues(alpha: 0.4)),
                 ),
-                child: Icon(Icons.map_outlined, color: MlControlRoom.blue, size: 24),
+                child: Icon(Icons.map_outlined, color: MlControlRoom.cyan, size: 24),
               );
               final words = Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Fleet activity map',
-                    style: context.mlText.titleMedium.copyWith(
+                    style: context.mlText.editorialMedium.copyWith(
                       color: MlControlRoom.textStrong,
-                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -1932,7 +1939,7 @@ class _MirrorLiveMapPreview extends ConsumerWidget {
               height: 22,
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
-                color: MlControlRoom.blue,
+                color: MlControlRoom.cyan,
               ),
             ),
           ),
@@ -2170,10 +2177,10 @@ class _KpiTileState extends State<_KpiTile> {
       duration: MlTokens.durFast,
       curve: MlTokens.easeOutCubic,
       decoration: BoxDecoration(
-        color: hovered ? MlControlRoom.blue.withValues(alpha: 0.08) : MlControlRoom.surfaceTile,
+        color: hovered ? MlControlRoom.cyan.withValues(alpha: 0.08) : MlControlRoom.surfaceTile,
         borderRadius: BorderRadius.circular(MlControlRoom.rTile),
         border: Border.all(
-          color: hovered ? MlControlRoom.blue.withValues(alpha: 0.55) : MlControlRoom.borderCard,
+          color: hovered ? MlControlRoom.cyan.withValues(alpha: 0.55) : MlControlRoom.borderCard,
         ),
       ),
       child: Material(
@@ -2209,7 +2216,7 @@ class _KpiTileState extends State<_KpiTile> {
                         child: Icon(
                           Icons.north_east_rounded,
                           size: 13,
-                          color: hovered ? MlControlRoom.blue : MlControlRoom.textMuted,
+                          color: hovered ? MlControlRoom.cyan : MlControlRoom.textMuted,
                         ),
                       ),
                   ],

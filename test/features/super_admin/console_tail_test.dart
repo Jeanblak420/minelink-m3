@@ -34,6 +34,8 @@ import 'package:flutter_application_1/features/super_admin/screens/available_rou
 import 'package:flutter_application_1/features/super_admin/screens/driver_limit_requests_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/organization_detail_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/platform_users_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/super_admin_company_mirror_screen.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_control_room_palette.dart';
 import 'package:flutter_application_1/features/super_admin/screens/token_history_screen.dart';
 
 import '../../fixtures/console_capture_fixtures.dart';
@@ -92,6 +94,7 @@ void main() {
         ...portalCaptureOverrides(),
         ...consoleTailOverrides(),
         ...consoleLastOverrides(),
+        ...companyMirrorOverrides(),
       ],
       child: MaterialApp(
         theme: AppTheme.darkTheme,
@@ -308,6 +311,34 @@ void main() {
     expect(badge.right, lessThan(badgeCard.right - 16 + 1.5));
     expect(badge.right, greaterThan(badgeCard.right - 40),
         reason: 'the status pill is not at the right edge of its row');
+  });
+
+  testWidgets('the company mirror speaks the reference type and tones',
+      (tester) async {
+    // Phase 3 pass, 2026-08-23. The mirror was transcribed from its own
+    // mock before the reference was designated: a 32px sans ExtraBold
+    // title, 16px sans ExtraBold card headings, a sky-blue interactive
+    // accent beside the console's cyan, and a BUYER badge in that blue
+    // where the reference's tone table says violet.
+    await pump(tester, const SuperAdminCompanyMirrorScreen(companyId: 'o4'),
+        width: 1600, height: 1800);
+    Text textOf(String t) => tester.widget<Text>(find.text(t).first);
+    expect(textOf('Consolidated Mineral Offtake & Logistics Holdings')
+        .style?.fontFamily, MlTokens.fontSerif,
+        reason: 'the page title is not in the display face');
+    for (final h in ['Operational snapshot', 'Tons moved · last 7 days',
+        'Fleet activity map']) {
+      expect(textOf(h).style?.fontFamily, MlTokens.fontSerif,
+          reason: '"$h" is not in the display face');
+    }
+    // The org badge: a Container whose border is the violet tone.
+    final badge = tester.widget<Container>(find
+        .ancestor(of: find.text('Buyer'), matching: find.byType(Container))
+        .first);
+    final deco = badge.decoration as BoxDecoration;
+    expect(deco.border!.top.color.toARGB32() & 0xFFFFFF,
+        MlControlRoom.violet.toARGB32() & 0xFFFFFF,
+        reason: 'the BUYER badge is not violet');
   });
 
   testWidgets('platform users name the role in English', (tester) async {
