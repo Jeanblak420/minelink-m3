@@ -408,13 +408,34 @@ class _LiveTripMapViewState extends ConsumerState<LiveTripMapView>
   }) {
     final semantic = MlSemantic.of(context);
     final rows = [for (final t in trips) _row(context, t)];
+    // Separated in both branches and headed with its count — the desktop
+    // ListView ran its rows together (design-reference §4, §5.4). Phase 3
+    // mine pass, 2026-08-23.
+    // No meta: the page header above already counts the live trips.
+    const head = MlSectionTitle(
+      'Trips',
+      margin: EdgeInsets.fromLTRB(8, 4, 8, 4),
+    );
     return MlCard(
       padding: const EdgeInsets.all(8),
       child: scrollable
-          ? ListView(children: rows)
+          ? Column(
+              children: [
+                head,
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: rows.length,
+                    separatorBuilder: (_, __) =>
+                        Divider(height: 1, color: semantic.divider),
+                    itemBuilder: (_, i) => rows[i],
+                  ),
+                ),
+              ],
+            )
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                head,
                 for (var i = 0; i < rows.length; i++) ...[
                   if (i > 0) Divider(height: 1, color: semantic.divider),
                   rows[i],

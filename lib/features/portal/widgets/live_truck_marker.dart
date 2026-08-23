@@ -48,7 +48,11 @@ class _LiveTruckMarkerState extends State<LiveTruckMarker> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final color = widget.highlighted ? scheme.error : scheme.primary;
+    // The highlighted truck takes the ACCENT, as the fleet map
+    // (`vehicle_positions_map.dart`) already does — not `scheme.error`. Red
+    // is a fault (design-reference §2); a selection is not one. Phase 3
+    // mine pass, 2026-08-23.
+    final color = widget.highlighted ? MlTokens.accent : scheme.primary;
     final size = widget.highlighted ? 44.0 : 32.0;
 
     return CompositedTransformTarget(

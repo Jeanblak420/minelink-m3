@@ -9,6 +9,19 @@ import 'package:flutter_application_1/core/time/ml_time.dart';
 /// a left rail listing each vehicle's newest GPS sample and a large map —
 /// or the honest "No trucks have GPS coordinates recorded" empty panel.
 /// Tapping a row highlights that truck on the map via [onSelect].
+/// A position sample older than this is STALE: the driver app pings every
+/// 30 s (`TripPositionReporter.pingInterval`), so an hour of silence is a
+/// hundred missed pings — a phone off, a signal lost, a trip ended without
+/// the toggle. A stale row used to read exactly like a fresh one ("9h" in
+/// the same faint mono as "4m", the same blue well), on a screen whose whole
+/// subject is where a truck is NOW (Phase 3 mine pass, 2026-08-23). Public so
+/// a test can ask.
+const Duration kPositionStaleAfter = Duration(hours: 1);
+
+bool isPositionStale(DateTime recordedAt, {DateTime? asOf}) =>
+    (asOf?.toUtc() ?? MlTime.instant()).difference(recordedAt.toUtc()) >
+    kPositionStaleAfter;
+
 class TruckLocationsPanel extends StatelessWidget {
   final List<VehiclePositionRecord> positions;
   final String? highlight;
@@ -108,13 +121,35 @@ class TruckLocationsPanel extends StatelessWidget {
       for (var i = 0; i < positions.length; i++) _row(context, positions[i], i),
     ];
 
+    // The hairline between rows exists in BOTH branches now — the desktop
+    // `ListView(children: rows)` ran its rows together while the phone
+    // Column had the Divider (design-reference §4, "hairline row
+    // separators"). And the list carries a section head. No meta: the page
+    // header above this panel already reads "3 trucks reporting".
+    const head = MlSectionTitle(
+      'Trucks',
+      margin: EdgeInsets.fromLTRB(8, 4, 8, 4),
+    );
     return MlCard(
       padding: const EdgeInsets.all(8),
       child: scrollable
-          ? ListView(children: rows)
+          ? Column(
+              children: [
+                head,
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: rows.length,
+                    separatorBuilder: (_, __) =>
+                        Divider(height: 1, color: semantic.divider),
+                    itemBuilder: (_, i) => rows[i],
+                  ),
+                ),
+              ],
+            )
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                head,
                 for (var i = 0; i < rows.length; i++) ...[
                   if (i > 0) Divider(height: 1, color: semantic.divider),
                   rows[i],
@@ -127,6 +162,8 @@ class TruckLocationsPanel extends StatelessWidget {
   Widget _row(BuildContext context, VehiclePositionRecord p, int index) {
     final semantic = MlSemantic.of(context);
     final selected = highlight != null && p.vehicleId == highlight;
+    final stale = isPositionStale(p.recordedAt);
+    final staleInk = MlTone.warn.colors(Theme.of(context).brightness).fg;
     final plate = plateByVehicleId[p.vehicleId];
     final id = (plate != null && plate.trim().isNotEmpty)
         ? plate.toUpperCase()
@@ -156,7 +193,10 @@ class TruckLocationsPanel extends StatelessWidget {
                 icon: selected
                     ? Icons.my_location_rounded
                     : Icons.local_shipping_outlined,
-                tone: selected ? MlTone.accent : MlTone.transit,
+                // Warn for a stale sample: the well is the row's tone.
+                tone: selected
+                    ? MlTone.accent
+                    : (stale ? MlTone.warn : MlTone.transit),
                 size: 36,
                 radius: 10,
               ),
@@ -192,9 +232,12 @@ class TruckLocationsPanel extends StatelessWidget {
               Text(
                 MlTime.agoTag(p.recordedAt),
                 style: context.mlText.code(
-                  color: semantic.textFaint,
+                  // A stale age in the warn tone, weighted so it reads: a
+                  // "9h" that looks like a "4m" is the one thing this column
+                  // must not do.
+                  color: stale ? staleInk : semantic.textFaint,
                   size: 12,
-                  weight: FontWeight.w400,
+                  weight: stale ? FontWeight.w700 : FontWeight.w400,
                 ),
               ),
             ],
