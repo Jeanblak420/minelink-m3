@@ -140,25 +140,22 @@ class _CrashReportsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final semantic = MlSemantic.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // The shared page header, not a hand-rolled 16px sans title: every
+        // other console screen opens in the Fraunces display face through
+        // MlPageHeader, with a description and the count on the right.
+        // Found 2026-08-23 in the Phase 3 pass.
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: Row(
-            children: [
-              Flexible(
-                child: Text(
-                  'Crash reports',
-                  style: context.mlText.titleMedium.copyWith(
-                    color: semantic.textStrong,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ],
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+          child: MlPageHeader(
+            title: 'Crash reports',
+            description:
+                'Errors the app reported about itself, grouped by '
+                'fingerprint — newest first, fatal ones marked.',
+            meta: mlCount(rows.length, 'fingerprint', 'fingerprints'),
+            padding: EdgeInsets.zero,
           ),
         ),
         const Divider(height: 1),
@@ -166,7 +163,7 @@ class _CrashReportsBody extends StatelessWidget {
           width: double.infinity,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Row(
               children: [
                 FilterChip(
@@ -203,7 +200,7 @@ class _CrashReportsBody extends StatelessWidget {
                   message: 'No crash reports in the last 90 days.',
                 )
               : ListView.separated(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                   itemCount: rows.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, i) {

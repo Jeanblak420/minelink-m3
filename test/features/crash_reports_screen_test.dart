@@ -1,3 +1,5 @@
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -122,6 +124,21 @@ void main() {
       );
     }
   }
+
+  testWidgets('the screen opens in the shared page header, with its count',
+      (tester) async {
+    // 'Crash reports' was a 16px PlusJakartaSans ExtraBold title set by hand
+    // while every other console screen opens in the Fraunces display face
+    // through MlPageHeader. Found 2026-08-23 in the Phase 3 pass.
+    await _pumpAt(tester, width: 1600, scale: 1.0, reports: _populatedReports);
+    final header = find.byType(MlPageHeader);
+    expect(header, findsOneWidget);
+    final title = tester.widget<Text>(
+        find.descendant(of: header, matching: find.text('Crash reports')));
+    expect(title.style?.fontFamily, MlTokens.fontSerif);
+    expect(tester.widget<MlPageHeader>(header).meta,
+        '${_populatedReports.length} fingerprints');
+  });
 
   testWidgets('expanding a fatal report scrolls its stack trace instead of '
       'widening the page', (tester) async {
