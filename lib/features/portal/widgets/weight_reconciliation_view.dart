@@ -137,8 +137,10 @@ class WeightReconciliationView extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'System cross-check: mine Net Weight loaded (authoritative) vs '
-            'delivered tons at offload. Variance is the mass lost en route.',
+            'System cross-check over the DELIVERED loads: mine Net Weight '
+            'loaded (authoritative) vs delivered tons at offload. Variance '
+            'is the mass lost en route. A load still on the road has no '
+            'variance yet and is counted in none of the three.',
             style: Theme.of(context)
                 .textTheme
                 .bodySmall
@@ -170,17 +172,35 @@ class WeightReconciliationView extends ConsumerWidget {
                 disputesByTrip.putIfAbsent(x.tripId, () => x);
               }
               final delivered = rows.where((r) => r.isDelivered).toList();
-              final totalLoaded = rows.fold<double>(
-                  0, (s, r) => s + (r.mineNetTons ?? 0));
               final totalDelivered = delivered.fold<double>(
                   0, (s, r) => s + (r.deliveredTons ?? 0));
               final totalVariance = delivered.fold<double>(
                   0, (s, r) => s + (r.variance ?? 0));
-              // The denominator for the TOTAL's severity is the loaded mass of
-              // the delivered rows only — `totalLoaded` includes loads still on
-              // the road, which have no variance yet and would dilute the
-              // percentage toward zero.
-              final deliveredLoaded = delivered.fold<double>(
+              // ALL THREE FIGURES COVER THE SAME LOADS, AND THAT IS THE WHOLE
+              // POINT OF THEM.
+              //
+              // This used to be two populations side by side: "Loaded" summed
+              // EVERY row and "Delivered" summed the delivered ones. So
+              // `screen-buyer-reconciliations-desktop-dark` read `103.22 t
+              // loaded · 70.70 t delivered · 0.42 t net variance` over a table
+              // of three trips, one of them still Pending. 103.22 − 70.70 is
+              // 32.52. A reader doing the subtraction the caption invites —
+              // "mine Net Weight loaded (authoritative) vs delivered tons at
+              // offload… the mass lost en route" — gets a number seventy-seven
+              // times the real variance, on the screen that exists to say
+              // whether mass went missing.
+              //
+              // The file already knew. This figure was being computed under
+              // the name `deliveredLoaded` for the severity denominator, with
+              // a comment saying `totalLoaded` "includes loads still on the
+              // road, which have no variance yet". The same reasoning applies
+              // to the card a reader compares against; only the denominator
+              // had been fixed.
+              //
+              // A load still on the road is not missing mass, and its tonnage
+              // is not withheld: it is in the row above it (`Pending`), and
+              // the raw recon table below totals every row.
+              final totalLoaded = delivered.fold<double>(
                   0, (s, r) => s + (r.mineNetTons ?? 0));
 
               return Column(
@@ -209,7 +229,7 @@ class WeightReconciliationView extends ConsumerWidget {
                         label: 'Net variance',
                         value: _t(totalVariance),
                         icon: Icons.compare_arrows_rounded,
-                        tone: _varianceTone(totalVariance, deliveredLoaded),
+                        tone: _varianceTone(totalVariance, totalLoaded),
                       ),
                     ];
                     return Wrap(

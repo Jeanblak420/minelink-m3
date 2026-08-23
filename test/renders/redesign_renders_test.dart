@@ -1436,6 +1436,48 @@ void main() {
       );
     });
 
+    // AND IN THE DEFAULT THEME. The light one above exists because this is
+    // "the light theme's densest table"; it was also the ONLY picture of
+    // this screen, and the app opens dark. The mine pass has already shown
+    // what an unphotographed variant costs — `BuyerRequestsScreen` was
+    // counted as photographed for a year while every picture was the
+    // buyer's half of it (`8b9e71e`).
+    testWidgets('buyer loads & value — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const BuyerLoadsValueScreen(),
+          title: 'Fixture Metals',
+          subtitle: 'Loads & value',
+          orgType: OrgType.buyer,
+          role: UserRole.admin,
+          selectedRoute: '/portal/buyer/loads-value',
+          extraOverrides: allPortalOverrides(),
+        ),
+        const Size(1600, 1700),
+        'screen-buyer-loads-value-desktop-dark',
+      );
+    });
+
+    testWidgets('buyer loads & value — phone dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const BuyerLoadsValueScreen(),
+          title: 'Fixture Metals',
+          subtitle: 'Loads & value',
+          orgType: OrgType.buyer,
+          role: UserRole.admin,
+          selectedRoute: '/portal/buyer/loads-value',
+          extraOverrides: allPortalOverrides(),
+        ),
+        const Size(412, 2600),
+        'screen-buyer-loads-value-phone-dark',
+      );
+    });
+
     testWidgets('trucks on route — phone dark', (tester) async {
       await shoot(
         tester,
@@ -1686,6 +1728,27 @@ void main() {
         ),
         const Size(412, 4322),
         'screen-buyer-reconciliations-phone-dark',
+      );
+    });
+
+    // The same screen at the width a buyer's admin actually reads it at.
+    // Only the phone had ever been photographed, and the two tables on it
+    // are the widest things the buyer owns.
+    testWidgets('buyer reconciliations — desktop dark', (tester) async {
+      await shoot(
+        tester,
+        screen(
+          brightness: Brightness.dark,
+          child: const BuyerReconciliationsScreen(),
+          title: 'Fixture Metals',
+          subtitle: 'Reconciliations',
+          orgType: OrgType.buyer,
+          role: UserRole.admin,
+          selectedRoute: '/portal/buyer/reconciliations',
+          extraOverrides: allPortalOverrides(),
+        ),
+        const Size(1600, 3000),
+        'screen-buyer-reconciliations-desktop-dark',
       );
     });
   });
