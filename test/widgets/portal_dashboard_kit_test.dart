@@ -21,6 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:flutter_application_1/features/portal/widgets/dashboard/portal_dashboard_kit.dart';
+import 'package:flutter_application_1/features/super_admin/widgets/super_admin_dashboard_widgets.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 
 Future<void> _loadFont(String family, List<String> files) async {
@@ -369,6 +370,32 @@ void main() {
     // And the title still starts at the band's left edge, unmoved.
     expect(tester.getRect(find.text('On the mine floor')).left,
         closeTo(16, 1.5));
+  });
+
+  // The delta chip sits flush top-right of its tile, as the reference's
+  // `▲ 2 · 24h` does. It was `Spacer() + Flexible(chip)` — two flex-1
+  // children splitting the free space — so the chip started at the tile's
+  // midpoint and ended ~55px short of the edge on every dashboard. Found by
+  // two reviewers, 2026-08-23. Geometry, because nothing overflowed.
+  testWidgets("the KPI delta chip is flush with the tile's right edge",
+      (tester) async {
+    tester.view.physicalSize = const Size(1600, 2600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      _app(brightness: Brightness.dark, scale: 1.0, boldText: false),
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+
+    final tile = tester.getRect(find.ancestor(
+      of: find.text('Tons out'),
+      matching: find.byType(SaStatTile),
+    ));
+    final chip = tester.getRect(find.textContaining('7d').first);
+    // The tile pads 16; the chip's own trailing padding is a few px.
+    expect(chip.right, greaterThan(tile.right - 24),
+        reason: 'chip ends at ${chip.right} in a tile ending at ${tile.right}');
   });
 
   testWidgets('every KPI tile and queue row navigates to its screen',

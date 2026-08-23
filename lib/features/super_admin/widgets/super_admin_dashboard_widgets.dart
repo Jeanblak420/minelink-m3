@@ -537,22 +537,32 @@ class SaStatTile extends StatelessWidget {
                               ),
                               child: Icon(icon, size: 18, color: iconFg),
                             ),
-                            const Spacer(),
-                            // FLEXIBLE, not a bare child. A `Row` hands a
-                            // non-flex child unbounded width (CLAUDE.md
-                            // §10.4), so the badge could never ellipsise — it
-                            // simply pushed the row over. It survived only
-                            // because `▲ −35 · 24h` is short; the moment a
-                            // delta carries a currency prefix, thousands
-                            // separators and a real period (`▼ −R156,567 ·
-                            // 12m`) it is 17 characters, and at the console's
-                            // 2.0 text scale that is wider than the tile.
+                            // EXPANDED + ALIGN RIGHT, not Spacer + Flexible.
+                            //
+                            // A `Row` hands a non-flex child unbounded width
+                            // (CLAUDE.md §10.4), so a bare badge could never
+                            // ellipsise — it pushed the row over once a delta
+                            // carried a currency prefix and thousands
+                            // separators (`▼ −R156,567 · 12m`). The first fix
+                            // was `Spacer() + Flexible(badge)`: bounded, but
+                            // a Spacer IS an Expanded(flex: 1) and Flexible
+                            // defaults to flex: 1, so the free space was split
+                            // in half and the badge started at the MIDPOINT —
+                            // "▲+71 · 7d" ended 55px short of the tile's edge
+                            // on every dashboard, where the reference puts it
+                            // flush top-right. Found by two reviewers,
+                            // 2026-08-23. One Expanded with the badge aligned
+                            // right inside it: all the free space, bounded,
+                            // at the edge.
                             if (delta != null)
-                              Flexible(
-                                child: _Delta(
-                                  delta: delta!,
-                                  tone: deltaTone,
-                                  period: deltaPeriod,
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: _Delta(
+                                    delta: delta!,
+                                    tone: deltaTone,
+                                    period: deltaPeriod,
+                                  ),
                                 ),
                               ),
                           ],
