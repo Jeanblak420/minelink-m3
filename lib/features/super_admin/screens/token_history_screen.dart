@@ -38,7 +38,11 @@ class _TokenHistoryScreenState extends ConsumerState<TokenHistoryScreen>
   String _tabLabel(String key) {
     switch (key) {
       case 'mineSupplier':
-        return 'Mines / suppliers';
+        // The plural the console writes everywhere else — the nav group,
+        // the dashboard's org-type card, the targets screens. This tab had
+        // a lower-case 'suppliers', a third spelling on the same admin's
+        // screens. Found 2026-08-23 in the Phase 3 pass.
+        return 'Mines / Suppliers';
       case 'buyer':
         return 'Buyers';
       case 'transporter':

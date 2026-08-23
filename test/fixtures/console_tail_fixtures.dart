@@ -134,7 +134,14 @@ AuditLog _log(
       actionType: action,
       targetType: targetType,
       targetName: targetName,
-      organizationId: 'o1',
+      // One id PER COMPANY. Every log used to carry 'o1' whatever its name,
+      // so the token-history screen — which groups by organizationId and
+      // titles the group with the first entry's name — rendered nine events
+      // from four companies as "Iron Hills Mining · 9 events", with "Approved
+      // 2 extra seats for Atlas Buyer Group" inside it. A fixture that
+      // contradicts itself photographs a screen that looks broken and is not.
+      // Found 2026-08-23 in the Phase 3 pass.
+      organizationId: orgName == null ? null : 'o-${orgName.hashCode.abs()}',
       organizationName: orgName,
       organizationType: orgType,
       description: description,
@@ -755,7 +762,10 @@ List<Override> consoleTailOverrides() => [
         };
       }),
       auditLogsProvider.overrideWith((ref, _) async => kAuditLogs),
-      tokenHistoryAuditLogsProvider.overrideWith((ref, _) async => kAuditLogs),
+      // The real provider is keyed by org type; an override that ignores the
+      // key put a mine's events under the Transporters tab.
+      tokenHistoryAuditLogsProvider.overrideWith((ref, orgType) async =>
+          kAuditLogs.where((l) => l.organizationType == orgType).toList()),
       organizationTokensProvider.overrideWith((ref, _) async => kOrgTokens),
       organizationSeatsProvider.overrideWith((ref, _) async => kOrgSeats),
       companyUsersGroupedProvider

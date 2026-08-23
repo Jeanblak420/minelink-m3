@@ -253,13 +253,31 @@ void main() {
     // both forms satisfy it; the capitalisation changed because title-casing
     // every word also capitalised "To" and "Of" elsewhere in the same table
     // ("User Assigned To Seat"). See `AuditLog.labelForAction`.
-    expect(find.text('Token generated'), findsWidgets,
+    // The first tab is Transporters, and since 2026-08-23 the fixture only
+    // hands a tab the events of its own org type — so this is Roadhaul's
+    // seat assignment, not a mine's token (which used to sit here because
+    // every fixture log shared one organizationId).
+    expect(find.text('User assigned to seat'), findsWidgets,
         reason: 'the action type is being printed raw again.');
+    expect(find.text('USER_ASSIGNED_TO_SEAT'), findsNothing);
     // `org o1` was the subtitle. A database key is not a fact about a company.
     for (final line in painted(tester)) {
       expect(line.contains('org o1'), isFalse,
           reason: 'the group caption is printing a database id: "$line".');
     }
+  });
+
+  testWidgets('and each token-history tab lists only its own org type',
+      (tester) async {
+    // The fixture used to give every log organizationId 'o1' and ignore the
+    // org-type key, so the Transporters tab opened on "Iron Hills Mining ·
+    // 9 events · Mine/Supplier" with Atlas Buyer Group's approval inside it.
+    await pump(tester, const TokenHistoryScreen(), width: 1600, height: 1600);
+    expect(find.text('Roadhaul Logistics'), findsOneWidget);
+    expect(find.text('Iron Hills Mining'), findsNothing,
+        reason: 'a mine is listed under the Transporters tab');
+    expect(find.text('Mines / Suppliers'), findsOneWidget,
+        reason: 'the tab spells the plural differently from the nav group');
   });
 
   testWidgets('and the token-history screen says what it is', (tester) async {
