@@ -1606,7 +1606,12 @@ class _DispatchStep extends ConsumerWidget {
         if (buyerPreference != null && buyerPreference!.trim().isNotEmpty) ...[
           const SizedBox(height: 4),
           Text(
-            'Buyer asked for: "$buyerPreference"',
+            // Named for whoever raised it. Mines raise transport requests
+            // too (their own haul, no buyer yet), and on 2026-08-23 this line
+            // told the admin linking one that the "Buyer asked for" a loading
+            // point the MINE had typed — on a request with no buyer on it.
+            '${request.isFromMine ? 'Mine' : 'Buyer'} asked for: '
+            '"$buyerPreference"',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
