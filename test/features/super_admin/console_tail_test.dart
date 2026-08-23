@@ -229,6 +229,33 @@ void main() {
     expect(find.textContaining('Load Controller'), findsWidgets);
   });
 
+  testWidgets('and the deactivations queue opens in the shared page header, '
+      'with its actions on the right', (tester) async {
+    // Two drifts found 2026-08-23 in the Phase 3 pass: a hand-rolled 16px
+    // sans title (every other console screen opens through MlPageHeader),
+    // and Approve / Reject hanging at the card's far left under the icon
+    // well, where the reference (and the request-review card) put a card's
+    // actions on the right.
+    await pump(tester, const AccountDeactivationsScreen(),
+        width: 1600, height: 1600);
+    final header = find.byType(MlPageHeader);
+    expect(header, findsOneWidget);
+    expect(
+        tester
+            .widget<Text>(find.descendant(
+                of: header, matching: find.text('Account deactivations')))
+            .style
+            ?.fontFamily,
+        MlTokens.fontSerif);
+    final card = find.ancestor(
+        of: find.text('Sipho Dlamini'), matching: find.byType(MlCard));
+    final cardRect = tester.getRect(card.first);
+    final reject = tester.getRect(find.widgetWithText(MlButton, 'Reject').first);
+    // The last control sits inside the card's 14px padding, flush right.
+    expect(reject.right, closeTo(cardRect.right - 14, 1.5),
+        reason: 'the action row is not right-aligned inside its card');
+  });
+
   testWidgets('platform users name the role in English', (tester) async {
     await pump(tester, const PlatformUsersScreen(), height: 2600);
     expectNoWireVocabulary(tester, 'the platform users list');

@@ -267,25 +267,22 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final semantic = MlSemantic.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // The shared page header, not a hand-rolled 16px sans title — every
+        // other console screen opens in the Fraunces display face through
+        // MlPageHeader, with a description and a count on the right. Found
+        // 2026-08-23 in the Phase 3 pass.
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: Row(
-            children: [
-              Flexible(
-                child: Text(
-                  'Account deactivations',
-                  style: context.mlText.titleMedium.copyWith(
-                    color: semantic.textStrong,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ],
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+          child: MlPageHeader(
+            title: 'Account deactivations',
+            description:
+                'Requests to deactivate an account, and the accounts already '
+                'held — approve, reject or reactivate.',
+            meta: mlCount(rows.length, 'request'),
+            padding: EdgeInsets.zero,
           ),
         ),
         const Divider(height: 1),
@@ -293,7 +290,7 @@ class _Body extends StatelessWidget {
           width: double.infinity,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Row(
               children: [
                 ChoiceChip(
@@ -338,7 +335,7 @@ class _Body extends StatelessWidget {
                   message: 'No account deactivation requests in this view.',
                 )
               : ListView.separated(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                   itemCount: rows.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, i) {
@@ -563,7 +560,21 @@ class _RequestCard extends StatelessWidget {
           ),
           if (actions.isNotEmpty) ...[
             const SizedBox(height: 12),
-            Wrap(spacing: 8, runSpacing: 8, children: actions),
+            // Right-aligned, as the reference places a card's actions
+            // (docs/design-reference.md §4: notice bar, data rows) and as
+            // the request-review card beside this one does. They used to
+            // hang at the card's far left, under the icon well. The Wrap
+            // must claim the row first (CLAUDE.md §10.4) or `end` has no
+            // free space to align within.
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 8,
+                runSpacing: 8,
+                children: actions,
+              ),
+            ),
           ],
         ],
       ),
