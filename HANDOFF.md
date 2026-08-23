@@ -37,7 +37,7 @@ file governs the redesign work.**
 
 ## WHERE THIS SESSION STOPPED — READ THIS FIRST
 
-The tree is **clean**, **178 commits**, nothing half-applied and nothing
+The tree is **clean**, **179 commits**, nothing half-applied and nothing
 uncommitted. **The tip is the commit that carries THIS FILE**, so the count
 above includes it. The last code commit under it is `56df087`; `f8d8839` and this commit are docs and two re-pointed test expectations.
 
@@ -85,7 +85,7 @@ fixes have not been seen in a browser — that is where it stopped.
 | | |
 |---|---|
 | **This project** | `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3` |
-| What it is | A **complete, independent fork** of MineLink, redesigned onto Material 3. Its own git repo (`main`), **178 commits**, clean tree, **no remote**. |
+| What it is | A **complete, independent fork** of MineLink, redesigned onto Material 3. Its own git repo (`main`), **179 commits**, clean tree, **no remote**. |
 | **The task list** | `MineLink-M3\M3-TASKS.md` — the single markable source of what is done. 11 ticks. |
 | **The original** | `C:\Users\Somebody Someone\Music\SHOWME!\worktree-2026-05-05T11-53-29` — **DO NOT TOUCH IT.** |
 
@@ -945,7 +945,7 @@ Continue the MineLink Material 3 redesign, exactly where the last session left o
 
 THE PATHS THAT MATTER
 
-  Work happens here (its own git repo, branch main, 178 commits, clean, NO remote):
+  Work happens here (its own git repo, branch main, 179 commits, clean, NO remote):
     C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3
 
   NEVER TOUCHED, for any reason:
@@ -978,7 +978,7 @@ HOW THE MARKABLE FILE WORKS
 
 VERIFIED STATE AT THE MOMENT THIS MESSAGE WAS WRITTEN (2026-08-23 05:45)
 
-  MineLink-M3                       178 commits, clean; the tip is the commit carrying this message (parent 56df087); M3-TASKS.md has 11 ticks
+  MineLink-M3                       179 commits, clean; the last CODE commit is 56df087; the tip is the docs commit carrying this message; M3-TASKS.md has 11 ticks
   flutter analyze                   No issues (whole tree, 05:38, after the last code commit)
   the four new test files           12/12 pass (second_driver_is_reachable, phone_title_never_breaks_a_word, link_step_names_the_requester, company_context_survives_auth_resync); each was sabotaged and bit
   dart tool/release_guards.dart     43/43 PASS; --selftest: all guards bite (new: one-spelling-for-mine-supplier)
