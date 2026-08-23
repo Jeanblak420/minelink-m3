@@ -177,7 +177,16 @@ void main() {
         expect(find.text(_longToken), findsWidgets);
         expect(find.textContaining(_longCompanyName), findsOneWidget);
         // Null company_name / role fall back to readable placeholders
-        // instead of rendering "null".
+        // instead of rendering "null". The row carrying them is the last
+        // card, and at 360px / scale 2.0 it sits below the 900px viewport
+        // since the screen gained its page header (2026-08-23) — a lazy
+        // ListView never builds it, so scroll to it rather than assume it
+        // was built.
+        await tester.dragUntilVisible(
+          find.textContaining('No company'),
+          find.byType(ListView).first,
+          const Offset(0, -300),
+        );
         expect(find.textContaining('No company'), findsOneWidget);
       });
     }
