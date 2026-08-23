@@ -48,8 +48,17 @@ class MlStatusBadge extends StatelessWidget {
         s.contains('transit') ||
         s.contains('on trip') ||
         s.contains('en route') ||
+        s.contains('in_progress') ||
+        s.contains('in progress') ||
         s.contains('pending')) {
       return MlTone.transit;
+    }
+    // An OPEN request is the reference's "pending, needs attention" (warn).
+    // `open` and `in_progress` fell through to neutral, so the token-requests
+    // queue — whose whole point is which rows are waiting on the admin —
+    // drew every pill in the same grey. Seen 2026-08-23 in the Phase 3 pass.
+    if (s == 'open' || s.startsWith('open ') || s.endsWith(' open')) {
+      return MlTone.warn;
     }
     if (s.contains('at mine') ||
         s.contains('arrived') ||

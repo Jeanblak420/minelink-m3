@@ -56,6 +56,34 @@ class _TokenRequestsScreenState extends ConsumerState<TokenRequestsScreen> {
     // screen. A test overrides it with a no-op.
     ref.watch(tokenRequestsRealtimeProvider);
     final async = ref.watch(openTokenRequestsProvider);
+    // The page header every other console screen opens with. This one went
+    // straight to the list — the same fault the token-history screen had
+    // ("opened straight onto a tab bar with no title"), found 2026-08-23 in
+    // the Phase 3 pass. The count on the right is the reference's meta.
+    final header = Padding(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+      child: MlPageHeader(
+        title: 'Token requests',
+        description:
+            'Access tokens awaiting your approval — seat expansions and '
+            'renewals, oldest first.',
+        meta: async.valueOrNull == null
+            ? null
+            : mlCount(async.value!.length, 'open request', 'open requests'),
+        padding: EdgeInsets.zero,
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        header,
+        const SizedBox(height: 14),
+        Expanded(child: _body(async)),
+      ],
+    );
+  }
+
+  Widget _body(AsyncValue<List<TokenRequest>> async) {
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => MlEmptyState(
@@ -89,7 +117,7 @@ class _TokenRequestsScreenState extends ConsumerState<TokenRequestsScreen> {
             ref.invalidate(dashboardStatsProvider);
           },
           child: ListView.separated(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
             itemCount: list.length,
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (context, i) {

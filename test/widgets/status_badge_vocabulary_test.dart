@@ -76,6 +76,22 @@ void main() {
       expect(find.text('IN PROGRESS'), findsOneWidget);
     });
 
+    test('an open request is pending (warn) and one in hand is moving (transit)',
+        () {
+      // Both fell through to neutral, so the token-requests queue drew every
+      // pill the same grey. docs/design-reference.md §2: warn = "pending,
+      // needs attention"; the blue transit tone is what is in motion.
+      expect(MlStatusBadge.toneForStatus('open'), MlTone.warn);
+      expect(MlStatusBadge.toneForStatus('in_progress'), MlTone.transit);
+      // And the specific wrongness: not neutral.
+      expect(MlStatusBadge.toneForStatus('open'), isNot(MlTone.neutral));
+      expect(MlStatusBadge.toneForStatus('in_progress'),
+          isNot(MlTone.neutral));
+      // Statuses that were already toned keep their tone.
+      expect(MlStatusBadge.toneForStatus('expired'), MlTone.error);
+      expect(MlStatusBadge.toneForStatus('approved'), MlTone.done);
+    });
+
     test('the tone still comes from the RAW string', () {
       // `toneForStatus` matches substrings including `in_progress` and
       // `sent_back`. Humanising before the match would change what it sees.

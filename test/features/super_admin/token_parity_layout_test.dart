@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/layout/app_breakpoints.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/features/profile/widgets/company_token_requests_panel.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_application_1/features/super_admin/providers/super_admin
 import 'package:flutter_application_1/features/super_admin/screens/token_history_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/token_requests_screen.dart';
 
+import '../../fixtures/console_capture_fixtures.dart';
 import '../../test_helpers/test_supabase.dart';
 
 void main() {
@@ -35,6 +37,32 @@ void main() {
 
       expect(find.byType(AppBar), findsNothing);
       expect(find.text('Queue is clear'), findsOneWidget);
+    });
+
+    testWidgets('TokenRequestsScreen opens with the page header, and its count',
+        (tester) async {
+      // This screen went straight to the list — no title, no description,
+      // no count — which no other console screen does (token history had the
+      // same fault). Found 2026-08-23 in the Phase 3 pass.
+      final three = kTokenRequests;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            openTokenRequestsProvider.overrideWith((ref) async => three),
+            tokenRequestsRealtimeProvider.overrideWithValue(null),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const Scaffold(body: TokenRequestsScreen()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final header = find.byType(MlPageHeader);
+      expect(header, findsOneWidget);
+      expect(tester.widget<MlPageHeader>(header).title, 'Token requests');
+      expect(tester.widget<MlPageHeader>(header).meta,
+          '${three.length} open requests');
     });
 
     testWidgets('TokenHistoryScreen uses in-body TabBar without AppBar', (tester) async {
