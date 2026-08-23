@@ -354,12 +354,14 @@ class _RawReconViewState extends ConsumerState<RawReconView> {
                     children: [
                       _filter(
                         'Transporter',
+                        all: 'All transporters',
                         _transporter,
                         transporters,
                         (v) => setState(() => _transporter = v),
                       ),
                       _filter(
                         'Product',
+                        all: 'All products',
                         _product,
                         products,
                         (v) => setState(() => _product = v),
@@ -410,12 +412,17 @@ class _RawReconViewState extends ConsumerState<RawReconView> {
   double _totalTons(List<RawReconRow> rows) =>
       rows.fold<double>(0, (s, r) => s + (r.netMass ?? 0));
 
+  /// [all] is the "no filter" item's own wording. It was `'All $label'`,
+  /// which read "All Transporter" and "All Product" — the field's singular
+  /// label pressed into a plural sentence. Same family as "Every load what
+  /// was hauled". Phase 3 pass, 2026-08-23.
   Widget _filter(
     String label,
     String? value,
     List<String> options,
-    ValueChanged<String?> onChanged,
-  ) {
+    ValueChanged<String?> onChanged, {
+    required String all,
+  }) {
     return SizedBox(
       width: 230,
       child: DropdownButtonFormField<String?>(
@@ -427,7 +434,7 @@ class _RawReconViewState extends ConsumerState<RawReconView> {
           isDense: true,
         ),
         items: [
-          DropdownMenuItem<String?>(value: null, child: Text('All $label')),
+          DropdownMenuItem<String?>(value: null, child: Text(all)),
           for (final o in options)
             DropdownMenuItem<String?>(value: o, child: Text(o)),
         ],
@@ -489,10 +496,18 @@ class _ExcelReconTable extends StatelessWidget {
 
   static const _cols = <_ReconCol>[
     _ReconCol('Date', flex: 20),
-    _ReconCol('Time-in', flex: 12, mono: true),
+    // 15, not 12: at the table's own minimum a flex-12 column is ~60px,
+    // and "TIME-IN" broke at its hyphen into "TIME-" over "IN" — a legal
+    // break the mid-word test allowed. Phase 3 pass, 2026-08-23.
+    _ReconCol('Time-in', flex: 15, mono: true),
     _ReconCol('Waybill', flex: 24, mono: true, code: true),
     _ReconCol('Transporter', flex: 26),
-    _ReconCol('Truck', flex: 16, mono: true, code: true),
+    // 20, not 16: a code column injects zero-width breaks so a long value
+    // wraps rather than overflows, and at flex 16 every SA registration
+    // ("CK 84 RT GP") wrapped to "CK 84 RT" over "GP" at the table's own
+    // minimum — a plate in two pieces, in the column that identifies the
+    // truck. Wide enough now for the longest plate the fixture draws.
+    _ReconCol('Truck', flex: 20, mono: true, code: true),
     _ReconCol('Destination', flex: 26),
     _ReconCol('Product', flex: 20),
     _ReconCol('Source', flex: 22),
@@ -501,7 +516,7 @@ class _ExcelReconTable extends StatelessWidget {
     _ReconCol('Delivered', flex: 16, mono: true, right: true),
     _ReconCol('Variance', flex: 16, mono: true, right: true),
     _ReconCol('POD', flex: 10),
-    _ReconCol('Time-out', flex: 12, mono: true),
+    _ReconCol('Time-out', flex: 15, mono: true),
   ];
 
   /// Column positions the row builder needs to treat specially. Named rather
@@ -635,8 +650,15 @@ class _ExcelReconTable extends StatelessWidget {
     //
     // Same conservative direction as the sibling: over-paying a little on width
     // costs a few pixels of horizontal scroll on a table that already scrolls.
+    //
+    // 1550 since 2026-08-23: the two time columns went from flex 12 to 15
+    // so "TIME-IN" stops breaking at its hyphen, and Truck from 16 to 20 so
+    // a registration stays whole, which took the table's flex from 260 to
+    // 270 — and at 1480 that cost "DELIVERED" the few pixels it had. The
+    // floor scales with the flex it was measured against;
+    // recon_table_legibility_test.dart checks it at the boundary.
     final scale = MediaQuery.textScalerOf(context).scale(16) / 16;
-    return MlWideTable(minWidth: 1480 * scale, child: table);
+    return MlWideTable(minWidth: 1550 * scale, child: table);
   }
 
   TableRow _row(

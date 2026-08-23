@@ -138,6 +138,54 @@ void main() {
     });
   }
 
+  // 2b. AND AT ITS OWN MINIMUM, NO HEADER AND NO PLATE WRAPS AT ALL.
+  //
+  // The test above allows a break at a hyphen or a space, so it was green
+  // while the 1600px render read "TIME-" over "IN" and "CK 84 RT" over "GP":
+  // legal breaks, and still a column head in two pieces and a registration
+  // split across lines in a table whose whole job is to be read down a
+  // column. Seen 2026-08-23 in the Phase 3 per-screen pass. Pumped narrow,
+  // so the scroll view sizes the table to exactly its minWidth — the
+  // boundary itself is what is checked.
+  testWidgets('at its own minimum, no header and no plate wraps at all',
+      (tester) async {
+    await pumpRecon(tester, 500);
+    final oneLine = tester.getRect(find.text('DATE')).height;
+    final wrapped = <String>[];
+    for (final h in headers) {
+      final f = find.text(h);
+      if (f.evaluate().isEmpty) continue;
+      if ((tester.getRect(f.first).height / oneLine).round() > 1) {
+        wrapped.add(h);
+      }
+    }
+    // Every plate the fixture draws, in the mono column.
+    for (final e in find.byType(Text).evaluate()) {
+      // The code column joins every character with a zero-width space so a
+      // long value can wrap; strip them before matching, or no plate is ever
+      // checked.
+      final t = ((e.widget as Text).data ?? '').replaceAll('​', '');
+      if (!RegExp(r'^[A-Z]{2} \d{2} [A-Z]{2} [A-Z]{2}$').hasMatch(t)) continue;
+      final ro = e.renderObject! as RenderBox;
+      if ((ro.size.height / oneLine).round() > 1) wrapped.add('plate $t');
+    }
+    expect(wrapped, isEmpty,
+        reason: "these sit on more than one line at the table's own "
+            "minimum width — widen the column's flex or the minWidth: "
+            '${wrapped.join(', ')}');
+  });
+
+  testWidgets('the filters offer "All transporters", not "All Transporter"',
+      (tester) async {
+    // 'All $label' pressed the field's singular label into a plural
+    // sentence. Phase 3 pass, 2026-08-23.
+    await pumpRecon(tester, 1600);
+    expect(find.text('All transporters'), findsOneWidget);
+    expect(find.text('All products'), findsOneWidget);
+    expect(find.text('All Transporter'), findsNothing);
+    expect(find.text('All Product'), findsNothing);
+  });
+
   // 3. AND A FIGURE MUST NOT BREAK EITHER, AT ANY TEXT SIZE.
   //
   // The header fix of 2026-08-20 raised `minWidth` to a MEASURED 1480 — measured
