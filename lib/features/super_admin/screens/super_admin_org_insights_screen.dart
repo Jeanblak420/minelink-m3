@@ -2424,7 +2424,7 @@ class _MovementChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final n = series.length;
     // Axis ticks every 4th day, plus a trailing "Today" like the design.
-    final ticks = <int>[for (var i = 0; i < n - 1; i += 4) i];
+    final ticks = movementAxisTicks(n);
 
     Widget legendItem(String label, Color color, {bool dashed = false}) => Row(
       mainAxisSize: MainAxisSize.min,
@@ -2713,6 +2713,25 @@ class _LegendDashPainter extends CustomPainter {
       old.color != color || old.dashed != dashed;
 }
 
+/// Which day indices the movement chart labels along its axis.
+///
+/// Every 4th day from the 1st — and none within the last fifth of the axis,
+/// because "Today" is right-aligned there and a tick that close collides with
+/// it: on a 14-day month-to-date the 13th tick sat at 92% and the axis read
+/// "1Today". Seen 2026-08-23 in the Phase 3 pass. Public so a test can ask.
+List<int> movementAxisTicks(int n) => <int>[
+      for (var i = 0; i < n - 1; i += 4)
+        if (n <= 2 || i / (n - 1) <= 0.8) i,
+    ];
+
+/// Where the reference-line caption sits: its left edge at the chart's left
+/// edge, just above the line — or just below it when the line runs within a
+/// caption's height of the top, where the end-of-series pill already is.
+Offset movementCaptionOffset(Size chart, double lineY, Size caption) {
+  final above = lineY - caption.height - 5;
+  return Offset(0, above >= 34 ? above : lineY + 5);
+}
+
 class _MovementChartPainter extends CustomPainter {
   final List<double> series;
   final List<double> prevSeries;
@@ -2773,7 +2792,13 @@ class _MovementChartPainter extends CustomPainter {
           ),
           textDirection: ui.TextDirection.ltr,
         )..layout();
-        tp.paint(canvas, Offset(size.width - tp.width, ry - tp.height - 5));
+        // At the LEFT end of the line, as the v2 overview draws its
+        // "TARGET 903 T/DAY" pill — not the right end, where the
+        // end-of-series pill, the curve's last point and the day axis all
+        // already are. Right-anchored it sat on the spike, and with a low
+        // reference it ran into the axis labels. Phase 3 pass, 2026-08-23.
+        final at = movementCaptionOffset(size, ry, tp.size);
+        tp.paint(canvas, at);
       }
     }
 

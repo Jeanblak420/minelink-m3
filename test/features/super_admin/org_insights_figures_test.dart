@@ -43,8 +43,8 @@ void main() {
     );
   });
 
-  Future<void> pumpInsights(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(1600, 2400);
+  Future<void> pumpInsights(WidgetTester tester, {double width = 1600}) async {
+    tester.view.physicalSize = Size(width, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(ProviderScope(
@@ -187,6 +187,57 @@ void main() {
     }
     return null;
   }
+
+  // ── The movement chart's axis and target caption ──────────────────────
+  //
+  // Seen 2026-08-23 in the Phase 3 pass: on a 14-day month-to-date the 13th
+  // day's tick sat at 92% of the axis and ran into the right-aligned "Today"
+  // ("1Today"), and the TARGET caption was right-anchored onto the spike and
+  // the end-of-series pill. The v2 overview draws its target pill at the
+  // line's LEFT end.
+  test('no axis tick lands in the last fifth of the axis, where Today is', () {
+    for (final n in [5, 10, 14, 17, 21, 31]) {
+      for (final t in movementAxisTicks(n)) {
+        expect(t / (n - 1), lessThanOrEqualTo(0.8),
+            reason: 'day ${t + 1} of $n would collide with "Today"');
+      }
+      // And the axis still has ticks — the first is always day 01.
+      expect(movementAxisTicks(n).first, 0);
+    }
+    expect(movementAxisTicks(14), isNot(contains(12)));
+    expect(movementAxisTicks(31), [0, 4, 8, 12, 16, 20, 24]);
+  });
+
+  test('the target caption is left-anchored and clear of the top pill', () {
+    const chart = Size(400, 150);
+    const caption = Size(80, 12);
+    // A line well down the chart: caption just above it, at the left.
+    expect(movementCaptionOffset(chart, 100, caption), const Offset(0, 83));
+    // A line near the top: above would sit in the 34px headroom the
+    // end-of-series pill occupies, so it goes below the line instead.
+    expect(movementCaptionOffset(chart, 40, caption).dy, 45);
+    expect(movementCaptionOffset(chart, 40, caption).dx, 0);
+  });
+
+  testWidgets('the last day tick and "Today" do not overlap', (tester) async {
+    // 1320 is what the console shell leaves a 1600px window — the width the
+    // render is photographed at, where the collision showed.
+    await pumpInsights(tester, width: 1320);
+    final today = tester.getRect(find.text('Today').first);
+    var checked = 0;
+    for (final e in find.byType(Text).evaluate()) {
+      final t = (e.widget as Text).data ?? '';
+      if (!RegExp(r'^\d{2}$').hasMatch(t)) continue;
+      final r = tester.getRect(find.byWidget(e.widget));
+      if ((r.top - today.top).abs() > 2) continue; // not on the axis row
+      checked++;
+      expect(r.right, lessThan(today.left - 4),
+          reason: 'tick "$t" runs into "Today"');
+    }
+    expect(checked, greaterThan(0),
+        reason: 'no axis tick was found on the "Today" row — the check '
+            'examined nothing');
+  });
 
   testWidgets('the control-room readouts are not zero-padded', (tester) async {
     await pumpInsights(tester);
