@@ -61,6 +61,11 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
   RealtimeChannel? _employeeChannel;
   String? _lastSyncedCompanyUserId;
 
+  /// The user the last AuthState emission was for, company user or employee.
+  /// An employee's managed context is cleared only when this CHANGES — see
+  /// `_handleAuthStateChanged`.
+  String? _lastSeenUserId;
+
   CompanyNotifier(
     this._companyService,
     this._companyDatabaseService,
@@ -131,11 +136,40 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
     final user = authState.user;
     final isCompanyUser = authState.userType?.isCompany == true;
 
-    if (user == null || !isCompanyUser) {
+    if (user == null) {
       _lastSyncedCompanyUserId = null;
+      _lastSeenUserId = null;
       clearContext();
       return;
     }
+
+    if (!isCompanyUser) {
+      // An EMPLOYEE. The context this notifier holds for them is the managed
+      // company an admin or manager works in, loaded by the portal shell
+      // through `loadManagedCompanyContext` — not by this listener. It used
+      // to be wiped here on EVERY AuthState emission, and AuthState re-emits
+      // far more often than a sign-in: the auth notifier re-syncs on every
+      // change to the user's own `profiles` row, and the chat presence
+      // heartbeat writes `last_seen_at` there every 45 s. So every 45 s an
+      // admin's company context went to null, `portalWorkspaceProvider` left
+      // `ready`, the whole portal body was torn down and rebuilt, and the
+      // shell loaded the context again — the dashboard re-read its feeds, the
+      // chat dock closed, and any scroll or form state in the body was lost.
+      // Owners never saw it: they are company users and take the other path.
+      //
+      // Driven on 2026-08-23 as ironhills.admin: semantics node count
+      // 142 → 6 → 31 → 129 at 05:26:47, 05:27:32 and 05:28:16, each one
+      // paired with a "Synced auth state" line in the console and a
+      // `profiles.last_seen_at` 45 s heartbeat. Clear only when the USER
+      // changed — a different employee, or somebody signing in over them.
+      if (_lastSeenUserId != null && _lastSeenUserId != user.id) {
+        clearContext();
+      }
+      _lastSeenUserId = user.id;
+      _lastSyncedCompanyUserId = null;
+      return;
+    }
+    _lastSeenUserId = user.id;
 
     final alreadyLoadedForUser = state.company?.userId == user.id;
     if (state.isLoading ||
