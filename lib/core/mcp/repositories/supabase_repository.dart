@@ -1,13 +1,27 @@
 import 'package:flutter_application_1/core/config/supabase_config.dart';
 import 'package:flutter_application_1/core/mcp/models/supabase_model.dart';
 import 'package:flutter_application_1/core/utils/logger.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Base repository for interacting with Supabase
 ///
 /// This class provides common CRUD operations for Supabase tables.
 /// It is designed to be extended by specific repositories for each model.
 abstract class SupabaseRepository<T extends SupabaseModel> {
-  final supabase = SupabaseConfig.client;
+  /// The client, resolved ON USE rather than at construction.
+  ///
+  /// It was `final supabase = SupabaseConfig.client;` — a field
+  /// initialiser, which runs the moment a repository is built and reads
+  /// `Supabase.instance.client`. That throws unless `Supabase.initialize`
+  /// has already run, so **no repository in this product could be
+  /// constructed in a test at all**, however little of it a test wanted to
+  /// reach. `EmployeeRepository.getByCompanyId` answers a warm cache
+  /// without touching the network; there was no way to prove that, and
+  /// the paging bug below lived in exactly that path.
+  ///
+  /// A getter is source-compatible with every read of the field, resolves
+  /// the same singleton, and costs a static property lookup.
+  SupabaseClient get supabase => SupabaseConfig.client;
   final _logger = LoggerFactory.getLogger('SupabaseRepository');
 
   /// The table name in Supabase
