@@ -828,3 +828,62 @@ looks like an endless spinner while its network requests complete normally.
 Measured before any app code was suspected. `--headless=new` (same profile,
 so the session survives) renders at 39 rAF/s and the Trip tab appeared in
 8 s.
+
+### The request → approve → link → dispatch chain, driven from the four forms
+
+Every field typed through the real forms over CDP, against live data, with
+the phone asleep and then awake beside it:
+
+- **Mine → Request transportation** (Ongoing, seals, 24 h, R 680 / ton) →
+  `18800451`. **Mine → Request buyers** (FOB, R 2350, the map picker —
+  `place_index` answered "Steelpoort" with six results and the field saved a
+  `?q=lat,lng` link — three lab PDFs added two-together then one-by-one, a
+  photo) → `5dc2579d`, four objects in `request_docs`. **Buyer → Request
+  transportation** (Single request, operating hours 05:30–18:00 set in the
+  time pickers, 27 Aug → 30 Sep in the date pickers) → `d40a9d3e`. **Buyer →
+  Request products** → `34eba1e9`.
+- **The revision loop** on `18800451`: sent back with a note → the mine saw
+  `NEEDS YOUR ACTION · SENT BACK`, the note, `Edit & resubmit`, the pre-filled
+  form with its `Returned for changes` banner → edited → `resubmitted` →
+  approved.
+- **All four inboxes** rendered the submissions read-only; the product inbox
+  carries the `0 · Complete the order` step an enquiry needs.
+- **Linking twice** through the five-step gate exactly as §4 specifies, with
+  the preview naming every field and the transporter's price only. Server
+  side per dispatch: a `routes` row (seals and operating hours carried), a
+  `margin_ledger` row, a `request_dispatches` row at the transporter price, a
+  capped `stockpiles` row at 0, and the three notification kinds — mine
+  `New stockpile to prepare`, transporter `New order assigned`, buyer `Order
+  accepted & dispatched` (the buyerless order correctly raised no buyer
+  notice).
+- **Transporter accept + allocation**: the route sheet shows `R 620.00` and
+  nothing of the margin; `Accept 1 truck` → `accepted`, trip `b9189cd5`
+  scheduled on S6W001GP; a second driver added to KVK007MP through
+  `DriverAssignmentDialog`, which fired the order-aware notification to him.
+- The driver then **started the route on the handset**, security checked the
+  truck in on the web, and the controller's phone showed the on-site truck
+  card — which is how Phase 1(b) and 1(c) got their long-pill and truck-row
+  evidence.
+
+### Three defects, found by driving that chain
+
+1. **The second driver on a truck was unreachable** (`69f6738`). The Fleet
+   register swapped Assign for Unassign the moment a driver was on, and the
+   Trucks-on-route card offered the dialog only under its no-driver warning;
+   `DriverAssignmentDialog`'s cap and "request more" path had no entry point.
+   Pinned by `second_driver_is_reachable_test.dart`, sabotaged both ways.
+2. **The phone title broke mid-word** (`705843a`) — `Load co` / `ntroller`,
+   `Compli` / `ance`, `Reconci` / `liations` on the SM-G780G at Jean's font.
+   The bar now measures the title against the room beside the icons and drops
+   it onto its own full-width row (M3's medium top app bar) only when a word
+   would otherwise split. Pinned by `phone_title_never_breaks_a_word_test.dart`.
+3. **"Buyer asked for" on a mine-raised request** (`22eb90b`). Pinned by
+   `link_step_names_the_requester_test.dart` over the real review screen.
+
+### A server-side gap, recorded for the shipping app
+
+`accept_request_dispatch` notifies only the transporter's admins, and only
+about DRIVERLESS trucks. A driver already on the allocated truck is told
+nothing about the new scheduled trip — measured: S6W001GP accepted with
+Driver Test on it, 0 driver notifications. The order-aware notice exists but
+fires only from `add_vehicle_driver`. Added to Phase 5.
