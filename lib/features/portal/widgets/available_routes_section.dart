@@ -56,9 +56,30 @@ class AvailableRoutesSection extends ConsumerWidget {
                     for (final r in routes)
                       ActionChip(
                         avatar: const Icon(Icons.alt_route_outlined, size: 16),
+                        // A LABEL THAT CANNOT FIT ELLIPSISES; IT IS NOT CUT.
+                        //
+                        // On a 412px phone this read `RT-0042 · Iron Hills
+                        // Mining → Richards Bay · perm` — truncated mid-word,
+                        // with no ellipsis to say so.
+                        //
+                        // NOT an overflow, and not the `Wrap` trap it looks
+                        // like. `RenderWrap` DOES bound its children to the
+                        // row, and measurement confirms it: the chip lays out
+                        // at 33..379 inside a card at 16..396, with or without
+                        // any constraint of our own (a `ConstrainedBox` was
+                        // tried here first and was a no-op). What overran was
+                        // the LABEL inside the correctly-bounded chip: with no
+                        // `maxLines`/`overflow`, `Chip` clips its label rather
+                        // than shortening it, and clipping is silent — no
+                        // stripe, nothing in the layout sweeps.
+                        //
+                        // The route NUMBER leads the label, so what survives
+                        // the truncation is the identifier.
                         label: Text(
                           '${r.routeNumber} · ${r.routeLabel}'
                           '${r.permanent ? ' · permanent' : ''}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 12),
                         ),
                         onPressed: !enabled
