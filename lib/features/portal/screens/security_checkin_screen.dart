@@ -226,51 +226,22 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ---- Kit header: brand chip + title + subtitle ----
-                  Row(
-                    children: [
-                      Container(
-                        width: 46,
-                        height: 46,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [MlTokens.cyan400, MlTokens.cyan600],
-                          ),
-                          borderRadius: MlShape.radiusLarge,
-                        ),
-                        child: const Icon(
-                          Icons.local_shipping_rounded,
-                          size: 24,
-                          color: MlTokens.inkOnFill,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Mine Security',
-                              style: context.mlText.titleLarge.copyWith(
-                                color: semantic.textStrong,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            Text(
-                              'Gate control — arrivals & departures',
-                              style: context.mlText.bodyMedium.copyWith(
-                                color: semantic.textMuted,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  // ---- Page header ----
+                  //
+                  // `MlPageHeader`, like the Load Controller's "Mine Control"
+                  // next door. Until 2026-08-23 this was a hand-rolled
+                  // 22px sans ExtraBold beside a gradient brand chip — the
+                  // one portal title not in the display face, on the screen
+                  // whose sibling already was (the class the console pass
+                  // found on six screens, HANDOFF §3.25). The meta is the
+                  // one fact a guard reads first.
+                  MlPageHeader(
+                    title: 'Mine Security',
+                    description: 'Gate control — arrivals & departures',
+                    meta: '${onSite.length + loadedReady.length} on site · '
+                        '${inbound.length} inbound',
+                    padding: const EdgeInsets.only(bottom: 16),
                   ),
-                  const SizedBox(height: 16),
                   TextField(
                     controller: _controller,
                     textCapitalization: TextCapitalization.characters,
@@ -329,7 +300,7 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                           child: _MiniStat(
                             icon: Icons.shield_outlined,
                             value: '${onSite.length + loadedReady.length}',
-                            label: 'At Mine',
+                            label: 'At mine',
                             tone: MlTone.atMine,
                           ),
                         ),
@@ -338,7 +309,7 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                           child: _MiniStat(
                             icon: Icons.check_circle_outline,
                             value: '$departedToday',
-                            label: 'Departed Today',
+                            label: 'Departed today',
                             tone: MlTone.done,
                           ),
                         ),
@@ -411,8 +382,7 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                     ..._orderedGateSections(
                       arrivals: _GateSection(
                         icon: Icons.login_rounded,
-                        iconColor: MlTokens.accent,
-                        title: 'Incoming Trucks — Mark Arrival',
+                        title: 'Incoming trucks — mark arrival',
                         child: inbound.isEmpty
                             ? _EmptyLine(
                                 'No incoming trucks right now — new arrivals appear here.',
@@ -432,7 +402,7 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                                       trip: inbound[i],
                                       tone: MlTone.transit,
                                       action: MlButton.go(
-                                        label: 'Mark Arrived',
+                                        label: 'Mark arrived',
                                         icon: Icons.login_rounded,
                                         expand: true,
                                         onPressed: () =>
@@ -452,8 +422,7 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                       ),
                       departures: _GateSection(
                         icon: Icons.shield_outlined,
-                        iconColor: MlTokens.orange600,
-                        title: 'At Mine — Mark Departure',
+                        title: 'At mine — mark departure',
                         child: (onSite.isEmpty && loadedReady.isEmpty)
                             ? _EmptyLine('No trucks at the mine right now.')
                             : Column(
@@ -474,7 +443,7 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                                         loadedReady[i].status.label,
                                       ),
                                       action: MlButton.leave(
-                                        label: 'Mark Left',
+                                        label: 'Mark left',
                                         icon: Icons.logout_rounded,
                                         expand: true,
                                         onPressed: () => _markGone(
@@ -514,7 +483,7 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           MlSectionTitle(
-                            'Recent Activity',
+                            'Recent activity',
                             meta: mlCount(recent.length, 'trip'),
                             icon: Icons.history_rounded,
                             margin: const EdgeInsets.only(bottom: 8),
@@ -695,7 +664,7 @@ class _PendingGateConfirmationsState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             MlSectionTitle(
-              'Pending Gate Confirmations',
+              'Pending gate confirmations',
               meta: mlCount(rows.length, 'awaiting sign-off'),
               icon: Icons.verified_user_outlined,
               margin: const EdgeInsets.only(bottom: 4),
@@ -854,41 +823,32 @@ class _MiniStat extends StatelessWidget {
 
 class _GateSection extends StatelessWidget {
   final IconData icon;
-  final Color iconColor;
   final String title;
   final Widget child;
 
   const _GateSection({
     required this.icon,
-    required this.iconColor,
     required this.title,
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
-    final semantic = MlSemantic.of(context);
     return MlCard(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 20, color: iconColor),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  title,
-                  style: context.mlText.titleMedium.copyWith(
-                    color: semantic.textStrong,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ],
+          // The section heading in the reference's vocabulary — Fraunces via
+          // `MlSectionTitle`, as "Pending gate confirmations" and "Recent
+          // activity" on this same screen already are. It was a 16px sans
+          // ExtraBold row until 2026-08-23, so one screen headed its four
+          // sections in two faces.
+          MlSectionTitle(
+            title,
+            icon: icon,
+            margin: const EdgeInsets.only(bottom: 12),
           ),
-          const SizedBox(height: 12),
           child,
         ],
       ),

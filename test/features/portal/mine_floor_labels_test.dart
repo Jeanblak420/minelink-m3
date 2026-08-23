@@ -82,7 +82,7 @@ void main() {
           'x $scale', (tester) async {
         await pumpGate(tester, width: width, textScale: scale);
 
-        for (final label in const ['Incoming', 'At Mine', 'Departed Today']) {
+        for (final label in const ['Incoming', 'At mine', 'Departed today']) {
           final found = truncations(tester, label);
           expect(found, isNotEmpty,
               reason: '"$label" is not on the gate screen at all. If a chip '
