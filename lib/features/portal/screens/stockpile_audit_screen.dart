@@ -10,7 +10,8 @@ import 'package:flutter_application_1/features/portal/providers/stockpile_ledger
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
 import 'package:flutter_application_1/features/portal/widgets/premium_overview_widgets.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
-import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
+import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
 /// Permanent stockpile audit trail: per-buyer balances and the full,
@@ -53,24 +54,22 @@ class StockpileAuditScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Buyer allocations',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w800)),
-                const SizedBox(height: 12),
+                // Section headings in the reference's vocabulary — both
+                // were 22px sans ExtraBold, with the sub-line a separate
+                // Text. Phase 3 mine pass, 2026-08-23.
+                MlSectionTitle(
+                  'Buyer allocations',
+                  meta: mlCount(buyerList.length, 'buyer'),
+                  margin: const EdgeInsets.only(bottom: 12),
+                ),
                 for (final b in buyerList) _BuyerBalanceCard(buyer: b, ledger: ledger),
                 const SizedBox(height: 24),
-                Text('Transactions',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w800)),
-                const SizedBox(height: 4),
-                Text('Newest first · append-only',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant)),
-                const SizedBox(height: 12),
+                MlSectionTitle(
+                  'Transactions',
+                  subtitle: 'Newest first · append-only',
+                  meta: mlCount(ledger.transactions.length, 'entry', 'entries'),
+                  margin: const EdgeInsets.only(bottom: 12),
+                ),
                 if (ledger.transactions.isEmpty)
                   Text('No transactions yet.',
                       style: TextStyle(color: scheme.onSurfaceVariant))
@@ -193,12 +192,14 @@ class _Stat extends StatelessWidget {
                   .bodySmall
                   ?.copyWith(color: scheme.onSurfaceVariant)),
           const SizedBox(height: 2),
+          // Mono: a figure in a column (design-reference §3).
           Text(
             value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: emphasize ? PortalColors.accent : scheme.onSurface,
-                ),
+            style: context.mlText.code(
+              size: MlTokens.fsH3,
+              weight: FontWeight.w700,
+              color: emphasize ? PortalColors.accent : scheme.onSurface,
+            ),
           ),
         ],
       ),
@@ -218,8 +219,12 @@ class _TxnRow extends StatelessWidget {
     // theme was. On the dark stockpile ledger that put `-36.22 t` at 3.28:1
     // and `+64.62 t` at 3.60:1 — the tonnage, which is the only number on the
     // row anyone came to read. `MlTone` is the brightness-aware pair, and it
-    // carries the lifecycle meaning too: out is an error tone, in is done.
-    final tone = (isOut ? MlTone.error : MlTone.done)
+    // carries the lifecycle meaning too. A load-out is WARN, not error: it
+    // is a normal movement — the reference reserves red for a fault and
+    // makes a downward figure amber (design-reference §4, "negative deltas
+    // are amber, not red"). Every "Loaded out" row on the trail used to
+    // draw in the fault colour. Phase 3 mine pass, 2026-08-23.
+    final tone = (isOut ? MlTone.warn : MlTone.done)
         .colors(Theme.of(context).brightness);
     final color = tone.fg;
     return Padding(
@@ -267,8 +272,10 @@ class _TxnRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
+                  // The plate is one token: with plain spaces a phone broke
+                  // "truck CK 84 RT" / "GP" across two lines.
                   '${MlTime.stamp(txn.at)}'
-                  '${txn.truckReg != null ? ' · truck ${txn.truckReg}' : ''}',
+                  '${txn.truckReg != null ? ' · truck ${txn.truckReg!.replaceAll(' ', ' ')}' : ''}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: scheme.onSurfaceVariant),
                 ),
@@ -281,7 +288,10 @@ class _TxnRow extends StatelessWidget {
             children: [
               Text(
                 '${txn.delta >= 0 ? '+' : '−'}${formatTons(txn.magnitude)}',
-                style: TextStyle(fontWeight: FontWeight.w800, color: color),
+                style: context.mlText.code(
+                  weight: FontWeight.w700,
+                  color: color,
+                ),
               ),
               Text('bal ${formatTons(txn.balanceAfter)}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
