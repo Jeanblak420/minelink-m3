@@ -21,6 +21,10 @@ class OrganizationManagementScreen extends ConsumerStatefulWidget {
   final String? initialStatusFilter;
   const OrganizationManagementScreen({super.key, this.initialStatusFilter});
 
+  /// The pagination footer, so a test can measure that its hairline spans the
+  /// table rather than the pager.
+  static const paginationFooterKey = Key('organizations-pagination-footer');
+
   @override
   ConsumerState<OrganizationManagementScreen> createState() =>
       _OrganizationManagementScreenState();
@@ -101,6 +105,13 @@ class _OrganizationManagementScreenState
         children: [
           MlPageHeader(
             title: 'Organizations',
+            // 52 of the 53 page headers in the tree carried a description and
+            // this one did not — the registry opened on a bare title while
+            // every section of the dashboard beside it says what it lists.
+            // Found 2026-08-23 in the Phase 3 pass against the reference's
+            // section-header pattern (docs/design-reference.md §4).
+            description: 'Every registered company — its type, its seats '
+                'and how long its access token has left.',
             meta: orgsAsync.valueOrNull == null
                 ? null
                 : mlCount(orgsAsync.value!.length, 'company', 'companies'),
@@ -350,6 +361,13 @@ class _OrganizationManagementScreenState
           ),
         // ── Pagination footer ──
         Container(
+          key: OrganizationManagementScreen.paginationFooterKey,
+          // The Wrap below sizes to its content (CLAUDE.md §10.4), and so did
+          // this Container around it: the hairline it draws ran 475px under a
+          // 1240px table, stopping mid-panel beside the pager while every row
+          // separator above it spanned the panel. Photographed 2026-08-23 in
+          // the Phase 3 pass. The footer has to claim the row first.
+          width: double.infinity,
           margin: const EdgeInsets.only(top: 16),
           padding: const EdgeInsets.only(top: 16),
           decoration: BoxDecoration(

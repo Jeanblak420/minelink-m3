@@ -100,6 +100,33 @@ void main() {
             'the edge.');
   });
 
+  testWidgets('the pagination footer spans the table, not the pager',
+      (tester) async {
+    // The footer is a bordered Container around a Wrap, and a Wrap sizes to
+    // its content (CLAUDE.md §10.4) — so the hairline it draws used to run
+    // 475px under a 1240px table, stopping mid-panel beside the pager while
+    // every row separator above it spanned the panel. Seen 2026-08-23 in the
+    // Phase 3 per-screen pass. Geometry, not overflow: nothing threw.
+    await pumpRegistry(tester, 1600);
+    final footer = tester.getRect(
+        find.byKey(OrganizationManagementScreen.paginationFooterKey));
+    final table = tester.getRect(find.byType(MlWideTable).first);
+    expect(footer.left, closeTo(table.left, 1));
+    expect(footer.right, closeTo(table.right, 1),
+        reason: 'the footer hairline stops at the pager instead of the '
+            'table edge — the Container has shrunk to its Wrap again');
+  });
+
+  testWidgets('the page header says what the registry lists', (tester) async {
+    // docs/design-reference.md §4: title, then a meta line under it. 52 of
+    // the 53 page headers had one; this, the console's front door, did not.
+    await pumpRegistry(tester, 1600);
+    final header = tester.widget<MlPageHeader>(find.byType(MlPageHeader));
+    expect(header.description, isNotNull);
+    expect(header.description!.trim(), isNotEmpty);
+    expect(find.textContaining('Every registered company'), findsOneWidget);
+  });
+
   testWidgets('and it does NOT scroll on a desktop', (tester) async {
     // A scrollbar over content that fits is a promise of more. 620 is what the
     // content needs; a 1600px console is far above it.
