@@ -929,3 +929,82 @@ session made. The APK on the handset (`1ad4c725`) carries the first three.
   43/43 + selftest; everything else on the Phase 0 list is owed first thing
   next session, including both builds.
 - Phases 3–7 are untouched, as before.
+
+## Current state — 2026-08-23 (third session) — the gate, the browser look, the chat finished, Phase 2 closed
+
+### The owed gate, run in full
+
+`flutter analyze` clean · `flutter test` 2481 passed / 1 skipped / 9 failed, the
+nine being exactly the goldens that moved on purpose in `69f6738` and `56df087`,
+regenerated with `--update-goldens`, each diffed against HEAD with PIL and looked
+at (`eb2276d`: the group icon, 1148 px on the phone fleet; 132 px of scrollbar
+thumb on desktop because the table grew by the icon's width; `Mine / Supplier`
+→ `Mine/Supplier` on six) · guards 43/43, `--selftest` all bite · `_sabotage.py`
+all three caught · `type_scale_codemod --selftest` OK · `dropdown_width_check`
+clean · `glyph_coverage_check` clean · `one_clock_check` 0 sites, selftest bites
+· `unphotographed_screens` 94/94 · `health_probe` 6/7 then 7/7 — the extras
+project's `search_place_index` timed out twice on the first run (cold after an
+idle stretch) and answered in 1.16 s on the retry · `flutter build web
+--release` 73.6 s · `flutter build apk --debug` 43.4 s.
+
+### The five fixes, seen in a browser on the rebuilt web
+
+- `f225278` — as `ironhills.admin`, the dock opened at 08:37:21 and held for
+  181 s through four presence heartbeats. The console still logs `Synced auth
+  state` every 45 s (+17, +63, +108, +152 s) — that is the auth notifier doing
+  what it always did — but the semantics node count read 142 at every minute and
+  the +181 s screenshot shows the dock open. Before the fix the count went
+  142 → 6 → 31 → 129 on each beat.
+- `56df087` — `Organisation type · Mine/Supplier` on the contact profile.
+- `69f6738` — as `roadhaul.admin`, `Manage drivers` on both assigned trucks;
+  on S6W001GP it opens `Drivers — S6W001GP · 1/2 drivers assigned`.
+- `22eb90b` — as `jean@cyberhouse.co.za`, on a mine-raised request raised from
+  the mine's own form this session (500 t, north stockyard → Richards Bay,
+  `REQUESTED` → `APPROVED`, deliberately not dispatched): `1 · Supplying mine —
+  Mine asked for: "Iron Hills Mining - north stockyard"`.
+- `705843a` — already re-seen on glass (Phase 1).
+
+### One more defect, found by looking at `56df087`
+
+**The profile panel's Role row never said the role** (`31b07cb`). Opening
+Controller Test's profile read `Role · Company member` — a weighbridge
+controller, while the Contacts list beside it had grouped the same person under
+CONTROLLERS from the same RPC field. `ChatContact.roleLabel` now carries the
+rule beside `blockedLabel`, through `UserRole.labelFor`; pinned by
+`chat_contact_role_label_test.dart` (7 cases; sabotaged: 4 fail, the 3 that must
+survive do). Re-seen: Admin Test's profile reads `Role · Admin`.
+
+### The chat, finished
+
+Two headless Chromes, `ironhills.owner` (9222, desktop) and `ironhills.admin`
+(9223, desktop then 412×915). Presence `Online` in both lists and both thread
+headers. Reply with a quote: hover → floating `Reply` → quote bar → sent; the
+owner's bubble carries the quote block; `chat_messages.649d61d8.reply_to_id =
+1c1dc7b5`. @mention: `@Adm` → picker with three matches → `@Admin Test · Iron
+Hills Mining` → chip on both sides; row `93bac70e.mentions = [{user_id,
+display_name}]`; tapping the chip on the owner's side opened the admin's
+profile. Phone width: the dock reflowed above the bottom nav; the admin typed
+there and the owner's desktop showed `Admin Test is typing…` (header) and
+`Admin is typing…` (above the composer); the message landed (`b4d3f93b`).
+Attachments both directions: the owner's image (previous session) and the
+admin's `lab-sizing-2026-08-23.pdf` from phone width through `Attach a file or
+image` (`92ecf5b8`, `file_type file`). Every row `delivered` and `read`.
+
+Observed and left alone, because the shipping app does the same: the composer
+shows the raw `@[Name](user:uuid)` token while typing (its line 3324 inserts
+the identical string); tapping one's own mention is a no-op (the caller is never
+in the contacts list).
+
+Looked at and NOT defects: `fa243ad` on a Trucks-on-route card is a real
+registration typed into a test HILUX (trailers `asf324g` / `142ghg42`); the
+fleet stat-card captions `all_vehicles` / `carrying_a_load` / `ready_to_allocate`
+/ `not_in_service` are the reference's deliberate mono texture
+(`docs/design-reference.md` §3, "a deliberate texture, not a bug"); an admin
+cannot start a DM with the owner (`Message an admin`) by the P10-07 hierarchy.
+
+### What is NOT proven
+
+- Phase 3 (the per-screen design pass) is untouched.
+- Phases 4–7 remain blocked on Jean, as before.
+- The approved request above is live test data awaiting a dispatch nobody has
+  asked for.
