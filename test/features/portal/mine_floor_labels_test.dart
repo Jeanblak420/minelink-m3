@@ -128,7 +128,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    const heading = 'Trucks at Mine — Ready for Loading';
+    const heading = 'Trucks at mine — ready for loading';
     final found = truncations(tester, heading);
     expect(found, isNotEmpty,
         reason: 'the weighbridge heading is not on screen — the fixture stopped '

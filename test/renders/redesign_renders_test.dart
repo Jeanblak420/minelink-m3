@@ -4748,7 +4748,7 @@ void main() {
       await shootDialog(
         tester,
         const LoadControllerScreen(),
-        'Record Load',
+        'Record load',
         const Size(412, 915),
         'dialog-record-load-phone-dark',
         orgType: OrgType.mineSupplier,

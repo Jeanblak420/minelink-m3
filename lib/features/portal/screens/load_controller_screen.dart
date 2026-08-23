@@ -52,7 +52,7 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
     _panelOpen = true;
     await showMlSlideOver<void>(
       context,
-      title: 'Record Load — ${trip.reg}',
+      title: 'Record load — ${trip.reg}',
       width: 460,
       child: _RecordLoadSheet(companyId: companyId, trip: trip),
     );
@@ -139,19 +139,19 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
                 columnsFor: (w) => w > 980 ? 4 : (w > 620 ? 2 : 1),
                 children: [
                   MlStatCard(
-                    label: 'Ready for Loading',
+                    label: 'Ready for loading',
                     value: '${onSite.length}',
                     icon: Icons.local_shipping_outlined,
                     tone: MlTone.accent,
                   ),
                   MlStatCard(
-                    label: 'Loads Recorded',
+                    label: 'Loads recorded',
                     value: '${loaded.length}',
                     icon: Icons.description_outlined,
                     tone: MlTone.transit,
                   ),
                   MlStatCard(
-                    label: 'Avg Tons / Load',
+                    label: 'Avg tons / load',
                     value: avgTons == null ? '—' : formatTons(avgTons),
                     // A mass metric, so a scale — not the clock this carried,
                     // which read as a duration (P8-26).
@@ -159,7 +159,7 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
                     tone: MlTone.done,
                   ),
                   MlStatCard(
-                    label: 'Inbound Trucks',
+                    label: 'Inbound trucks',
                     value: '${inbound.length}',
                     icon: Icons.pending_actions_outlined,
                     tone: MlTone.atMine,
@@ -172,7 +172,7 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     MlSectionTitle(
-                      'Trucks at Mine — Ready for Loading',
+                      'Trucks at mine — ready for loading',
                       icon: Icons.balance_outlined,
                       meta: mlCount(matches.length, 'truck'),
                     ),
@@ -207,7 +207,7 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    MlSectionTitle('Recent Loads',
+                    MlSectionTitle('Recent loads',
                         meta: avgTons == null
                             ? mlCount(loaded.length, 'load')
                             : '${mlCount(loaded.length, 'load')} · '
@@ -403,7 +403,7 @@ class _ReadyTruckRow extends StatelessWidget {
           children: [
             MlStatusBadge.forStatus(trip.status.label),
             MlButton.primary(
-              label: 'Record Load',
+              label: 'Record load',
               icon: Icons.inventory_2_outlined,
               compact: true,
               onPressed: onRecord,
