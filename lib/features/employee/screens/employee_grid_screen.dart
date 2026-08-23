@@ -9,7 +9,13 @@ import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-/// Provider for the list of employees by company ID
+/// Every person on a company's roster — the whole list, not a page of it.
+///
+/// Declared here since the screen was written and read by nothing until
+/// 2026-08-23, when the page header gained the meta line §5.4 asks every
+/// header for. It costs no extra round trip: `getByCompanyId` selects the
+/// company's whole roster whatever page is asked for, and caches it, so
+/// the grid's own first page has already paid for this.
 final employeesByCompanyProvider =
     FutureProvider.family<List<EmployeeMCP>, String>((ref, companyId) async {
       final repository = ref.watch(employeeRepositoryProvider);
@@ -29,6 +35,12 @@ class EmployeeGridScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // The roster behind the meta line. `null` until it resolves — a header
+    // with no meta yet is right; a header reading "0 people" for a frame is
+    // not (§5.7: an empty state must SAY it is empty, and this one is not
+    // empty, it is unread).
+    final roster = ref.watch(employeesByCompanyProvider(companyId));
+
     // NO `Scaffold(appBar:)` — `/employees/:companyId` is a leaf of the portal
     // `ShellRoute`, whose top bar already names the company.
     return Column(
@@ -37,8 +49,18 @@ class EmployeeGridScreen extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
           child: MlPageHeader(
-            title: '$companyName Employees',
+            // Sentence case, like every other header in the product: the
+            // company is a proper noun and "employees" is not. It read
+            // "Fixture Haulage Employees", which is the shipping app's
+            // `AppBar` title carried across unchanged.
+            title: '$companyName employees',
             description: 'Everyone registered under this company.',
+            // The register next door counts the same predicate in the same
+            // words (`1478`: person / people).
+            meta: roster.maybeWhen(
+              data: (people) => mlCount(people.length, 'person', 'people'),
+              orElse: () => null,
+            ),
           ),
         ),
         Expanded(child: _buildEmployeeGrid(context, ref)),
