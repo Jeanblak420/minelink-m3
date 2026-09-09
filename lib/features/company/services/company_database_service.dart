@@ -5,6 +5,7 @@ import 'package:flutter_application_1/core/services/cache_service.dart';
 import 'package:flutter_application_1/core/services/database_service.dart';
 import 'package:flutter_application_1/core/services/storage_asset_service.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
+import 'package:flutter_application_1/features/auth/utils/whatsapp_identity.dart';
 import 'package:flutter_application_1/features/company/models/company_model.dart';
 import 'package:flutter_application_1/features/company/models/seat_limit.dart';
 import 'package:flutter_application_1/features/employee/models/employee_model.dart';
@@ -120,20 +121,35 @@ class CompanyDatabaseService {
     required String password,
     required String firstName,
     required String lastName,
-    required String whatsappNumber,
+    String whatsappNumber = '',
     required UserRole role,
   }) async {
+    // Build the body - email falls back to the deterministic WhatsApp synthetic
+    // email (same derivation the login form uses), so a WhatsApp-only create
+    // still satisfies Supabase's per-user email requirement.
+    final trimmedEmail = email.trim();
+    final trimmedWhatsapp = whatsappNumber.trim();
+    final effectiveEmail = trimmedEmail.isNotEmpty
+        ? trimmedEmail.toLowerCase()
+        : (trimmedWhatsapp.isNotEmpty ? whatsappAuthEmail(trimmedWhatsapp) : '');
+
+    final body = <String, dynamic>{
+      'action': 'create_employee',
+      'email': effectiveEmail,
+      'password': password,
+      'first_name': firstName.trim(),
+      'last_name': lastName.trim(),
+      'role': role.name,
+    };
+
+    // Only include whatsapp_number if provided
+    if (trimmedWhatsapp.isNotEmpty) {
+      body['whatsapp_number'] = trimmedWhatsapp;
+    }
+
     final response = await SupabaseConfig.client.functions.invoke(
       'company-user-admin',
-      body: {
-        'action': 'create_employee',
-        'email': email.trim().toLowerCase(),
-        'password': password,
-        'first_name': firstName.trim(),
-        'last_name': lastName.trim(),
-        'whatsapp_number': whatsappNumber.trim(),
-        'role': role.name,
-      },
+      body: body,
     );
 
     final responseData = _expectFunctionSuccess(

@@ -34,6 +34,7 @@ import 'package:flutter_application_1/core/design/components/ml_components.dart'
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/portal/screens/buyer_requests_screen.dart';
+import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
 
 import '../../fixtures/portal_capture_fixtures.dart';
 import '../../fixtures/portal_tail_fixtures.dart';
@@ -83,6 +84,16 @@ void main() {
   MlPageHeader header(WidgetTester tester) =>
       tester.widget<MlPageHeader>(find.byType(MlPageHeader).first);
 
+  /// The screen-level actions, unwrapped from their TourTarget shells.
+  ///
+  /// The guided tour wraps each header action in a `TourTarget` so it can be
+  /// spotlighted during the coach-mark tour; the button inside the wrapper is
+  /// the thing this test judges.
+  List<Widget> screenActions(WidgetTester tester) => [
+        for (final w in header(tester).actions)
+          w is TourTarget ? w.child : w,
+      ];
+
   testWidgets('a mine is told it raises BUYER requests', (tester) async {
     await pump(tester, isMine: true);
 
@@ -122,7 +133,7 @@ void main() {
         2,
         reason: 'the screen-level actions belong to the screen-level header',
       );
-      for (final w in header(tester).actions) {
+      for (final w in screenActions(tester)) {
         expect(w, isA<MlButton>());
       }
 
@@ -159,10 +170,10 @@ void main() {
   ) async {
     await pump(tester, isMine: true);
 
-    final actions = header(tester).actions.cast<MlButton>();
-    expect(actions.first.label, 'Request transportation');
+    final buttons = screenActions(tester).cast<MlButton>();
+    expect(buttons.first.label, 'Request transportation');
     expect(
-      actions.last.label,
+      buttons.last.label,
       'Request buyers',
       reason:
           'the org-specific action keeps the right edge it already had, which '

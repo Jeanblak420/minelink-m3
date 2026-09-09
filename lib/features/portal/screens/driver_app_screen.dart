@@ -34,6 +34,8 @@ import 'package:flutter_application_1/features/portal/widgets/portal_company_req
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
+import 'package:flutter_application_1/features/tour/examples/driver_app_keys.dart';
 
 /// Driver mobile app shell (spec 2026-07-16 §5) — 3-tab bottom-nav scaffold
 /// matching the approved design (Dashboard · Trip · Profile). The **Trip**
@@ -175,7 +177,8 @@ class DriverDashboardTab extends ConsumerWidget {
         : driverAssignedVehicle(fleet.activeVehicles, assignments, employee.id);
     final dispatches = dispatchesAsync.requireValue;
     final routeByDispatch = {for (final d in dispatches) d.dispatchId: d};
-    final firstName = (employee?.fullName ?? 'Driver').trim().split(' ').first;
+    final nameParts = (employee?.fullName ?? 'Driver').trim().split(' ');
+    final firstName = nameParts.isNotEmpty ? nameParts.first : 'Driver';
 
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -253,26 +256,34 @@ class DriverDashboardTab extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _DashboardHeader(
-                title: 'Dashboard',
-                subtitle: '$firstName — your week at a glance',
+              TourTarget(
+                id: 'driver.dashboard',
+                targetKey: DriverAppTourKeys.dashboard,
+                child: _DashboardHeader(
+                  title: 'Dashboard',
+                  subtitle: '$firstName — your week at a glance',
+                ),
               ),
               const SizedBox(height: 16),
-              _ActiveTripHero(
-                plate: heroPlate,
-                route: heroRoute,
-                statusLabel: heroStatus,
-                onTap: current == null ? null : onOpenTrip,
-                onNavigate: current == null
-                    ? null
-                    : () =>
-                          context.push('/portal/driver/navigate/${current.id}'),
-                onStartRoute:
-                    (current != null &&
-                        TripStatus.parse(current.status) ==
-                            TripStatus.scheduled)
-                    ? () => _startRoute(context, ref, current, companyId)
-                    : null,
+              TourTarget(
+                id: 'driver.trip',
+                targetKey: DriverAppTourKeys.tripCard,
+                child: _ActiveTripHero(
+                  plate: heroPlate,
+                  route: heroRoute,
+                  statusLabel: heroStatus,
+                  onTap: current == null ? null : onOpenTrip,
+                  onNavigate: current == null
+                      ? null
+                      : () =>
+                            context.push('/portal/driver/navigate/${current.id}'),
+                  onStartRoute:
+                      (current != null &&
+                          TripStatus.parse(current.status) ==
+                              TripStatus.scheduled)
+                      ? () => _startRoute(context, ref, current, companyId)
+                      : null,
+                ),
               ),
               const SizedBox(height: 16),
               // `IntrinsicHeight` + `stretch`, so the pair CANNOT sit crooked.
@@ -706,35 +717,39 @@ class _ActiveTripHero extends StatelessWidget {
             ],
             if (onNavigate != null) ...[
               SizedBox(height: onStartRoute != null ? 8 : 14),
-              SizedBox(
-                width: double.infinity,
-                child: onStartRoute != null
-                    ? OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: MlTokens.inkOnFill,
-                          side: BorderSide(
-                            color: MlTokens.inkOnFill.withValues(alpha: 0.45),
+              TourTarget(
+                id: 'driver.navigation',
+                targetKey: DriverAppTourKeys.navigation,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: onStartRoute != null
+                      ? OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: MlTokens.inkOnFill,
+                            side: BorderSide(
+                              color: MlTokens.inkOnFill.withValues(alpha: 0.45),
+                            ),
+                          ),
+                          onPressed: onNavigate,
+                          icon: const Icon(Icons.navigation_rounded, size: 19),
+                          label: const Text(
+                            'Navigate',
+                            style: TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                        )
+                      : FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: MlTokens.inkOnFill,
+                            foregroundColor: MlTokens.navy700,
+                          ),
+                          onPressed: onNavigate,
+                          icon: const Icon(Icons.navigation_rounded, size: 19),
+                          label: const Text(
+                            'Navigate',
+                            style: TextStyle(fontWeight: FontWeight.w800),
                           ),
                         ),
-                        onPressed: onNavigate,
-                        icon: const Icon(Icons.navigation_rounded, size: 19),
-                        label: const Text(
-                          'Navigate',
-                          style: TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                      )
-                    : FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: MlTokens.inkOnFill,
-                          foregroundColor: MlTokens.navy700,
-                        ),
-                        onPressed: onNavigate,
-                        icon: const Icon(Icons.navigation_rounded, size: 19),
-                        label: const Text(
-                          'Navigate',
-                          style: TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                      ),
+                ),
               ),
             ],
           ],

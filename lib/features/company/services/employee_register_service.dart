@@ -74,6 +74,7 @@ class EmployeeRegisterService {
                 ? null
                 : DateTime.parse(r['last_seen_at'] as String).toUtc(),
             hasSignature: r['has_signature'] == true,
+            email: r['email'] as String?,
           ),
     };
   }
@@ -458,16 +459,19 @@ String stockpilesUntouchedCaption({
 
 /// What `list_company_member_presence` returns for one member. The signature
 /// URL itself is never exposed — only whether there is one (P7-35).
+/// Email is exposed to company owners, admins, and managers for communication.
 class MemberPresence {
   const MemberPresence({
     required this.userId,
     required this.lastSeenAt,
     required this.hasSignature,
+    this.email,
   });
 
   final String userId;
   final DateTime? lastSeenAt;
   final bool hasSignature;
+  final String? email;
 }
 
 /// One register row: the employee plus their account's presence facts.
@@ -484,6 +488,9 @@ class RegisterMember {
   /// `null` when presence could not be resolved for this member at all, so the
   /// screen can render "unknown" rather than claiming a missing signature.
   bool? get hasSignature => presence?.hasSignature;
+
+  /// Email from profiles table, visible to company owners, admins, and managers.
+  String? get email => presence?.email;
 }
 
 /// One role-group KPI: a completed-vs-outstanding ratio over a single record

@@ -15,6 +15,8 @@ import 'package:flutter_application_1/core/design/components/ml_components.dart'
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
+import 'package:flutter_application_1/features/tour/examples/mine_dashboard_keys.dart';
 
 /// Mine Security — the guard's mobile gate-control screen on real trips
 /// (ui_kits/mine-supplier MineSecurity). Search inbound registrations,
@@ -235,12 +237,16 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                   // whose sibling already was (the class the console pass
                   // found on six screens, HANDOFF §3.25). The meta is the
                   // one fact a guard reads first.
-                  MlPageHeader(
-                    title: 'Mine Security',
-                    description: 'Gate control — arrivals & departures',
-                    meta: '${onSite.length + loadedReady.length} on site · '
-                        '${inbound.length} inbound',
-                    padding: const EdgeInsets.only(bottom: 16),
+                  TourTarget(
+                    id: 'security.dashboard',
+                    targetKey: MineDashboardTourKeys.dashboard,
+                    child: MlPageHeader(
+                      title: 'Mine Security',
+                      description: 'Gate control — arrivals & departures',
+                      meta: '${onSite.length + loadedReady.length} on site · '
+                          '${inbound.length} inbound',
+                      padding: const EdgeInsets.only(bottom: 16),
+                    ),
                   ),
                   TextField(
                     controller: _controller,
@@ -380,99 +386,107 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                     // ---- Incoming Trucks — Mark Arrival + At Mine — Mark
                     // Departure (departures lead in gate mode) ----
                     ..._orderedGateSections(
-                      arrivals: _GateSection(
-                        icon: Icons.login_rounded,
-                        title: 'Incoming trucks — mark arrival',
-                        child: inbound.isEmpty
-                            ? _EmptyLine(
-                                'No incoming trucks right now — new arrivals appear here.',
-                              )
-                            : Column(
-                                children: [
-                                  for (
-                                    var i = 0;
-                                    i <
-                                        (inbound.length > 3
-                                            ? 3
-                                            : inbound.length);
-                                    i++
-                                  ) ...[
-                                    if (i > 0) const SizedBox(height: 14),
-                                    _GateTruck(
-                                      trip: inbound[i],
-                                      tone: MlTone.transit,
-                                      action: MlButton.go(
-                                        label: 'Mark arrived',
-                                        icon: Icons.login_rounded,
-                                        expand: true,
-                                        onPressed: () =>
-                                            _markArrived(companyId, inbound[i]),
-                                      ),
-                                    ),
-                                  ],
-                                  if (inbound.length > 3)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8),
-                                      child: _EmptyLine(
-                                        '+${inbound.length - 3} more — use search or the trucklist.',
-                                      ),
-                                    ),
-                                ],
-                              ),
-                      ),
-                      departures: _GateSection(
-                        icon: Icons.shield_outlined,
-                        title: 'At mine — mark departure',
-                        child: (onSite.isEmpty && loadedReady.isEmpty)
-                            ? _EmptyLine('No trucks at the mine right now.')
-                            : Column(
-                                children: [
-                                  for (
-                                    var i = 0;
-                                    i <
-                                        (loadedReady.length > 3
-                                            ? 3
-                                            : loadedReady.length);
-                                    i++
-                                  ) ...[
-                                    if (i > 0) const SizedBox(height: 14),
-                                    _GateTruck(
-                                      trip: loadedReady[i],
-                                      tone: MlTone.atMine,
-                                      badge: MlStatusBadge.forStatus(
-                                        loadedReady[i].status.label,
-                                      ),
-                                      action: MlButton.leave(
-                                        label: 'Mark left',
-                                        icon: Icons.logout_rounded,
-                                        expand: true,
-                                        onPressed: () => _markGone(
-                                          companyId,
-                                          loadedReady[i],
+                      arrivals: TourTarget(
+                        id: 'security.checkin',
+                        targetKey: MineDashboardTourKeys.checkin,
+                        child: _GateSection(
+                          icon: Icons.login_rounded,
+                          title: 'Incoming trucks — mark arrival',
+                          child: inbound.isEmpty
+                              ? _EmptyLine(
+                                  'No incoming trucks right now — new arrivals appear here.',
+                                )
+                              : Column(
+                                  children: [
+                                    for (
+                                      var i = 0;
+                                      i <
+                                          (inbound.length > 3
+                                              ? 3
+                                              : inbound.length);
+                                      i++
+                                    ) ...[
+                                      if (i > 0) const SizedBox(height: 14),
+                                      _GateTruck(
+                                        trip: inbound[i],
+                                        tone: MlTone.transit,
+                                        action: MlButton.go(
+                                          label: 'Mark arrived',
+                                          icon: Icons.login_rounded,
+                                          expand: true,
+                                          onPressed: () =>
+                                              _markArrived(companyId, inbound[i]),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                  for (
-                                    var i = 0;
-                                    i < (onSite.length > 2 ? 2 : onSite.length);
-                                    i++
-                                  ) ...[
-                                    if (i > 0 || loadedReady.isNotEmpty)
-                                      const SizedBox(height: 14),
-                                    _GateTruck(
-                                      trip: onSite[i],
-                                      tone: MlTone.atMine,
-                                      badge: const MlStatusBadge(
-                                        label: 'AT MINE',
-                                        tone: MlTone.atMine,
+                                    ],
+                                    if (inbound.length > 3)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 8),
+                                        child: _EmptyLine(
+                                          '+${inbound.length - 3} more — use search or the trucklist.',
+                                        ),
                                       ),
-                                      footnote:
-                                          'Waiting for the load controller to weigh & seal before release.',
-                                    ),
                                   ],
-                                ],
-                              ),
+                                ),
+                        ),
+                      ),
+                      departures: TourTarget(
+                        id: 'security.checkout',
+                        targetKey: MineDashboardTourKeys.checkout,
+                        child: _GateSection(
+                          icon: Icons.shield_outlined,
+                          title: 'At mine — mark departure',
+                          child: (onSite.isEmpty && loadedReady.isEmpty)
+                              ? _EmptyLine('No trucks at the mine right now.')
+                              : Column(
+                                  children: [
+                                    for (
+                                      var i = 0;
+                                      i <
+                                          (loadedReady.length > 3
+                                              ? 3
+                                              : loadedReady.length);
+                                      i++
+                                    ) ...[
+                                      if (i > 0) const SizedBox(height: 14),
+                                      _GateTruck(
+                                        trip: loadedReady[i],
+                                        tone: MlTone.atMine,
+                                        badge: MlStatusBadge.forStatus(
+                                          loadedReady[i].status.label,
+                                        ),
+                                        action: MlButton.leave(
+                                          label: 'Mark left',
+                                          icon: Icons.logout_rounded,
+                                          expand: true,
+                                          onPressed: () => _markGone(
+                                            companyId,
+                                            loadedReady[i],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                    for (
+                                      var i = 0;
+                                      i < (onSite.length > 2 ? 2 : onSite.length);
+                                      i++
+                                    ) ...[
+                                      if (i > 0 || loadedReady.isNotEmpty)
+                                        const SizedBox(height: 14),
+                                      _GateTruck(
+                                        trip: onSite[i],
+                                        tone: MlTone.atMine,
+                                        badge: const MlStatusBadge(
+                                          label: 'AT MINE',
+                                          tone: MlTone.atMine,
+                                        ),
+                                        footnote:
+                                            'Waiting for the load controller to weigh & seal before release.',
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 14),

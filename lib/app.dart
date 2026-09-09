@@ -10,14 +10,37 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialApp.router(
-      title: AppBranding.appName,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      // User-controlled via the portal app-bar toggle; defaults to dark.
-      themeMode: ref.watch(themeModeProvider),
-      routerConfig: AppRouter.router,
-      debugShowCheckedModeBanner: false,
+    return PopScope(
+      // Handle native back button to navigate within the app instead of closing
+      // Only intercept when GoRouter can pop (i.e., not at root)
+      canPop: _canPopSafely(),
+      onPopInvokedWithResult: (didPop, result) {
+        // This is called when canPop returns false
+        if (!didPop && _canPopSafely()) {
+          // Let GoRouter handle the back navigation
+          AppRouter.router.pop();
+        }
+      },
+      child: MaterialApp.router(
+        title: AppBranding.appName,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        // User-controlled via the portal app-bar toggle; defaults to dark.
+        themeMode: ref.watch(themeModeProvider),
+        routerConfig: AppRouter.router,
+        debugShowCheckedModeBanner: false,
+      ),
     );
+  }
+
+  /// Safely check if the router can pop without throwing an error
+  bool _canPopSafely() {
+    try {
+      return !AppRouter.router.canPop();
+    } catch (e) {
+      // If canPop throws (e.g., when router is not yet initialized),
+      // assume we cannot pop
+      return true;
+    }
   }
 }

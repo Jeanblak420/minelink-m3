@@ -22,6 +22,8 @@ import 'package:flutter_application_1/core/design/components/ml_components.dart'
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_charts.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screens_core.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
+import 'package:flutter_application_1/features/tour/examples/transporter_dashboard_keys.dart';
 
 /// The Transporter dashboard (P7-20, P7-23, P7-24, P7-25).
 ///
@@ -171,70 +173,74 @@ class _TransporterPortalDashboardScreenState
           ),
           const SizedBox(height: 20),
 
-          PortalKpiRow(
-            period: _period,
-            kpis: [
-              PortalKpi(
-                label: 'Tons moved',
-                value: tons == null ? null : _tons(tons),
-                unit: 't',
-                sublabel: 'Weighbridge net, ${_period.label.toLowerCase()}',
-                icon: Icons.local_shipping_outlined,
-                tone: MlTone.accent,
-                route: '/portal/transporter/tons-out',
-                delta: tons == null ? null : tons - priorTons,
-                emptyReason: 'earnings feed unavailable',
-                loading: earningsPending,
-              ),
-              PortalKpi(
-                label: 'Revenue',
-                // `R` PREFIXES the figure and is not a unit.
-                //
-                // This passed `unit: 'R'`, which the tile renders after the
-                // number in the small muted style it uses for "t" and "%" — so
-                // the dashboard read "29 159 R" while the same file writes
-                // "R29 159" for its peak-per-day caption and its table, and the
-                // margin ledger writes "R 141,306.00". Three spellings of one
-                // currency, one of them treating a currency symbol as a unit of
-                // measure. Photographed 2026-08-20 on the phone dashboards.
-                value: revenue == null ? null : 'R${_rand(revenue)}',
-                sublabel: 'At your rate per ton, before costs',
-                icon: Icons.account_balance_wallet_outlined,
-                tone: MlTone.done,
-                route: '/portal/transporter/earnings',
-                delta: revenue == null ? null : revenue - priorRevenue,
-                // Rand, like the value above it. Without this the badge read
-                // a bare `-956566` beside `R156,567`.
-                deltaPrefix: 'R',
-                emptyReason: 'earnings feed unavailable',
-                loading: earningsPending,
-              ),
-              PortalKpi(
-                label: 'Trucks on route',
-                value: onRoute?.length.toString(),
-                sublabel: active == null
-                    ? 'Carrying an active trip'
-                    : 'of ${active.length} active trucks',
-                icon: Icons.route_outlined,
-                tone: MlTone.transit,
-                route: '/portal/transporter/trucks-on-route',
-                emptyReason: 'fleet status unavailable',
-                loading: fleetPending,
-              ),
-              PortalKpi(
-                label: 'Fleet utilisation',
-                value: utilisation?.toString(),
-                unit: '%',
-                sublabel: 'Active trucks currently on a route',
-                icon: Icons.speed_outlined,
-                tone: MlTone.atMine,
-                route: '/portal/transporter/fleet',
-                emptyReason: active == null
-                    ? 'fleet status unavailable'
-                    : 'no active trucks registered',
-                loading: fleetPending,
-              ),
-            ],
+          TourTarget(
+            id: 'transporter.fleet_status',
+            targetKey: TransporterDashboardTourKeys.fleetStatus,
+            child: PortalKpiRow(
+              period: _period,
+              kpis: [
+                PortalKpi(
+                  label: 'Tons moved',
+                  value: tons == null ? null : _tons(tons),
+                  unit: 't',
+                  sublabel: 'Weighbridge net, ${_period.label.toLowerCase()}',
+                  icon: Icons.local_shipping_outlined,
+                  tone: MlTone.accent,
+                  route: '/portal/transporter/tons-out',
+                  delta: tons == null ? null : tons - priorTons,
+                  emptyReason: 'earnings feed unavailable',
+                  loading: earningsPending,
+                ),
+                PortalKpi(
+                  label: 'Revenue',
+                  // `R` PREFIXES the figure and is not a unit.
+                  //
+                  // This passed `unit: 'R'`, which the tile renders after the
+                  // number in the small muted style it uses for "t" and "%" — so
+                  // the dashboard read "29 159 R" while the same file writes
+                  // "R29 159" for its peak-per-day caption and its table, and the
+                  // margin ledger writes "R 141,306.00". Three spellings of one
+                  // currency, one of them treating a currency symbol as a unit of
+                  // measure. Photographed 2026-08-20 on the phone dashboards.
+                  value: revenue == null ? null : 'R${_rand(revenue)}',
+                  sublabel: 'At your rate per ton, before costs',
+                  icon: Icons.account_balance_wallet_outlined,
+                  tone: MlTone.done,
+                  route: '/portal/transporter/earnings',
+                  delta: revenue == null ? null : revenue - priorRevenue,
+                  // Rand, like the value above it. Without this the badge read
+                  // a bare `-956566` beside `R156,567`.
+                  deltaPrefix: 'R',
+                  emptyReason: 'earnings feed unavailable',
+                  loading: earningsPending,
+                ),
+                PortalKpi(
+                  label: 'Trucks on route',
+                  value: onRoute?.length.toString(),
+                  sublabel: active == null
+                      ? 'Carrying an active trip'
+                      : 'of ${active.length} active trucks',
+                  icon: Icons.route_outlined,
+                  tone: MlTone.transit,
+                  route: '/portal/transporter/trucks-on-route',
+                  emptyReason: 'fleet status unavailable',
+                  loading: fleetPending,
+                ),
+                PortalKpi(
+                  label: 'Fleet utilisation',
+                  value: utilisation?.toString(),
+                  unit: '%',
+                  sublabel: 'Active trucks currently on a route',
+                  icon: Icons.speed_outlined,
+                  tone: MlTone.atMine,
+                  route: '/portal/transporter/fleet',
+                  emptyReason: active == null
+                      ? 'fleet status unavailable'
+                      : 'no active trucks registered',
+                  loading: fleetPending,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 26),
 
@@ -262,19 +268,22 @@ class _TransporterPortalDashboardScreenState
           ),
           const SizedBox(height: 26),
 
-          PortalActionQueue(
-            items: [
-              PortalQueueItem(
-                label: 'Dispatches to accept',
-                count: dispatches
-                    ?.where((d) => d.status == DispatchStatus.dispatched)
-                    .length,
-                route: '/portal/transporter/routes',
-                icon: Icons.assignment_turned_in_outlined,
-                tone: MlTone.transit,
-                clearedMessage: 'No routes waiting on your acceptance',
-                loading: dispatchesAsync.isFirstLoad,
-              ),
+          TourTarget(
+            id: 'transporter.available_routes',
+            targetKey: TransporterDashboardTourKeys.availableRoutes,
+            child: PortalActionQueue(
+              items: [
+                PortalQueueItem(
+                  label: 'Dispatches to accept',
+                  count: dispatches
+                      ?.where((d) => d.status == DispatchStatus.dispatched)
+                      .length,
+                  route: '/portal/transporter/routes',
+                  icon: Icons.assignment_turned_in_outlined,
+                  tone: MlTone.transit,
+                  clearedMessage: 'No routes waiting on your acceptance',
+                  loading: dispatchesAsync.isFirstLoad,
+                ),
               PortalQueueItem(
                 label: 'Trucks available to allocate',
                 count: allocatable,
@@ -311,39 +320,44 @@ class _TransporterPortalDashboardScreenState
                 loading: disputesAsync.isFirstLoad,
               ),
             ],
+            ),
           ),
           const SizedBox(height: 26),
 
-          PortalDashboardSection(
-            title: 'Trucks on route',
-            subtitle: 'Every vehicle currently carrying a load.',
-            meta: onRoute == null ? null : '${onRoute.length} moving',
-            viewRoute: '/portal/transporter/truck-locations',
-            viewLabel: 'Truck locations',
-            child: PortalLiveStrip(
-              trucks: [
-                for (final v in onRoute ?? const <FleetVehicleStatus>[])
-                  PortalLiveTruck(
-                    registration: v.registration,
-                    status: v.tripStatus == null
-                        ? 'On route'
-                        : TripStatus.parse(v.tripStatus!).label,
-                    tone: MlTone.transit,
-                    // Where it is going. An ETA needs a `?q=lat,lng`
-                    // destination, and a guessed one on a haul is worse than
-                    // none — the live map is one tap away and has the real
-                    // position.
-                    detail: v.offloadingPoint ?? v.commodity,
-                    route: v.activeTripId == null
-                        ? null
-                        : '/portal/transporter/trips/${v.activeTripId}',
-                  ),
-              ],
-              emptyMessage: onRoute != null
-                  ? 'None of your trucks is on a route right now.'
-                  : fleetPending
-                      ? 'Reading fleet status…'
-                      : 'The fleet status could not be read.',
+          TourTarget(
+            id: 'transporter.active_trips',
+            targetKey: TransporterDashboardTourKeys.activeTrips,
+            child: PortalDashboardSection(
+              title: 'Trucks on route',
+              subtitle: 'Every vehicle currently carrying a load.',
+              meta: onRoute == null ? null : '${onRoute.length} moving',
+              viewRoute: '/portal/transporter/truck-locations',
+              viewLabel: 'Truck locations',
+              child: PortalLiveStrip(
+                trucks: [
+                  for (final v in onRoute ?? const <FleetVehicleStatus>[])
+                    PortalLiveTruck(
+                      registration: v.registration,
+                      status: v.tripStatus == null
+                          ? 'On route'
+                          : TripStatus.parse(v.tripStatus!).label,
+                      tone: MlTone.transit,
+                      // Where it is going. An ETA needs a `?q=lat,lng`
+                      // destination, and a guessed one on a haul is worse than
+                      // none — the live map is one tap away and has the real
+                      // position.
+                      detail: v.offloadingPoint ?? v.commodity,
+                      route: v.activeTripId == null
+                          ? null
+                          : '/portal/transporter/trips/${v.activeTripId}',
+                    ),
+                ],
+                emptyMessage: onRoute != null
+                    ? 'None of your trucks is on a route right now.'
+                    : fleetPending
+                        ? 'Reading fleet status…'
+                        : 'The fleet status could not be read.',
+              ),
             ),
           ),
           const SizedBox(height: 26),

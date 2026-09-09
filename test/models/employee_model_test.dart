@@ -127,5 +127,75 @@ void main() {
 
       expect(employee.role, isNull);
     });
+
+    test('should not throw on null fields — the transporter-owner '
+        '"type \'Null\' is not a subtype of type \'String\'" regression', () {
+      // A single null used to crash the whole portal at login: id, user_id,
+      // first_name, last_name were assigned straight into non-nullable
+      // Strings and created_at into DateTime.parse, so any null row in a
+      // company's employee list (database, device cache or RPC payload)
+      // surfaced as "Error loading workspace · type 'Null' is not a subtype
+      // of type 'String'". Same fault `Company.fromJson` was fixed for on
+      // 2026-08-21; the fallbacks here match its conventions exactly.
+      final employee = Employee.fromJson(const {
+        'id': null,
+        'user_id': null,
+        'first_name': null,
+        'last_name': null,
+        'whatsapp_number': null,
+        'company_id': null,
+        'role': null,
+        'status': null,
+        'created_at': null,
+        'updated_at': null,
+        'profile_photo_url': null,
+        'is_south_african_citizen': null,
+        'id_number': null,
+        'date_of_birth': null,
+        'is_dismissed': null,
+      });
+
+      expect(employee.id, '');
+      expect(employee.userId, '');
+      expect(employee.firstName, '');
+      expect(employee.lastName, '');
+      expect(employee.whatsappNumber, '');
+      expect(employee.companyId, isNull);
+      expect(employee.role, isNull);
+      expect(employee.status, isNull);
+      expect(
+        employee.createdAt,
+        DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
+      );
+      expect(employee.updatedAt, isNull);
+      expect(employee.isSouthAfricanCitizen, isTrue);
+      expect(employee.isDismissed, isFalse);
+    });
+
+    test('should not throw on missing keys (stale device cache row)', () {
+      // A cached row written by an older build can be missing keys entirely;
+      // a missing key reads as null and must not crash the parse either.
+      final employee = Employee.fromJson(const {});
+
+      expect(employee.id, '');
+      expect(employee.fullName, ' ');
+      expect(employee.isSouthAfricanCitizen, isTrue);
+      expect(employee.isDismissed, isFalse);
+    });
+
+    test('should fall back to the epoch for an unparseable created_at', () {
+      final employee = Employee.fromJson(const {
+        'id': '123',
+        'user_id': 'user123',
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'created_at': 12345, // a non-String must not throw either
+      });
+
+      expect(
+        employee.createdAt,
+        DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
+      );
+    });
   });
 }

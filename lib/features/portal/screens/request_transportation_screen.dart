@@ -14,6 +14,8 @@ import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
+import 'package:flutter_application_1/features/tour/examples/mine_requests_keys.dart';
 
 /// Buyer "Request Transportation" form + revise-and-resubmit (§7.5).
 ///
@@ -257,136 +259,161 @@ class _RequestTransportationScreenState
           alignment: Alignment.topLeft,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (editing && widget.existing!.adminNotes != null)
-                    _SentBackBanner(notes: widget.existing!.adminNotes!),
-                  _section('Route'),
-                  _textField(_loadingPoint, 'Loading point', required: true),
-                  _textField(
-                    _offloadingPoint,
-                    'Offloading point',
-                    required: true,
-                  ),
-                  _textField(_commodity, 'Commodity', required: true),
-                  _textField(_distance, 'Distance'),
-                  // CLAUDE.md §4: tonnage carries a visible `t` unit.
-                  _textField(_tonsAvailable, 'Tons available', suffix: 't'),
-                  _textField(_numSlots, 'Number of Trucks Required'),
-                  _textField(_contractDuration, 'Contract duration'),
-
-                  // The only writer for `routes.seal_required` in the product.
-                  // The Load Controller's capture rule and record_truck_load's
-                  // server-side enforcement both read that column, and until
-                  // 2026-08-17 nothing could ever set it — every route in
-                  // production had seals off and the whole path was dead code
-                  // (migration 20260817170000).
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Seals required'),
-                    subtitle: const Text(
-                      'Every load must be sealed. The Load Controller cannot '
-                      'complete a load without a number and a photo for each seal.',
+            child: TourTarget(
+              id: 'mine_requests.form',
+              targetKey: MineRequestsTourKeys.form,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (editing && widget.existing!.adminNotes != null)
+                      _SentBackBanner(notes: widget.existing!.adminNotes!),
+                    TourTarget(
+                      id: 'mine_requests.route',
+                      targetKey: MineRequestsTourKeys.routeSection,
+                      child: _section('Route'),
                     ),
-                    value: _sealRequired,
-                    activeThumbColor: PortalColors.accent,
-                    onChanged: (v) => setState(() => _sealRequired = v),
-                  ),
+                    _textField(_loadingPoint, 'Loading point', required: true),
+                    _textField(
+                      _offloadingPoint,
+                      'Offloading point',
+                      required: true,
+                    ),
+                    TourTarget(
+                      id: 'mine_requests.product',
+                      targetKey: MineRequestsTourKeys.productField,
+                      child: _textField(
+                        _commodity,
+                        'Commodity',
+                        required: true,
+                      ),
+                    ),
+                    _textField(_distance, 'Distance'),
+                    // CLAUDE.md §4: tonnage carries a visible `t` unit.
+                    _textField(_tonsAvailable, 'Tons available', suffix: 't'),
+                    _textField(_numSlots, 'Number of Trucks Required'),
+                    _textField(_contractDuration, 'Contract duration'),
 
-                  _section('Commercials'),
-                  _dropdown(
-                    label: 'Payment terms',
-                    value: _paymentTerms,
-                    options: RequestOptions.paymentTerms,
-                    onChanged: (v) => setState(() => _paymentTerms = v),
-                  ),
-                  _dropdown(
-                    label: 'Diesel',
-                    value: _diesel,
-                    options: RequestOptions.diesel,
-                    onChanged: (v) => setState(() => _diesel = v),
-                  ),
-                  _textField(_rate, 'Rate'),
-
-                  _section('Mine loading operation hours'),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('24 hours'),
-                    subtitle: const Text('Mine operates continuously'),
-                    value: _hours24,
-                    activeThumbColor: PortalColors.accent,
-                    onChanged: (v) => setState(() => _hours24 = v),
-                  ),
-                  if (!_hours24)
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _timeField('Start time', _start, (t) {
-                            setState(() => _start = t);
-                          }),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _timeField('End time', _end, (t) {
-                            setState(() => _end = t);
-                          }),
-                        ),
-                      ],
+                    // The only writer for `routes.seal_required` in the product.
+                    // The Load Controller's capture rule and record_truck_load's
+                    // server-side enforcement both read that column, and until
+                    // 2026-08-17 nothing could ever set it — every route in
+                    // production had seals off and the whole path was dead code
+                    // (migration 20260817170000).
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Seals required'),
+                      subtitle: const Text(
+                        'Every load must be sealed. The Load Controller cannot '
+                        'complete a load without a number and a photo for each seal.',
+                      ),
+                      value: _sealRequired,
+                      activeThumbColor: PortalColors.accent,
+                      onChanged: (v) => setState(() => _sealRequired = v),
                     ),
 
-                  _section('Request period'),
-                  _dropdown(
-                    label: 'Request type',
-                    value: _ongoing ? 'Ongoing' : 'Single request',
-                    options: const ['Ongoing', 'Single request'],
-                    onChanged: (v) => setState(() => _ongoing = v == 'Ongoing'),
-                  ),
-                  _dateField(
-                    label: 'Start date',
-                    value: _startingDate,
-                    onPick: (d) => setState(() => _startingDate = d),
-                  ),
-                  if (!_ongoing)
+                    _section('Commercials'),
+                    _dropdown(
+                      label: 'Payment terms',
+                      value: _paymentTerms,
+                      options: RequestOptions.paymentTerms,
+                      onChanged: (v) => setState(() => _paymentTerms = v),
+                    ),
+                    _dropdown(
+                      label: 'Diesel',
+                      value: _diesel,
+                      options: RequestOptions.diesel,
+                      onChanged: (v) => setState(() => _diesel = v),
+                    ),
+                    _textField(_rate, 'Rate'),
+
+                    _section('Mine loading operation hours'),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('24 hours'),
+                      subtitle: const Text('Mine operates continuously'),
+                      value: _hours24,
+                      activeThumbColor: PortalColors.accent,
+                      onChanged: (v) => setState(() => _hours24 = v),
+                    ),
+                    if (!_hours24)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _timeField('Start time', _start, (t) {
+                              setState(() => _start = t);
+                            }),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _timeField('End time', _end, (t) {
+                              setState(() => _end = t);
+                            }),
+                          ),
+                        ],
+                      ),
+
+                    TourTarget(
+                      id: 'mine_requests.period',
+                      targetKey: MineRequestsTourKeys.periodSection,
+                      child: _section('Request period'),
+                    ),
+                    _dropdown(
+                      label: 'Request type',
+                      value: _ongoing ? 'Ongoing' : 'Single request',
+                      options: const ['Ongoing', 'Single request'],
+                      onChanged: (v) =>
+                          setState(() => _ongoing = v == 'Ongoing'),
+                    ),
                     _dateField(
-                      label: 'End date',
-                      value: _endingDate,
-                      // End must land after the chosen start.
-                      notBefore: _startingDate?.add(const Duration(days: 1)),
-                      onPick: (d) => setState(() => _endingDate = d),
+                      label: 'Start date',
+                      value: _startingDate,
+                      onPick: (d) => setState(() => _startingDate = d),
                     ),
-
-                  _section('Notes'),
-                  _textField(_routeNotes, 'Route notes', maxLines: 4),
-
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: _saving ? null : _submit,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: MlTokens.accent,
-                        foregroundColor: MlTokens.navy950,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                    if (!_ongoing)
+                      _dateField(
+                        label: 'End date',
+                        value: _endingDate,
+                        // End must land after the chosen start.
+                        notBefore: _startingDate?.add(const Duration(days: 1)),
+                        onPick: (d) => setState(() => _endingDate = d),
                       ),
-                      icon: _saving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: MlTokens.inkOnFill,
-                              ),
-                            )
-                          : const Icon(Icons.send_rounded, size: 18),
-                      label: Text(
-                        editing ? 'Re-submit request' : 'Submit request',
+
+                    _section('Notes'),
+                    _textField(_routeNotes, 'Route notes', maxLines: 4),
+
+                    const SizedBox(height: 24),
+                    TourTarget(
+                      id: 'mine_requests.submit',
+                      targetKey: MineRequestsTourKeys.submitButton,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: _saving ? null : _submit,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: MlTokens.accent,
+                            foregroundColor: MlTokens.navy950,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          icon: _saving
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: MlTokens.inkOnFill,
+                                  ),
+                                )
+                              : const Icon(Icons.send_rounded, size: 18),
+                          label: Text(
+                            editing ? 'Re-submit request' : 'Submit request',
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

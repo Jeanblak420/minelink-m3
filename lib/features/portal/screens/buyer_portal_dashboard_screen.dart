@@ -21,6 +21,8 @@ import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/m
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screens_core.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
+import 'package:flutter_application_1/features/tour/examples/buyer_dashboard_keys.dart';
 
 /// The Buyer dashboard (P7-20, P7-22, P7-24, P7-25).
 ///
@@ -155,9 +157,12 @@ class _BuyerPortalDashboardScreenState
           ),
           const SizedBox(height: 20),
 
-          PortalKpiRow(
-            period: _period,
-            kpis: [
+          TourTarget(
+            id: 'buyer.dashboard',
+            targetKey: BuyerDashboardTourKeys.dashboard,
+            child: PortalKpiRow(
+              period: _period,
+              kpis: [
               PortalKpi(
                 label: 'Tons delivered',
                 value: delivered == null ? null : _tons(delivered),
@@ -221,6 +226,7 @@ class _BuyerPortalDashboardScreenState
                 route: '/portal/buyer/truck-locations',
               ),
             ],
+            ),
           ),
           const SizedBox(height: 26),
 
@@ -248,19 +254,22 @@ class _BuyerPortalDashboardScreenState
           ),
           const SizedBox(height: 26),
 
-          PortalActionQueue(
-            items: [
-              PortalQueueItem(
-                label: 'Requests sent back for revision',
-                count: requests
-                    ?.where((r) => r.status == RequestStatus.sentBack)
-                    .length,
-                route: '/portal/buyer/requests',
-                icon: Icons.assignment_return_outlined,
-                tone: MlTone.warn,
-                clearedMessage: 'No requests awaiting your revision',
-                loading: requestsAsync.isFirstLoad,
-              ),
+          TourTarget(
+            id: 'buyer.requests',
+            targetKey: BuyerDashboardTourKeys.requests,
+            child: PortalActionQueue(
+              items: [
+                PortalQueueItem(
+                  label: 'Requests sent back for revision',
+                  count: requests
+                      ?.where((r) => r.status == RequestStatus.sentBack)
+                      .length,
+                  route: '/portal/buyer/requests',
+                  icon: Icons.assignment_return_outlined,
+                  tone: MlTone.warn,
+                  clearedMessage: 'No requests awaiting your revision',
+                  loading: requestsAsync.isFirstLoad,
+                ),
               PortalQueueItem(
                 label: 'Delivered loads to invoice',
                 count: uninvoiced,
@@ -284,15 +293,19 @@ class _BuyerPortalDashboardScreenState
                 loading: disputesAsync.isFirstLoad,
               ),
             ],
+            ),
           ),
           const SizedBox(height: 26),
 
-          PortalDashboardSection(
-            title: 'Inbound to you',
-            subtitle: 'Loads that have left the mine and not yet offloaded.',
-            meta: '${inbound.length} on the road',
-            viewRoute: '/portal/buyer/truck-locations',
-            viewLabel: 'Truck locations',
+          TourTarget(
+            id: 'buyer.orders',
+            targetKey: BuyerDashboardTourKeys.orders,
+            child: PortalDashboardSection(
+              title: 'Inbound to you',
+              subtitle: 'Loads that have left the mine and not yet offloaded.',
+              meta: '${inbound.length} on the road',
+              viewRoute: '/portal/buyer/truck-locations',
+              viewLabel: 'Truck locations',
             child: PortalLiveStrip(
               trucks: [
                 for (final t in inbound)
@@ -311,6 +324,7 @@ class _BuyerPortalDashboardScreenState
                   ),
               ],
               emptyMessage: 'Nothing is on the road to you right now.',
+            ),
             ),
           ),
           const SizedBox(height: 26),

@@ -18,9 +18,13 @@ class CompanyEmployeeFormResult {
     this.password = '',
     required this.firstName,
     required this.lastName,
-    required this.whatsappNumber,
+    this.whatsappNumber = '',
     required this.role,
   });
+
+  /// Whether this result has at least one of email or WhatsApp number
+  bool get hasEmailOrWhatsapp =>
+      email.isNotEmpty || whatsappNumber.isNotEmpty;
 }
 
 class CompanyEmployeeFormDialog extends StatefulWidget {
@@ -42,6 +46,7 @@ class CompanyEmployeeFormDialog extends StatefulWidget {
 
 class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
   final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
   late final TextEditingController _firstNameController;
   late final TextEditingController _lastNameController;
@@ -54,6 +59,8 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
     super.initState();
     final employee = widget.employee;
 
+    // Pre-fill email if editing existing employee
+    _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _firstNameController = TextEditingController(
       text: employee?.firstName ?? '',
@@ -69,6 +76,7 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
 
   @override
   void dispose() {
+    _emailController.dispose();
     _passwordController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
@@ -82,14 +90,22 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
       return;
     }
 
+    final email = _emailController.text.trim();
     final whatsappNumber = _whatsappController.text.trim();
+
+    // Require at least one of email or WhatsApp number
+    if (email.isEmpty && whatsappNumber.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please provide either an email address or WhatsApp number'),
+        ),
+      );
+      return;
+    }
+
     Navigator.of(context).pop(
       CompanyEmployeeFormResult(
-        // No email is collected: admin-created users are identified by their
-        // WhatsApp number. A deterministic synthetic email is derived from it
-        // so the existing auth-user creation keeps working until WhatsApp OTP
-        // login lands. See whatsapp_identity.dart.
-        email: whatsappAuthEmail(whatsappNumber),
+        email: email,
         password: _passwordController.text,
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
@@ -101,8 +117,15 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
 
   String? _validateWhatsapp(String? value) {
     final raw = value?.trim() ?? '';
+    final email = _emailController.text.trim();
+
+    // WhatsApp is optional if email is provided
+    if (raw.isEmpty && email.isNotEmpty) {
+      return null;
+    }
+
     if (raw.isEmpty) {
-      return 'WhatsApp number is required';
+      return 'WhatsApp number is required when no email is provided';
     }
     if (normalizeWhatsappNumber(raw).length < 6) {
       return 'Enter a valid WhatsApp number';
@@ -117,6 +140,28 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
 
     if ((value ?? '').length < 6) {
       return 'Password must be at least 6 characters';
+    }
+
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    final raw = value?.trim() ?? '';
+    final whatsapp = _whatsappController.text.trim();
+
+    // Email is optional if WhatsApp is provided
+    if (raw.isEmpty && whatsapp.isNotEmpty) {
+      return null;
+    }
+
+    if (raw.isEmpty) {
+      return 'Email is required when no WhatsApp number is provided';
+    }
+
+    // Basic email validation
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(raw)) {
+      return 'Enter a valid email address';
     }
 
     return null;
@@ -151,6 +196,20 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Email field - optional if WhatsApp is provided
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    labelText: 'Email (optional)',
+                    helperText: 'Provide email and/or WhatsApp',
+                    helperMaxLines: 2,
+                    prefixIcon: Icon(Icons.email_outlined),
+                  ),
+                  validator: _validateEmail,
+                ),
+                const SizedBox(height: 12),
+                // WhatsApp field - optional if email is provided
                 TextFormField(
                   controller: _whatsappController,
                   keyboardType: TextInputType.phone,
@@ -159,7 +218,7 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
                     // InputDecoration label is always one line and always
                     // ellipsises, so a long one is simply unreadable on a
                     // phone. Helper text wraps.
-                    labelText: 'WhatsApp',
+                    labelText: 'WhatsApp (optional)',
                     helperText: 'Mobile number',
                     helperMaxLines: 2,
                     prefixIcon: Icon(Icons.phone_outlined),

@@ -208,6 +208,7 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
 
   Future<void> _openRecordDialog(BuildContext context, WidgetRef ref,
       String companyId, List<FleetVehicleStatus> fleet) async {
+    if (fleet.isEmpty) return;
     final formKey = GlobalKey<FormState>();
     var vehicleId = fleet.first.vehicleId;
     var kind = MaintenanceKind.repair;
@@ -512,7 +513,7 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
                         initialValue:
                             fleet.any((v) => v.vehicleId == vehicleId)
                                 ? vehicleId
-                                : fleet.first.vehicleId,
+                                : (fleet.isEmpty ? '' : fleet.first.vehicleId),
                         decoration:
                             const InputDecoration(labelText: 'Vehicle'),
                         items: [

@@ -4,7 +4,8 @@ import 'package:flutter_application_1/features/portal/models/logistics_models.da
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
 import 'package:flutter_application_1/features/portal/providers/logistics_provider.dart';
 import 'package:flutter_application_1/features/portal/services/dispute_service.dart';
-import 'package:flutter_application_1/features/portal/services/logistics_service.dart' show CompanyPin;
+import 'package:flutter_application_1/features/portal/services/logistics_service.dart'
+    show CompanyPin;
 import 'package:flutter_application_1/features/portal/models/trip_reconciliation.dart';
 import 'package:flutter_application_1/features/portal/services/reconciliation_service.dart';
 import 'package:flutter_application_1/features/portal/services/recon_exporter.dart';
@@ -16,6 +17,8 @@ import 'package:flutter_application_1/features/portal/widgets/recon_uploads_pane
 import 'package:flutter_application_1/features/portal/widgets/weight_reconciliation_view.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
+import 'package:flutter_application_1/features/tour/examples/buyer_reconciliations_keys.dart';
 
 /// Buyer "Tons & reconciliations" (§7.3): tonnage windowed by D/W/M/Y/T,
 /// filterable by source (mine) and product, with the reconciliation batches to
@@ -45,20 +48,25 @@ class _BuyerReconciliationsScreenState
     // leaves the map empty and the card says "Unknown company", which is
     // honest; it never prints the id.
     final nameById = <String, String>{
-      for (final p in ref
-              .watch(partnerCompaniesProvider(
-                  (companyId: companyId, orgFilter: '')))
-              .valueOrNull ??
-          const <CompanyPin>[])
+      for (final p
+          in ref
+                  .watch(
+                    partnerCompaniesProvider((
+                      companyId: companyId,
+                      orgFilter: '',
+                    )),
+                  )
+                  .valueOrNull ??
+              const <CompanyPin>[])
         p.id: p.name,
     };
 
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => MlLoadFailure(
-          subject: 'the reconciliations',
-          error: e,
-          onRetry: () => ref.invalidate(logisticsSnapshotProvider(companyId)),
+        subject: 'the reconciliations',
+        error: e,
+        onRetry: () => ref.invalidate(logisticsSnapshotProvider(companyId)),
       ),
       data: (snap) {
         // Index the buyer's transactions for source/product lookup per trip.
@@ -91,7 +99,8 @@ class _BuyerReconciliationsScreenState
             children: [
               MlPageHeader(
                 title: 'Reconciliations',
-                meta: '${mlCount(filtered.length, 'trip')} shown · '
+                meta:
+                    '${mlCount(filtered.length, 'trip')} shown · '
                     '${buyerTrips.length} total',
                 description:
                     'View recons by mine, route or overall — filter delivered tonnage '
@@ -104,51 +113,64 @@ class _BuyerReconciliationsScreenState
               const SizedBox(height: 16),
               ReconUploadsPanel(companyId: companyId),
               const SizedBox(height: 20),
-              LayoutBuilder(builder: (context, c) {
-                final w = c.maxWidth;
-                const gap = 14.0;
-                final cols = w > 720 ? 4 : 2;
-                final itemW = (w - gap * (cols - 1)) / cols;
-                final pending = snap.reconciliations
-                    .where((r) => r.status == 'draft' || r.status == 'pending')
-                    .length;
-                // Real, actionable disputes (open / under review) on this
-                // buyer's trips — wired to the recon_disputes workflow.
-                final disputed = ref
-                        .watch(reconDisputesProvider(companyId))
-                        .asData
-                        ?.value
-                        .where((d) => d.status.isActive)
-                        .length ??
-                    0;
-                return Wrap(
-                  spacing: gap,
-                  runSpacing: gap,
-                  children: [
-                    SizedBox(
-                        width: itemW,
-                        child: MlStatCard(
+              TourTarget(
+                id: 'buyer.reconciliations.summary',
+                targetKey: BuyerReconciliationsTourKeys.summaryCards,
+                child: LayoutBuilder(
+                  builder: (context, c) {
+                    final w = c.maxWidth;
+                    const gap = 14.0;
+                    final cols = w > 720 ? 4 : 2;
+                    final itemW = (w - gap * (cols - 1)) / cols;
+                    final pending = snap.reconciliations
+                        .where(
+                          (r) => r.status == 'draft' || r.status == 'pending',
+                        )
+                        .length;
+                    // Real, actionable disputes (open / under review) on this
+                    // buyer's trips — wired to the recon_disputes workflow.
+                    final disputed =
+                        ref
+                            .watch(reconDisputesProvider(companyId))
+                            .asData
+                            ?.value
+                            .where((d) => d.status.isActive)
+                            .length ??
+                        0;
+                    return Wrap(
+                      spacing: gap,
+                      runSpacing: gap,
+                      children: [
+                        SizedBox(
+                          width: itemW,
+                          child: MlStatCard(
                             label: 'Total records',
                             value: '${snap.reconciliations.length}',
                             icon: Icons.receipt_long_outlined,
-                            tone: MlTone.accent)),
-                    SizedBox(
-                        width: itemW,
-                        child: MlStatCard(
+                            tone: MlTone.accent,
+                          ),
+                        ),
+                        SizedBox(
+                          width: itemW,
+                          child: MlStatCard(
                             label: 'Pending',
                             value: '$pending',
                             icon: Icons.schedule_outlined,
-                            tone: MlTone.atMine)),
-                    SizedBox(
-                        width: itemW,
-                        child: MlStatCard(
+                            tone: MlTone.atMine,
+                          ),
+                        ),
+                        SizedBox(
+                          width: itemW,
+                          child: MlStatCard(
                             label: 'Disputed',
                             value: '$disputed',
                             icon: Icons.error_outline_rounded,
-                            tone: MlTone.warn)),
-                    SizedBox(
-                        width: itemW,
-                        child: MlStatCard(
+                            tone: MlTone.warn,
+                          ),
+                        ),
+                        SizedBox(
+                          width: itemW,
+                          child: MlStatCard(
                             // THIS FIGURE IS THE MINE'S NET, NOT THE
                             // DELIVERED TONS.
                             //
@@ -170,66 +192,116 @@ class _BuyerReconciliationsScreenState
                             label: 'Loaded (mine net)',
                             value: formatTons(tons.total),
                             icon: Icons.trending_up_rounded,
-                            tone: MlTone.done)),
-                  ],
-                );
-              }),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  _filter('Source', 'All sources', _source, sources,
-                      (v) => setState(() => _source = v)),
-                  _filter('Product', 'All products', _product, products,
-                      (v) => setState(() => _product = v)),
-                ],
+                            tone: MlTone.done,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
-              const SizedBox(height: 18),
-              OverviewHeroTile(
-                // The same figure as the stat card above, and the same
-                // correction — `tons` is mine net throughout this screen.
-                title: 'Loaded (mine net)',
-                icon: Icons.scale_outlined,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 16),
+              TourTarget(
+                id: 'buyer.reconciliations.filters',
+                targetKey: BuyerReconciliationsTourKeys.filters,
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
                   children: [
-                    AnimatedTons(
-                      value: tons.total,
-                      style: MlType.figure(
-                          color: PortalColors.accent, size: MlTokens.fsH1),
+                    _filter(
+                      'Source',
+                      'All sources',
+                      _source,
+                      sources,
+                      (v) => setState(() => _source = v),
                     ),
-                    const SizedBox(height: 10),
-                    MetricBreakdownRow(label: 'Daily (D)', value: tons.daily),
-                    MetricBreakdownRow(label: 'Weekly (W)', value: tons.weekly),
-                    MetricBreakdownRow(
-                        label: 'Monthly (M)', value: tons.monthly),
-                    MetricBreakdownRow(label: 'Yearly (Y)', value: tons.yearly),
-                    MetricBreakdownRow(
-                        label: 'Total (T)', value: tons.total, emphasize: true),
+                    _filter(
+                      'Product',
+                      'All products',
+                      _product,
+                      products,
+                      (v) => setState(() => _product = v),
+                    ),
                   ],
                 ),
               ),
+              const SizedBox(height: 18),
+              TourTarget(
+                id: 'buyer.reconciliations.tons',
+                targetKey: BuyerReconciliationsTourKeys.tonsOverview,
+                child: OverviewHeroTile(
+                  // The same figure as the stat card above, and the same
+                  // correction — `tons` is mine net throughout this screen.
+                  title: 'Loaded (mine net)',
+                  icon: Icons.scale_outlined,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AnimatedTons(
+                        value: tons.total,
+                        style: MlType.figure(
+                          color: PortalColors.accent,
+                          size: MlTokens.fsH1,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      MetricBreakdownRow(label: 'Daily (D)', value: tons.daily),
+                      MetricBreakdownRow(
+                        label: 'Weekly (W)',
+                        value: tons.weekly,
+                      ),
+                      MetricBreakdownRow(
+                        label: 'Monthly (M)',
+                        value: tons.monthly,
+                      ),
+                      MetricBreakdownRow(
+                        label: 'Yearly (Y)',
+                        value: tons.yearly,
+                      ),
+                      MetricBreakdownRow(
+                        label: 'Total (T)',
+                        value: tons.total,
+                        emphasize: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
-              MlSectionTitle('Reconciliation batches',
-                  icon: Icons.balance_outlined,
-                  meta: mlCount(snap.reconciliations.length, 'batch', 'batches')),
-              if (snap.reconciliations.isEmpty)
-                MlCard(
-                  child: MlEmptyState(
-                    icon: Icons.balance_outlined,
-                    title: 'No reconciliation batches yet.',
-                    message:
-                        'Batches are seeded automatically as trucks are loaded and delivered.',
-                  ),
-                )
-              else
-                for (final r in snap.reconciliations)
-                  _ReconCard(
-                    recon: r,
-                    companyId: companyId,
-                    nameById: nameById,
-                  ),
+              TourTarget(
+                id: 'buyer.reconciliations.batches',
+                targetKey: BuyerReconciliationsTourKeys.batches,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MlSectionTitle(
+                      'Reconciliation batches',
+                      icon: Icons.balance_outlined,
+                      meta: mlCount(
+                        snap.reconciliations.length,
+                        'batch',
+                        'batches',
+                      ),
+                    ),
+                    if (snap.reconciliations.isEmpty)
+                      MlCard(
+                        child: MlEmptyState(
+                          icon: Icons.balance_outlined,
+                          title: 'No reconciliation batches yet.',
+                          message:
+                              'Batches are seeded automatically as trucks are loaded and delivered.',
+                        ),
+                      )
+                    else
+                      for (final r in snap.reconciliations)
+                        _ReconCard(
+                          recon: r,
+                          companyId: companyId,
+                          nameById: nameById,
+                        ),
+                  ],
+                ),
+              ),
             ],
           ),
         );
@@ -241,8 +313,13 @@ class _BuyerReconciliationsScreenState
   /// rather than composed, because `'All $label'` produced "All Source"
   /// and "All Product". `raw_recon_view.dart`, on this same screen, has
   /// said "All products" since it was written.
-  Widget _filter(String label, String all, String? value,
-      List<String> options, ValueChanged<String?> onChanged) {
+  Widget _filter(
+    String label,
+    String all,
+    String? value,
+    List<String> options,
+    ValueChanged<String?> onChanged,
+  ) {
     return SizedBox(
       width: 240,
       child: DropdownButtonFormField<String?>(
@@ -286,7 +363,12 @@ class _BuyerReconciliationsScreenState
 class TonsOutWindowsLite {
   final double daily, weekly, monthly, yearly, total;
   const TonsOutWindowsLite(
-      this.daily, this.weekly, this.monthly, this.yearly, this.total);
+    this.daily,
+    this.weekly,
+    this.monthly,
+    this.yearly,
+    this.total,
+  );
 }
 
 /// One reconciliation batch: who it is between, what it is worth, and a
@@ -324,7 +406,10 @@ class _ReconCard extends ConsumerWidget {
             Row(
               children: [
                 const MlIconWell(
-                    icon: Icons.balance_outlined, size: 40, radius: 11),
+                  icon: Icons.balance_outlined,
+                  size: 40,
+                  radius: 11,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -346,10 +431,9 @@ class _ReconCard extends ConsumerWidget {
                         'Hauled by ${_party(recon.transporterCompanyId)}',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelSmall
-                            ?.copyWith(color: scheme.onSurfaceVariant),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -374,10 +458,9 @@ class _ReconCard extends ConsumerWidget {
                       MlStatusBadge.forStatus(recon.status),
                       Text(
                         MlTime.day(recon.updatedAt),
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelSmall
-                            ?.copyWith(color: scheme.onSurfaceVariant),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -443,7 +526,8 @@ class _ReconCard extends ConsumerWidget {
     ReconExporter.pickFormatAndExport(
       context,
       title: 'Reconciliation · $supplier → $buyer',
-      filenameBase: 'reconciliation_'
+      filenameBase:
+          'reconciliation_'
           '${supplier.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_')}',
       headers: WeightReconciliationView.exportHeaders,
       rows: WeightReconciliationView.exportRows(rows),
@@ -459,11 +543,16 @@ class _ReconCard extends ConsumerWidget {
   void _showDetail(BuildContext context, WidgetRef ref) {
     final rows =
         ref.read(tripReconciliationsProvider(companyId)).valueOrNull ??
-            const <TripReconciliation>[];
+        const <TripReconciliation>[];
     final delivered = rows.where((r) => r.deliveredTons != null).toList();
-    final loaded = delivered.fold<double>(0, (a, r) => a + (r.mineNetTons ?? 0));
-    final arrived =
-        delivered.fold<double>(0, (a, r) => a + (r.deliveredTons ?? 0));
+    final loaded = delivered.fold<double>(
+      0,
+      (a, r) => a + (r.mineNetTons ?? 0),
+    );
+    final arrived = delivered.fold<double>(
+      0,
+      (a, r) => a + (r.deliveredTons ?? 0),
+    );
     final variance = delivered.fold<double>(0, (a, r) => a + (r.variance ?? 0));
     String t(double v) => '${v.toStringAsFixed(2)} t';
 
@@ -484,8 +573,11 @@ class _ReconCard extends ConsumerWidget {
             // Dashes, not zeros, when nothing has been delivered yet: an
             // unreconciled batch has no tonnage, which is not the same as a
             // batch that reconciled to nothing.
-            _kv(context, 'Loads reconciled',
-                delivered.isEmpty ? '—' : '${delivered.length} of ${rows.length}'),
+            _kv(
+              context,
+              'Loads reconciled',
+              delivered.isEmpty ? '—' : '${delivered.length} of ${rows.length}',
+            ),
             _kv(context, 'Mine net', delivered.isEmpty ? '—' : t(loaded)),
             _kv(context, 'Delivered', delivered.isEmpty ? '—' : t(arrived)),
             _kv(context, 'Variance', delivered.isEmpty ? '—' : t(variance)),
@@ -502,17 +594,19 @@ class _ReconCard extends ConsumerWidget {
   }
 
   Widget _kv(BuildContext context, String k, String v) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-                width: 100,
-                child: Text(k,
-                    style: TextStyle(
-                        color: MlSemantic.of(context).textMuted))),
-            Expanded(child: Text(v)),
-          ],
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(
+            k,
+            style: TextStyle(color: MlSemantic.of(context).textMuted),
+          ),
         ),
-      );
+        Expanded(child: Text(v)),
+      ],
+    ),
+  );
 }

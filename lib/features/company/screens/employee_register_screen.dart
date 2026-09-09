@@ -1780,7 +1780,8 @@ class _MemberCard extends ConsumerWidget {
                       ),
                       Text(
                         '·  ${e.role?.label ?? 'No role set'}'
-                        '${e.whatsappNumber.trim().isEmpty ? '' : '  ·  ${e.whatsappNumber}'}',
+                        '${e.whatsappNumber.trim().isEmpty ? '' : '  ·  ${e.whatsappNumber}'}'
+                        '${member.email?.trim().isEmpty == true ? '' : '  ·  ${member.email}'}',
                         style: context.mlText.bodySmall.copyWith(
                           color: pal.textMuted,
                         ),

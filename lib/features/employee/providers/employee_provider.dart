@@ -170,9 +170,29 @@ class EmployeeNotifier extends StateNotifier<EmployeeState> {
       state = state.copyWith(isLoading: true, error: null);
       final employee = await _employeeService.getEmployeeByUserId(userId);
 
+      // The EMPLOYEE row loaded; their company row is a separate read with its
+      // own failure modes. Swallowing the employee because the company read
+      // failed used to leave `employee == null` and the error text on the
+      // state, which `portalWorkspaceProvider` renders as an unrecoverable
+      // "Error loading workspace" whose Retry re-runs this exact read — a
+      // dead end when the failure is permanent (measured 2026-09-07 as
+      // tt@cyberhouse.co.za: an account that owns a company AND is linked to
+      // another as a driver; RLS `current_company_id()` answers the OWNED
+      // company, so the linked company's row is invisible to them and every
+      // retry failed). Keeping the employee lets the workspace resolve to the
+      // designed waiting tab instead — `resolvePortalTabs` already treats "no
+      // company row" as "cannot resolve a workspace yet", not as a crash.
+      // The error stays on the state, so the provider's
+      // `connectingToCompany` gate (which requires `error == null`) cannot
+      // spin forever on a company that will never arrive.
       Company? company;
+      String? companyError;
       if (employee.companyId != null) {
-        company = await _companyService.getCompanyById(employee.companyId!);
+        try {
+          company = await _companyService.getCompanyById(employee.companyId!);
+        } catch (e) {
+          companyError = e.toString();
+        }
       }
 
       state = state.copyWith(
@@ -180,6 +200,7 @@ class EmployeeNotifier extends StateNotifier<EmployeeState> {
         company: company,
         isLoading: false,
         roleJustAssigned: false,
+        error: companyError,
       );
 
       if (employee.role != null) {

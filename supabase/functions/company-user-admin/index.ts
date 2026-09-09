@@ -8,7 +8,7 @@ type CreateEmployeePayload = {
   password: string;
   first_name: string;
   last_name: string;
-  whatsapp_number: string;
+  whatsapp_number?: string;
   role: string;
 };
 
@@ -74,6 +74,36 @@ function getErrorCode(error: unknown): string | null {
   return null;
 }
 
+// Domain used for synthetic WhatsApp-identity emails. Must stay in sync with
+// `kWhatsappAuthEmailDomain` in
+// lib/features/auth/utils/whatsapp_identity.dart — the login form maps a typed
+// WhatsApp number back to this same address.
+const WHATSAPP_AUTH_EMAIL_DOMAIN = "wa.mineralguide.com";
+
+function whatsappAuthEmail(whatsappNumber: string): string {
+  const digits = whatsappNumber.replace(/\D/g, "");
+  if (!digits) return "";
+  return `wa-${digits}@${WHATSAPP_AUTH_EMAIL_DOMAIN}`;
+}
+
+/**
+ * Formats a WhatsApp number as an E.164 phone string (`+<digits>`).
+ *
+ * E.164 forbids a leading zero, but local South African numbers are typed with
+ * a leading trunk `0` (`0821234567`); the leading `0` is replaced with the `27`
+ * country code. Must stay in sync with `whatsappToE164` in
+ * lib/features/auth/utils/whatsapp_identity.dart so the stored phone matches
+ * the one used at WhatsApp OTP login. Returns "" when there are no digits.
+ */
+function whatsappToE164(whatsappNumber: string): string {
+  let digits = whatsappNumber.replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("0")) {
+    digits = `27${digits.slice(1)}`;
+  }
+  return `+${digits}`;
+}
+
 function validatePayload(payload: Partial<SupportedPayload>): string | null {
   if (payload.action === "create_employee") {
     const email = payload.email?.trim() ?? "";
@@ -83,8 +113,11 @@ function validatePayload(payload: Partial<SupportedPayload>): string | null {
     const whatsappNumber = payload.whatsapp_number?.trim() ?? "";
     const role = payload.role?.trim() ?? "";
 
-    if (!email || !email.includes("@")) {
-      return "A valid email address is required";
+    // Require at least one of email or WhatsApp number
+    const hasEmail = email.includes("@");
+    const hasWhatsapp = whatsappNumber.length > 0;
+    if (!hasEmail && !hasWhatsapp) {
+      return "Either a valid email address or WhatsApp number is required";
     }
 
     if (password.length < 6) {
@@ -97,10 +130,6 @@ function validatePayload(payload: Partial<SupportedPayload>): string | null {
 
     if (!lastName) {
       return "Last name is required";
-    }
-
-    if (!whatsappNumber) {
-      return "WhatsApp number is required";
     }
 
     if (!role) {
@@ -287,23 +316,36 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const email = payload.email!.trim().toLowerCase();
-    const password = payload.password!;
-    const firstName = payload.first_name!.trim();
-    const lastName = payload.last_name!.trim();
-    const whatsappNumber = payload.whatsapp_number!.trim();
-    const role = payload.role!.trim();
+    // Type assertion: at this point we've validated it's a create_employee action
+    const createPayload = payload as CreateEmployeePayload;
+    // `email` is optional at runtime (WhatsApp-only creates omit the key);
+    // the CreateEmployeePayload type says `string`, but absent keys are
+    // `undefined` — coalesce before trim.
+    const email = (createPayload.email ?? "").trim().toLowerCase();
+    const password = createPayload.password;
+    const firstName = createPayload.first_name.trim();
+    const lastName = createPayload.last_name.trim();
+    const whatsappNumber = createPayload.whatsapp_number?.trim() ?? "";
+    const role = createPayload.role.trim();
     const displayName = `${firstName} ${lastName}`.trim();
 
-    const phoneE164 = `+${whatsappNumber.replace(/\D/g, "")}`;
+    // Build auth user params - only set phone if WhatsApp number provided.
+    // Supabase requires an email per auth user, so a WhatsApp-only create
+    // derives the same deterministic synthetic email the login form uses.
+    // GoTrue requires strict E.164 (`+[1-9]\d{1,14}`); a locally-typed
+    // `0821234567` must become `+27821234567` or user creation fails with
+    // "Invalid phone number format (E.164 required)".
+    const hasWhatsapp = whatsappNumber.length > 0;
+    const effectiveEmail = email || (hasWhatsapp ? whatsappAuthEmail(whatsappNumber) : "");
+    const phoneE164 = hasWhatsapp ? whatsappToE164(whatsappNumber) : undefined;
 
     const { data: createdUserData, error: createUserError } =
       await serviceRoleClient.auth.admin.createUser({
-        email,
+        email: effectiveEmail,
         password,
         phone: phoneE164,
         email_confirm: true,
-        phone_confirm: true,
+        phone_confirm: hasWhatsapp,
         user_metadata: {
           user_type: "employee",
           display_name: displayName,
@@ -325,7 +367,10 @@ Deno.serve(async (req: Request) => {
         target_user_id: createdUserId,
         first_name_input: firstName,
         last_name_input: lastName,
-        whatsapp_number_input: whatsappNumber,
+        // `employees.whatsapp_number` is nullable; email-only employees store
+        // NULL (the RPC's `trim(NULL)` stays NULL, and the column has no
+        // unique index so duplicates are fine).
+        whatsapp_number_input: hasWhatsapp ? whatsappNumber : null,
         target_role: role,
       },
     );

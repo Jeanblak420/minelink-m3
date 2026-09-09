@@ -36,9 +36,18 @@ String whatsappAuthEmail(String whatsappNumber) {
 bool looksLikeEmail(String identifier) => identifier.contains('@');
 
 /// Formats [whatsappNumber] as an E.164 phone string (`+<digits>`) for Supabase
-/// phone auth. Returns an empty string when there are no digits.
+/// phone auth.
+///
+/// E.164 forbids a leading zero, but local South African numbers are typed
+/// with a leading trunk `0` (`0821234567`); the leading `0` is replaced with
+/// the `27` country code so the result is a valid E.164 number. Numbers that
+/// already carry a country code (`+27…`, `27…`) pass through unchanged.
+/// Returns an empty string when there are no digits.
 String whatsappToE164(String whatsappNumber) {
-  final digits = normalizeWhatsappNumber(whatsappNumber);
+  var digits = normalizeWhatsappNumber(whatsappNumber);
   if (digits.isEmpty) return '';
+  if (digits.startsWith('0')) {
+    digits = '27${digits.substring(1)}';
+  }
   return '+$digits';
 }

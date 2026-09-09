@@ -72,42 +72,63 @@ class Employee {
     this.isDismissed = false,
   });
 
+  /// TOLERANT on every field, per the house rule for anything that crosses the
+  /// wire — the same rule `Company.fromJson` states: "an unrecognised value
+  /// must not crash a picker", and a single null must not crash a workspace.
+  ///
+  /// Five fields were assigned straight into non-nullable `String`s (and
+  /// `created_at` into `DateTime.parse`), so one null row in a company's
+  /// employee list — from the database, the device cache, or an RPC payload —
+  /// took the whole portal down at login with
+  /// `type 'Null' is not a subtype of type 'String'`, the red-box error the
+  /// transporter owner saw behind "Error loading workspace". Found 2026-09-07
+  /// driving the transporter-owner sign-in; `Company.fromJson` documents the
+  /// identical fault it was fixed for on 2026-08-21.
+  ///
+  /// The fallbacks are deliberately EMPTY rather than invented, matching
+  /// `Company.fromJson`: an empty id makes a query find nothing, which is a
+  /// visible dead end, while a made-up one would quietly address a different
+  /// employee. `createdAt` falls back to the epoch, which sorts to the bottom
+  /// and reads as obviously wrong.
   factory Employee.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(dynamic v) =>
+        (v is String ? DateTime.tryParse(v) : null) ??
+        DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
     return Employee(
-      id: json['id'],
-      userId: json['user_id'],
-      firstName: json['first_name'],
-      lastName: json['last_name'],
-      whatsappNumber: json['whatsapp_number'],
-      companyId: json['company_id'],
+      id: (json['id'] as String?) ?? '',
+      userId: (json['user_id'] as String?) ?? '',
+      firstName: (json['first_name'] as String?) ?? '',
+      lastName: (json['last_name'] as String?) ?? '',
+      whatsappNumber: (json['whatsapp_number'] as String?) ?? '',
+      companyId: json['company_id'] as String?,
       role: UserRole.tryParse(json['role'] as String?),
-      status: json['status'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
-          : null,
-      profilePhotoUrl: json['profile_photo_url'],
-      isSouthAfricanCitizen: json['is_south_african_citizen'] ?? true,
-      idNumber: json['id_number'],
-      passportOrWorkersPermit: json['passport_or_workers_permit'],
-      licenseDocument: json['license_document'],
-      idDocumentUrl: json['id_document_url'],
-      passportDocumentUrl: json['passport_document_url'],
-      workVisaDocumentUrl: json['work_visa_document_url'],
-      licenseDocumentUrl: json['license_document_url'],
-      dateOfBirth: json['date_of_birth'] != null
-          ? DateTime.tryParse(json['date_of_birth'].toString())
-          : null,
-      residentialAddress: json['residential_address'],
-      emergencyContactName: json['emergency_contact_name'],
-      emergencyContactPhone: json['emergency_contact_phone'],
-      contactEmail: json['contact_email'],
-      employmentStartDate: json['employment_start_date'] != null
-          ? DateTime.tryParse(json['employment_start_date'].toString())
-          : null,
-      licenseCodes: json['license_codes'],
-      psiraGrade: json['psira_grade'],
-      isDismissed: json['is_dismissed'] ?? false,
+      status: json['status'] as String?,
+      createdAt: parseDate(json['created_at']),
+      updatedAt: json['updated_at'] == null
+          ? null
+          : parseDate(json['updated_at']),
+      profilePhotoUrl: json['profile_photo_url'] as String?,
+      isSouthAfricanCitizen: (json['is_south_african_citizen'] as bool?) ?? true,
+      idNumber: json['id_number'] as String?,
+      passportOrWorkersPermit: json['passport_or_workers_permit'] as String?,
+      licenseDocument: json['license_document'] as String?,
+      idDocumentUrl: json['id_document_url'] as String?,
+      passportDocumentUrl: json['passport_document_url'] as String?,
+      workVisaDocumentUrl: json['work_visa_document_url'] as String?,
+      licenseDocumentUrl: json['license_document_url'] as String?,
+      dateOfBirth: json['date_of_birth'] == null
+          ? null
+          : DateTime.tryParse(json['date_of_birth'].toString()),
+      residentialAddress: json['residential_address'] as String?,
+      emergencyContactName: json['emergency_contact_name'] as String?,
+      emergencyContactPhone: json['emergency_contact_phone'] as String?,
+      contactEmail: json['contact_email'] as String?,
+      employmentStartDate: json['employment_start_date'] == null
+          ? null
+          : DateTime.tryParse(json['employment_start_date'].toString()),
+      licenseCodes: json['license_codes'] as String?,
+      psiraGrade: json['psira_grade'] as String?,
+      isDismissed: (json['is_dismissed'] as bool?) ?? false,
     );
   }
 

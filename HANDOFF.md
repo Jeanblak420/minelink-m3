@@ -1765,3 +1765,67 @@ flutter build apk --debug
 STOP READING AND PRODUCE THE MESSAGE. Rewrite `C:\Users\Somebody Someone\Music\SHOWME!\MineLink-M3\HANDOFF.md` the same way — verified state only, no intentions — ending with a fresh self-contained copy-paste block in §8 that carries ALL THREE paths (`M3-TASKS.md`, `MineLink-M3\HANDOFF.md` and `C:\Users\Somebody Someone\Claude\HANDOFF.md`) plus the reviewer reports' path, the untouchable worktree path and its baseline, exactly where you stopped, what is already ticked so it is not redone, HOW THE MARKABLE FILE WORKS, THE PHONE RULE, THE MOUSE RULE, THE CPU RULE, the reviewer-agent rule, this same HOW TO WORK instruction quoted verbatim, the one-task-at-a-time rule, and the fix-as-you-go rule. Add the session's line to `M3-TASKS.md`'s Session log. Commit both. State the commit count the tree WILL be at once that commit lands, and say that the tip is the commit carrying the file, so that includes itself. Put the message in the chat as well, whole. Before producing it, make sure every task that is truly proven is ticked and nothing unproven is.
 
 ---
+
+## ADDENDUM — 2026-09-08 · transporter-owner login crash (verified fixed)
+
+**Bug:** A transporter owner (`roadhaul.owner@mineralguide.com` /
+`MineralGuide123!`) signed in and got
+
+`type 'Null' is not a subtype of type 'String'`
+
+rendered as an unrecoverable "Error loading workspace" (Retry could never
+succeed).
+
+**Faithful reproduction (2026-09-08):** the device cache — `company_employees`
+via SharedPreferences (plain localStorage on web) — holds a stale employee
+row, and `getCompanyEmployees` reads the cache FIRST. Seeded that cache with
+a Roadhaul crew row MISSING `first_name` plus the crew's real NULL
+`whatsapp_number` rows (both present in the live DB today, photographed in the
+audit): the OLD `Employee.fromJson` throws the exact typed failure above, the
+NEW one resolves. Reproduced end-to-end against `roadhaul.owner@mineralguide.com`
+on the fixed web build (headless Chromium): no error screen, no page errors,
+portal resolves. The same screen was also hit (before the fix) by
+`tt@cyberhouse.co.za` (Fast Freight Logistics) via a DIFFERENT path — layer 2
+below.
+
+**Root cause (two layers):**
+
+1. `Employee.fromJson` assigned `id`, `user_id`, `first_name`, `last_name`
+   straight into non-nullable `String`s and `created_at` into
+   `DateTime.parse`. One null in any employee row — database, device cache,
+   or RPC payload — crashed the whole workspace at login. Same fault
+   `Company.fromJson` was fixed for on 2026-08-21.
+2. `loadEmployeeProfile` threw the successfully-loaded employee away when the
+   linked-company read failed, leaving `employee == null` plus an error the
+   portal renders as an unrecoverable dead end. `tt@cyberhouse.co.za` is a
+   mixed-identity account (owns a company AND is a linked driver of another);
+   RLS `current_company_id()` answers the OWNED company, so the linked
+   company's row is invisible to them and every retry failed.
+
+**Fixes (uncommitted as of this addendum):**
+
+- `lib/features/employee/models/employee_model.dart` — `Employee.fromJson`
+  now mirrors `Company.fromJson`: nulls become `''`, `created_at` falls back
+  to the epoch, booleans default sensibly. Empty fallbacks (no invented ids).
+- `lib/features/employee/providers/employee_provider.dart` —
+  `loadEmployeeProfile` keeps the loaded employee when the linked-company
+  read fails; the company stays null, the error stays on state (so the
+  `connectingToCompany` gate cannot spin), and the workspace resolves to the
+  designed waiting tab instead of the dead end.
+- `test/models/employee_model_test.dart` — three regression tests: null
+  fields, missing keys (stale cache row), unparseable `created_at`.
+
+**Verified (all pass):** 8 employee-model tests · analyzer "No issues found"
+· 16 related workspace/provider/realtime tests.
+
+**Live E2E (web-server build, port 61783, headless Chromium):**
+
+- `roadhaul.owner@mineralguide.com` WITH the poisoned `company_employees`
+  cache seeded (row missing `first_name`, null `whatsapp_number` rows): no
+  error screen, no page errors, portal resolves. This is the user's exact
+  reported scenario — the OLD build throws the typed failure here.
+- Same account, clean cache: full Roadhaul Logistics transporter overview
+  with all portal tabs.
+- `tt@cyberhouse.co.za` (the layer-2 account): resolves to its dashboard.
+- The served `employee_model.dart.lib.js` contains the epoch fallback
+  (`fromMillisecondsSinceEpoch(0`).

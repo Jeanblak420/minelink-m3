@@ -9,6 +9,8 @@ import 'package:flutter_application_1/features/portal/widgets/portal_company_req
 import 'package:flutter_application_1/core/design/components/ml_page_body.dart';
 import 'package:flutter_application_1/core/design/components/ml_page_header.dart';
 import 'package:flutter_application_1/features/portal/services/reconciliation_service.dart';
+import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
+import 'package:flutter_application_1/features/tour/examples/mine_reconciliations_keys.dart';
 
 /// Mine/Supplier reconciliations (CLAUDE.md §4): the mine's view of the same
 /// three layers the buyer and transporter get — Side B weight variance
@@ -43,11 +45,23 @@ class MineReconciliationsScreen extends ConsumerWidget {
                 'against delivered tons, view the raw records, and keep the '
                 'original next to any edited re-upload.',
           ),
-          WeightReconciliationView(companyId: companyId),
+          TourTarget(
+            id: 'mine.reconciliations.weight',
+            targetKey: MineReconciliationsTourKeys.weightReconciliation,
+            child: WeightReconciliationView(companyId: companyId),
+          ),
           const SizedBox(height: 16),
-          RawReconView(companyId: companyId),
+          TourTarget(
+            id: 'mine.reconciliations.raw',
+            targetKey: MineReconciliationsTourKeys.rawRecords,
+            child: RawReconView(companyId: companyId),
+          ),
           const SizedBox(height: 16),
-          ReconUploadsPanel(companyId: companyId),
+          TourTarget(
+            id: 'mine.reconciliations.uploads',
+            targetKey: MineReconciliationsTourKeys.uploadsPanel,
+            child: ReconUploadsPanel(companyId: companyId),
+          ),
           const SizedBox(height: 60),
         ],
       ),

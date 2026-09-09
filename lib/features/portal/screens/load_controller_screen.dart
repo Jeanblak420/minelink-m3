@@ -21,6 +21,8 @@ import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/portal/widgets/premium_overview_widgets.dart'
     show formatTons;
+import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
+import 'package:flutter_application_1/features/tour/examples/mine_dashboard_keys.dart';
 
 /// Mine Control — the load controller's weighbridge + sealing desk on real
 /// trips (ui_kits/mine-supplier MineControl). Search, KPI row, "Trucks at
@@ -117,12 +119,16 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              MlPageHeader(
-                title: 'Mine Control',
-                meta: '${mlCount(onSite.length, 'truck')} on site · '
-                    '${loaded.length} loaded',
-                description:
-                    'Record loads and tonnage — weigh, seal and capture wayslip info for on-site trucks.',
+              TourTarget(
+                id: 'wb.dashboard',
+                targetKey: MineDashboardTourKeys.dashboard,
+                child: MlPageHeader(
+                  title: 'Mine Control',
+                  meta: '${mlCount(onSite.length, 'truck')} on site · '
+                      '${loaded.length} loaded',
+                  description:
+                      'Record loads and tonnage — weigh, seal and capture wayslip info for on-site trucks.',
+                ),
               ),
               const SizedBox(height: 18),
               TextField(
@@ -748,12 +754,16 @@ class _RecordLoadSheetState extends ConsumerState<_RecordLoadSheet> {
             trailing: const MlStatusBadge(label: 'Step 1 of 2', tone: MlTone.atMine),
             child: Column(
               children: [
-                _WeightRow(
-                  label: 'Empty (tare)',
-                  controller: _empty,
-                  onChanged: () => setState(() {}),
-                  photoLabel: 'Empty scale photo',
-                  onPhoto: (f) => _tarePhoto = f,
+                TourTarget(
+                  id: 'wb.tare',
+                  targetKey: MineDashboardTourKeys.tare,
+                  child: _WeightRow(
+                    label: 'Empty (tare)',
+                    controller: _empty,
+                    onChanged: () => setState(() {}),
+                    photoLabel: 'Empty scale photo',
+                    onPhoto: (f) => _tarePhoto = f,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -782,12 +792,16 @@ class _RecordLoadSheetState extends ConsumerState<_RecordLoadSheet> {
                   value: '${trip.tareTons!.toStringAsFixed(2)} t',
                 ),
                 const SizedBox(height: 12),
-                _WeightRow(
-                  label: 'Loaded (gross)',
-                  controller: _loaded,
-                  onChanged: () => setState(() {}),
-                  photoLabel: 'Loaded scale photo',
-                  onPhoto: (f) => _grossPhoto = f,
+                TourTarget(
+                  id: 'wb.gross',
+                  targetKey: MineDashboardTourKeys.gross,
+                  child: _WeightRow(
+                    label: 'Loaded (gross)',
+                    controller: _loaded,
+                    onChanged: () => setState(() {}),
+                    photoLabel: 'Loaded scale photo',
+                    onPhoto: (f) => _grossPhoto = f,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 _NetBox(net: _net),

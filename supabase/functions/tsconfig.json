@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2021",
     "module": "ESNext",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "strict": true,
-    "lib": ["ES2020", "DOM"],
+    "lib": ["ES2021", "DOM"],
     "types": [],
     "allowJs": true,
     "checkJs": false,
@@ -14,7 +14,9 @@
     "isolatedModules": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
     "paths": {
+      "jsr:@supabase/supabase-js@2": ["./supabase-edge.d.ts"],
       "https://deno.land/std@0.168.0/http/server.ts": ["./supabase-edge.d.ts"],
       "https://esm.sh/@supabase/supabase-js@2": ["./supabase-edge.d.ts"]
     }

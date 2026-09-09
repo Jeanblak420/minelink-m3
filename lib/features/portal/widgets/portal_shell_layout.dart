@@ -33,8 +33,12 @@ import 'package:flutter_application_1/core/widgets/app_navigation_back_button.da
 import 'package:flutter_application_1/core/navigation/nav_history_provider.dart';
 import 'package:flutter_application_1/core/navigation/nav_back.dart';
 import 'package:flutter_application_1/core/widgets/nav_history_recorder.dart';
-import 'package:flutter_application_1/features/tutorial/providers/tutorial_providers.dart';
-import 'package:flutter_application_1/features/tutorial/widgets/tutorial_overlay.dart';
+import 'package:flutter_application_1/features/tour/providers/tour_provider.dart';
+import 'package:flutter_application_1/features/tour/providers/tour_seen_provider.dart';
+import 'package:flutter_application_1/features/tour/providers/tour_service_provider.dart';
+import 'package:flutter_application_1/features/tour/widgets/tour_overlay.dart';
+import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
+import 'package:flutter_application_1/features/tour/examples/generic_dashboard_keys.dart';
 import 'package:flutter_application_1/core/design/tokens/ui_prefs.dart';
 import 'package:flutter_application_1/core/design/components/ml_expiry_notice.dart';
 import 'package:flutter_application_1/features/portal/providers/company_access_provider.dart';
@@ -499,9 +503,13 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
     // selects the same leaf the dashboard route does. Phase 12 removes the
     // route; until then the two are the same page under two addresses and the
     // rail must not look unselected on one of them.
-    final dashboardRoute = navTree.first.isGroup
-        ? navTree.first.leaves.first.route!
-        : navTree.first.route!;
+    final dashboardRoute = navTree.isEmpty
+        ? location
+        : navTree.first.isGroup
+            ? navTree.first.leaves.isEmpty
+                ? location
+                : navTree.first.leaves.first.route!
+            : navTree.first.route!;
     final selectedRoute = onHome ? dashboardRoute : location;
 
     // Live queue counts for the badges this tree names, and only those
@@ -601,12 +609,15 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
       );
     }
 
-    final shellBody = PortalScaffold(
-      scaffoldKey: _portalKey,
-      nav: navTree,
-      selectedRoute: selectedRoute,
-      badgeCounts: badgeCounts,
-      navLocked: vm.isEmployeeWithoutRole,
+    final shellBody = TourTarget(
+      id: 'generic.navigation',
+      targetKey: GenericDashboardTourKeys.navigation,
+      child: PortalScaffold(
+        scaffoldKey: _portalKey,
+        nav: navTree,
+        selectedRoute: selectedRoute,
+        badgeCounts: badgeCounts,
+        navLocked: vm.isEmployeeWithoutRole,
       // The top bar's content, rather than a hand-built AppBar.
       //
       // This is where the portal and the console had most visibly diverged:
@@ -631,8 +642,13 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
       actions: [
         IconButton(
           tooltip: 'Take a tour',
-          onPressed: () => ref.read(tutorialOverlayProvider.notifier).show(),
-          icon: ref.watch(tutorialSeenProvider)
+          onPressed: () {
+            final steps = ref.read(tourStepsProvider);
+            if (steps.isNotEmpty) {
+              ref.read(tourProvider.notifier).startTour(steps);
+            }
+          },
+          icon: ref.watch(tourSeenProvider)
               ? const Icon(Icons.help_outline_rounded)
               : Badge(
                   smallSize: 8,
@@ -724,22 +740,27 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
               ),
             ),
           Expanded(
-            child: NavHistoryRecorder(
-              // DELIBERATELY UNKEYED. A key that changes with the route
-              // REMOUNTS this on every navigation, and go_router keys its shell
-              // navigator with GlobalObjectKey(navigatorKey.hashCode) — so the
-              // remount reparented that global key out of a parent which never
-              // updated, which is a framework error and truncates the tree.
-              // It also made didUpdateWidget below unreachable, which is the one
-              // path this widget exists for.
-              location: navLocation,
-              isRoot: isRootScreen,
-              child: widget.child,
+            child: TourTarget(
+              id: 'generic.dashboard',
+              targetKey: GenericDashboardTourKeys.dashboard,
+              child: NavHistoryRecorder(
+                // DELIBERATELY UNKEYED. A key that changes with the route
+                // REMOUNTS this on every navigation, and go_router keys its shell
+                // navigator with GlobalObjectKey(navigatorKey.hashCode) — so the
+                // remount reparented that global key out of a parent which never
+                // updated, which is a framework error and truncates the tree.
+                // It also made didUpdateWidget below unreachable, which is the one
+                // path this widget exists for.
+                location: navLocation,
+                isRoot: isRootScreen,
+                child: widget.child,
+              ),
             ),
           ),
         ],
       ),
       onNavigate: (route) => context.go(route),
+      ),
     );
 
     // The waiting-for-role overlay promises "you can only access your Profile"
@@ -764,11 +785,11 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
       content = ChatDock(child: content);
     }
 
-    // Guided "Take a tour" overlay — renders nothing until launched from the
+    // Guided coach-mark tour overlay — renders nothing until launched from the
     // help button (or the compact overflow menu), so it never blocks normal
     // app use. Mounted here so it covers the whole shell and still sits
     // inside the mine premium theme/semantic scope when one is installed.
-    content = Stack(children: [content, const TutorialOverlay()]);
+    content = Stack(children: [content, const TourOverlay()]);
 
     content = PopScope(
       canPop: false,

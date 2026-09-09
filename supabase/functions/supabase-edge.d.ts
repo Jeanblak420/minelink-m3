@@ -26,6 +26,11 @@ declare module "https://deno.land/std@0.168.0/http/server.ts" {
   export function serve(options: ServeInit): void;
 }
 
+// Supabase client module (JSR import for Deno)
+declare module "jsr:@supabase/supabase-js@2" {
+  export * from "https://esm.sh/@supabase/supabase-js@2";
+}
+
 // Supabase client module
 declare module "https://esm.sh/@supabase/supabase-js@2" {
   export interface SupabaseClientOptions {

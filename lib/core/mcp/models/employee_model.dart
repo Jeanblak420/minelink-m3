@@ -71,7 +71,7 @@ class EmployeeMCP
       userId: json['user_id'],
       firstName: json['first_name'],
       lastName: json['last_name'],
-      whatsappNumber: json['whatsapp_number'],
+      whatsappNumber: json['whatsapp_number'] ?? '',
       companyId: json['company_id'],
       role: UserRole.tryParse(json['role'] as String?),
       status: json['status'],

@@ -27,6 +27,8 @@ import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/m
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screens_core.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
+import 'package:flutter_application_1/features/tour/examples/mine_dashboard_keys.dart';
 
 /// The Mine / Supplier dashboard (P7-20, P7-21, P7-24, P7-25).
 ///
@@ -163,9 +165,12 @@ class _MineSupplierPortalDashboardScreenState
           const SizedBox(height: 20),
 
           // ---- band 1: KPI row -------------------------------------------
-          PortalKpiRow(
-            period: _period,
-            kpis: [
+          TourTarget(
+            id: 'mine.dashboard',
+            targetKey: MineDashboardTourKeys.dashboard,
+            child: PortalKpiRow(
+              period: _period,
+              kpis: [
               PortalKpi(
                 label: 'Tons out',
                 value: _tons(tons),
@@ -220,27 +225,31 @@ class _MineSupplierPortalDashboardScreenState
                 loading: inboundAsync.isFirstLoad,
               ),
             ],
+            ),
           ),
           const SizedBox(height: 26),
 
           // ---- band 2 + 3: trend and stockpile ring ----------------------
-          LayoutBuilder(
-            builder: (context, c) {
-              final trend = _trendBand(context, companyId, current, previous);
-              // The ring measures ORDER COVER, so it takes the capped subset —
-              // the same numerator the KPI's percentage uses. It previously
-              // took the all-piles `balance` and then clamped it to the cap,
-              // so the ring read a tidy 100% while the card above it read
-              // 193% of the same quantity: two widgets on one screen
-              // disagreeing, with the clamp hiding which was wrong.
-              final ring = _stockpileBand(
-                context,
-                stockpiles,
-                cover?.cappedTons,
-                cover?.capacityTons,
-                totalOnGround: cover?.totalTons,
-                loading: stockpilesAsync.isFirstLoad,
-              );
+          TourTarget(
+            id: 'mine.stockpiles',
+            targetKey: MineDashboardTourKeys.stockpiles,
+            child: LayoutBuilder(
+              builder: (context, c) {
+                final trend = _trendBand(context, companyId, current, previous);
+                // The ring measures ORDER COVER, so it takes the capped subset —
+                // the same numerator the KPI's percentage uses. It previously
+                // took the all-piles `balance` and then clamped it to the cap,
+                // so the ring read a tidy 100% while the card above it read
+                // 193% of the same quantity: two widgets on one screen
+                // disagreeing, with the clamp hiding which was wrong.
+                final ring = _stockpileBand(
+                  context,
+                  stockpiles,
+                  cover?.cappedTons,
+                  cover?.capacityTons,
+                  totalOnGround: cover?.totalTons,
+                  loading: stockpilesAsync.isFirstLoad,
+                );
               if (c.maxWidth < 980) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -256,12 +265,16 @@ class _MineSupplierPortalDashboardScreenState
                 ],
               );
             },
+            ),
           ),
           const SizedBox(height: 26),
 
           // ---- band 4: action queue --------------------------------------
-          PortalActionQueue(
-            items: [
+          TourTarget(
+            id: 'mine.requests',
+            targetKey: MineDashboardTourKeys.requests,
+            child: PortalActionQueue(
+              items: [
               PortalQueueItem(
                 label: 'Arrivals to check in',
                 count: arrivals,
@@ -310,6 +323,7 @@ class _MineSupplierPortalDashboardScreenState
                 loading: disputesAsync.isFirstLoad,
               ),
             ],
+            ),
           ),
           const SizedBox(height: 26),
 

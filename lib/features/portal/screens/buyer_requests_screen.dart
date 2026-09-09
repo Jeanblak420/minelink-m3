@@ -15,6 +15,8 @@ import 'package:flutter_application_1/features/portal/widgets/request_attachment
 import 'package:flutter_application_1/features/portal/widgets/request_dialogs.dart';
 import 'package:flutter_application_1/features/portal/widgets/request_tracking_view.dart';
 import 'package:flutter_application_1/features/portal/widgets/portal_company_required.dart';
+import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
+import 'package:flutter_application_1/features/tour/examples/buyer_requests_keys.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
@@ -42,9 +44,9 @@ class BuyerRequestsScreen extends ConsumerWidget {
         async.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => MlLoadFailure(
-              subject: 'your requests',
-              error: e,
-              onRetry: () => ref.invalidate(companyRequestsProvider(companyId)),
+            subject: 'your requests',
+            error: e,
+            onRetry: () => ref.invalidate(companyRequestsProvider(companyId)),
           ),
           data: (requests) => MlPageBody(
             child: Column(
@@ -62,9 +64,9 @@ class BuyerRequestsScreen extends ConsumerWidget {
                   // only; Request 3 is mine/supplier only.
                   description: isMine
                       ? 'Raise transportation and buyer requests to the MineLink '
-                          'representative and track their review.'
+                            'representative and track their review.'
                       : 'Raise transportation and product requests to the MineLink '
-                          'representative and track their review.',
+                            'representative and track their review.',
                   // The screen's own actions belong to its header. They sat
                   // in a left `Wrap` BELOW it as stock Material — a
                   // `FilledButton.tonalIcon` next to a `FilledButton.icon`,
@@ -75,59 +77,104 @@ class BuyerRequestsScreen extends ConsumerWidget {
                   actions: mirror
                       ? const []
                       : [
-                          MlButton.tonal(
-                            label: 'Request transportation',
-                            icon: Icons.local_shipping_outlined,
-                            compact: true,
-                            onPressed: () =>
-                                _openForm(context, ref, companyId),
+                          TourTarget(
+                            id: 'requests.transportation',
+                            targetKey:
+                                BuyerRequestsTourKeys.transportationAction,
+                            child: MlButton.tonal(
+                              label: 'Request transportation',
+                              icon: Icons.local_shipping_outlined,
+                              compact: true,
+                              onPressed: () =>
+                                  _openForm(context, ref, companyId),
+                            ),
                           ),
                           if (isMine)
-                            MlButton.primary(
-                              label: 'Request buyers',
-                              icon: Icons.group_add_outlined,
-                              compact: true,
-                              onPressed: () => showBuyersRequestDialog(
-                                  context, ref, companyId),
+                            TourTarget(
+                              id: 'requests.primary_action',
+                              targetKey: BuyerRequestsTourKeys.primaryAction,
+                              child: MlButton.primary(
+                                label: 'Request buyers',
+                                icon: Icons.group_add_outlined,
+                                compact: true,
+                                onPressed: () => showBuyersRequestDialog(
+                                  context,
+                                  ref,
+                                  companyId,
+                                ),
+                              ),
                             )
                           else
-                            MlButton.primary(
-                              label: 'Request products',
-                              icon: Icons.add_shopping_cart_outlined,
-                              compact: true,
-                              onPressed: () => showProductRequestDialog(
-                                  context, ref, companyId),
+                            TourTarget(
+                              id: 'requests.primary_action',
+                              targetKey: BuyerRequestsTourKeys.primaryAction,
+                              child: MlButton.primary(
+                                label: 'Request products',
+                                icon: Icons.add_shopping_cart_outlined,
+                                compact: true,
+                                onPressed: () => showProductRequestDialog(
+                                  context,
+                                  ref,
+                                  companyId,
+                                ),
+                              ),
                             ),
                         ],
                 ),
                 const SizedBox(height: 16),
-                AvailableRoutesSection(companyId: companyId, enabled: !mirror),
-                if (requests.isEmpty)
-                  MlCard(
-                    child: MlEmptyState(
-                      icon: Icons.local_shipping_outlined,
-                      title: 'No requests yet.',
-                      message:
-                          'Tap "Request transportation" to send your first request.',
-                    ),
-                  )
-                else
-                  for (final section in groupRequestsByStatus(requests)) ...[
-                    _RequestSectionHeader(
-                      group: section.group,
-                      count: section.requests.length,
-                    ),
-                    for (final r in section.requests)
-                      _RequestCard(
-                        request: r,
-                        onReopen: (mirror || !r.status.buyerCanEdit)
-                            ? null
-                            : () =>
-                                _openForm(context, ref, companyId, existing: r),
-                      ),
-                  ],
+                TourTarget(
+                  id: 'requests.available_routes',
+                  targetKey: BuyerRequestsTourKeys.availableRoutes,
+                  child: AvailableRoutesSection(
+                    companyId: companyId,
+                    enabled: !mirror,
+                  ),
+                ),
+                TourTarget(
+                  id: 'requests.list',
+                  targetKey: BuyerRequestsTourKeys.requestsList,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (requests.isEmpty)
+                        MlCard(
+                          child: MlEmptyState(
+                            icon: Icons.local_shipping_outlined,
+                            title: 'No requests yet.',
+                            message:
+                                'Tap "Request transportation" to send your first request.',
+                          ),
+                        )
+                      else
+                        for (final section in groupRequestsByStatus(
+                          requests,
+                        )) ...[
+                          _RequestSectionHeader(
+                            group: section.group,
+                            count: section.requests.length,
+                          ),
+                          for (final r in section.requests)
+                            _RequestCard(
+                              request: r,
+                              onReopen: (mirror || !r.status.buyerCanEdit)
+                                  ? null
+                                  : () => _openForm(
+                                      context,
+                                      ref,
+                                      companyId,
+                                      existing: r,
+                                    ),
+                            ),
+                        ],
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 16),
-                RequestTrackingView(companyId: companyId),
+                TourTarget(
+                  id: 'requests.tracking',
+                  targetKey: BuyerRequestsTourKeys.tracking,
+                  child: RequestTrackingView(companyId: companyId),
+                ),
                 const SizedBox(height: 80),
               ],
             ),
@@ -174,18 +221,18 @@ class _RequestSectionHeader extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final (IconData icon, Color color) = switch (group) {
       RequestGroup.needsAction => (
-          Icons.assignment_late_outlined,
-          scheme.error,
-        ),
+        Icons.assignment_late_outlined,
+        scheme.error,
+      ),
       RequestGroup.pendingReview => (
-          Icons.hourglass_top_outlined,
-          scheme.tertiary,
-        ),
+        Icons.hourglass_top_outlined,
+        scheme.tertiary,
+      ),
       RequestGroup.active => (Icons.check_circle_outline, scheme.primary),
       RequestGroup.closed => (
-          Icons.inventory_2_outlined,
-          scheme.onSurfaceVariant,
-        ),
+        Icons.inventory_2_outlined,
+        scheme.onSurfaceVariant,
+      ),
     };
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 8),
@@ -291,7 +338,8 @@ class _RequestCard extends StatelessWidget {
               [
                 if (r.requestType == 'transportation' && r.commodity != null)
                   r.commodity,
-                if (r.tonsAvailable != null) mlCountText(r.tonsAvailable, 'ton'),
+                if (r.tonsAvailable != null)
+                  mlCountText(r.tonsAvailable, 'ton'),
                 if (r.requestType == 'product' && r.offloadingPoint != null)
                   '→ ${r.offloadingPoint}',
                 if (r.paymentTerms != null) r.paymentTerms,
@@ -394,7 +442,9 @@ class _AllocatedTrucksSection extends ConsumerWidget {
       ),
       error: (e, _) => Text(
         'Could not load allocated trucks. ${friendlyError(e)}',
-        style: context.mlText.bodySmall.copyWith(color: scheme.onSurfaceVariant),
+        style: context.mlText.bodySmall.copyWith(
+          color: scheme.onSurfaceVariant,
+        ),
       ),
       data: (trucks) {
         if (trucks.isEmpty) {
@@ -430,52 +480,54 @@ class _AllocatedTrucksSection extends ConsumerWidget {
             // detail line is `Flexible` inside it so a long crew list
             // shortens rather than shoving the plate out. The plate itself is
             // never truncated: it is the identifier.
-            LayoutBuilder(builder: (context, c) {
-              return Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final t in trucks)
-                    ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: c.maxWidth),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: scheme.surfaceContainerHighest.withValues(
-                            alpha: 0.5,
+            LayoutBuilder(
+              builder: (context, c) {
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final t in trucks)
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: c.maxWidth),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
                           ),
-                          borderRadius: MlShape.radiusMedium,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            MlPlatePill(t.truckReg ?? '—', fontSize: 12),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                [
-                                  if (t.transporterName != null)
-                                    t.transporterName!,
-                                  if (t.drivers != null) t.drivers!,
-                                  TripStatus.parse(t.tripStatus).label,
-                                ].join(' · '),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.mlText.bodySmall.copyWith(
-                                  color: scheme.onSurfaceVariant,
+                          decoration: BoxDecoration(
+                            color: scheme.surfaceContainerHighest.withValues(
+                              alpha: 0.5,
+                            ),
+                            borderRadius: MlShape.radiusMedium,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              MlPlatePill(t.truckReg ?? '—', fontSize: 12),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  [
+                                    if (t.transporterName != null)
+                                      t.transporterName!,
+                                    if (t.drivers != null) t.drivers!,
+                                    TripStatus.parse(t.tripStatus).label,
+                                  ].join(' · '),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: context.mlText.bodySmall.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                ],
-              );
-            }),
+                  ],
+                );
+              },
+            ),
           ],
         );
       },

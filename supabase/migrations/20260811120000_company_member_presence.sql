@@ -49,7 +49,8 @@ create or replace function public.list_company_member_presence(
 returns table (
   user_id uuid,
   last_seen_at timestamptz,
-  has_signature boolean
+  has_signature boolean,
+  email text
 )
 language sql
 stable
@@ -62,7 +63,11 @@ as $$
     -- The URL itself is never returned: the register only needs to show WHO
     -- is missing a signature (P7-35). A user without one silently produces a
     -- blank waybill signature line, and today only 3 of 116 profiles have one.
-    (p.signature_url is not null and p.signature_url <> '') as has_signature
+    (p.signature_url is not null and p.signature_url <> '') as has_signature,
+    -- Email is now returned for company owners, admins, and managers to view
+    -- in the employee register (2026-09-08). These users already have
+    -- is_company_manager access, and email is essential for communication.
+    p.email
   from public.employees e
   join public.profiles p on p.id = e.user_id
   where e.company_id = p_company_id
@@ -76,14 +81,15 @@ as $$
 $$;
 
 comment on function public.list_company_member_presence(uuid) is
-  'Employee Register presence, company-scoped. Returns last_seen_at and a '
-  'has_signature flag for one company''s employees, to a company owner/admin/'
-  'management user or the platform admin. Exists because profiles_select_own '
-  'restricts profiles to the caller''s own row, so a manager reading the table '
-  'directly gets nothing and every colleague renders offline -- a fabricated '
-  'status. Deliberately returns two facts rather than widening the profiles '
-  'policy, which would expose platform_role, must_change_password, metadata, '
-  'email and signature_url along with them.';
+  'Employee Register presence, company-scoped. Returns last_seen_at, has_signature, '
+  'and email for one company''s employees, to a company owner/admin/management user '
+  'or the platform admin. Exists because profiles_select_own restricts profiles to '
+  'the caller''s own row, so a manager reading the table directly gets nothing and '
+  'every colleague renders offline -- a fabricated status. Returns three facts '
+  'rather than widening the profiles policy, which would expose platform_role, '
+  'must_change_password, metadata and signature_url along with them. Email is '
+  'included as it is essential for communication and the register''s intended '
+  'audience (company owners, admins, managers) already have is_company_manager access.';
 
 -- Match the grant pattern the other 178 definer functions use: never PUBLIC
 -- (anon inherits from PUBLIC, which is how 27 functions were callable
