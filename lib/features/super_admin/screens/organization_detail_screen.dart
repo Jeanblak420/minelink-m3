@@ -846,6 +846,11 @@ class _UsersTab extends ConsumerWidget {
                                     const PopupMenuItem(value: 'reactivate', child: Row(children: [Icon(Icons.check_circle_outline_rounded, size: 18, color: MlTokens.green600), SizedBox(width: 8), Text('Reactivate User')])),
                                   const PopupMenuItem(value: 'remove_seat', child: Row(children: [Icon(Icons.event_seat_rounded, size: 18, color: MlTokens.orange500), SizedBox(width: 8), Text('Remove from Seat')])),
                                   const PopupMenuItem(value: 'change_role', child: Row(children: [Icon(Icons.manage_accounts_rounded, size: 18), SizedBox(width: 8), Text('Change Role')])),
+                                  PopupMenuItem(
+                                    value: 'edit_login',
+                                    enabled: userId != null,
+                                    child: const Row(children: [Icon(Icons.key_rounded, size: 18), SizedBox(width: 8), Text('Change Password / Email / Phone')]),
+                                  ),
                                 ],
                               ),
                             ],
@@ -924,6 +929,46 @@ class _UsersTab extends ConsumerWidget {
         await repo.changeEmployeeRole(employeeId: employeeId, newRole: newRole);
         ref.invalidateIfMounted(companyUsersGroupedProvider(companyId));
         if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$name role changed to $newRole')));
+
+      case 'edit_login':
+        if (userId == null) {
+          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('This employee has no login account')));
+          return;
+        }
+        final currentEmail = _profileEmail(user) ?? '';
+        final currentPhone = (user['whatsapp_number'] as String?)?.trim() ?? '';
+        final edit = await showDialog<_LoginEdit>(
+          context: context,
+          builder: (dialogContext) => _EditLoginDialog(
+            name: name.isEmpty ? 'this user' : name,
+            currentEmail: currentEmail,
+            currentPhone: currentPhone,
+          ),
+        );
+        if (edit == null || !context.mounted) return;
+        try {
+          final changed = await repo.updateUserCredentials(
+            userId: userId,
+            password: edit.password,
+            email: edit.email,
+            phone: edit.phone,
+          );
+          ref.invalidateIfMounted(companyUsersGroupedProvider(companyId));
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(changed.isEmpty
+                  ? 'Nothing changed for $name'
+                  : 'Updated ${changed.join(', ')} for $name'),
+            ));
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Could not update $name: ${friendlyError(e)}'),
+              backgroundColor: MlTokens.red600,
+            ));
+          }
+        }
     }
   }
 
@@ -969,6 +1014,171 @@ class _UsersTab extends ConsumerWidget {
   }
 
   String _roleLabel(String r) => UserRole.labelFor(r);
+}
+
+/// Only the fields the admin actually changed; `null` means "leave as is".
+typedef _LoginEdit = ({String? password, String? email, String? phone});
+
+/// Super-admin dialog to change one user's password, email and/or phone.
+///
+/// Email and phone start filled in with the current values; the password
+/// fields start empty and an empty password means "keep the current one".
+/// The dialog pops with its own context (see the note above `_confirm`).
+class _EditLoginDialog extends StatefulWidget {
+  final String name;
+  final String currentEmail;
+  final String currentPhone;
+  const _EditLoginDialog({
+    required this.name,
+    required this.currentEmail,
+    required this.currentPhone,
+  });
+
+  @override
+  State<_EditLoginDialog> createState() => _EditLoginDialogState();
+}
+
+class _EditLoginDialogState extends State<_EditLoginDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final _email = TextEditingController(text: widget.currentEmail);
+  late final _phone = TextEditingController(text: widget.currentPhone);
+  final _password = TextEditingController();
+  final _confirm = TextEditingController();
+  bool _showPassword = false;
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _phone.dispose();
+    _password.dispose();
+    _confirm.dispose();
+    super.dispose();
+  }
+
+  void _submit(BuildContext dialogContext) {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final email = _email.text.trim();
+    final phone = _phone.text.trim();
+    final password = _password.text;
+    final edit = (
+      password: password.isEmpty ? null : password,
+      email: email.isEmpty || email.toLowerCase() == widget.currentEmail.toLowerCase() ? null : email,
+      phone: phone.isEmpty || phone == widget.currentPhone ? null : phone,
+    );
+    if (edit.password == null && edit.email == null && edit.phone == null) {
+      Navigator.pop(dialogContext);
+      return;
+    }
+    Navigator.pop(dialogContext, edit);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    return AlertDialog(
+      title: Text('Login details for ${widget.name}'),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Change any of these. Fields you leave as they are stay unchanged. '
+                  'The user is not notified — tell them their new details yourself.',
+                  style: context.mlText.bodyMedium.copyWith(color: muted),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _email,
+                  keyboardType: TextInputType.emailAddress,
+                  autocorrect: false,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.alternate_email_rounded),
+                  ),
+                  validator: (v) {
+                    final t = v?.trim() ?? '';
+                    if (t.isEmpty) return null;
+                    return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(t)
+                        ? null
+                        : 'Enter a valid email address';
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _phone,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone / WhatsApp number',
+                    hintText: 'e.g. 082 123 4567',
+                    prefixIcon: Icon(Icons.phone_rounded),
+                  ),
+                  validator: (v) {
+                    final digits = (v ?? '').replaceAll(RegExp(r'\D'), '');
+                    if (digits.isEmpty) return null;
+                    return digits.length >= 9 ? null : 'Enter a valid phone number';
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _password,
+                  obscureText: !_showPassword,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  decoration: InputDecoration(
+                    labelText: 'New password',
+                    helperText: 'Leave empty to keep the current password',
+                    prefixIcon: const Icon(Icons.lock_reset_rounded),
+                    suffixIcon: IconButton(
+                      tooltip: _showPassword ? 'Hide password' : 'Show password',
+                      icon: Icon(_showPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded),
+                      onPressed: () => setState(() => _showPassword = !_showPassword),
+                    ),
+                  ),
+                  validator: (v) {
+                    final t = v ?? '';
+                    if (t.isEmpty) return null;
+                    return t.length >= 6 ? null : 'At least 6 characters';
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _confirm,
+                  obscureText: !_showPassword,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  decoration: const InputDecoration(
+                    labelText: 'Confirm new password',
+                    prefixIcon: Icon(Icons.lock_outline_rounded),
+                  ),
+                  validator: (v) =>
+                      (v ?? '') == _password.text ? null : 'Passwords do not match',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        Builder(
+          builder: (dialogContext) => TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+        ),
+        Builder(
+          builder: (dialogContext) => FilledButton(
+            onPressed: () => _submit(dialogContext),
+            child: const Text('Save changes'),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 bool _serialTokenCountsAsValid(SerialToken t) {

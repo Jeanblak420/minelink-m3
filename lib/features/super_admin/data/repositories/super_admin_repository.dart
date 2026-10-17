@@ -981,6 +981,44 @@ class SuperAdminRepository {
     });
   }
 
+  /// Change any user's sign-in password, email and/or phone.
+  ///
+  /// Goes through the `admin-update-user` edge function, which checks
+  /// `is_platform_admin()` as the caller before touching `auth.users` and
+  /// writes an `audit_logs` row. Pass only the fields being changed. Returns
+  /// the list of fields the server actually changed.
+  Future<List<String>> updateUserCredentials({
+    required String userId,
+    String? password,
+    String? email,
+    String? phone,
+  }) async {
+    final body = <String, dynamic>{
+      'target_user_id': userId,
+      if (password != null && password.isNotEmpty) 'password': password,
+      if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
+      if (phone != null && phone.trim().isNotEmpty) 'phone': phone.trim(),
+    };
+
+    dynamic data;
+    try {
+      final res = await _client.functions.invoke('admin-update-user', body: body);
+      data = res.data;
+    } on FunctionException catch (e) {
+      final details = e.details;
+      if (details is Map && details['error'] != null) {
+        throw Exception(details['error'].toString());
+      }
+      throw Exception(e.reasonPhrase ?? 'Could not update login details');
+    }
+
+    if (data is! Map) throw Exception('Unexpected response');
+    final map = Map<String, dynamic>.from(data);
+    if (map['error'] != null) throw Exception(map['error'].toString());
+    if (map['success'] != true) throw Exception('Could not update login details');
+    return (map['changed'] as List? ?? const []).map((e) => e.toString()).toList();
+  }
+
   // ============ Org insights (monthly, platform admin reads) ============
 
   /// Preferred path: single DB RPC for companies + aggregate; falls back to Dart merge if RPC fails.
