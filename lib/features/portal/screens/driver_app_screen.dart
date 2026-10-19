@@ -68,7 +68,7 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
     // shell-ground-exempt: the driver app is SELF-CHROMED. `PortalShellLayout`
     // renders these three tabs bare for a driver employee, so this Scaffold is
     // the only one on screen and its ground is the page.
-    return Scaffold(
+    final scaffold = Scaffold(
       // The driver shell bypasses the portal scaffold, so it mounts its own
       // account-setup nag (renders nothing once setup is complete).
       body: SafeArea(
@@ -101,6 +101,21 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
           ),
         ],
       ),
+    );
+
+    // Phone Back on the Trip or Profile tab returns to the Dashboard tab
+    // first; on the Dashboard it falls through to the shell's SystemBackHandler.
+    // Needs a Router above it, which the app always has and bare-widget tests
+    // do not.
+    if (Router.maybeOf(context) == null) return scaffold;
+    return BackButtonListener(
+      onBackButtonPressed: () async {
+        if (GoRouter.maybeOf(context)?.canPop() ?? false) return false;
+        if (_tab == 0) return false;
+        setState(() => _tab = 0);
+        return true;
+      },
+      child: scaffold,
     );
   }
 }
@@ -275,8 +290,9 @@ class DriverDashboardTab extends ConsumerWidget {
                   onTap: current == null ? null : onOpenTrip,
                   onNavigate: current == null
                       ? null
-                      : () =>
-                            context.push('/portal/driver/navigate/${current.id}'),
+                      : () => context.push(
+                          '/portal/driver/navigate/${current.id}',
+                        ),
                   onStartRoute:
                       (current != null &&
                           TripStatus.parse(current.status) ==

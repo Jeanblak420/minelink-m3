@@ -8,13 +8,13 @@ import 'package:flutter_application_1/core/design/shell/ml_rail_blocks.dart';
 import 'package:flutter_application_1/core/design/tokens/ui_prefs.dart';
 import 'package:flutter_application_1/core/layout/text_scale.dart';
 import 'package:flutter_application_1/core/navigation/app_sidebar_prefs.dart';
-import 'package:flutter_application_1/core/navigation/nav_back.dart';
 import 'package:flutter_application_1/core/navigation/nav_history_provider.dart';
 import 'package:flutter_application_1/core/routing/ml_route_title.dart';
 import 'package:flutter_application_1/core/routing/notifications_inbox_route.dart';
 import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/core/widgets/app_navigation_back_button.dart';
 import 'package:flutter_application_1/core/widgets/nav_history_recorder.dart';
+import 'package:flutter_application_1/core/widgets/system_back_handler.dart';
 import 'package:flutter_application_1/core/widgets/user_identity_flyout.dart';
 import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 import 'package:flutter_application_1/features/auth/services/logout_service.dart';
@@ -150,14 +150,11 @@ class _SuperAdminShellLayoutState extends ConsumerState<SuperAdminShellLayout> {
       ),
     );
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        if (ref.read(navHistoryProvider.notifier).canGoBack) {
-          navigateBack(context, ref);
-        }
-      },
+    // The phone's Back button / gesture. A PopScope here was never reached by
+    // a system back — see SystemBackHandler for why.
+    return SystemBackHandler(
+      isRoot: location == '/super-admin',
+      goToRoot: () => context.go('/super-admin'),
       child: ChatDock(child: shell),
     );
   }

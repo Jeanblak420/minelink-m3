@@ -31,8 +31,8 @@ import 'package:flutter_application_1/features/portal/widgets/portal_scaffold.da
 import 'package:flutter_application_1/features/portal/widgets/workflow_notification_bell.dart';
 import 'package:flutter_application_1/core/widgets/app_navigation_back_button.dart';
 import 'package:flutter_application_1/core/navigation/nav_history_provider.dart';
-import 'package:flutter_application_1/core/navigation/nav_back.dart';
 import 'package:flutter_application_1/core/widgets/nav_history_recorder.dart';
+import 'package:flutter_application_1/core/widgets/system_back_handler.dart';
 import 'package:flutter_application_1/features/tour/providers/tour_provider.dart';
 import 'package:flutter_application_1/features/tour/providers/tour_seen_provider.dart';
 import 'package:flutter_application_1/features/tour/providers/tour_service_provider.dart';
@@ -410,6 +410,23 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
     );
   }
 
+  /// The driver app is self-chromed and bypasses the shell below, so it needs
+  /// its own Back handling. Its Dashboard/Trip/Profile tabs are the driver's
+  /// landing screens; only the in-app navigation screen under
+  /// `/portal/driver/trip/...` steps back to them.
+  Widget _driverBack(String shellPath, Widget child) {
+    final isRoot = !shellPath.startsWith('/portal/driver/trip/');
+    return NavHistoryRecorder(
+      location: NavLocation(path: shellPath),
+      isRoot: isRoot,
+      child: SystemBackHandler(
+        isRoot: isRoot,
+        goToRoot: () => context.go('/portal/driver/home'),
+        child: child,
+      ),
+    );
+  }
+
   Widget _buildShell(BuildContext context) {
     final vm = ref.watch(portalWorkspaceProvider);
     final authState = ref.watch(authStateProvider);
@@ -454,7 +471,7 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
       // keeps off the portal's: the dock reserves `kMlBottomNavHeight` by
       // WINDOW CLASS rather than by asking whether a bar happens to be there
       // (`chat_dock.dart`), and the driver shell is only ever narrow.
-      return const ChatDock(child: DriverAppScreen());
+      return _driverBack(shellPath, const ChatDock(child: DriverAppScreen()));
     }
     // Phase-2 nav merge (T2): /portal/driver/{home,trip,profile} deep-link
     // the same self-chromed driver app — render the routed child without the
@@ -468,7 +485,7 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
     // Fixing that one alone left the disc still missing on the handset, which
     // is how this second `return` was found.
     if (isDriverEmployee && driverAppOwnsChrome(shellPath)) {
-      return ChatDock(child: widget.child);
+      return _driverBack(shellPath, ChatDock(child: widget.child));
     }
 
     final tabs = vm.tabs!;
@@ -791,13 +808,13 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
     // inside the mine premium theme/semantic scope when one is installed.
     content = Stack(children: [content, const TourOverlay()]);
 
-    content = PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        if (ref.read(navHistoryProvider.notifier).canGoBack) {
-          navigateBack(context, ref);
-        }
+    // The phone's Back button / gesture. A PopScope here was never reached by
+    // a system back — see SystemBackHandler for why.
+    content = SystemBackHandler(
+      isRoot: isRootScreen,
+      goToRoot: () {
+        ref.read(portalTabIndexProvider.notifier).state = 0;
+        context.go('/home');
       },
       child: content,
     );
