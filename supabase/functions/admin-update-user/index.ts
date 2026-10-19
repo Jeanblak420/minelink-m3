@@ -158,15 +158,27 @@ Deno.serve(async (req: Request) => {
       changed.push("password");
     }
 
+    // Compared in E.164, so `0821234567` and `+27821234567` are the same number.
+    const phoneChanged = phone !== "" && phone !== oldPhone;
+
     let newEmail = email;
     // A WhatsApp-only account signs in with a synthetic email derived from
     // its number. Moving the number without moving that email would lock the
     // user out of WhatsApp login, so follow it unless an email was given.
+    //
+    // Derived from the number AS TYPED (`phoneRaw`), not its E.164 form:
+    // creation (company-user-admin) and the login form both take the typed
+    // digits, so `0821234567` must map to `wa-0821234567@…`. Using the E.164
+    // digits produced `wa-27821234567@…`, which nothing would ever look up.
+    //
+    // Only when the number really changed. Re-typing the SAME number in another
+    // shape (`+27…` for `0…`) used to rewrite the login email anyway — found
+    // 2026-10-19 when exactly that locked a test user out of number sign-in.
     if (
-      !newEmail && phone &&
+      !newEmail && phoneChanged &&
       oldEmail.endsWith(`@${WHATSAPP_AUTH_EMAIL_DOMAIN}`)
     ) {
-      newEmail = whatsappAuthEmail(phone);
+      newEmail = whatsappAuthEmail(phoneRaw);
     }
     if (newEmail && newEmail !== oldEmail.toLowerCase()) {
       attrs.email = newEmail;
@@ -174,7 +186,7 @@ Deno.serve(async (req: Request) => {
       changed.push("email");
     }
 
-    if (phone && phone !== oldPhone) {
+    if (phoneChanged) {
       attrs.phone = phone;
       attrs.phone_confirm = true;
       changed.push("phone");

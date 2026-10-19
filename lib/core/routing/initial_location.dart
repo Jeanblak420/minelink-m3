@@ -62,6 +62,12 @@ void captureInitialLocation(Uri base) {
 /// normally" case and must fall through to the router's own default rather
 /// than being forced to `/`.
 String? initialLocationFrom(Uri base) {
+  // Off the web `Uri.base` is the process's working directory, not an address
+  // anyone opened. On Windows that is `file:///C:/…/<folder the exe ran from>`,
+  // and treating its path as a route sent every sign-in to "That page is not
+  // here" (found driving the Windows release, 2026-10-19). Android only
+  // escaped because its working directory is `/`.
+  if (base.scheme == 'file') return null;
   final fragment = base.fragment;
   if (fragment.isNotEmpty) {
     return _accept(fragment);

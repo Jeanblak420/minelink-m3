@@ -262,10 +262,16 @@ class _OrganizationDetailScreenState extends ConsumerState<OrganizationDetailScr
 
         return Scaffold(
           backgroundColor: Colors.transparent,
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _showTokenDialog(context, ref, widget.organizationId, name, seatLimit),
-            icon: const Icon(Icons.vpn_key_rounded),
-            label: const Text('Generate Token'),
+          // Shifted left of the ChatDock bubble (66px, pinned 16px from the
+          // bottom-right — the same corner a FAB takes), which otherwise sat
+          // on top of this button and hid "Token".
+          floatingActionButton: Padding(
+            padding: const EdgeInsets.only(right: 76),
+            child: FloatingActionButton.extended(
+              onPressed: () => _showTokenDialog(context, ref, widget.organizationId, name, seatLimit),
+              icon: const Icon(Icons.vpn_key_rounded),
+              label: const Text('Generate Token'),
+            ),
           ),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -946,6 +952,13 @@ class _UsersTab extends ConsumerWidget {
           ),
         );
         if (edit == null || !context.mounted) return;
+        // The round trip can take several seconds (edge-function cold start),
+        // and the dialog has already closed — say something is happening.
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.showSnackBar(SnackBar(
+          content: Text('Saving login details for $name…'),
+          duration: const Duration(minutes: 1),
+        ));
         try {
           final changed = await repo.updateUserCredentials(
             userId: userId,
@@ -954,20 +967,20 @@ class _UsersTab extends ConsumerWidget {
             phone: edit.phone,
           );
           ref.invalidateIfMounted(companyUsersGroupedProvider(companyId));
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          messenger
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(
               content: Text(changed.isEmpty
                   ? 'Nothing changed for $name'
                   : 'Updated ${changed.join(', ')} for $name'),
             ));
-          }
         } catch (e) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          messenger
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(
               content: Text('Could not update $name: ${friendlyError(e)}'),
               backgroundColor: MlTokens.red600,
             ));
-          }
         }
     }
   }
