@@ -201,9 +201,10 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
-                    labelText: 'Email (optional)',
-                    helperText: 'Provide email and/or WhatsApp',
-                    helperMaxLines: 2,
+                    // Short label for the same reason as WhatsApp's below.
+                    labelText: 'Email',
+                    helperText: 'Optional — provide email and/or WhatsApp',
+                    helperMaxLines: 3,
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
                   validator: _validateEmail,
@@ -218,8 +219,8 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
                     // InputDecoration label is always one line and always
                     // ellipsises, so a long one is simply unreadable on a
                     // phone. Helper text wraps.
-                    labelText: 'WhatsApp (optional)',
-                    helperText: 'Mobile number',
+                    labelText: 'WhatsApp',
+                    helperText: 'Optional — mobile number',
                     helperMaxLines: 2,
                     prefixIcon: Icon(Icons.phone_outlined),
                   ),

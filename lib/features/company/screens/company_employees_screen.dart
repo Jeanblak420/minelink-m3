@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
+import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -806,7 +807,7 @@ class _CompanyEmployeesScreenState
   };
 
   String _tenureLabel(Employee e) {
-    final months = DateTime.now().difference(e.createdAt).inDays ~/ 30;
+    final months = MlTime.instant().difference(e.createdAt).inDays ~/ 30;
     if (months < 1) return 'New this month';
     if (months < 12) return '$months mo tenure';
     final y = months ~/ 12, m = months % 12;

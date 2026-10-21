@@ -1781,7 +1781,10 @@ class _MemberCard extends ConsumerWidget {
                       Text(
                         '·  ${e.role?.label ?? 'No role set'}'
                         '${e.whatsappNumber.trim().isEmpty ? '' : '  ·  ${e.whatsappNumber}'}'
-                        '${member.email?.trim().isEmpty == true ? '' : '  ·  ${member.email}'}',
+                        // `?? ''`, not `?.trim().isEmpty == true`: with no
+                        // email that test is `null == true`, which is false,
+                        // and the card printed the word "null".
+                        '${(member.email ?? '').trim().isEmpty ? '' : '  ·  ${member.email}'}',
                         style: context.mlText.bodySmall.copyWith(
                           color: pal.textMuted,
                         ),

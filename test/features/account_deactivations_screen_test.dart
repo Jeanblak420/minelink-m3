@@ -408,8 +408,11 @@ void main() {
               companyName: 'Iron Hills Mining',
               role: 'driver',
               status: 'pending',
-              requestedAt: DateTime.utc(2026, 8, 19),
-              autoApplyAt: DateTime.utc(2026, 9, 18),
+              // Relative to now: a fixed date here stopped being "pending"
+              // the day it passed, and the test failed with the calendar.
+              requestedAt: DateTime.now().toUtc(),
+              autoApplyAt:
+                  DateTime.now().toUtc().add(const Duration(days: 30)),
               isCompanyOwner: false,
               activeTrips: 0,
             ),
