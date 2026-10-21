@@ -57,7 +57,7 @@ class DriverNavigationScreen extends ConsumerStatefulWidget {
 }
 
 class _DriverNavigationScreenState extends ConsumerState<DriverNavigationScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   // Approved design exception (CLAUDE.md plan): the cyan→navy hero pair.
   // Was `Color(0xFF0B2545)` declared here. That is byte-identical to
   // MlTokens.navy700, the portal's navy chrome, which the driver
@@ -111,6 +111,41 @@ class _DriverNavigationScreenState extends ConsumerState<DriverNavigationScreen>
   bool _arrived = false;
   bool _followCamera = true;
 
+  // Google Maps / Waze camera behaviour (jean, 2026-10-21).
+  //
+  // * Following puts the truck in the LOWER part of the screen, not its middle,
+  //   so most of the map is the road ahead — the half behind the truck is road
+  //   already driven, and the top of the screen is under the banner.
+  // * One-finger drag looks around and stops following; the Re-centre button
+  //   glides back.
+  // * ZOOM never stops following — pinch, double-tap and the +/- buttons all
+  //   keep the truck in view at the driver's chosen zoom. Before this, the zoom
+  //   buttons were silently undone by the next GPS fix (the camera reapplied
+  //   the speed zoom) and a pinch dropped out of follow entirely.
+  // * The compass turns the follow camera north-up; Re-centre returns to
+  //   heading-up.
+
+  /// Zoom the driver chose while following; null means "pick by speed".
+  double? _userZoom;
+
+  /// Follow the truck with north at the top instead of the travel direction.
+  bool _northUp = false;
+
+  /// How far below the centre the truck sits while following, as a fraction of
+  /// the map's height. Clears the HUD card at the bottom on a 360–412 px phone.
+  static const _lookAhead = 0.22;
+
+  /// Tags this screen's own camera moves, so [_onMapEvent] can tell them apart
+  /// from the driver's (and from [MlMapControls]', which carry no id).
+  static const _navCam = 'nav-camera';
+
+  late final AnimationController _recenterAnim = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 600),
+  )..addListener(_onRecenterTick);
+  MapCamera? _recenterFrom;
+  bool _followSnapQueued = false;
+
   /// True once `FlutterMap` has been laid out at least once.
   ///
   /// `MapController` throws if it is used before that, and the follow camera is
@@ -143,6 +178,7 @@ class _DriverNavigationScreenState extends ConsumerState<DriverNavigationScreen>
   void dispose() {
     if (!kIsWeb) WakelockPlus.disable().catchError((_) {});
     _motion.dispose();
+    _recenterAnim.dispose();
     _posSub?.cancel();
     _mapController.dispose();
     super.dispose();
@@ -161,16 +197,112 @@ class _DriverNavigationScreenState extends ConsumerState<DriverNavigationScreen>
     // Shortest-arc heading interpolation so 350°→10° doesn't spin the long way.
     var dh = (_headingTo - _headingFrom + 540) % 360 - 180;
     _smoothHeading = (_headingFrom + dh * t + 360) % 360;
-    // `_mapReady` — see `MapOptions.onMapReady` below for why this guard is
-    // load-bearing rather than defensive.
-    if (_mapReady && _followCamera && _smoothPos != null) {
-      _mapController.moveAndRotate(
-        _smoothPos!,
-        _zoomForSpeed(_speedKmh),
-        -_smoothHeading,
-      );
-    }
+    // While Re-centre is gliding, its own tick drives the camera (towards the
+    // moving truck), so this one must not fight it.
+    if (!_recenterAnim.isAnimating) _applyFollow();
     if (mounted) setState(() {});
+  }
+
+  double get _followZoom => _userZoom ?? _zoomForSpeed(_speedKmh);
+  double get _followRotation => _northUp ? 0 : -_smoothHeading;
+
+  /// The camera centre that puts [puck] [_lookAhead] below the middle of the
+  /// screen, in the direction the map is pointing — the road ahead fills the
+  /// screen. North-up keeps the truck centred, as Google Maps does.
+  LatLng _followCenter(LatLng puck, double zoom, double rotation) {
+    if (_northUp) return puck;
+    final cam = _mapController.camera
+        .withRotation(rotation)
+        .withPosition(center: puck, zoom: zoom);
+    final size = cam.nonRotatedSize;
+    if (!size.height.isFinite || size.height <= 0) return puck;
+    return cam.screenOffsetToLatLng(
+      Offset(size.width / 2, size.height * (0.5 - _lookAhead)),
+    );
+  }
+
+  /// Puts the camera where following wants it, immediately.
+  ///
+  /// `_mapReady` — see `MapOptions.onMapReady` below for why this guard is
+  /// load-bearing rather than defensive.
+  void _applyFollow() {
+    final p = _smoothPos ?? _pos;
+    if (!_mapReady || !_followCamera || p == null) return;
+    final z = _followZoom, r = _followRotation;
+    _mapController.moveAndRotate(_followCenter(p, z, r), z, r, id: _navCam);
+  }
+
+  /// Re-applies following after the current frame. Used from map events: a
+  /// pinch moves the centre to the fingers, and moving the camera from inside
+  /// the event that the move emitted would re-enter the controller.
+  void _queueFollowSnap() {
+    if (_followSnapQueued) return;
+    _followSnapQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _followSnapQueued = false;
+      if (mounted) _applyFollow();
+    });
+  }
+
+  /// Decides what each camera change MEANS — see the note on [_userZoom].
+  void _onMapEvent(MapEvent e) {
+    switch (e.source) {
+      case MapEventSource.dragStart:
+      case MapEventSource.onDrag:
+      case MapEventSource.flingAnimationController:
+        // Looking around. Stop following, and stop a Re-centre in flight.
+        if (_followCamera) {
+          _recenterAnim.stop();
+          setState(() => _followCamera = false);
+        }
+      case MapEventSource.multiFingerGestureStart:
+      case MapEventSource.onMultiFinger:
+      case MapEventSource.multiFingerEnd:
+      case MapEventSource.doubleTap:
+      case MapEventSource.doubleTapHold:
+      case MapEventSource.scrollWheel:
+        // Zooming. Keep following, at the zoom the driver picked.
+        if (_followCamera && e is MapEventWithMove) {
+          _userZoom = e.camera.zoom;
+          _queueFollowSnap();
+        }
+      case MapEventSource.mapController:
+        // Our own moves carry `_navCam`; anything else came from the map
+        // controls — the +/- buttons or the compass.
+        if (e is MapEventMove && e.id != _navCam && _followCamera) {
+          if ((e.camera.zoom - e.oldCamera.zoom).abs() > 0.01) {
+            _userZoom = e.camera.zoom;
+          }
+          _queueFollowSnap();
+        } else if (e is MapEventRotate && e.id != _navCam) {
+          final northUp = e.camera.rotation.abs() < 0.5;
+          if (northUp != _northUp) setState(() => _northUp = northUp);
+          if (_followCamera) _queueFollowSnap();
+        }
+      default:
+        break;
+    }
+  }
+
+  void _onRecenterTick() {
+    final from = _recenterFrom;
+    final p = _smoothPos ?? _pos;
+    if (from == null || p == null || !_mapReady || !_followCamera) return;
+    final t = Curves.easeInOutCubic.transform(_recenterAnim.value);
+    final z = _followZoom, r = _followRotation;
+    final target = _followCenter(p, z, r);
+    // Shortest arc, as for the heading, so a turn back never spins 300°.
+    final dr = (r - from.rotation + 540) % 360 - 180;
+    _mapController.moveAndRotate(
+      LatLng(
+        from.center.latitude + (target.latitude - from.center.latitude) * t,
+        from.center.longitude + (target.longitude - from.center.longitude) * t,
+      ),
+      from.zoom + (z - from.zoom) * t,
+      from.rotation + dr * t,
+      id: _navCam,
+    );
+    if (_recenterAnim.isCompleted) _recenterFrom = null;
   }
 
   void _glideTo(LatLng pos, double heading) {
@@ -853,12 +985,22 @@ class _DriverNavigationScreenState extends ConsumerState<DriverNavigationScreen>
   /// `_followCamera = true` the next GPS fix would not move the camera, so the
   /// map jumped to the truck once and then went stale again — which reads as
   /// the button not having worked.
+  ///
+  /// Like Google Maps' and Waze's, it GLIDES back rather than jumping — a jump
+  /// loses the driver's sense of where he had scrolled to relative to the
+  /// truck — and it returns to the default driving view: heading-up, zoom by
+  /// speed.
   void _recenterOnMe() {
     final p = _smoothPos ?? _pos;
     if (p == null) return;
-    setState(() => _followCamera = true);
+    setState(() {
+      _followCamera = true;
+      _userZoom = null;
+      _northUp = false;
+    });
     if (!_mapReady) return;
-    _mapController.moveAndRotate(p, _zoomForSpeed(_speedKmh), -_smoothHeading);
+    _recenterFrom = _mapController.camera;
+    _recenterAnim.forward(from: 0);
   }
 
   /// Frames the whole journey — Google Maps' "route overview".
@@ -875,8 +1017,9 @@ class _DriverNavigationScreenState extends ConsumerState<DriverNavigationScreen>
       if (_destination?.point != null) _destination!.point!,
     ];
     if (pts.isEmpty) return;
+    _recenterAnim.stop();
     setState(() => _followCamera = false);
-    _mapController.rotate(0);
+    _mapController.rotate(0, id: _navCam);
     _mapController.fitCamera(
       safeCoordinatesFit(
         pts,
@@ -979,6 +1122,22 @@ class _DriverNavigationScreenState extends ConsumerState<DriverNavigationScreen>
               overviewTooltip: 'See the whole route',
             ),
           ),
+          // Google Maps' "Re-centre": the moment the driver drags the map away,
+          // a labelled button says how to get back. The my-location disc in the
+          // controls does the same thing, but it is a small icon at the edge
+          // of the screen, which is not what a driver looks for at 80 km/h.
+          if (!_followCamera && _pos != null)
+            Positioned(
+              left: 12,
+              bottom: _arrived ? 196 : 128,
+              child: MlButton.primary(
+                key: const ValueKey('nav-recenter'),
+                label: 'Re-centre',
+                icon: Icons.navigation_rounded,
+                compact: true,
+                onPressed: _recenterOnMe,
+              ),
+            ),
           // Arrival action.
           if (_arrived)
             Positioned(
@@ -1117,20 +1276,17 @@ class _DriverNavigationScreenState extends ConsumerState<DriverNavigationScreen>
           // Catch up: the fixes that arrived before the map existed left the
           // camera behind, and without this the puck sits still until the next
           // one — which on a truck stopped at a boom gate can be a long time.
-          final p = _smoothPos ?? _pos;
-          if (p != null && _followCamera) {
-            _mapController.moveAndRotate(
-              p,
-              _zoomForSpeed(_speedKmh),
-              -_smoothHeading,
-            );
-          }
+          _applyFollow();
         },
-        onPositionChanged: (camera, hasGesture) {
-          if (hasGesture && _followCamera) {
-            setState(() => _followCamera = false);
-          }
-        },
+        onMapEvent: _onMapEvent,
+        // Two-finger ROTATE is off while following: the camera already turns
+        // with the truck, and a twist fighting it every fix reads as the map
+        // being broken. Free-looking gets every gesture.
+        interactionOptions: InteractionOptions(
+          flags: _followCamera
+              ? InteractiveFlag.all & ~InteractiveFlag.rotate
+              : InteractiveFlag.all,
+        ),
         // Press and hold to ask where something is — see [_droppedPin].
         onLongPress: (tapPosition, point) => _droppedPin(point),
       ),
@@ -1189,6 +1345,7 @@ class _DriverNavigationScreenState extends ConsumerState<DriverNavigationScreen>
             ),
             if (puckPos != null)
               Marker(
+                key: const ValueKey('nav-puck'),
                 point: puckPos,
                 width: 46,
                 height: 46,

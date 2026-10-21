@@ -87,14 +87,28 @@ class FakeGeolocatorPlatform extends GeolocatorPlatform {
   }) async =>
       _position;
 
-  /// One fix, then silence.
+  /// Later fixes, sent on demand by [emit]. Nothing is sent unless a test asks.
+  final _more = StreamController<Position>.broadcast();
+
+  /// Sends one more fix at this position — for a test that needs to see what
+  /// the NEXT fix does (the follow camera re-applies itself on every one).
+  void emit() => _more.add(_position);
+
+  /// One fix, then silence — unless a test calls [emit].
   ///
   /// A repeating stream would keep the smooth-motion controller running and the
   /// camera rotating forever, which `pumpAndSettle` cannot survive and a golden
   /// cannot pin down.
   @override
-  Stream<Position> getPositionStream({LocationSettings? locationSettings}) =>
-      Stream<Position>.value(_position);
+  Stream<Position> getPositionStream({LocationSettings? locationSettings}) {
+    // Closed by the screen's subscription cancel, through `onCancel`.
+    // ignore: close_sinks
+    final out = StreamController<Position>();
+    out.add(_position);
+    final sub = _more.stream.listen(out.add);
+    out.onCancel = sub.cancel;
+    return out.stream;
+  }
 
   @override
   Future<bool> openAppSettings() async => true;
