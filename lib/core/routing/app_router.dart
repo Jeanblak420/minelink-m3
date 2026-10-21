@@ -202,6 +202,13 @@ class AppRouter {
   static bool _cachedMustChangePassword = false;
   static String? _cachedProfileUserId;
 
+  /// When the profile gate fields were last read successfully. Lets the
+  /// `/super-admin/*` guard trust its cached role for [portalGateTtl] instead
+  /// of re-reading `profiles` before EVERY console navigation — a round trip
+  /// the router waits on before it renders anything. RLS (`is_super_admin()`)
+  /// remains the real boundary, exactly as for the portal guard.
+  static DateTime? _profileGateFetchedAt;
+
   /// Cached org/role fields for the `/portal/{mine,buyer,transporter,driver}`
   /// prefix guards (phase-2 nav merge §4.2). Resolved LAZILY on the first
   /// `/portal/*` navigation only — never per-navigation — mirroring the
@@ -238,6 +245,7 @@ class AppRouter {
     _cachedUserType = null;
     _cachedMustChangePassword = false;
     _cachedProfileUserId = null;
+    _profileGateFetchedAt = null;
     _cachedOrgType = null;
     _cachedEmployeeRole = null;
     _cachedIsEmployeeWithoutRole = false;
@@ -285,6 +293,7 @@ class AppRouter {
       _cachedUserType = profile?['user_type'] as String?;
       _cachedMustChangePassword =
           profile?['must_change_password'] as bool? ?? false;
+      _profileGateFetchedAt = DateTime.now();
     } catch (e) {
       _logger.w('Failed to refresh profile gate fields: $e');
     }
@@ -402,7 +411,14 @@ class AppRouter {
 
       final needsProfileGate =
           (_cachedPlatformRole == null ||
-          isSuperAdminRoute ||
+          (isSuperAdminRoute &&
+              shouldRefreshPortalGate(
+                loaded: _profileGateFetchedAt != null,
+                fetchedAt: _profileGateFetchedAt,
+                cachedUserId: _cachedProfileUserId,
+                currentUserId: currentUser.id,
+                now: DateTime.now(),
+              )) ||
           currentPath == '/mandatory-password-change' ||
           currentPath == '/login' ||
           currentPath == '/forgot-password');
