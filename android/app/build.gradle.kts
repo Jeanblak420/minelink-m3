@@ -116,8 +116,18 @@ android {
             // identical on every machine. The failure mode was silent: the
             // build succeeded and produced something that merely looked
             // shippable.
-            signingConfig =
-                if (hasReleaseKeystore) signingConfigs.getByName("release") else null
+            //
+            // With no keystore, `-PallowDebugSigning=true` must still SIGN —
+            // with the debug key. Falling through to `null` produced an
+            // unsigned APK that every Android installer rejects with a bare
+            // "App not installed" (2026-10-19 build, found 2026-10-21).
+            val allowDebugSigning =
+                (project.findProperty("allowDebugSigning") as String?)?.toBoolean() ?: false
+            signingConfig = when {
+                hasReleaseKeystore -> signingConfigs.getByName("release")
+                allowDebugSigning -> signingConfigs.getByName("debug")
+                else -> null
+            }
         }
     }
 }
