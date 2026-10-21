@@ -142,7 +142,26 @@ final _mirrorSearchIndexProvider = FutureProvider.autoDispose
 class _MirrorSearchBox extends ConsumerWidget {
   final String companyId;
   final List<String> tabLabels;
-  const _MirrorSearchBox({required this.companyId, required this.tabLabels});
+
+  /// Field width; the phone's search sheet passes `double.infinity`.
+  final double width;
+
+  /// Results list width — kept inside the screen on a narrow phone.
+  final double optionsWidth;
+  final bool autofocus;
+
+  /// Opens a tab by index. Null means "the [DefaultTabController] above me",
+  /// which the phone sheet does not have, being a route of its own.
+  final ValueChanged<int>? onOpenTab;
+
+  const _MirrorSearchBox({
+    required this.companyId,
+    required this.tabLabels,
+    this.width = 300,
+    this.optionsWidth = 340,
+    this.autofocus = false,
+    this.onOpenTab,
+  });
 
   int? _tabIndexFor(String keyword) {
     int? find(String kw) {
@@ -166,7 +185,7 @@ class _MirrorSearchBox extends ConsumerWidget {
         const <_SearchHit>[];
 
     return SizedBox(
-      width: 300,
+      width: width,
       child: RawAutocomplete<_SearchHit>(
         displayStringForOption: (h) => h.title,
         optionsBuilder: (t) {
@@ -183,11 +202,18 @@ class _MirrorSearchBox extends ConsumerWidget {
         },
         onSelected: (h) {
           final idx = _tabIndexFor(h.tabKeyword);
-          if (idx != null) DefaultTabController.of(context).animateTo(idx);
+          if (idx == null) return;
+          final open = onOpenTab;
+          if (open != null) {
+            open(idx);
+          } else {
+            DefaultTabController.of(context).animateTo(idx);
+          }
         },
         fieldViewBuilder: (context, controller, focus, onSubmit) => TextField(
           controller: controller,
           focusNode: focus,
+          autofocus: autofocus,
           style: context.mlText.bodyMedium.copyWith(
             color: MlControlRoom.textStrong,
           ),
@@ -221,7 +247,7 @@ class _MirrorSearchBox extends ConsumerWidget {
             color: Colors.transparent,
             child: Container(
               margin: const EdgeInsets.only(top: 6),
-              width: 340,
+              width: optionsWidth,
               constraints: const BoxConstraints(maxHeight: 320),
               decoration: BoxDecoration(
                 color: MlControlRoom.surfaceCard,
@@ -421,6 +447,58 @@ class _SuperAdminCompanyMirrorScreenState
           ),
         ];
 
+        // PHONES get their own arrangement (jean, 2026-10-22).
+        //
+        // The desktop chrome stacked on a 412×915 screen — a header card with
+        // a sentence of description, a 300px search field, a pill and a
+        // button, then a three-line read-only notice, then the tabs — was
+        // ~490px of FIXED furniture, and the part that scrolls got the ~270px
+        // left over: under a third of the screen, the tab content visible
+        // through a letterbox. On a phone the header is one compact row and
+        // scrolls away with the content; the tabs stay pinned at the top,
+        // which is how every native app with tabs over a feed behaves.
+        if (MediaQuery.sizeOf(context).width < _phoneBreakpoint) {
+          return DefaultTabController(
+            length: tabs.length,
+            child: Scaffold(
+              backgroundColor: mlWorkspaceGround(Theme.of(context).brightness),
+              body: NestedScrollView(
+                headerSliverBuilder: (context, _) => [
+                  SliverToBoxAdapter(
+                    child: _PhoneHeader(
+                      company: company,
+                      tabLabels: [for (final t in tabs) t.label],
+                      canExport: canExport,
+                      onExport: () =>
+                          _exportMonthlyInsightsCsv(context, company),
+                    ),
+                  ),
+                ],
+                // The tabs are the top of the BODY, not a pinned header
+                // sliver. Once the header has scrolled off, the body fills
+                // the screen and the strip sits at its top — pinned in effect.
+                // A pinned `SliverPersistentHeader` in the header list instead
+                // let the body slide UNDER the strip by its own height, hiding
+                // the top 60px of every tab (measured: the tab viewport began
+                // at y=72, the strip's bottom at 110). The cure for that,
+                // `SliverOverlapInjector`, would have to go inside every
+                // mirrored screen; this needs none of them to change.
+                body: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _PillTabBar(tabs: tabs),
+                    Expanded(
+                      child: TabBarView(
+                        children: tabs.map((t) => t.screen).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
         return DefaultTabController(
           length: tabs.length,
           child: Scaffold(
@@ -505,6 +583,296 @@ class _SuperAdminCompanyMirrorScreenState
 // Header / banner / tab chrome
 // ---------------------------------------------------------------------------
 
+/// Below this width the mirror uses [_PhoneHeader] and a scroll-away header.
+const double _phoneBreakpoint = 600;
+
+/// The org-type tones from docs/design-reference.md §2 — shared by the
+/// desktop [_HeroHeader] and the phone header so the two cannot drift.
+Color _orgTone(OrgType t) => switch (t) {
+      OrgType.transporter => MlControlRoom.cyan,
+      OrgType.buyer => MlControlRoom.violet,
+      OrgType.mineSupplier => MlControlRoom.amber,
+    };
+
+/// The phone header: one compact card that scrolls away with the content.
+///
+/// Identity on the left (an initial well in the org tone, the name, an org
+/// chip and a Read-only chip), actions on the right as 44px round icon
+/// buttons — search opens a sheet, export shares the CSV. The desktop header's
+/// description sentence and the separate read-only notice are folded into the
+/// Read-only chip, which explains itself when tapped.
+class _PhoneHeader extends StatelessWidget {
+  final Company company;
+  final List<String> tabLabels;
+  final bool canExport;
+  final VoidCallback onExport;
+
+  const _PhoneHeader({
+    required this.company,
+    required this.tabLabels,
+    required this.canExport,
+    required this.onExport,
+  });
+
+  String get _initials {
+    final words = company.companyName
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty && RegExp(r'[A-Za-z0-9]').hasMatch(w[0]))
+        .toList();
+    if (words.isEmpty) return '?';
+    final first = words.first[0];
+    final second = words.length > 1 ? words[1][0] : '';
+    return (first + second).toUpperCase();
+  }
+
+  void _openSearch(BuildContext context) {
+    // The sheet is its own route, so it cannot see the DefaultTabController;
+    // take the controller now and hand the sheet a way to drive it.
+    final tabs = DefaultTabController.of(context);
+    final screenW = MediaQuery.sizeOf(context).width;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: MlControlRoom.surfaceCard,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(MlControlRoom.rCard),
+        ),
+      ),
+      builder: (sheet) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          16 + MediaQuery.viewInsetsOf(sheet).bottom,
+        ),
+        child: SizedBox(
+          height: MediaQuery.sizeOf(sheet).height * 0.6,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 14),
+                  decoration: BoxDecoration(
+                    color: MlControlRoom.borderCard,
+                    borderRadius: MlShape.pill,
+                  ),
+                ),
+              ),
+              Text(
+                'Search ${company.companyName}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.mlText.titleMedium.copyWith(
+                  color: MlControlRoom.textStrong,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Users, vehicles and loads. Picking one opens its tab.',
+                style: context.mlText.bodySmall.copyWith(
+                  color: MlControlRoom.textMuted,
+                ),
+              ),
+              const SizedBox(height: 14),
+              _MirrorSearchBox(
+                companyId: company.id,
+                tabLabels: tabLabels,
+                width: double.infinity,
+                optionsWidth: math.min(340, screenW - 32),
+                autofocus: true,
+                onOpenTab: (i) {
+                  Navigator.of(sheet).pop();
+                  tabs.animateTo(i);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _explainReadOnly(BuildContext context) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Read-only mirror of this organization\'s workspace. Edits, '
+            'deletes and moves are disabled; you can inspect activity and '
+            'export data where allowed.',
+          ),
+        ),
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = _orgTone(company.orgType);
+
+    Widget roundAction({
+      required IconData icon,
+      required String tooltip,
+      required VoidCallback onTap,
+      bool accent = false,
+    }) =>
+        Tooltip(
+          message: tooltip,
+          child: Material(
+            color: accent ? MlTokens.accent : MlControlRoom.surfaceTile,
+            shape: CircleBorder(
+              side: accent
+                  ? BorderSide.none
+                  : BorderSide(color: MlControlRoom.borderCard),
+            ),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: onTap,
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: accent ? MlTokens.inkOnAccent : MlControlRoom.textStrong,
+                ),
+              ),
+            ),
+          ),
+        );
+
+    Widget chip({
+      required String label,
+      required Color color,
+      IconData? icon,
+      VoidCallback? onTap,
+    }) {
+      final body = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.14),
+          borderRadius: MlShape.pill,
+          border: Border.all(color: color.withValues(alpha: 0.45)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 13, color: color),
+              const SizedBox(width: 5),
+            ],
+            Text(
+              label,
+              style: context.mlText.labelMedium.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      );
+      if (onTap == null) return body;
+      return InkWell(borderRadius: MlShape.pill, onTap: onTap, child: body);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+        decoration: BoxDecoration(
+          color: MlControlRoom.surfaceCard,
+          borderRadius: BorderRadius.circular(MlControlRoom.rCard),
+          border: Border.all(color: MlControlRoom.borderCard),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: tone.withValues(alpha: 0.16),
+                borderRadius: MlShape.radiusMedium,
+                border: Border.all(color: tone.withValues(alpha: 0.45)),
+              ),
+              child: Text(
+                _initials,
+                style: context.mlText.titleMedium.copyWith(
+                  color: tone,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    company.companyName,
+                    // Three lines: a holding company's full legal name is the
+                    // thing this header is for, and two cut most of them off.
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.mlText.editorialLarge.copyWith(
+                      fontSize: 19,
+                      height: 1.15,
+                      color: MlControlRoom.textStrong,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      chip(label: company.orgType.label, color: tone),
+                      chip(
+                        label: 'Read-only',
+                        icon: Icons.visibility_outlined,
+                        color: MlControlRoom.textMuted,
+                        onTap: () => _explainReadOnly(context),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                roundAction(
+                  icon: Icons.search_rounded,
+                  tooltip: 'Search assets, routes, users',
+                  onTap: () => _openSearch(context),
+                ),
+                if (canExport) ...[
+                  const SizedBox(height: 8),
+                  roundAction(
+                    icon: Icons.ios_share_rounded,
+                    tooltip: 'Export monthly insights',
+                    onTap: onExport,
+                    accent: true,
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
 class _HeroHeader extends StatelessWidget {
   final Company company;
   final List<String> tabLabels;
@@ -524,11 +892,7 @@ class _HeroHeader extends StatelessWidget {
   // second accent beside the console's cyan. One accent (§5 rule 2); the
   // blue stays for the tons series and the drivers chip. Phase 3 pass,
   // 2026-08-23.
-  Color _orgChipColor(Brightness b) => switch (company.orgType) {
-    OrgType.transporter => MlControlRoom.cyan,
-    OrgType.buyer => MlControlRoom.violet,
-    OrgType.mineSupplier => MlControlRoom.amber,
-  };
+  Color _orgChipColor(Brightness b) => _orgTone(company.orgType);
 
   @override
   Widget build(BuildContext context) {
@@ -1031,6 +1395,30 @@ class _DashboardBody extends StatelessWidget {
   }
 
   Widget _cardTitle(BuildContext context, String title, {String? trailing}) {
+    // On a phone the note goes UNDER the heading. Beside it, the two shared a
+    // ~340px row and both wrapped: "Tons moved · / last 7 days" next to a
+    // two-line note, neither readable at a glance.
+    if (trailing != null &&
+        MediaQuery.sizeOf(context).width < _phoneBreakpoint) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: context.mlText.editorialMedium.copyWith(
+              color: MlControlRoom.textStrong,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            trailing,
+            style: context.mlText.bodySmall.copyWith(
+              color: MlControlRoom.textMuted,
+            ),
+          ),
+        ],
+      );
+    }
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1267,14 +1655,28 @@ class _DashboardBody extends StatelessWidget {
                 ),
               );
 
+              // A phone gets the 2×2 grid too, in compact tiles. Stacked
+              // one per row, each full-width tile was ~150px tall around one
+              // number, and the four of them filled the whole screen.
               if (tilesWidth < 460) {
+                final small = [
+                  for (final t in tiles) (t as _KpiTile).asCompact(),
+                ];
+                Widget pair(List<Widget> kids) => IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(child: kids[0]),
+                          const SizedBox(width: 10),
+                          Expanded(child: kids[1]),
+                        ],
+                      ),
+                    );
                 return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (var i = 0; i < tiles.length; i++) ...[
-                      if (i > 0) const SizedBox(height: 12),
-                      tiles[i],
-                    ],
+                    pair(small.sublist(0, 2)),
+                    const SizedBox(height: 10),
+                    pair(small.sublist(2)),
                   ],
                 );
               }
@@ -2152,6 +2554,10 @@ class _KpiTile extends StatefulWidget {
   final String? hint;
   final VoidCallback? onTap;
 
+  /// Phone density: two tiles share a row, so the figure, padding and gaps
+  /// shrink and a long figure scales down rather than wrapping.
+  final bool compact;
+
   const _KpiTile({
     required this.icon,
     required this.label,
@@ -2159,7 +2565,18 @@ class _KpiTile extends StatefulWidget {
     required this.sub,
     this.hint,
     this.onTap,
+    this.compact = false,
   });
+
+  _KpiTile asCompact() => _KpiTile(
+        icon: icon,
+        label: label,
+        value: value,
+        sub: sub,
+        hint: hint,
+        onTap: onTap,
+        compact: true,
+      );
 
   @override
   State<_KpiTile> createState() => _KpiTileState();
@@ -2191,7 +2608,7 @@ class _KpiTileState extends State<_KpiTile> {
           borderRadius: BorderRadius.circular(MlControlRoom.rTile),
           hoverColor: Colors.transparent,
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(widget.compact ? 14 : 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -2221,21 +2638,26 @@ class _KpiTileState extends State<_KpiTile> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  widget.value,
-                  style: TextStyle(
-                    fontFamily: MlTokens.fontSans,
-                    fontSize: 34,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                    color: MlControlRoom.textStrong,
+                SizedBox(height: widget.compact ? 10 : 16),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    widget.value,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontFamily: MlTokens.fontSans,
+                      fontSize: widget.compact ? 26 : 34,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      color: MlControlRoom.textStrong,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: widget.compact ? 6 : 14),
                 Text(
                   widget.sub,
-                  maxLines: 1,
+                  maxLines: widget.compact ? 2 : 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.mlText.bodySmall.copyWith(
                     color: MlControlRoom.textMuted,

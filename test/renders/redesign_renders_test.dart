@@ -3353,6 +3353,68 @@ void main() {
         'screen-company-mirror-phone-dark',
       );
     });
+
+    // The same screen at a REAL phone height. The tall capture above lays the
+    // whole page out at once, so it cannot show how much of a 915px screen the
+    // fixed chrome (header, notice, tabs) leaves for the part that scrolls —
+    // which is exactly what was wrong with it (jean, 2026-10-22).
+    testWidgets('company mirror — phone dark, one screen', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const SuperAdminCompanyMirrorScreen(companyId: 'o4'),
+          extraOverrides: [...tail(), ...companyMirrorOverrides()],
+        ),
+        const Size(412, 915),
+        'screen-company-mirror-phone-screen-dark',
+      );
+      // The header is compact, so the snapshot starts in the top third.
+      expect(tester.getRect(find.text('Operational snapshot')).top,
+          lessThan(915 * 0.4),
+          reason: 'the fixed chrome above the tabs is eating the screen again');
+    });
+
+    // Scrolled: the header goes, the tabs stay pinned under the shell's app
+    // bar, and the content runs right up under the tabs — not behind them.
+    testWidgets('company mirror — phone dark, scrolled', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const SuperAdminCompanyMirrorScreen(companyId: 'o4'),
+          extraOverrides: [...tail(), ...companyMirrorOverrides()],
+        ),
+        const Size(412, 915),
+        'screen-company-mirror-phone-scrolled-dark',
+        act: (tester) async {
+          await tester.drag(
+            find.text('Operational snapshot'),
+            const Offset(0, -260),
+          );
+        },
+      );
+      final tabs = tester.getRect(find.text('Snapshot'));
+      expect(tabs.top, lessThan(110),
+          reason: 'the tab strip scrolled away with the header; it must pin');
+      // The phone header (and its search button) has scrolled off the top.
+      final search = find.byTooltip('Search assets, routes, users');
+      expect(
+        search.evaluate().isEmpty || tester.getRect(search).bottom <= tabs.top,
+        isTrue,
+        reason: 'the phone header did not scroll away',
+      );
+      // The tab's scrolling area begins BELOW the pinned strip. If it began
+      // under it, the top of every tab would be hidden behind the tabs.
+      final viewport = tester.getRect(find
+          .ancestor(
+            of: find.text('Operational snapshot'),
+            matching: find.byType(Scrollable),
+          )
+          .first);
+      expect(viewport.top, greaterThanOrEqualTo(tabs.bottom),
+          reason: 'content is scrolling underneath the pinned tab strip');
+    });
   });
 
   // -------------------------------------------------------------------------
