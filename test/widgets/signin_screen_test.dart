@@ -363,7 +363,7 @@ void main() {
     // NB: not `findsNothing` on 'WhatsApp' generally — the identity field is
     // labelled "Email or WhatsApp number" and stays either way. What must
     // disappear is the button and the divider that introduces it.
-    expect(find.text('Sign in with WhatsApp code'), findsNothing);
+    expect(find.text('Or sign in with WhatsApp code'), findsNothing);
     expect(find.text('OR'), findsNothing);
     expect(find.byType(MlGhostButton), findsNothing);
   });
@@ -376,7 +376,7 @@ void main() {
       onVerifyWhatsAppCode: (_, __) async => null,
     );
 
-    expect(find.text('Sign in with WhatsApp code'), findsOneWidget);
+    expect(find.text('Or sign in with WhatsApp code'), findsOneWidget);
     expect(find.text('OR'), findsOneWidget);
   });
 
@@ -394,7 +394,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField).at(0), 'user@example.com');
     await tester.pump();
-    await tester.tap(find.text('Sign in with WhatsApp code'));
+    await tester.tap(find.text('Or sign in with WhatsApp code'));
     await nudge(tester);
 
     expect(requests, 0, reason: 'an email is not somewhere to send a code');
@@ -420,7 +420,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField).at(0), '082 123 4567');
     await tester.pump();
-    await tester.tap(find.text('Sign in with WhatsApp code'));
+    await tester.tap(find.text('Or sign in with WhatsApp code'));
     await nudge(tester);
 
     expect(find.byType(MlOtpRow), findsOneWidget);
@@ -454,7 +454,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField).at(0), '082 123 4567');
     await tester.pump();
-    await tester.tap(find.text('Sign in with WhatsApp code'));
+    await tester.tap(find.text('Or sign in with WhatsApp code'));
     await nudge(tester);
 
     await tester.enterText(find.byType(TextField).at(0), '123456');
@@ -475,7 +475,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField).at(0), '082 123 4567');
     await tester.pump();
-    await tester.tap(find.text('Sign in with WhatsApp code'));
+    await tester.tap(find.text('Or sign in with WhatsApp code'));
     await nudge(tester);
     expect(find.byType(MlOtpRow), findsOneWidget);
 
@@ -684,7 +684,7 @@ void main() {
           );
           await tester.enterText(find.byType(TextField).at(0), '082 123 4567');
           await tester.pump();
-          await tester.tap(find.text('Sign in with WhatsApp code'),
+          await tester.tap(find.text('Or sign in with WhatsApp code'),
               warnIfMissed: false);
           await nudge(tester);
           // Six boxes, a banner and the two-label row, all at once.

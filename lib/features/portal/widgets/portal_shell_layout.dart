@@ -663,6 +663,14 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
             final steps = ref.read(tourStepsProvider);
             if (steps.isNotEmpty) {
               ref.read(tourProvider.notifier).startTour(steps);
+            } else {
+              // Show feedback when tour can't start
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Tour not available. Please make sure you are signed in and your profile is complete.'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
             }
           },
           icon: ref.watch(tourSeenProvider)

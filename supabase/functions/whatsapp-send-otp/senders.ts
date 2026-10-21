@@ -39,14 +39,14 @@ export class MetaCloudSender implements OtpSender {
             name: this.template,
             language: { code: "en" },
             components: [
-              { type: "body", parameters: [{ type: "text", text: otp }] },
               {
-                type: "button",
-                sub_type: "url",
-                index: "0",
-                parameters: [{ type: "text", text: otp }],
-              },
-            ],
+                type: "body",
+                parameters: [
+                  { type: "text", text: "MineLink" }, // {{1}} app name
+                  { type: "text", text: otp } // {{2}} OTP code
+                ]
+              }
+            ]
           },
         }),
       },
@@ -61,8 +61,14 @@ export function selectSender(env: Record<string, string | undefined>): OtpSender
   const phoneId = env.META_WABA_PHONE_ID;
   const token = env.META_WABA_TOKEN;
   const template = env.META_OTP_TEMPLATE;
-  if (env.OTP_SENDER === "meta" && phoneId && token && template) {
+  
+  // Only use Meta Cloud API when credentials are configured
+  // No SMS fallback - WhatsApp only as per requirements
+  if (phoneId && token && template) {
     return new MetaCloudSender(phoneId, token, template);
   }
+  
+  // Fallback to dev console for development only
+  console.warn('WhatsApp credentials not configured, using dev console sender');
   return new DevConsoleSender();
 }

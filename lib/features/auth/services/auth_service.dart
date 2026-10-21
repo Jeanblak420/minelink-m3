@@ -149,7 +149,7 @@ class AuthService {
 
   /// Sends a WhatsApp OTP to [whatsappNumber] via Supabase phone auth.
   /// Supabase generates the code and fires the Send-SMS hook, which delivers
-  /// it over WhatsApp.
+  /// it over WhatsApp via the Meta Cloud API (configured in Edge Function).
   ///
   /// [shouldCreateUser] is false: these accounts are created only by the admin
   /// flow, so an unknown number must NOT silently create a new account

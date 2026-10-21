@@ -628,7 +628,7 @@ class _MineLinkSignInScreenState extends State<MineLinkSignInScreen> {
           if (widget.onRequestWhatsAppCode != null) ...[
             _divider(),
             MlGhostButton(
-              label: 'Sign in with WhatsApp code',
+              label: 'Or sign in with WhatsApp code',
               icon: const Icon(Icons.chat_bubble_rounded,
                   size: 17, color: MlAuth.whatsapp),
               onPressed: _busy ? null : _requestCode,

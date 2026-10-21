@@ -31,6 +31,7 @@ class TourService {
     if (orgType == OrgType.mineSupplier) {
       if (role == 'security') return _mineSecurityTour();
       if (role == 'controllerWB') return _mineLoadControllerTour();
+      // supervisorForeman, admin, and management all get the supervisor tour
       return _mineSupervisorTour();
     }
 
@@ -40,6 +41,7 @@ class TourService {
 
     if (orgType == OrgType.transporter) {
       if (role == 'driver') return _transporterDriverTour();
+      // admin and management get the transporter admin tour
       return _transporterAdminTour();
     }
 

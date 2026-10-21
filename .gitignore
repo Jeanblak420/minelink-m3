@@ -47,6 +47,11 @@ app.*.map.json
 # Local release drops (large binaries; zip and share outside git)
 /Mine-Link_windows/
 /Mine-Link_android/
+/release/
+
+# One-off script that DELETES every company, profile and auth user on the live
+# database, and carries the super admins' ID and phone numbers. Kept local.
+/clean_profiles_and_add_admins.sql
 
 # Per-project GitHub CLI auth (bryson42069 for this repo only)
 .gh/
