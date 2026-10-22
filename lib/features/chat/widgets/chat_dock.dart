@@ -1849,9 +1849,11 @@ class _ThreadViewState extends ConsumerState<_ThreadView> {
     final room = widget.room;
 
     final myId = ref.read(messagingServiceProvider).currentUserId;
-    final messages = ref.watch(roomMessagesProvider(room.id));
+    // Keyed by messagesKey, not id: a thread folded from duplicate DM rooms
+    // reads all of them (collapseDuplicateDms).
+    final messages = ref.watch(roomMessagesProvider(room.messagesKey));
     // Play a tone when a new message arrives from the other side.
-    ref.listen(roomMessagesProvider(room.id), (prev, next) {
+    ref.listen(roomMessagesProvider(room.messagesKey), (prev, next) {
       final prevList = prev?.valueOrNull;
       final nextList = next.valueOrNull;
       if (prevList == null || nextList == null) return;
@@ -1864,11 +1866,12 @@ class _ThreadViewState extends ConsumerState<_ThreadView> {
             .read(typingProvider(room.id).notifier)
             .clearName(nextList.last.senderName);
         // The thread is open → these are read immediately.
-        ref.read(messagingServiceProvider).markRoomRead(room.id);
+        ref.read(messagingServiceProvider).markConversationRead(room);
       }
     });
     final reactions =
-        ref.watch(roomReactionsProvider(room.id)).valueOrNull ?? const [];
+        ref.watch(roomReactionsProvider(room.messagesKey)).valueOrNull ??
+            const [];
     final reactionsByMsg = <String, List<ChatReaction>>{};
     for (final r in reactions) {
       reactionsByMsg.putIfAbsent(r.messageId, () => []).add(r);
@@ -1964,7 +1967,7 @@ class _ThreadViewState extends ConsumerState<_ThreadView> {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           ref
                               .read(messagingServiceProvider)
-                              .markRoomRead(room.id);
+                              .markConversationRead(room);
                         });
                       }
                       return ListView.builder(

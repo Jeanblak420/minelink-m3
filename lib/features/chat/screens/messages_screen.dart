@@ -540,13 +540,14 @@ class _ConversationPaneState extends ConsumerState<_ConversationPane> {
     // Mark read once per opened room.
     if (_markedRoomId != room.id) {
       _markedRoomId = room.id;
-      ref.read(messagingServiceProvider).markRoomRead(room.id);
+      ref.read(messagingServiceProvider).markConversationRead(room);
     }
 
     final contacts = ref.watch(chatContactsProvider).valueOrNull ?? const [];
     final blocked = _isBlocked(room, contacts);
     final myId = ref.read(messagingServiceProvider).currentUserId;
-    final messages = ref.watch(roomMessagesProvider(room.id));
+    // messagesKey, not id — see collapseDuplicateDms.
+    final messages = ref.watch(roomMessagesProvider(room.messagesKey));
 
     return Column(
       children: [

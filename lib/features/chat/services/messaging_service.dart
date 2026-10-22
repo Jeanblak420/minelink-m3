@@ -125,16 +125,39 @@ class MessagingService {
     // RPC returns per-room unread count + the latest message's read/delivered
     // state, already ordered newest-activity first.
     final rows = await _db.rpc('get_chat_conversations', params: {'p_user_id': uid});
-    return (rows as List)
+    // Duplicate DM rooms for one pair are shown as one conversation carrying
+    // every room's history — see [collapseDuplicateDms].
+    return collapseDuplicateDms((rows as List)
         .map((r) => ChatConversation.fromJson(Map<String, dynamic>.from(r as Map)))
-        .toList();
+        .toList());
   }
 
-  /// Finds an existing 1:1 DM room with [otherUserId], or creates one.
+  /// In-flight [getOrCreateDm] calls, keyed by the other user. A second tap
+  /// while the first is still resolving joins it instead of racing it: the
+  /// lookup-then-insert below is not atomic, and three taps inside 0.37 s
+  /// minted three rooms for one pair in production on 2026-10-21.
+  final Map<String, Future<ChatConversation>> _dmInFlight = {};
+
+  /// Finds the existing 1:1 DM room with [otherUserId], or creates one.
+  ///
+  /// When duplicates already exist, the same room is chosen on every device
+  /// (see [collapseDuplicateDms]) and the others' history comes with it.
+  /// Previously the first row the database returned was taken — unordered —
+  /// so two devices could open two different rooms for the same person.
   Future<ChatConversation> getOrCreateDm({
     required String otherUserId,
     required String otherDisplayName,
-  }) async {
+  }) {
+    final pending = _dmInFlight[otherUserId];
+    if (pending != null) return pending;
+    final call = _getOrCreateDm(otherUserId, otherDisplayName)
+        .whenComplete(() => _dmInFlight.remove(otherUserId));
+    _dmInFlight[otherUserId] = call;
+    return call;
+  }
+
+  Future<ChatConversation> _getOrCreateDm(
+      String otherUserId, String otherDisplayName) async {
     final uid = currentUserId;
     if (uid == null) {
       throw StateError('Not authenticated');
@@ -144,16 +167,20 @@ class MessagingService {
         .select()
         .eq('type', 'dm')
         .contains('participant_ids', [uid, otherUserId]);
-    for (final row in (existing as List)) {
-      final conv = ChatConversation.fromJson(Map<String, dynamic>.from(row as Map));
-      // Exactly this pair (guard against larger rooms that happen to contain both).
-      if (conv.participantIds.toSet().length == 2 &&
-          conv.participantIds.contains(uid) &&
-          conv.participantIds.contains(otherUserId)) {
-        // The stored `name` reflects whoever created the room; always show the
-        // OTHER participant from this caller's perspective.
-        return conv.copyWith(name: otherDisplayName);
-      }
+    // Exactly this pair (guard against larger rooms that happen to contain both).
+    final pair = [
+      for (final row in (existing as List))
+        ChatConversation.fromJson(Map<String, dynamic>.from(row as Map)),
+    ].where((conv) =>
+        conv.participantIds.toSet().length == 2 &&
+        conv.participantIds.contains(uid) &&
+        conv.participantIds.contains(otherUserId));
+    if (pair.isNotEmpty) {
+      // The stored `name` reflects whoever created the room; always show the
+      // OTHER participant from this caller's perspective.
+      return collapseDuplicateDms(pair.toList())
+          .single
+          .copyWith(name: otherDisplayName);
     }
     final inserted = await _db
         .from('chat_rooms')
@@ -360,6 +387,11 @@ class MessagingService {
     }
   }
 
+  /// [markRoomRead] for every room folded into [conversation], so a duplicate
+  /// room's unread messages do not keep the badge lit after the thread is open.
+  Future<void> markConversationRead(ChatConversation conversation) =>
+      Future.wait(conversation.allRoomIds.map(markRoomRead));
+
   /// Marks every inbound message the current user has NOT yet received as
   /// "delivered" (across all their rooms). Called when the chat surface is
   /// open, so the sender sees the delivered (double) tick even before the
@@ -376,11 +408,14 @@ class MessagingService {
 
   /// Realtime stream of all emoji reactions in a room (grouped per message in
   /// the UI).
-  Stream<List<ChatReaction>> reactionsStream(String roomId) {
+  ///
+  /// [messagesKey] is [ChatConversation.messagesKey]: one room id, or several
+  /// comma-joined when duplicate DM rooms were folded together.
+  Stream<List<ChatReaction>> reactionsStream(String messagesKey) {
     return _db
         .from('chat_message_reactions')
         .stream(primaryKey: ['id'])
-        .eq('room_id', roomId)
+        .inFilter('room_id', messagesKey.split(','))
         .map((rows) => rows
             .map((r) => ChatReaction.fromJson(Map<String, dynamic>.from(r)))
             .toList());
@@ -416,14 +451,23 @@ class MessagingService {
     }
   }
 
-  /// Realtime stream of the ordered message list for a room.
-  Stream<List<ChatMessage>> streamMessages(String roomId) {
+  /// Realtime stream of the ordered (oldest-first) message list for a thread.
+  ///
+  /// [messagesKey] is [ChatConversation.messagesKey]: one room id, or several
+  /// comma-joined when duplicate DM rooms were folded together, so their
+  /// history reads as one thread.
+  ///
+  /// Fetched NEWEST first and reversed here. The initial load is an ordinary
+  /// PostgREST select, which the server caps at its max-rows setting; asking
+  /// oldest-first meant a long enough history would load its first N messages
+  /// and silently drop the latest ones — the ones anybody opened it to read.
+  Stream<List<ChatMessage>> streamMessages(String messagesKey) {
     return _db
         .from('chat_messages')
         .stream(primaryKey: ['id'])
-        .eq('chat_room_id', roomId)
-        .order('timestamp', ascending: true)
-        .map((rows) => rows
+        .inFilter('chat_room_id', messagesKey.split(','))
+        .order('timestamp', ascending: false)
+        .map((rows) => rows.reversed
             .map((r) => ChatMessage.fromJson(Map<String, dynamic>.from(r)))
             .toList());
   }

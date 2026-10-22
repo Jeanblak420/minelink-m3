@@ -301,6 +301,18 @@ class ChatConversation {
 
   bool get isEnded => endedAt != null;
 
+  /// Other `dm` rooms between the same two people, folded into this one by
+  /// [collapseDuplicateDms]. Their messages are shown in this thread; new
+  /// messages go to [id] only.
+  final List<String> mergedRoomIds;
+
+  /// Every room whose messages belong in this thread — [id] first.
+  List<String> get allRoomIds => [id, ...mergedRoomIds];
+
+  /// The family key for the message and reaction providers. Identical to [id]
+  /// for an ordinary room, so nothing keyed by a plain room id changes.
+  String get messagesKey => allRoomIds.join(',');
+
   const ChatConversation({
     required this.id,
     required this.name,
@@ -317,11 +329,17 @@ class ChatConversation {
     this.lastMessageReadAt,
     this.lastMessageDeliveredAt,
     this.endedAt,
+    this.mergedRoomIds = const [],
   });
 
   DateTime get sortKey => lastMessageTimestamp ?? createdAt;
 
-  ChatConversation copyWith({String? name}) => ChatConversation(
+  ChatConversation copyWith({
+    String? name,
+    int? unreadCount,
+    List<String>? mergedRoomIds,
+  }) =>
+      ChatConversation(
         id: id,
         name: name ?? this.name,
         participantIds: participantIds,
@@ -333,10 +351,11 @@ class ChatConversation {
         lastMessageContent: lastMessageContent,
         lastMessageTimestamp: lastMessageTimestamp,
         lastMessageSenderId: lastMessageSenderId,
-        unreadCount: unreadCount,
+        unreadCount: unreadCount ?? this.unreadCount,
         lastMessageReadAt: lastMessageReadAt,
         lastMessageDeliveredAt: lastMessageDeliveredAt,
         endedAt: endedAt,
+        mergedRoomIds: mergedRoomIds ?? this.mergedRoomIds,
       );
 
   factory ChatConversation.fromJson(Map<String, dynamic> j) => ChatConversation(
@@ -364,6 +383,72 @@ class ChatConversation {
             ? DateTime.parse(j['ended_at'] as String).toUtc()
             : null,
       );
+}
+
+/// Folds duplicate 1:1 rooms into one conversation per pair of people.
+///
+/// `chat_rooms` has no uniqueness rule for a DM pair, and opening a DM was a
+/// check-then-insert, so a quick double tap could mint several rooms for the
+/// same two people — production held three, created within 0.37 s on
+/// 2026-10-21, only one of them with messages. Opening the chat then picked
+/// whichever room the database returned first, so one device showed the
+/// history and another an empty thread.
+///
+/// The surviving conversation is chosen the same way on every device: most
+/// recent message first, then the oldest room, then the lowest id. The others
+/// ride along in [ChatConversation.mergedRoomIds] so their history is still
+/// shown. Groups, org groups and rooms that are not exactly two people are
+/// passed through untouched. Order is otherwise preserved.
+List<ChatConversation> collapseDuplicateDms(List<ChatConversation> rooms) {
+  String? pairKey(ChatConversation c) {
+    if (c.type != ChatRoomType.dm) return null;
+    final people = c.participantIds.toSet().toList()..sort();
+    return people.length == 2 ? people.join('|') : null;
+  }
+
+  int preference(ChatConversation a, ChatConversation b) {
+    final am = a.lastMessageTimestamp, bm = b.lastMessageTimestamp;
+    if (am != null || bm != null) {
+      if (am == null) return 1;
+      if (bm == null) return -1;
+      final byMessage = bm.compareTo(am);
+      if (byMessage != 0) return byMessage;
+    }
+    final byAge = a.createdAt.compareTo(b.createdAt);
+    return byAge != 0 ? byAge : a.id.compareTo(b.id);
+  }
+
+  final groups = <String, List<ChatConversation>>{};
+  for (final c in rooms) {
+    final key = pairKey(c);
+    if (key != null) (groups[key] ??= []).add(c);
+  }
+
+  final canonical = <String, ChatConversation>{};
+  groups.forEach((key, members) {
+    if (members.length < 2) return;
+    final sorted = [...members]..sort(preference);
+    final keep = sorted.first;
+    canonical[key] = keep.copyWith(
+      unreadCount: members.fold<int>(0, (n, c) => n + c.unreadCount),
+      mergedRoomIds: [for (final c in sorted.skip(1)) c.id],
+    );
+  });
+
+  final out = <ChatConversation>[];
+  final emitted = <String>{};
+  for (final c in rooms) {
+    final key = pairKey(c);
+    final folded = key == null ? null : canonical[key];
+    if (folded == null) {
+      out.add(c);
+    } else if (emitted.add(key!)) {
+      // Placed where the group's newest member stood, which in a
+      // newest-first list is where the canonical room belongs.
+      out.add(folded);
+    }
+  }
+  return out;
 }
 
 /// An emoji reaction on a chat message (row of `chat_message_reactions`).

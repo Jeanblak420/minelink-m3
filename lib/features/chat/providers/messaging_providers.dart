@@ -136,10 +136,13 @@ final chatConversationsProvider =
   return controller.stream;
 });
 
-/// Realtime ordered messages for a room.
+/// Realtime ordered messages for a thread, keyed by
+/// [ChatConversation.messagesKey] (a room id, or several when duplicate DM
+/// rooms were folded together — pass the key, not `room.id`, or a folded
+/// thread shows only part of its history).
 final roomMessagesProvider =
-    StreamProvider.family<List<ChatMessage>, String>((ref, roomId) {
-  return ref.watch(messagingServiceProvider).streamMessages(roomId);
+    StreamProvider.family<List<ChatMessage>, String>((ref, messagesKey) {
+  return ref.watch(messagingServiceProvider).streamMessages(messagesKey);
 });
 
 /// Org-to-org connections (super-admin Connections panel).
@@ -148,10 +151,11 @@ final orgConnectionsProvider =
   return ref.watch(messagingServiceProvider).getConnections();
 });
 
-/// Realtime emoji reactions for a room (grouped per message in the UI).
+/// Realtime emoji reactions for a thread (grouped per message in the UI),
+/// keyed by [ChatConversation.messagesKey] like [roomMessagesProvider].
 final roomReactionsProvider =
-    StreamProvider.family<List<ChatReaction>, String>((ref, roomId) {
-  return ref.watch(messagingServiceProvider).reactionsStream(roomId);
+    StreamProvider.family<List<ChatReaction>, String>((ref, messagesKey) {
+  return ref.watch(messagingServiceProvider).reactionsStream(messagesKey);
 });
 
 /// The room currently open in the Messages screen (null = none selected).
