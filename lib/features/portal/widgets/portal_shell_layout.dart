@@ -367,6 +367,18 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
                     icon: const Icon(Icons.refresh),
                     label: const Text('Retry'),
                   ),
+                  // Retry cannot help a session whose account has no profile
+                  // or employee row any more — on 2026-10-22 the emulator was
+                  // still signed in as a fixture account removed by the
+                  // September data reset, and this screen was a dead end: no
+                  // chrome, no drawer, nothing but a Retry that always fails.
+                  const SizedBox(height: 8),
+                  TextButton.icon(
+                    onPressed: () =>
+                        LogoutService.logoutWithConfirmation(context, ref),
+                    icon: const Icon(Icons.logout, size: 18),
+                    label: const Text('Sign out'),
+                  ),
                 ],
                 if (vm.phase == PortalWorkspacePhase.platformAdminObserver) ...[
                   const SizedBox(height: 24),

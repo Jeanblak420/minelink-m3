@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_application_1/features/auth/services/logout_service.dart';
 import 'package:flutter_application_1/features/employee/screens/company_selection_screen.dart';
 import 'package:flutter_application_1/features/portal/providers/portal_workspace_provider.dart';
 
@@ -64,7 +65,7 @@ class PortalPhaseGate extends ConsumerWidget {
 /// shell's own providers, and lifting it would have meant refactoring the
 /// shell to close a gate about a screen that is not in it. Same three states —
 /// working, failed, and the phase's own words — without the coupling.
-class _PortalPhaseStatus extends StatelessWidget {
+class _PortalPhaseStatus extends ConsumerWidget {
   const _PortalPhaseStatus({required this.vm, this.showConsoleLink = false});
 
   final PortalWorkspaceModel vm;
@@ -75,7 +76,7 @@ class _PortalPhaseStatus extends StatelessWidget {
   final bool showConsoleLink;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final failed = vm.retryAction != PortalRetryAction.none;
     return Scaffold(
@@ -118,6 +119,17 @@ class _PortalPhaseStatus extends StatelessWidget {
                     onPressed: () => context.go('/super-admin'),
                     icon: const Icon(Icons.dashboard_outlined, size: 18),
                     label: const Text('Open the admin console'),
+                  ),
+                ],
+                // A failed load has no chrome here either, so without this the
+                // only way off the screen was to clear the app's data.
+                if (failed && !showConsoleLink) ...[
+                  const SizedBox(height: 20),
+                  TextButton.icon(
+                    onPressed: () =>
+                        LogoutService.logoutWithConfirmation(context, ref),
+                    icon: const Icon(Icons.logout, size: 18),
+                    label: const Text('Sign out'),
                   ),
                 ],
               ],
