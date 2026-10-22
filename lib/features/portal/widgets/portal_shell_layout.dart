@@ -322,7 +322,8 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
                     size: 48,
                     color: Theme.of(context).colorScheme.primary,
                   )
-                else if (vm.retryAction == PortalRetryAction.none)
+                else if (vm.retryAction == PortalRetryAction.none &&
+                    vm.phase != PortalWorkspacePhase.accountWithoutProfile)
                   const CircularProgressIndicator()
                 else
                   Icon(
@@ -374,6 +375,15 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
                   // chrome, no drawer, nothing but a Retry that always fails.
                   const SizedBox(height: 8),
                   TextButton.icon(
+                    onPressed: () =>
+                        LogoutService.logoutWithConfirmation(context, ref),
+                    icon: const Icon(Icons.logout, size: 18),
+                    label: const Text('Sign out'),
+                  ),
+                ],
+                if (vm.phase == PortalWorkspacePhase.accountWithoutProfile) ...[
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
                     onPressed: () =>
                         LogoutService.logoutWithConfirmation(context, ref),
                     icon: const Icon(Icons.logout, size: 18),

@@ -31,6 +31,14 @@ enum PortalWorkspacePhase {
   /// had no idea what an observer was.
   platformAdminObserver,
 
+  /// Signed in, sign-in finished, and no profile, company or employee row
+  /// says what this account is. `getUserType` returns null, and this used to
+  /// fall into [preparingWorkspace] — "Securing session…" with a spinner that
+  /// never stopped and no way off the screen. Reproduced on the emulator
+  /// 2026-10-22 as jean@cyberhouse.co.za, an account whose profile the
+  /// September data reset removed while leaving the login itself in place.
+  accountWithoutProfile,
+
   ready,
 }
 
@@ -156,6 +164,21 @@ final portalWorkspaceProvider = Provider<PortalWorkspaceModel>((ref) {
   final authState = ref.watch(authStateProvider);
   final companyState = ref.watch(companyProvider);
   final employeeState = ref.watch(employeeProvider);
+
+  if (authState.user != null &&
+      !authState.isLoading &&
+      authState.userType == null) {
+    return PortalWorkspaceModel(
+      phase: PortalWorkspacePhase.accountWithoutProfile,
+      title: 'Account not set up',
+      message: authState.error != null
+          ? 'Your account details could not be loaded. Sign out and try '
+              'again, or contact your MineLink administrator.'
+          : 'This sign-in has no MineLink company or employee profile. Sign '
+              'out and use another account, or ask your MineLink administrator '
+              'to set this one up.',
+    );
+  }
 
   if (authState.user == null || authState.isLoading || authState.userType == null) {
     return const PortalWorkspaceModel(
