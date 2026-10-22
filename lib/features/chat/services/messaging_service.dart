@@ -133,9 +133,9 @@ class MessagingService {
   }
 
   /// In-flight [getOrCreateDm] calls, keyed by the other user. A second tap
-  /// while the first is still resolving joins it instead of racing it: the
-  /// lookup-then-insert below is not atomic, and three taps inside 0.37 s
-  /// minted three rooms for one pair in production on 2026-10-21.
+  /// while the first is still resolving joins it rather than queueing a
+  /// second round trip. (Three taps inside 0.37 s minted three rooms for one
+  /// pair on 2026-10-21; the server is now atomic too, see below.)
   final Map<String, Future<ChatConversation>> _dmInFlight = {};
 
   /// Finds the existing 1:1 DM room with [otherUserId], or creates one.
@@ -158,41 +158,27 @@ class MessagingService {
 
   Future<ChatConversation> _getOrCreateDm(
       String otherUserId, String otherDisplayName) async {
-    final uid = currentUserId;
-    if (uid == null) {
+    if (currentUserId == null) {
       throw StateError('Not authenticated');
     }
-    final existing = await _db
-        .from('chat_rooms')
-        .select()
-        .eq('type', 'dm')
-        .contains('participant_ids', [uid, otherUserId]);
-    // Exactly this pair (guard against larger rooms that happen to contain both).
+    // `get_or_create_dm` (migration 20261022200000) does the lookup and the
+    // insert under a per-pair advisory lock, so two devices opening the same
+    // chat at once get one room. It returns every dm room for the pair —
+    // duplicates from before it existed included — and they are folded here.
+    final rows = await _db.rpc('get_or_create_dm', params: {
+      'p_other_user_id': otherUserId,
+      'p_name': otherDisplayName,
+    });
     final pair = [
-      for (final row in (existing as List))
+      for (final row in (rows as List))
         ChatConversation.fromJson(Map<String, dynamic>.from(row as Map)),
-    ].where((conv) =>
-        conv.participantIds.toSet().length == 2 &&
-        conv.participantIds.contains(uid) &&
-        conv.participantIds.contains(otherUserId));
-    if (pair.isNotEmpty) {
-      // The stored `name` reflects whoever created the room; always show the
-      // OTHER participant from this caller's perspective.
-      return collapseDuplicateDms(pair.toList())
-          .single
-          .copyWith(name: otherDisplayName);
+    ];
+    if (pair.isEmpty) {
+      throw StateError('get_or_create_dm returned no room');
     }
-    final inserted = await _db
-        .from('chat_rooms')
-        .insert({
-          'name': otherDisplayName,
-          'participant_ids': [uid, otherUserId],
-          'type': 'dm',
-          'created_by': uid,
-        })
-        .select()
-        .single();
-    return ChatConversation.fromJson(inserted).copyWith(name: otherDisplayName);
+    // The stored `name` reflects whoever created the room; always show the
+    // OTHER participant from this caller's perspective.
+    return collapseDuplicateDms(pair).single.copyWith(name: otherDisplayName);
   }
 
   /// Creates an org-group chat across up to **three** companies, at most one
