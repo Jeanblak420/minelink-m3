@@ -38,6 +38,8 @@ import 'package:flutter_application_1/core/design/components/ml_components.dart'
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/presence/ml_presence.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
+import 'package:flutter_application_1/features/super_admin/widgets/edit_login_dialog.dart';
 
 /// URL segment for an org's portal routes.
 String portalOrgSegment(OrgType org) => switch (org) {
@@ -877,6 +879,28 @@ class _EmployeeProfileScreenState extends ConsumerState<EmployeeProfileScreen> {
                   ],
                 ),
               ),
+              // A super global admin can reset anybody's sign-in from the
+              // profile itself — previously only from the company page's
+              // Users list, which this screen gives no route back to. The
+              // edge function re-checks is_platform_admin(), so hiding the
+              // button is UX, not the security boundary.
+              if (ref.watch(currentPlatformRoleProvider).valueOrNull?.isSuperAdmin ==
+                  true) ...[
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: () => showAdminEditLogin(
+                    context,
+                    ref,
+                    userId: e.userId,
+                    name: e.fullName,
+                    currentEmail: b.person.email ?? '',
+                    currentPhone: e.whatsappNumber,
+                    whatsappOnly: b.person.whatsappOnly,
+                  ),
+                  icon: const Icon(Icons.key_rounded, size: 18),
+                  label: const Text('Reset password / login'),
+                ),
+              ],
               const SizedBox(height: 14),
               Container(
                 padding: const EdgeInsets.symmetric(
