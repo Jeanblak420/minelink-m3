@@ -204,6 +204,60 @@ void main() {
           reason: 'dismissal references survive:\n${offenders.join('\n')}');
     });
   });
+  // ------------------------------------------ suspended (2026-10-24)
+  group('a suspended or inactive member gets "Access suspended", not tabs', () {
+    // Seats are held by active people only (20261024100000) and the database
+    // refuses everyone else company data, so a normal workspace for them was
+    // an empty app that looked broken.
+    final auth = AuthState(userType: UserType.employee);
+
+    for (final status in const ['suspended', 'inactive']) {
+      test(status, () {
+        final vm = portalSuspendedModel(
+          auth,
+          EmployeeState(
+            employee: _employee(
+                companyId: 'company-1',
+                role: UserRole.security,
+                status: status),
+            company: _mine(),
+          ),
+        );
+        expect(vm, isNotNull);
+        expect(vm!.phase, PortalWorkspacePhase.accessSuspended);
+        expect(vm.phase.endsInSignOut, isTrue);
+        expect(vm.message, contains('Iron Hills Mining'));
+      });
+    }
+
+    test('an active member is not caught', () {
+      expect(
+        portalSuspendedModel(
+          auth,
+          EmployeeState(
+            employee: _employee(
+                companyId: 'company-1',
+                role: UserRole.security,
+                status: 'active'),
+            company: _mine(),
+          ),
+        ),
+        isNull,
+      );
+    });
+
+    test('an unlinked person still goes to company selection instead', () {
+      expect(
+        portalSuspendedModel(
+          auth,
+          EmployeeState(
+            employee: _employee(companyId: null, role: null, status: 'inactive'),
+          ),
+        ),
+        isNull,
+      );
+    });
+  });
 }
 
 const _thisFile = 'portal_workspace_removed_employee_test.dart';

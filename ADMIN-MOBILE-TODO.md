@@ -24,6 +24,12 @@ Status: ☐ not started · ◐ in progress · ☑ done
 - [x] 0.1 Backup of the current version (git tag pushed + APK and restore notes).
   - Evidence: tag `backup/pre-admin-mobile-2026-10-24` → `ab8605c` on origin;
     `MineLink-M3-ab8605c.apk` + `README.txt` in the backup folder.
+  - Added before any database change (Jean asked): full read-only database
+    export (all 71 public tables + auth users/identities, every function,
+    constraint, trigger, policy, index, cron job and the migration ledger),
+    zipped and tested; full project-folder zip (tested). Code zip + APK copied
+    to `\\192.168.88.30\Shared\MineLink-M3-backups\2026-10-24-before-admin-mobile\`.
+    The database zip holds login data, so it stays on the PC only.
 - [x] 0.2 This list created and opened in the IDE.
 
 ## 1. The three broken items
@@ -45,9 +51,34 @@ Status: ☐ not started · ◐ in progress · ☑ done
     path): window closes and page stays; open/close ×3; conversation → list →
     closed. Fails without the fix ("Back left the chat window open"). All chat +
     Back tests green (86), analyze clean. Re-check on the phone in 7.3.
-- [ ] 1.3 Seats are counted: every company's seats-used matches its real users,
+- [x] 1.3 Seats are counted: every company's seats-used matches its real users,
       stays right when users are added, moved, deactivated or removed, and the
       existing numbers are corrected.
+  - Cause: the triggers that kept the count were dropped from production out
+    of band; nothing updated `seats_used` or the seat list since.
+  - Fix — migration `20261024100000_seats_follow_active_employees` (applied
+    live, ledger row matches the file): one rule, a seat is held by every
+    active person; triggers keep `seats_used` / `seats_available` and the seat
+    list in step on every employee and seat-limit change; existing data
+    corrected. Found and fixed on the way, all broken before today:
+    seat-expansion approval ("function does not exist"), Suspend user (status
+    not allowed), Suspend company / Change role / Suspend-Reactivate user (audit
+    log refused 'company'/'employee'), Remove from seat (dropped function +
+    missing column), a token could be issued with fewer seats than people.
+  - App: Suspend frees the seat and says so; "Remove from Seat" dropped (now
+    identical to Suspend); Reassign offers only people without a seat and says
+    the holder will be suspended; every user action now shows an error instead
+    of failing silently and refreshes seats + counts; "Suspended" label
+    everywhere; a suspended person signing in gets "Access suspended" + Sign
+    out instead of an empty workspace.
+  - Evidence: live now AB mine 4/10 (4 people, 4 seats), AB trans 1/10, AB
+    buyer 0/10. Rollback probes on live: suspend → 0 / reactivate → 1;
+    limit 10→4→2→10 (seats disabled/re-enabled, people never evicted); remove
+    from seat; reassign seat 1 to Bob; reassign to a seated person refused;
+    token below headcount refused; seat expansion to 15 approved (failed
+    before); expansion below headcount refused; every company consistent.
+    Health: main 6/6 services OK. Tests: 437 admin/portal + new suspended
+    tests green; analyze clean.
 
 ## 2. Passwords & login methods
 - [ ] 2.1 Super-admin password reset proven end to end for real: reset a test

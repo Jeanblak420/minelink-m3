@@ -107,6 +107,8 @@ class MineSupplierTabScreen extends ConsumerWidget {
         return 'Declined';
       case 'inactive':
         return 'Inactive';
+      case 'suspended':
+        return 'Suspended';
       default:
         return 'Unknown';
     }

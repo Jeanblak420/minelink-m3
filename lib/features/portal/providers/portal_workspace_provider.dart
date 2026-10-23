@@ -39,7 +39,19 @@ enum PortalWorkspacePhase {
   /// September data reset removed while leaving the login itself in place.
   accountWithoutProfile,
 
-  ready,
+  /// The person belongs to a company but is suspended or inactive there
+  /// (employees.status). A seat is held only by active people
+  /// (20261024100000), and the database already refuses them company data —
+  /// so without this they were shown a normal workspace with nothing in it.
+  accessSuspended,
+
+  ready;
+
+  /// A screen with nothing to wait for and nothing to retry: the only way on
+  /// is to sign out (and in as someone else).
+  bool get endsInSignOut =>
+      this == PortalWorkspacePhase.accountWithoutProfile ||
+      this == PortalWorkspacePhase.accessSuspended;
 }
 
 enum PortalRetryAction { none, companyProfile, employeeProfile }
@@ -155,9 +167,37 @@ String portalFormatEmployeeStatus(String? status) {
       return 'Request declined';
     case 'inactive':
       return 'Inactive';
+    // Allowed by employees_status_check from 20261024100000; the console's
+    // Suspend action writes it.
+    case 'suspended':
+      return 'Suspended';
     default:
       return 'Unknown';
   }
+}
+
+/// The workspace for an employee whose company membership is suspended or
+/// inactive, or null when that is not the case. See
+/// [PortalWorkspacePhase.accessSuspended].
+PortalWorkspaceModel? portalSuspendedModel(
+  AuthState authState,
+  EmployeeState employeeState,
+) {
+  final employee = employeeState.employee;
+  if (authState.userType?.isEmployee != true || employee == null) return null;
+  if (employee.companyId == null) return null; // not linked: selectingCompany
+  if (employee.status != 'suspended' && employee.status != 'inactive') {
+    return null;
+  }
+  final company = employeeState.company?.companyName.trim();
+  final at = company == null || company.isEmpty ? '' : ' at $company';
+  return PortalWorkspaceModel(
+    phase: PortalWorkspacePhase.accessSuspended,
+    title: 'Access suspended',
+    message: 'Your access$at is suspended, so there is nothing to show yet. '
+        "Ask your company's administrator or MineLink support to "
+        'reactivate you, then sign in again.',
+  );
 }
 
 final portalWorkspaceProvider = Provider<PortalWorkspaceModel>((ref) {
@@ -265,6 +305,9 @@ final portalWorkspaceProvider = Provider<PortalWorkspaceModel>((ref) {
       !employeeState.isLinkedToCompany) {
     return const PortalWorkspaceModel(phase: PortalWorkspacePhase.selectingCompany);
   }
+
+  final suspended = portalSuspendedModel(authState, employeeState);
+  if (suspended != null) return suspended;
 
   final isEmployeeWithoutRole = authState.userType?.isEmployee == true &&
       employeeState.employee != null &&

@@ -128,4 +128,23 @@ void main() {
     await t.pump();
     expect(find.text(''), findsNothing);
   });
+
+  testWidgets('a SUSPENDED member gets no spinner and a way out', (t) async {
+    await t.pumpWidget(
+      _gated(
+        const PortalWorkspaceModel(
+          phase: PortalWorkspacePhase.accessSuspended,
+          title: 'Access suspended',
+          message: 'Your access is suspended.',
+        ),
+      ),
+    );
+    await t.pump();
+    expect(find.byKey(_navKey), findsNothing);
+    expect(find.text('Access suspended'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing,
+        reason: 'nothing is loading; a spinner would wait forever');
+    expect(find.text('Sign out'), findsOneWidget);
+  });
 }
+

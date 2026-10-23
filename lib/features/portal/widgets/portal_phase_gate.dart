@@ -79,7 +79,7 @@ class _PortalPhaseStatus extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final failed = vm.retryAction != PortalRetryAction.none ||
-        vm.phase == PortalWorkspacePhase.accountWithoutProfile;
+        vm.phase.endsInSignOut;
     return Scaffold(
       body: Center(
         child: Padding(

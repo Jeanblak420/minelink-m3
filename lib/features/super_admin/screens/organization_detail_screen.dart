@@ -563,7 +563,9 @@ class _OverviewTab extends ConsumerWidget {
               _InfoRow(label: 'Seats Used', value: '$seatsUsed'),
               _InfoRow(
                   label: 'Seats Available',
-                  value: '${seatLimit - seatsUsed}'),
+                  // Never negative: a platform admin can seat people past the
+                  // limit, and "-2 available" read as a bug, not a fact.
+                  value: '${seatLimit - seatsUsed < 0 ? 0 : seatLimit - seatsUsed}'),
               const Divider(height: 32),
               TokenAccessDetailsSection(
                 activeToken: active,
@@ -882,7 +884,6 @@ class _UsersTab extends ConsumerWidget {
                                     const PopupMenuItem(value: 'suspend', child: Row(children: [Icon(Icons.block_rounded, size: 18, color: MlTokens.red600), SizedBox(width: 8), Text('Suspend User')])),
                                   if (isSuspended)
                                     const PopupMenuItem(value: 'reactivate', child: Row(children: [Icon(Icons.check_circle_outline_rounded, size: 18, color: MlTokens.green600), SizedBox(width: 8), Text('Reactivate User')])),
-                                  const PopupMenuItem(value: 'remove_seat', child: Row(children: [Icon(Icons.event_seat_rounded, size: 18, color: MlTokens.orange500), SizedBox(width: 8), Text('Remove from Seat')])),
                                   const PopupMenuItem(value: 'change_role', child: Row(children: [Icon(Icons.manage_accounts_rounded, size: 18), SizedBox(width: 8), Text('Change Role')])),
                                   PopupMenuItem(
                                     value: 'edit_login',
@@ -924,49 +925,44 @@ class _UsersTab extends ConsumerWidget {
   ) async {
     final repo = ref.read(superAdminRepositoryProvider);
 
+    // Seats follow active people (20261024100000), so a status change moves
+    // the Seats tab and the Overview's counts as well as the list.
+    void refreshSeats() {
+      ref.invalidateIfMounted(companyUsersGroupedProvider(companyId));
+      ref.invalidateIfMounted(organizationSeatsProvider(companyId));
+      ref.invalidateIfMounted(organizationDetailProvider(companyId));
+    }
+
+    // Every action here is a server call that can be refused; until
+    // 2026-10-24 none of them caught one, so a failed Suspend looked like a
+    // button that did nothing.
+    try {
     switch (action) {
       case 'suspend':
         final confirmed = await _confirm(
           context,
           title: 'Suspend $name?',
-          message: 'This will prevent them from accessing the platform. You can reactivate them later.',
+          message: 'They lose access to the platform and their seat is freed '
+              'for someone else. You can reactivate them later.',
           confirmLabel: 'Suspend',
           danger: true,
         );
         if (confirmed != true || !context.mounted) return;
         await repo.suspendUser(employeeId: employeeId);
-        ref.invalidateIfMounted(companyUsersGroupedProvider(companyId));
-        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$name suspended')));
+        refreshSeats();
+        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$name suspended — their seat is free')));
 
       case 'reactivate':
         await repo.reactivateUser(employeeId: employeeId);
-        ref.invalidateIfMounted(companyUsersGroupedProvider(companyId));
-        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$name reactivated')));
-
-      case 'remove_seat':
-        if (userId == null) {
-          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No seat assigned to this user')));
-          return;
-        }
-        final confirmed = await _confirm(
-          context,
-          title: 'Remove $name from seat?',
-          message: 'Their seat will be released and made available to other users.',
-          confirmLabel: 'Remove',
-          danger: false,
-        );
-        if (confirmed != true || !context.mounted) return;
-        await repo.removeUserFromSeat(userId: userId, companyId: companyId);
-        ref.invalidateIfMounted(companyUsersGroupedProvider(companyId));
-        ref.invalidateIfMounted(organizationSeatsProvider(companyId));
-        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$name removed from seat')));
+        refreshSeats();
+        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$name reactivated — they hold a seat again')));
 
       case 'change_role':
         final newRole = await _pickRole(context, current: user['role'] as String?);
         if (newRole == null || !context.mounted) return;
         await repo.changeEmployeeRole(employeeId: employeeId, newRole: newRole);
-        ref.invalidateIfMounted(companyUsersGroupedProvider(companyId));
-        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$name role changed to $newRole')));
+        refreshSeats();
+        if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$name is now ${UserRole.labelFor(newRole)}')));
 
       case 'edit_login':
         if (userId == null) {
@@ -985,6 +981,14 @@ class _UsersTab extends ConsumerWidget {
           onSaved: () =>
               ref.invalidateIfMounted(companyUsersGroupedProvider(companyId)),
         );
+    }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Could not update $name: ${friendlyError(e)}'),
+          backgroundColor: MlTokens.red600,
+        ));
+      }
     }
   }
 
@@ -1338,10 +1342,17 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
       allowance = await repo.seatReassignmentAllowance(widget.organizationId);
       final grouped =
           await ref.read(companyUsersGroupedProvider(widget.organizationId).future);
+      // A seat is held by every active member (20261024100000), so the seat
+      // can only move to a member who holds none: suspended, inactive or
+      // still waiting. A declined request cannot be seated (reassign_seat
+      // refuses it too).
+      const notSeatable = {'active', 'rejected'};
       candidates = [
         for (final list in grouped.values)
           for (final u in list)
-            if (u['user_id'] != null && u['user_id'] != seat.occupiedByUserId)
+            if (u['user_id'] != null &&
+                u['user_id'] != seat.occupiedByUserId &&
+                !notSeatable.contains(u['status']))
               u,
       ];
     } catch (e) {
@@ -1355,7 +1366,8 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
 
     if (candidates.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('No other member of this company to move the seat to.')));
+          content: Text('Everyone in this company already holds a seat. '
+              'Suspend someone first, or add seats.')));
       return;
     }
 
@@ -1372,7 +1384,7 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
             children: [
               Text(
                 remaining > 0
-                    ? 'Currently ${seat.occupiedByName ?? 'unassigned'}. '
+                    ? '${seat.occupiedByName != null ? '${seat.occupiedByName} holds this seat and will be suspended; the person you pick gets the seat and access.' : 'This seat is free; the person you pick gets it and access.'} '
                         '$remaining of ${allowance['limit'] ?? 2} reassignments '
                         'left in the next ${mlCount(allowance['period_days'] ?? 30, 'day')}.'
                     : 'This company has used all ${allowance['limit'] ?? 2} '

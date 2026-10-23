@@ -323,7 +323,7 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
                     color: Theme.of(context).colorScheme.primary,
                   )
                 else if (vm.retryAction == PortalRetryAction.none &&
-                    vm.phase != PortalWorkspacePhase.accountWithoutProfile)
+                    !vm.phase.endsInSignOut)
                   const CircularProgressIndicator()
                 else
                   Icon(
@@ -381,7 +381,7 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
                     label: const Text('Sign out'),
                   ),
                 ],
-                if (vm.phase == PortalWorkspacePhase.accountWithoutProfile) ...[
+                if (vm.phase.endsInSignOut) ...[
                   const SizedBox(height: 24),
                   FilledButton.icon(
                     onPressed: () =>
