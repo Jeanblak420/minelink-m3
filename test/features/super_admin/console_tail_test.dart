@@ -509,4 +509,44 @@ void main() {
             'clock, so it cannot be photographed and it is the device\'s '
             'opinion of the hour (CLAUDE.md §7.1).');
   });
+
+  // ------------------------------------------- admin mobile (2026-10-24)
+  testWidgets(
+      'on a phone the Overview tab scrolls its last button clear of the '
+      'Generate Token button', (tester) async {
+    // Seen on a Galaxy S25 Ultra 2026-10-23: "Connect via MineLink
+    // Messenger" is the last control on the tab, and with only 20px of
+    // bottom padding it stopped under the floating Generate Token button and
+    // could not be pressed.
+    await pump(tester, const OrganizationDetailScreen(organizationId: 'o4'),
+        width: 412, height: 915);
+    final overview = find
+        .descendant(
+            of: find.byType(TabBarView),
+            matching: find.byType(SingleChildScrollView))
+        .first;
+    final position = tester
+        .state<ScrollableState>(find.descendant(
+            of: overview, matching: find.byType(Scrollable)).first)
+        .position;
+    // The tab's content settles over a few frames (the company list under
+    // "Link a company for chat" sizes itself after it loads), so keep going
+    // until the end stops moving.
+    for (var i = 0; i < 10; i++) {
+      position.jumpTo(position.maxScrollExtent);
+      await tester.pumpAndSettle();
+      if (position.pixels >= position.maxScrollExtent) break;
+    }
+    expect(position.pixels, position.maxScrollExtent);
+
+    final connect = find.text('Connect via MineLink Messenger');
+    expect(connect, findsOneWidget);
+    final button = tester.getRect(find
+        .ancestor(of: connect, matching: find.byType(MlButton))
+        .first);
+    final fab = tester.getRect(find.byType(FloatingActionButton));
+    expect(button.bottom, lessThanOrEqualTo(fab.top),
+        reason: 'the Connect button ends at ${button.bottom} but the Generate '
+            'Token button starts at ${fab.top}: it is still covered');
+  });
 }

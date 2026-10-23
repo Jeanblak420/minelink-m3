@@ -21,6 +21,7 @@ import 'package:flutter_application_1/features/super_admin/widgets/edit_login_di
 import 'package:flutter_application_1/features/auth/utils/whatsapp_identity.dart';
 import 'package:flutter_application_1/features/super_admin/utils/audit_log_csv_exporter.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 
 String _nz(String? v) => (v != null && v.trim().isNotEmpty) ? v.trim() : '—';
@@ -127,6 +128,15 @@ Widget _orgDetailBackButton(BuildContext context) {
     onPressed: () => context.go('/super-admin/organizations'),
   );
 }
+
+/// Extra room at the end of every tab on a phone, so the last item can scroll
+/// clear of the floating Generate Token button. Without it the Overview tab's
+/// last control ("Connect … via MineLink Messenger") sat permanently under the
+/// button and could not be pressed (seen on a Galaxy S25 Ultra, 2026-10-23).
+/// The extended FAB is 56px tall and sits 16px up; 96 leaves a clear gap.
+/// Phone width only: the desktop layout is left as it is.
+double _fabClearance(BuildContext context) =>
+    MlWindowClass.of(context).usesBottomNav ? 96 : 0;
 
 List<Widget> _orgDetailAppBarActions(BuildContext context) {
   return [
@@ -382,7 +392,7 @@ class _OverviewTab extends ConsumerWidget {
                 : 'Not provided';
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + _fabClearance(context)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -767,7 +777,7 @@ class _UsersTab extends ConsumerWidget {
           );
         }
         return ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + _fabClearance(context)),
           children: grouped.entries.map((entry) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1165,7 +1175,7 @@ class _TokensTabState extends ConsumerState<_TokensTab> {
                       ),
                     )
                   : ListView(
-                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                      padding: EdgeInsets.fromLTRB(12, 0, 12, 12 + _fabClearance(context)),
                       children: [
                         Text(
                           'Token records',
@@ -1519,7 +1529,7 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.fromLTRB(16, 0, 16, _fabClearance(context)),
                       itemCount: visible.length,
                       itemBuilder: (context, i) {
                         final s = visible[i];
