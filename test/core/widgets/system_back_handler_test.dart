@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,12 +14,21 @@ import 'package:flutter_application_1/core/widgets/system_back_handler.dart';
 /// gesture sends. `SystemNavigator.pop` being called is the app closing.
 void main() {
   late int exits;
+  // What the app last told Android about Back. Under predictive back (on by
+  // default for targetSdk 36 on Android 16, e.g. One UI 8 on a Galaxy S25)
+  // Android never sends Back to Flutter while this is false: it closes the
+  // app itself, and `handlePopRoute` below is never reached.
+  bool? frameworkHandlesBack;
 
   setUp(() {
     exits = 0;
+    frameworkHandlesBack = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (call) async {
           if (call.method == 'SystemNavigator.pop') exits++;
+          if (call.method == 'SystemNavigator.setFrameworkHandlesBack') {
+            frameworkHandlesBack = call.arguments as bool;
+          }
           return null;
         });
   });
@@ -79,7 +89,11 @@ void main() {
             return SystemBackHandler(
               isRoot: location == '/root',
               goToRoot: () => context.go('/root'),
-              child: recorded,
+              child: Scaffold(
+                appBar: AppBar(),
+                drawer: const Drawer(child: Text('the drawer')),
+                body: recorded,
+              ),
             );
           },
           routes: [
@@ -93,8 +107,15 @@ void main() {
   }
 
   Future<void> pumpApp(WidgetTester tester, GoRouter router) async {
+    // WidgetsApp only reports to the platform once the app is resumed.
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpWidget(
-      ProviderScope(child: MaterialApp.router(routerConfig: router)),
+      ProviderScope(
+        child: MaterialApp.router(
+          routerConfig: router,
+          onNavigationNotification: SystemBackHandler.claimSystemBack,
+        ),
+      ),
     );
     await tester.pumpAndSettle();
   }
@@ -178,5 +199,50 @@ void main() {
     await tester.binding.handlePopRoute();
     await tester.pump();
     expect(exits, 1);
+  });
+
+  testWidgets(
+    'Android predictive back: the app claims Back on every shell screen',
+    (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      try {
+        await pumpApp(tester, buildRouter(withHandler: true));
+        expect(frameworkHandlesBack, isTrue,
+            reason: 'landing screen: Back must reach "press again to exit"');
+
+        await tester.tap(find.text('next'));
+        await tester.pumpAndSettle();
+        expect(frameworkHandlesBack, isTrue, reason: 'one screen in');
+
+        await tester.tap(find.text('open dialog'));
+        await tester.pumpAndSettle();
+        expect(frameworkHandlesBack, isTrue, reason: 'dialog open');
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
+    },
+  );
+
+  testWidgets('system back closes an open drawer and stays on the page', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    try {
+      await pumpApp(tester, buildRouter(withHandler: true));
+      await tester.tap(find.text('next'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DrawerButton));
+      await tester.pumpAndSettle();
+      expect(find.text('the drawer'), findsOneWidget);
+      expect(frameworkHandlesBack, isTrue, reason: 'drawer open');
+
+      await systemBack(tester);
+      expect(find.text('the drawer'), findsNothing);
+      expect(find.text('page a'), findsOneWidget);
+      expect(frameworkHandlesBack, isTrue, reason: 'drawer closed again');
+      expect(exits, 0);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 }

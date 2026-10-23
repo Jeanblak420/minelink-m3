@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/core/navigation/nav_back.dart';
@@ -15,6 +16,21 @@ import 'package:flutter_application_1/core/navigation/nav_history_provider.dart'
 /// was therefore never reached by a system back. A [BackButtonListener] sits
 /// ahead of `popRoute` in the router's back-button dispatcher, so it is.
 ///
+/// That alone was NOT enough on Android 16 (Galaxy S25 Ultra, One UI 8).
+/// With predictive back (on for every app targeting SDK 36 there, and for
+/// Android 13+ here via `enableOnBackInvokedCallback`), Android only hands
+/// Back to Flutter while the framework has said it wants it
+/// (`SystemNavigator.setFrameworkHandlesBack`). WidgetsApp says so only when
+/// a navigator can pop or a route is held by `PopScope(canPop: false)` — a
+/// `BackButtonListener` counts for neither, and each shell route is the only
+/// page in its navigator. So Android was told "not wanted" and closed the app
+/// without ever calling this handler. [claimSystemBack] is the app's
+/// `onNavigationNotification` and always says "wanted"; a Back nobody in the
+/// app handles still closes it, through [SystemNavigator.pop].
+///
+/// Not a `PopScope(canPop: false)` here: it outranks the local history entry
+/// an open drawer adds to the route, so Back could no longer close the menu.
+///
 /// Order, per press:
 /// 1. Something the router can pop (dialog, sheet, open drawer, pushed route)
 ///    → let the router close it.
@@ -24,6 +40,24 @@ import 'package:flutter_application_1/core/navigation/nav_history_provider.dart'
 /// 4. On the landing screen → "Press back again to exit"; a second press
 ///    within [exitWindow] lets Android close the app.
 class SystemBackHandler extends ConsumerStatefulWidget {
+  /// `MaterialApp.onNavigationNotification`: tells Android the app handles
+  /// Back on every screen. Replaces WidgetsApp's default, which reports only
+  /// whether a navigator can pop. Like that default it stays quiet until the
+  /// app has a lifecycle state, so the engine is not updated before it's ready.
+  static bool claimSystemBack(NavigationNotification notification) {
+    switch (WidgetsBinding.instance.lifecycleState) {
+      case null:
+      case AppLifecycleState.detached:
+        return true;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.resumed:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        SystemNavigator.setFrameworkHandlesBack(true);
+        return true;
+    }
+  }
+
   final bool isRoot;
   final VoidCallback goToRoot;
   final Widget child;
@@ -65,7 +99,9 @@ class _SystemBackHandlerState extends ConsumerState<SystemBackHandler> {
     final last = _lastRootPress;
     if (last != null && now.difference(last) <= SystemBackHandler.exitWindow) {
       _lastRootPress = null;
-      return false; // second press: let the app close
+      // Second press: close the app.
+      await SystemNavigator.pop();
+      return true;
     }
     _lastRootPress = now;
     ScaffoldMessenger.maybeOf(context)

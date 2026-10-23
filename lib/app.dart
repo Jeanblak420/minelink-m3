@@ -4,6 +4,7 @@ import 'package:flutter_application_1/core/theme/app_theme.dart';
 import 'package:flutter_application_1/core/theme/theme_mode_provider.dart';
 import 'package:flutter_application_1/core/constants/app_branding.dart';
 import 'package:flutter_application_1/core/routing/app_router.dart';
+import 'package:flutter_application_1/core/widgets/system_back_handler.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -28,6 +29,9 @@ class App extends ConsumerWidget {
         // User-controlled via the portal app-bar toggle; defaults to dark.
         themeMode: ref.watch(themeModeProvider),
         routerConfig: AppRouter.router,
+        // Android 16 predictive back: without this the phone's Back closes
+        // the app instead of reaching SystemBackHandler.
+        onNavigationNotification: SystemBackHandler.claimSystemBack,
         debugShowCheckedModeBanner: false,
       ),
     );
