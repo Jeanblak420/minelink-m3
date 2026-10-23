@@ -429,6 +429,28 @@ class _ChatPanelState extends ConsumerState<_ChatPanel> {
 
   void _showProfile(ChatContact c) => setState(() => _profile = c);
 
+  /// The phone's Back while the window is open: one step back inside the
+  /// window — out of Support, Settings, a profile or a conversation, in the
+  /// order [build] layers them — and from the conversation list, close it.
+  ///
+  /// Without this a Back went to the page UNDER the window and left the window
+  /// open on top of the new page (Galaxy S25 Ultra, 2026-10-23).
+  bool _stepBack() {
+    if (!mounted) return false;
+    if (_showSupport) {
+      setState(() => _showSupport = false);
+    } else if (_showSettings) {
+      setState(() => _showSettings = false);
+    } else if (_profile != null) {
+      setState(() => _profile = null);
+    } else if (_inThread) {
+      setState(() => _inThread = false);
+    } else {
+      widget.onClose();
+    }
+    return true;
+  }
+
   /// Opens the profile panel for a user id (used when a @mention is tapped).
   void _showProfileByUserId(String userId) {
     final contacts = ref.read(chatContactsProvider).valueOrNull ?? const [];
@@ -517,7 +539,7 @@ class _ChatPanelState extends ConsumerState<_ChatPanel> {
       );
     }
 
-    return Material(
+    final panel = Material(
       color: Colors.transparent,
       child: Container(
         decoration: BoxDecoration(
@@ -593,6 +615,31 @@ class _ChatPanelState extends ConsumerState<_ChatPanel> {
           ],
         ),
       ),
+    );
+    // Registered while the window is open, and only then: the panel is built
+    // when the window opens, so this Back handler is the newest one and runs
+    // before the page's (BackButtonListener gives the last one mounted
+    // priority).
+    return _ChatBackStep(onBack: _stepBack, child: panel);
+  }
+}
+
+/// Hooks [onBack] to the phone's Back for as long as [child] is on screen.
+/// [onBack] returns whether it handled the press.
+///
+/// A no-op without a Router above it, which the app always has and bare
+/// widget tests do not.
+class _ChatBackStep extends StatelessWidget {
+  final bool Function() onBack;
+  final Widget child;
+  const _ChatBackStep({required this.onBack, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    if (Router.maybeOf(context) == null) return child;
+    return BackButtonListener(
+      onBackButtonPressed: () async => onBack(),
+      child: child,
     );
   }
 }
@@ -5059,23 +5106,32 @@ class _SupportViewState extends ConsumerState<_SupportView> {
   Widget build(BuildContext context) {
     final pal = widget.pal;
     final isAdmin = ref.watch(supportIsAdminProvider).valueOrNull ?? false;
+    // Back from a ticket or the new-ticket form returns to Support's home,
+    // not out of Support altogether. Mounted with the sub-screen, so it runs
+    // before the window's own Back step.
+    bool backToHome() {
+      if (!mounted) return false;
+      setState(() => _screen = 'home');
+      return true;
+    }
+
     switch (_screen) {
       case 'new':
-        return _NewTicketForm(
+        return _ChatBackStep(onBack: backToHome, child: _NewTicketForm(
           pal: pal,
           onBack: () => setState(() => _screen = 'home'),
           onCreated: (id) {
             ref.invalidate(myTicketsProvider);
             _openTicket(id);
           },
-        );
+        ));
       case 'ticket':
-        return _TicketView(
+        return _ChatBackStep(onBack: backToHome, child: _TicketView(
           pal: pal,
           ticketId: _ticketId!,
           isAdmin: isAdmin,
           onBack: () => setState(() => _screen = 'home'),
-        );
+        ));
       default:
         return _SupportHome(
           pal: pal,

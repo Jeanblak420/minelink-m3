@@ -35,8 +35,16 @@ Status: ☐ not started · ◐ in progress · ☑ done
     ≤ FAB top. Fails without the fix (895 vs 843), passes with it.
     `console_tail_test` + overflow sweep green (58); desktop and phone renders
     of the page unchanged. Re-check on the phone in 7.3.
-- [ ] 1.2 Back closes the Messages panel (and steps back inside it first:
+- [x] 1.2 Back closes the Messages panel (and steps back inside it first:
       open conversation → list → closed), instead of changing the page under it.
+  - Fix: while the window is open it registers its own Back step (newest
+    handler, so it runs before the page's): Support / Settings / profile /
+    conversation → list → close. Support's ticket and new-ticket screens step
+    back to Support's home first. Window closed → Back is the page's again.
+  - Evidence: `back_closes_chat_window_test.dart` (3 tests, real router Back
+    path): window closes and page stays; open/close ×3; conversation → list →
+    closed. Fails without the fix ("Back left the chat window open"). All chat +
+    Back tests green (86), analyze clean. Re-check on the phone in 7.3.
 - [ ] 1.3 Seats are counted: every company's seats-used matches its real users,
       stays right when users are added, moved, deactivated or removed, and the
       existing numbers are corrected.
