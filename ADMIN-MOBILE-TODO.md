@@ -124,8 +124,25 @@ Status: ☐ not started · ◐ in progress · ☑ done
     now WhatsApp"). `login_display_test.dart` 2/2; goldens unchanged.
 
 ## 3. Wrong or misleading numbers
-- [ ] 3.1 "Active users right now" counts people actually using the app (recent
+- [x] 3.1 "Active users right now" counts people actually using the app (recent
       activity), not people who typed a password in the last 5 minutes.
+  - Cause, two parts: `platform_registry_extras` counted
+    `auth.users.last_sign_in_at` in the last 5 min (a token refresh does not
+    move it), AND the 45 s activity heartbeat (`chat_touch_last_seen`) only
+    started once somebody opened the chat panel or a staff profile. Seen
+    live: Jean's `last_seen_at` stopped at 23:56 the night before although
+    the app was open on his phone 03:58–04:13.
+  - App: `App` keeps `presenceProvider` alive for the whole session
+    (`presenceKeepAlive`, a listen — nothing rebuilds on presence changes);
+    the provider follows the signed-in account (rebuilt for a new user, torn
+    down on sign-out, not on a token refresh) and beats once on returning to
+    the app. This also fixes the green online dots and "last seen" app-wide.
+  - DB: migration `20261024120000_active_users_from_activity` (applied,
+    ledger row; live body verified) counts `profiles.last_seen_at` in the
+    last 2 min. Rolled-back probe as jean@: 0 → one heartbeat → 1.
+  - Label "signed-in · last 5m" → "using the app · last 2 min". Six goldens
+    changed by that line only (668 px each; crop compared old vs new).
+  - Phone confirmation of the heartbeat is in the final walk (7.3).
 - [ ] 3.2 Live map: the "trucks reporting" count and the "No GPS fixes yet"
       message agree.
 - [ ] 3.3 "Recent alerts" says the period it really shows.
@@ -179,5 +196,7 @@ Status: ☐ not started · ◐ in progress · ☑ done
 - [ ] 7.2 Windows/web layouts unchanged (desktop goldens still match).
 - [ ] 7.3 Release APK on Jean's phone; whole admin panel walked again on the
       phone; every item above re-checked there.
+      Includes: with the app open (chat never opened), Jean's
+      `last_seen_at` moves every ~45 s and the dashboard shows him as active (3.1).
 - [ ] 7.4 Database healthy (all services probed); migration ledger matches files.
 - [ ] 7.5 Committed, pushed, APK on the NAS.

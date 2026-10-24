@@ -82,7 +82,7 @@ class SuperAdminRepository {
       // Tolerate absence of the RPC on older environments.
     }
 
-    // Live extras: active users (last 5m) + tons in the last 24h. Tolerates the
+    // Live extras: people using the app (last 2 min) + tons in the last 24h. Tolerates the
     // migration not being applied yet (function absent → zeros).
     var activeUsersNow = 0;
     var tons24h = 0.0;

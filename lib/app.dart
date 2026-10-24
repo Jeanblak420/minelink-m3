@@ -5,12 +5,16 @@ import 'package:flutter_application_1/core/theme/theme_mode_provider.dart';
 import 'package:flutter_application_1/core/constants/app_branding.dart';
 import 'package:flutter_application_1/core/routing/app_router.dart';
 import 'package:flutter_application_1/core/widgets/system_back_handler.dart';
+import 'package:flutter_application_1/features/chat/providers/chat_presence_provider.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Online status and "last seen" for everyone with the app open, not only
+    // once the chat panel has been opened.
+    presenceKeepAlive(ref);
     return PopScope(
       // Handle native back button to navigate within the app instead of closing
       // Only intercept when GoRouter can pop (i.e., not at root)

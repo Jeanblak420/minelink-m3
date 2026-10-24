@@ -172,7 +172,7 @@ class MlSampleData {
       value: '14',
       icon: Icons.bolt_rounded,
       tone: MlChipTone.cyan,
-      sub: 'signed-in · last 5m',
+      sub: 'using the app · last 2 min',
       delta: 'Live',
       deltaTone: MlDelta.live,
     ),

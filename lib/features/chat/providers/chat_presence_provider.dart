@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_application_1/core/time/ml_time.dart';
@@ -20,7 +21,14 @@ class Presence {
 /// stamp their last-seen immediately (no polling), so the line flips the moment
 /// they go offline. A 45s heartbeat also persists last_seen_at to the DB so it
 /// survives across sessions for users you weren't watching.
-class PresenceController extends StateNotifier<Presence> {
+///
+/// That heartbeat is also what the super-admin "Active users right now" figure
+/// counts (`platform_registry_extras`), so it has to run for everyone who has
+/// the app open, not only for whoever opened the chat panel: [App] keeps this
+/// provider alive from start-up (see `presenceKeepAlive`), and it is rebuilt
+/// for the new account when the signed-in user changes.
+class PresenceController extends StateNotifier<Presence>
+    with WidgetsBindingObserver {
   PresenceController(this._uid)
       : super(const Presence(<String>{}, <String, DateTime>{})) {
     _init();
@@ -79,6 +87,16 @@ class PresenceController extends StateNotifier<Presence> {
     _touchLastSeen();
     _heartbeat = Timer.periodic(
         const Duration(seconds: 45), (_) => _touchLastSeen());
+    // Coming back to the app counts at once, not up to 45 s later.
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // (`state` here is the app's lifecycle, not this notifier's state.)
+    if (state == AppLifecycleState.resumed && _channel != null) {
+      _touchLastSeen();
+    }
   }
 
   Future<void> _touchLastSeen() async {
@@ -91,6 +109,7 @@ class PresenceController extends StateNotifier<Presence> {
 
   @override
   void dispose() {
+    if (_uid != null) WidgetsBinding.instance.removeObserver(this);
     _heartbeat?.cancel();
     _authSub?.cancel();
     final ch = _channel;
@@ -102,10 +121,26 @@ class PresenceController extends StateNotifier<Presence> {
   }
 }
 
+/// The signed-in account's id, following sign-in and sign-out.
+final _presenceUserIdProvider = StreamProvider<String?>((ref) async* {
+  final auth = SupabaseConfig.client.auth;
+  yield auth.currentUser?.id;
+  yield* auth.onAuthStateChange.map((e) => e.session?.user.id);
+});
+
 final presenceProvider =
     StateNotifierProvider<PresenceController, Presence>((ref) {
-  return PresenceController(SupabaseConfig.client.auth.currentUser?.id);
+  // `select` on the id itself, so a token refresh for the same account does
+  // not tear the channel down and rebuild it.
+  final uid = ref.watch(_presenceUserIdProvider.select((a) =>
+      a.hasValue ? a.value : SupabaseConfig.client.auth.currentUser?.id));
+  return PresenceController(uid);
 });
+
+/// Mounted once by [App]: keeps presence and its last-seen heartbeat running
+/// for the whole session without rebuilding anything when presence changes.
+void presenceKeepAlive(WidgetRef ref) =>
+    ref.listen<Presence>(presenceProvider, (_, __) {});
 
 /// The set of user-ids currently online (real-time).
 final onlineUsersProvider =
