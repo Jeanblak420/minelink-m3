@@ -47,13 +47,41 @@ final _log = LoggerFactory.getLogger('ChatDock');
 /// the window's position/size/open-state persist while moving between screens.
 class ChatDock extends ConsumerStatefulWidget {
   final Widget child;
-  const ChatDock({super.key, required this.child});
+
+  /// On a phone, no floating disc: the chat opens from [ChatDockAppBarButton]
+  /// in the top bar instead.
+  ///
+  /// The disc floated over every screen and covered what was under it — the
+  /// "Create company account" button, the edge of "Update password", table
+  /// edges, and beside "Generate Token" a strip of text (admin phone audit,
+  /// 2026-10-24). Wider windows keep the disc. Opt-in per shell: the
+  /// super-admin console uses it; the company portals do not yet.
+  final bool launcherInAppBarOnPhone;
+
+  const ChatDock({
+    super.key,
+    required this.child,
+    this.launcherInAppBarOnPhone = false,
+  });
 
   /// Whether a dock is mounted above [context] — i.e. firing
   /// [dockOpenRequestProvider] will actually open a chat window here. Both the
   /// portal and super-admin shells mount one; standalone legacy routes don't.
   static bool isMounted(BuildContext context) =>
       context.findAncestorStateOfType<_ChatDockState>() != null;
+
+  /// Whether the dock above [context] has handed its launcher to the top bar
+  /// at this window's width.
+  static bool launcherInAppBar(BuildContext context) {
+    final dock = context.findAncestorStateOfType<_ChatDockState>();
+    return dock != null &&
+        dock.widget.launcherInAppBarOnPhone &&
+        MlWindowClass.of(context).usesBottomNav;
+  }
+
+  /// Opens the chat window, or closes it if it is open.
+  static void toggle(BuildContext context) =>
+      context.findAncestorStateOfType<_ChatDockState>()?._toggleOpen();
 
   @override
   ConsumerState<ChatDock> createState() => _ChatDockState();
@@ -170,6 +198,9 @@ class _ChatDockState extends ConsumerState<ChatDock>
             ? kMlBottomNavHeight + MediaQuery.viewPaddingOf(context).bottom
             : 0.0;
         final area = Size(full.width, math.max(0, full.height - reserved));
+
+        final discInAppBar = widget.launcherInAppBarOnPhone &&
+            MlWindowClass.forWidth(full.width).usesBottomNav;
 
         final defaultFab =
             Offset(area.width - _fabSize - 22, area.height - _fabSize - 22);
@@ -288,6 +319,8 @@ class _ChatDockState extends ConsumerState<ChatDock>
               // The disc widget is built ONCE (passed as `child`); only the
               // Positioned wrapper rebuilds while dragging, so the CustomPaint
               // disc is never re-inflated per frame → smooth 1:1 drag.
+              // Not drawn when the top bar carries the launcher.
+              if (!discInAppBar)
               AnimatedBuilder(
                 animation: Listenable.merge([_anim, _fabPos]),
                 child: _DraggableFab(
@@ -332,6 +365,36 @@ class _ChatDockState extends ConsumerState<ChatDock>
           ),
         );
       },
+    );
+  }
+}
+
+/// The chat launcher for the top bar, for a [ChatDock] that set
+/// [ChatDock.launcherInAppBarOnPhone]. Draws nothing anywhere else, so a shell
+/// can list it in its actions unconditionally.
+class ChatDockAppBarButton extends ConsumerWidget {
+  const ChatDockAppBarButton({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!ChatDock.launcherInAppBar(context)) return const SizedBox.shrink();
+    final unread = ref
+            .watch(chatConversationsProvider)
+            .valueOrNull
+            ?.fold<int>(0, (sum, c) => sum + c.unreadCount) ??
+        0;
+    final typing = ref.watch(typingInboxProvider).anyone;
+    return IconButton(
+      key: const ValueKey('chat-dock-appbar-launcher'),
+      tooltip: unread > 0 ? 'Messages, $unread unread' : 'Messages',
+      onPressed: () => ChatDock.toggle(context),
+      icon: Badge(
+        isLabelVisible: unread > 0 || typing,
+        label: unread > 0 ? Text('$unread') : null,
+        child: Icon(
+          typing ? Icons.mark_unread_chat_alt_outlined : Icons.forum_outlined,
+        ),
+      ),
     );
   }
 }

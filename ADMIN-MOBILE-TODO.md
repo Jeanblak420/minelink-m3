@@ -260,8 +260,22 @@ Status: ☐ not started · ◐ in progress · ☑ done
   - `targets_phone_width_test.dart` new case at 360×780: drag up → the band
     leaves the screen and "Set monthly targets" comes up; the file's 15 tests
     and the overflow sweep green.
-- [ ] 4.4 Floating chat button (and Generate Token) never cover content or
+- [x] 4.4 Floating chat button (and Generate Token) never cover content or
       buttons on any screen.
+  - On a phone the admin console no longer floats the chat disc at all: the
+    chat opens from a Messages button in the top bar (unread count as a
+    badge, a dot while someone is typing). `ChatDock.launcherInAppBarOnPhone`
+    + `ChatDockAppBarButton`, opted into by the super-admin shell only;
+    wider windows keep the disc. Back still closes the window (1.2).
+  - Generate Token is the page's only floating button now, and every tab on
+    the company page carries 96px of bottom clearance on a phone (1.x
+    `_fabClearance`), so the last row scrolls clear of it.
+  - `chat_launcher_in_app_bar_test.dart` 4/4: phone → no disc, top-bar
+    button opens the chat; unread count shown; desktop → disc, no button;
+    a dock that did not opt in keeps its disc. Chat / admin / render / widget
+    suites green, goldens unchanged.
+  - Not changed: the company portals still float the disc on a phone (not
+    part of this admin-panel job) — flagged to Jean.
 - [ ] 4.5 Wide tables become one card per row on a phone: Organizations, Margin
       ledger (money visible), Recon, Route marketplace.
 - [ ] 4.6 Company page: one back arrow; bottom bar highlights Access; all tabs

@@ -132,7 +132,13 @@ class _SuperAdminShellLayoutState extends ConsumerState<SuperAdminShellLayout> {
         onTap: () => context.go('/super-admin'),
       ),
       railFooter: _identity(context),
-      actions: [const AnimatedNotificationBell(), _overflow(context)],
+      // The chat launcher sits here on a phone (see ChatDock
+      // .launcherInAppBarOnPhone); elsewhere it draws nothing.
+      actions: [
+        const ChatDockAppBarButton(),
+        const AnimatedNotificationBell(),
+        _overflow(context),
+      ],
       // The semantics boundary that used to be here is now inside MlAppShell,
       // so the portal gets it too — it never had one, which left every company
       // user's rail invisible to assistive tech.
@@ -155,7 +161,7 @@ class _SuperAdminShellLayoutState extends ConsumerState<SuperAdminShellLayout> {
     return SystemBackHandler(
       isRoot: location == '/super-admin',
       goToRoot: () => context.go('/super-admin'),
-      child: ChatDock(child: shell),
+      child: ChatDock(launcherInAppBarOnPhone: true, child: shell),
     );
   }
 
