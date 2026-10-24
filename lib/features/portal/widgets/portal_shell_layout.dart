@@ -9,6 +9,7 @@ import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 import 'package:flutter_application_1/features/profile_setup/widgets/profile_setup_banner.dart';
 import 'package:flutter_application_1/features/auth/services/logout_service.dart';
 import 'package:flutter_application_1/features/chat/widgets/chat_dock.dart';
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 import 'package:flutter_application_1/features/company/providers/company_provider.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_status_provider.dart';
@@ -82,6 +83,58 @@ bool portalShowsChatDock({
   // `/chatter`-shaped route is not silently swept in with it.
   if (location == '/chat' || location.startsWith('/chat/')) return false;
   return true;
+}
+
+/// The portal top bar's actions.
+///
+/// On a phone, chat opens from here (the dock is opted in; see
+/// [ChatDock.launcherInAppBarOnPhone]) instead of from a disc floating over
+/// the page, as in the admin console (Jean's go-ahead, 2026-10-24). That is a
+/// fifth icon, and `MlAppShell` gives the title what the icons leave: at
+/// 360dp five would push every page title onto its own row. So on a phone
+/// "Take a tour" moves into More, keeping its unseen dot there, and the bar
+/// stays at four icons. Wider windows keep the bar as it was; the chat button
+/// draws nothing there.
+///
+/// [onMenu] receives `theme`, `profile`, `signout` and, on a phone, `tour`.
+List<Widget> portalShellActions({
+  required bool phone,
+  required bool waitingForRole,
+  required bool tourSeen,
+  required bool darkTheme,
+  required VoidCallback onTour,
+  required ValueChanged<String> onMenu,
+}) {
+  const help = Icon(Icons.help_outline_rounded);
+  const more = Icon(Icons.more_vert_rounded);
+  return [
+    if (phone) const ChatDockAppBarButton(),
+    if (!phone)
+      IconButton(
+        tooltip: 'Take a tour',
+        onPressed: onTour,
+        icon: tourSeen ? help : Badge(smallSize: 8, child: help),
+      ),
+    if (!waitingForRole) const WorkflowNotificationBell(),
+    if (!waitingForRole) const AnimatedNotificationBell(),
+    PopupMenuButton<String>(
+      tooltip: 'More',
+      icon: phone && !tourSeen ? Badge(smallSize: 8, child: more) : more,
+      onSelected: (value) => value == 'tour' ? onTour() : onMenu(value),
+      itemBuilder: (_) => [
+        if (phone)
+          const PopupMenuItem(value: 'tour', child: Text('Take a tour')),
+        PopupMenuItem(
+          value: 'theme',
+          child: Text(
+            darkTheme ? 'Switch to light theme' : 'Switch to dark theme',
+          ),
+        ),
+        const PopupMenuItem(value: 'profile', child: Text('Profile')),
+        const PopupMenuItem(value: 'signout', child: Text('Sign out')),
+      ],
+    ),
+  ];
 }
 
 /// The rail for a session with no operational surface: an employee whose role
@@ -678,59 +731,36 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
         ref.read(portalTabIndexProvider.notifier).state = 0;
         context.go('/home');
       },
-      actions: [
-        IconButton(
-          tooltip: 'Take a tour',
-          onPressed: () {
-            final steps = ref.read(tourStepsProvider);
-            if (steps.isNotEmpty) {
-              ref.read(tourProvider.notifier).startTour(steps);
-            } else {
-              // Show feedback when tour can't start
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Tour not available. Please make sure you are signed in and your profile is complete.'),
-                  duration: Duration(seconds: 3),
-                ),
-              );
-            }
-          },
-          icon: ref.watch(tourSeenProvider)
-              ? const Icon(Icons.help_outline_rounded)
-              : Badge(
-                  smallSize: 8,
-                  child: const Icon(Icons.help_outline_rounded),
-                ),
-        ),
-        if (!vm.isEmployeeWithoutRole) const WorkflowNotificationBell(),
-        if (!vm.isEmployeeWithoutRole) const AnimatedNotificationBell(),
-        PopupMenuButton<String>(
-          tooltip: 'More',
-          icon: const Icon(Icons.more_vert_rounded),
-          onSelected: (value) {
-            switch (value) {
-              case 'theme':
-                ref.read(themeModeProvider.notifier).toggle();
-              case 'profile':
-                context.go('/profile');
-              case 'signout':
-                LogoutService.logoutWithConfirmation(context, ref);
-            }
-          },
-          itemBuilder: (_) => [
-            PopupMenuItem(
-              value: 'theme',
-              child: Text(
-                themeMode == ThemeMode.dark
-                    ? 'Switch to light theme'
-                    : 'Switch to dark theme',
+      actions: portalShellActions(
+        phone: MlWindowClass.of(context).usesBottomNav,
+        waitingForRole: vm.isEmployeeWithoutRole,
+        tourSeen: ref.watch(tourSeenProvider),
+        darkTheme: themeMode == ThemeMode.dark,
+        onTour: () {
+          final steps = ref.read(tourStepsProvider);
+          if (steps.isNotEmpty) {
+            ref.read(tourProvider.notifier).startTour(steps);
+          } else {
+            // Show feedback when tour can't start
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Tour not available. Please make sure you are signed in and your profile is complete.'),
+                duration: Duration(seconds: 3),
               ),
-            ),
-            const PopupMenuItem(value: 'profile', child: Text('Profile')),
-            const PopupMenuItem(value: 'signout', child: Text('Sign out')),
-          ],
-        ),
-      ],
+            );
+          }
+        },
+        onMenu: (value) {
+          switch (value) {
+            case 'theme':
+              ref.read(themeModeProvider.notifier).toggle();
+            case 'profile':
+              context.go('/profile');
+            case 'signout':
+              LogoutService.logoutWithConfirmation(context, ref);
+          }
+        },
+      ),
       sidebarBrandTitle: vm.workspaceName,
       userName: vm.operatorName,
       userMeta: vm.roleLabel,
@@ -829,7 +859,9 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
         : shellBody;
 
     if (showChatFab) {
-      content = ChatDock(child: content);
+      // On a phone the launcher is the chat button in the top bar
+      // ([portalShellActions]) and the window opens full screen.
+      content = ChatDock(launcherInAppBarOnPhone: true, child: content);
     }
 
     // Guided coach-mark tour overlay — renders nothing until launched from the

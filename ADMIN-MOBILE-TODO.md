@@ -615,8 +615,26 @@ end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
   - Analyze clean; renders regenerated, none changed (no render shows a
     company page with the desktop rail). Desktop check on the real rail
     added to 8.7.
-- [ ] 8.3 Company portals on a phone: chat in the top bar (no floating disc),
+- [x] 8.3 Company portals on a phone: chat in the top bar (no floating disc),
       full screen like the admin chat.
+  - Portal shell: `ChatDock(launcherInAppBarOnPhone: true, ...)` — the same
+    dock and full-screen panel the admin console uses (5.3/1.2), so Back and
+    Close behave the same.
+  - Top bar via new `portalShellActions(...)`. On a phone: chat button first,
+    "Take a tour" moved into More (its unseen dot moves to the More icon),
+    so the bar stays at FOUR icons — a fifth would have pushed every page
+    title to its own row (`MlAppShell` measures 48 dp per action). Desktop
+    bar unchanged (tour button, bells, More; the chat button draws nothing).
+  - Drivers keep the floating disc, deliberately: their app
+    (`DriverAppScreen`) draws its own screens with no top bar, so the disc is
+    their only way into chat on the Trip and Profile tabs. For Jean.
+  - Inside Messages (`/communications`, `/chat/...`) there is still no dock,
+    so the button draws nothing there.
+  - Tests: `portal_chat_in_app_bar_test` 4/4 (phone order + four icons +
+    tour in More; unseen dot on More; desktop as it was; shell wiring).
+    Dock behaviour already proven by `chat_launcher_in_app_bar_test` and
+    `back_closes_chat_window_test`. test/features/portal + test/widgets:
+    1,198 passed. Analyze clean.
 - [ ] 8.4 Company portals on a phone: wide tables as cards.
 - [ ] 8.5 Crash-report check-in: new table + a daily check-in per device, shown
       on the Crash reports page (which devices have gone quiet). Live DB.
