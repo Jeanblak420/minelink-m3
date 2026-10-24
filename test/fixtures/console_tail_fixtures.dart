@@ -28,6 +28,7 @@ import 'package:flutter_application_1/features/super_admin/data/models/account_d
 import 'package:flutter_application_1/features/super_admin/data/models/audit_log.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/company_monthly_ops_stats.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/crash_report_row.dart';
+import 'package:flutter_application_1/features/super_admin/data/models/device_checkin_row.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/organization_seat.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/serial_token.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
@@ -772,6 +773,7 @@ List<Override> consoleTailOverrides() => [
           .overrideWith((ref, _) async => kCompanyUsersGrouped),
       crashReportsProvider.overrideWith((ref, _) async => kCrashReports),
       crashReportFacetsProvider.overrideWith((ref) async => kCrashFacets),
+      deviceCheckinsProvider.overrideWith((ref) async => kDeviceCheckins),
       accountDeactivationRequestsProvider
           .overrideWith((ref) async => kDeactivations),
       adminAvailableRoutesProvider.overrideWith((ref) async => kAvailableRoutes),
@@ -947,3 +949,24 @@ List<Override> consoleLastOverrides() => [
       periodInsightsBundleProvider
           .overrideWith((ref, _) async => kTransporterInsights),
     ];
+
+/// Five installs for the Crash reports page's "Devices" line: four checked in
+/// today, one quiet for five days (Jean's go-ahead, 2026-10-24).
+final List<DeviceCheckinRow> kDeviceCheckins = [
+  for (final (who, platform, ago) in [
+    ('Thandi Mokoena', 'android', const Duration(hours: 1)),
+    ('Pieter van Wyk', 'windows', const Duration(hours: 3)),
+    ('Lerato Dlamini', 'web', const Duration(hours: 9)),
+    ('Sipho Ndlovu', 'android', const Duration(hours: 20)),
+    ('Johan Botha', 'android', const Duration(days: 5)),
+  ])
+    DeviceCheckinRow(
+      deviceId: 'fixture-${who.toLowerCase().replaceAll(' ', '-')}',
+      userLabel: who,
+      platform: platform,
+      appVersion: '1.0.0',
+      firstSeenAt: kCaptureNow.subtract(const Duration(days: 40)),
+      lastSeenAt: kCaptureNow.subtract(ago),
+      checkins: 38,
+    ),
+];
