@@ -37,11 +37,7 @@ class LiveMapScreen extends ConsumerWidget {
             title: 'Live map',
             meta: live.valueOrNull == null
                 ? null
-                : mlCount(
-                    live.value!.length,
-                    'truck reporting',
-                    'trucks reporting',
-                  ),
+                : liveMapReportingMeta(live.value!),
             description:
                 'Every active trip on the platform in real time — trucks appear '
                 'as drivers share their GPS position.',

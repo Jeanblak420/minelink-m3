@@ -143,8 +143,15 @@ Status: ☐ not started · ◐ in progress · ☑ done
   - Label "signed-in · last 5m" → "using the app · last 2 min". Six goldens
     changed by that line only (668 px each; crop compared old vs new).
   - Phone confirmation of the heartbeat is in the final walk (7.3).
-- [ ] 3.2 Live map: the "trucks reporting" count and the "No GPS fixes yet"
+- [x] 3.2 Live map: the "trucks reporting" count and the "No GPS fixes yet"
       message agree.
+  - Cause: both live-map headers (super admin + company portal) counted every
+    active trip as "a truck reporting"; the map only draws trips with a GPS
+    fix. Now one shared rule, `liveMapReportingMeta`: all reporting → "N trucks
+    reporting"; otherwise "N active trips · M reporting GPS".
+  - `live_map_reporting_count_test.dart` 3/3. The sample-data renders showed
+    the bug too ("4 trucks reporting" over 3 fixes) — three live-map goldens
+    now read "4 active trips · 3 reporting GPS" (header line only changed).
 - [ ] 3.3 "Recent alerts" says the period it really shows.
 - [ ] 3.4 Zero counts show no badge; "NEW" only shows when something is new.
 - [ ] 3.5 Notifications for a request clear themselves once it is linked; the

@@ -18,6 +18,21 @@ import 'package:flutter_application_1/features/portal/widgets/map_fit.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
+/// The live-map page header's count, from the same rule the map uses: a truck
+/// is "reporting" only when it has a GPS fix ([LiveTripPosition.hasFix]).
+///
+/// The header used to count every active trip, so one scheduled trip whose
+/// driver had not shared GPS read "1 truck reporting" directly above the map's
+/// "No GPS fixes yet." When some trips have no fix, both numbers are given.
+String liveMapReportingMeta(List<LiveTripPosition> trips) {
+  final reporting = trips.where((t) => t.hasFix).length;
+  if (reporting == trips.length) {
+    return mlCount(reporting, 'truck reporting', 'trucks reporting');
+  }
+  return '${mlCount(trips.length, 'active trip', 'active trips')} · '
+      '$reporting reporting GPS';
+}
+
 /// Live trip map (§4 Live GPS tracking): every active trip the caller may see,
 /// with its truck's latest position, refreshed over realtime as driver pings
 /// land. [companyId] scopes to that org's trips; null is the platform-wide
