@@ -11,6 +11,7 @@ import 'package:flutter_application_1/features/super_admin/screens/targets_org_t
 import 'package:flutter_application_1/features/super_admin/widgets/targets/targets_chrome.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/targets/targets_workspace.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart';
+import 'package:flutter_application_1/core/utils/ml_count.dart';
 
 /// Targets for one company.
 ///
@@ -121,7 +122,7 @@ class _TargetsCompanyScreenState extends ConsumerState<TargetsCompanyScreen> {
                 isDense: true,
                 hintText: loading
                     ? 'Loading organizations…'
-                    : 'Search ${companies.length} organizations',
+                    : 'Search ${mlCount(companies.length, 'organization')}',
                 hintStyle: context.mlText.bodySmall.copyWith(color: t.inkLo),
                 prefixIcon:
                     Icon(Icons.search_rounded, size: 15, color: t.inkLo),

@@ -15,6 +15,7 @@ import 'package:flutter_application_1/core/design/tokens/ml_surface_tokens.dart'
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_console_palettes.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/core/utils/ml_count.dart';
 
 /// Super-admin dashboard — the v3 layout from the 2026-08-08 design drop,
 /// fed from live data instead of the drop's sample constants.
@@ -293,7 +294,7 @@ class SuperAdminDashboardV2ViewModel {
         spark: _spark(
             rows, (r) => (r.transporterName ?? '').isNotEmpty, today),
         subtitle: (a) =>
-            '${a.companyCount} organizations · ${a.fleetVehiclesTotal} fleet',
+            '${mlCount(a.companyCount, 'organization')} · ${a.fleetVehiclesTotal} fleet',
         metrics: (a) => [
           MapEntry('Trips', mlThousands(a.activeTripsApprox)),
           MapEntry('Tons', _tons(a.tonsMoved)),
@@ -308,7 +309,7 @@ class SuperAdminDashboardV2ViewModel {
         sparkColor: MlConsolePalettes.sparkBuyer,
         a: buyers?.aggregate,
         spark: _spark(rows, (r) => (r.customerName ?? '').isNotEmpty, today),
-        subtitle: (a) => '${a.companyCount} organizations',
+        subtitle: (a) => mlCount(a.companyCount, 'organization'),
         metrics: (a) => [
           MapEntry('Orders', mlThousands(a.transactionsTotal)),
           MapEntry('Tons', _tons(a.tonsMoved)),
@@ -323,7 +324,7 @@ class SuperAdminDashboardV2ViewModel {
         sparkColor: MlConsolePalettes.sparkMine,
         a: mines?.aggregate,
         spark: _spark(rows, (r) => (r.sourceName ?? '').isNotEmpty, today),
-        subtitle: (a) => '${a.companyCount} organizations',
+        subtitle: (a) => mlCount(a.companyCount, 'organization'),
         metrics: (a) => [
           MapEntry('Tons', _tons(a.tonsMoved)),
           MapEntry('Loads', mlThousands(a.transactionsTotal)),

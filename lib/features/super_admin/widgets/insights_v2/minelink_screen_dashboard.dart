@@ -19,6 +19,7 @@
 // primitives the Transporters overview uses.
 // ============================================================================
 
+import 'package:flutter_application_1/core/utils/ml_count.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -198,8 +199,8 @@ class MineLinkDashboardScreen extends StatelessWidget {
                 MlSectionHead(
                   tokens: t,
                   title: 'Platform registry',
-                  subtitle: 'Companies, users and throughput — updated live '
-                      'read fresh on every load.',
+                  subtitle: 'Companies, users and throughput — refreshed '
+                      'every minute while this page is open.',
                   meta: registryMeta,
                   link: 'Export snapshot',
                   onLink: () => _go('orgs'),
@@ -468,6 +469,22 @@ class _PendingCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A recent organization's status line, the same in the card and the table.
+///
+/// The card joined its parts with ` - ` and the table with ` · `, and both
+/// printed the location even when it was the "—" placeholder and the users
+/// as "N users" — so a company with no address and no staff read
+/// "Active - — - 0 users", and one with one person "1 users" (admin phone
+/// audit, 2026-10-24).
+String _orgSummary(MlRecentOrg r) {
+  final location = r.location.trim();
+  return [
+    r.status,
+    if (location.isNotEmpty && location != '—') location,
+    mlCount(r.users, 'user'),
+  ].join(' · ');
 }
 
 class _NewBadge extends StatelessWidget {
@@ -1252,7 +1269,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              '${r.status} - ${r.location} - ${r.users} users',
+                              _orgSummary(r),
                               overflow: TextOverflow.ellipsis,
                               style: context.mlText.labelSmall.copyWith(
                                 color: t.inkMid,
@@ -1431,7 +1448,7 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                '${r.status} · ${r.location} · ${r.users} users',
+                                _orgSummary(r),
                                 overflow: TextOverflow.ellipsis,
                                 style: context.mlText.labelSmall.copyWith(
                                   color: t.inkMid,

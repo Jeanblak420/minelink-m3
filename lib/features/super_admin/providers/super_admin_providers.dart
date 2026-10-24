@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/config/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -12,8 +14,18 @@ final superAdminRepositoryProvider = Provider<SuperAdminRepository>((ref) {
   return SuperAdminRepository(Supabase.instance.client);
 });
 
-/// Provider for dashboard stats
-final dashboardStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+/// Dashboard stats, read when the dashboard opens and again every minute
+/// while it is on screen.
+///
+/// It was read ONCE per app session and kept: the registry said "updated
+/// live", "Active users right now" carried a Live pill, and both showed
+/// whatever was true when the dashboard was first opened (admin phone audit,
+/// 2026-10-24). `autoDispose` re-reads on every visit; the timer re-reads in
+/// place, and `when` keeps the current figures on screen while it does.
+final dashboardStatsProvider =
+    FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
+  final refresh = Timer(const Duration(minutes: 1), ref.invalidateSelf);
+  ref.onDispose(refresh.cancel);
   final repo = ref.watch(superAdminRepositoryProvider);
   return repo.getDashboardStats();
 });

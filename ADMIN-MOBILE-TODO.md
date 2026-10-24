@@ -192,9 +192,28 @@ Status: ☐ not started · ◐ in progress · ☑ done
     count is 0. The open app updates live (the feed listens to all changes).
     The company-side order / stockpile / driver notices for that request are
     still current work, so they were left alone.
-- [ ] 3.6 Wording: "1 organization", "1 user", no broken "- — -" separators,
+- [x] 3.6 Wording: "1 organization", "1 user", no broken "- — -" separators,
       "updated live, read fresh on every load" sentence fixed — checked across
       the admin panel, not just the examples.
+  - Swept all of `lib/` (scripted: an interpolated count followed by a plural
+    noun). Real counts fixed with `mlCount`: dashboard org cards
+    "N organizations" (×3), Targets search "Search N organizations", audit
+    export "Total: N entries", recent-organization rows "N users". The rest
+    are names, not counts (e.g. "Manage <company> users"), or already guarded.
+  - Recent-organization line built once (`_orgSummary`) for card and table:
+    joined with " · ", the "—" no-address placeholder left out — was
+    "Active - — - 0 users", now "Active · 0 users". Swept the admin panel
+    for other " - " joins: none left.
+  - The sentence was also untrue: the dashboard figures were read ONCE per
+    app session. `dashboardStatsProvider` now re-reads on every visit and
+    every minute while open (current figures stay up while it does), so
+    "Active users right now" (3.1) is current too. Sentence: "Companies,
+    users and throughput — refreshed every minute while this page is open."
+    `dashboard_stats_refresh_test.dart` (59 s: 1 read; 60 s: 2, shown; closed
+    3 min: still 2; reopened: 3).
+  - Full suite: only the 7 dashboard goldens differed; regenerated and
+    compared band by band (the wording, and the one extra subtitle line
+    moving the rest down).
 
 ## 4. Hard to read or use on a phone
 - [ ] 4.1 No words broken in half and no cut-off labels on Buyers / Mines /

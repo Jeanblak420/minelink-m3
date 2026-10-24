@@ -11,6 +11,7 @@ import '../data/models/models.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+import 'package:flutter_application_1/core/utils/ml_count.dart';
 
 /// Supported export formats for audit logs
 enum ExportFormat { csv, pdf, excel, json }
@@ -266,7 +267,7 @@ class AuditLogExporter {
               ),
               pw.SizedBox(height: 4),
               pw.Text(
-                'Generated: ${MlTime.stamp(MlTime.instant())}  |  Page ${p + 1} of $pages  |  Total: ${logs.length} entries',
+                'Generated: ${MlTime.stamp(MlTime.instant())}  |  Page ${p + 1} of $pages  |  Total: ${mlCount(logs.length, 'entry', 'entries')}',
                 style: pw.TextStyle(font: font, fontSize: 9, color: PdfColors.grey600),
               ),
               pw.SizedBox(height: 8),
