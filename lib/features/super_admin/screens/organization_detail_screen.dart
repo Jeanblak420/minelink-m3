@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/features/super_admin/utils/seat_pressure.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:async';
 
@@ -510,6 +511,42 @@ class _OverviewTab extends ConsumerWidget {
                       ),
                       ],
                       ),
+                    ),
+                  );
+                }),
+              // 6.4, on a phone: say so before the company runs out of seats.
+              if (MlWindowClass.of(context).usesBottomNav)
+                Builder(builder: (context) {
+                  final used = (org['seats_used'] as num?)?.toInt() ?? 0;
+                  final limit = (org['seat_limit'] as num?)?.toInt() ?? 0;
+                  final warn = seatPressureLabel(used, limit);
+                  if (warn == null) return const SizedBox.shrink();
+                  final tone = (seatPressure(used, limit) == SeatPressure.near
+                          ? MlTone.warn
+                          : MlTone.error)
+                      .colors(Theme.of(context).brightness);
+                  return Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: tone.bg,
+                      borderRadius: BorderRadius.circular(MlTokens.rLg),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.event_seat_outlined, color: tone.fg),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            '$used of $limit seats used — $warn. Free a seat '
+                            'or raise the limit before adding anyone.',
+                            style: context.mlText.bodyMedium.copyWith(
+                              color: tone.fg,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 }),

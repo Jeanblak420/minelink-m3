@@ -91,4 +91,15 @@ void main() {
     expect(find.text('Needs your attention'), findsNothing);
     expect(find.text('Pending requests'), findsOneWidget);
   });
+
+  test('companies at or near their seat limit are listed (6.4)', () {
+    final items = dashboardAttentionItems(
+      expiredCompanies: 0, tokensExpiringSoon: 0, openTokenRequests: 0,
+      mineTransport: 0, buyerTransport: 0, productRequests: 0,
+      buyerRequests: 0, openDisputes: 0, openWaybills: 0, seatsRunningOut: 2,
+    );
+    expect(items.single.label, 'Seats running out');
+    expect(items.single.detail, '2 companies at or near the seat limit');
+    expect(dashboardNavRoute(items.single.id), '/super-admin/organizations');
+  });
 }

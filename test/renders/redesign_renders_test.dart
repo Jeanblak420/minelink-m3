@@ -3096,8 +3096,9 @@ void main() {
         // The whole page. A frame shorter than the page leaves its last
         // control under the floating Generate Token button in the picture,
         // where a phone would simply scroll it clear (2026-10-24: the phone
-        // header changed height and 1755 stopped being enough).
-        const Size(412, 1840),
+        // header changed height and 1755 stopped being enough; 1940 since the
+        // phone's seat warning, 6.4).
+        const Size(412, 1940),
         'screen-organization-detail-phone-dark',
       );
     });

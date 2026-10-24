@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/features/super_admin/utils/seat_pressure.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -682,6 +683,15 @@ class _OrganizationManagementScreenState
                           weight: FontWeight.w700,
                         ),
                       ),
+                      // Running out (6.4): "1 seat left", "All seats used".
+                      if (seatPressureLabel(seatsUsed, seatLimit) case final warn?)
+                        MlStatusBadge(
+                          label: warn,
+                          tone: seatPressure(seatsUsed, seatLimit) ==
+                                  SeatPressure.near
+                              ? MlTone.warn
+                              : MlTone.error,
+                        ),
                     ],
                   ),
                   const SizedBox(height: 6),

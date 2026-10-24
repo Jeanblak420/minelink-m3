@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_application_1/features/super_admin/utils/seat_pressure.dart';
 import 'package:flutter_application_1/features/portal/models/recon_dispute.dart';
 import 'package:flutter_application_1/features/portal/services/dispute_service.dart';
 import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
@@ -112,6 +113,14 @@ class SuperAdminDashboardV2Screen extends ConsumerWidget {
                   openDisputes: openDisputes,
                   openWaybills:
                       bundle('transporter')?.aggregate.pendingWaybills ?? 0,
+                  seatsRunningOut: orgs
+                      .where((o) =>
+                          seatPressure(
+                            SuperAdminDashboardV2ViewModel._int(o['seats_used']),
+                            SuperAdminDashboardV2ViewModel._int(o['seat_limit']),
+                          ) !=
+                          SeatPressure.none)
+                      .length,
                 ),
           orgAggregates: vm.orgAggregates,
           pendingRequests: vm.pendingRequests,
@@ -193,6 +202,7 @@ List<MlAttentionItem> dashboardAttentionItems({
   required int buyerRequests,
   required int openDisputes,
   required int openWaybills,
+  int seatsRunningOut = 0,
 }) {
   MlAttentionItem? item(int n, String id, String label, String detail,
           IconData icon, MlChipTone tone) =>
@@ -211,6 +221,10 @@ List<MlAttentionItem> dashboardAttentionItems({
         'Waiting for approval', Icons.token_outlined, MlChipTone.amber),
     item(tokensExpiringSoon, 'attention.expiring', 'Tokens expiring',
         'Within 7 days', Icons.timer_outlined, MlChipTone.amber),
+    // 6.4: a company about to run out of seats cannot add its next person.
+    item(seatsRunningOut, 'orgs', 'Seats running out',
+        '${mlCount(seatsRunningOut, 'company', 'companies')} at or near the seat limit',
+        Icons.event_seat_outlined, MlChipTone.amber),
     item(mineTransport + buyerTransport, 'requests.mine-transport',
         'Requested routes',
         '$mineTransport from mines · $buyerTransport from buyers',

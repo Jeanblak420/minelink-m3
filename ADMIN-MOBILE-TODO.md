@@ -458,7 +458,19 @@ Status: ☐ not started · ◐ in progress · ☑ done
     one heartbeat → 1; its body counts `last_seen_at`. The dashboard
     re-reads it every minute (3.6) — `dashboard_stats_refresh_test` green.
     On-device heartbeat check stays in 7.3.
-- [ ] 6.4 Seat warning when a company nears its limit.
+- [x] 6.4 Seat warning when a company nears its limit.
+  - Rule (`seat_pressure.dart`): near = a fifth or fewer seats left, and
+    always the last seat (8/10, 4/5, 1/2); full; over. No limit set → never
+    warned. Seats count people since the seat fix, so it reads
+    seats_used / seat_limit directly.
+  - On a phone: Organizations cards carry "1 SEAT LEFT" (amber) / "ALL SEATS
+    USED" or "N PEOPLE OVER THE LIMIT" (red); the company page shows "4 of 5
+    seats used — 1 seat left. Free a seat or raise the limit before adding
+    anyone."; Needs your attention lists "Seats running out — N companies".
+    Desktop unchanged.
+  - `seat_pressure_test.dart` 4/4; attention test 7/7; three phone goldens
+    updated and viewed (company page frame 1940 so its last control is not
+    under Generate Token in the picture). Full suite 2,834 passed.
 - [ ] 6.5 Chat behaves like a page: Back closes it, docks out of the way of
       buttons (1.2 + 4.4 + 5.3 — tick when all three are ticked and re-checked).
 
