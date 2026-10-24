@@ -499,7 +499,7 @@ Status: ☐ not started · ◐ in progress · ☑ done
     Dashboard on the company page and a few other pages; Platform settings
     still listed; Platform users not listed. The company portals still float
     the chat disc on a phone.
-- [ ] 7.3 Release APK on Jean's phone; whole admin panel walked again on the
+- [x] 7.3 Release APK on Jean's phone; whole admin panel walked again on the
       phone; every item above re-checked there.
       Includes: with the app open (chat never opened), Jean's
       `last_seen_at` moves every ~45 s and the dashboard shows him as active (3.1).
@@ -514,7 +514,42 @@ Status: ☐ not started · ◐ in progress · ☑ done
       `attention_list_test` gained a failing-first test, 12/12 green.
       Needs the rebuilt APK.
     - Walk interrupted: the phone dropped wireless debugging (port refused,
-      no longer advertised). Rest of the walk pending a fresh pairing code.
+      no longer advertised). Re-paired, rebuilt APK installed 11:0x.
+      (First rebuild came out with 444 entries / no config; NOT installed.
+      Plain rebuild: 511, config present.)
+  - Walk completed on the rebuilt APK, 2026-10-24 10:58–11:12:
+    - Dashboard: "1 item" over the one row (fix confirmed). Registry:
+      Active users right now = 1 (Jean); zero tiles as "Nothing in:" chips.
+    - Drawer (4.2/5.1/5.2): labels whole; Platform users under Tokens &
+      Seats; Settings holds only Account security + User preferences.
+    - Organizations (4.5/6.4): phone cards; no seat badge, correctly (1/10,
+      4/10). Company page (4.6): one back arrow, 4 readable tabs, Access lit;
+      Back returns to Organizations.
+    - Platform users (4.6): "WhatsApp <number>"; Eli Mans card has no
+      placeholder email; Login dialog WhatsApp-only, switch locked with its
+      reason (2.2). Cancelled, nothing saved.
+    - Chat (4.4/5.3/1.2): opens from the top bar, full screen. Back:
+      thread → keyboard down (input autofocuses, `mInputShown=true`) → list →
+      closed, page underneath unchanged. Close button also closes.
+    - Crash reports (5.5): "9,243 reports · newest 500 shown", "Last report
+      received 6 days ago"; Send a test report → 9,244, "just now", row on
+      top marked "not an error". Pipeline proven from the release APK.
+    - Margin ledger, Recon tables, Route marketplace (4.1/4.5): cards.
+    - Live map (3.2): "2 active trips · 0 reporting GPS" agrees with "No GPS
+      fixes yet".
+    - Insights (4.1/4.7): opens at top, scrolls cleanly.
+    - Targets (4.3/4.8): scrolls through the dials; −/+ measured 84 px at
+      density 280 = 48 dp.
+    - Requests (3.4): no zero badges; inbox counts match the DB (the one
+      request is type `buyer` → Requested buyers, listed Linked).
+    - Audit logs: the three Eli entries read "Super admin changed removed
+      email, …" — stored by the function BEFORE v6 (2.2); audit rows are a
+      record and are not rewritten. New entries use the v6 wording.
+    - Phone restored: stay-awake off, home screen, screenshots deleted.
+  - After the fix: analyze clean; one golden changed
+    (`screen-super-admin-dashboard-v2-phone-dark`, header now "9 items" over
+    9 rows instead of the summed 43), regenerated from a full-file run;
+    full suite 2,835 passed, 1 skipped.
 - [x] 7.4 Database healthy (all services probed); migration ledger matches files.
   - `tool/health_probe.py`: main PostgREST/Auth/Storage/Realtime/Postgres RPC/
     Edge Functions all answer. Management API `/health`: db, rest, auth,
