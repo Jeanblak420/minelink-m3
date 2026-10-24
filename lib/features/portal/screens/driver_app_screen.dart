@@ -264,8 +264,10 @@ class DriverDashboardTab extends ConsumerWidget {
             : currentReq?.routeLabel ??
                   '${currentReq?.loadingPoint ?? '?'} → '
                       '${currentReq?.offloadingPoint ?? '?'}';
-        final heroPlate =
-            current?.truckReg ?? myVehicle?.vehicleRegistrationNumber ?? '—';
+        // Words, not a bare dash, when the driver has no truck yet.
+        final heroPlate = current?.truckReg ??
+            myVehicle?.vehicleRegistrationNumber ??
+            'No truck yet';
 
         return MlPageBody(
           child: Column(
@@ -698,7 +700,9 @@ class _ActiveTripHero extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         route,
-                        maxLines: 1,
+                        // Two lines: at the S25's 1.3 text size one line cut
+                        // "Your next load will appear here." (2026-10-24).
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           // Same as the eyebrow above: the cyan end of
@@ -1138,10 +1142,17 @@ class DriverProfileTab extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                MlPlatePill(
-                  myVehicle?.vehicleRegistrationNumber ?? '—',
-                  fontSize: 12,
-                ),
+                // A plate badge only when there is a plate: with no truck it
+                // drew an empty number plate holding a dash.
+                if (myVehicle?.vehicleRegistrationNumber case final reg?)
+                  MlPlatePill(reg, fontSize: 12)
+                else
+                  Text(
+                    'No truck assigned yet',
+                    style: context.mlText.bodySmall.copyWith(
+                      color: semantic.textMuted,
+                    ),
+                  ),
               ],
             ),
           ),
