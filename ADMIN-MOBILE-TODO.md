@@ -722,7 +722,7 @@ end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
     twice this morning).
   - Re-import note in `supabase/extras_project/README.md` (refresh the view;
     the two old tools still create the dropped index).
-- [ ] 8.7 Analyze clean, full suite green, desktop goldens accounted for,
+- [x] 8.7 Analyze clean, full suite green, desktop goldens accounted for,
       Windows build: rail lights Organizations on a company page,
       DB healthy + ledger matches, release APK walked on the S25, pushed, NAS.
 
@@ -747,3 +747,28 @@ end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
       600 dp phone class, so the same rail a Windows window draws), not a
       separate Windows build.
     - Release APK built: 511 entries, config present.
+  - S25 walk (2026-10-24, 13:20–13:26, release APK installed over adb):
+    - 8.5 PROVEN live: 16 s after launch `device_checkins` held the S25
+      (android, v1.0.0, jean@minelink.org, checkins=1). Crash reports reads
+      "Devices: 1 device checked in today"; Show devices lists "Jean Burger
+      · android · v1.0.0 · last check-in 1 min ago · TODAY".
+    - Realtime with the app open: main `db_connected: true`,
+      `replication_connected: true`, connected_cluster 1 — the earlier false
+      was idleness, as reasoned.
+    - 8.1 on device: Tracking → Live map, Navigation setup; the guide opens,
+      reads cleanly, bottom bar lights More.
+    - 8.2 on device, phone in LANDSCAPE (≈890 dp, desktop rail): on AB mine's
+      company page Dashboard reports selected=false (the bug was Dashboard
+      lit); filtering the rail for "Organ" shows Tokens & Seats with its
+      icon in the accent that marks the group holding the page.
+      FINDING (pre-existing, not from this work): at landscape phone height
+      (≈411 dp) the expanded rail's list area is about one row tall and does
+      not scroll, so the Organizations row itself can't be seen. For Jean.
+    - Rotation restored to Jean's settings (auto-rotate on, user_rotation 0,
+      ROTATION_0); stay-awake off; home screen; screenshots deleted.
+    - NOT walked on the device: 8.3/8.4 (company-portal chat and cards). They
+      need a company account signed in on the phone; Jean's phone is signed
+      in as super admin and his own sign-in was not touched. Proven by
+      tests and renders (20 phone renders looked at). For Jean.
+  - NAS: `MineLink-M3-2026-10-24.apk` (replaced) and
+    `PhoneRemote\minelink-m3.apk`, both SHA-256 equal to the build.
