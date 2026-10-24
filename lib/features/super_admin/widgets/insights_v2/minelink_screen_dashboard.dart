@@ -19,6 +19,7 @@
 // primitives the Transporters overview uses.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 import 'package:flutter_application_1/core/utils/ml_count.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
@@ -135,6 +136,10 @@ class MineLinkDashboardScreen extends StatelessWidget {
             // Column counts step down on narrow windows rather than letting
             // cards crush; the section order never changes.
             final w = c.maxWidth;
+            // A phone gets a shorter dashboard (admin phone audit,
+            // 2026-10-24: ~9 screens long, half of it zero tiles and a copy
+            // of the Organizations page). Wider windows are unchanged.
+            final phone = MlWindowClass.of(context).usesBottomNav;
             final threeUp = w < 900 ? (w < 620 ? 1 : 2) : 3;
             final fourUp = w < 1180 ? (w < 860 ? (w < 620 ? 1 : 2) : 3) : 4;
 
@@ -154,15 +159,20 @@ class MineLinkDashboardScreen extends StatelessWidget {
                 const SizedBox(height: 14),
                 MlGrid(
                   columns: threeUp,
-                  gap: 14,
+                  gap: phone ? 10 : 14,
                   children: orgAggregates
-                      .map((a) => _OrgCard(
-                          tokens: t, agg: a, onTap: () => _go(a.id)))
+                      .map((a) => phone
+                          ? _OrgRowCompact(
+                              tokens: t, agg: a, onTap: () => _go(a.id))
+                          : _OrgCard(
+                              tokens: t, agg: a, onTap: () => _go(a.id)))
                       .toList(),
                 ),
 
                 // 2 ─────────────────────────────────────────────────────────
-                if (pendingRequests.isNotEmpty) ...[
+                // On a phone only the inboxes with work, and nothing at all
+                // when none has any.
+                if (pendingRequests.isNotEmpty && (!phone || openRequests > 0)) ...[
                   const SizedBox(height: 26),
                   MlSectionHead(
                     tokens: t,
@@ -188,6 +198,7 @@ class MineLinkDashboardScreen extends StatelessWidget {
                     columns: threeUp.clamp(1, pendingRequests.length),
                     gap: 14,
                     children: pendingRequests
+                        .where((r) => !phone || r.count > 0)
                         .map((r) => _PendingCard(
                             tokens: t, req: r, onTap: () => _go(r.id)))
                         .toList(),
@@ -206,6 +217,9 @@ class MineLinkDashboardScreen extends StatelessWidget {
                   onLink: () => _go('orgs'),
                 ),
                 const SizedBox(height: 14),
+                if (phone)
+                  _RegistryPhone(tokens: t, stats: registry, onTap: _go)
+                else
                 MlGrid(
                   columns: fourUp,
                   gap: 14,
@@ -235,9 +249,13 @@ class MineLinkDashboardScreen extends StatelessWidget {
                 _QuickActions(tokens: t, onNavigate: onNavigate),
 
                 // 6 ─────────────────────────────────────────────────────────
-                const SizedBox(height: 26),
-                _RecentOrgsPanel(
-                    tokens: t, rows: recentOrgs, onNavigate: onNavigate),
+                // Not on a phone: it is the Organizations page again, one tap
+                // away under Access and in the quick actions above.
+                if (!phone) ...[
+                  const SizedBox(height: 26),
+                  _RecentOrgsPanel(
+                      tokens: t, rows: recentOrgs, onNavigate: onNavigate),
+                ],
               ],
             );
           },
@@ -485,6 +503,185 @@ String _orgSummary(MlRecentOrg r) {
     if (location.isNotEmpty && location != '—') location,
     mlCount(r.users, 'user'),
   ].join(' · ');
+}
+
+/// An org-type card as one line, for a phone: what it is, its headline
+/// figures, and a way in. The full card's sparkline and three-row foot made
+/// the three of them most of a screen on their own.
+class _OrgRowCompact extends StatelessWidget {
+  const _OrgRowCompact({required this.tokens, required this.agg, this.onTap});
+
+  final MlGlass tokens;
+  final MlOrgAggregate agg;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = tokens;
+    final tone = agg.tone.base;
+    final figures = [
+      agg.subtitle,
+      for (final m in agg.metrics.take(2)) '${m.key} ${m.value}',
+    ].join(' · ');
+    return MlHoverLift(
+      lift: 0,
+      onTap: onTap,
+      builder: (context, hovered) => Container(
+        padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+        decoration: BoxDecoration(
+          color: t.panel,
+          borderRadius: MlShape.radiusMedium,
+          border: Border.all(color: t.line2),
+        ),
+        child: Row(
+          children: [
+            MlWell(icon: agg.icon, color: tone, size: 34, iconSize: 16),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(agg.title,
+                      style: context.mlText.titleSmall.copyWith(
+                        color: t.inkHi,
+                        fontWeight: FontWeight.w700,
+                      )),
+                  const SizedBox(height: 2),
+                  Text(figures,
+                      style: context.mlText.labelSmall.copyWith(
+                        color: t.inkMid,
+                        fontWeight: FontWeight.w400,
+                      )),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, size: 20, color: t.inkLo),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The registry for a phone: figures that say something, two to a row, and
+/// every tile that reads 0 folded into one line of chips beneath them — they
+/// still open their screens. Four zero tiles were a full screen of scrolling.
+class _RegistryPhone extends StatelessWidget {
+  const _RegistryPhone(
+      {required this.tokens, required this.stats, required this.onTap});
+
+  final MlGlass tokens;
+  final List<MlRegistryStat> stats;
+  final ValueChanged<String> onTap;
+
+  static bool _isZero(MlRegistryStat s) =>
+      s.value.trim() == '0' || s.value.trim() == '0.0';
+
+  @override
+  Widget build(BuildContext context) {
+    final t = tokens;
+    final shown = stats.where((s) => !_isZero(s)).toList();
+    final zero = stats.where(_isZero).toList();
+    Widget tile(MlRegistryStat s) => MlHoverLift(
+          lift: 0,
+          onTap: () => onTap(s.id),
+          builder: (context, hovered) => Container(
+            padding: const EdgeInsets.fromLTRB(12, 11, 12, 12),
+            decoration: BoxDecoration(
+              color: t.panel,
+              borderRadius: MlShape.radiusMedium,
+              border: Border.all(color: t.line2),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Icon(s.icon, size: 15, color: s.tone.base),
+                    const SizedBox(width: 8),
+                    // Scales down rather than overflowing a half-width tile
+                    // at the largest text sizes ("▲ 9 · 24h", "79% healthy").
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: _Delta(
+                              tokens: t, label: s.delta, tone: s.deltaTone),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text.rich(
+                  TextSpan(children: [
+                    TextSpan(text: s.value),
+                    if (s.unit != null)
+                      TextSpan(
+                          text: ' ${s.unit}',
+                          style: const TextStyle(fontSize: 13)),
+                  ]),
+                  style: TextStyle(
+                    fontFamily: MlGlass.display,
+                    fontFamilyFallback: MlGlass.displayFallback,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    color: t.inkHi,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(s.label,
+                    style: context.mlText.labelSmall.copyWith(
+                      color: t.inkMid,
+                      fontWeight: FontWeight.w600,
+                    )),
+              ],
+            ),
+          ),
+        );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 10,
+      children: [
+        for (var i = 0; i < shown.length; i += 2)
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 10,
+              children: [
+                Expanded(child: tile(shown[i])),
+                Expanded(
+                  child: i + 1 < shown.length
+                      ? tile(shown[i + 1])
+                      : const SizedBox(),
+                ),
+              ],
+            ),
+          ),
+        if (zero.isNotEmpty)
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text('Nothing in:',
+                  style: context.mlText.labelSmall.copyWith(
+                    color: t.inkLo,
+                    fontWeight: FontWeight.w600,
+                  )),
+              for (final s in zero)
+                ActionChip(
+                  label: Text(s.label),
+                  onPressed: () => onTap(s.id),
+                ),
+            ],
+          ),
+      ],
+    );
+  }
 }
 
 class _NewBadge extends StatelessWidget {

@@ -60,7 +60,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: AppTheme.darkTheme,
       home: MediaQuery(
-        data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+        // The window's real size: the dashboard asks the window class (phone
+        // or not), and a MediaQuery with no size says "0px wide" — a phone,
+        // whatever the test meant.
+        data: MediaQueryData(
+            size: Size(width, 1800), textScaler: TextScaler.linear(scale)),
         child: Scaffold(body: _dashboard()),
       ),
     ));
@@ -86,9 +90,11 @@ void main() {
   });
 
   group('the responsive split is a split, not a deletion', () {
-    testWidgets('a phone shows the cards and no column headings',
+    // 760: a narrow window that is not a phone. The panel is not on a phone at
+    // all since 2026-10-24 (see below) — it is the Organizations page again.
+    testWidgets('a narrow window shows the cards and no column headings',
         (tester) async {
-      await faultsAt(tester, 412);
+      await faultsAt(tester, 760);
       // The table's own headings are gone...
       expect(find.text('COMPANY'), findsNothing);
       // ...but the card's labelled fields carry the same information, and the
@@ -115,10 +121,22 @@ void main() {
         expect(find.text(n), findsOneWidget, reason: '$n missing from table');
       }
 
-      await faultsAt(tester, 412);
+      await faultsAt(tester, 760);
       for (final n in names) {
         expect(find.text(n), findsOneWidget, reason: '$n missing from cards');
       }
+    });
+
+    testWidgets('a phone leaves the panel out and keeps the way to it',
+        (tester) async {
+      // Admin phone audit, 2026-10-24: the dashboard was ~9 screens long on a
+      // phone, and this panel is the Organizations page a second time.
+      await faultsAt(tester, 412);
+      for (final o in MlSampleData.recentOrgs) {
+        expect(find.text(o.name), findsNothing);
+      }
+      expect(find.text('Organizations'), findsWidgets,
+          reason: 'the quick action to the Organizations page is gone too');
     });
   });
 }

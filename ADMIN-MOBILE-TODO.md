@@ -387,8 +387,23 @@ Status: ☐ not started · ◐ in progress · ☑ done
     window controls, Close closes; with a 300px keyboard the panel ends at
     the keyboard); back-closes-chat 3/3; tap-target test updated. Full suite
     2,813 passed. On-device check in 7.3.
-- [ ] 5.4 Dashboard: repeats removed, one real version of each section kept,
+- [x] 5.4 Dashboard: repeats removed, one real version of each section kept,
       zero-only stat cards condensed; much shorter on a phone.
+  - On a phone: the three org-type cards are one line each (title, org
+    count and two headline figures, tap to open); Pending requests shows
+    only inboxes with work and disappears when none has any; the registry
+    shows the figures that say something two to a row, and every tile that
+    reads 0 is folded into one "Nothing in:" line of chips that still open
+    their screens; "Recently active organizations" is left off (it is the
+    Organizations page again — one tap away under Access and in Quick
+    actions). The expired-token banner and Quick actions stay.
+  - Length: the phone render is 1,960px for the whole page, down from 4,695
+    (sample data); Jean's real data (more zeros) folds further.
+  - Desktop unchanged: every desktop dashboard golden byte-identical.
+  - Tests: `dashboard_phone_test.dart` 4/4; `dashboard_responsive_test`
+    (its harness now gives the window a real size — without one every
+    width counted as a phone) 20/20 incl. 360dp at text 2.0 with no
+    overflow. Full suite 2,818 passed. Phone goldens updated and viewed.
 - [ ] 5.5 Crash reports: real count instead of a 500 cap; found out why nothing
       arrived after 17 Oct and fixed it so reporting can't silently stop again.
 

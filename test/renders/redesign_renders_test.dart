@@ -3246,7 +3246,10 @@ void main() {
       await shootConsole(
         tester,
         const SuperAdminDashboardV2Screen(),
-        const Size(412, 4695),
+        // 1960, not 4695: the phone dashboard is that much shorter since
+        // 2026-10-24 (no zero tiles, no empty inboxes, no second copy of the
+        // Organizations page). Still the whole page.
+        const Size(412, 1960),
         'screen-super-admin-dashboard-v2-phone-dark',
       );
     });
