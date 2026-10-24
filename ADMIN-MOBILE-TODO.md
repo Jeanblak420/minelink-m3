@@ -248,7 +248,18 @@ Status: ☐ not started · ◐ in progress · ☑ done
   - `drawer_labels_whole_test.dart`: the real admin menu, every group open,
     at text 1.0 / 1.15 / 1.3 / 1.5 — no label cut, no overflow; control case
     (old drawer at 1.3) does cut, so the test bites.
-- [ ] 4.3 Targets: the header scrolls away on a phone; nothing clipped.
+- [x] 4.3 Targets: the header scrolls away on a phone; nothing clipped.
+  - Cause: `TargetsPage` pinned the band above the workspace at up to half
+    the screen, with its own inner scroll — so the dials scrolled in the
+    lower half and the band's last line sat clipped at its fold.
+  - On a phone (`usesBottomNav`) the page is a `NestedScrollView`: the band
+    is the first thing that scrolls, then the workspace's own scroll views;
+    the band is never clipped. Desktop keeps the pinned band (renders
+    unchanged). Applies to all three targets screens (platform / org type /
+    company).
+  - `targets_phone_width_test.dart` new case at 360×780: drag up → the band
+    leaves the screen and "Set monthly targets" comes up; the file's 15 tests
+    and the overflow sweep green.
 - [ ] 4.4 Floating chat button (and Generate Token) never cover content or
       buttons on any screen.
 - [ ] 4.5 Wide tables become one card per row on a phone: Organizations, Margin

@@ -1,5 +1,6 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/insights_v2/minelink_screens_core.dart';
@@ -37,7 +38,20 @@ class TargetsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, box) => Column(
+        builder: (context, box) {
+          // On a phone the band scrolls away with the page instead. Pinned at
+          // up to half the screen it left the dials a small window to scroll
+          // in, and its own last line sat clipped at the fold (admin phone
+          // audit, 2026-10-24). `NestedScrollView` hands the scroll to the
+          // band first, then to the workspace's own scroll views beneath it.
+          if (box.hasBoundedHeight && MlWindowClass.of(context).usesBottomNav) {
+            return NestedScrollView(
+              headerSliverBuilder: (context, _) =>
+                  [SliverToBoxAdapter(child: band)],
+              body: body,
+            );
+          }
+          return Column(
           children: [
             ConstrainedBox(
               constraints: BoxConstraints(
@@ -48,7 +62,8 @@ class TargetsPage extends StatelessWidget {
             ),
             Expanded(child: body),
           ],
-        ),
+        );
+        },
       );
 }
 

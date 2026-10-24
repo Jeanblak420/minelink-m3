@@ -229,4 +229,47 @@ void main() {
         reason: 'the board is scrolling at 1600px, so the declared minimum has '
             'grown past what the four columns actually need.');
   });
+  // Admin phone audit, 2026-10-24: on the S25 the band stayed pinned and took
+  // nearly half the screen, so the dials scrolled in a small window under it,
+  // and the band's own last line sat clipped at the fold. On a phone the band
+  // now scrolls away with the page.
+  testWidgets('on a phone the band scrolls away and the dials take the screen',
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 780);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        ...companyScopeOverrides(),
+        ...consoleCaptureOverrides(),
+        ...portalCaptureOverrides(),
+      ],
+      child: MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: const Scaffold(
+          body: TargetsOrgTypeScreen(orgType: TargetOrgType.transporter),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 900));
+
+    // Matched on the words: the title may join them with a non-breaking space.
+    Finder textLike(String a, String b) => find.byWidgetPredicate((w) {
+          final t = w is Text ? (w.data ?? w.textSpan?.toPlainText()) : null;
+          return t != null && t.contains(a) && t.contains(b);
+        });
+    final title = textLike('Transporters', 'targets');
+    expect(tester.getTopLeft(title.first).dy, greaterThanOrEqualTo(0));
+    await tester.drag(find.byType(NestedScrollView), const Offset(0, -700));
+    await tester.pump(const Duration(milliseconds: 600));
+    // Scrolled off: above the top edge, or so far that it left the tree.
+    expect(
+        title.evaluate().isEmpty || tester.getTopLeft(title.first).dy < 0, isTrue,
+        reason: 'the band is still pinned on screen');
+    final dials = textLike('Set monthly', 'targets');
+    expect(dials, findsWidgets);
+    expect(tester.getTopLeft(dials.first).dy,
+        lessThan(780), reason: 'the dials did not come up to take its place');
+  });
 }
