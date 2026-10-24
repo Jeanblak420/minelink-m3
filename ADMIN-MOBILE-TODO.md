@@ -566,3 +566,22 @@ Status: ☐ not started · ◐ in progress · ☑ done
     `\\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk`, both SHA-256 equal
     to the build (511 entries, config present). The 2026-10-23 APK removed;
     the 2026-10-22 Windows and source zips left as they were.
+
+## 8. Jean's go-ahead, 2026-10-24 ("yes go ahead" — all four, plus the address search)
+Same rules: one at a time, fully, ticked with evidence; ONE phone walk at the
+end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
+- [ ] 8.1 Platform settings off the desktop menu too (route kept so old links
+      still open); add a "Navigation setup" guide for custom mine maps,
+      written fresh for this app, the old `ML` guide read as reference only.
+- [ ] 8.2 Desktop menu fixes: the rail lights the right item on company pages
+      and the other pages that fell back to Dashboard; Platform users under
+      Tokens & Seats on desktop too.
+- [ ] 8.3 Company portals on a phone: chat in the top bar (no floating disc),
+      full screen like the admin chat.
+- [ ] 8.4 Company portals on a phone: wide tables as cards.
+- [ ] 8.5 Crash-report check-in: new table + a daily check-in per device, shown
+      on the Crash reports page (which devices have gone quiet). Live DB.
+- [ ] 8.6 Extras address search timeout: diagnosed and fixed on the extras
+      project (`qbydiuplqhmkaxarnuza`, via the Management API only).
+- [ ] 8.7 Analyze clean, full suite green, desktop goldens accounted for,
+      DB healthy + ledger matches, release APK walked on the S25, pushed, NAS.
