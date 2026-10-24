@@ -18,7 +18,6 @@ import 'package:flutter_application_1/features/chat/providers/messaging_provider
 import 'package:flutter_application_1/features/super_admin/widgets/token_generator_dialog.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/token_access_details.dart';
 import 'package:flutter_application_1/features/super_admin/widgets/edit_login_dialog.dart';
-import 'package:flutter_application_1/features/auth/utils/whatsapp_identity.dart';
 import 'package:flutter_application_1/features/super_admin/utils/audit_log_csv_exporter.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
@@ -535,19 +534,13 @@ class _OverviewTab extends ConsumerWidget {
               MlSectionTitle(
                 'Account owner (login)',
                 margin: const EdgeInsets.only(bottom: 8),
-                link: org['user_id'] is String ? 'Reset password' : null,
+                link: org['user_id'] is String ? 'Login & password' : null,
                 onLink: org['user_id'] is String
                     ? () => showAdminEditLogin(
                           context,
                           ref,
                           userId: org['user_id'] as String,
                           name: _ownerName(org) == '—' ? '' : _ownerName(org),
-                          currentEmail:
-                              _ownerEmail(org) == '—' ? '' : _ownerEmail(org),
-                          currentPhone: whatsapp?.trim() ?? '',
-                          whatsappOnly: _ownerEmail(org)
-                              .toLowerCase()
-                              .endsWith('@$kWhatsappAuthEmailDomain'),
                         )
                     : null,
               ),
@@ -888,7 +881,7 @@ class _UsersTab extends ConsumerWidget {
                                   PopupMenuItem(
                                     value: 'edit_login',
                                     enabled: userId != null,
-                                    child: const Row(children: [Icon(Icons.key_rounded, size: 18), SizedBox(width: 8), Text('Change Password / Email / Phone')]),
+                                    child: const Row(children: [Icon(Icons.key_rounded, size: 18), SizedBox(width: 8), Text('Login & password')]),
                                   ),
                                 ],
                               ),
@@ -969,15 +962,11 @@ class _UsersTab extends ConsumerWidget {
           if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('This employee has no login account')));
           return;
         }
-        final currentEmail = _profileEmail(user) ?? '';
         await showAdminEditLogin(
           context,
           ref,
           userId: userId,
           name: name,
-          currentEmail: currentEmail,
-          currentPhone: (user['whatsapp_number'] as String?)?.trim() ?? '',
-          whatsappOnly: currentEmail.toLowerCase().endsWith('@$kWhatsappAuthEmailDomain'),
           onSaved: () =>
               ref.invalidateIfMounted(companyUsersGroupedProvider(companyId)),
         );

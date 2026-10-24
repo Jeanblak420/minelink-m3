@@ -77,17 +77,24 @@ class LoginScreen extends ConsumerWidget {
     String password,
   ) async {
     final id = identity.trim();
-    // Admin-created Mine/Supplier users have no mailbox — they are identified
-    // by WhatsApp number and registered against a deterministic synthetic
-    // email. Same derivation as at creation, so the credential matches.
-    final email = looksLikeEmail(id) ? id : whatsappAuthEmail(id);
-    if (email.isEmpty) {
+    final byEmail = looksLikeEmail(id);
+    // A number signs in through the account's WhatsApp number (phone), with
+    // the older placeholder email as the fallback — see
+    // AuthService.signInWithWhatsappNumber.
+    if (!byEmail && whatsappAuthEmail(id).isEmpty) {
       return 'Enter your email address or WhatsApp number.';
     }
 
     final notifier = ref.read(authStateProvider.notifier);
     notifier.clearError();
-    await notifier.signIn(email: email, password: password);
+    if (byEmail) {
+      await notifier.signIn(email: id, password: password);
+    } else {
+      await notifier.signInWithWhatsappNumber(
+        whatsappNumber: id,
+        password: password,
+      );
+    }
 
     // Succeeding is exactly what unmounts this screen: the sign-in flips
     // `onAuthStateChange`, the router redirects off `/login`, and `ref` then

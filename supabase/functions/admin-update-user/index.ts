@@ -3,24 +3,37 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
 
 // Lets a super global admin change ANY user's sign-in credentials — password,
-// email and/or phone — across every company on the platform.
+// email and/or WhatsApp number — and which of the two is their primary way in,
+// across every company on the platform.
 //
 // Authored from the MineLink-M3 project on 2026-10-17 at Jean's explicit
 // instruction, as a one-off exception to the M3 "never change the database from
-// here" rule. It is additive: it creates no table, alters no function, and the
-// shipping app does not call it.
+// here" rule. v4 (2026-10-24, Jean's request in ADMIN-MOBILE-TODO.md 2.2) adds
+// login methods: add / change / remove an email or a WhatsApp number, and set
+// one of them primary. The shipping app does not call this function.
 //
 // Security boundary is HERE, not in the Dart UI: the caller's JWT is verified,
 // then `public.is_platform_admin()` is evaluated AS THE CALLER. Only then does
 // the service-role client touch `auth.users`. Every change is written to
 // `public.audit_logs` — the password itself is never logged, only the fact
 // that it changed.
+//
+// HOW AN ACCOUNT SIGNS IN (see migration 20261024110000_login_methods.sql)
+//   * email + password            when auth.users.email is a real address;
+//   * WhatsApp number + password  when auth.users.phone is set (phone password
+//     grant), or a WhatsApp code; legacy accounts also through the placeholder
+//     email `wa-<digits>@wa.mineralguide.com`.
+// An account with no real email keeps a placeholder (auth needs an email).
+// THE ONE RULE: a change that would leave no way to sign in is refused.
 
 type UpdateUserPayload = {
   target_user_id?: string;
   password?: string;
   email?: string;
   phone?: string;
+  remove_email?: boolean;
+  remove_phone?: boolean;
+  primary?: "email" | "whatsapp";
 };
 
 const supabaseUrl =
@@ -42,9 +55,25 @@ function getErrorMessage(error: unknown): string {
   return "Unknown error";
 }
 
+/** GoTrue's words for the two collisions an admin can actually cause. */
+function friendlyAuthError(error: unknown): string {
+  const msg = getErrorMessage(error);
+  if (/email.*(already|registered|exists)/i.test(msg)) {
+    return "Another account already uses that email address.";
+  }
+  if (/phone.*(already|registered|exists)/i.test(msg)) {
+    return "Another account already uses that WhatsApp number.";
+  }
+  return msg;
+}
+
 // Must stay in sync with company-user-admin/index.ts and
 // lib/features/auth/utils/whatsapp_identity.dart.
 const WHATSAPP_AUTH_EMAIL_DOMAIN = "wa.mineralguide.com";
+
+function isPlaceholderEmail(email: string): boolean {
+  return email.toLowerCase().endsWith(`@${WHATSAPP_AUTH_EMAIL_DOMAIN}`);
+}
 
 function whatsappAuthEmail(phone: string): string {
   const digits = phone.replace(/\D/g, "");
@@ -57,6 +86,12 @@ function toE164(phone: string): string {
   if (!digits) return "";
   if (digits.startsWith("0")) digits = `27${digits.slice(1)}`;
   return `+${digits}`;
+}
+
+/** `+27821234567` → `0821234567`, the shape people type and creation uses. */
+function toLocal(e164: string): string {
+  const digits = e164.replace(/\D/g, "");
+  return digits.startsWith("27") ? `0${digits.slice(2)}` : digits;
 }
 
 const UUID_RE =
@@ -123,9 +158,27 @@ Deno.serve(async (req: Request) => {
     const password = payload.password ?? "";
     const email = payload.email?.trim().toLowerCase() ?? "";
     const phoneRaw = payload.phone?.trim() ?? "";
+    const removeEmail = payload.remove_email === true;
+    const removePhone = payload.remove_phone === true;
+    const primaryAsked = payload.primary ?? null;
 
-    if (!password && !email && !phoneRaw) {
+    if (
+      !password && !email && !phoneRaw && !removeEmail && !removePhone &&
+      !primaryAsked
+    ) {
       return jsonResponse({ error: "Nothing to change" }, 400);
+    }
+    if (primaryAsked && primaryAsked !== "email" && primaryAsked !== "whatsapp") {
+      return jsonResponse({ error: "Primary must be email or whatsapp" }, 400);
+    }
+    if (email && removeEmail) {
+      return jsonResponse({ error: "Set an email or remove it, not both" }, 400);
+    }
+    if (phoneRaw && removePhone) {
+      return jsonResponse(
+        { error: "Set a WhatsApp number or remove it, not both" },
+        400,
+      );
     }
     if (password && password.length < 6) {
       return jsonResponse(
@@ -135,6 +188,12 @@ Deno.serve(async (req: Request) => {
     }
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return jsonResponse({ error: "That email address is not valid" }, 400);
+    }
+    if (email && isPlaceholderEmail(email)) {
+      return jsonResponse(
+        { error: "That is an internal WhatsApp login address, not an email" },
+        400,
+      );
     }
     const phone = phoneRaw ? toE164(phoneRaw) : "";
     if (phoneRaw && phone.replace(/\D/g, "").length < 9) {
@@ -147,9 +206,66 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "User not found" }, 404);
     }
     const target = targetData.user;
-    const oldEmail = target.email ?? "";
+    const oldEmail = (target.email ?? "").toLowerCase();
+    const oldPlaceholder = isPlaceholderEmail(oldEmail);
+    const oldRealEmail = oldPlaceholder ? "" : oldEmail;
     const oldPhone = target.phone ? `+${target.phone.replace(/^\+/, "")}` : "";
 
+    // ---- the state the account will be in -------------------------------
+    const finalRealEmail = removeEmail ? "" : (email || oldRealEmail);
+    let finalPhone = removePhone ? "" : (phone || oldPhone);
+    // A legacy WhatsApp account whose number lives only in its placeholder
+    // email: give it the number as a phone before the placeholder can go, so
+    // number sign-in survives an email being added.
+    if (!finalPhone && !removePhone && oldPlaceholder && finalRealEmail) {
+      const digits = oldEmail.replace(/^wa-/, "").split("@")[0];
+      finalPhone = toE164(digits);
+    }
+
+    if (!finalRealEmail && !finalPhone) {
+      return jsonResponse({
+        error: "A user needs at least one way to sign in. Keep an email " +
+          "address or a WhatsApp number.",
+      }, 400);
+    }
+
+    // auth.users.email: the real address, or a placeholder from the number.
+    let finalAuthEmail = finalRealEmail;
+    if (!finalAuthEmail) {
+      // Keep the existing placeholder unless the number really moved, so a
+      // re-typed number in another shape cannot rewrite the login (2026-10-19).
+      finalAuthEmail = oldPlaceholder && finalPhone === oldPhone
+        ? oldEmail
+        : whatsappAuthEmail(phoneRaw || toLocal(finalPhone));
+    }
+
+    // Primary: what was asked, else what was chosen before, else inferred.
+    const { data: targetProfile } = await admin
+      .from("profiles")
+      .select("display_name, login_primary")
+      .eq("id", targetId)
+      .maybeSingle();
+    const oldPrimary = (targetProfile?.login_primary as string | null) ?? null;
+    const available = (m: string) =>
+      m === "email" ? finalRealEmail !== "" : finalPhone !== "";
+    if (primaryAsked && !available(primaryAsked)) {
+      return jsonResponse({
+        error: primaryAsked === "email"
+          ? "Email can't be the primary sign-in: this user has no email address."
+          : "WhatsApp can't be the primary sign-in: this user has no WhatsApp number.",
+      }, 400);
+    }
+    let finalPrimary = primaryAsked ?? oldPrimary;
+    if (!finalPrimary || !available(finalPrimary)) {
+      finalPrimary = finalRealEmail ? "email" : "whatsapp";
+    }
+    // If both exist and nothing was ever chosen, keep reading it the way the
+    // account was set up (placeholder → WhatsApp first).
+    if (!primaryAsked && !oldPrimary && finalRealEmail && finalPhone) {
+      finalPrimary = oldPlaceholder ? "whatsapp" : "email";
+    }
+
+    // ---- what changes ------------------------------------------------------
     const attrs: Record<string, unknown> = {};
     const changed: string[] = [];
 
@@ -157,59 +273,95 @@ Deno.serve(async (req: Request) => {
       attrs.password = password;
       changed.push("password");
     }
-
-    // Compared in E.164, so `0821234567` and `+27821234567` are the same number.
-    const phoneChanged = phone !== "" && phone !== oldPhone;
-
-    let newEmail = email;
-    // A WhatsApp-only account signs in with a synthetic email derived from
-    // its number. Moving the number without moving that email would lock the
-    // user out of WhatsApp login, so follow it unless an email was given.
-    //
-    // Derived from the number AS TYPED (`phoneRaw`), not its E.164 form:
-    // creation (company-user-admin) and the login form both take the typed
-    // digits, so `0821234567` must map to `wa-0821234567@…`. Using the E.164
-    // digits produced `wa-27821234567@…`, which nothing would ever look up.
-    //
-    // Only when the number really changed. Re-typing the SAME number in another
-    // shape (`+27…` for `0…`) used to rewrite the login email anyway — found
-    // 2026-10-19 when exactly that locked a test user out of number sign-in.
-    if (
-      !newEmail && phoneChanged &&
-      oldEmail.endsWith(`@${WHATSAPP_AUTH_EMAIL_DOMAIN}`)
-    ) {
-      newEmail = whatsappAuthEmail(phoneRaw);
-    }
-    if (newEmail && newEmail !== oldEmail.toLowerCase()) {
-      attrs.email = newEmail;
+    if (finalAuthEmail !== oldEmail) {
+      attrs.email = finalAuthEmail;
       attrs.email_confirm = true;
-      changed.push("email");
+      changed.push(
+        removeEmail ? "removed email" : (finalRealEmail ? "email" : "login address"),
+      );
+    }
+    // GoTrue's admin API IGNORES `phone: ""` (measured 2026-10-24: 200, phone
+    // still set, number sign-in still working), so a removal is done by
+    // `admin_clear_user_phone` AFTER the email update below — that function
+    // refuses to run unless the account already has a real email.
+    const clearPhone = finalPhone === "" && oldPhone !== "";
+    if (finalPhone !== oldPhone) {
+      if (finalPhone) {
+        attrs.phone = finalPhone;
+        attrs.phone_confirm = true;
+      }
+      changed.push(finalPhone ? "WhatsApp number" : "removed WhatsApp number");
+    }
+    // The primary is STORED whenever it was asked for or the methods moved,
+    // so the stored value and admin_login_methods' reading of a NULL can never
+    // disagree. (They did once, in this function's own end-to-end test: a
+    // WhatsApp account given an email answered "primary: whatsapp" here and
+    // "email" from the lookup, because the inferred value was never saved.)
+    const methodsChanged = attrs.email !== undefined ||
+      attrs.phone !== undefined || clearPhone;
+    const persistPrimary = finalPrimary !== oldPrimary &&
+      (primaryAsked !== null || methodsChanged);
+    // Only worth a line in the audit when someone chose it, or it moved from
+    // a value someone had chosen.
+    const primaryChanged = persistPrimary &&
+      (primaryAsked !== null || oldPrimary !== null);
+
+    if (changed.length === 0 && !persistPrimary) {
+      return jsonResponse({
+        success: true,
+        changed: [],
+        email: finalRealEmail || null,
+        phone: finalPhone || null,
+        primary: finalPrimary,
+      });
     }
 
-    if (phoneChanged) {
-      attrs.phone = phone;
-      attrs.phone_confirm = true;
-      changed.push("phone");
+    if (Object.keys(attrs).length > 0) {
+      const { error: updateError } = await admin.auth.admin.updateUserById(
+        targetId,
+        attrs,
+      );
+      if (updateError) {
+        return jsonResponse({ error: friendlyAuthError(updateError) }, 400);
+      }
     }
 
-    if (changed.length === 0) {
-      return jsonResponse({ success: true, changed: [] });
+    if (clearPhone) {
+      const { error: clearError } = await admin.rpc("admin_clear_user_phone", {
+        p_user_id: targetId,
+      });
+      if (clearError) {
+        return jsonResponse({
+          error: `The WhatsApp number could not be removed: ${
+            getErrorMessage(clearError)
+          }`,
+        }, 400);
+      }
     }
 
-    const { error: updateError } = await admin.auth.admin.updateUserById(
-      targetId,
-      attrs,
-    );
-    if (updateError) {
-      return jsonResponse({ error: getErrorMessage(updateError) }, 400);
+    if (persistPrimary) {
+      const { error: primaryError } = await admin
+        .from("profiles")
+        .update({ login_primary: finalPrimary })
+        .eq("id", targetId);
+      if (primaryError) {
+        return jsonResponse({
+          error: `Saved, but the primary sign-in could not be set: ${
+            getErrorMessage(primaryError)
+          }`,
+        }, 500);
+      }
+      if (primaryChanged) changed.push(`primary: ${finalPrimary}`);
     }
 
     // profiles.email follows auth.users via handle_auth_user_updated. The
-    // number shown on the employee card lives on employees, so keep it in step.
-    if (changed.includes("phone")) {
+    // number shown on the employee card lives on employees, so keep it in step
+    // when a number is set (removing WhatsApp sign-in leaves the contact number
+    // on the card alone — it is still how to reach them).
+    if (finalPhone && finalPhone !== oldPhone) {
       const { error: empError } = await admin
         .from("employees")
-        .update({ whatsapp_number: phoneRaw })
+        .update({ whatsapp_number: phoneRaw || toLocal(finalPhone) })
         .eq("user_id", targetId);
       if (empError) console.warn("employees phone sync failed", empError);
     }
@@ -220,11 +372,6 @@ Deno.serve(async (req: Request) => {
       .select("platform_role, display_name")
       .eq("id", caller.id)
       .maybeSingle();
-    const { data: targetProfile } = await admin
-      .from("profiles")
-      .select("display_name")
-      .eq("id", targetId)
-      .maybeSingle();
     const { data: targetEmployee } = await admin
       .from("employees")
       .select("company_id")
@@ -232,15 +379,20 @@ Deno.serve(async (req: Request) => {
       .limit(1)
       .maybeSingle();
 
+    const name = targetProfile?.display_name ?? oldEmail;
     const before: Record<string, unknown> = {};
     const after: Record<string, unknown> = { changed };
-    if (changed.includes("email")) {
+    if (attrs.email !== undefined) {
       before.email = oldEmail;
       after.email = attrs.email;
     }
-    if (changed.includes("phone")) {
-      before.phone = oldPhone;
-      after.phone = phone;
+    if (attrs.phone !== undefined) {
+      before.phone = oldPhone || null;
+      after.phone = finalPhone || null;
+    }
+    if (primaryChanged) {
+      before.primary = oldPrimary;
+      after.primary = finalPrimary;
     }
 
     const { error: auditError } = await admin.from("audit_logs").insert({
@@ -250,11 +402,9 @@ Deno.serve(async (req: Request) => {
       action_type: "USER_CREDENTIALS_UPDATED",
       target_type: "user",
       target_id: targetId,
-      target_name: targetProfile?.display_name ?? oldEmail,
+      target_name: name,
       organization_id: targetEmployee?.company_id ?? null,
-      description: `Super admin changed ${changed.join(", ")} for ${
-        targetProfile?.display_name ?? oldEmail
-      }`,
+      description: `Super admin changed ${changed.join(", ")} for ${name}`,
       before_data: Object.keys(before).length ? before : null,
       after_data: after,
     });
@@ -263,8 +413,9 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({
       success: true,
       changed,
-      email: (attrs.email as string | undefined) ?? oldEmail,
-      phone: (attrs.phone as string | undefined) ?? oldPhone,
+      email: finalRealEmail || null,
+      phone: finalPhone || null,
+      primary: finalPrimary,
     });
   } catch (error) {
     console.error("admin-update-user failed", error);

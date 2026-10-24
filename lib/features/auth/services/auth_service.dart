@@ -10,7 +10,11 @@ import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/auth/utils/whatsapp_identity.dart';
 
 class AuthService {
-  final _supabase = SupabaseConfig.client;
+  /// [client] is for tests; the app always uses [SupabaseConfig.client].
+  AuthService({SupabaseClient? client})
+      : _supabase = client ?? SupabaseConfig.client;
+
+  final SupabaseClient _supabase;
   final _logger = LoggerFactory.getLogger('AuthService');
 
   String _buildDisplayName(UserType userType, Map<String, dynamic> profile) {
@@ -138,6 +142,50 @@ class AuthService {
       // the one thing we know is that we do not know — and telling somebody
       // their password is wrong when it may be right sends them off resetting a
       // credential that works.
+      throw Exception(
+        'Signing in is taking longer than expected. Check your connection and '
+        'try again — your password has not been rejected.',
+      );
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Signs in with a WhatsApp number and password.
+  ///
+  /// The number names the account through its phone (Supabase's password
+  /// grant takes `phone` as well as `email`), which works for EVERY account
+  /// whose WhatsApp sign-in is set up — including one whose email is a real
+  /// address, which number sign-in used to miss entirely (2026-10-24, the
+  /// login-methods work). Only when that is refused does it fall back to the
+  /// placeholder `wa-<digits>@wa.mineralguide.com`, the older way an account
+  /// created from a number was named. A wrong password is therefore tried
+  /// twice; both answers are the same "invalid credentials".
+  Future<AuthResponse> signInWithWhatsappNumber({
+    required String whatsappNumber,
+    required String password,
+  }) async {
+    final phone = whatsappToE164(whatsappNumber);
+    final placeholder = whatsappAuthEmail(whatsappNumber);
+    if (phone.isEmpty || placeholder.isEmpty) {
+      throw Exception('Enter your email address or WhatsApp number.');
+    }
+    try {
+      try {
+        return await _supabase.auth
+            .signInWithPassword(phone: phone, password: password)
+            .timeout(authTimeout);
+      } on AuthException catch (e) {
+        // Anything other than "those credentials don't match" (rate limit,
+        // server fault) is the real answer; a second attempt would hide it.
+        final refused = e.code == 'invalid_credentials' ||
+            e.message.toLowerCase().contains('invalid login credentials');
+        if (!refused) rethrow;
+        return await _supabase.auth
+            .signInWithPassword(email: placeholder, password: password)
+            .timeout(authTimeout);
+      }
+    } on TimeoutException {
       throw Exception(
         'Signing in is taking longer than expected. Check your connection and '
         'try again — your password has not been rejected.',

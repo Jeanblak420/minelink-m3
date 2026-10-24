@@ -8,3 +8,4 @@ export 'platform_admin_settings.dart';
 export 'business_pair.dart';
 export 'crash_report_row.dart';
 export 'account_deactivation_row.dart';
+export 'login_methods.dart';

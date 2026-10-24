@@ -221,17 +221,36 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> signIn({required String email, required String password}) async {
+  Future<void> signIn({required String email, required String password}) =>
+      _signInWith(
+        'email $email',
+        () => _authService.signIn(email: email, password: password),
+      );
+
+  /// Number + password: see [AuthService.signInWithWhatsappNumber].
+  Future<void> signInWithWhatsappNumber({
+    required String whatsappNumber,
+    required String password,
+  }) =>
+      _signInWith(
+        'WhatsApp number',
+        () => _authService.signInWithWhatsappNumber(
+          whatsappNumber: whatsappNumber,
+          password: password,
+        ),
+      );
+
+  Future<void> _signInWith(
+    String label,
+    Future<supabase.AuthResponse> Function() attempt,
+  ) async {
     try {
       await CacheService.clearAllCache();
 
       state = state.copyWith(isLoading: true, error: null);
-      debugPrint('AuthStateNotifier: Starting sign in for email: $email');
+      debugPrint('AuthStateNotifier: Starting sign in with $label');
 
-      final response = await _authService.signIn(
-        email: email,
-        password: password,
-      );
+      final response = await attempt();
 
       if (response.user == null) {
         throw Exception('Failed to sign in: No user returned');

@@ -992,12 +992,18 @@ class SuperAdminRepository {
     String? password,
     String? email,
     String? phone,
+    bool removeEmail = false,
+    bool removePhone = false,
+    String? primary,
   }) async {
     final body = <String, dynamic>{
       'target_user_id': userId,
       if (password != null && password.isNotEmpty) 'password': password,
       if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
       if (phone != null && phone.trim().isNotEmpty) 'phone': phone.trim(),
+      if (removeEmail) 'remove_email': true,
+      if (removePhone) 'remove_phone': true,
+      if (primary != null) 'primary': primary,
     };
 
     dynamic data;
@@ -1017,6 +1023,14 @@ class SuperAdminRepository {
     if (map['error'] != null) throw Exception(map['error'].toString());
     if (map['success'] != true) throw Exception('Could not update login details');
     return (map['changed'] as List? ?? const []).map((e) => e.toString()).toList();
+  }
+
+  /// How [userId] can sign in — email, WhatsApp number, which is primary —
+  /// read from auth.users by `admin_login_methods` (platform admin only).
+  Future<LoginMethods> getLoginMethods(String userId) async {
+    final res = await _client.rpc('admin_login_methods', params: {'p_user_id': userId});
+    if (res is! Map) throw Exception('Could not read login details');
+    return LoginMethods.fromJson(Map<String, dynamic>.from(res));
   }
 
   // ============ Org insights (monthly, platform admin reads) ============
