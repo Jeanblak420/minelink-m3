@@ -163,7 +163,18 @@ Status: ☐ not started · ◐ in progress · ☑ done
     "last 24h" claim in the admin panel sits over older data (searched: the
     remaining ones are real 24 h counts — new companies/users/requests).
   - `screen-org-insights-desktop-dark` golden: that subtitle line only.
-- [ ] 3.4 Zero counts show no badge; "NEW" only shows when something is new.
+- [x] 3.4 Zero counts show no badge; "NEW" only shows when something is new.
+  - Cause: the dashboard's Pending-requests section always drew its NEW pill
+    and "N open", and every request card its orange count badge — at 0 too.
+  - Now: no badge on a card with 0 ("None waiting · Open →"); the NEW pill
+    and "N open" only when at least one request is open, else "Nothing
+    waiting". Cards say "N waiting", not "N new": the count is what is open,
+    and nothing on that screen knows when a request arrived. The cards stay
+    (they are the way into each inbox).
+  - Checked the rest: nav rail / bottom bar / More badges already hide at 0
+    (`count > 0` in `ml_app_shell.dart` and `ml_nav_rail.dart`).
+  - `pending_requests_zero_test.dart` 2/2 (all-empty; one inbox with work).
+    Seven dashboard goldens changed by "new" → "waiting" only (compared).
 - [ ] 3.5 Notifications for a request clear themselves once it is linked; the
       stale 18 Sep one is cleared.
 - [ ] 3.6 Wording: "1 organization", "1 user", no broken "- — -" separators,

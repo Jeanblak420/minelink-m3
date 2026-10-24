@@ -107,6 +107,8 @@ class MineLinkDashboardScreen extends StatelessWidget {
     // "Last 24h · +2 companies, +14 users" — but only the parts that are real.
     // Nothing new in a quiet 24 hours is a fact worth stating plainly, so the
     // line still appears; it just says so instead of naming invented figures.
+    final openRequests =
+        pendingRequests.fold<int>(0, (a, r) => a + r.count);
     final registryMeta = (newCompanies24h == null && newUsers24h == null)
         ? null
         : () {
@@ -166,13 +168,17 @@ class MineLinkDashboardScreen extends StatelessWidget {
                     title: 'Pending requests',
                     subtitle: 'Requests waiting on your approval — oldest '
                         'first, ordered by criticality.',
-                    badge: _NewBadge(tokens: t),
+                    // The pill and the count only when something is waiting.
+                    // With every inbox empty this read "NEW · 0 open" over
+                    // three orange "0" badges (admin phone audit, 2026-10-24).
+                    badge: openRequests > 0 ? _NewBadge(tokens: t) : null,
                     meta:
                         // '· 2 aging > 24h' used to follow this. MlPendingRequest
                         // carries no timestamp, so nothing on this screen could
                         // ever have known it; the count is real, the age was not.
-                        '${pendingRequests.fold<int>(0, (a, r) => a + r.count)}'
-                        ' open',
+                        openRequests > 0
+                            ? '$openRequests open'
+                            : 'Nothing waiting',
                     link: 'All requests',
                     onLink: () => _go('requests'),
                   ),
@@ -397,7 +403,10 @@ class _PendingCard extends StatelessWidget {
               clipBehavior: Clip.none,
               children: [
                 MlWell(icon: req.icon, color: tone, size: 42, iconSize: 19),
-                Positioned(
+                // A count badge only for a count — an orange "0" reads as
+                // something to deal with.
+                if (req.count > 0)
+                  Positioned(
                   top: -6,
                   right: -6,
                   child: Container(
@@ -442,7 +451,12 @@ class _PendingCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       )),
                   const SizedBox(height: 8),
-                  Text('${req.count} new · Review →',
+                  // "waiting", not "new": the count is what is open, and
+                  // nothing here knows when any of it arrived.
+                  Text(
+                      req.count > 0
+                          ? '${req.count} waiting · Review →'
+                          : 'None waiting · Open →',
                       style: context.mlText.labelSmall.copyWith(
                         color: t.accent2,
                       )),
