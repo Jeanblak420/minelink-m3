@@ -861,6 +861,36 @@ Throwaway users per role, everything they touch deleted after (9.3 method).
 - [ ] 10.2 Every portal role walked on the emulator at phone width (mine:
       supervisor, load controller, security; transporter: driver; buyer;
       and the owner/company account); every fault found fixed, with a test.
+  - Emulator matched to Jean's S25 Ultra first (his request): new AVD
+    `minelink_s25` — Android 16 (API 36, downloaded), 720x1560 @ 280 dpi
+    (411x891 dp like the S25), text 1.3, 3-button nav, en-ZA, dark mode;
+    verified by reading each setting back. Old AVD untouched.
+  - Six throwaway role users (AB mine security / load controller /
+    supervisor; AB trans driver / management; AB buyer management); walker
+    script visits every menu page per role (menus printed from
+    `portalNavTree`), flags error text, screenshots + contact sheet.
+  - Walked: Security 4/4, Load Controller 4/4, Supervisor 7/7, Driver 3/3,
+    transporter Management 23/23 pages — no error text anywhere.
+  - FIXED (each with a test, pushed):
+    - Stockpile card "5,000 / 5000 t": every figure grouped
+      (`stockpile_card_figures_test`).
+    - Driver hero cut "Your next load will appear he…" at 1.3; no-truck
+      state showed a bare dash / an empty plate badge
+      (`driver_hero_route_whole_test`, fails before at 1.3).
+    - SECURITY: Account & security named the PREVIOUS user after a
+      sign-out/sign-in on the same device ("For role.walk.sec…" while signed
+      in as transporter management), and the change-password check would
+      have used that account. `accountEmailProvider` now follows
+      authStateProvider (`account_email_follows_signin_test`).
+    - Same class in chat: delivery receipts never started for a user who
+      signed in after a fresh install; chat role and typing kept the
+      previous user. New `sessionUserIdProvider`; a scan test fails on any
+      app-lifetime provider in chat/auth/profile reading currentUser
+      (scanner itself tested on the leaked shapes).
+  - For Jean (not changed): "Incidents & gate checks" / "Weighbridge
+    records" open a page titled "Operations Hub"; snake_case captions
+    (`all_vehicles`, `net_mass · last_24h`) are hand-written design-style
+    captions, not leaks; the driver's chat disc still floats over content.
 - [ ] 10.3 The same roles at tablet/desktop width (the rail layout) on the
       emulator rotated / sized wide; faults fixed.
 - [ ] 10.4 Analyze, full suite, renders accounted; DB healthy + ledgers;
