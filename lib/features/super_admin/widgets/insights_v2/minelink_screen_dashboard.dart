@@ -1339,32 +1339,45 @@ class _RecentOrgsPanelState extends State<_RecentOrgsPanel> {
             // ---- token expiry: the cell that could not fit as a column ----
             label('Token expiry'),
             const SizedBox(height: 5),
-            Row(
+            // A Wrap, not a Row of two Flexibles: those split the line in
+            // half, so on a 360dp phone the countdown read "328d 23 : 53…"
+            // and the date was cut too (admin phone audit, 2026-10-24). The
+            // date drops to the next line instead when both do not fit.
+            Wrap(
+              spacing: 9,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration:
+                          BoxDecoration(color: dot, shape: BoxShape.circle),
+                    ),
+                    const SizedBox(width: 9),
+                    // Flexible inside a min-size Row: it takes only what it
+                    // needs, and at the largest text sizes wraps rather than
+                    // overflowing.
+                    Flexible(
+                      child: Text(r.expiry,
+                          style: context.mlText.code(
+                            color: r.expiryState == MlExpiry.expired
+                                ? t.bad
+                                : t.inkHi,
+                            size: 12,
+                            weight: FontWeight.w600,
+                          )),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 9),
-                Flexible(
-                  child: Text(r.expiry,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.mlText.code(
-                        color: r.expiryState == MlExpiry.expired ? t.bad : t.inkHi,
-                        size: 12,
-                        weight: FontWeight.w600,
-                      )),
-                ),
-                const SizedBox(width: 9),
-                Flexible(
-                  child: Text(r.date,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.mlText.labelSmall.copyWith(
-                        color: t.inkLo,
-                        fontWeight: FontWeight.w400,
-                      )),
-                ),
+                Text(r.date,
+                    style: context.mlText.labelSmall.copyWith(
+                      color: t.inkLo,
+                      fontWeight: FontWeight.w400,
+                    )),
               ],
             ),
           ],

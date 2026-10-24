@@ -2343,6 +2343,27 @@ void main() {
       );
     });
 
+    // Phone, at the S25 Ultra's 360dp (admin phone audit, 2026-10-24): the
+    // Buyers / Mines board broke
+    // column headers mid-word ("WAYBIL / LS DO…", "RELIABI / LITY") and cut
+    // labels ("PRIORITY AL…", "AVG TURNA…"). It had never been rendered
+    // below desktop width, so nothing showed it.
+    testWidgets('org insights — mines, phone dark', (tester) async {
+      await shoot(
+        tester,
+        console(
+          brightness: Brightness.dark,
+          body: const SuperAdminOrgInsightsScreen(orgType: 'mineSupplier'),
+          extraOverrides: [
+            ...consoleCaptureOverrides(),
+            ...portalCaptureOverrides(),
+          ],
+        ),
+        const Size(360, 4400),
+        'screen-org-insights-phone-dark',
+      );
+    });
+
     // The TRANSPORTER org type does not get the screen above.
     // `/super-admin/insights/transporter` routes to the v2 overview instead
     // (the 2026-08-09 "Replacing old views and screens" drop), so the picture
@@ -3101,6 +3122,16 @@ void main() {
         const RouteMarketplaceScreen(),
         const Size(1600, 1300),
         'screen-route-marketplace-desktop-dark',
+      );
+    });
+
+    // Phone (admin phone audit, 2026-10-24): "ROUT / E ID", "PROD / UCT".
+    testWidgets('route marketplace — phone dark', (tester) async {
+      await shootConsole(
+        tester,
+        const RouteMarketplaceScreen(),
+        const Size(360, 1800),
+        'screen-route-marketplace-phone-dark',
       );
     });
 

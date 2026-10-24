@@ -160,6 +160,7 @@ class RouteMarketplaceScreen extends ConsumerWidget {
                   boxShadow: MlTokens.shadowSm,
                 ),
                 child: MlDataTable(
+                  cardsOnPhone: true,
                   columns: const [
                     MlColumn('Route ID', flex: 2),
                     MlColumn('Route', flex: 4),
@@ -174,7 +175,8 @@ class RouteMarketplaceScreen extends ConsumerWidget {
                     for (final r in rows)
                       [
                         _mono(context, r.routeNumber),
-                        _cell(context, r.routeLabel, strong: true, lines: 2),
+                        // Three: as a phone card the route is the line that runs long.
+                        _cell(context, r.routeLabel, strong: true, lines: 3),
                         _cell(context, r.commodity ?? '—', lines: 2),
                         _cell(context, r.transporterName ?? '—', lines: 2),
                         _cell(context, _dateFmt.format(MlTime.sast(r.acceptedAt))),

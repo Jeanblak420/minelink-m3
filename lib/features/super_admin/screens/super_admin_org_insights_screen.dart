@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -144,7 +145,8 @@ class _SuperAdminOrgInsightsScreenState
           final heroSideBySide = mainW - donutW - 18 >= 430;
 
           final donut = _distributionCard(companies, d, focus, donutW);
-          final flagship = _flagshipCard(context, d, focus, heroSideBySide);
+          final flagship = _flagshipCard(context, d, focus, heroSideBySide,
+              compact: mainW < 600);
 
           // Mock hero: narrow fleet panel beside the wide flagship.
           final heroRow = mainW >= 620
@@ -542,8 +544,9 @@ class _SuperAdminOrgInsightsScreenState
     BuildContext context,
     _Derived d,
     CompanyMonthlyOpsStats? focus,
-    bool wide,
-  ) {
+    bool wide, {
+    bool compact = false,
+  }) {
     final tonsPeriod = focus?.tonsMoved ?? d.tonsThisMonth;
     final delta = focus == null
         ? d.tonsDeltaPct
@@ -706,6 +709,31 @@ class _SuperAdminOrgInsightsScreenState
       ),
     );
 
+    // [cells] (each already `Expanded`) in rows of [columns]. Four cells to a
+    // row on a phone left each label ~50px, and a word wider than its line is
+    // broken mid-word: "RELIABI / LITY", "FORECA / ST AUG" (admin phone audit,
+    // 2026-10-24). Compact cards use two to a row.
+    Widget rows(
+      int columns,
+      List<Widget> cells, {
+      double? spacing,
+      CrossAxisAlignment align = CrossAxisAlignment.center,
+    }) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 16,
+      children: [
+        for (var i = 0; i < cells.length; i += columns)
+          Row(
+            crossAxisAlignment: align,
+            spacing: spacing ?? 0,
+            children: [
+              for (var j = i; j < i + columns; j++)
+                j < cells.length ? cells[j] : const Expanded(child: SizedBox()),
+            ],
+          ),
+      ],
+    );
+
     // Mock: the headline figure sits to the LEFT of the chart, not above it.
     final numberBlock = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -851,8 +879,10 @@ class _SuperAdminOrgInsightsScreenState
               divider(),
               const SizedBox(height: 18),
               // Mock strip: peak day · avg/day · month forecast.
-              Row(
-                children: [
+              rows(
+                compact ? 2 : 3,
+                spacing: compact ? 14 : 0,
+                [
                   stripCell(
                     Icons.local_shipping_outlined,
                     MlControlRoom.cyan,
@@ -888,14 +918,15 @@ class _SuperAdminOrgInsightsScreenState
               const SizedBox(height: 18),
               divider(),
               const SizedBox(height: 18),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              rows(
+                compact ? 2 : 4,
+                align: CrossAxisAlignment.start,
                 // A GAP. Four `Expanded` cells with nothing between them
                 // printed "WAYBILLS DONE WAYBILLS OPEN RELIABILITY" as one
                 // run of words — three labels touching, with no way to tell
                 // where one ended. Measured 2026-08-21.
                 spacing: 14,
-                children: [
+                [
                   miniStat('Trips', _int.format(tripsN)),
                   miniStat('Waybills done', _int.format(wbDone)),
                   miniStat(
@@ -966,7 +997,11 @@ class _SuperAdminOrgInsightsScreenState
     Widget mini(String label, String value, {String? unit, Color? color}) =>
         Container(
           constraints: const BoxConstraints(minHeight: 68),
-          padding: const EdgeInsets.fromLTRB(15, 13, 15, 12),
+          // 12, not 15, at the sides on a phone: at 360dp "TURNAROUND"
+          // alone is wider than what 15 left of a half-width tile.
+          padding: MlWindowClass.of(context).usesBottomNav
+              ? const EdgeInsets.fromLTRB(12, 13, 12, 12)
+              : const EdgeInsets.fromLTRB(15, 13, 15, 12),
           decoration: BoxDecoration(
             color: MlControlRoom.surfaceTile,
             borderRadius: MlShape.radiusMedium,
@@ -1004,7 +1039,10 @@ class _SuperAdminOrgInsightsScreenState
               const SizedBox(height: 6),
               Text(
                 label.toUpperCase(),
-                maxLines: 1,
+                // Two lines: "AVG TURNAROUND" and "ROUTE RELIABILITY" were cut
+                // to "AVG TURNAROU…" on a phone (admin phone audit,
+                // 2026-10-24); they wrap between the words instead.
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: context.mlText.overline.copyWith(
                   color: MlControlRoom.textMuted,
@@ -1379,7 +1417,8 @@ class _SuperAdminOrgInsightsScreenState
               children: [
                 Text(
                   a.title,
-                  maxLines: 1,
+                  // Two lines: "Waybill follow-up pend…" on a phone.
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.mlText.titleSmall.copyWith(
                     color: MlControlRoom.textStrong,
@@ -1389,7 +1428,8 @@ class _SuperAdminOrgInsightsScreenState
                 const SizedBox(height: 3),
                 Text(
                   a.message,
-                  maxLines: 2,
+                  // Three: two cut every alert short on a 360dp phone.
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: context.mlText.bodySmall.copyWith(
                     color: MlControlRoom.textMuted,
@@ -1772,7 +1812,8 @@ class _SuperAdminOrgInsightsScreenState
               const SizedBox(height: 5),
               Text(
                 metaParts.join(' · '),
-                maxLines: 1,
+                // Two lines: "… · 6 rout…" on a 360dp phone.
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: context.mlText.bodySmall.copyWith(
                   color: MlControlRoom.textMuted,

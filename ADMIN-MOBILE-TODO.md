@@ -216,8 +216,28 @@ Status: ☐ not started · ◐ in progress · ☑ done
     moving the rest down).
 
 ## 4. Hard to read or use on a phone
-- [ ] 4.1 No words broken in half and no cut-off labels on Buyers / Mines /
+- [x] 4.1 No words broken in half and no cut-off labels on Buyers / Mines /
       Transporters insights and Route marketplace; token countdown readable.
+  - Neither screen had ever been rendered at phone width. New goldens at the
+    S25's real 360dp: `screen-org-insights-phone-dark`,
+    `screen-route-marketplace-phone-dark` (the transporters overview already
+    had one and is clean).
+  - Insights: the tons card's stat rows go two-to-a-row when the column is
+    under 600px (a word wider than its cell is broken mid-word — that was
+    "RELIABI / LITY", "FORECA / ST AUG"); rail tiles' labels get two lines
+    and, on a phone, 12px side padding ("AVG TURNAROUND", "ROUTE
+    RELIABILITY" in full); alert titles 2 lines, messages 3; company meta
+    line 2 lines.
+  - Route marketplace: `MlDataTable(cardsOnPhone: true)` — a new, opt-in
+    phone layout, one card per row with every column as label + value; route
+    names up to 3 lines.
+  - Countdown: on the dashboard's phone org cards the countdown and date
+    split one line in half ("328d 23 : 53…"); now a Wrap, the date drops to
+    the next line. (The Organizations list's countdown is part of 4.5.)
+  - Desktop untouched: every existing golden byte-identical (twice a change
+    leaked to desktop during the work — a row alignment and the tile padding
+    — both caught by the desktop golden and gated to phone). Overflow sweep
+    (widths 360–1612 × text 0.85–2.0) and `dashboard_responsive_test` green.
 - [ ] 4.2 Full names in the menu (no "Communicatio…").
 - [ ] 4.3 Targets: the header scrolls away on a phone; nothing clipped.
 - [ ] 4.4 Floating chat button (and Generate Token) never cover content or

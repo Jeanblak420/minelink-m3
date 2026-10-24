@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/core/design/components/ml_wide_table.dart';
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 
@@ -54,12 +55,22 @@ class MlDataTable extends StatelessWidget {
   final void Function(int index)? onRowTap;
   final double minWidth;
 
+  /// On a phone, one card per row — every column as a label beside its
+  /// value — instead of a table to swipe sideways.
+  ///
+  /// Opt-in. The admin panel's tables on a 360dp phone broke their headers
+  /// mid-word ("ROUT / E ID", "PRODU / CT"), cut every cell, and hid the
+  /// columns that matter behind a sideways scroll (admin phone audit,
+  /// 2026-10-24). Windows wider than a phone are untouched.
+  final bool cardsOnPhone;
+
   const MlDataTable({
     super.key,
     required this.columns,
     required this.rows,
     this.onRowTap,
     this.minWidth = 560,
+    this.cardsOnPhone = false,
   });
 
   Alignment _alignment(TextAlign a) => switch (a) {
@@ -71,6 +82,9 @@ class MlDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semantic = MlSemantic.of(context);
+    if (cardsOnPhone && MlWindowClass.of(context).usesBottomNav) {
+      return _cards(context, semantic);
+    }
 
     Widget cell(MlColumn c, Widget child) {
       // A small right gutter keeps a right-aligned column (e.g. numeric "Tons")
@@ -145,6 +159,63 @@ class MlDataTable extends StatelessWidget {
     return MlWideTable(
       minWidth: _effectiveMinWidth(MediaQuery.textScalerOf(context)),
       child: table,
+    );
+  }
+
+  /// The phone layout behind [cardsOnPhone]: a block per row, a line per
+  /// column. Labels take two parts of the width and values three, so both
+  /// scale with the reader's text size; a label wraps between its words.
+  Widget _cards(BuildContext context, MlSemantic semantic) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < rows.length; i++) ...[
+          _MlRow(
+            onTap: onRowTap == null ? null : () => onRowTap!(i),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 8,
+                children: [
+                  for (var c = 0; c < columns.length; c++)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 2, right: 12),
+                            child: Text(
+                              columns[c].label.toUpperCase(),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.mlText.overline.copyWith(
+                                color: semantic.textFaint,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: c < rows[i].length
+                                ? rows[i][c]
+                                : const SizedBox(),
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+          if (i < rows.length - 1)
+            Container(height: 1, color: semantic.divider),
+        ],
+      ],
     );
   }
 
