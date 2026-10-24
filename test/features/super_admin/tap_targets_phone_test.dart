@@ -125,7 +125,8 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('chat-dock-launcher')));
       }
       await _settle(tester);
-      for (final tip in ['Minimize', 'Close']) {
+      // The phone's full-screen chat has no Minimize (5.3); both have these.
+      for (final tip in ['Messages settings', 'Close']) {
         final sizes = _targets(tester, tip);
         expect(sizes, isNotEmpty, reason: '$tip not found');
         for (final s in sizes) {

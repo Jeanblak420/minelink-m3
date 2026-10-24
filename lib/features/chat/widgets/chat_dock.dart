@@ -232,6 +232,7 @@ class _ChatDockState extends ConsumerState<ChatDock>
                 builder: (context, maximized, _) {
                   final panel = _ChatPanel(
                     maximized: maximized,
+                    fullScreen: discInAppBar,
                     onDragTitle: (d) {
                       final size = maximized
                           ? area
@@ -278,6 +279,27 @@ class _ChatDockState extends ConsumerState<ChatDock>
                     builder: (context, child) {
                       final a = _anim.value;
                       if (a == 0) return const SizedBox.shrink();
+                      if (discInAppBar) {
+                        // The whole screen, over the bars, and above the
+                        // keyboard: this overlay sits outside the shell's
+                        // Scaffold, so nothing else would lift the message
+                        // box clear of it.
+                        return Positioned.fill(
+                          child: IgnorePointer(
+                            ignoring: a < 0.999,
+                            child: Opacity(
+                              opacity: Curves.easeOut
+                                  .transform(a.clamp(0.0, 1.0)),
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                    bottom: MediaQuery.viewInsetsOf(context)
+                                        .bottom),
+                                child: child,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
                       final Size size = maximized
                           ? Size(math.max(area.width, _minW),
                               math.max(area.height, _minH))
@@ -455,6 +477,12 @@ class _DraggableFabState extends State<_DraggableFab> {
 
 class _ChatPanel extends ConsumerStatefulWidget {
   final bool maximized;
+
+  /// The phone layout (a dock with [ChatDock.launcherInAppBarOnPhone], at
+  /// phone width): the whole screen, no window to drag, resize, maximise or
+  /// minimise — none of which did anything useful on a phone (admin phone
+  /// audit, 2026-10-24). Close and the phone's Back still close it.
+  final bool fullScreen;
   final ValueChanged<Offset> onDragTitle;
   final void Function(bool left, bool top, bool right, bool bottom, Offset delta)
       onResize;
@@ -463,6 +491,7 @@ class _ChatPanel extends ConsumerStatefulWidget {
   final VoidCallback onClose;
   const _ChatPanel({
     required this.maximized,
+    this.fullScreen = false,
     required this.onDragTitle,
     required this.onResize,
     required this.onMinimize,
@@ -567,7 +596,8 @@ class _ChatPanelState extends ConsumerState<_ChatPanel> {
     });
     final pal = ref.watch(chatPrefsProvider).palette;
     final room = ref.watch(activeRoomProvider);
-    final radius = widget.maximized ? 0.0 : MlTokens.rXl;
+    final windowed = !widget.maximized && !widget.fullScreen;
+    final radius = windowed ? MlTokens.rXl : 0.0;
 
     Widget body;
     if (_showSupport) {
@@ -616,10 +646,17 @@ class _ChatPanelState extends ConsumerState<_ChatPanel> {
           children: [
             Column(
               children: [
+                // Full screen: the bar runs up under the status bar.
+                if (widget.fullScreen)
+                  Container(
+                    height: MediaQuery.viewPaddingOf(context).top,
+                    color: pal.header,
+                  ),
                 _TitleBar(
                   pal: pal,
                   maximized: widget.maximized,
-                  onDragTitle: widget.maximized ? null : widget.onDragTitle,
+                  windowControls: !widget.fullScreen,
+                  onDragTitle: windowed ? widget.onDragTitle : null,
                   onSettings: () =>
                       setState(() => _showSettings = !_showSettings),
                   onMinimize: widget.onMinimize,
@@ -628,9 +665,14 @@ class _ChatPanelState extends ConsumerState<_ChatPanel> {
                 ),
                 Container(height: 1, color: pal.divider),
                 Expanded(child: body),
+                // Full screen: clear of the gesture bar. `padding`, not
+                // `viewPadding`: it drops to 0 while the keyboard is up, so
+                // there is no gap between the message box and the keyboard.
+                if (widget.fullScreen)
+                  SizedBox(height: MediaQuery.paddingOf(context).bottom),
               ],
             ),
-            if (!widget.maximized) ...[
+            if (windowed) ...[
               // Edges
               _ResizeEdge(
                 cursor: SystemMouseCursors.resizeLeftRight,
@@ -748,6 +790,10 @@ class _ResizeEdge extends StatelessWidget {
 class _TitleBar extends StatelessWidget {
   final ChatPalette pal;
   final bool maximized;
+
+  /// Minimise and maximise. Off in the phone's full-screen chat, where Close
+  /// is the one way out it needs.
+  final bool windowControls;
   final ValueChanged<Offset>? onDragTitle;
   final VoidCallback onSettings;
   final VoidCallback onMinimize;
@@ -756,6 +802,7 @@ class _TitleBar extends StatelessWidget {
   const _TitleBar({
     required this.pal,
     required this.maximized,
+    this.windowControls = true,
     required this.onDragTitle,
     required this.onSettings,
     required this.onMinimize,
@@ -786,14 +833,16 @@ class _TitleBar extends StatelessWidget {
             ),
           ),
           _WinBtn(icon: Icons.settings_outlined, tip: 'Messages settings', onTap: onSettings, pal: pal),
-          _WinBtn(icon: Icons.remove_rounded, tip: 'Minimize', onTap: onMinimize, pal: pal),
-          _WinBtn(
-              icon: maximized
-                  ? Icons.close_fullscreen_rounded
-                  : Icons.open_in_full_rounded,
-              tip: maximized ? 'Restore' : 'Maximize',
-              onTap: onToggleMax,
-              pal: pal),
+          if (windowControls) ...[
+            _WinBtn(icon: Icons.remove_rounded, tip: 'Minimize', onTap: onMinimize, pal: pal),
+            _WinBtn(
+                icon: maximized
+                    ? Icons.close_fullscreen_rounded
+                    : Icons.open_in_full_rounded,
+                tip: maximized ? 'Restore' : 'Maximize',
+                onTap: onToggleMax,
+                pal: pal),
+          ],
           _WinBtn(icon: Icons.close_rounded, tip: 'Close', onTap: onClose, pal: pal),
         ],
       ),

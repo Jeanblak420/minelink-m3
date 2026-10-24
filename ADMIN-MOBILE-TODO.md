@@ -373,8 +373,20 @@ Status: ☐ not started · ◐ in progress · ☑ done
     WhatsApp users by number now (4.6).
   - `console_nav_phone_test.dart` 4/4; the phone-drawer label test now runs
     on the phone menu and includes it (whole at text 1.0–1.5).
-- [ ] 5.3 Chat window on a phone: practical full-screen / docked behaviour that
+- [x] 5.3 Chat window on a phone: practical full-screen / docked behaviour that
       can always be moved back, resized or closed — never stuck or unusable.
+  - On a phone (admin console) the chat opens from the top bar (4.4) as the
+    whole screen: title bar up under the status bar, clear of the gesture
+    bar, and lifted above the keyboard so the message box is never hidden
+    (the overlay sits outside the shell's Scaffold, so nothing else did).
+  - No window to fight: no dragging, no resize edges, no Minimize/Maximize
+    (they did nothing useful on a phone). Ways out: Close (48px, 4.8) and the
+    phone's Back, which steps back inside the chat then closes it (1.2).
+  - Desktop keeps the floating, draggable, resizable window.
+  - `chat_launcher_in_app_bar_test.dart` 6/6 (full screen edge to edge, no
+    window controls, Close closes; with a 300px keyboard the panel ends at
+    the keyboard); back-closes-chat 3/3; tap-target test updated. Full suite
+    2,813 passed. On-device check in 7.3.
 - [ ] 5.4 Dashboard: repeats removed, one real version of each section kept,
       zero-only stat cards condensed; much shorter on a phone.
 - [ ] 5.5 Crash reports: real count instead of a 500 cap; found out why nothing

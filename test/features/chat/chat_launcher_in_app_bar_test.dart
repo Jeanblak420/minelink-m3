@@ -97,4 +97,49 @@ void main() {
     expect(_disc, findsOneWidget);
     expect(_barButton, findsNothing);
   });
+
+  // 5.3: on a phone the chat is the whole screen, never a window to fight.
+  testWidgets('phone: the chat opens full screen with no window controls',
+      (tester) async {
+    await _pump(tester, const Size(360, 780), optIn: true);
+    await tester.tap(_barButton);
+    await _settle(tester);
+    expect(find.byTooltip('Maximize'), findsNothing);
+    expect(find.byTooltip('Minimize'), findsNothing);
+    expect(find.byTooltip('Close'), findsOneWidget);
+    // Edge to edge: the window's title starts at the left edge and the panel
+    // runs to the bottom of the screen.
+    final title = tester.getRect(find.text('Messages').first);
+    expect(title.left, lessThan(60));
+    final close = tester.getRect(find.byTooltip('Close'));
+    expect(close.right, greaterThan(360 - 60));
+
+    await tester.tap(find.byTooltip('Close'));
+    await _settle(tester);
+    expect(find.byTooltip('Close'), findsNothing, reason: 'Close did not close it');
+  });
+
+  testWidgets('phone: with the keyboard up the chat sits above it',
+      (tester) async {
+    await _pump(tester, const Size(360, 780), optIn: true);
+    await tester.tap(_barButton);
+    await _settle(tester);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(tester.view.resetViewInsets);
+    await _settle(tester);
+    // The panel's Material ends where the keyboard begins.
+    // The chat panel is the nearest Material around Close that spans the
+    // screen's width (the button's own ink is smaller).
+    final rects = find
+        .ancestor(of: find.byTooltip('Close'), matching: find.byType(Material))
+        .evaluate()
+        .map((e) => tester.getRect(find.byWidget(e.widget).first))
+        .where((r) => r.width >= 359)
+        .toList()
+      ..sort((a, b) => a.height.compareTo(b.height));
+    expect(rects, isNotEmpty);
+    expect(rects.first.bottom, lessThanOrEqualTo(780 - 300 + 0.5),
+        reason: 'the chat runs under the keyboard');
+    expect(rects.first.top, 0, reason: 'not full screen');
+  });
 }
