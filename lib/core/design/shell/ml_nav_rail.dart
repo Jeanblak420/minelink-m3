@@ -131,6 +131,9 @@ class MlNavRail extends StatefulWidget {
   /// M3's standard rail width when it shows icons only.
   static const double collapsedWidth = 80;
 
+  /// Below this height the rail scrolls as one list (see [build]).
+  static const double compactHeight = 560;
+
   /// Expanded width. M3 puts an expanded rail between 220 and 360; 280 is what
   /// fits this app's longest label ("Transporter driver limits") at the default
   /// text scale without truncation.
@@ -233,59 +236,100 @@ class _MlNavRailState extends State<MlNavRail> {
             expanded: expanded,
             child: SafeArea(
               right: false,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (widget.header != null) widget.header!,
-                  if (expanded && widget.showSearch) _buildSearch(chrome),
-                  Expanded(
-                    child: _query.isNotEmpty && tree.isEmpty
-                        ? _EmptySearch(chrome: chrome, query: _query)
-                        : ListView(
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  final empty = _query.isNotEmpty && tree.isEmpty;
+                  final items = [
+                    for (final node in tree)
+                      if (node.isGroup)
+                        _RailGroup(
+                          node: node,
+                          expanded: expanded,
+                          // A search result is always open: hiding matches
+                          // inside a closed group is the same fault as not
+                          // matching them at all.
+                          open: _query.isNotEmpty || _isOpen(node),
+                          selectedRoute: _selected,
+                          count: _countFor(node),
+                          countFor: _countFor,
+                          onToggle: () => setState(() {
+                            _groupOverride[node.label] = !_isOpen(node);
+                          }),
+                          onNavigate: widget.onNavigate,
+                        )
+                      else
+                        _RailTile(
+                          node: node,
+                          expanded: expanded,
+                          selected: node.route == _selected,
+                          count: _countFor(node),
+                          onTap: () => widget.onNavigate(node.route!),
+                        ),
+                  ];
+                  final chromeTop = [
+                    if (widget.header != null) widget.header!,
+                    if (expanded && widget.showSearch) _buildSearch(chrome),
+                  ];
+                  final chromeBottom = [
+                    if (widget.onToggleExpanded != null)
+                      _CollapseControl(
+                        expanded: expanded,
+                        onPressed: widget.onToggleExpanded!,
+                        chrome: chrome,
+                      ),
+                    if (widget.footer != null) ...[
+                      Divider(
+                          height: 1, thickness: 1, color: chrome.railDivider),
+                      widget.footer!,
+                    ],
+                  ];
+
+                  // A SHORT window — a phone held sideways is ~411dp tall —
+                  // scrolls the brand, search, items, collapse control and
+                  // footer as ONE list. Pinned, those left the items a strip
+                  // about one row high that could not be scrolled by hand
+                  // (found on the S25, 2026-10-24). Taller windows keep the
+                  // pinned layout below.
+                  if (box.maxHeight < MlNavRail.compactHeight) {
+                    return ListView(
+                      padding: EdgeInsets.zero,
+                      children: [
+                        ...chromeTop,
+                        if (empty)
+                          _EmptySearch(chrome: chrome, query: _query)
+                        else
+                          Padding(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 8,
+                                horizontal: 8, vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: items,
                             ),
-                            children: [
-                              for (final node in tree)
-                                if (node.isGroup)
-                                  _RailGroup(
-                                    node: node,
-                                    expanded: expanded,
-                                    // A search result is always open: hiding matches
-                                    // inside a closed group is the same fault as not
-                                    // matching them at all.
-                                    open: _query.isNotEmpty || _isOpen(node),
-                                    selectedRoute: _selected,
-                                    count: _countFor(node),
-                                    countFor: _countFor,
-                                    onToggle: () => setState(() {
-                                      _groupOverride[node.label] = !_isOpen(node);
-                                    }),
-                                    onNavigate: widget.onNavigate,
-                                  )
-                                else
-                                  _RailTile(
-                                    node: node,
-                                    expanded: expanded,
-                                    selected: node.route == _selected,
-                                    count: _countFor(node),
-                                    onTap: () => widget.onNavigate(node.route!),
-                                  ),
-                            ],
                           ),
-                  ),
-                  if (widget.onToggleExpanded != null)
-                    _CollapseControl(
-                      expanded: expanded,
-                      onPressed: widget.onToggleExpanded!,
-                      chrome: chrome,
-                    ),
-                  if (widget.footer != null) ...[
-                    Divider(height: 1, thickness: 1, color: chrome.railDivider),
-                    widget.footer!,
-                  ],
-                ],
+                        ...chromeBottom,
+                      ],
+                    );
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ...chromeTop,
+                      Expanded(
+                        child: empty
+                            ? _EmptySearch(chrome: chrome, query: _query)
+                            : ListView(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 8,
+                                ),
+                                children: items,
+                              ),
+                      ),
+                      ...chromeBottom,
+                    ],
+                  );
+                },
               ),
             ),
           ),

@@ -774,8 +774,17 @@ end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
     `PhoneRemote\minelink-m3.apk`, both SHA-256 equal to the build.
 ## 9. Jean's follow-ups, 2026-10-24
 Same rules: one at a time, fully, ticked with evidence; the phone walk last.
-- [ ] 9.1 The expanded rail is usable on a short window (a phone held
+- [x] 9.1 The expanded rail is usable on a short window (a phone held
       sideways, ≈411 dp tall): its list gets the height, everything reachable.
+  - `MlNavRail`: below `compactHeight` (560 dp) the brand, search, items,
+    collapse control and footer scroll as ONE list; taller windows keep the
+    pinned layout unchanged (shared by console and portals).
+  - `rail_short_window_test` 2/2: at 411 dp no overflow and Organizations,
+    Settings and the footer are all reachable by scrolling; at 1000 dp the
+    brand stays pinned while the list scrolls. Bite-tested: with the
+    threshold at 0 (old layout) the 411 test fails.
+  - Analyze clean; test/core + test/widgets 1,161 passed; renders 238 passed,
+    none changed. On-device check in the 9.3 walk (landscape).
 - [ ] 9.2 The old place-index tools no longer recreate the dropped
       `place_index_search_fts` index, and refresh `place_index_search` after
       they change `place_index`.
