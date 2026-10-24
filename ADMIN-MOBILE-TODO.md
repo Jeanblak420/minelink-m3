@@ -471,8 +471,13 @@ Status: ☐ not started · ◐ in progress · ☑ done
   - `seat_pressure_test.dart` 4/4; attention test 7/7; three phone goldens
     updated and viewed (company page frame 1940 so its last control is not
     under Generate Token in the picture). Full suite 2,834 passed.
-- [ ] 6.5 Chat behaves like a page: Back closes it, docks out of the way of
+- [x] 6.5 Chat behaves like a page: Back closes it, docks out of the way of
       buttons (1.2 + 4.4 + 5.3 — tick when all three are ticked and re-checked).
+  - Re-checked: 1.2 (Back steps out of the chat, then closes it), 4.4 (no
+    disc over the page; opened from the top bar) and 5.3 (full screen, no
+    window controls, above the keyboard) all ticked; their tests re-run
+    together green (back-closes 3, launcher 6, tap targets 6). On-device in
+    7.3.
 
 ## 7. Prove it and ship it
 - [ ] 7.1 `flutter analyze` clean; full test suite green; new tests for each fix.
