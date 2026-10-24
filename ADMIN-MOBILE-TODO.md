@@ -503,5 +503,26 @@ Status: ☐ not started · ◐ in progress · ☑ done
       phone; every item above re-checked there.
       Includes: with the app open (chat never opened), Jean's
       `last_seen_at` moves every ~45 s and the dashboard shows him as active (3.1).
-- [ ] 7.4 Database healthy (all services probed); migration ledger matches files.
+  - Progress (2026-10-24, S25, release APK 511 entries, installed 10:46):
+    - 3.1 PROVEN on device: chat never opened, `last_seen_at` 08:46:52 →
+      08:47:37 UTC (45 s), the only profile seen in the last 10 min.
+    - 3.5 on device: bell carries no badge.
+    - 6.1 on device: "Needs your attention" first; "All clear" while loading,
+      then "Open waybills · 2". Live org-type cards load with real numbers.
+    - FOUND and fixed: the header read "2 items" over that ONE row (it summed
+      the counts inside rows). Now counts rows ("1 item");
+      `attention_list_test` gained a failing-first test, 12/12 green.
+      Needs the rebuilt APK.
+    - Walk interrupted: the phone dropped wireless debugging (port refused,
+      no longer advertised). Rest of the walk pending a fresh pairing code.
+- [x] 7.4 Database healthy (all services probed); migration ledger matches files.
+  - `tool/health_probe.py`: main PostgREST/Auth/Storage/Realtime/Postgres RPC/
+    Edge Functions all answer. Management API `/health`: db, rest, auth,
+    storage healthy; realtime healthy with `db_connected` and
+    `replication_connected` both true.
+  - Ledger: rows since 20261022 are exactly 20261022200000, 20261024100000,
+    110000, 111000, 120000, 130000, with the same names as the 6 files.
+  - Extras `search_place_index` still times out (500 statement timeout,
+    twice). That predates this work and nothing here touched that project.
+    It is the address-search item already waiting on Jean's choice.
 - [ ] 7.5 Committed, pushed, APK on the NAS.

@@ -543,7 +543,7 @@ class _AttentionList extends StatelessWidget {
               : 'Everything waiting on you, most urgent first.',
           meta: items.isEmpty
               ? null
-              : mlCount(items.fold<int>(0, (a, i) => a + i.count), 'item'),
+              : mlCount(items.length, 'item'),
         ),
         const SizedBox(height: 12),
         if (items.isEmpty)

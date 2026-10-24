@@ -81,6 +81,14 @@ void main() {
     expect(find.text('Expired token requests'), findsNothing);
   });
 
+  testWidgets('phone: the header counts rows, not what is inside them',
+      (tester) async {
+    // Seen on the S25: one row "Open waybills · 2" headed "2 items".
+    await _pump(tester, 360, _items(waybills: 2));
+    expect(find.text('1 item'), findsOneWidget);
+    expect(find.text('2 items'), findsNothing);
+  });
+
   testWidgets('phone: nothing waiting says so', (tester) async {
     await _pump(tester, 360, const []);
     expect(find.text('All clear'), findsOneWidget);
