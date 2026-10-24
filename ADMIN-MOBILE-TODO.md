@@ -840,3 +840,19 @@ Same rules: one at a time, fully, ticked with evidence; the phone walk last.
     storage for the 3 user ids + 3 employee ids now finds nothing. No seat
     log, audit, notification or crash rows were written. The app was left
     signed out at the sign-in screen; phone home, screenshots deleted.
+
+## 10. Jean away (2026-10-24, ~1 h): fix request tracking, then every role
+"please use the emulator from here on out ... please fix it, and fix all
+other issues and problems u find in other accounts and user roles and so on
+for the mobile and all other versions of the app please". Emulator only.
+Throwaway users per role, everything they touch deleted after (9.3 method).
+- [ ] 10.1 `list_request_tracking` names the real requester
+      (`requesting_company_id`), on every party's tracking page. Live DB
+      function change — Jean's explicit OK ("please fix it").
+- [ ] 10.2 Every portal role walked on the emulator at phone width (mine:
+      supervisor, load controller, security; transporter: driver; buyer;
+      and the owner/company account); every fault found fixed, with a test.
+- [ ] 10.3 The same roles at tablet/desktop width (the rail layout) on the
+      emulator rotated / sized wide; faults fixed.
+- [ ] 10.4 Analyze, full suite, renders accounted; DB healthy + ledgers;
+      test users removed and verified; APK to the NAS; pushed.
