@@ -37,11 +37,16 @@ class LogisticsService {
 
   Future<LogisticsSnapshot> loadForCompany(String companyId) async {
     try {
+      // `routes`, not `haul_routes`: the link -> dispatch flow mints routes
+      // there, and nothing has written haul_routes since (0 rows against 1 on
+      // 2026-10-24), so Routes & mines was always empty. RLS scopes it to
+      // the mine, the buyer and any dispatched transporter.
       final routesFuture = _client
-          .from('haul_routes')
-          .select()
+          .from('routes')
+          .select('id, route_number, supplier_company_id, buyer_company_id, '
+              'loading_point, offloading_point, created_at')
           .or('supplier_company_id.eq.$companyId,buyer_company_id.eq.$companyId')
-          .order('updated_at', ascending: false);
+          .order('created_at', ascending: false);
 
       final reconFuture = _client
           .from('reconciliations')
@@ -61,7 +66,7 @@ class LogisticsService {
       ]);
 
       final routes =
-          (results[0] as List).map((e) => HaulRouteRecord.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+          (results[0] as List).map((e) => HaulRouteRecord.fromRoute(Map<String, dynamic>.from(e as Map))).toList();
       final recon =
           (results[1] as List).map((e) => ReconciliationRecord.fromJson(Map<String, dynamic>.from(e as Map))).toList();
       final waybillsRaw = results[2] as List<OperationTransaction>;

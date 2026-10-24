@@ -25,6 +25,26 @@ class HaulRouteRecord {
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
   }
+
+  /// A row of `routes` — the route the platform mints when it links a request
+  /// (`RT-…`). Routes & mines read the abandoned `haul_routes` table, which no
+  /// flow writes, so it always said "No haul routes yet" (emulator walk,
+  /// 2026-10-24). A route has no `updated_at`; it is created once.
+  factory HaulRouteRecord.fromRoute(Map<String, dynamic> json) {
+    String point(Object? v) {
+      final s = (v as String?)?.trim();
+      return (s == null || s.isEmpty) ? '—' : s;
+    }
+
+    return HaulRouteRecord(
+      id: json['id'] as String,
+      supplierCompanyId: json['supplier_company_id'] as String?,
+      buyerCompanyId: json['buyer_company_id'] as String?,
+      originLabel: point(json['loading_point']),
+      destinationLabel: point(json['offloading_point']),
+      updatedAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
 }
 
 class TripRecord {
