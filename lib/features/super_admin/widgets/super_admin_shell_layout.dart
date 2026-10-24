@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 import 'package:flutter_application_1/core/design/nav/ml_nav_node.dart';
 import 'package:flutter_application_1/core/design/shell/ml_app_shell.dart';
 import 'package:flutter_application_1/core/design/shell/ml_rail_blocks.dart';
@@ -22,6 +23,29 @@ import 'package:flutter_application_1/features/chat/widgets/chat_dock.dart';
 import 'package:flutter_application_1/features/notifications/providers/notification_provider.dart';
 import 'package:flutter_application_1/features/notifications/widgets/animated_notification_bell.dart';
 import 'package:flutter_application_1/features/super_admin/nav/console_nav.dart';
+
+/// On a phone, the destination a page belongs to when its address does not
+/// sit under that destination's own.
+///
+/// The company page is `/super-admin/organization/<id>`, which is not under
+/// `/super-admin/organizations`, so the longest match was `/super-admin` and
+/// the bottom bar lit Dashboard while you were in Access (admin phone audit,
+/// 2026-10-24). The same was true of the pages listed here. Phone only: the
+/// desktop rail is left as it is.
+String superAdminPhoneNavSection(String location) {
+  const sections = <String, String>{
+    '/super-admin/organization/': '/super-admin/organizations',
+    '/super-admin/register-company': '/super-admin/organizations',
+    '/super-admin/seat-requests': '/super-admin/token-requests',
+    '/super-admin/requests/': '/super-admin/requests/transportation-mine',
+    '/super-admin/tons-out': '/super-admin/recon-tables',
+  };
+  for (final e in sections.entries) {
+    if (location.startsWith(e.key)) return e.value;
+  }
+  return location;
+}
+
 
 /// The super-admin console's shell.
 ///
@@ -117,7 +141,9 @@ class _SuperAdminShellLayoutState extends ConsumerState<SuperAdminShellLayout> {
       tree: tree,
       // The raw location. The rail resolves it to the destination that owns it
       // (longest match), so a detail page keeps its parent lit.
-      selectedRoute: location,
+      selectedRoute: MlWindowClass.of(context).usesBottomNav
+          ? superAdminPhoneNavSection(location)
+          : location,
       onNavigate: (route) => context.go(route),
       badgeCounts: {MlNavBadge.unreadNotifications: unread},
       title: titles.title,

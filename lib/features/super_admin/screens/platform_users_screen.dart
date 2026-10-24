@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_application_1/features/auth/utils/whatsapp_identity.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
@@ -161,6 +162,7 @@ class _PlatformUsersScreenState extends ConsumerState<PlatformUsersScreen> {
       (u['profiles'] is Map)
           ? (u['profiles']['display_name'] as String?)
           : null,
+      u['whatsapp_number'] as String?,
     ];
     for (final p in parts) {
       if (p != null && p.toLowerCase().contains(q)) return true;
@@ -311,11 +313,15 @@ class _UserRow extends StatelessWidget {
     final roleRaw = user['role'] as String?;
     final roleLabel = _roleLabel(roleRaw);
     final profile = user['profiles'];
-    String? email;
-    if (profile is Map) {
-      email = (profile['email'] as String?)?.trim();
-      if (email != null && email.isEmpty) email = null;
-    }
+    // The internal `wa-…@wa.mineralguide.com` login address is not an email
+    // anybody can use; a WhatsApp user is named by their number instead
+    // (admin phone audit, 2026-10-24).
+    final email = profile is Map
+        ? realEmailOrNull(profile['email'] as String?)
+        : null;
+    final whatsapp = (user['whatsapp_number'] as String?)?.trim();
+    final contact = email ??
+        (whatsapp == null || whatsapp.isEmpty ? null : 'WhatsApp $whatsapp');
 
     final semantic = MlSemantic.of(context);
     return InkWell(
@@ -367,7 +373,7 @@ class _UserRow extends StatelessWidget {
                   Text(
                     [
                       if (roleLabel != null) roleLabel,
-                      if (email != null) email,
+                      if (contact != null) contact,
                     ].join(' · '),
                     style: context.mlText.bodySmall.copyWith(
                       color: semantic.textMuted,

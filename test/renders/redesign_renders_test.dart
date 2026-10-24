@@ -3093,7 +3093,11 @@ void main() {
       await shootConsole(
         tester,
         const OrganizationDetailScreen(organizationId: 'o4'),
-        const Size(412, 1755),
+        // The whole page. A frame shorter than the page leaves its last
+        // control under the floating Generate Token button in the picture,
+        // where a phone would simply scroll it clear (2026-10-24: the phone
+        // header changed height and 1755 stopped being enough).
+        const Size(412, 1840),
         'screen-organization-detail-phone-dark',
       );
     });

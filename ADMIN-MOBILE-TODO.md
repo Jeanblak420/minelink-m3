@@ -294,9 +294,27 @@ Status: ☐ not started · ◐ in progress · ☑ done
   - Tests: `ml_data_table_cards_test.dart` 3/3; `organizations_registry_test`
     now asserts cards on a phone and the scrolling table just above phone
     width (610px). Full suite: 2,791 passed.
-- [ ] 4.6 Company page: one back arrow; bottom bar highlights Access; all tabs
+- [x] 4.6 Company page: one back arrow; bottom bar highlights Access; all tabs
       readable; WhatsApp users show their number, not the internal login
       address (also on Platform users).
+  - One back arrow: on a phone the page's own back arrow and home button are
+    gone (the top bar has Back, the bottom bar Dashboard); the title gets the
+    room. Desktop header unchanged.
+  - Tabs: on a phone the four tabs share the width (not scrollable, tight
+    label padding) — "Overview Users Tokens Seats" all whole at 412dp.
+  - Bottom bar: `superAdminPhoneNavSection` maps pages whose address is not
+    under their section's — company page and Register company → Access
+    (Organizations), seat requests → Access (Token requests), request
+    inboxes → Requests, tons-out → Recon. Phone only; the desktop rail has
+    the same wrong highlight and was left as it is (flagged to Jean).
+  - WhatsApp users: Users tab and Seats tab done in 2.2; Platform users now
+    shows "WhatsApp 0833067846" instead of the internal address, and the
+    number is searchable.
+  - `company_page_phone_test.dart` 4/4; company page phone golden updated
+    (viewed: one arrow, four tabs) and its frame made the full page height
+    (1840) so its last control is not under Generate Token in the picture;
+    desktop golden unchanged. Analyzer clean; admin/render/widget/core
+    suites green.
 - [ ] 4.7 Each insights page opens at the top.
 - [ ] 4.8 Tap targets at least 48 px: chat window buttons, table page arrows,
       targets − / +.

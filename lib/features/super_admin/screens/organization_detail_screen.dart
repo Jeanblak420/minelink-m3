@@ -159,6 +159,12 @@ class _OrganizationDetailScreenState extends ConsumerState<OrganizationDetailScr
   ];
 
   Widget _orgDetailChrome(String title, {required bool showTabs}) {
+    // On a phone the top bar already has a back arrow and the bottom bar a
+    // Dashboard, so the page's own back arrow and home button were a second
+    // pair of each — two back arrows stacked (admin phone audit,
+    // 2026-10-24). The tabs share the width instead of scrolling, so the
+    // fourth no longer reads "Seat…" at the edge.
+    final compact = MlWindowClass.of(context).usesBottomNav;
     return Material(
       color: Theme.of(context).colorScheme.surface,
       child: Column(
@@ -169,7 +175,10 @@ class _OrganizationDetailScreenState extends ConsumerState<OrganizationDetailScr
             padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
             child: Row(
               children: [
-                _orgDetailBackButton(context),
+                if (compact)
+                  const SizedBox(width: 12)
+                else
+                  _orgDetailBackButton(context),
                 Expanded(
                   child: Text(
                     title,
@@ -186,14 +195,18 @@ class _OrganizationDetailScreenState extends ConsumerState<OrganizationDetailScr
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                ..._orgDetailAppBarActions(context),
+                if (!compact) ..._orgDetailAppBarActions(context),
               ],
             ),
           ),
+          if (compact) const SizedBox(height: 6),
           if (showTabs) ...[
             TabBar(
               controller: _tabController,
-              isScrollable: true,
+              isScrollable: !compact,
+              labelPadding: compact
+                  ? const EdgeInsets.symmetric(horizontal: 4)
+                  : null,
               tabs: _orgDetailTabs,
             ),
             const Divider(height: 1),
