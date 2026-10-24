@@ -7,6 +7,7 @@ import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/features/auth/providers/session_user_provider.dart';
 
 /// Live presence snapshot: who is online right now + a real-time last-seen
 /// stamp for anyone who has just gone offline this session.
@@ -121,19 +122,11 @@ class PresenceController extends StateNotifier<Presence>
   }
 }
 
-/// The signed-in account's id, following sign-in and sign-out.
-final _presenceUserIdProvider = StreamProvider<String?>((ref) async* {
-  final auth = SupabaseConfig.client.auth;
-  yield auth.currentUser?.id;
-  yield* auth.onAuthStateChange.map((e) => e.session?.user.id);
-});
-
 final presenceProvider =
     StateNotifierProvider<PresenceController, Presence>((ref) {
-  // `select` on the id itself, so a token refresh for the same account does
-  // not tear the channel down and rebuild it.
-  final uid = ref.watch(_presenceUserIdProvider.select((a) =>
-      a.hasValue ? a.value : SupabaseConfig.client.auth.currentUser?.id));
+  // Changes only with the account, so a token refresh for the same account
+  // does not tear the channel down and rebuild it.
+  final uid = ref.watch(sessionUserIdProvider);
   return PresenceController(uid);
 });
 
@@ -252,7 +245,7 @@ final typingProvider =
         (ref, roomId) {
   // `..start()` rather than the constructor doing it — see
   // [TypingController.start]. The running app is unchanged.
-  return TypingController(roomId, SupabaseConfig.client.auth.currentUser?.id)
+  return TypingController(roomId, ref.watch(sessionUserIdProvider))
     ..start();
 });
 
@@ -335,5 +328,6 @@ class TypingInboxController extends StateNotifier<TypingInbox> {
 
 final typingInboxProvider =
     StateNotifierProvider<TypingInboxController, TypingInbox>((ref) {
-  return TypingInboxController(SupabaseConfig.client.auth.currentUser?.id);
+  // Rebuilt for each account (see sessionUserIdProvider).
+  return TypingInboxController(ref.watch(sessionUserIdProvider));
 });

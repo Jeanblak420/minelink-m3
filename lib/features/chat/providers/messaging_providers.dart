@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/features/auth/providers/session_user_provider.dart';
 import 'package:flutter_application_1/features/chat/models/messaging_models.dart';
 import 'package:flutter_application_1/features/chat/services/messaging_service.dart';
 
@@ -24,7 +25,10 @@ final messagingServiceProvider = Provider<MessagingService>((ref) {
 /// Kept alive by the always-mounted ChatDock via `ref.watch`.
 final chatDeliveryProvider = Provider<void>((ref) {
   final svc = ref.watch(messagingServiceProvider);
-  final uid = svc.currentUserId;
+  // Watched, not read once: started signed out (a fresh install) this
+  // returned here and never listened for the user who then signed in, and
+  // after a sign-out it kept listening for the previous one.
+  final uid = ref.watch(sessionUserIdProvider);
   if (uid == null) return;
   Timer? debounce;
   void markSoon() {
@@ -178,7 +182,9 @@ final dockOpenRequestProvider = StateProvider<int>((ref) => 0);
 /// rather than showing one that will be refused.
 final myChatRoleProvider = FutureProvider<String?>((ref) async {
   final client = SupabaseConfig.client;
-  final uid = client.auth.currentUser?.id;
+  // Watched, so the next account on this device gets its own role rather
+  // than the cached role of the last one.
+  final uid = ref.watch(sessionUserIdProvider);
   if (uid == null) return null;
   try {
     final res = await client.rpc('chat_role_of', params: {'p_uid': uid});
