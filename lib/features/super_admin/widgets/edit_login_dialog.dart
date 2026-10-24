@@ -108,6 +108,8 @@ class _EditLoginDialogState extends State<EditLoginDialog> {
   late final _phone = TextEditingController(text: widget.currentPhone);
   final _password = TextEditingController();
   final _confirm = TextEditingController();
+  final _passwordFocus = FocusNode();
+  final _confirmFocus = FocusNode();
   bool _showPassword = false;
 
   @override
@@ -116,6 +118,8 @@ class _EditLoginDialogState extends State<EditLoginDialog> {
     _phone.dispose();
     _password.dispose();
     _confirm.dispose();
+    _passwordFocus.dispose();
+    _confirmFocus.dispose();
     super.dispose();
   }
 
@@ -170,6 +174,7 @@ class _EditLoginDialogState extends State<EditLoginDialog> {
                   TextFormField(
                     controller: _email,
                     keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
                     autocorrect: false,
                     decoration: const InputDecoration(
                       labelText: 'Email',
@@ -188,6 +193,8 @@ class _EditLoginDialogState extends State<EditLoginDialog> {
                 TextFormField(
                   controller: _phone,
                   keyboardType: TextInputType.phone,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
                   decoration: const InputDecoration(
                     labelText: 'Phone / WhatsApp number',
                     hintText: 'e.g. 082 123 4567',
@@ -202,7 +209,15 @@ class _EditLoginDialogState extends State<EditLoginDialog> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _password,
+                  focusNode: _passwordFocus,
                   obscureText: !_showPassword,
+                  // On a phone the keyboard hides the Confirm field once it
+                  // opens (found resetting a password on a Galaxy S25 Ultra,
+                  // 2026-10-24): Next moves there, and scrolls it into view.
+                  // Explicitly — the default "next" lands on the show-password
+                  // eye, which sits between the two fields.
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (_) => _confirmFocus.requestFocus(),
                   autocorrect: false,
                   enableSuggestions: false,
                   decoration: InputDecoration(
@@ -225,9 +240,13 @@ class _EditLoginDialogState extends State<EditLoginDialog> {
                   },
                 ),
                 const SizedBox(height: 12),
-                TextFormField(
+                Builder(
+                  builder: (dialogContext) => TextFormField(
                   controller: _confirm,
+                  focusNode: _confirmFocus,
                   obscureText: !_showPassword,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _submit(dialogContext),
                   autocorrect: false,
                   enableSuggestions: false,
                   decoration: const InputDecoration(
@@ -236,6 +255,7 @@ class _EditLoginDialogState extends State<EditLoginDialog> {
                   ),
                   validator: (v) =>
                       (v ?? '') == _password.text ? null : 'Passwords do not match',
+                ),
                 ),
               ],
             ),

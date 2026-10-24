@@ -81,8 +81,22 @@ Status: ☐ not started · ◐ in progress · ☑ done
     tests green; analyze clean.
 
 ## 2. Passwords & login methods
-- [ ] 2.1 Super-admin password reset proven end to end for real: reset a test
+- [x] 2.1 Super-admin password reset proven end to end for real: reset a test
       account's password, then sign in with the new one.
+  - Done on Jean's S25 Ultra (today's build, wireless adb), signed in as
+    jean@minelink.org: AB trans → Users → Eli Mans → Change Password → saved
+    ("Updated password for Eli Mans"). **Eli Mans's password is now
+    `MineLinkTest2410`** (WhatsApp 083 306 7846).
+  - Evidence: Auth sign-in as wa-0833067846 with the new password → HTTP 200
+    (session signed straight back out, 204); wrong password → 400
+    invalid_credentials; audit log row "Super admin changed password for Eli
+    Mans" by jean@minelink.org, 2026-10-24 00:25 UTC.
+  - Fixed on the way: with the keyboard open the Confirm field was hidden and
+    the keyboard's button did not go to it. Next now moves password → confirm
+    (explicitly — the default landed on the show-password eye) and Done saves.
+    `edit_login_dialog_test.dart` (3 tests) green.
+  - Seen, for 4.x: the user menu's last item is cut off at the screen edge
+    ("Change Password / Email / Ph…").
 - [ ] 2.2 Super admin can see, add, change and remove a user's login methods
       (email / WhatsApp), switch between them, and mark one primary and one
       secondary; sign-in works with each method that is set up.
