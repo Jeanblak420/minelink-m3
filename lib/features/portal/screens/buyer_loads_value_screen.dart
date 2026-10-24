@@ -285,6 +285,7 @@ class _Body extends ConsumerWidget {
               ),
               const SizedBox(height: 14),
               MlDataTable(
+                cardsOnPhone: true,
                 columns: const [
                   MlColumn('Truck', flex: 3, minWidth: kPlateColumnMinWidth),
                   // 124: "Iron Hills Mining" is 105px and "Atlas Buyer Group"

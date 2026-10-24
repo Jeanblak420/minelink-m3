@@ -54,7 +54,7 @@ class MineReconciliationsScreen extends ConsumerWidget {
           TourTarget(
             id: 'mine.reconciliations.raw',
             targetKey: MineReconciliationsTourKeys.rawRecords,
-            child: RawReconView(companyId: companyId),
+            child: RawReconView(cardsOnPhone: true, companyId: companyId),
           ),
           const SizedBox(height: 16),
           TourTarget(

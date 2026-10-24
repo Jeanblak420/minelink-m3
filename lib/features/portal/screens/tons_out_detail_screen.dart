@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 
 /// Premium drill-down for the overview "Tons out" tile: rolling-window summary
 /// boxes plus a fully filterable / sortable dispatch table.
@@ -522,6 +523,41 @@ class _ResultsTable extends StatelessWidget {
       );
     }
 
+    // On a phone, one card per load (Jean's go-ahead, 2026-10-24). The cards
+    // have no column heads to tap, so the sort the heads carry moves to a
+    // "Sort by" field and a direction button, through the same [onSort].
+    if (MlWindowClass.of(context).usesBottomNav) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _PhoneSort(filter: filter, onSort: onSort),
+          const SizedBox(height: 8),
+          MlCard(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: MlDataTable(
+              cardsOnPhone: true,
+              columns: [
+                for (final (label, _) in _phoneFields) MlColumn(label),
+              ],
+              rows: [
+                for (final e in rows)
+                  [
+                    Text(MlTime.calendarDay(e.date)),
+                    _mono(context, e.time),
+                    Text(e.transporter),
+                    MlPlatePill(e.truckReg, fontSize: 12),
+                    Text(e.destination),
+                    Text(e.product),
+                    Text(e.customer),
+                    _mono(context, '${massFmt.format(e.netMass)} t'),
+                  ],
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -595,5 +631,67 @@ class _ResultsTable extends StatelessWidget {
               ),
           ],
         );
+  }
+}
+
+/// The results' fields, in column order, with the sort each one carries.
+const _phoneFields = <(String, TonsOutSortField)>[
+  ('Date', TonsOutSortField.date),
+  ('Time out', TonsOutSortField.time),
+  ('Transporter', TonsOutSortField.transporter),
+  ('Truck reg', TonsOutSortField.truckReg),
+  ('Destination', TonsOutSortField.destination),
+  ('Product', TonsOutSortField.product),
+  ('Customer', TonsOutSortField.customer),
+  ('Net mass', TonsOutSortField.netMass),
+];
+
+/// "Sort by" for the phone's cards. Picking a field, or the direction
+/// button, goes through the same toggle a column head does: the same field
+/// again flips the direction, a new field starts ascending.
+class _PhoneSort extends StatelessWidget {
+  const _PhoneSort({required this.filter, required this.onSort});
+
+  final TonsOutFilter filter;
+  final ValueChanged<TonsOutSortField> onSort;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          // Re-keyed on the field: `initialValue` is read once, and Reset
+          // changes the sort from outside.
+          child: KeyedSubtree(
+            key: ValueKey(filter.sortField),
+            child: DropdownButtonFormField<TonsOutSortField>(
+              key: const ValueKey('tons-out-sort-field'),
+              isExpanded: true,
+              initialValue: filter.sortField,
+              decoration: const InputDecoration(
+                labelText: 'Sort by',
+                isDense: true,
+              ),
+              items: [
+                for (final (label, field) in _phoneFields)
+                  DropdownMenuItem(value: field, child: Text(label)),
+              ],
+              onChanged: (f) {
+                if (f != null && f != filter.sortField) onSort(f);
+              },
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          key: const ValueKey('tons-out-sort-direction'),
+          tooltip: filter.ascending ? 'Ascending' : 'Descending',
+          onPressed: () => onSort(filter.sortField),
+          icon: Icon(filter.ascending
+              ? Icons.arrow_upward_rounded
+              : Icons.arrow_downward_rounded),
+        ),
+      ],
+    );
   }
 }

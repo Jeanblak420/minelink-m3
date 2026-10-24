@@ -164,18 +164,35 @@ void main() {
             'the bar can attach to.');
   }
 
-  // 412px: the width the renders are taken at, and the width the fault was
-  // found at. A nine-column tracking table has no chance of fitting it, so
-  // every one of these genuinely scrolls.
-  testWidgets('the buyer\'s Requests screen shows a bar on its tracking table',
+  // Found at 412px. Since 2026-10-24 (Jean's go-ahead) a phone shows these
+  // tables as cards, so at 412 nothing scrolls sideways at all — the second
+  // pair below holds that. The bar is still owed wherever a table DOES scroll,
+  // which is now the widths just above the phone class (600): the nine-column
+  // tracking table needs 1200, and the waybill tables 560 of a 600 window
+  // less its gutters.
+  testWidgets("the buyer's Requests screen shows a bar on its tracking table",
       (tester) async {
-    await pump(tester, const BuyerRequestsScreen(), const Size(412, 2600));
+    await pump(tester, const BuyerRequestsScreen(), const Size(800, 2600));
     await expectEveryWideTableSaysSo(tester, "the buyer's Requests screen");
   });
 
-  testWidgets('the buyer\'s Waybills screen shows a bar on every route table',
+  testWidgets("the buyer's Waybills screen shows a bar on every route table",
       (tester) async {
-    await pump(tester, const BuyerWaybillsScreen(), const Size(412, 1500));
+    await pump(tester, const BuyerWaybillsScreen(), const Size(600, 1500));
     await expectEveryWideTableSaysSo(tester, "the buyer's Waybills screen");
   });
+
+  for (final (name, screen, height) in [
+    ('Requests', const BuyerRequestsScreen() as Widget, 2600.0),
+    ('Waybills', const BuyerWaybillsScreen() as Widget, 1500.0),
+  ]) {
+    testWidgets("phone: the buyer's $name tables are cards, nothing scrolls "
+        'sideways', (tester) async {
+      await pump(tester, screen, Size(412, height));
+      expect(
+          horizontalViewports(tester)
+              .where((v) => v.position.maxScrollExtent > 0),
+          isEmpty);
+    });
+  }
 }

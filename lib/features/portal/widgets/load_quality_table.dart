@@ -177,6 +177,7 @@ class LoadQualityTable extends ConsumerWidget {
                   ),
                   const SizedBox(height: 10),
                   MlDataTable(
+                    cardsOnPhone: true,
                     columns: [
                       const MlColumn('Truck', flex: 3, minWidth: kPlateColumnMinWidth),
                       // flex 3: "Manganese" is 75px at bodyMedium and a flex-2 column of

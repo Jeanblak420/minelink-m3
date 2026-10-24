@@ -290,6 +290,7 @@ class _EarningsBody extends StatelessWidget {
           icon: Icons.local_shipping_outlined,
           meta: mlCount(vehicleRows.length, 'vehicle'),
           child: MlDataTable(
+            cardsOnPhone: true,
             columns: const [
               MlColumn('Vehicle', flex: 3, minWidth: kPlateColumnMinWidth),
               MlColumn('Trips', flex: 1, align: TextAlign.right),
@@ -318,6 +319,7 @@ class _EarningsBody extends StatelessWidget {
           icon: Icons.alt_route_outlined,
           meta: mlCount(routeRows.length, 'route'),
           child: MlDataTable(
+            cardsOnPhone: true,
             columns: const [
               MlColumn('Route', flex: 4),
               MlColumn('Trips', flex: 1, align: TextAlign.right),
@@ -403,6 +405,7 @@ class _EarningsBody extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               MlDataTable(
+                cardsOnPhone: true,
                 columns: const [
                   MlColumn('Truck', flex: 2, minWidth: kPlateColumnMinWidth),
                   MlColumn('Customer', flex: 3),

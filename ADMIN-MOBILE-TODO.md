@@ -635,7 +635,36 @@ end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
     Dock behaviour already proven by `chat_launcher_in_app_bar_test` and
     `back_closes_chat_window_test`. test/features/portal + test/widgets:
     1,198 passed. Analyze clean.
-- [ ] 8.4 Company portals on a phone: wide tables as cards.
+- [x] 8.4 Company portals on a phone: wide tables as cards.
+  - Opted in every table in the portals and fleet: 17 `MlDataTable`s
+    (dashboards ×3, buyer loads & value, waybills, earnings ×3, fuel costs,
+    load controller, production ×2, transporter reconciliations, load
+    quality, request tracking, weight reconciliation, fleet vehicles) and
+    the 4 portal `RawReconView`s. All had 3+ columns and a 560 px or wider
+    minimum, so all scrolled sideways on a phone.
+  - Request tracking sat in its own 1200 px sideways scroller; on a phone
+    that wrapper is skipped (`_wideUnlessPhone`), so the cards are not
+    trapped in it.
+  - Tons-out search results (Flutter's sortable `DataTable`, sorted by
+    tapping heads): on a phone, cards plus a "Sort by" field and a direction
+    button through the same `onSort` (re-keyed so Reset can't leave it
+    stale). Desktop keeps the sortable table.
+  - Shared with the admin console: the load-quality table also shows on the
+    admin Recon tables page, so that page gets cards on a phone too.
+  - Tests: `portal_tables_cards_on_phone_test` 4/4 — a guard over every
+    `MlDataTable(`/`RawReconView(` in portal + fleet (fails on any that
+    forgets `cardsOnPhone`; it failed on all 21 before), tons-out cards with
+    no overflow at 360, Sort by sorts both ways, desktop unchanged.
+    `wide_table_scrollbar_test` updated: its "a sideways table shows a bar"
+    guard moved to 800/600 px (where they still scroll) and gained the
+    phone check that nothing scrolls sideways; 4/4.
+  - Renders: 20 phone renders regenerated, NO desktop render changed. Looked
+    at tons-out search, request tracking, fuel costs and the quality-spec
+    dialog (that dialog, and four others, changed only because the page
+    behind them now has cards). The harness's CUT OFF notes on four of them
+    are the Available-routes chip, ellipsised on purpose (comment in
+    `available_routes_section.dart`), not these tables.
+  - Analyze clean; portal + fleet + widgets + admin tests: 1,425 passed.
 - [ ] 8.5 Crash-report check-in: new table + a daily check-in per device, shown
       on the Crash reports page (which devices have gone quiet). Live DB.
 - [ ] 8.6 Extras address search timeout: diagnosed and fixed on the extras

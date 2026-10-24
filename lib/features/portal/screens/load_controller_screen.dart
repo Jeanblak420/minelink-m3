@@ -227,6 +227,7 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
                       )
                     else
                       MlDataTable(
+                        cardsOnPhone: true,
                         columns: const [
                           MlColumn('Truck Reg', flex: 3, minWidth: kPlateColumnMinWidth),
                           // flex 4: the client is a company name — "Atlas Buyer Group"

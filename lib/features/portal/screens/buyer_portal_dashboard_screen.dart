@@ -525,6 +525,7 @@ class _BuyerPortalDashboardScreenState
     return MlCard(
       padding: EdgeInsets.zero,
       child: MlDataTable(
+        cardsOnPhone: true,
         columns: const [
           MlColumn('Date'),
           // The truck column carries a plate. Six columns sharing the 560px

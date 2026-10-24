@@ -242,6 +242,7 @@ class FleetVehicleTable extends StatelessWidget {
     return MlCard(
       padding: const EdgeInsets.all(18),
       child: MlDataTable(
+        cardsOnPhone: true,
         // MEASURED BY RENDERING IT, not by arithmetic. The first draft kept
         // thirteen columns at `minWidth: 1180`, and the register at 1600px has
         // only ~1250px to lay them out in — so the table COMPRESSED instead of

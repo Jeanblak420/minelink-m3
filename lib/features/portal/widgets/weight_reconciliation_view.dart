@@ -242,6 +242,7 @@ class WeightReconciliationView extends ConsumerWidget {
                   }),
                   const SizedBox(height: 16),
                   MlDataTable(
+                    cardsOnPhone: true,
                     columns: const [
                       MlColumn('Truck', flex: 3, minWidth: kPlateColumnMinWidth),
                       // 124 is what a company name needs at this table's body

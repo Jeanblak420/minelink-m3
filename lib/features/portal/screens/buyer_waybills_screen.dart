@@ -96,6 +96,7 @@ class BuyerWaybillsScreen extends ConsumerWidget {
                   MlCard(
                     padding: const EdgeInsets.all(18),
                     child: MlDataTable(
+                      cardsOnPhone: true,
                       onRowTap: mirror
                           ? null
                           : (i) => _editWaybill(

@@ -57,7 +57,7 @@ class PortalTonsOutScreen extends ConsumerWidget {
                 'Every check-in → check-out as captured, with live Day / Week / '
                 'Month / Year / Total cards and Excel/CSV/PDF export.',
           ),
-          RawReconView(companyId: companyId, initialTransporter: transporter),
+          RawReconView(cardsOnPhone: true, companyId: companyId, initialTransporter: transporter),
           const SizedBox(height: 60),
         ],
       ),

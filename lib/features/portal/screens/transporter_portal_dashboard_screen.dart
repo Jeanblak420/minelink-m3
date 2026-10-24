@@ -564,6 +564,7 @@ class _TransporterPortalDashboardScreenState
     return MlCard(
       padding: EdgeInsets.zero,
       child: MlDataTable(
+        cardsOnPhone: true,
         columns: const [
           MlColumn('Date'),
           // The truck column carries a South African plate. Without this the

@@ -609,6 +609,7 @@ class _MineSupplierPortalDashboardScreenState
     return MlCard(
       padding: EdgeInsets.zero,
       child: MlDataTable(
+        cardsOnPhone: true,
         columns: const [
           MlColumn('Date'),
           MlColumn('Waybill'),

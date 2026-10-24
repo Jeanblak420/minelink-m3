@@ -109,7 +109,7 @@ class _BuyerReconciliationsScreenState
               const SizedBox(height: 16),
               WeightReconciliationView(companyId: companyId),
               const SizedBox(height: 16),
-              RawReconView(companyId: companyId),
+              RawReconView(cardsOnPhone: true, companyId: companyId),
               const SizedBox(height: 16),
               ReconUploadsPanel(companyId: companyId),
               const SizedBox(height: 20),

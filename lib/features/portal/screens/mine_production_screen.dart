@@ -238,6 +238,7 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
               return MlCard(
                 padding: const EdgeInsets.all(18),
                 child: MlDataTable(
+                  cardsOnPhone: true,
                   columns: const [
                     MlColumn('Date', flex: 2),
                     MlColumn('Tons', flex: 2, align: TextAlign.right),
@@ -465,6 +466,7 @@ class _ReportSection extends StatelessWidget {
                 )
               else
                 MlDataTable(
+                  cardsOnPhone: true,
                   columns: const [
                     MlColumn('Date', flex: 2),
                     MlColumn('Mined', flex: 2, align: TextAlign.right),

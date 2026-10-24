@@ -208,6 +208,7 @@ class _EconomyCard extends StatelessWidget {
             )
           else
             MlDataTable(
+              cardsOnPhone: true,
               columns: const [
                 MlColumn('Vehicle', flex: 3, minWidth: kPlateColumnMinWidth),
                 MlColumn('Litres', flex: 2, align: TextAlign.right),

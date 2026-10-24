@@ -54,7 +54,7 @@ class TransporterReconciliationsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             WeightReconciliationView(companyId: companyId),
             const SizedBox(height: 16),
-            RawReconView(companyId: companyId),
+            RawReconView(cardsOnPhone: true, companyId: companyId),
             const SizedBox(height: 16),
             // Transporters are non-initiators — view-only per §4 (the server
             // also rejects their save_recon_upload).
@@ -81,6 +81,7 @@ class TransporterReconciliationsScreen extends ConsumerWidget {
               MlCard(
                 padding: const EdgeInsets.all(18),
                 child: MlDataTable(
+                  cardsOnPhone: true,
                   columns: const [
                     MlColumn('Batch', flex: 3),
                     MlColumn('Status', flex: 2, align: TextAlign.right),
