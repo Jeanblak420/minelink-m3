@@ -772,3 +772,15 @@ end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
       tests and renders (20 phone renders looked at). For Jean.
   - NAS: `MineLink-M3-2026-10-24.apk` (replaced) and
     `PhoneRemote\minelink-m3.apk`, both SHA-256 equal to the build.
+## 9. Jean's follow-ups, 2026-10-24
+Same rules: one at a time, fully, ticked with evidence; the phone walk last.
+- [ ] 9.1 The expanded rail is usable on a short window (a phone held
+      sideways, ≈411 dp tall): its list gets the height, everything reachable.
+- [ ] 9.2 The old place-index tools no longer recreate the dropped
+      `place_index_search_fts` index, and refresh `place_index_search` after
+      they change `place_index`.
+- [ ] 9.3 Company-portal chat (8.3) and cards (8.4) walked on the S25 as real
+      company users. Passwords are stored only as hashes, so: throwaway test
+      companies + users created for the walk, and EVERYTHING they create or
+      change deleted afterwards (verified by query). Jean's own sign-in on the
+      phone must be left as it was.
