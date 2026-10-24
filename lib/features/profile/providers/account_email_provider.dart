@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:flutter_application_1/core/config/supabase_config.dart';
+import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 
 /// The signed-in account's email address, trimmed, or null when there is none.
 ///
@@ -17,12 +17,24 @@ import 'package:flutter_application_1/core/config/supabase_config.dart';
 ///
 /// A provider is the seam. The screen watches this; a test overrides it.
 ///
-/// Deliberately a plain `Provider` rather than a `StreamProvider` over
-/// `onAuthStateChange`: the screen is only reachable behind the router's auth
-/// gate, so the session cannot vanish underneath it without the whole route
-/// being torn down first. A stream here would add a rebuild path with nothing
-/// to rebuild for.
+/// ## It follows the session — it used to read it once
+///
+/// This was a plain `Provider` over `currentUser`, on the reasoning that the
+/// screen sits behind the router's auth gate. But a provider lives in the
+/// app's root container, not in the route: it was computed on first read and
+/// then cached for the life of the app. Found on the emulator walk
+/// (2026-10-24): signed in as a transporter manager, the change-password card
+/// read "For role.walk.sec…" — the user who had signed in on that device two
+/// sign-ins earlier — and `ChangePasswordSection` would have checked the
+/// "current password" against that previous account. It now follows
+/// [authStateProvider], which tracks every sign-in and sign-out.
 final accountEmailProvider = Provider<String?>((ref) {
-  final email = SupabaseConfig.client.auth.currentUser?.email?.trim();
+  final email = ref.watch(accountEmailSourceProvider)?.trim();
   return (email == null || email.isEmpty) ? null : email;
 });
+
+/// The raw email of whoever is signed in, from [authStateProvider]. Its own
+/// provider so a test can drive sign-ins without a live auth client.
+final accountEmailSourceProvider = Provider<String?>(
+  (ref) => ref.watch(authStateProvider.select((s) => s.user?.email)),
+);
