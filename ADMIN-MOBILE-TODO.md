@@ -448,9 +448,16 @@ Status: ☐ not started · ◐ in progress · ☑ done
     `attention_list_test.dart` 6/6 (order, empties, every row routes, first
     on the page, taps open, all clear, desktop untouched). Phone dashboard
     golden updated and viewed; renders 273/273.
-- [ ] 6.2 Phone card layout for the four wide tables (done in 4.5 — tick when
+- [x] 6.2 Phone card layout for the four wide tables (done in 4.5 — tick when
       4.5 is ticked and re-checked).
-- [ ] 6.3 Real "online now" count (done in 3.1 — tick when re-checked).
+  - Re-checked: 4.5 ticked; `ml_data_table_cards_test` 3/3 and
+    `organizations_registry_test` 7/7 re-run green; the four phone goldens
+    (organizations, margin ledger, recon tables, route marketplace) pass.
+- [x] 6.3 Real "online now" count (done in 3.1 — tick when re-checked).
+  - Re-checked live, rolled back: `platform_registry_extras` as jean@ → 0,
+    one heartbeat → 1; its body counts `last_seen_at`. The dashboard
+    re-reads it every minute (3.6) — `dashboard_stats_refresh_test` green.
+    On-device heartbeat check stays in 7.3.
 - [ ] 6.4 Seat warning when a company nears its limit.
 - [ ] 6.5 Chat behaves like a page: Back closes it, docks out of the way of
       buttons (1.2 + 4.4 + 5.3 — tick when all three are ticked and re-checked).
