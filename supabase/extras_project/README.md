@@ -45,3 +45,34 @@ MineLink user arrives as `anon`. There is no session to scope rows by, which
 means RLS cannot protect party-scoped data here at all. Every table on the main
 project except `place_index` carries RLS policies for exactly that reason;
 `place_index` had none, and that is what made it the one table safe to move.
+
+## After re-importing `place_index`: refresh the search copy
+
+Since `20261024150000` / `20261024160000` (2026-10-24) the address search does
+not scan `place_index` itself. `_place_index_rank` reads
+`place_index_search`, a materialized view holding only `id`, `name`,
+`search_text` and `confidence`, stored in town order, and goes back to
+`place_index` only for the rows it returns.
+
+**Why:** this free-plan database has 455 MB of RAM and was 429 MB into swap.
+A common town's matching rows were scattered one per page across
+`place_index`, so a first search read thousands of pages back from swap and
+ran past `anon`'s 3-second timeout ("Johannesburg" 7.7 s, "Centurion" 3.3 s).
+In town order the same rows sit on neighbouring pages: fresh searches now take
+40–210 ms on the server. Pre-loading the table (`pg_prewarm`) was tried and
+did not help — it loads pages into a cache that is itself swapped out.
+
+**So after any re-import of `place_index`, run:**
+
+```sql
+refresh materialized view public.place_index_search;
+```
+
+Non-concurrent on purpose (a concurrent refresh needs a 34 MB unique index
+this project does not need). It takes about 25 seconds; searches made during
+it wait for it.
+
+The old full-text index on `place_index` (`place_index_search_fts`) was
+dropped by `20261024160000`: nothing uses it any more. `tools/place_index_move_project.py`
+and `tools/place_index_trim.py` still create it; on their next use, drop it
+again afterwards (34 MB) and refresh the view.

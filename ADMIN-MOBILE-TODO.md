@@ -694,8 +694,34 @@ end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
   - Tests: `device_checkin_test` 5/5, `device_checkins_test` 4/4 (counts,
     wording, badges, fits 360), crash screen tests 47 green. Analyze clean.
   - Phone walk (8.7): the S25 should appear as a device checked in today.
-- [ ] 8.6 Extras address search timeout: diagnosed and fixed on the extras
+- [x] 8.6 Extras address search timeout: diagnosed and fixed on the extras
       project (`qbydiuplqhmkaxarnuza`, via the Management API only).
+  - Symptom: `anon` (every app user, there) has a 3 s statement timeout;
+    the first search for a common town took 2.8–7.7 s (Johannesburg
+    7,726 ms, Centurion 3,273 ms); the same search again 30–200 ms.
+  - Root cause, measured: the machine has 455 MB RAM, Postgres's default
+    280 MB cache, 429 MB of swap in use (metrics endpoint). The ranking
+    reads every row matching the town to sort by confidence, ~1 page per
+    row ("durban": 24,356 rows, 7,991 pages), so a first search pulls
+    thousands of pages back from swap. JIT is off; the plan is fine.
+    `pg_prewarm` was tried: every page loaded (2.5 s), still 1.8–2.2 s on
+    fresh words — the cache itself is swapped. Extension removed again.
+  - Fix (extras migrations, ledger rows added in separate calls):
+    `20261024150000_place_index_search_compact` — materialized view
+    `place_index_search` (id, name, search_text, confidence) in town order
+    + its FTS index (91 + 27 MB), no grants. `20261024160000_place_index_rank_uses_compact`
+    — `_place_index_rank` finds candidates there, joins `place_index` only
+    for the ≤20 rows returned; `id` added as the last tie-break (the
+    2,000-row cut used to fall wherever the disk order put it); the unused
+    old FTS index dropped (−34 MB). Database 236 → 321 MB (64%).
+  - Proof: rolled-back comparison of 25 searches old vs new — identical
+    25/25 (139 rows, same ids, scores, order); total 19.3 s → 5.1 s cold.
+    After: 12 never-searched towns 40–213 ms each on the server. As `anon`
+    over the internet: Johannesburg 1.41 s, Cape Town 1.63 s, the rest
+    0.26–0.95 s, all HTTP 200. `tool/health_probe.py` 7/7 (extras failed
+    twice this morning).
+  - Re-import note in `supabase/extras_project/README.md` (refresh the view;
+    the two old tools still create the dropped index).
 - [ ] 8.7 Analyze clean, full suite green, desktop goldens accounted for,
       Windows build: rail lights Organizations on a company page,
       DB healthy + ledger matches, release APK walked on the S25, pushed, NAS.
