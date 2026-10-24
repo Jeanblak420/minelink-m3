@@ -27,7 +27,8 @@ Future<void> _pump(WidgetTester tester,
   tester.view.physicalSize = const Size(360, 2400);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
-  final tree = consoleNavTree();
+  // The phone's own menu (what the drawer shows).
+  final tree = consoleNavTree(phone: true);
   await tester.pumpWidget(MaterialApp(
     theme: AppTheme.darkTheme,
     home: MediaQuery(
@@ -75,7 +76,7 @@ void main() {
       await _pump(tester, scale: scale, wrap: true, width: 304);
       // The entries that were cut on the phone are actually laid out here.
       for (final label in ['Account deactivations', 'Communications',
-          'Transporter driver limits']) {
+          'Transporter driver limits', 'Platform users']) {
         expect(find.text(label), findsWidgets, reason: label);
       }
       expect(_cut(tester), isEmpty);

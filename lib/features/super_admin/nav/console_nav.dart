@@ -98,43 +98,53 @@ List<MlNavNode> consoleNavTree({bool phone = false}) => <MlNavNode>[
   ),
 
   // ---- Organisations, access and the audit trail ----
-  const MlNavNode.group(
+  MlNavNode.group(
     label: 'Tokens & Seats',
     shortLabel: 'Access',
     icon: Icons.vpn_key_outlined,
     selectedIcon: Icons.vpn_key_rounded,
     children: [
-      MlNavNode.leaf(
+      const MlNavNode.leaf(
         label: 'Organizations',
         icon: Icons.business_outlined,
         selectedIcon: Icons.business_rounded,
         route: '/super-admin/organizations',
       ),
-      MlNavNode.leaf(
+      const MlNavNode.leaf(
         label: 'Token requests',
         icon: Icons.key_outlined,
         selectedIcon: Icons.key_rounded,
         route: '/super-admin/token-requests',
       ),
-      MlNavNode.leaf(
+      const MlNavNode.leaf(
         label: 'Token history',
         icon: Icons.timeline_outlined,
         selectedIcon: Icons.timeline_rounded,
         route: '/super-admin/token-history',
       ),
-      MlNavNode.leaf(
+      // On the phone menu (admin phone audit, 2026-10-24): every user on
+      // the platform, and before this the only way in was tapping the
+      // dashboard's "Total users" card. Desktop rail unchanged.
+      if (phone)
+        const MlNavNode.leaf(
+          label: 'Platform users',
+          icon: Icons.people_outline_rounded,
+          selectedIcon: Icons.people_rounded,
+          route: '/super-admin/users',
+        ),
+      const MlNavNode.leaf(
         label: 'Audit logs',
         icon: Icons.history_outlined,
         selectedIcon: Icons.history_rounded,
         route: '/super-admin/audit-logs',
       ),
-      MlNavNode.leaf(
+      const MlNavNode.leaf(
         label: 'Crash reports',
         icon: Icons.bug_report_outlined,
         selectedIcon: Icons.bug_report_rounded,
         route: '/super-admin/crash-reports',
       ),
-      MlNavNode.leaf(
+      const MlNavNode.leaf(
         label: 'Account deactivations',
         icon: Icons.person_off_outlined,
         selectedIcon: Icons.person_off_rounded,

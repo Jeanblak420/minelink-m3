@@ -366,7 +366,13 @@ Status: ☐ not started · ◐ in progress · ☑ done
     `console_nav_phone_test.dart` 2/2; nav-structure and drawer tests green.
   - Jean to decide: remove it from the desktop menu too? Add the navigation
     guide (as "Navigation setup")?
-- [ ] 5.2 Platform users in the menu under Tokens & Seats.
+- [x] 5.2 Platform users in the menu under Tokens & Seats.
+  - Phone menu: "Platform users" under Tokens & Seats (after Token history),
+    route `/super-admin/users`; the bottom bar lights Access on it. Desktop
+    rail unchanged (Jean to say if it should get it too). It also shows
+    WhatsApp users by number now (4.6).
+  - `console_nav_phone_test.dart` 4/4; the phone-drawer label test now runs
+    on the phone menu and includes it (whole at text 1.0–1.5).
 - [ ] 5.3 Chat window on a phone: practical full-screen / docked behaviour that
       can always be moved back, resized or closed — never stuck or unusable.
 - [ ] 5.4 Dashboard: repeats removed, one real version of each section kept,

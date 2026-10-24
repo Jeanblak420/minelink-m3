@@ -20,4 +20,21 @@ void main() {
     final router = File('lib/core/routing/app_router.dart').readAsStringSync();
     expect(router, contains("'/super-admin/settings'"));
   });
+
+  test('Platform users is on the phone menu, under Tokens & Seats', () {
+    final access = consoleNavTree(phone: true)
+        .firstWhere((n) => n.label == 'Tokens & Seats');
+    final users = access.leaves.where((l) => l.label == 'Platform users');
+    expect(users, hasLength(1));
+    expect(users.single.route, '/super-admin/users');
+    expect(consoleNavTree(phone: true).resolveSelected('/super-admin/users'),
+        '/super-admin/users',
+        reason: 'the bottom bar would light Dashboard on that page');
+    final router = File('lib/core/routing/app_router.dart').readAsStringSync();
+    expect(router, contains("'/super-admin/users'"));
+  });
+
+  test('the desktop rail is unchanged by it', () {
+    expect(_labels(consoleNavTree()), isNot(contains('Platform users')));
+  });
 }
