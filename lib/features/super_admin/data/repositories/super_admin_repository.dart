@@ -848,6 +848,17 @@ class SuperAdminRepository {
     return res.count;
   }
 
+  /// Every device's daily check-in, newest first, with who last used it.
+  /// Platform admin only (`list_device_checkins` returns nothing to anyone
+  /// else). See `DeviceCheckin` for why this exists.
+  Future<List<DeviceCheckinRow>> getDeviceCheckins({int limit = 200}) async {
+    final rows = await _client
+        .rpc('list_device_checkins', params: {'p_limit': limit});
+    return (rows as List)
+        .map((e) => DeviceCheckinRow.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
+  }
+
   /// Distinct `platform` / `app_version` values across ALL crash reports —
   /// deliberately independent of the `fatalOnly`/`platform`/`appVersion`
   /// filters applied in [getCrashReports], so the console's facet chips

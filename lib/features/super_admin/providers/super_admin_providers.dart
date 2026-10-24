@@ -160,6 +160,13 @@ final crashReportTotalProvider = FutureProvider.family<int,
       ),
 );
 
+/// Every device's daily check-in, for the Crash reports page's "Devices"
+/// line (Jean's go-ahead, 2026-10-24).
+final deviceCheckinsProvider =
+    FutureProvider.autoDispose<List<DeviceCheckinRow>>(
+  (ref) => ref.watch(superAdminRepositoryProvider).getDeviceCheckins(),
+);
+
 /// Distinct platform / app_version values across ALL crash reports, for the
 /// console screen's facet chips — deliberately NOT keyed by the current
 /// filter selection, so the chip list itself never shrinks just because a

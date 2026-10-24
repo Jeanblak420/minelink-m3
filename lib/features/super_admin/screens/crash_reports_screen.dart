@@ -7,6 +7,7 @@ import 'package:flutter_application_1/core/design/components/ml_components.dart'
 import 'package:flutter_application_1/features/super_admin/data/models/models.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/core/telemetry/crash_reporter.dart';
+import 'package:flutter_application_1/features/super_admin/widgets/device_checkins.dart';
 import 'package:intl/intl.dart';
 
 /// Super-global admin console: read-only viewer over `public.crash_reports`
@@ -151,6 +152,7 @@ class _CrashReportsScreenState extends ConsumerState<CrashReportsScreen> {
         rows: rows,
         total: total,
         onSendTest: _sendTestReport,
+        devices: const DeviceCheckinsLine(),
         platforms: (facets?.platforms.toList() ?? const <String>[])..sort(),
         appVersions: (facets?.appVersions.toList() ?? const <String>[])
           ..sort(),
@@ -180,6 +182,10 @@ class _CrashReportsBody extends StatelessWidget {
   /// "Send a test report"; null where there is no live reporter (tests that
   /// inject rows).
   final Future<void> Function()? onSendTest;
+
+  /// The devices' daily check-ins (`DeviceCheckinsLine`); null where there is
+  /// no live database (tests that inject rows).
+  final Widget? devices;
   final List<String> platforms;
   final List<String> appVersions;
   final bool fatalOnly;
@@ -195,6 +201,7 @@ class _CrashReportsBody extends StatelessWidget {
     required this.rows,
     this.total,
     this.onSendTest,
+    this.devices,
     required this.platforms,
     required this.appVersions,
     required this.fatalOnly,
@@ -259,6 +266,12 @@ class _CrashReportsBody extends StatelessWidget {
             ],
           ),
         ),
+        // Which devices could have reported, so a silence can be read.
+        if (devices != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: devices,
+          ),
         const Divider(height: 1),
         SizedBox(
           width: double.infinity,

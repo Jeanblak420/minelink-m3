@@ -10,6 +10,7 @@ import 'package:flutter_application_1/core/config/supabase_config.dart';
 import 'package:flutter_application_1/core/push/push_service.dart';
 import 'package:flutter_application_1/core/routing/initial_location.dart';
 import 'package:flutter_application_1/core/telemetry/crash_reporter.dart';
+import 'package:flutter_application_1/core/telemetry/device_checkin.dart';
 import 'package:flutter_application_1/core/telemetry/error_screen_widget.dart';
 import 'package:flutter_application_1/core/telemetry/supabase_reporting_sink.dart';
 import 'package:flutter_application_1/core/services/database_migration_service.dart';
@@ -48,6 +49,8 @@ void main() async {
   });
 }
 
+DeviceCheckin? _deviceCheckin;
+
 Future<void> _initializeApplication() async {
   try {
     await SupabaseConfig.initialize();
@@ -71,6 +74,10 @@ Future<void> _initializeApplication() async {
       );
     }
     crashReporter.useSink(SupabaseReportingSink(appVersion: appVersion));
+    // The daily per-device check-in that lets a quiet crash table be read
+    // (see DeviceCheckin). Once per process: this function is retried after a
+    // failed boot, and a second start would double its listeners.
+    _deviceCheckin ??= DeviceCheckin(appVersion: appVersion)..start();
     // Push notifications. See PushService's doc comment: there is no
     // Firebase project yet, so this lands in an unavailable state and the
     // app behaves exactly as it did before push existed — never allowed to

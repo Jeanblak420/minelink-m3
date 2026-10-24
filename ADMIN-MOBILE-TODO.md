@@ -665,8 +665,35 @@ end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
     are the Available-routes chip, ellipsised on purpose (comment in
     `available_routes_section.dart`), not these tables.
   - Analyze clean; portal + fleet + widgets + admin tests: 1,425 passed.
-- [ ] 8.5 Crash-report check-in: new table + a daily check-in per device, shown
+- [x] 8.5 Crash-report check-in: new table + a daily check-in per device, shown
       on the Crash reports page (which devices have gone quiet). Live DB.
+  - Migration `20261024140000_device_checkins.sql` (Jean's explicit OK):
+    `device_checkins` (one row per install, bounded by installs not runs),
+    RLS on, SELECT for the platform admin only, no write grant;
+    `record_device_checkin` (signed-in only, ignores a repeat inside the
+    hour); `list_device_checkins` (admin only, names the user);
+    `prune-device-checkins` cron, nightly 03:58, drops 180-day-quiet rows.
+  - Dry run first (probe raising, rolled back, verified nothing left): Eli
+    sees 0 rows, Jean sees 1 labelled "Eli Mans", repeat ignored
+    (checkins=1), anon may call neither function, cron present. Applied;
+    ledger row inserted in its own call; ledger since 20261024 = the 7 files.
+  - Real path, throwaway account (created + deleted, 0 rows left): two
+    PostgREST calls with a real JWT → 204/204, row has that user and
+    checkins=1; non-admin list `[]`, non-admin select `[]`; no sign-in →
+    401 "permission denied for function record_device_checkin".
+  - Security advisor: only the generic "authenticated can execute a
+    SECURITY DEFINER function" notes (the app has ~265, by design); nothing
+    on the table.
+  - App: `lib/core/telemetry/device_checkin.dart` — stable install id in
+    shared preferences, at most once in 20 h, at start + sign-in + resume,
+    never throws, a failed send retried next time; started once in `main()`
+    beside the crash sink (guarded: boot can be retried). Admin: Crash
+    reports gains "Devices: N devices checked in today · M quiet for 3+
+    days" with "Show devices" (who, platform, version, last check-in,
+    TODAY / QUIET N DAYS).
+  - Tests: `device_checkin_test` 5/5, `device_checkins_test` 4/4 (counts,
+    wording, badges, fits 360), crash screen tests 47 green. Analyze clean.
+  - Phone walk (8.7): the S25 should appear as a device checked in today.
 - [ ] 8.6 Extras address search timeout: diagnosed and fixed on the extras
       project (`qbydiuplqhmkaxarnuza`, via the Management API only).
 - [ ] 8.7 Analyze clean, full suite green, desktop goldens accounted for,
