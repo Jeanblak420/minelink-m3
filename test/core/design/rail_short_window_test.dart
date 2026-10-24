@@ -12,7 +12,7 @@ import 'package:flutter_application_1/features/super_admin/nav/console_nav.dart'
 
 import '../../test_helpers/real_fonts.dart';
 
-Future<List<String>> _pump(WidgetTester tester, double height) async {
+Future<List<String>> _pump(WidgetTester tester, double height, {bool expanded = true}) async {
   final overflows = <String>[];
   final previous = FlutterError.onError;
   FlutterError.onError = (d) {
@@ -34,6 +34,7 @@ Future<List<String>> _pump(WidgetTester tester, double height) async {
           header: const SizedBox(height: 90, child: Text('MineLink brand')),
           footer: const SizedBox(height: 80, child: Text('jean footer')),
           onToggleExpanded: () {},
+          expanded: expanded,
         ),
         const Expanded(child: SizedBox()),
       ]),
@@ -73,5 +74,19 @@ void main() {
     expect(tester.getTopLeft(find.text('MineLink brand')).dy, brandTop,
         reason: 'the brand scrolled with the list on a tall window');
     expect(find.text('jean footer'), findsOneWidget);
+  });
+
+  testWidgets('411dp tall, COLLAPSED: the icons are drawn and reachable',
+      (tester) async {
+    // Seen on the S25-matched emulator held sideways: after the compact
+    // layout went in, the collapsed rail drew an empty band.
+    expect(await _pump(tester, 411, expanded: false), isEmpty);
+    final rail = tester.getRect(find.byType(MlNavRail));
+    final dash = find.descendant(
+        of: find.byType(MlNavRail), matching: find.byIcon(Icons.dashboard_outlined));
+    expect(dash, findsOneWidget, reason: 'no Dashboard icon in the collapsed rail');
+    final r = tester.getRect(dash);
+    expect(rail.contains(r.center), isTrue, reason: 'the icon is outside the rail: $r');
+    expect(r.width, greaterThan(0));
   });
 }

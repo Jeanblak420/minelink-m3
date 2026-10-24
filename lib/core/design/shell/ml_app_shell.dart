@@ -368,7 +368,15 @@ class _MlAppShellState extends State<MlAppShell> {
           ? (widget.bottomNavOverride ?? _buildBottomBar(context))
           : null,
       floatingActionButton: widget.floatingActionButton,
-      body: windowClass.usesRail
+      // Keep clear of side system bars. On Android 15+ the app draws edge to
+      // edge, and a phone held sideways puts its navigation buttons on the
+      // RIGHT: the workspace ran under them, cutting "Complete now" and the
+      // chat disc (S25 and the S25-matched emulator, 2026-10-24). Top and
+      // bottom are the app bar's and the bottom bar's to handle.
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: windowClass.usesRail
           ? Row(
               // STRETCH, not the default centre.
               //
@@ -410,6 +418,7 @@ class _MlAppShellState extends State<MlAppShell> {
               ],
             )
           : workspace,
+      ),
     );
 
     if (widget.overlay == null) return scaffold;
