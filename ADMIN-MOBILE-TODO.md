@@ -846,9 +846,18 @@ Same rules: one at a time, fully, ticked with evidence; the phone walk last.
 other issues and problems u find in other accounts and user roles and so on
 for the mobile and all other versions of the app please". Emulator only.
 Throwaway users per role, everything they touch deleted after (9.3 method).
-- [ ] 10.1 `list_request_tracking` names the real requester
+- [x] 10.1 `list_request_tracking` names the real requester
       (`requesting_company_id`), on every party's tracking page. Live DB
       function change — Jean's explicit OK ("please fix it").
+  - Migration `20261024170000_request_tracking_names_the_requester.sql`:
+    requester = coalesce(requesting_company_id, buyer_company_id); and the
+    requesting company can now see its own request (visibility only checked
+    buyer/supplier/transporter, so a mine's request stayed invisible to it
+    until a mine was assigned). Body otherwise copied from the live catalog.
+  - Dry run (rolled back): admin sees requester "AB mine" (was "AB buyer");
+    an AB mine staff member still sees it; grants unchanged
+    (authenticated, postgres). Applied; ledger row in its own call; live
+    body confirmed; main ledger since 20261024 = its 7 files.
 - [ ] 10.2 Every portal role walked on the emulator at phone width (mine:
       supervisor, load controller, security; transporter: driver; buyer;
       and the owner/company account); every fault found fixed, with a test.
