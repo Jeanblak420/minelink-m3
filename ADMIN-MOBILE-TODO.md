@@ -404,8 +404,32 @@ Status: ☐ not started · ◐ in progress · ☑ done
     (its harness now gives the window a real size — without one every
     width counted as a phone) 20/20 incl. 360dp at text 2.0 with no
     overflow. Full suite 2,818 passed. Phone goldens updated and viewed.
-- [ ] 5.5 Crash reports: real count instead of a 500 cap; found out why nothing
+- [x] 5.5 Crash reports: real count instead of a 500 cap; found out why nothing
       arrived after 17 Oct and fixed it so reporting can't silently stop again.
+  - Real count: the header said "500 fingerprints" — the length of the
+    newest-500 page. The table holds 9,243 reports. Header now "9,243
+    reports · newest 500 shown" (exact count from the server, same filters).
+  - Why nothing since 17 Oct (checked, not guessed): the server accepts a
+    signed-in user's report (insert probe as jean@, rolled back: 1 row);
+    the policy allows own/anonymous rows; no trigger; the 90-day prune is
+    not involved; the app wires its reporter at start-up and has no switch
+    that stops it except a per-session cap. The last Android reports were a
+    388-row "Duplicate GlobalKey" storm on 17 Oct from a bug since fixed;
+    web stopped 10 Sep. So the quiet looks genuine — but nothing could tell
+    that from a broken pipeline.
+  - So a silence can no longer pass unnoticed: the screen says when the last
+    report arrived, and "Send a test report" pushes one report through the
+    app's real reporter and checks it reached the table — "crash reporting
+    works", or in red that it did not arrive within 10 s. (Found and fixed
+    on the way: a failed read-back escaped as an error and the screen said
+    nothing.) Test reports are labelled "not an error"; the shipping app,
+    which reads the same table, will list any that are sent.
+  - Not done without Jean's OK (needs a new table): an automatic daily
+    check-in per device, so a broken pipeline raises itself without anyone
+    pressing the button.
+  - `crash_reports_count_test.dart` 5/5; crash screen tests 33/33; three
+    crash-report goldens updated (header + the new line — desktop too,
+    as a wrong-number fix like section 3). Full suite green.
 
 ## 6. Additions
 - [ ] 6.1 "Needs your attention" list at the top of the dashboard (pending

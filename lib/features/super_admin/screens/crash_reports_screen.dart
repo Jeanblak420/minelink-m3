@@ -6,6 +6,8 @@ import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/models.dart';
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
+import 'package:flutter_application_1/core/telemetry/crash_reporter.dart';
+import 'package:intl/intl.dart';
 
 /// Super-global admin console: read-only viewer over `public.crash_reports`
 /// (Task 2 created the table, Task 3 fills it from `SupabaseReportingSink`).
@@ -55,6 +57,61 @@ class _CrashReportsScreenState extends ConsumerState<CrashReportsScreen> {
     return out;
   }
 
+  /// Pushes one report through the app's real reporter — the same sink every
+  /// crash uses — and checks that it reached the table.
+  ///
+  /// Nothing arrived after 17 Oct, and nothing on this screen could tell a
+  /// quiet app from a broken pipeline (admin phone audit, 2026-10-24). The
+  /// table accepted a signed-in user's insert when probed, the reporter is
+  /// wired at start-up, and the last reports were a since-fixed storm — so
+  /// the quiet looks genuine, but this button is how anyone can prove it.
+  Future<void> _sendTestReport() async {
+    final messenger = ScaffoldMessenger.of(context);
+    // The time makes the message unique, so finding it proves THIS report
+    // arrived, not an earlier test.
+    final message = 'Test report sent from the Crash reports screen at '
+        '${DateFormat('HH:mm:ss').format(MlTime.now())} — not an error.';
+    crashReporter.recordError(message, StackTrace.current,
+        context: 'test report');
+    messenger.showSnackBar(
+        const SnackBar(content: Text('Test report sent — checking it arrived…')));
+    final filters = (fatalOnly: false, platform: null, appVersion: null);
+    for (var attempt = 0; attempt < 5; attempt++) {
+      await Future<void>.delayed(const Duration(seconds: 2));
+      if (!mounted) return;
+      // A failed read is "not seen yet", never an escaped error: the screen
+      // must always end by saying whether the report arrived.
+      List<CrashReportRow> rows;
+      try {
+        rows = await ref
+            .read(superAdminRepositoryProvider)
+            .getCrashReports(limit: 5);
+      } catch (_) {
+        rows = const <CrashReportRow>[];
+      }
+      final arrived = rows.any((r) => r.error.startsWith(message));
+      if (arrived) {
+        ref.invalidate(crashReportsProvider(filters));
+        ref.invalidate(crashReportsProvider(
+            (fatalOnly: _fatalOnly, platform: _platform, appVersion: _appVersion)));
+        ref.invalidate(crashReportTotalProvider);
+        messenger
+          ..hideCurrentSnackBar()
+          ..showSnackBar(const SnackBar(
+              content: Text('Test report received — crash reporting works.')));
+        return;
+      }
+    }
+    if (!mounted) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(
+        backgroundColor: MlTokens.red600,
+        content: Text('The test report did not arrive within 10 seconds. '
+            'Crash reporting from this device is not reaching the server.'),
+      ));
+  }
+
   void _onExpand(String id) =>
       setState(() => _expandedId = _expandedId == id ? null : id);
 
@@ -77,9 +134,10 @@ class _CrashReportsScreenState extends ConsumerState<CrashReportsScreen> {
       );
     }
 
-    final rowsAsync = ref.watch(crashReportsProvider(
-      (fatalOnly: _fatalOnly, platform: _platform, appVersion: _appVersion),
-    ));
+    final filters =
+        (fatalOnly: _fatalOnly, platform: _platform, appVersion: _appVersion);
+    final rowsAsync = ref.watch(crashReportsProvider(filters));
+    final total = ref.watch(crashReportTotalProvider(filters)).valueOrNull;
     final facets = ref.watch(crashReportFacetsProvider).valueOrNull;
 
     return rowsAsync.when(
@@ -91,6 +149,8 @@ class _CrashReportsScreenState extends ConsumerState<CrashReportsScreen> {
       ),
       data: (rows) => _CrashReportsBody(
         rows: rows,
+        total: total,
+        onSendTest: _sendTestReport,
         platforms: (facets?.platforms.toList() ?? const <String>[])..sort(),
         appVersions: (facets?.appVersions.toList() ?? const <String>[])
           ..sort(),
@@ -113,6 +173,13 @@ class _CrashReportsScreenState extends ConsumerState<CrashReportsScreen> {
 /// (the live route) or the caller's (tests wrap it in one directly).
 class _CrashReportsBody extends StatelessWidget {
   final List<CrashReportRow> rows;
+
+  /// Every report matching the filters (the list stops at the newest 500).
+  final int? total;
+
+  /// "Send a test report"; null where there is no live reporter (tests that
+  /// inject rows).
+  final Future<void> Function()? onSendTest;
   final List<String> platforms;
   final List<String> appVersions;
   final bool fatalOnly;
@@ -126,6 +193,8 @@ class _CrashReportsBody extends StatelessWidget {
 
   const _CrashReportsBody({
     required this.rows,
+    this.total,
+    this.onSendTest,
     required this.platforms,
     required this.appVersions,
     required this.fatalOnly,
@@ -152,10 +221,42 @@ class _CrashReportsBody extends StatelessWidget {
           child: MlPageHeader(
             title: 'Crash reports',
             description:
-                'Errors the app reported about itself, grouped by '
-                'fingerprint — newest first, fatal ones marked.',
-            meta: mlCount(rows.length, 'fingerprint', 'fingerprints'),
+                'Errors the app reported about itself — newest first, fatal '
+                'ones marked.',
+            // The real number. It said "500 fingerprints": the length of the
+            // newest-500 page, under 9,243 reports.
+            meta: total == null || total! <= rows.length
+                ? mlCount(total ?? rows.length, 'report')
+                : '${NumberFormat.decimalPattern().format(total)} reports '
+                    '· newest ${rows.length} shown',
             padding: EdgeInsets.zero,
+          ),
+        ),
+        // When the last one arrived, so a silence is visible — and a way to
+        // check the silence is real.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+          child: Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                rows.isEmpty
+                    ? 'No reports received.'
+                    : 'Last report received ${MlTime.ago(rows.first.at)}.',
+                style: context.mlText.bodySmall.copyWith(
+                  color: MlSemantic.of(context).textMuted,
+                ),
+              ),
+              if (onSendTest != null)
+                MlButton.outline(
+                  label: 'Send a test report',
+                  icon: Icons.send_outlined,
+                  compact: true,
+                  onPressed: () => onSendTest!(),
+                ),
+            ],
           ),
         ),
         const Divider(height: 1),

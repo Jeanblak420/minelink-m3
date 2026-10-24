@@ -149,6 +149,17 @@ final crashReportsProvider = FutureProvider.family<List<CrashReportRow>,
   },
 );
 
+/// The real number of crash reports for the same filters as
+/// [crashReportsProvider], whose list stops at the newest 500.
+final crashReportTotalProvider = FutureProvider.family<int,
+    ({bool fatalOnly, String? platform, String? appVersion})>(
+  (ref, f) => ref.watch(superAdminRepositoryProvider).getCrashReportTotal(
+        fatalOnly: f.fatalOnly,
+        platform: f.platform,
+        appVersion: f.appVersion,
+      ),
+);
+
 /// Distinct platform / app_version values across ALL crash reports, for the
 /// console screen's facet chips — deliberately NOT keyed by the current
 /// filter selection, so the chip list itself never shrinks just because a

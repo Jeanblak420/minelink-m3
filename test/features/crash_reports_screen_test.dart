@@ -135,8 +135,10 @@ void main() {
     final title = tester.widget<Text>(
         find.descendant(of: header, matching: find.text('Crash reports')));
     expect(title.style?.fontFamily, MlTokens.fontSerif);
+    // "N reports", not "N fingerprints": the rows are reports, and the
+    // figure is their real count (2026-10-24).
     expect(tester.widget<MlPageHeader>(header).meta,
-        '${_populatedReports.length} fingerprints');
+        '${_populatedReports.length} reports');
   });
 
   testWidgets('expanding a fatal report scrolls its stack trace instead of '

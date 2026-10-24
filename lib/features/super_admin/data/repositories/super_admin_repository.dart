@@ -831,6 +831,23 @@ class SuperAdminRepository {
         .toList();
   }
 
+  /// How many crash reports match the filters — the real figure, not the
+  /// length of [getCrashReports]' newest-500 page. The console showed "500
+  /// fingerprints" against 9,243 rows (admin phone audit, 2026-10-24).
+  Future<int> getCrashReportTotal({
+    bool fatalOnly = false,
+    String? platform,
+    String? appVersion,
+  }) async {
+    var query = _client.from('crash_reports').select('id');
+    if (fatalOnly) query = query.eq('fatal', true);
+    if (platform != null) query = query.eq('platform', platform);
+    if (appVersion != null) query = query.eq('app_version', appVersion);
+    // One row of payload; the total comes back in the count header.
+    final res = await query.limit(1).count(CountOption.exact);
+    return res.count;
+  }
+
   /// Distinct `platform` / `app_version` values across ALL crash reports —
   /// deliberately independent of the `fatalOnly`/`platform`/`appVersion`
   /// filters applied in [getCrashReports], so the console's facet chips
