@@ -7,6 +7,7 @@ import 'package:flutter_application_1/features/portal/models/raw_recon_row.dart'
 import 'package:flutter_application_1/features/portal/services/recon_exporter.dart';
 import 'package:flutter_application_1/features/portal/services/reconciliation_service.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 import 'package:flutter_application_1/features/portal/widgets/pod_photo_link.dart';
 import 'package:flutter_application_1/features/portal/widgets/waybill_modal.dart';
 import 'package:flutter_application_1/features/portal/utils/variance_severity.dart';
@@ -33,9 +34,15 @@ class RawReconView extends ConsumerStatefulWidget {
     super.key,
     required this.companyId,
     this.initialTransporter,
+    this.cardsOnPhone = false,
   });
 
   final String? companyId;
+
+  /// On a phone, one card per load — every column as a label beside its
+  /// value — instead of the 14-column grid behind a sideways scroll (admin
+  /// phone audit, 2026-10-24). Opt-in: the super-admin recon tables use it.
+  final bool cardsOnPhone;
 
   /// Optional deep-link transporter pre-filter (phase-2 nav merge T4, the
   /// `/portal/{org}/tons-out/:transporterId` glue): applied once when it
@@ -371,6 +378,8 @@ class _RawReconViewState extends ConsumerState<RawReconView> {
                   const SizedBox(height: 12),
                   _ExcelReconTable(
                     rows: filtered,
+                    cards: widget.cardsOnPhone &&
+                        MlWindowClass.of(context).usesBottomNav,
                     onWaybillTap: (row) => showWaybillModal(
                       context,
                       ref,
@@ -482,9 +491,13 @@ class _ExcelReconTable extends StatelessWidget {
     required this.rows,
     this.onWaybillTap,
     this.onPodTap,
+    this.cards = false,
   });
 
   final List<RawReconRow> rows;
+
+  /// One card per load instead of the grid (see [RawReconView.cardsOnPhone]).
+  final bool cards;
 
   /// Tapping a WAYBILL NUMBER opens the real linked waybill (§4). Null-safe:
   /// only rows that actually carry a waybill number render as a link.
@@ -539,8 +552,9 @@ class _ExcelReconTable extends StatelessWidget {
     _ReconCol col,
     String value,
     double? variance,
-    double? netMass,
-  ) {
+    double? netMass, {
+    Alignment align = Alignment.centerRight,
+  }) {
     final severity = varianceSeverityOf(
       varianceTons: variance,
       netTons: netMass,
@@ -554,7 +568,7 @@ class _ExcelReconTable extends StatelessWidget {
     }
     final colors = varianceTone(severity).colors(Theme.of(context).brightness);
     return Align(
-      alignment: Alignment.centerRight,
+      alignment: align,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
         decoration: BoxDecoration(
@@ -582,6 +596,7 @@ class _ExcelReconTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final semantic = MlSemantic.of(context);
+    if (cards) return _cards(context, semantic);
     final gridline = semantic.borderStrong;
 
     final table = Table(
@@ -729,6 +744,99 @@ class _ExcelReconTable extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  /// The phone layout: a card per load, a line per column, the same cells the
+  /// grid draws (waybill and POD links, the tinted variance). Each card shows
+  /// its own date — the grid's "date on the first row of the day" grouping
+  /// does not survive being split into cards.
+  Widget _cards(BuildContext context, MlSemantic semantic) {
+    String time(DateTime? t) => t == null ? '—' : MlTime.calendarClock(t);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final r in rows)
+          Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(MlTokens.rLg),
+              border: Border.all(color: semantic.borderCard),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 7,
+              children: [
+                for (var col = 0; col < _cols.length; col++)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 2, right: 10),
+                          child: Text(
+                            _cols[col].label.toUpperCase(),
+                            style: context.mlText.overline.copyWith(
+                              color: semantic.textFaint,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: _cardValue(context, semantic, r, col, time),
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _cardValue(BuildContext context, MlSemantic semantic, RawReconRow r,
+      int col, String Function(DateTime?) time) {
+    final c = _cols[col];
+    // Left-aligned in a card: the grid right-aligns figures to line up a
+    // column of them, and a card has no column.
+    final left = _ReconCol(c.label, flex: c.flex, mono: c.mono, code: c.code);
+    final value = switch (col) {
+      0 => MlTime.calendarDay(r.tripDate),
+      1 => time(r.timeIn),
+      2 => r.waybillNumber ?? '—',
+      3 => r.transporterName ?? '—',
+      4 => r.truckReg ?? '—',
+      5 => r.destination ?? '—',
+      6 => r.product ?? '—',
+      7 => r.sourceName ?? '—',
+      8 => r.customerName ?? '—',
+      9 => r.netMass == null ? '—' : '${r.netMass!.toStringAsFixed(2)} t',
+      10 => r.deliveredTons == null
+          ? '—'
+          : '${r.deliveredTons!.toStringAsFixed(2)} t',
+      11 => r.varianceTons == null
+          ? '—'
+          : '${r.varianceTons!.toStringAsFixed(2)} t',
+      12 => r.podPhotoPath == null ? '—' : 'View',
+      _ => time(r.timeOut),
+    };
+    if (col == _colWaybill && onWaybillTap != null && r.waybillNumber != null) {
+      return _waybillLink(semantic, left, value, r);
+    }
+    if (col == _colPod && onPodTap != null && r.podPhotoPath != null) {
+      return _podLink(context, value, r);
+    }
+    if (col == _colVariance) {
+      return _varianceText(
+          context, semantic, left, value, r.varianceTons, r.netMass,
+          align: Alignment.centerLeft);
+    }
+    return _valueText(semantic, left, value);
   }
 
   Widget _waybillLink(

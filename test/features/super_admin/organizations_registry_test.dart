@@ -90,8 +90,19 @@ void main() {
     });
   }
 
-  testWidgets('the registry scrolls rather than compressing', (tester) async {
+  // On a phone the registry is one card per company (admin phone audit,
+  // 2026-10-24) — nothing to scroll sideways to, and no column to compress.
+  testWidgets('on a phone the registry is cards, not a table', (tester) async {
     await pumpRegistry(tester, 412);
+    expect(find.byType(MlWideTable), findsNothing,
+        reason: 'the phone still gets the sideways-scrolling table');
+    expect(find.textContaining('Seats '), findsWidgets,
+        reason: 'the cards do not show seats');
+  });
+
+  testWidgets('the registry scrolls rather than compressing', (tester) async {
+    // Just above phone width the table is back, and too narrow for itself.
+    await pumpRegistry(tester, 610);
     expect(find.byType(MlWideTable), findsWidgets,
         reason: 'the table is laid straight into the page again, so its '
             'columns compress on a phone instead of the table scrolling. '

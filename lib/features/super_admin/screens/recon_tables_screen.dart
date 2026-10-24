@@ -36,7 +36,7 @@ class ReconTablesScreen extends StatelessWidget {
                 'Use the Transporter filter for the per-transporter view.',
           ),
           // null = platform-wide (the RPC scopes by caller; the admin sees all).
-          const RawReconView(companyId: null),
+          const RawReconView(companyId: null, cardsOnPhone: true),
           const SizedBox(height: 16),
           // Platform-wide quality certificates per load (view-only here — the
           // loading mine attaches them).

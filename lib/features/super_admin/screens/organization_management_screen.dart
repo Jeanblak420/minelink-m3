@@ -8,6 +8,7 @@ import 'package:flutter_application_1/features/super_admin/data/models/organizat
 import 'package:flutter_application_1/features/super_admin/providers/super_admin_providers.dart';
 import 'package:flutter_application_1/features/super_admin/utils/organization_search.dart';
 import 'package:flutter_application_1/core/design/components/ml_components.dart';
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
@@ -349,6 +350,15 @@ class _OrganizationManagementScreenState
           //
           // Header and rows go inside ONE `MlWideTable` so they scroll
           // together; two would drift apart the moment anyone touched it.
+          // On a phone, one card per company instead: the table needed a
+          // sideways scroll to reach its seats and expiry, and cut the token
+          // countdown to "328d 23 : 53…" (admin phone audit, 2026-10-24).
+          if (MlWindowClass.of(context).usesBottomNav)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [for (final o in shown) _phoneCard(context, s, o)],
+            )
+          else
           MlWideTable(
             minWidth: 620,
             child: Column(
@@ -553,8 +563,155 @@ class _OrganizationManagementScreenState
             // Org type pill
             Expanded(
               flex: 10,
+              child: _typePill(context, s, type, tc),
+            ),
+            // Seats
+            Expanded(
+              flex: 9,
+              child: Text(
+                '$seatsUsed/$seatLimit',
+                textAlign: TextAlign.center,
+                style: context.mlText.code(
+                  color: over ? MlTokens.orange600 : s.textBody,
+                  size: 13,
+                  weight: FontWeight.w700,
+                ),
+              ),
+            ),
+            // Token expiry
+            Expanded(
+              flex: 13,
+              // A Wrap, so the date drops BELOW the countdown rather than
+              // competing with it for a 66px cell.
+              //
+              // Both were `Flexible` in a Row, which shares the space evenly —
+              // fine on a desktop, and on a 412px phone it left the countdown
+              // 66px for "107d 22h left" (95px) and "Expired · 01 Aug". The
+              // expiry column is the one a platform admin scans this register
+              // for; neither half of it can be the half that gets cut.
+              child: _expiryCell(context, s, exp),
+            ),
+            SizedBox(
+              width: 44,
               child: Align(
+                alignment: Alignment.centerRight,
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: s.textFaint,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// A company as a phone card: who it is on top, then type, seats and token
+  /// expiry on a line that wraps — nothing cut, nothing behind a scroll.
+  Widget _phoneCard(BuildContext context, MlSemantic s, Map<String, dynamic> o) {
+    final name = (o['company_name'] as String?)?.trim().isNotEmpty == true
+        ? o['company_name'] as String
+        : 'Unnamed';
+    final type = o['org_type'] as String?;
+    final seatLimit = (o['seat_limit'] as num?)?.toInt() ?? 0;
+    final seatsUsed = (o['seats_used'] as num?)?.toInt() ?? 0;
+    final over = seatLimit > 0 && seatsUsed > seatLimit;
+    final exp = _expiry(o['token_expires_at'] as String?);
+    final tc = _typeColor(type, Theme.of(context).brightness);
+    final op = o['owner_profile'];
+    final owner = op is Map ? ((op['email'] as String?)?.trim() ?? '') : '';
+
+    return InkWell(
+      onTap: () => context.go('/super-admin/organization/${o['id']}'),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: s.divider)),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: tc.withValues(alpha: 0.10),
+                borderRadius: MlShape.radiusMedium,
+                border: Border.all(color: tc.withValues(alpha: 0.28)),
+              ),
+              child: Icon(_typeIcon(type), size: 17, color: tc),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: context.mlText.titleSmall.copyWith(
+                      color: s.textStrong,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (owner.isNotEmpty)
+                    Text(
+                      owner,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.mlText.code(
+                        color: s.textFaint,
+                        size: 12,
+                        weight: FontWeight.w400,
+                      ),
+                    ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _typePill(context, s, type, tc),
+                      Text(
+                        'Seats $seatsUsed/$seatLimit',
+                        style: context.mlText.code(
+                          color: over ? MlTokens.orange600 : s.textBody,
+                          size: 13,
+                          weight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  _expiryCell(context, s, exp),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Padding(
+              padding: const EdgeInsets.only(top: 7),
+              child: Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: s.textFaint,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// The org-type pill, shared by the table row and the phone card.
+  Widget _typePill(
+      BuildContext context, MlSemantic s, String? type, Color tc) {
+    return Align(
                 alignment: Alignment.centerLeft,
+      // Sizes to the pill where the parent allows (the phone card's Wrap);
+      // a table column's tight width still fills as before.
+      widthFactor: 1,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -597,33 +754,12 @@ class _OrganizationManagementScreenState
                     ],
                   ),
                 ),
-              ),
-            ),
-            // Seats
-            Expanded(
-              flex: 9,
-              child: Text(
-                '$seatsUsed/$seatLimit',
-                textAlign: TextAlign.center,
-                style: context.mlText.code(
-                  color: over ? MlTokens.orange600 : s.textBody,
-                  size: 13,
-                  weight: FontWeight.w700,
-                ),
-              ),
-            ),
-            // Token expiry
-            Expanded(
-              flex: 13,
-              // A Wrap, so the date drops BELOW the countdown rather than
-              // competing with it for a 66px cell.
-              //
-              // Both were `Flexible` in a Row, which shares the space evenly —
-              // fine on a desktop, and on a 412px phone it left the countdown
-              // 66px for "107d 22h left" (95px) and "Expired · 01 Aug". The
-              // expiry column is the one a platform admin scans this register
-              // for; neither half of it can be the half that gets cut.
-              child: Wrap(
+              );
+  }
+
+  /// Countdown and date, shared by the table row and the phone card.
+  Widget _expiryCell(BuildContext context, MlSemantic s, _ExpiryInfo exp) {
+    return Wrap(
                 spacing: 8,
                 runSpacing: 2,
                 crossAxisAlignment: WrapCrossAlignment.center,
@@ -676,23 +812,7 @@ class _OrganizationManagementScreenState
                       ),
                     ),
                 ],
-              ),
-            ),
-            SizedBox(
-              width: 44,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Icon(
-                  Icons.chevron_right_rounded,
-                  size: 20,
-                  color: s.textFaint,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+              );
   }
 
   // ───────────────────────── controls ─────────────────────────

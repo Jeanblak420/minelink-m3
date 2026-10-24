@@ -422,6 +422,10 @@ class _MarginLedgerScreenState extends ConsumerState<MarginLedgerScreen> {
         boxShadow: MlTokens.shadowSm,
       ),
       child: MlDataTable(
+        // On a phone, one card per entry with every figure on screen — the
+        // money columns sat off the right edge behind a sideways scroll, and
+        // they are what anyone opens this for (admin phone audit, 2026-10-24).
+        cardsOnPhone: true,
         minWidth: 1180,
         columns: const [
           MlColumn('Date', flex: 3),

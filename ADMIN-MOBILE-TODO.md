@@ -276,8 +276,24 @@ Status: ☐ not started · ◐ in progress · ☑ done
     suites green, goldens unchanged.
   - Not changed: the company portals still float the disc on a phone (not
     part of this admin-panel job) — flagged to Jean.
-- [ ] 4.5 Wide tables become one card per row on a phone: Organizations, Margin
+- [x] 4.5 Wide tables become one card per row on a phone: Organizations, Margin
       ledger (money visible), Recon, Route marketplace.
+  - Route marketplace and Margin ledger: `MlDataTable(cardsOnPhone: true)`
+    (4.1) — every column a label + value; the ledger's five money figures
+    are all on screen, no sideways scroll.
+  - Organizations: a phone card per company — icon, full name, owner email,
+    then type pill · "Seats 4/5" · countdown and date on a wrapping line,
+    chevron to open. Pill and expiry are now shared helpers used by the
+    table row and the card, so the two cannot drift.
+  - Recon tables (super-admin): `RawReconView(cardsOnPhone: true)` — a card
+    per load, all 14 columns, waybill and POD links and the tinted variance
+    kept. Opt-in: the company portals' recon screens are unchanged.
+  - Desktop goldens byte-identical (checked after the helper refactor and
+    after each card mode). Phone goldens updated: margin ledger,
+    organizations, recon tables, route marketplace — each viewed.
+  - Tests: `ml_data_table_cards_test.dart` 3/3; `organizations_registry_test`
+    now asserts cards on a phone and the scrolling table just above phone
+    width (610px). Full suite: 2,791 passed.
 - [ ] 4.6 Company page: one back arrow; bottom bar highlights Access; all tabs
       readable; WhatsApp users show their number, not the internal login
       address (also on Platform users).
