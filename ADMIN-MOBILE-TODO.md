@@ -725,3 +725,25 @@ end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
 - [ ] 8.7 Analyze clean, full suite green, desktop goldens accounted for,
       Windows build: rail lights Organizations on a company page,
       DB healthy + ledger matches, release APK walked on the S25, pushed, NAS.
+
+  - Progress (2026-10-24):
+    - `flutter analyze`: no issues. Full suite: 2,868 passed, 1 skipped
+      (pre-existing), 0 failed (+33 since section 8 began).
+    - Desktop renders changed in section 8: 13. Pixel-diffed against
+      0421b93: 12 differ only inside the rail (x 8–259: Platform users and
+      Navigation setup in, Platform settings out, the lit item moved); the
+      13th pair, Crash reports, also gains the Devices line (8.5). Fixture
+      check-ins added so the render shows it.
+    - Health: `tool/health_probe.py` 7/7 incl. extras. Management API: db,
+      rest, auth, storage, realtime healthy on both projects. Realtime's
+      `db_connected` reads false on BOTH, with zero Realtime connections and
+      no replication slots on main — consistent with no client subscribed
+      (Realtime connects per tenant on demand; the never-subscribed extras
+      project reads the same). To be shown true with the app open on the
+      S25 in the walk.
+    - Ledgers: main since 20261024 = the 7 files (…140000 device_checkins);
+      extras = 20261024150000, 20261024160000, matching its 2 new files.
+    - Desktop rail: to be checked on the S25 in LANDSCAPE (≈890 dp, above the
+      600 dp phone class, so the same rail a Windows window draws), not a
+      separate Windows build.
+    - Release APK built: 511 entries, config present.
