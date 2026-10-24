@@ -560,4 +560,9 @@ Status: ☐ not started · ◐ in progress · ☑ done
   - Extras `search_place_index` still times out (500 statement timeout,
     twice). That predates this work and nothing here touched that project.
     It is the address-search item already waiting on Jean's choice.
-- [ ] 7.5 Committed, pushed, APK on the NAS.
+- [x] 7.5 Committed, pushed, APK on the NAS.
+  - Pushed to origin/main (`git rev-list --left-right --count` = 0 0).
+  - `\\192.168.88.30\Shared\MineLink-M3\MineLink-M3-2026-10-24.apk` and
+    `\\192.168.88.30\Shared\PhoneRemote\minelink-m3.apk`, both SHA-256 equal
+    to the build (511 entries, config present). The 2026-10-23 APK removed;
+    the 2026-10-22 Windows and source zips left as they were.
