@@ -483,7 +483,8 @@ Status: ☐ not started · ◐ in progress · ☑ done
 - [x] 7.1 `flutter analyze` clean; full test suite green; new tests for each fix.
   - `flutter analyze`: no issues. Full suite: 2,834 passed, 0 failed (1
     skipped, pre-existing). Every ticked item above names its new test file;
-    25 new test files this round.
+    18 new test files this round (counted against
+    the backup tag), plus 7 existing ones extended.
 - [x] 7.2 Windows/web layouts unchanged (desktop goldens still match).
   - Compared every non-phone golden with the backup tag
     `backup/pre-admin-mobile-2026-10-24`. 12 differ; 11 by single text lines
