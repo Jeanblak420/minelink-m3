@@ -480,8 +480,24 @@ Status: ☐ not started · ◐ in progress · ☑ done
     7.3.
 
 ## 7. Prove it and ship it
-- [ ] 7.1 `flutter analyze` clean; full test suite green; new tests for each fix.
-- [ ] 7.2 Windows/web layouts unchanged (desktop goldens still match).
+- [x] 7.1 `flutter analyze` clean; full test suite green; new tests for each fix.
+  - `flutter analyze`: no issues. Full suite: 2,834 passed, 0 failed (1
+    skipped, pre-existing). Every ticked item above names its new test file;
+    25 new test files this round.
+- [x] 7.2 Windows/web layouts unchanged (desktop goldens still match).
+  - Compared every non-phone golden with the backup tag
+    `backup/pre-admin-mobile-2026-10-24`. 12 differ; 11 by single text lines
+    only (12px bands, no layout movement): the corrected wording and numbers
+    from section 3 (active users label, "N waiting", live-map count, alerts
+    period, "1 organization"/registry sentence) and "Login & password" on
+    the company page (2.1). The 12th, crash reports, gained the "last report
+    received / Send a test report" line (5.5), which moves its list down —
+    the one desktop layout change, and it is part of a reliability fix.
+  - Everything else this round is gated to phones (`usesBottomNav`).
+  - Desktop-only faults left as they are, for Jean to decide: the rail lights
+    Dashboard on the company page and a few other pages; Platform settings
+    still listed; Platform users not listed. The company portals still float
+    the chat disc on a phone.
 - [ ] 7.3 Release APK on Jean's phone; whole admin panel walked again on the
       phone; every item above re-checked there.
       Includes: with the app open (chat never opened), Jean's
