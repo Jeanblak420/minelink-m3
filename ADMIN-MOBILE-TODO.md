@@ -315,7 +315,21 @@ Status: ☐ not started · ◐ in progress · ☑ done
     (1840) so its last control is not under Generate Token in the picture;
     desktop golden unchanged. Analyzer clean; admin/render/widget/core
     suites green.
-- [ ] 4.7 Each insights page opens at the top.
+- [x] 4.7 Each insights page opens at the top.
+  - Cause (reproduced, not assumed): Buyers and Mines are one route
+    (`/super-admin/insights/:orgType`). When Mines' figures are already
+    loaded — the dashboard reads all three org types — the router keeps the
+    same screen and only changes its argument, so the scroll position
+    carries over. (First attempt at a test passed WITHOUT the fix because the
+    data loaded fresh; the test now visits Mines first, as the app does, and
+    the unkeyed control case keeps Buyers' scroll.)
+  - Fix: the route builds `SuperAdminOrgInsightsScreen` keyed by org type, so
+    each type has its own state and opens at the top. Applies on every
+    platform (a key, no visual change); renders unchanged.
+  - `insights_open_at_top_test.dart` 3/3: keyed → Mines at 0 after Buyers
+    scrolled 1,500px; unkeyed control → kept; source guard on the router's
+    key. (The builder stays inline in the route: the render harness reads
+    screen names per route block and mislabelled 5 renders when it moved.)
 - [ ] 4.8 Tap targets at least 48 px: chat window buttons, table page arrows,
       targets − / +.
 

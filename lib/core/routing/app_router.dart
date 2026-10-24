@@ -1434,7 +1434,16 @@ class AppRouter {
               if (orgType == 'transporter') {
                 return const TransportersOverviewV2Screen();
               }
-              return SuperAdminOrgInsightsScreen(orgType: orgType);
+              // Keyed by org type. Buyers and Mines are this one route with a
+              // different parameter, so without a key the router kept the one
+              // screen and only changed its argument — and Mines opened at the
+              // bottom, wherever Buyers had been scrolled to (admin phone
+              // audit, 2026-10-24). A key per type gives each its own state
+              // and scroll position. insights_open_at_top_test.dart holds it.
+              return SuperAdminOrgInsightsScreen(
+                key: ValueKey('insights-$orgType'),
+                orgType: orgType,
+              );
             },
           ),
           GoRoute(
