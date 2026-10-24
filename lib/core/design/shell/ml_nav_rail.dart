@@ -83,6 +83,8 @@ class MlNavRail extends StatefulWidget {
     this.footer,
     this.onToggleExpanded,
     this.showSearch = true,
+    this.width,
+    this.wrapLabels = false,
   });
 
   final List<MlNavNode> tree;
@@ -113,6 +115,18 @@ class MlNavRail extends StatefulWidget {
 
   /// Filter box. Suppressed on short trees, where it is pure overhead.
   final bool showSearch;
+
+  /// The expanded width, when the host is not the desktop rail. The phone
+  /// drawer passes its own: up to 320dp, as M3 allows.
+  final double? width;
+
+  /// Labels may take two lines and rows grow to fit them.
+  ///
+  /// The phone drawer sets this. At the phone's own text size the drawer
+  /// read "Communicatio…", "Account deactivati…", "Margin ledger histo…"
+  /// (admin phone audit, 2026-10-24) — menu entries nobody could read in
+  /// full. The desktop rail keeps one line.
+  final bool wrapLabels;
 
   /// M3's standard rail width when it shows icons only.
   static const double collapsedWidth = 80;
@@ -188,10 +202,12 @@ class _MlNavRailState extends State<MlNavRail> {
     final tree = _query.isEmpty ? widget.tree : widget.tree.filtered(_query);
 
     final targetWidth = expanded
-        ? MlNavRail.expandedWidth
+        ? (widget.width ?? MlNavRail.expandedWidth)
         : MlNavRail.collapsedWidth;
 
-    return AnimatedContainer(
+    return _RailLabels(
+      wrap: widget.wrapLabels,
+      child: AnimatedContainer(
       duration: MlMotion.of(context, MlMotion.expand),
       curve: MlMotion.curveOf(context, MlMotion.standard),
       width: targetWidth,
@@ -275,6 +291,7 @@ class _MlNavRailState extends State<MlNavRail> {
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -337,6 +354,34 @@ class _MlNavRailState extends State<MlNavRail> {
   }
 }
 
+/// Carries [MlNavRail.wrapLabels] down to every row without threading it
+/// through each constructor.
+class _RailLabels extends InheritedWidget {
+  const _RailLabels({required this.wrap, required super.child});
+
+  final bool wrap;
+
+  static bool _wrap(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_RailLabels>()?.wrap ?? false;
+
+  static int lines(BuildContext context) => _wrap(context) ? 2 : 1;
+
+  /// A row: exactly 48 high on the rail; at least 48, growing for a second
+  /// line of label, in the drawer.
+  static Widget rowBox(BuildContext context, Widget row) => _wrap(context)
+      ? ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: row,
+          ),
+        )
+      : SizedBox(height: 48, child: row);
+
+  @override
+  bool updateShouldNotify(_RailLabels old) => old.wrap != wrap;
+}
+
 /// One destination.
 class _RailTile extends StatelessWidget {
   const _RailTile({
@@ -392,9 +437,9 @@ class _RailTile extends StatelessWidget {
             color: selected ? chrome.railIndicator : Colors.transparent,
             shape: MlShape.pillShape,
           ),
-          child: SizedBox(
-            height: 48,
-            child: Row(
+          child: _RailLabels.rowBox(
+            context,
+            Row(
               children: [
                 SizedBox(width: indent),
                 // The selected marker. Deliberately a SHAPE and not only a
@@ -423,7 +468,7 @@ class _RailTile extends StatelessWidget {
                   Expanded(
                     child: Text(
                       node.label,
-                      maxLines: 1,
+                      maxLines: _RailLabels.lines(context),
                       overflow: TextOverflow.ellipsis,
                       style: (selected ? text.labelLarge : text.bodyMedium)
                           ?.copyWith(
@@ -557,9 +602,9 @@ class _RailGroup extends StatelessWidget {
                       : Colors.transparent,
                   shape: MlShape.pillShape,
                 ),
-                child: SizedBox(
-                  height: 48,
-                  child: Row(
+                child: _RailLabels.rowBox(
+                  context,
+                  Row(
                     children: [
                       const SizedBox(width: 16),
                       Icon(
@@ -573,7 +618,7 @@ class _RailGroup extends StatelessWidget {
                       Expanded(
                         child: Text(
                           node.label,
-                          maxLines: 1,
+                          maxLines: _RailLabels.lines(context),
                           overflow: TextOverflow.ellipsis,
                           style: text.labelLarge?.copyWith(
                             color: holdsSelection

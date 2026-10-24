@@ -238,7 +238,16 @@ Status: ☐ not started · ◐ in progress · ☑ done
     leaked to desktop during the work — a row alignment and the tile padding
     — both caught by the desktop golden and gated to phone). Overflow sweep
     (widths 360–1612 × text 0.85–2.0) and `dashboard_responsive_test` green.
-- [ ] 4.2 Full names in the menu (no "Communicatio…").
+- [x] 4.2 Full names in the menu (no "Communicatio…").
+  - Cause: the phone drawer was the desktop rail at its fixed 280dp with
+    one-line labels; at the phone's text size the long entries were cut.
+  - The drawer is now as wide as M3 allows less a 56dp tap-to-close strip
+    (304dp on a 360dp phone, at most 320), and passes `wrapLabels` so labels
+    take up to two lines and rows grow (min 48dp). Both are new `MlNavRail`
+    options; the desktop rail keeps 280dp and one line (renders unchanged).
+  - `drawer_labels_whole_test.dart`: the real admin menu, every group open,
+    at text 1.0 / 1.15 / 1.3 / 1.5 — no label cut, no overflow; control case
+    (old drawer at 1.3) does cut, so the test bites.
 - [ ] 4.3 Targets: the header scrolls away on a phone; nothing clipped.
 - [ ] 4.4 Floating chat button (and Generate Token) never cover content or
       buttons on any screen.

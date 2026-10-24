@@ -696,9 +696,14 @@ class _MlAppShellState extends State<MlAppShell> {
     // the exact duplication this shell exists to delete. The drawer theme in
     // AppTheme still styles a real NavigationDrawer for anywhere one is used
     // directly.
+    // As wide as M3 lets a drawer be (360), less a 56dp strip of the page to
+    // tap to close it; at least the rail's own width. With two-line labels
+    // that is what keeps every entry readable on a phone.
+    final drawerWidth = (MediaQuery.sizeOf(context).width - 56)
+        .clamp(MlNavRail.expandedWidth, 320.0);
     return Drawer(
       backgroundColor: chrome.railBottom,
-      width: MlNavRail.expandedWidth,
+      width: drawerWidth,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topRight: Radius.circular(MlShape.extraLarge),
@@ -713,6 +718,8 @@ class _MlAppShellState extends State<MlAppShell> {
           header: widget.drawerHeader ?? widget.railHeader,
           footer: widget.railFooter,
           showSearch: widget.tree.allLeaves.length > 8,
+          width: drawerWidth,
+          wrapLabels: true,
           onNavigate: (route) {
             Navigator.of(context).pop();
             widget.onNavigate(route);
