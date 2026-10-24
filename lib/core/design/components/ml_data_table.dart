@@ -163,60 +163,109 @@ class MlDataTable extends StatelessWidget {
   }
 
   /// The phone layout behind [cardsOnPhone]: a block per row, a line per
-  /// column. Labels take two parts of the width and values three, so both
-  /// scale with the reader's text size; a label wraps between its words.
+  /// column, label beside value.
+  ///
+  /// The label column is as wide as the WIDEST label, capped at 45% of the
+  /// card, rather than a fixed two-fifths. The fixed share broke a long
+  /// one-word label mid-word: "TRANSPORTER / S" on the S25 at its 1.3 text
+  /// size (2026-10-24). Multi-word labels wrap between words. When even the
+  /// longest single WORD of a label cannot fit that 45% — a narrow phone at a
+  /// large text size — every card of the table stacks instead: the label on
+  /// its own line, the value under it, so no word is ever split.
   Widget _cards(BuildContext context, MlSemantic semantic) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var i = 0; i < rows.length; i++) ...[
-          _MlRow(
-            onTap: onRowTap == null ? null : () => onRowTap!(i),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 8,
-                children: [
-                  for (var c = 0; c < columns.length; c++)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 2, right: 12),
-                            child: Text(
-                              columns[c].label.toUpperCase(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.mlText.overline.copyWith(
-                                color: semantic.textFaint,
-                              ),
+    final labelStyle = context.mlText.overline.copyWith(
+      color: semantic.textFaint,
+    );
+    final scaler = MediaQuery.textScalerOf(context);
+    final labels = [for (final c in columns) c.label.toUpperCase()];
+    var widestWord = 0.0;
+    for (final l in labels) {
+      for (final w in l.split(' ')) {
+        final p = TextPainter(
+          text: TextSpan(text: w, style: labelStyle),
+          textScaler: scaler,
+          textDirection: TextDirection.ltr,
+        )..layout();
+        if (p.width > widestWord) widestWord = p.width;
+        p.dispose();
+      }
+    }
+
+    Widget value(int i, int c) => Align(
+          alignment: Alignment.centerLeft,
+          child: c < rows[i].length ? rows[i][c] : const SizedBox(),
+        );
+    Widget label(int c) => Text(
+          labels[c],
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: labelStyle,
+        );
+
+    return LayoutBuilder(builder: (context, box) {
+      // 8 of row padding and the label's 12 gutter come out of the 45%.
+      final stacked = widestWord + 12 > (box.maxWidth - 8) * 0.45;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < rows.length; i++) ...[
+            _MlRow(
+              onTap: onRowTap == null ? null : () => onRowTap!(i),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
+                child: stacked
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: 10,
+                        children: [
+                          for (var c = 0; c < columns.length; c++)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              spacing: 2,
+                              children: [label(c), value(i, c)],
                             ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: c < rows[i].length
-                                ? rows[i][c]
-                                : const SizedBox(),
-                          ),
-                        ),
-                      ],
-                    ),
-                ],
+                        ],
+                      )
+                    : Table(
+                        columnWidths: const {
+                          0: MinColumnWidth(IntrinsicColumnWidth(),
+                              FractionColumnWidth(0.45)),
+                          1: FlexColumnWidth(),
+                        },
+                        defaultVerticalAlignment:
+                            TableCellVerticalAlignment.top,
+                        children: [
+                          for (var c = 0; c < columns.length; c++)
+                            TableRow(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      top: 2,
+                                      right: 12,
+                                      bottom:
+                                          c < columns.length - 1 ? 8 : 0),
+                                  child: label(c),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom:
+                                          c < columns.length - 1 ? 8 : 0),
+                                  child: value(i, c),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
               ),
             ),
-          ),
-          if (i < rows.length - 1)
-            Container(height: 1, color: semantic.divider),
+            if (i < rows.length - 1)
+              Container(height: 1, color: semantic.divider),
+          ],
         ],
-      ],
-    );
+      );
+    });
   }
 
   /// [minWidth], widened until every column that declared an [MlColumn.minWidth]
