@@ -175,8 +175,23 @@ Status: ☐ not started · ◐ in progress · ☑ done
     (`count > 0` in `ml_app_shell.dart` and `ml_nav_rail.dart`).
   - `pending_requests_zero_test.dart` 2/2 (all-empty; one inbox with work).
     Seven dashboard goldens changed by "new" → "waiting" only (compared).
-- [ ] 3.5 Notifications for a request clear themselves once it is linked; the
+- [x] 3.5 Notifications for a request clear themselves once it is linked; the
       stale 18 Sep one is cleared.
+  - Migration `20261024130000_request_notifications_clear_when_decided`
+    (applied, ledger row): trigger on `transportation_requests` status — the
+    admins' "to review" notices are marked read once the request is decided
+    (approved / sent back / declined / linked; a resubmission makes fresh
+    ones), and the requester's "was approved" notice once it is linked.
+    Marked read, never deleted; a failure only warns, never blocks the
+    decision.
+  - Rolled-back probe on the real request: resubmit → 2 new admin notices
+    unread → approve → 0 unread; new "approved" notice 1 → link → 0; the
+    57 unrelated unread notifications untouched (57 → 57).
+  - Backfill: the 18 Sep "New buyer request to review" (jean@) and the
+    requester's "approved" (bryson@tlgc.com) are now read; Jean's unread
+    count is 0. The open app updates live (the feed listens to all changes).
+    The company-side order / stockpile / driver notices for that request are
+    still current work, so they were left alone.
 - [ ] 3.6 Wording: "1 organization", "1 user", no broken "- — -" separators,
       "updated live, read fresh on every load" sentence fixed — checked across
       the admin panel, not just the examples.
