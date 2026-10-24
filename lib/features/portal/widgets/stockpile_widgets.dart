@@ -2,6 +2,7 @@ import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_application_1/features/portal/models/stockpile_entry.dart';
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
 import 'package:flutter_application_1/features/portal/widgets/premium_overview_widgets.dart';
@@ -83,7 +84,7 @@ class StockpileCard extends StatelessWidget {
             // word, and it belongs in prose, which is where "Add tons" below
             // keeps it.
             suffix: pile.maxCapTons != null
-                ? ' / ${pile.maxCapTons!.toStringAsFixed(0)} t'
+                ? ' / ${_tons.format(pile.maxCapTons)} t'
                 : ' t',
             style: MlType.figure(
                 color: scheme.onSurface, size: MlTokens.fsH1),
@@ -123,6 +124,10 @@ class StockpileCard extends StatelessWidget {
   }
 }
 
+/// Whole tons with thousands grouped, as [AnimatedTons] prints the balance
+/// beside them: the card read "5,000 / 5000 t" (emulator walk, 2026-10-24).
+final _tons = NumberFormat('#,##0');
+
 /// Fill progress for an order-linked stockpile: a bar of balance vs the order
 /// cap plus a "N full load(s) ready" line so the mine, buyer and transporter
 /// all read the same collect-readiness at a glance.
@@ -154,10 +159,10 @@ class _StockpileFillBar extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           full
-              ? 'Order complete · ${cap.toStringAsFixed(0)} t · '
+              ? 'Order complete · ${_tons.format(cap)} t · '
                   '${mlCount(loads, 'load')} ready'
               : '${(frac * 100).round()}% of order · '
-                  '${(pile.remainingToCap ?? 0).toStringAsFixed(0)} t to go · '
+                  '${_tons.format(pile.remainingToCap ?? 0)} t to go · '
                   '${mlCount(loads, 'load')} ready',
           style: textTheme.bodySmall?.copyWith(
             color: full ? MlTokens.green600 : scheme.onSurfaceVariant,
