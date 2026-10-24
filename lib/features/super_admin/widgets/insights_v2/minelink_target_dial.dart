@@ -12,6 +12,7 @@
 // still be focused and puzzled over; an absent one cannot.
 // ============================================================================
 
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
@@ -358,9 +359,12 @@ class _MlTargetDialState extends State<MlTargetDial> {
           child: MlHoverLift(
             lift: 0,
             onTap: onTap,
+            // 48 to tap on a phone (admin phone audit, 2026-10-24): a 26px
+            // − / + beside a number is a misfire waiting to happen. 26 on a
+            // desktop, where it is clicked with a pointer.
             builder: (context, hovered) => Container(
-              width: 26,
-              height: 26,
+              width: MlWindowClass.of(context).usesBottomNav ? 48 : 26,
+              height: MlWindowClass.of(context).usesBottomNav ? 48 : 26,
               decoration: BoxDecoration(
                 color: hovered
                     ? t.accent.withValues(alpha: 0.16)

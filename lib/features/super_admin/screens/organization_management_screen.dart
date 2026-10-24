@@ -866,6 +866,10 @@ class _OrganizationManagementScreenState
     );
   }
 
+  /// The pager's buttons: 48 to tap on a phone, 34 on a desktop.
+  double _pagerSize(BuildContext context) =>
+      MlWindowClass.of(context).usesBottomNav ? 48 : 34;
+
   Widget _pageBtn(
     MlSemantic s,
     IconData icon, {
@@ -881,8 +885,9 @@ class _OrganizationManagementScreenState
           borderRadius: MlShape.radiusMedium,
           onTap: enabled ? onTap : null,
           child: Container(
-            width: 34,
-            height: 34,
+            // 48 to tap on a phone (admin phone audit, 2026-10-24).
+            width: _pagerSize(context),
+            height: _pagerSize(context),
             alignment: Alignment.center,
             decoration: BoxDecoration(
               borderRadius: MlShape.radiusMedium,
@@ -909,8 +914,8 @@ class _OrganizationManagementScreenState
         borderRadius: MlShape.radiusMedium,
         onTap: onTap,
         child: Container(
-          constraints: const BoxConstraints(minWidth: 34),
-          height: 34,
+          constraints: BoxConstraints(minWidth: _pagerSize(context)),
+          height: _pagerSize(context),
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
             borderRadius: MlShape.radiusMedium,

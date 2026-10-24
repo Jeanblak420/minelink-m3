@@ -766,7 +766,8 @@ class _TitleBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bar = Container(
-      height: 42,
+      // Room for 48px buttons on a phone (see _WinBtn); 42 on a desktop.
+      height: MlWindowClass.of(context).usesBottomNav ? 52 : 42,
       padding: const EdgeInsets.only(left: 12, right: 6),
       color: pal.header,
       child: Row(
@@ -824,7 +825,10 @@ class _WinBtn extends StatelessWidget {
         borderRadius: MlShape.radiusSmall,
         hoverColor: pal.headerText.withValues(alpha: 0.12),
         child: Padding(
-          padding: const EdgeInsets.all(7),
+          // 48px to tap on a phone (17 + 2 × 15.5); a 31px corner button was
+          // hard to hit (admin phone audit, 2026-10-24). Desktop keeps 31.
+          padding: EdgeInsets.all(
+              MlWindowClass.of(context).usesBottomNav ? 15.5 : 7),
           child: Icon(icon, size: 17, color: pal.headerText.withValues(alpha: 0.85)),
         ),
       ),

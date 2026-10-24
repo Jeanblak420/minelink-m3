@@ -330,8 +330,18 @@ Status: ☐ not started · ◐ in progress · ☑ done
     scrolled 1,500px; unkeyed control → kept; source guard on the router's
     key. (The builder stays inline in the route: the render harness reads
     screen names per route block and mislabelled 5 renders when it moved.)
-- [ ] 4.8 Tap targets at least 48 px: chat window buttons, table page arrows,
+- [x] 4.8 Tap targets at least 48 px: chat window buttons, table page arrows,
       targets − / +.
+  - On a phone: chat window buttons 31 → 48 (title bar 42 → 52 to hold them);
+    the registry's page arrows and page numbers 34 → 48; the targets dials'
+    − / + 26 → 48. Desktop keeps 31 / 34 / 26. (The registry is the only
+    paged table in the admin panel; the leaderboard chevron is a back link.)
+  - `tap_targets_phone_test.dart` 6/6 — measured at 360dp (≥ 48 each way)
+    and at 1280 (desktop sizes unchanged). Six phone goldens updated and
+    viewed; full suite 2,807 passed.
+  - Noted, not mine: `dock-thread-phone-dark` renders the attachment loaded
+    when run alone and still loading in a full run (timing). Goldens are
+    therefore regenerated from a full-file run.
 
 ## 5. Clean-ups
 - [ ] 5.1 Platform settings: checked the Windows/web code, then the old canonical
