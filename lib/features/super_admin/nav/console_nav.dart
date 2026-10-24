@@ -30,7 +30,10 @@ import 'package:flutter_application_1/core/routing/notifications_inbox_route.dar
 /// return from it. Every leaf in this model carries a route that resolves, and
 /// that rule is what keeps dead entries out of navigation by construction. It
 /// now lives in the top bar's overflow menu, where the app's other actions are.
-List<MlNavNode> consoleNavTree() => <MlNavNode>[
+/// [phone] is the tree for the phone's drawer and bottom bar. It differs from
+/// the desktop rail only where the admin phone audit (2026-10-24) asked, and
+/// the desktop rail is deliberately left as it is.
+List<MlNavNode> consoleNavTree({bool phone = false}) => <MlNavNode>[
   // ON ITS OWN, above the groups.
   //
   // Ruled by jean on 2026-08-22, and it is what the ORIGINAL app's
@@ -280,29 +283,35 @@ List<MlNavNode> consoleNavTree() => <MlNavNode>[
   ),
 
   // ---- Settings ----
-  const MlNavNode.group(
+  MlNavNode.group(
     label: 'Settings',
     icon: Icons.settings_outlined,
     selectedIcon: Icons.settings_rounded,
     children: [
-      MlNavNode.leaf(
+      const MlNavNode.leaf(
         label: 'Account security',
         icon: Icons.lock_outline_rounded,
         selectedIcon: Icons.lock_rounded,
         route: '/super-admin/account-security',
       ),
-      MlNavNode.leaf(
+      const MlNavNode.leaf(
         label: 'User preferences',
         icon: Icons.palette_outlined,
         selectedIcon: Icons.palette_rounded,
         route: '/super-admin/preferences',
       ),
-      MlNavNode.leaf(
-        label: 'Platform settings',
-        icon: Icons.tune_outlined,
-        selectedIcon: Icons.tune_rounded,
-        route: '/super-admin/settings',
-      ),
+      // Not on a phone. The page has had nothing to set since the delegated
+      // ("child") super-admin was removed on 2026-07-12: its only controls
+      // were that admin's status and a switch letting it register companies,
+      // and the old canonical tree and the oldest `ML` tree hold nothing else
+      // for it (checked read-only, 2026-10-24). The route still resolves.
+      if (!phone)
+        const MlNavNode.leaf(
+          label: 'Platform settings',
+          icon: Icons.tune_outlined,
+          selectedIcon: Icons.tune_rounded,
+          route: '/super-admin/settings',
+        ),
     ],
   ),
 ];

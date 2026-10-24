@@ -127,7 +127,8 @@ class _SuperAdminShellLayoutState extends ConsumerState<SuperAdminShellLayout> {
     final prefs = ref.watch(uiPrefsProvider);
     final goState = GoRouterState.of(context);
     final location = goState.uri.path;
-    final tree = consoleNavTree();
+    final tree =
+        consoleNavTree(phone: MlWindowClass.of(context).usesBottomNav);
     final titles = mlRouteTitle(goState.uri);
 
     final navLocation = NavLocation(

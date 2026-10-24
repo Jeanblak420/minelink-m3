@@ -344,9 +344,28 @@ Status: ☐ not started · ◐ in progress · ☑ done
     therefore regenerated from a full-file run.
 
 ## 5. Clean-ups
-- [ ] 5.1 Platform settings: checked the Windows/web code, then the old canonical
+- [x] 5.1 Platform settings: checked the Windows/web code, then the old canonical
       tree, then the oldest `ML` tree (read-only) for what it ever held;
       reported to Jean; then removed or filled in.
+  - **Findings (for Jean):**
+    - This app (Windows/web/phone — one codebase): the page only says both
+      super admins have equal rights and there is nothing to configure.
+    - Old canonical tree (read-only; first version 8895b58, 21 Jun 2026): it
+      held exactly two things — the delegated ("child") admin's status
+      (email, active, created) with an "Open Child admin" button, and a
+      switch "Allow child admin to register companies". Both were removed on
+      purpose on 2026-07-12 when the two super admins were made equal.
+      Nothing else ever lived there.
+    - Oldest `ML` tree (read-only): no Platform settings page at all. Its one
+      related admin screen is a read-only guide, "Navigation Setup — Custom
+      Mine Maps" (CAD/DXF → QGIS → JOSM → Valhalla steps for adding a
+      mine's own haul roads to navigation). It is not in this app. Nothing
+      was copied; whether it is wanted is Jean's call.
+  - Done: removed from the PHONE menu (`consoleNavTree(phone: true)`); the
+    desktop rail keeps it, as instructed, and the route still opens.
+    `console_nav_phone_test.dart` 2/2; nav-structure and drawer tests green.
+  - Jean to decide: remove it from the desktop menu too? Add the navigation
+    guide (as "Navigation setup")?
 - [ ] 5.2 Platform users in the menu under Tokens & Seats.
 - [ ] 5.3 Chat window on a phone: practical full-screen / docked behaviour that
       can always be moved back, resized or closed — never stuck or unusable.
