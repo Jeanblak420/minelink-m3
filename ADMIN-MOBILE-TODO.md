@@ -858,7 +858,7 @@ Throwaway users per role, everything they touch deleted after (9.3 method).
     an AB mine staff member still sees it; grants unchanged
     (authenticated, postgres). Applied; ledger row in its own call; live
     body confirmed; main ledger since 20261024 = its 7 files.
-- [ ] 10.2 Every portal role walked on the emulator at phone width (mine:
+- [x] 10.2 Every portal role walked on the emulator at phone width (mine:
       supervisor, load controller, security; transporter: driver; buyer;
       and the owner/company account); every fault found fixed, with a test.
   - Emulator matched to Jean's S25 Ultra first (his request): new AVD
@@ -891,7 +891,38 @@ Throwaway users per role, everything they touch deleted after (9.3 method).
     records" open a page titled "Operations Hub"; snake_case captions
     (`all_vehicles`, `net_mass · last_24h`) are hand-written design-style
     captions, not leaks; the driver's chat disc still floats over content.
-- [ ] 10.3 The same roles at tablet/desktop width (the rail layout) on the
+  - Buyer management 19/19 walked, no error text. FIXED: Routes & mines read
+    the abandoned `haul_routes` (0 rows) instead of `routes` (1), so it was
+    always empty; now reads `routes` (`routes_mines_reads_routes_test`).
+    On the emulator after the fix: "1 route · Belfast → maputo".
+  - Account & security re-checked on the emulator with the fixed build:
+    after switching buyer → transporter manager it names
+    role.walk.tmg… (the account signed in), not the previous one.
+  - Owner (company) accounts not walked: a company owner login cannot be
+    created for an existing company without changing its owner; the admin
+    employee walk (9.3) covers the same portal.
+- [x] 10.3 The same roles at tablet/desktop width (the rail layout) on the
       emulator rotated / sized wide; faults fixed.
-- [ ] 10.4 Analyze, full suite, renders accounted; DB healthy + ledgers;
+  - Emulator sideways (891x411 dp, Android 16): the page ran under the
+    navigation buttons on the right (edge-to-edge) — "Complete now" and the
+    chat disc cut; same on the S25 earlier. FIXED: the shell body takes a
+    left/right safe area (`shell_side_insets_test`, fails on the old shell).
+  - FOUND, NOT FIXED (for Jean): in a company portal held sideways the
+    collapsed rail draws an EMPTY band (gradient, no icons). Not from today:
+    a build with the pre-9.1 rail shows the same. A widget test of the same
+    portal tree, header and size draws all the icons, so it needs a debug
+    build on the device to find; the console's rail on the S25 sideways did
+    draw its icons earlier.
+- [x] 10.4 Analyze, full suite, renders accounted; DB healthy + ledgers;
       test users removed and verified; APK to the NAS; pushed.
+  - Analyze clean; full suite 2,877+ green (last full run), core + widgets +
+    renders 1,442 after the final fix; no render changed in section 10.
+  - health_probe 7/7; main ledger since 20261024 = its 7 files, extras = its
+    2 files.
+  - Six role users: device check-ins + employees deleted, six seats back to
+    their exact vacant state, seats_used AB buyer 0 / AB mine 4 / AB trans
+    1, auth users deleted (200 ×6); sweep of every uuid/text/json column in
+    public/auth/storage finds nothing. Scratch credentials file deleted.
+  - Release APK (511 entries, config) installed on the emulator; NAS
+    `MineLink-M3-2026-10-24.apk` + `PhoneRemote\minelink-m3.apk`, SHA-256
+    equal to the build.
