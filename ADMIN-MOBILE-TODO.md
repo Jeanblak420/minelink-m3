@@ -802,8 +802,41 @@ Same rules: one at a time, fully, ticked with evidence; the phone walk last.
     0.81 s, Westway Rd Fourways 0.62 s — all HTTP 200. Note: right after a
     refresh the copy is cold and the biggest towns sit nearer the 3 s
     (server-side) limit than the 1.4 s measured warm.
-- [ ] 9.3 Company-portal chat (8.3) and cards (8.4) walked on the S25 as real
+- [x] 9.3 Company-portal chat (8.3) and cards (8.4) walked on the S25 as real
       company users. Passwords are stored only as hashes, so: throwaway test
       companies + users created for the walk, and EVERYTHING they create or
-      change deleted afterwards (verified by query). Jean's own sign-in on the
-      phone must be left as it was.
+      change deleted afterwards (verified by query). Jean chose to be signed
+      out on the S25 for it (he signs back in himself).
+  - Throwaway ADMIN employees added to the existing AB mine / AB trans /
+    AB buyer (so the pages had real data), created through the auth admin
+    API + SQL (`employees` has no write grant for the service key, by
+    design).
+  - On the S25 (Jean signed out first, at his choice):
+    - Mine: top bar = chat, workflow alerts, notifications, More (with the
+      unseen-tour dot); no tour icon, no floating disc. More holds "Take a
+      tour" first. Chat opens full screen, Back closes it, page unchanged.
+      Dashboard loads table = cards; Search loads = cards + "Sort by | Date"
+      + Descending above "2 of 2 loads".
+    - Buyer: same bar; request tracking (had a 1200 px sideways scroller)
+      = a card.
+    - Transporter: same bar; fleet vehicles render as phone cards.
+  - FOUND + FIXED on the walk: at the S25's 1.3 text size a card label broke
+    mid-word ("TRANSPORTER / S"). `MlDataTable` cards now size the label
+    column to the widest label (max 45%) and stack label over value when
+    even one word can't fit. `ml_data_table_cards_test` +3 (360/1.0,
+    360/1.3, 411/1.3 with the real page padding; reproduced the fault before
+    the fix). 20 phone renders regenerated, no desktop render changed;
+    test/features + widgets + core 2,208 passed. Rebuilt APK on the S25:
+    "TRANSPORTERS" whole, "ROUTE / PRODUCT" wraps between words.
+  - FOUND, NOT FIXED (live DB function, outside today's OKs; for Jean):
+    `list_request_tracking` takes "requested by" from `buyer_company_id`
+    instead of `requesting_company_id`, so a mine-raised request shows the
+    buyer as its requester on every tracking page.
+  - Cleanup, verified: device check-ins + employee rows deleted; the three
+    seats they took (existing vacant seats) put back to their exact vacant
+    state (available, timestamps null, updated_at = created_at); seats_used
+    back to AB buyer 0 / AB mine 4 / AB trans 1; auth users deleted (HTTP
+    200 ×3). A sweep of every uuid, text and json column in public, auth and
+    storage for the 3 user ids + 3 employee ids now finds nothing. No seat
+    log, audit, notification or crash rows were written. The app was left
+    signed out at the sign-in screen; phone home, screenshots deleted.
