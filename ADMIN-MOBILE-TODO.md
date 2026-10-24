@@ -785,9 +785,23 @@ Same rules: one at a time, fully, ticked with evidence; the phone walk last.
     threshold at 0 (old layout) the 411 test fails.
   - Analyze clean; test/core + test/widgets 1,161 passed; renders 238 passed,
     none changed. On-device check in the 9.3 walk (landscape).
-- [ ] 9.2 The old place-index tools no longer recreate the dropped
+- [x] 9.2 The old place-index tools no longer recreate the dropped
       `place_index_search_fts` index, and refresh `place_index_search` after
       they change `place_index`.
+  - `tools/place_index_move_project.py`: the old FTS index is out of the
+    post-load rebuild; the two new extras migrations are in
+    EXTRAS_MIGRATIONS (a fresh project gets the copy and the new ranking);
+    new `refresh_search_copy()` refreshes + analyzes `place_index_search`
+    after the load and stops if its row count differs from `place_index`.
+  - `tools/place_index_trim.py`: the old FTS index is out of REBUILD; after
+    the delete + rebuild it refreshes the copy and checks the same counts.
+    (Their `drop index if exists ..._fts` lines stay: harmless.)
+  - Both compile. `refresh_search_copy` run for real on the live extras
+    project: 611,841 rows, matches place_index, 31.5 s. Searches after it,
+    as anon end to end: Johannesburg 2.24 s, Cape Town 1.73 s, Centurion
+    0.81 s, Westway Rd Fourways 0.62 s — all HTTP 200. Note: right after a
+    refresh the copy is cold and the biggest towns sit nearer the 3 s
+    (server-side) limit than the 1.4 s measured warm.
 - [ ] 9.3 Company-portal chat (8.3) and cards (8.4) walked on the S25 as real
       company users. Passwords are stored only as hashes, so: throwaway test
       companies + users created for the walk, and EVERYTHING they create or

@@ -84,9 +84,8 @@ DROP_PREDICATE = "addr_country is distinct from 'ZA' or confidence is null or co
 REBUILD = [
     ("place_index_pkey",
      "alter table public.place_index add constraint place_index_pkey primary key (id)"),
-    ("place_index_search_fts",
-     "create index place_index_search_fts on public.place_index "
-     "using gin (to_tsvector('simple'::regconfig, search_text))"),
+    # NOT place_index_search_fts any more: since 20261024160000 the search
+    # scans place_index_search, and this index is 34 MB nothing reads.
     ("place_index_street_number",
      "create index place_index_street_number on public.place_index "
      "using btree (street_key, house_number) "
@@ -250,6 +249,20 @@ def run(c: Client, batch: int, pause: float, dry: bool) -> int:
         c.sql_tolerant(ddl + ";", timeout=900)
         wait_idle(c, name)
     c.sql("analyze public.place_index;", timeout=600)
+
+    # The search reads place_index_search, a copy of this table
+    # (20261024150000). After deleting rows it must be refreshed, or the
+    # search keeps returning places that are gone.
+    print("   refreshing place_index_search (the copy the search scans)", flush=True)
+    c.sql_tolerant("refresh materialized view public.place_index_search;", timeout=900)
+    wait_idle(c, "refresh materialized view")
+    c.sql("analyze public.place_index_search;", timeout=600)
+    cnt = c.sql("select (select count(*) from public.place_index) as base, "
+                "(select count(*) from public.place_index_search) as copy;",
+                timeout=120)[0]
+    if int(cnt["base"]) != int(cnt["copy"]):
+        raise Stop(f"place_index_search has {cnt['copy']} rows against "
+                   f"{cnt['base']} in place_index; the refresh did not land")
 
     got = c.sql("""
       select indexname from pg_indexes

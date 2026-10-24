@@ -114,9 +114,17 @@ MIGRATIONS = [
 #
 # Without the second one a freshly built project answers every picker search
 # with `permission denied` and the app silently falls through to Nominatim.
+#
+#   ..._search_compact        creates place_index_search, the narrow town-ordered
+#                             copy the ranking scans (2026-10-24). Built EMPTY
+#                             here, before the load; finish() refreshes it.
+#   ..._rank_uses_compact     points _place_index_rank at it and drops the old
+#                             place_index_search_fts, which nothing uses now.
 EXTRAS_MIGRATIONS = [
     "20260816190000_place_index_revoke_table_grants.sql",
     "20260816200000_search_place_index_grant_anon.sql",
+    "20261024150000_place_index_search_compact.sql",
+    "20261024160000_place_index_rank_uses_compact.sql",
 ]
 
 # search_text is GENERATED — it must never be inserted into.
@@ -131,10 +139,10 @@ COL_NAMES = [c for c, _ in COLS]
 COL_DEFS = ", ".join(f"{c} {t}" for c, t in COLS)
 
 # Rebuilt AFTER the load. Captured verbatim from pg_indexes on the source.
+# NOT place_index_search_fts any more: since 20261024160000 the search scans
+# place_index_search (its own index), and rebuilding this one would spend
+# 34 MB of a 500 MB project on an index nothing reads.
 POST_LOAD_INDEXES = [
-    ("place_index_search_fts",
-     "create index if not exists place_index_search_fts on public.place_index "
-     "using gin (to_tsvector('simple'::regconfig, search_text))"),
     ("place_index_street_number",
      "create index if not exists place_index_street_number on public.place_index "
      "using btree (street_key, house_number) "
@@ -330,6 +338,26 @@ def copy_rows(src: Project, dst: Project, batch: int, pause: float,
     return total
 
 
+def refresh_search_copy(sql) -> None:
+    """Refresh place_index_search after place_index changed, and prove it.
+
+    The search reads this copy, not place_index (20261024150000). Left stale it
+    keeps answering from the old rows; empty (as on a project just built from
+    the migrations) it answers nothing at all, silently, and the app falls
+    through to Nominatim.
+    """
+    print("   refreshing place_index_search (the copy the search scans)", flush=True)
+    sql("refresh materialized view public.place_index_search;", timeout=900)
+    sql("analyze public.place_index_search;", timeout=600)
+    got = sql("select (select count(*) from public.place_index) as base, "
+              "(select count(*) from public.place_index_search) as copy;",
+              timeout=120)[0]
+    if int(got["base"]) != int(got["copy"]):
+        raise Stop(f"place_index_search has {got['copy']} rows against "
+                   f"{got['base']} in place_index; the refresh did not land")
+    print(f"   place_index_search: {int(got['copy']):,} rows, matches place_index")
+
+
 def finish(src: Project, dst: Project, total: int) -> int:
     print("\n4. Rebuilding indexes on the destination…")
     for name, ddl in POST_LOAD_INDEXES:
@@ -344,6 +372,7 @@ def finish(src: Project, dst: Project, total: int) -> int:
         if name not in {g["indexname"] for g in (got or [])}:
             raise Stop(f"{name} did not get built — stopping before you rely on it")
     dst.sql("analyze public.place_index;", timeout=900)
+    refresh_search_copy(dst.sql)
 
     print("\n5. Verifying…")
     dcount = int(dst.scalar("select count(*) as n from public.place_index;", "n"))
