@@ -47,6 +47,7 @@ class MineLinkDashboardScreen extends StatelessWidget {
     required this.pendingRequests,
     required this.registry,
     required this.recentOrgs,
+    this.attention,
     this.newCompanies24h,
     this.newUsers24h,
     this.expiredCompanies,
@@ -96,6 +97,12 @@ class MineLinkDashboardScreen extends StatelessWidget {
   final List<MlRegistryStat> registry;
   final List<MlRecentOrg> recentOrgs;
 
+  /// "Needs your attention", shown first on a phone (and only there). Null
+  /// leaves the dashboard as it was; an empty list says all is clear. On a
+  /// phone it stands in for the pending-request cards and the expired banner,
+  /// which would otherwise repeat it.
+  final List<MlAttentionItem>? attention;
+
   final MlGlass? tokens;
   final EdgeInsets padding;
 
@@ -143,9 +150,14 @@ class MineLinkDashboardScreen extends StatelessWidget {
             final threeUp = w < 900 ? (w < 620 ? 1 : 2) : 3;
             final fourUp = w < 1180 ? (w < 860 ? (w < 620 ? 1 : 2) : 3) : 4;
 
+            final attentionShown = phone && attention != null;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (attentionShown) ...[
+                  _AttentionList(tokens: t, items: attention!, onTap: _go),
+                  const SizedBox(height: 26),
+                ],
                 // 1 ─────────────────────────────────────────────────────────
                 MlSectionHead(
                   tokens: t,
@@ -172,7 +184,9 @@ class MineLinkDashboardScreen extends StatelessWidget {
                 // 2 ─────────────────────────────────────────────────────────
                 // On a phone only the inboxes with work, and nothing at all
                 // when none has any.
-                if (pendingRequests.isNotEmpty && (!phone || openRequests > 0)) ...[
+                if (pendingRequests.isNotEmpty &&
+                    (!phone || openRequests > 0) &&
+                    !attentionShown) ...[
                   const SizedBox(height: 26),
                   MlSectionHead(
                     tokens: t,
@@ -230,7 +244,7 @@ class MineLinkDashboardScreen extends StatelessWidget {
                 ),
 
                 // 4 ─────────────────────────────────────────────────────────
-                if (expired > 0) ...[
+                if (expired > 0 && !attentionShown) ...[
                   const SizedBox(height: 26),
                   _ExpiredBanner(
                       tokens: t,
@@ -503,6 +517,130 @@ String _orgSummary(MlRecentOrg r) {
     if (location.isNotEmpty && location != '—') location,
     mlCount(r.users, 'user'),
   ].join(' · ');
+}
+
+/// "Needs your attention" (phone): one row per queue with something in it,
+/// most urgent first, each opening the screen where it is dealt with.
+class _AttentionList extends StatelessWidget {
+  const _AttentionList(
+      {required this.tokens, required this.items, required this.onTap});
+
+  final MlGlass tokens;
+  final List<MlAttentionItem> items;
+  final ValueChanged<String> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = tokens;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        MlSectionHead(
+          tokens: t,
+          title: 'Needs your attention',
+          subtitle: items.isEmpty
+              ? 'Nothing is waiting on you right now.'
+              : 'Everything waiting on you, most urgent first.',
+          meta: items.isEmpty
+              ? null
+              : mlCount(items.fold<int>(0, (a, i) => a + i.count), 'item'),
+        ),
+        const SizedBox(height: 12),
+        if (items.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: t.panel,
+              borderRadius: MlShape.radiusMedium,
+              border: Border.all(color: t.line2),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.check_circle_outline_rounded, color: t.good, size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text('All clear',
+                      style: context.mlText.titleSmall.copyWith(
+                        color: t.inkHi,
+                        fontWeight: FontWeight.w700,
+                      )),
+                ),
+              ],
+            ),
+          )
+        else
+          Container(
+            decoration: BoxDecoration(
+              color: t.panel,
+              borderRadius: MlShape.radiusMedium,
+              border: Border.all(color: t.line2),
+            ),
+            child: Column(
+              children: [
+                for (var i = 0; i < items.length; i++) ...[
+                  if (i > 0) Divider(height: 1, color: t.line2),
+                  InkWell(
+                    onTap: () => onTap(items[i].id),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 56),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+                        child: Row(
+                          children: [
+                            MlWell(
+                                icon: items[i].icon,
+                                color: items[i].tone.base,
+                                size: 34,
+                                iconSize: 16),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(items[i].label,
+                                      style: context.mlText.titleSmall.copyWith(
+                                        color: t.inkHi,
+                                        fontWeight: FontWeight.w700,
+                                      )),
+                                  Text(items[i].detail,
+                                      style: context.mlText.labelSmall.copyWith(
+                                        color: t.inkMid,
+                                        fontWeight: FontWeight.w400,
+                                      )),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              constraints: const BoxConstraints(minWidth: 28),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: items[i].tone.base.withValues(alpha: 0.16),
+                                borderRadius: MlShape.pill,
+                              ),
+                              child: Text('${items[i].count}',
+                                  textAlign: TextAlign.center,
+                                  style: context.mlText.labelLarge.copyWith(
+                                    color: t.inkHi,
+                                    fontWeight: FontWeight.w800,
+                                  )),
+                            ),
+                            Icon(Icons.chevron_right_rounded,
+                                size: 20, color: t.inkLo),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+      ],
+    );
+  }
 }
 
 /// An org-type card as one line, for a phone: what it is, its headline

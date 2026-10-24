@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:flutter_application_1/features/portal/models/recon_dispute.dart';
+import 'package:flutter_application_1/features/portal/services/dispute_service.dart';
+import 'package:flutter_application_1/core/design/shell/ml_window_class.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/features/portal/models/raw_recon_row.dart';
 import 'package:flutter_application_1/features/portal/providers/request_provider.dart';
@@ -57,6 +60,20 @@ class SuperAdminDashboardV2Screen extends ConsumerWidget {
         ref.watch(adminRequestQueueProvider('transportation')).valueOrNull ??
             const [];
 
+    // The phone's "Needs your attention" list also counts open disputes.
+    // Read only on a phone: the desktop dashboard does not show the list.
+    final phone = MlWindowClass.of(context).usesBottomNav;
+    final openDisputes = !phone
+        ? 0
+        : ref
+                .watch(reconDisputesProvider(null))
+                .valueOrNull
+                ?.where((d) =>
+                    d.status == DisputeStatus.open ||
+                    d.status == DisputeStatus.underReview)
+                .length ??
+            0;
+
     return statsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => _Error(
@@ -79,8 +96,23 @@ class SuperAdminDashboardV2Screen extends ConsumerWidget {
           buyerRequestCount: queue('buyer'),
         );
 
+        final mineTransport = transportation.where((r) => r.isFromMine).length;
         return MineLinkDashboardScreen(
           onNavigate: (id) => _navigate(context, id),
+          attention: !phone
+              ? null
+              : dashboardAttentionItems(
+                  expiredCompanies: SuperAdminDashboardV2ViewModel._int(stats['expiredCompanies']),
+                  tokensExpiringSoon: SuperAdminDashboardV2ViewModel._int(stats['tokensExpiringSoon']),
+                  openTokenRequests: SuperAdminDashboardV2ViewModel._int(stats['openTokenRequests']),
+                  mineTransport: mineTransport,
+                  buyerTransport: transportation.length - mineTransport,
+                  productRequests: queue('product'),
+                  buyerRequests: queue('buyer'),
+                  openDisputes: openDisputes,
+                  openWaybills:
+                      bundle('transporter')?.aggregate.pendingWaybills ?? 0,
+                ),
           orgAggregates: vm.orgAggregates,
           pendingRequests: vm.pendingRequests,
           registry: vm.registry,
@@ -132,8 +164,67 @@ String? dashboardNavRoute(String id) {
       return '/super-admin/requests/transportation-mine';
     case 'export':
       return null;
+    // "Needs your attention" rows (phone).
+    case 'attention.expiring':
+      return '/super-admin/organizations?status=active';
+    case 'attention.waybills':
+      return '/super-admin/recon-tables';
+    case 'attention.disputes':
+      return '/super-admin/disputes';
   }
   return consoleNavRoutes[id];
+}
+
+/// The dashboard's "Needs your attention" list (admin phone audit,
+/// 2026-10-24): every queue with something in it, most urgent first, and
+/// nothing for a queue that is empty — so the first thing on the phone is
+/// what to do, not a screen of zeros to scroll through.
+///
+/// Open waybills are counted on the transporter side: a load has one
+/// transporter but also a mine and a buyer, so summing the sides would count
+/// every open waybill three times.
+List<MlAttentionItem> dashboardAttentionItems({
+  required int expiredCompanies,
+  required int tokensExpiringSoon,
+  required int openTokenRequests,
+  required int mineTransport,
+  required int buyerTransport,
+  required int productRequests,
+  required int buyerRequests,
+  required int openDisputes,
+  required int openWaybills,
+}) {
+  MlAttentionItem? item(int n, String id, String label, String detail,
+          IconData icon, MlChipTone tone) =>
+      n <= 0
+          ? null
+          : MlAttentionItem(
+              id: id, label: label, detail: detail, count: n, icon: icon, tone: tone);
+  return [
+    item(expiredCompanies, 'orgs.expired', 'Access expired',
+        '${mlCount(expiredCompanies, 'company', 'companies')} cannot use the app',
+        Icons.lock_clock_outlined, MlChipTone.red),
+    item(openDisputes, 'attention.disputes', 'Open disputes',
+        'Reconciliation disputes waiting on a decision',
+        Icons.gavel_outlined, MlChipTone.red),
+    item(openTokenRequests, 'tokens.requests', 'Token requests',
+        'Waiting for approval', Icons.token_outlined, MlChipTone.amber),
+    item(tokensExpiringSoon, 'attention.expiring', 'Tokens expiring',
+        'Within 7 days', Icons.timer_outlined, MlChipTone.amber),
+    item(mineTransport + buyerTransport, 'requests.mine-transport',
+        'Requested routes',
+        '$mineTransport from mines · $buyerTransport from buyers',
+        Icons.alt_route_rounded, MlChipTone.cyan),
+    item(productRequests, 'requests.product', 'Requested product',
+        'Buyers asking for a product listing', Icons.inventory_2_outlined,
+        MlChipTone.violet),
+    item(buyerRequests, 'requests.buyers', 'Requested buyers',
+        'Mines asking for buyer connections',
+        Icons.person_add_alt_1_outlined, MlChipTone.amber),
+    item(openWaybills, 'attention.waybills', 'Open waybills',
+        'Loads this month without a closed-out waybill',
+        Icons.receipt_long_outlined, MlChipTone.amber),
+  ].whereType<MlAttentionItem>().toList();
 }
 
 // ===========================================================================

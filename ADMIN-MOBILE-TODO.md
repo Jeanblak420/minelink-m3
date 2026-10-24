@@ -432,8 +432,22 @@ Status: ☐ not started · ◐ in progress · ☑ done
     as a wrong-number fix like section 3). Full suite green.
 
 ## 6. Additions
-- [ ] 6.1 "Needs your attention" list at the top of the dashboard (pending
+- [x] 6.1 "Needs your attention" list at the top of the dashboard (pending
       requests, expiring tokens, open waybills, disputes), each tappable.
+  - First thing on the phone dashboard: one row per queue that has something
+    in it, most urgent first — access expired, open disputes, token
+    requests, tokens expiring within 7 days, requested routes (mines +
+    buyers), requested product, requested buyers, open waybills — each with
+    its count, each opening the screen where it is dealt with. Nothing
+    waiting → "All clear". Open waybills are counted on the transporter side
+    (one transporter per load; summing mine/buyer/transporter would triple
+    them); disputes = open + under review, the disputes inbox's own feed.
+  - On a phone it stands in for the pending-request cards and the expired
+    banner, so nothing appears twice. Desktop: no list, unchanged.
+  - `dashboardAttentionItems` (pure) + `_AttentionList`;
+    `attention_list_test.dart` 6/6 (order, empties, every row routes, first
+    on the page, taps open, all clear, desktop untouched). Phone dashboard
+    golden updated and viewed; renders 273/273.
 - [ ] 6.2 Phone card layout for the four wide tables (done in 4.5 — tick when
       4.5 is ticked and re-checked).
 - [ ] 6.3 Real "online now" count (done in 3.1 — tick when re-checked).

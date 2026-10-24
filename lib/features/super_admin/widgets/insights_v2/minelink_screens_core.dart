@@ -102,6 +102,28 @@ class MlRegistryStat {
   final MlDelta deltaTone;
 }
 
+/// One line of the dashboard's "Needs your attention" list: something that
+/// is waiting on a platform admin, how many, and where to deal with it.
+@immutable
+class MlAttentionItem {
+  const MlAttentionItem({
+    required this.id,
+    required this.label,
+    required this.detail,
+    required this.count,
+    required this.icon,
+    required this.tone,
+  });
+
+  /// Nav id the row opens (see `dashboardNavRoute`).
+  final String id;
+  final String label;
+  final String detail;
+  final int count;
+  final IconData icon;
+  final MlChipTone tone;
+}
+
 /// A pending-request card.
 @immutable
 class MlPendingRequest {
