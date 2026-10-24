@@ -762,7 +762,7 @@ class _SuperAdminOrgInsightsScreenState
               TextSpan(
                 // `MlTime.now()`. This is a MONTH a reader acts on, and
                 // CLAUDE.md §7.1 keeps the device's opinion out of those.
-                text: '${DateFormat('MMM yyyy').format(MlTime.now())} · MTD',
+                text: _periodLabel(),
               ),
               if (tonsDelta != null) ...[
                 const TextSpan(text: '   ·   '),
@@ -1283,7 +1283,12 @@ class _SuperAdminOrgInsightsScreenState
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Signals from the last 24h',
+                      // The alerts are worked out from this month's rows,
+                      // and each one's date is that company's last load. It
+                      // read "Signals from the last 24h" over a stamp of
+                      // 07 Oct (admin phone audit, 2026-10-24); the period now
+                      // comes from the same place as the page header.
+                      'Signals from ${_periodLabel()} · dated by last load',
                       style: context.mlText.bodySmall.copyWith(
                         color: MlControlRoom.textMuted,
                       ),
@@ -1336,6 +1341,12 @@ class _SuperAdminOrgInsightsScreenState
       ),
     );
   }
+
+  /// The period every figure on this screen covers: month to date, in
+  /// South African time (CLAUDE.md §7.1). One source for the header and the
+  /// alerts card, so they cannot name different windows.
+  static String _periodLabel() =>
+      '${DateFormat('MMM yyyy').format(MlTime.now())} · MTD';
 
   Widget _alertRow(_AttentionItem a, String? stamp) {
     final tint = a.color;

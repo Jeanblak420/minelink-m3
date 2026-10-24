@@ -152,7 +152,17 @@ Status: ☐ not started · ◐ in progress · ☑ done
   - `live_map_reporting_count_test.dart` 3/3. The sample-data renders showed
     the bug too ("4 trucks reporting" over 3 fixes) — three live-map goldens
     now read "4 active trips · 3 reporting GPS" (header line only changed).
-- [ ] 3.3 "Recent alerts" says the period it really shows.
+- [x] 3.3 "Recent alerts" says the period it really shows.
+  - Cause: the Buyers / Mines / Transporters org-insights card hard-coded
+    "Signals from the last 24h", but its alerts are built from the month's
+    rows and each one's date is that company's last load (hence 07 Oct).
+  - Now "Signals from <Mon yyyy> · MTD · dated by last load", the period
+    taken from `_periodLabel()` — the same function the page header uses, so
+    the two cannot name different windows again. The transporters overview's
+    own alerts card already named its window (checked; unchanged). No other
+    "last 24h" claim in the admin panel sits over older data (searched: the
+    remaining ones are real 24 h counts — new companies/users/requests).
+  - `screen-org-insights-desktop-dark` golden: that subtitle line only.
 - [ ] 3.4 Zero counts show no badge; "NEW" only shows when something is new.
 - [ ] 3.5 Notifications for a request clear themselves once it is linked; the
       stale 18 Sep one is cleared.
