@@ -24,21 +24,37 @@ import 'package:flutter_application_1/features/notifications/providers/notificat
 import 'package:flutter_application_1/features/notifications/widgets/animated_notification_bell.dart';
 import 'package:flutter_application_1/features/super_admin/nav/console_nav.dart';
 
-/// On a phone, the destination a page belongs to when its address does not
-/// sit under that destination's own.
+/// The menu entry a page belongs to when its address does not sit under that
+/// entry's own.
 ///
 /// The company page is `/super-admin/organization/<id>`, which is not under
 /// `/super-admin/organizations`, so the longest match was `/super-admin` and
-/// the bottom bar lit Dashboard while you were in Access (admin phone audit,
-/// 2026-10-24). The same was true of the pages listed here. Phone only: the
-/// desktop rail is left as it is.
-String superAdminPhoneNavSection(String location) {
+/// the menu lit Dashboard while you were in Organizations (admin phone audit,
+/// 2026-10-24). The same was true of the pages listed here. Phone first, then
+/// the desktop rail on Jean's go-ahead the same day.
+///
+/// Applied only to a page that would otherwise light Dashboard. On a phone
+/// that guard changes nothing (the bottom bar lights a whole section), but the
+/// desktop rail lights one ITEM, and every request inbox has its own.
+///
+/// A page that is off the menu altogether (the old Platform settings link)
+/// lights nothing rather than Dashboard.
+String superAdminNavSection(String location, List<MlNavNode> tree) {
+  if (location == '/super-admin' ||
+      tree.resolveSelected(location) != '/super-admin') {
+    return location;
+  }
   const sections = <String, String>{
     '/super-admin/organization/': '/super-admin/organizations',
     '/super-admin/register-company': '/super-admin/organizations',
     '/super-admin/seat-requests': '/super-admin/token-requests',
+    '/super-admin/requests/buyer-transport':
+        '/super-admin/requests/transportation-buyer',
     '/super-admin/requests/': '/super-admin/requests/transportation-mine',
     '/super-admin/tons-out': '/super-admin/recon-tables',
+    '/super-admin/dashboard-v2': '/super-admin',
+    // Matches no entry, so nothing is lit.
+    '/super-admin/settings': '',
   };
   for (final e in sections.entries) {
     if (location.startsWith(e.key)) return e.value;
@@ -140,11 +156,10 @@ class _SuperAdminShellLayoutState extends ConsumerState<SuperAdminShellLayout> {
 
     final shell = MlAppShell(
       tree: tree,
-      // The raw location. The rail resolves it to the destination that owns it
-      // (longest match), so a detail page keeps its parent lit.
-      selectedRoute: MlWindowClass.of(context).usesBottomNav
-          ? superAdminPhoneNavSection(location)
-          : location,
+      // The rail resolves this to the destination that owns it (longest
+      // match), so a detail page keeps its parent lit; the few pages whose
+      // address sits under no entry are pointed at the one they belong to.
+      selectedRoute: superAdminNavSection(location, tree),
       onNavigate: (route) => context.go(route),
       badgeCounts: {MlNavBadge.unreadNotifications: unread},
       title: titles.title,

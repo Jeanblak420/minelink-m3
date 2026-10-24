@@ -597,9 +597,24 @@ end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
     PHONE render now lights Access instead of Dashboard: the harness picks
     the tab from the default tree, which now matches the phone's (the app
     itself already passed `phone:` and lit Access on the S25).
-- [ ] 8.2 Desktop menu fixes: the rail lights the right item on company pages
+- [x] 8.2 Desktop menu fixes: the rail lights the right item on company pages
       and the other pages that fell back to Dashboard; Platform users under
       Tokens & Seats on desktop too.
+  - Platform users on the desktop rail under Tokens & Seats (done with 8.1's
+    tree change; `console_nav_phone_test` checks both widths).
+  - `superAdminPhoneNavSection` → `superAdminNavSection(location, tree)`,
+    used at every width. It only steps in when a page would otherwise light
+    Dashboard, because the desktop rail lights one ITEM and each request
+    inbox has its own (the old blanket `requests/` mapping would have lit
+    the mine inbox on the buyer one). Aliases map to their own inbox; the
+    old Platform settings link lights nothing instead of Dashboard.
+  - `company_page_phone_test` now runs phone AND desktop, plus a sweep of
+    every `/super-admin` path the router registers (params filled): none
+    lights Dashboard except Dashboard itself. Sweep bite-tested: deleting
+    the tons-out mapping fails it with "[/super-admin/tons-out]".
+  - Analyze clean; renders regenerated, none changed (no render shows a
+    company page with the desktop rail). Desktop check on the real rail
+    added to 8.7.
 - [ ] 8.3 Company portals on a phone: chat in the top bar (no floating disc),
       full screen like the admin chat.
 - [ ] 8.4 Company portals on a phone: wide tables as cards.
@@ -608,4 +623,5 @@ end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
 - [ ] 8.6 Extras address search timeout: diagnosed and fixed on the extras
       project (`qbydiuplqhmkaxarnuza`, via the Management API only).
 - [ ] 8.7 Analyze clean, full suite green, desktop goldens accounted for,
+      Windows build: rail lights Organizations on a company page,
       DB healthy + ledger matches, release APK walked on the S25, pushed, NAS.
