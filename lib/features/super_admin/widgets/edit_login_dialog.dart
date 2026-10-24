@@ -63,7 +63,7 @@ Future<void> showAdminEditLogin(
       ..showSnackBar(SnackBar(
         content: Text(changed.isEmpty
             ? 'Nothing changed for $who'
-            : 'Updated ${changed.join(', ')} for $who'),
+            : 'Saved for $who: ${loginChangeSummary(changed)}'),
       ));
   } catch (e) {
     messenger

@@ -31,6 +31,17 @@ String whatsappAuthEmail(String whatsappNumber) {
   return 'wa-$digits@$kWhatsappAuthEmailDomain';
 }
 
+/// [email] when it is a real address a person could read or type; null for an
+/// empty value or a synthetic WhatsApp-identity email, which is internal and
+/// must never be shown as somebody's email.
+String? realEmailOrNull(String? email) {
+  final e = email?.trim() ?? '';
+  if (e.isEmpty || e.toLowerCase().endsWith('@$kWhatsappAuthEmailDomain')) {
+    return null;
+  }
+  return e;
+}
+
 /// Whether [identifier] looks like an email address (contains `@`) rather than
 /// a bare WhatsApp number. Used by the login form to decide how to sign in.
 bool looksLikeEmail(String identifier) => identifier.contains('@');

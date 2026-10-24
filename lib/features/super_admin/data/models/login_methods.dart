@@ -72,3 +72,25 @@ String localWhatsappNumber(String e164) {
   final digits = e164.replaceAll(RegExp(r'\D'), '');
   return digits.startsWith('27') ? '0${digits.substring(2)}' : digits;
 }
+
+/// The edge function's change list (`password`, `email`, `removed email`,
+/// `WhatsApp number`, `primary: whatsapp`, ...) as one sentence an admin reads
+/// in the snackbar, e.g. "email sign-in removed; primary is now WhatsApp".
+String loginChangeSummary(List<String> changed) {
+  String say(String c) {
+    if (c.startsWith('primary: ')) {
+      return c.endsWith('whatsapp') ? 'primary is now WhatsApp' : 'primary is now email';
+    }
+    return switch (c) {
+      'password' => 'password changed',
+      'email' => 'email saved',
+      'login address' => 'login address saved',
+      'removed email' => 'email sign-in removed',
+      'WhatsApp number' => 'WhatsApp number saved',
+      'removed WhatsApp number' => 'WhatsApp sign-in removed',
+      _ => c,
+    };
+  }
+
+  return changed.map(say).join('; ');
+}

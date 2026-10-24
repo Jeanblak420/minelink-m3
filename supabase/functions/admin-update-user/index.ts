@@ -404,7 +404,7 @@ Deno.serve(async (req: Request) => {
       target_id: targetId,
       target_name: name,
       organization_id: targetEmployee?.company_id ?? null,
-      description: `Super admin changed ${changed.join(", ")} for ${name}`,
+      description: `Super admin updated the login for ${name}: ${changed.join("; ")}`,
       before_data: Object.keys(before).length ? before : null,
       after_data: after,
     });

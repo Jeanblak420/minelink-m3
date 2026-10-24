@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
+import 'package:flutter_application_1/features/auth/utils/whatsapp_identity.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/organization_status.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/organization_seat.dart';
 import 'package:flutter_application_1/features/super_admin/data/models/serial_token.dart';
@@ -744,10 +745,8 @@ class _UsersTab extends ConsumerWidget {
     final p = userRow['profiles'];
     if (p is Map) {
       final m = Map<String, dynamic>.from(p);
-      final e = m['email'] as String?;
-      if (e != null && e.trim().isNotEmpty) {
-        return e.trim();
-      }
+      // The internal WhatsApp login address is not their email.
+      return realEmailOrNull(m['email'] as String?);
     }
     return null;
   }
@@ -1403,11 +1402,11 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
                             '${u['first_name'] ?? ''} ${u['last_name'] ?? ''}'
                                 .trim()
                                 .isEmpty
-                            ? (u['email'] as String? ?? 'Unnamed')
+                            ? (realEmailOrNull(u['email'] as String?) ?? 'Unnamed')
                             : '${u['first_name'] ?? ''} ${u['last_name'] ?? ''}'
                                 .trim()),
                         subtitle: Text(
-                            '${u['email'] ?? '—'} · '
+                            '${realEmailOrNull(u['email'] as String?) ?? '—'} · '
                             '${UserRole.labelFor(u['role'] as String?, fallback: 'no role')}'),
                         onTap: remaining > 0
                             ? () => Navigator.of(ctx).pop(u)
@@ -1564,7 +1563,7 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
                                 // used for is a list of numbers.
                                 s.isOccupied
                                     ? [
-                                        _nz(s.occupiedByEmail),
+                                        realEmailOrNull(s.occupiedByEmail) ?? 'Signs in with WhatsApp',
                                         if (s.occupiedByEmployeeRole != null)
                                           s.occupiedByEmployeeRole!,
                                       ].join(' · ')
@@ -1615,7 +1614,7 @@ class _SeatsTabState extends ConsumerState<_SeatsTab> {
                                             _UserDetailLine(label: 'Contact No.', value: _nz(s.employeeWhatsapp)),
                                             _UserDetailLine(label: 'WhatsApp No.', value: _nz(s.employeeWhatsapp)),
                                             _UserDetailLine(label: 'ID number', value: _nz(s.employeeIdNumber)),
-                                            _UserDetailLine(label: 'Login email', value: _nz(s.occupiedByEmail)),
+                                            _UserDetailLine(label: 'Login email', value: _nz(realEmailOrNull(s.occupiedByEmail))),
                                             _UserDetailLine(label: 'Role', value: _nz(s.occupiedByEmployeeRole)),
                                             _UserDetailLine(label: 'Seat serial', value: _nz(s.serialNumber)),
                                             const SizedBox(height: 10),

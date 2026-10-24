@@ -97,9 +97,31 @@ Status: ☐ not started · ◐ in progress · ☑ done
     `edit_login_dialog_test.dart` (3 tests) green.
   - Seen, for 4.x: the user menu's last item is cut off at the screen edge
     ("Change Password / Email / Ph…").
-- [ ] 2.2 Super admin can see, add, change and remove a user's login methods
+- [x] 2.2 Super admin can see, add, change and remove a user's login methods
       (email / WhatsApp), switch between them, and mark one primary and one
       secondary; sign-in works with each method that is set up.
+  - Server: migrations `20261024110000_login_methods`,
+    `20261024111000_clear_user_phone` (applied, ledger rows), edge function
+    `admin-update-user` v6. Throwaway-account end-to-end
+    (add / make primary / remove WhatsApp / refuse removing the last method /
+    add back / switch to WhatsApp-only / email user gets WhatsApp / internal
+    address refused / non-admin refused): **26/26 pass** against v6; cleanup
+    leaves 0 throwaway accounts, super admins = bryson@ + jean@ only.
+  - Number sign-in tries the phone first, then the old internal address:
+    `whatsapp_number_sign_in_test.dart` 5/5. Dialog: `edit_login_dialog_test.dart`
+    10/10.
+  - Jean's S25 Ultra, 2026-10-24, as jean@minelink.org, on Eli Mans: the dialog
+    read WhatsApp on (locked: only way in) and email off → added
+    eli.mans.test@minelink-probe.invalid, made Email primary, saved. From the
+    PC: email + password → 200, number + password → 200; DB email set,
+    `login_primary = email`. Then switched email off in the dialog → saved:
+    WhatsApp primary again, the test email → 400, number → 200, internal
+    address restored. Eli is exactly as before. Three audit rows present.
+  - Fixed from that walk: the user card and the seat list showed the internal
+    `wa-…@wa.mineralguide.com` address as the user's email (now hidden,
+    `realEmailOrNull`); the save message and the audit text read "Updated
+    removed email, primary: whatsapp" (now "email sign-in removed; primary is
+    now WhatsApp"). `login_display_test.dart` 2/2; goldens unchanged.
 
 ## 3. Wrong or misleading numbers
 - [ ] 3.1 "Active users right now" counts people actually using the app (recent
