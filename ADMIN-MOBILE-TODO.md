@@ -570,9 +570,33 @@ Status: ☐ not started · ◐ in progress · ☑ done
 ## 8. Jean's go-ahead, 2026-10-24 ("yes go ahead" — all four, plus the address search)
 Same rules: one at a time, fully, ticked with evidence; ONE phone walk at the
 end (8.7). Item 8.5 is a live database change, explicitly OK'd by Jean.
-- [ ] 8.1 Platform settings off the desktop menu too (route kept so old links
+- [x] 8.1 Platform settings off the desktop menu too (route kept so old links
       still open); add a "Navigation setup" guide for custom mine maps,
       written fresh for this app, the old `ML` guide read as reference only.
+  - Menu: Platform settings gone from both trees; `/super-admin/settings`
+    still routed (old links open); `settings.platform` id dropped (no tile
+    used it). "Navigation setup" under Tracking on both, route
+    `/super-admin/navigation-setup`, title + subtitle in `ml_route_title`.
+  - Guide (`navigation_setup_screen.dart`), read-only, 8 steps. Written from
+    THIS app's code and the Valhalla/osmium docs (Context7); the `ML` guide
+    read only. Three corrections to that guide: the setting is
+    `VALHALLA_BASE_URL` (the app asks Valhalla first, truck costing; OSRM
+    is only the fallback), the image is now
+    `ghcr.io/valhalla/valhalla-scripted`, truck access is `hgv=yes`. Added:
+    join the gate road to the public road; carry edits over with
+    `osmium derive-changes` + `apply-changes` instead of a blind merge;
+    a test route before building; every build needs the setting.
+    Not run end to end here (no mine drawing); the guide says the test
+    route is the proof.
+  - Tests: `navigation_setup_test` 4/4 (names what the app reads; says it
+    runs outside the app; no overflow at 360 px, text 1.0 and 1.3),
+    `console_nav_phone_test` 7/7, `route_title_test`, `console_nav_test`
+    green. Analyze clean. Rendered at 412 px and looked at.
+  - Goldens: 14 regenerated, all the rail (x 25–259 on desktop) — Platform
+    users and Navigation setup in, Platform settings out. The Platform users
+    PHONE render now lights Access instead of Dashboard: the harness picks
+    the tab from the default tree, which now matches the phone's (the app
+    itself already passed `phone:` and lit Access on the S25).
 - [ ] 8.2 Desktop menu fixes: the rail lights the right item on company pages
       and the other pages that fell back to Dashboard; Platform users under
       Tokens & Seats on desktop too.

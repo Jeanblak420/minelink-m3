@@ -30,9 +30,10 @@ import 'package:flutter_application_1/core/routing/notifications_inbox_route.dar
 /// return from it. Every leaf in this model carries a route that resolves, and
 /// that rule is what keeps dead entries out of navigation by construction. It
 /// now lives in the top bar's overflow menu, where the app's other actions are.
-/// [phone] is the tree for the phone's drawer and bottom bar. It differs from
-/// the desktop rail only where the admin phone audit (2026-10-24) asked, and
-/// the desktop rail is deliberately left as it is.
+/// [phone] asks for the tree for the phone's drawer and bottom bar. The admin
+/// phone audit (2026-10-24) made two differences; Jean's go-ahead the same day
+/// brought both to the desktop rail too, so today the trees are the same. The
+/// parameter stays so a later phone-only difference has a place to go.
 List<MlNavNode> consoleNavTree({bool phone = false}) => <MlNavNode>[
   // ON ITS OWN, above the groups.
   //
@@ -122,16 +123,15 @@ List<MlNavNode> consoleNavTree({bool phone = false}) => <MlNavNode>[
         selectedIcon: Icons.timeline_rounded,
         route: '/super-admin/token-history',
       ),
-      // On the phone menu (admin phone audit, 2026-10-24): every user on
-      // the platform, and before this the only way in was tapping the
-      // dashboard's "Total users" card. Desktop rail unchanged.
-      if (phone)
-        const MlNavNode.leaf(
-          label: 'Platform users',
-          icon: Icons.people_outline_rounded,
-          selectedIcon: Icons.people_rounded,
-          route: '/super-admin/users',
-        ),
+      // Every user on the platform. Before this the only way in was the
+      // dashboard's "Total users" card. On the phone menu first (admin phone
+      // audit, 2026-10-24), then the desktop rail on Jean's go-ahead.
+      const MlNavNode.leaf(
+        label: 'Platform users',
+        icon: Icons.people_outline_rounded,
+        selectedIcon: Icons.people_rounded,
+        route: '/super-admin/users',
+      ),
       const MlNavNode.leaf(
         label: 'Audit logs',
         icon: Icons.history_outlined,
@@ -289,6 +289,14 @@ List<MlNavNode> consoleNavTree({bool phone = false}) => <MlNavNode>[
         selectedIcon: Icons.gps_fixed_rounded,
         route: '/super-admin/live-map',
       ),
+      // How to put a mine's own haul roads into turn-by-turn navigation. A
+      // read-only guide, added on Jean's go-ahead (2026-10-24).
+      MlNavNode.leaf(
+        label: 'Navigation setup',
+        icon: Icons.map_outlined,
+        selectedIcon: Icons.map_rounded,
+        route: '/super-admin/navigation-setup',
+      ),
     ],
   ),
 
@@ -310,18 +318,13 @@ List<MlNavNode> consoleNavTree({bool phone = false}) => <MlNavNode>[
         selectedIcon: Icons.palette_rounded,
         route: '/super-admin/preferences',
       ),
-      // Not on a phone. The page has had nothing to set since the delegated
-      // ("child") super-admin was removed on 2026-07-12: its only controls
+      // No "Platform settings": it has had nothing to set since the delegated
+      // ("child") super-admin was removed on 2026-07-12. Its only controls
       // were that admin's status and a switch letting it register companies,
       // and the old canonical tree and the oldest `ML` tree hold nothing else
-      // for it (checked read-only, 2026-10-24). The route still resolves.
-      if (!phone)
-        const MlNavNode.leaf(
-          label: 'Platform settings',
-          icon: Icons.tune_outlined,
-          selectedIcon: Icons.tune_rounded,
-          route: '/super-admin/settings',
-        ),
+      // for it (checked read-only, 2026-10-24). Off the phone menu first,
+      // then the desktop rail on Jean's go-ahead. The route still resolves,
+      // so an old link opens.
     ],
   ),
 ];

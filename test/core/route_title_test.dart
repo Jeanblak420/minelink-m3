@@ -105,6 +105,10 @@ void main() {
         'Platform settings',
         'Platform-wide configuration'
       ),
+      '/super-admin/navigation-setup': (
+        'Navigation setup',
+        "Adding a mine's own haul roads to turn-by-turn navigation"
+      ),
       // "Request tracking logs", not "Request's Tracking Logs" — the
       // possessive was misplaced and the title case sat against every
       // sentence-case label on the console (Phase 3 pass, 2026-08-23).

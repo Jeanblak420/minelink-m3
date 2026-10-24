@@ -42,10 +42,10 @@ const Map<String, String> consoleNavRoutes = <String, String>{
   'route-marketplace': '/super-admin/route-marketplace',
   'chat-links': '/super-admin/chat-links',
   'live-map': '/super-admin/live-map',
+  'navigation-setup': '/super-admin/navigation-setup',
   'notifications': NotificationsInboxRoute.superAdminPath,
   'settings.security': '/super-admin/account-security',
   'settings.preferences': '/super-admin/preferences',
-  'settings.platform': '/super-admin/settings',
 };
 
 /// Ids that deliberately have no route: expandable group parents, plus

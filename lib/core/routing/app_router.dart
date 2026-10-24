@@ -104,6 +104,7 @@ import 'package:flutter_application_1/features/super_admin/screens/token_request
 import 'package:flutter_application_1/features/super_admin/screens/token_history_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/expired_access_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/platform_admin_settings_screen.dart';
+import 'package:flutter_application_1/features/super_admin/screens/navigation_setup_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/user_preferences_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/platform_users_screen.dart';
 import 'package:flutter_application_1/features/super_admin/screens/register_company_screen.dart';
@@ -1644,9 +1645,15 @@ class AppRouter {
             path: '/super-admin/preferences',
             builder: (context, state) => const UserPreferencesScreen(),
           ),
+          // Off both menus since 2026-10-24 (nothing to set); kept so an old
+          // link still opens.
           GoRoute(
             path: '/super-admin/settings',
             builder: (context, state) => const PlatformAdminSettingsScreen(),
+          ),
+          GoRoute(
+            path: '/super-admin/navigation-setup',
+            builder: (context, state) => const NavigationSetupScreen(),
           ),
           GoRoute(
             path: '/super-admin/notifications',

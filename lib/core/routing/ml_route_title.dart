@@ -218,6 +218,7 @@ String _consoleTitle(String path) {
   if (path.contains('/available-routes')) return 'Available routes';
   if (path.contains('/route-marketplace')) return 'Route marketplace';
   if (path.contains('/live-map')) return 'Live map';
+  if (path.contains('/navigation-setup')) return 'Navigation setup';
   if (path.contains('/seat-requests')) return 'Seat requests';
 
   if (path.contains('/token-requests')) return 'Token requests';
@@ -343,6 +344,9 @@ String _consoleSubtitle(String path) {
   }
   if (path.contains('/live-map')) {
     return 'Trucks reporting position right now, across every trip';
+  }
+  if (path.contains('/navigation-setup')) {
+    return "Adding a mine's own haul roads to turn-by-turn navigation";
   }
   if (path.contains('/seat-requests')) {
     return 'Companies asking for more seats than their token allows';
