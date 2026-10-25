@@ -170,11 +170,11 @@ class _SummaryStrip extends StatelessWidget {
     // five times on a screen where the reference spends it once
     // (design-reference §4, §5.5). Found by two reviewers.
     final items = <(String, String, double)>[
-      ('Day', 'net_mass · last_24h', summary.daily),
-      ('Week', 'net_mass · last_7_days', summary.weekly),
-      ('Month', 'net_mass · last_30_days', summary.monthly),
-      ('Year', 'net_mass · last_365_days', summary.yearly),
-      ('Total', 'net_mass · all_time', summary.total),
+      ('Day', 'Net mass · last 24 hours', summary.daily),
+      ('Week', 'Net mass · last 7 days', summary.weekly),
+      ('Month', 'Net mass · last 30 days', summary.monthly),
+      ('Year', 'Net mass · last 365 days', summary.yearly),
+      ('Total', 'Net mass · all time', summary.total),
     ];
     return LayoutBuilder(
       builder: (context, c) {

@@ -33,8 +33,8 @@ import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 /// which collapses the tween to 1ms; the figure simply appears at its value.
 ///
 /// **The card announces itself as one fact.** A screen reader previously met
-/// four loose nodes — an icon, "128.4", "Tons delivered", "net_mass ·
-/// all_time" — in layout order, which reads the number before the thing it
+/// four loose nodes — an icon, "128.4", "Tons delivered", "Net mass ·
+/// all time" — in layout order, which reads the number before the thing it
 /// measures. It is now a single semantics node reading "Tons delivered,
 /// 128.4", with the icon excluded and the caption folded in. Tapping is
 /// announced as a button.
@@ -45,11 +45,12 @@ class MlStatCard extends StatelessWidget {
   final MlTone tone;
   final VoidCallback? onTap;
 
-  /// The mono sub-caption — `net_mass · all_time`, `across_4_org_types`.
-  /// Lowercase, underscored, monospaced: `docs/design-reference.md` §3 calls
-  /// this texture "a deliberate texture, not a bug", and §4 makes it part of
-  /// the card. Optional, because a figure with nothing true to say underneath
-  /// it should say nothing rather than pad.
+  /// The sub-caption — "Net mass · all time", "All vehicles". Plain English
+  /// since 2026-10-25 (Jean: "use plain English captions"); it used to be the
+  /// reference's lowercase-underscored mono texture (`net_mass · all_time`),
+  /// which read to a user as a leaked database name. Optional, because a
+  /// figure with nothing true to say underneath it should say nothing rather
+  /// than pad.
   final String? caption;
 
   /// A short trend note. **Rendered in the warn tone when [deltaPositive] is
@@ -182,28 +183,18 @@ class MlStatCard extends StatelessWidget {
                             const SizedBox(height: 3),
                             Text(
                               caption!,
-                              // TWO lines. `net_mass · last_365_days` is 24
-                              // characters of 11px mono — about 163px — and
-                              // the text column of a 220px tile is 128. So the
-                              // recon table's five period cards, on the screen
-                              // whose whole purpose is those five figures,
-                              // read `last_7_da…`, `last_30_d…`,
-                              // `last_365_…`. The caption is a machine string
-                              // and its whole value is being exact about which
-                              // window the number covers; cut in half it says
-                              // the opposite of what it is for. Photographed
-                              // 2026-08-21. It breaks at the middot.
+                              // TWO lines. The recon table's five period
+                              // cards once read `last_7_da…`, `last_30_d…`,
+                              // `last_365_…` (photographed 2026-08-21): the
+                              // caption's whole value is being exact about
+                              // which window the number covers, and cut in
+                              // half it says the opposite of what it is for.
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              // A caption is a machine string
-                              // (`net_mass · all_time`), so it is code, not
-                              // prose — MlType.code rather than a fifth
-                              // hand-written mono style.
-                              style: MlType.code(
+                              style: text.bodySmall?.copyWith(
                                 color: semantic.textFaint,
-                                size: MlTokens.fsMicro,
-                                weight: FontWeight.w400,
-                                letterSpacing: 0.2,
+                                fontSize: MlTokens.fsMicro,
+                                height: 1.3,
                               ),
                             ),
                           ],

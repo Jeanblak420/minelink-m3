@@ -57,14 +57,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  // Every caption the four cards can carry. They are snake_case on purpose —
-  // the reference's own texture (§4) — which is exactly why they cannot be
-  // allowed to break: there is no space in them to break AT.
+  // Every caption the four cards can carry, in plain English since
+  // 2026-10-25. Each is short enough that it should never need a second line.
   const captions = [
-    'all_vehicles',
-    'carrying_a_load',
-    'excludes_1_in_maintenance',
-    'not_in_service',
+    'All vehicles',
+    'Carrying a load',
+    'Excludes 1 in maintenance',
+    'Not in service',
   ];
 
   // 380 and 412 are phones; 720 a small tablet, where two columns is right and
@@ -76,7 +75,7 @@ void main() {
       // COUNTED, not inferred from a height ratio.
       //
       // The first version of this divided each caption's height by the height
-      // of `all_vehicles` in the same render, on the assumption that the
+      // of `All vehicles` in the same render, on the assumption that the
       // shortest caption always fits. At 380px under the old two-column
       // ladder it does NOT — it wraps too — so the reference was two lines
       // tall and every caption measured as exactly "1". The test PASSED under

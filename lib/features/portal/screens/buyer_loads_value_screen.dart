@@ -235,7 +235,7 @@ class _Body extends ConsumerWidget {
                 value: variance == null
                     ? '—'
                     : BuyerLoadsValueScreen.money(variance, currency),
-                caption: variance == null ? 'no_invoices_captured' : null,
+                caption: variance == null ? 'No invoices captured' : null,
                 icon: Icons.compare_arrows_rounded,
                 tone: variance == null
                     ? MlTone.neutral

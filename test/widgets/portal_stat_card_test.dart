@@ -121,20 +121,22 @@ void main() {
     );
   });
 
-  testWidgets('the mono sub-caption renders in the mono face', (tester) async {
-    // §3: the sub-caption is the design's distinctive tell — lowercase,
-    // underscored, monospaced (`across_4_org_types`, `tokens_valid · 100%_up`).
+  testWidgets('the sub-caption is plain English in the UI face',
+      (tester) async {
+    // Jean, 2026-10-25: "use plain English captions". The old lowercase,
+    // underscored mono texture (`net_mass · all_time`) read as a leaked
+    // database name.
     await _pump(
       tester,
       const MlStatCard(
         label: 'Tons out',
         value: '1,193.7',
         icon: Icons.scale_outlined,
-        caption: 'net_mass · all_time',
+        caption: 'Net mass · all time',
       ),
     );
-    final caption = tester.widget<Text>(find.text('net_mass · all_time'));
-    expect(caption.style?.fontFamily, MlTokens.fontMono);
+    final caption = tester.widget<Text>(find.text('Net mass · all time'));
+    expect(caption.style?.fontFamily, isNot(MlTokens.fontMono));
   });
 
   testWidgets('the figure aligns down a column with tabular figures',

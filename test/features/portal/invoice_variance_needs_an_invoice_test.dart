@@ -113,7 +113,7 @@ void main() {
             'nothing on one side of it, and R0.00 in the done tone reads as '
             '"every invoice balances" on a screen headed "0 invoiced".');
 
-    expect(strings, contains('no_invoices_captured'),
+    expect(strings, contains('No invoices captured'),
         reason: 'the variance card must say WHY it has no figure.');
   });
 
@@ -127,6 +127,6 @@ void main() {
         reason: 'one load is over-invoiced by R652.50 and the roll-up must '
             'still report it. The fix is about an ABSENT comparison, not '
             'about suppressing variances that exist.');
-    expect(strings, isNot(contains('no_invoices_captured')));
+    expect(strings, isNot(contains('No invoices captured')));
   });
 }

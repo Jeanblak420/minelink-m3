@@ -559,7 +559,7 @@ class _ComponentGallery extends StatelessWidget {
                 label: 'Tons out',
                 value: '1,193.7',
                 icon: Icons.scale_outlined,
-                caption: 'net_mass · all_time',
+                caption: 'Net mass · all time',
                 tone: MlTone.accent,
               ),
             ),

@@ -130,8 +130,7 @@ class _RawReconViewState extends ConsumerState<RawReconView> {
   static const _statOrder = ['Day', 'Week', 'Month', 'Year', 'Total'];
 
   /// What each card actually measures, in the caption slot the card already
-  /// has for it (`docs/design-reference.md` §4 — mono, lowercase, underscored;
-  /// the widget's own doc gives `net_mass · all_time` as the example).
+  /// has for it, in plain English ("Net mass · last 7 days").
   ///
   /// S6-21. The windows are **rolling**, which is what §4 specifies — "a row
   /// of live summary cards showing **rolling** NET MASS totals". The labels
@@ -141,11 +140,11 @@ class _RawReconViewState extends ConsumerState<RawReconView> {
   /// takes it for the calendar month and is out by 2.4x. The figure was never
   /// wrong; the label was silent about which thirty days it meant.
   static const _statCaption = <String, String>{
-    'Day': 'net_mass · last_24h',
-    'Week': 'net_mass · last_7_days',
-    'Month': 'net_mass · last_30_days',
-    'Year': 'net_mass · last_365_days',
-    'Total': 'net_mass · all_time',
+    'Day': 'Net mass · last 24 hours',
+    'Week': 'Net mass · last 7 days',
+    'Month': 'Net mass · last 30 days',
+    'Year': 'Net mass · last 365 days',
+    'Total': 'Net mass · all time',
   };
 
   DateTime _rowTime(RawReconRow r) => r.timeOut ?? r.tripDate;

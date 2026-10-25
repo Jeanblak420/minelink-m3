@@ -220,7 +220,7 @@ class FleetManagementScreen extends ConsumerWidget {
                         value: '${fleetState.vehicles.length}',
                         icon: Icons.local_shipping_outlined,
                         tone: MlTone.accent,
-                        caption: 'all_vehicles',
+                        caption: 'All vehicles',
                       ),
                       // ON ROUTE AND AVAILABLE ARE DERIVED FROM ACTIVE TRIPS, not
                       // from whether a driver happens to be rostered. They used to
@@ -242,7 +242,7 @@ class FleetManagementScreen extends ConsumerWidget {
                         value: onRoute == null ? '—' : '$onRoute',
                         icon: Icons.bolt_outlined,
                         tone: MlTone.transit,
-                        caption: 'carrying_a_load',
+                        caption: 'Carrying a load',
                       ),
                       MlStatCard(
                         label: 'Available',
@@ -254,15 +254,15 @@ class FleetManagementScreen extends ConsumerWidget {
                         // cards stop adding up to the total and the reader
                         // has no way to see why.
                         caption: (inMaintenance ?? 0) > 0
-                            ? 'excludes_${inMaintenance}_in_maintenance'
-                            : 'ready_to_allocate',
+                            ? 'Excludes $inMaintenance in maintenance'
+                            : 'Ready to allocate',
                       ),
                       MlStatCard(
                         label: 'Inactive',
                         value: '${fleetState.inactiveVehicles.length}',
                         icon: Icons.do_not_disturb_on_outlined,
                         tone: MlTone.warn,
-                        caption: 'not_in_service',
+                        caption: 'Not in service',
                       ),
                     ],
                   );

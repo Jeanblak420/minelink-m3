@@ -287,11 +287,11 @@ void main() {
       await _pump(tester);
 
       for (final caption in const [
-        'net_mass · last_24h',
-        'net_mass · last_7_days',
-        'net_mass · last_30_days',
-        'net_mass · last_365_days',
-        'net_mass · all_time',
+        'Net mass · last 24 hours',
+        'Net mass · last 7 days',
+        'Net mass · last 30 days',
+        'Net mass · last 365 days',
+        'Net mass · all time',
       ]) {
         expect(find.text(caption), findsOneWidget, reason: caption);
       }
