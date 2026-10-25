@@ -41,12 +41,18 @@ class AppearanceThemeScreen extends ConsumerWidget {
           // "Appearance" — the rail's word and, since 2026-08-22, the top
           // bar's. Three names for one destination is the fault the route-name
           // pass exists to end, and this page had two of them stacked.
-          const MlPageHeader(
+          //
+          // The theme-and-density half names controls only a mine is shown,
+          // so a transporter or buyer was told about a "Mine/Supplier
+          // dashboard" they do not have (S25 walk, 2026-10-25).
+          MlPageHeader(
             title: 'Appearance',
-            description:
-                'Personalise how MineLink looks. Light or dark applies '
-                'everywhere; the dashboard theme and density apply to your '
-                'Mine/Supplier dashboard.',
+            description: isMineSupplier
+                ? 'Personalise how MineLink looks. Light or dark applies '
+                    'everywhere; the dashboard theme and density apply to '
+                    'your Mine/Supplier dashboard.'
+                : 'Personalise how MineLink looks. Light or dark applies '
+                    'everywhere.',
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
