@@ -830,7 +830,14 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
                 // path this widget exists for.
                 location: navLocation,
                 isRoot: isRootScreen,
-                child: widget.child,
+                // Its own semantics boundary. The routed child is a nested
+                // Navigator whose route carries `BlockSemantics`, which drops
+                // everything painted before it in the same container — and
+                // the setup banner and licence notice above paint first. On
+                // the S25 (2026-10-25) a screen reader could not see either,
+                // nor reach "Complete now". MlAppShell's boundary is around
+                // this whole Column, so it does not help them.
+                child: Semantics(container: true, child: widget.child),
               ),
             ),
           ),
