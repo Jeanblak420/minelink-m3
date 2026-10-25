@@ -111,6 +111,39 @@ String portalLandingRoute({required OrgType orgType, required UserRole? role}) {
   return '/profile';
 }
 
+/// The menu's own name for [path] in [tree], or null when no leaf is that
+/// exact route.
+///
+/// The bar and the page heading read this so a page is called what the menu
+/// called it. `/portal/mine/operations` is one screen the menu names three
+/// ways by role — "Incidents & gate checks" for a guard, "Weighbridge records"
+/// for a load controller, "Operations hub" for an admin — and until
+/// 2026-10-25 every one of them opened onto a page headed "Operations Hub"
+/// (S25 walk), so a guard tapped "Incidents" and landed somewhere else by
+/// name.
+String? portalNavLabelFor(List<PortalNavNode> tree, String path) {
+  for (final leaf in tree.expand((n) => n.leaves)) {
+    if (leaf.route == path) return leaf.label;
+  }
+  return null;
+}
+
+/// The operations hub's heading for a session at [orgType] holding [role]:
+/// the menu's name for it, or "Operations hub" where the menu has no entry
+/// (a buyer or transporter reaches it from a tab, never from the rail).
+String operationsHubTitle({required OrgType orgType, required UserRole? role}) {
+  final segment = switch (orgType) {
+    OrgType.mineSupplier => 'mine',
+    OrgType.buyer => 'buyer',
+    OrgType.transporter => 'transporter',
+  };
+  return portalNavLabelFor(
+        portalNavTree(orgType: orgType, role: role),
+        '/portal/$segment/operations',
+      ) ??
+      'Operations hub';
+}
+
 /// True when a session at [orgType] holding [role] may open [path].
 ///
 /// This is the guard half of P7-07 / P4-09: **the router and the rail read the

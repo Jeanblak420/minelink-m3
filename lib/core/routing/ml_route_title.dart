@@ -441,13 +441,15 @@ String _portalTitle(Uri uri, MlPortalTabs tabs) {
       // neighbour.
       'weighbridge' => 'Load controller',
       'stockpiles' => 'Stockpiles',
-      'minerals' || 'loads' || 'transactions' => 'Operations Hub',
+      'minerals' || 'loads' || 'transactions' => 'Operations hub',
       // `/portal/mine/operations` is one screen the rail names three ways by
       // role — "Operations hub" for an admin, "Incidents & gate checks" for a
       // guard, "Weighbridge records" for a controller. The resolver has no
       // role, so it takes the neutral name, which is also the one the three
-      // aliases above already resolve to.
-      'operations' => 'Operations Hub',
+      // aliases above already resolve to. The portal shell asks the menu
+      // first (`portalNavLabelFor`), so a guard's bar still reads
+      // "Incidents & gate checks"; this is only the fallback.
+      'operations' => 'Operations hub',
       'tons-out' => 'Tons out',
       'tons-out-search' => 'Search loads',
       'reconciliations' => 'Reconciliations',
@@ -550,7 +552,7 @@ String _portalTitle(Uri uri, MlPortalTabs tabs) {
     case '/messages':
       return 'Messages';
     default:
-      if (path.startsWith('/operations')) return 'Operations Hub';
+      if (path.startsWith('/operations')) return 'Operations hub';
       if (path.startsWith('/companies/')) return 'Companies';
       // "Employees", the word every other surface uses — `/company-employees`
       // above, the `employees` portal alias, the rail. This read **"Team

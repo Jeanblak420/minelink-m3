@@ -567,7 +567,6 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
     final uri = GoRouterState.of(context).uri;
     final location = uri.path;
     final navIndex = portalShellSelectedIndex(location, tabs, homeTabIndex);
-    final sectionTitle = portalShellSectionTitle(uri, tabs, navIndex);
     final onHome = location == '/home';
     final navLocation = NavLocation(
       path: location,
@@ -603,6 +602,10 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
                 : navTree.first.leaves.first.route!
             : navTree.first.route!;
     final selectedRoute = onHome ? dashboardRoute : location;
+    // The bar names a page as the menu does (see [portalNavLabelFor]); the
+    // path table is the fallback for pages the menu has no entry for.
+    final sectionTitle = portalNavLabelFor(navTree, location) ??
+        portalShellSectionTitle(uri, tabs, navIndex);
 
     // Live queue counts for the badges this tree names, and only those
     // (P7-05). Resolved against the company whose workspace is on screen —

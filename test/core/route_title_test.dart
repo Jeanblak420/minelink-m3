@@ -162,9 +162,9 @@ void main() {
       // fourteen other routes where the two vocabularies differ.
       '/portal/mine/weighbridge': 'Load controller',
       '/portal/mine/stockpiles': 'Stockpiles',
-      '/portal/mine/minerals': 'Operations Hub',
-      '/portal/mine/loads': 'Operations Hub',
-      '/portal/mine/transactions': 'Operations Hub',
+      '/portal/mine/minerals': 'Operations hub',
+      '/portal/mine/loads': 'Operations hub',
+      '/portal/mine/transactions': 'Operations hub',
       '/portal/mine/tons-out': 'Tons out',
       '/portal/buyer/reconciliations': 'Reconciliations',
       '/portal/buyer/requests': 'Requests',
@@ -207,8 +207,8 @@ void main() {
       '/communications': 'Communications',
       '/company-selection': 'Choose company',
       '/expired-access': 'Access expired',
-      '/operations': 'Operations Hub',
-      '/operations/weighbridge': 'Operations Hub',
+      '/operations': 'Operations hub',
+      '/operations/weighbridge': 'Operations hub',
       '/companies/123': 'Companies',
       '/employees/123': 'Employees',
       // A person's page is about a person, not about the grid it was

@@ -13,8 +13,22 @@ import 'package:flutter_application_1/features/employee/providers/employee_provi
 import 'package:flutter_application_1/features/fleet/models/fleet_vehicle_model.dart';
 import 'package:flutter_application_1/features/operations/models/operations_models.dart';
 import 'package:flutter_application_1/features/operations/providers/operations_provider.dart';
+import 'package:flutter_application_1/features/portal/nav/portal_nav.dart';
 import 'package:flutter_application_1/core/utils/friendly_error.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
+
+/// The hub's one-line description, naming only the tabs this session sees:
+/// a guard's page used to promise "minerals, transactions, the weighbridge,
+/// loads" above two tabs.
+@visibleForTesting
+String operationsHubDescription(List<OperationsTab> tabs) {
+  final names = [for (final t in tabs) t.label.toLowerCase()];
+  if (names.isEmpty) return 'The live working day.';
+  final list = names.length == 1
+      ? names.single
+      : '${names.sublist(0, names.length - 1).join(', ')} and ${names.last}';
+  return 'The live working day — $list.';
+}
 
 class OperationsHubScreen extends ConsumerWidget {
   final String? initialTabId;
@@ -97,9 +111,11 @@ class OperationsHubScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
               child: MlPageHeader(
-                title: 'Operations Hub',
-                description: 'The live working day — minerals, transactions, '
-                    'the weighbridge, loads, security and the gate.',
+                title: operationsHubTitle(
+                  orgType: access.company.orgType,
+                  role: access.isCompanyAccount ? null : access.role,
+                ),
+                description: operationsHubDescription(visibleTabs),
                 actions: [
                   MlButton.ghost(
                     label: 'Refresh',
