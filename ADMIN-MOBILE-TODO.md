@@ -926,3 +926,39 @@ Throwaway users per role, everything they touch deleted after (9.3 method).
   - Release APK (511 entries, config) installed on the emulator; NAS
     `MineLink-M3-2026-10-24.apk` + `PhoneRemote\minelink-m3.apk`, SHA-256
     equal to the build.
+
+## 11. Remaining role walks (Jean, 2026-10-25: "carry on with the role walks")
+
+- [x] 11.1 Company OWNER accounts walked on the S25 (latest build installed
+      over his, data kept). Owners of real companies cannot be signed in
+      without changing a real password, so three throwaway companies (Walk
+      Mine / Trans / Buyer, active, 30-day licence) were made with their own
+      owners, as Jean allowed on 2026-10-24.
+  - Mine owner 26 pages, transporter owner 24, buyer owner 20: no error
+    text anywhere.
+  - FIXED: the account-setup banner (and the licence notice beside it) was
+    drawn but absent from the accessibility tree — TalkBack could not read
+    it or reach "Complete now". The routed child's nested Navigator blocks
+    semantics painted before it; it now has its own boundary
+    (`shell_notices_semantics_test`, fails on the old shell).
+  - FIXED: Appearance told a transporter / buyer the theme applies to "your
+    Mine/Supplier dashboard" (`appearance_names_your_workspace_test`).
+- [x] 11.2 Mine MANAGEMENT walked on the S25 (AB mine, real data): 24 pages,
+      no error text.
+  - FIXED: Quality — the route spec row squeezed into three columns at
+    411dp / text 1.3, `RT-9F7B5BA3` broke mid-code and the sentence ran to
+    five lines; it now stacks below 480px (`quality_route_spec_phone_test`,
+    fails on the old tile; the quality-spec phone render updated).
+- [x] 11.3 Analyze clean, full suite green but the one intended render;
+      fixes re-checked on the new build (S25 dropped adb, so on the
+      S25-matched emulator): banner + "Complete now" now in the tree, the
+      Quality row stacks, a transporter's Appearance reads "Light or dark
+      applies everywhere."
+- [x] 11.4 Cleanup: device check-ins, the employee and the three companies
+      deleted, the one seat back to its exact vacant state (AB buyer 0 / AB
+      mine 4 / AB trans 1), four auth users deleted (200 ×4); sweep of every
+      uuid/text/json column in public/auth/storage finds nothing; health
+      probe 7/7. Scratch credentials deleted.
+  - NOT OURS, left alone: "Test Westway Mine", "Test Northcliff Port" and
+    "Test Haulage Co" (owners `test.*.owner@minelink.test`) appeared at
+    13:12 SAST during the walk — another session or Jean.
