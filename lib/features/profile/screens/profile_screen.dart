@@ -302,7 +302,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             MlPageHeader(
-              title: 'Profile',
+              title: 'My profile',
               description: subtitle,
               meta: authState.userType?.isCompany == true
                   ? 'Company workspace'

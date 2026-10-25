@@ -241,7 +241,7 @@ class _SecurityCheckinScreenState extends ConsumerState<SecurityCheckinScreen> {
                     id: 'security.dashboard',
                     targetKey: MineDashboardTourKeys.dashboard,
                     child: MlPageHeader(
-                      title: 'Mine Security',
+                      title: 'Security gate',
                       description: 'Gate control — arrivals & departures',
                       meta: '${onSite.length + loadedReady.length} on site · '
                           '${inbound.length} inbound',

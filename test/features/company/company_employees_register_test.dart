@@ -68,7 +68,7 @@ void main() {
 
   testWidgets('labels are sentence case', (tester) async {
     await pump(tester);
-    expect(find.text('Company employees'), findsOneWidget);
+    expect(find.text('Employees'), findsOneWidget);
     expect(find.text('Add user'), findsWidgets);
     for (final stale in const ['Company Employees', 'Add User']) {
       expect(find.text(stale), findsNothing, reason: '"$stale" is back');

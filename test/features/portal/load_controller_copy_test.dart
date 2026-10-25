@@ -6,7 +6,7 @@
 // "Recent Loads") and the action ("Record Load") were title case, against a
 // reference that cases every label as a sentence ("Total companies",
 // "Register company", "Export snapshot") — the same class the console pass
-// fixed on six screens. "Mine Control" is the screen's name and stays.
+// fixed on six screens. The screen is headed "Load controller", the menu's name.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,7 +54,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Mine Control'), findsOneWidget);
+    expect(find.text('Load controller'), findsOneWidget);
     for (final label in const [
       'Ready for loading',
       'Loads recorded',

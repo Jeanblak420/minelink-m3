@@ -114,7 +114,7 @@ class _SupervisorViewScreenState extends ConsumerState<SupervisorViewScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   MlPageHeader(
-                    title: 'Supervisor',
+                    title: 'Stockpiles',
                     meta: mlCount(stockpiles.length, 'stockpile'),
                     description:
                         'Manage stockpiles and monitor loading activity.',

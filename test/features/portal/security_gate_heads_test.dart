@@ -70,7 +70,7 @@ void main() {
     await pumpGate(tester);
 
     for (final heading in const [
-      'Mine Security',
+      'Security gate',
       'Pending gate confirmations',
       'At mine — mark departure',
       'Incoming trucks — mark arrival',

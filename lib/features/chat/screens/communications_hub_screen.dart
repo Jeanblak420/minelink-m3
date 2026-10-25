@@ -42,7 +42,7 @@ class CommunicationsHubScreen extends ConsumerWidget {
       // name — a second one beneath it repeats the same words.
       return const MlEmptyState(
         icon: Icons.forum_outlined,
-        title: 'Communications Hub',
+        title: 'Communications',
         message:
             'A linked company profile is required before live '
             'announcements and chat become available.',
@@ -73,7 +73,7 @@ class CommunicationsHubScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
             child: MlPageHeader(
-              title: 'Communications Hub',
+              title: 'Communications',
               description: 'Company announcements and team conversations.',
               actions: [
                 MlButton.ghost(

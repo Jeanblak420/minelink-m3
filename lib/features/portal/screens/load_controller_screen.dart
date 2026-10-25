@@ -123,7 +123,7 @@ class _LoadControllerScreenState extends ConsumerState<LoadControllerScreen> {
                 id: 'wb.dashboard',
                 targetKey: MineDashboardTourKeys.dashboard,
                 child: MlPageHeader(
-                  title: 'Mine Control',
+                  title: 'Load controller',
                   meta: '${mlCount(onSite.length, 'truck')} on site · '
                       '${loaded.length} loaded',
                   description:

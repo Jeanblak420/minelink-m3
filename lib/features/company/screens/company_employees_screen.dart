@@ -63,7 +63,7 @@ class _CompanyEmployeesScreenState
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
           child: MlPageHeader(
-            title: 'Company employees',
+            title: 'Employees',
             description: 'Everyone with a login under this company.',
             meta: mlCount(state.employees.length, 'user'),
             actions: [

@@ -78,7 +78,7 @@ class ChatRoomRoute extends ConsumerWidget {
       // Word for word the hub's, because it is the same condition.
       return const MlEmptyState(
         icon: Icons.forum_outlined,
-        title: 'Communications Hub',
+        title: 'Communications',
         message:
             'A linked company profile is required before live '
             'announcements and chat become available.',
