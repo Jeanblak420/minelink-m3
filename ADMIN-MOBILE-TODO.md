@@ -962,3 +962,17 @@ Throwaway users per role, everything they touch deleted after (9.3 method).
   - NOT OURS, left alone: "Test Westway Mine", "Test Northcliff Port" and
     "Test Haulage Co" (owners `test.*.owner@minelink.test`) appeared at
     13:12 SAST during the walk — another session or Jean.
+- [x] 11.5 The empty landscape rail band (open since 10.3), on the
+      S25-matched emulator (Jean, 2026-10-25: "continue on the emulator").
+  - Cause found: held sideways the phone reports a LEFT display-cutout
+    inset (78 dp here — the punch-hole camera). The old shell put the rail at
+    x=0, under it, and the device showed an empty band (10.3's screenshot).
+    d09772f's side safe area moves the rail clear of the cutout; on the
+    current build the collapsed rail draws every icon and the expanded rail
+    draws, scrolls and collapses. Why the icons vanished under the cutout is
+    not pinned down — a widget test of the old shell still paints them.
+  - Guarded: `shell_side_insets_test` gained a left-cutout case (fails on
+    the shell before d09772f: rail.left 0).
+  - One throwaway AB mine admin used and deleted: seat back to vacant (0 / 4
+    / 1), auth user deleted (200), sweep finds nothing; health probe 7/7.
+    Emulator left signed out, portrait, auto-rotate on.
