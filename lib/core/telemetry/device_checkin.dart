@@ -43,7 +43,9 @@ class DeviceCheckin {
   /// times each morning.
   static const interval = Duration(hours: 20);
 
-  static const _idKey = 'device_checkin.id';
+  /// This install's id. Kept through sign-out — see
+  /// `CacheService.clearAllCache` — because the table is one row per install.
+  static const idKey = 'device_checkin.id';
   static const _lastKey = 'device_checkin.last';
 
   final String? appVersion;
@@ -104,10 +106,10 @@ class DeviceCheckin {
       final last = DateTime.tryParse(prefs.getString(_lastKey) ?? '');
       if (last != null && now.difference(last) < interval) return;
 
-      var id = prefs.getString(_idKey);
+      var id = prefs.getString(idKey);
       if (id == null || id.length < 8) {
         id = const Uuid().v4();
-        await prefs.setString(_idKey, id);
+        await prefs.setString(idKey, id);
       }
       await _post({
         'p_device_id': id,

@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 
+import 'package:flutter_application_1/core/telemetry/device_checkin.dart';
+
 class CacheService {
   static const String _companyKeyPrefix = 'company_data_';
   static const String _employeeKeyPrefix = 'employee_data_';
@@ -325,10 +327,29 @@ class CacheService {
     debugPrint('Cleared all cache for current user');
   }
 
+  /// Keys that describe the INSTALL rather than whoever is signed in, kept
+  /// by [clearAllCache].
+  ///
+  /// Sign-in and sign-out both call [clearAllCache]. It wiped the device
+  /// check-in id with everything else, so each sign-in minted a new id and
+  /// the admin's device list (Crash reports) grew a phantom device every time
+  /// somebody signed in on the same phone - three for one emulator in an hour
+  /// (2026-10-25). The WhatsApp re-verification stamp is NOT here on purpose:
+  /// it is not tied to a user, so a second person on the same phone must not
+  /// inherit the first one's verification.
+  static const deviceScopedKeys = {DeviceCheckin.idKey};
+
   // Clear all cache
   static Future<void> clearAllCache() async {
     final prefs = await SharedPreferences.getInstance();
+    final keep = {
+      for (final k in deviceScopedKeys)
+        if (prefs.getString(k) != null) k: prefs.getString(k)!,
+    };
     await prefs.clear();
+    for (final e in keep.entries) {
+      await prefs.setString(e.key, e.value);
+    }
     debugPrint('Cleared all cache');
   }
 }
