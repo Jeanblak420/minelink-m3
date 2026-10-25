@@ -240,8 +240,13 @@ class AppRouter {
   /// timeout again on the very next navigation. See `portalGateFailureBackoff`.
   static DateTime? _portalGateFailedAt;
 
+  /// Bumped by every [clearProfileGateCache], so a portal-gate read that was
+  /// in flight across a clear can tell its answer is stale.
+  static int _gateGeneration = 0;
+
   /// Call after the user clears the mandatory password flag so the next redirect re-fetches profile.
   static void clearProfileGateCache() {
+    _gateGeneration++;
     _cachedPlatformRole = null;
     _cachedUserType = null;
     _cachedMustChangePassword = false;
@@ -276,6 +281,7 @@ class AppRouter {
   static const _gateReadTimeout = Duration(seconds: 6);
 
   static Future<void> _refreshProfileGateFields(String userId) async {
+    final generation = _gateGeneration;
     try {
       final profile = await SupabaseConfig.client
           .from('profiles')
@@ -283,6 +289,8 @@ class AppRouter {
           .eq('id', userId)
           .maybeSingle()
           .timeout(_gateReadTimeout);
+      // Cleared while reading (see [_refreshPortalGateFields]).
+      if (generation != _gateGeneration) return;
       _cachedProfileUserId = userId;
       // Tolerant legacy mapping: the flattened child super-admin role string
       // (removed — both admins are equal, full-rights) still resolves to the
@@ -305,8 +313,22 @@ class AppRouter {
   /// `companies` row; employees via their `employees` linkage (same lookup
   /// the portal workspace providers use). Failure leaves the fields null so
   /// the guard falls back to `/home` non-fatally and retries next time.
+  ///
+  /// **Every field is written at once, after the last read, and only if the
+  /// cache was not cleared meanwhile.** The reads await the network, and
+  /// sign-in clears this cache (`AuthNotifier._syncAuthState`) while a
+  /// redirect can be part-way through them. Writing the role first and the
+  /// org type after its own `await` let a clear land in between: the clear
+  /// reset "waiting for a role" to false, the late org-type write landed on
+  /// top, and an employee with no role was sent to `/portal/mine` — which the
+  /// no-role gate then bounced, ending on "That page is not here" (emulator,
+  /// signing in after another user, 2026-10-25).
   static Future<void> _refreshPortalGateFields(String userId) async {
+    final generation = _gateGeneration;
     try {
+      String? orgType;
+      String? employeeRole;
+      var withoutRole = false;
       if ((_cachedUserType ?? '') == 'company') {
         final company = await SupabaseConfig.client
             .from('companies')
@@ -314,9 +336,7 @@ class AppRouter {
             .eq('user_id', userId)
             .maybeSingle()
             .timeout(_gateReadTimeout);
-        _cachedOrgType = company?['org_type'] as String?;
-        _cachedEmployeeRole = null;
-        _cachedIsEmployeeWithoutRole = false;
+        orgType = company?['org_type'] as String?;
       } else {
         final employee = await SupabaseConfig.client
             .from('employees')
@@ -324,27 +344,29 @@ class AppRouter {
             .eq('user_id', userId)
             .maybeSingle()
             .timeout(_gateReadTimeout);
-        _cachedEmployeeRole = employee?['role'] as String?;
+        employeeRole = employee?['role'] as String?;
         final companyId = employee?['company_id'] as String?;
         // G1: an employee LINKED to a company but not yet given a role. The
         // company_id test matters — a self-signup that has not chosen a
         // company yet is a different state with its own screen.
-        _cachedIsEmployeeWithoutRole =
-            employee != null &&
-            companyId != null &&
-            _cachedEmployeeRole == null;
-        if (companyId == null) {
-          _cachedOrgType = null;
-        } else {
+        withoutRole =
+            employee != null && companyId != null && employeeRole == null;
+        if (companyId != null) {
           final company = await SupabaseConfig.client
               .from('companies')
               .select('org_type')
               .eq('id', companyId)
               .maybeSingle()
               .timeout(_gateReadTimeout);
-          _cachedOrgType = company?['org_type'] as String?;
+          orgType = company?['org_type'] as String?;
         }
       }
+      // Cleared while reading: this answer belongs to a cache that no longer
+      // exists. Leave the cleared state; the next redirect reads afresh.
+      if (generation != _gateGeneration) return;
+      _cachedOrgType = orgType;
+      _cachedEmployeeRole = employeeRole;
+      _cachedIsEmployeeWithoutRole = withoutRole;
       _portalGateFieldsLoaded = true;
       _portalGateFetchedAt = DateTime.now();
       _portalGateUserId = userId;
