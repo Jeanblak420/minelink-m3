@@ -976,3 +976,25 @@ Throwaway users per role, everything they touch deleted after (9.3 method).
   - One throwaway AB mine admin used and deleted: seat back to vacant (0 / 4
     / 1), auth user deleted (200), sweep finds nothing; health probe 7/7.
     Emulator left signed out, portrait, auto-rotate on.
+
+## 12. Jean, 2026-10-25: menu names, plain captions, every remaining role
+
+> "rename the page to match the menu, use plain English captions, you can fix
+> and improve whatever else needs it. If there are more user roles/employee
+> roles to test per company please do so" — S25 back (keep off the S20 FE,
+> another session is on it).
+
+- [x] 12.1 The operations page takes the menu's name: a guard's bar and
+      heading read "Incidents & gate checks", a load controller's "Weighbridge
+      records", an admin's "Operations hub"; the description names only the
+      tabs on the page (6853a4a, `operations_hub_named_like_menu_test`).
+- [x] 12.2 Stat-card captions in plain English, UI face: "All vehicles",
+      "Net mass · last 24 hours", "No invoices captured" … (c51011d; the walk
+      dumps held no other underscored text).
+- [ ] 12.3 Walk the roles not yet walked, on the S25-matched emulator: mine
+      ADMIN, buyer ADMIN, transporter ADMIN (throwaway users, deleted after).
+- [ ] 12.4 Walk the WhatsApp-only driver (Eli Mans, AB trans).
+- [ ] 12.5 Walk an employee still waiting for a role.
+- [ ] 12.6 Fix everything found, each with a test.
+- [ ] 12.7 Analyze, full suite, renders; cleanup + DB health; APK on the S25
+      (walk the fixes there), NAS, push.
