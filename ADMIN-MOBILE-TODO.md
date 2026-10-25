@@ -991,10 +991,49 @@ Throwaway users per role, everything they touch deleted after (9.3 method).
 - [x] 12.2 Stat-card captions in plain English, UI face: "All vehicles",
       "Net mass · last 24 hours", "No invoices captured" … (c51011d; the walk
       dumps held no other underscored text).
-- [ ] 12.3 Walk the roles not yet walked, on the S25-matched emulator: mine
-      ADMIN, buyer ADMIN, transporter ADMIN (throwaway users, deleted after).
-- [ ] 12.4 Walk the WhatsApp-only driver (Eli Mans, AB trans).
-- [ ] 12.5 Walk an employee still waiting for a role.
-- [ ] 12.6 Fix everything found, each with a test.
-- [ ] 12.7 Analyze, full suite, renders; cleanup + DB health; APK on the S25
-      (walk the fixes there), NAS, push.
+- [x] 12.3 Walked on the S25-matched emulator (throwaway users): mine ADMIN
+      25/25, buyer ADMIN 20/20, transporter ADMIN 24/24 pages, no error text
+      (one flag was the word "permissions" in a role description).
+  - FIXED: pages headed differently from the menu entry — Stockpiles
+    ("Supervisor"), Security gate ("Mine Security"), Load controller ("Mine
+    Control"), Communications ("Communications Hub"), Employees ("Company
+    employees"), My profile ("Profile"), the three dashboards ("Mine / Buyer
+    / Transporter overview"), Routes & dispatches ("Routes"), Vehicles
+    ("Fleet management") (949aa89, 332b971, 9ffcd7d;
+    `page_headings_match_menu_test` reads the label from the nav tree).
+  - FIXED: the driver's chat disc covered each tab's bottom card; chat now
+    opens from an icon beside the bell on Dashboard, Trip and Profile
+    (58ff1cd, `driver_chat_in_headers_test`). On the emulator: no disc on any
+    tab, the icon opens Messages, Back closes it.
+- [x] 12.4 Eli Mans (WhatsApp-only driver): signing in correctly asks for the
+      WhatsApp code sent to his number; walking past it needs that code, so
+      not attempted further (no second code sent). The driver role itself was
+      walked in 10.2, and today's driver change on a throwaway email driver.
+- [x] 12.5 Employee waiting for a role: FIXED — signing in after another
+      user landed on "That page is not here — /portal/mine". The router's
+      gate read wrote "no role" then awaited the org type, and sign-in's cache
+      clear landed in between (log: Blocked … / Landing mineSupplier on
+      /portal/mine / Blocked /portal/mine). Both gate reads now write together
+      after the last await and drop an answer read across a clear (ed411af,
+      `portal_gate_refresh_is_atomic_test`). Same sequence on the new build:
+      the previous user's page is blocked and the waiting screen shows.
+- [x] 12.6 FIXED (found in the device check-ins while checking 12.4): every
+      sign-in minted a new check-in device id, because sign-in/out wipes all
+      preferences; one emulator showed as three devices in an hour. The
+      install id is now kept (d1c332f, `sign_in_keeps_the_device_id_test`).
+      Not changed: the server keeps a row's user for an hour (its write
+      throttle), so a second person signing in within the hour shows under
+      the first until then — a migration, not done without Jean's OK.
+  - Renders: 37 updated, each only an intended change (2404a92).
+- [ ] 12.7 Ship and prove.
+  - [x] Analyze clean; full suite 2916 passed (1 skipped, pre-existing);
+        37 renders updated and checked.
+  - [x] Cleanup: 5 throwaway users — device check-ins and employees deleted,
+        5 seats back to their exact vacant state (AB buyer 0 / AB mine 4 / AB
+        trans 1), auth users deleted (200 x5), sweep of every uuid/text/json
+        column in public/auth/storage empty. The one check-in the Eli attempt
+        wrote from the emulator deleted. Health probe 7/7.
+  - [x] Release APK (511 entries, config present) to the NAS, hashes match.
+  - [ ] Walk the fixes on the S25: the pairing code from Jean had expired by
+        the time the list was done and the phone was not on the network —
+        needs a fresh code.
