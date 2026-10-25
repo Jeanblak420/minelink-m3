@@ -36,6 +36,7 @@ import 'package:flutter_application_1/core/utils/safe_ref.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 import 'package:flutter_application_1/features/tour/widgets/tour_target.dart';
 import 'package:flutter_application_1/features/tour/examples/driver_app_keys.dart';
+import 'package:flutter_application_1/features/chat/widgets/chat_dock.dart';
 
 /// Driver mobile app shell (spec 2026-07-16 §5) — 3-tab bottom-nav scaffold
 /// matching the approved design (Dashboard · Trip · Profile). The **Trip**
@@ -61,7 +62,22 @@ class _DriverAppScreenState extends State<DriverAppScreen> {
   Widget build(BuildContext context) {
     final body = switch (_tab) {
       0 => DriverDashboardTab(onOpenTrip: () => setState(() => _tab = 1)),
-      1 => const DriverRoutesScreen(),
+      // The Trip tab carries the same header as the other two, so its chat
+      // button and bell sit where they do on Dashboard and Profile.
+      1 => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                  _gutter(context), _gutter(context), _gutter(context), 0),
+              child: const _DashboardHeader(
+                title: 'Trip',
+                subtitle: 'Your current load',
+              ),
+            ),
+            const Expanded(child: DriverRoutesScreen()),
+          ],
+        ),
       _ => const DriverProfileTab(),
     };
 
@@ -448,6 +464,10 @@ class DriverDashboardTab extends ConsumerWidget {
   }
 }
 
+/// [MlPageBody]'s gutter, for a header that sits outside one.
+double _gutter(BuildContext context) =>
+    MediaQuery.sizeOf(context).width < 600 ? 16 : MlTokens.contentPadding;
+
 class _DashboardHeader extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -485,6 +505,12 @@ class _DashboardHeader extends StatelessWidget {
             ],
           ),
         ),
+        // Chat opens from here on a phone, beside the bell, instead of from
+        // a disc floating over the page: on all three tabs it covered the
+        // bottom card ("Total tons", the Account setup row) on the S25-matched
+        // emulator (2026-10-24). Draws nothing on a wide window, where the
+        // dock keeps its disc.
+        const ChatDockAppBarButton(),
         const AnimatedNotificationBell(),
       ],
     );

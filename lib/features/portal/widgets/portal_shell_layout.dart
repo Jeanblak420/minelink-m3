@@ -542,11 +542,13 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
       // showed up the first time the app was opened on a real handset, signed
       // in as a real driver, which is the whole argument for doing that.
       //
-      // The disc keeps off the driver's own bottom nav for the same reason it
-      // keeps off the portal's: the dock reserves `kMlBottomNavHeight` by
-      // WINDOW CLASS rather than by asking whether a bar happens to be there
-      // (`chat_dock.dart`), and the driver shell is only ever narrow.
-      return _driverBack(shellPath, const ChatDock(child: DriverAppScreen()));
+      // On a phone the chat opens from the driver's headers, beside the bell
+      // (`ChatDockAppBarButton` in `driver_app_screen.dart`), not from a disc
+      // over the page — the disc covered each tab's bottom card (2026-10-25).
+      return _driverBack(
+          shellPath,
+          const ChatDock(
+              launcherInAppBarOnPhone: true, child: DriverAppScreen()));
     }
     // Phase-2 nav merge (T2): /portal/driver/{home,trip,profile} deep-link
     // the same self-chromed driver app — render the routed child without the
@@ -560,7 +562,8 @@ class _PortalShellLayoutState extends ConsumerState<PortalShellLayout> {
     // Fixing that one alone left the disc still missing on the handset, which
     // is how this second `return` was found.
     if (isDriverEmployee && driverAppOwnsChrome(shellPath)) {
-      return _driverBack(shellPath, ChatDock(child: widget.child));
+      return _driverBack(shellPath,
+          ChatDock(launcherInAppBarOnPhone: true, child: widget.child));
     }
 
     final tabs = vm.tabs!;
