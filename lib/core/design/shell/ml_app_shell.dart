@@ -531,9 +531,13 @@ class _MlAppShellState extends State<MlAppShell> {
     // M3 has a layout for exactly this: the MEDIUM top app bar, whose
     // headline sits on its own full-width row under the icons. So the title
     // is MEASURED against the room it would get beside the icons — with the
-    // reader's text scale — and only when it would have to split a word, or
-    // needs more than two lines, does it drop to that row. Short titles keep
-    // the 72px bar they have always had.
+    // reader's text scale — and when it would need a second line there, it
+    // drops to that row. Short titles keep the 72px bar they have always had.
+    //
+    // A second line beside the icons was allowed until 2026-10-25. On Jean's
+    // S25 Ultra (411dp, system font 1.3) "My profile" sat wrapped between the
+    // back arrow and the chat icon, "My" over "profile", while the pages
+    // either side carried theirs on the row below — the row reads better.
     final titleNeedsOwnRow = compact &&
         _titleBreaksBesideTheIcons(
           _resolvedTitle,
@@ -639,8 +643,8 @@ class _MlAppShellState extends State<MlAppShell> {
     );
   }
 
-  /// Whether [title], set in [style] at [scaler], could sit in a column
-  /// [room] wide on at most two lines WITHOUT splitting a word.
+  /// Whether [title], set in [style] at [scaler], could NOT sit on one line
+  /// in a column [room] wide.
   ///
   /// Measured rather than assumed, because the answer depends on the reader's
   /// text scale, the number of actions in the bar and the longest word in
@@ -662,7 +666,7 @@ class _MlAppShellState extends State<MlAppShell> {
       }
     }
     return _lineCount(title, style: style, scaler: scaler, maxWidth: room) >
-        2;
+        1;
   }
 
   /// How many lines [text] takes at [maxWidth], unbounded.

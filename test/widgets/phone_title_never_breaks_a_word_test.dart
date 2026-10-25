@@ -108,6 +108,25 @@ void main() {
         reason: 'and starts at the bar\'s left padding, not beside the icons');
   });
 
+  // On Jean's S25 Ultra (411dp, system font 1.3, 2026-10-25) "My profile" fit
+  // beside the four icons only by wrapping: "My" over "profile", squeezed into
+  // the bar between the back arrow and the chat icon, while the pages either
+  // side of it carried their titles on the row below. Two lines beside the
+  // icons was the answer before the own row existed; with it, a title that
+  // needs a second line takes the row.
+  testWidgets('a title that would wrap beside the icons takes its own row',
+      (tester) async {
+    await tester.pumpWidget(_phone('My profile', scale: 1.3));
+    await tester.pumpAndSettle();
+
+    final titleRect = tester.getRect(find.text('My profile'));
+    expect(titleRect.top, greaterThanOrEqualTo(MlTokens.appBarHeight - 1),
+        reason: 'it was wrapped onto two lines inside the icon row');
+    expect(_lineTopsOf(tester, 'My profile', 0, 'My profile'.length),
+        hasLength(1),
+        reason: 'on its own row it reads on one line');
+  });
+
   testWidgets('a short title stays beside the icons in the 72px bar',
       (tester) async {
     // The console's phone bar: drawer + back and TWO actions. `Overview`
