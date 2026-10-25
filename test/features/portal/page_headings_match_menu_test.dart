@@ -3,7 +3,8 @@
 // S25-matched emulator, five pages opened under a different name from the
 // entry tapped: Stockpiles → "Supervisor", Security gate → "Mine Security",
 // Load controller → "Mine Control", Communications → "Communications Hub",
-// Employees → "Company employees". My profile read "Profile".
+// Employees → "Company employees". My profile read "Profile", and the
+// three dashboards "Mine / Buyer / Transporter overview".
 //
 // Read as source: each screen pulls in a session's worth of providers, and
 // the claim is a pairing of two strings — the menu's label (read from the
@@ -35,6 +36,11 @@ void main() {
     ('/portal/mine/employees',
         'lib/features/company/screens/company_employees_screen.dart'),
     ('/portal/mine/profile', 'lib/features/profile/screens/profile_screen.dart'),
+    // Walked as a transporter admin: "Routes" and "Fleet management".
+    ('/portal/transporter/routes',
+        'lib/features/portal/screens/transporter_routes_screen.dart'),
+    ('/portal/transporter/fleet',
+        'lib/features/fleet/screens/fleet_management_screen.dart'),
   ];
   final tree = [
     for (final o in OrgType.values) ...portalNavTree(orgType: o, role: null),

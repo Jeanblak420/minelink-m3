@@ -37,7 +37,7 @@ class FleetManagementScreen extends ConsumerWidget {
     if (!isAuthorized) {
       return const MlEmptyState(
         icon: Icons.lock_outline_rounded,
-        title: 'Fleet management',
+        title: 'Vehicles',
         message:
             'You are not authorized to access the fleet management system. '
             'Only Transporter companies with Admin or Management roles can '
@@ -51,7 +51,7 @@ class FleetManagementScreen extends ConsumerWidget {
     if (companyId == null) {
       return const MlEmptyState(
         icon: Icons.domain_disabled_outlined,
-        title: 'Fleet management',
+        title: 'Vehicles',
         message: 'Company information not available.',
       );
     }
@@ -67,7 +67,7 @@ class FleetManagementScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
             child: MlPageHeader(
-              title: 'Fleet management',
+              title: 'Vehicles',
               description:
                   'Every vehicle registered to this company, and '
                   'whether it is available, on route or in maintenance.',
