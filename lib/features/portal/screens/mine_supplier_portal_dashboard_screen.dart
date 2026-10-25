@@ -143,7 +143,7 @@ class _MineSupplierPortalDashboardScreenState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           PortalDashboardHeader(
-            title: 'Mine overview',
+            title: 'Dashboard',
             subtitle:
                 'Tons out, stockpile cover and the mine floor — live, '
                 'over the last ${_period.label.toLowerCase()}.',

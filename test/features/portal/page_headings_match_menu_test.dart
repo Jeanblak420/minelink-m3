@@ -17,6 +17,13 @@ import 'package:flutter_application_1/features/portal/nav/portal_nav.dart';
 
 void main() {
   final cases = <(String route, String file)>[
+    // The three dashboards were "Mine / Buyer / Transporter overview".
+    ('/portal/mine',
+        'lib/features/portal/screens/mine_supplier_portal_dashboard_screen.dart'),
+    ('/portal/buyer',
+        'lib/features/portal/screens/buyer_portal_dashboard_screen.dart'),
+    ('/portal/transporter',
+        'lib/features/portal/screens/transporter_portal_dashboard_screen.dart'),
     ('/portal/mine/stockpiles',
         'lib/features/portal/screens/supervisor_view_screen.dart'),
     ('/portal/mine/security',
@@ -29,14 +36,17 @@ void main() {
         'lib/features/company/screens/company_employees_screen.dart'),
     ('/portal/mine/profile', 'lib/features/profile/screens/profile_screen.dart'),
   ];
-  final tree = portalNavTree(orgType: OrgType.mineSupplier, role: null);
+  final tree = [
+    for (final o in OrgType.values) ...portalNavTree(orgType: o, role: null),
+  ];
 
   for (final (route, file) in cases) {
     test('$route is headed as the menu names it', () {
       final label = portalNavLabelFor(tree, route);
       expect(label, isNotNull, reason: '$route is no longer in the menu');
       final src = File(file).readAsStringSync();
-      final heading = RegExp(r"MlPageHeader\(\s*title: '([^']*)'")
+      final heading = RegExp(
+              r"(?:MlPageHeader|PortalDashboardHeader)\(\s*title: '([^']*)'")
           .firstMatch(src)
           ?.group(1);
       expect(heading, label,

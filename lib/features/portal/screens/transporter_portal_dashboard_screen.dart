@@ -157,7 +157,7 @@ class _TransporterPortalDashboardScreenState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           PortalDashboardHeader(
-            title: 'Transporter overview',
+            title: 'Dashboard',
             subtitle: 'Tonnage moved, earnings and fleet availability — live, '
                 'over the last ${_period.label.toLowerCase()}.',
             period: _period,

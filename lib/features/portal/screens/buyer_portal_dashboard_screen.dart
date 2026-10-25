@@ -141,7 +141,7 @@ class _BuyerPortalDashboardScreenState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           PortalDashboardHeader(
-            title: 'Buyer overview',
+            title: 'Dashboard',
             subtitle: 'Deliveries, payable value and open orders — live, over '
                 'the last ${_period.label.toLowerCase()}.',
             period: _period,
