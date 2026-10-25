@@ -101,7 +101,7 @@ class MineQualityScreen extends ConsumerWidget {
                     return Column(
                       children: [
                         for (final s in specs)
-                          _RouteSpecTile(spec: s, companyId: companyId),
+                          RouteSpecTile(spec: s, companyId: companyId),
                       ],
                     );
                   },
@@ -124,77 +124,89 @@ class MineQualityScreen extends ConsumerWidget {
   }
 }
 
-class _RouteSpecTile extends ConsumerWidget {
+/// One route's contract spec. Public only so its phone layout can be tested.
+@visibleForTesting
+class RouteSpecTile extends ConsumerWidget {
   final RouteQualitySpec spec;
   final String companyId;
-  const _RouteSpecTile({required this.spec, required this.companyId});
+  const RouteSpecTile({super.key, required this.spec, required this.companyId});
+
+  /// Below this the three columns stack: the spec sentence takes its own row.
+  ///
+  /// On the S25 (411dp, text 1.3) the card left the route a ~97px column, so
+  /// `RT-9F7B5BA3` broke mid-code and "No spec set — loads on this route are
+  /// not penalised." ran to five lines beside it (walk, 2026-10-25).
+  static const stackBelow = 480.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final semantic = MlSemantic.of(context);
+    final route = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          spec.routeNumber ?? 'Route',
+          style: context.mlText.code(
+            color: semantic.textStrong,
+            size: 13,
+            weight: FontWeight.w700,
+          ),
+        ),
+        Text(
+          [
+            if (spec.commodity != null) spec.commodity!,
+            if (spec.offloadingPoint != null) '→ ${spec.offloadingPoint!}',
+          ].join(' '),
+          // TWO lines: commodity AND destination. At one line "Chrome →
+          // Richards Bay" lost the destination, which is the half that
+          // distinguishes one of this mine's route specs from another.
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: context.mlText.bodySmall.copyWith(color: semantic.textMuted),
+        ),
+      ],
+    );
+    final specText = Text(
+      spec.hasSpec
+          ? [
+              if (spec.specCr2o3Pct != null) 'Cr₂O₃ ≥ ${spec.specCr2o3Pct}%',
+              if (spec.specMoistureMaxPct != null)
+                'moisture ≤ ${spec.specMoistureMaxPct}%',
+              if (spec.specSizing != null) 'sizing ${spec.specSizing}',
+            ].join(' · ')
+          : 'No spec set — loads on this route are not penalised.',
+      style: context.mlText.bodyMedium.copyWith(
+        color: spec.hasSpec ? semantic.textBody : semantic.textFaint,
+      ),
+    );
+    final button = MlButton.ghost(
+      label: spec.hasSpec ? 'Edit spec' : 'Set spec',
+      icon: Icons.tune_rounded,
+      compact: true,
+      onPressed: () => _editSpec(context, ref),
+    );
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: semantic.divider)),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  spec.routeNumber ?? 'Route',
-                  style: context.mlText.code(
-                    color: semantic.textStrong,
-                    size: 13,
-                    weight: FontWeight.w700,
-                  ),
-                ),
-                Text(
-                  [
-                    if (spec.commodity != null) spec.commodity!,
-                    if (spec.offloadingPoint != null)
-                      '→ ${spec.offloadingPoint!}',
-                  ].join(' '),
-                  // TWO lines: commodity AND destination, in a 97px column on
-                  // a phone. At one line "Chrome → Richards Bay" lost the
-                  // destination, which is the half that distinguishes one of
-                  // this mine's route specs from another.
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.mlText.bodySmall.copyWith(
-                    color: semantic.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 4,
-            child: Text(
-              spec.hasSpec
-                  ? [
-                      if (spec.specCr2o3Pct != null)
-                        'Cr₂O₃ ≥ ${spec.specCr2o3Pct}%',
-                      if (spec.specMoistureMaxPct != null)
-                        'moisture ≤ ${spec.specMoistureMaxPct}%',
-                      if (spec.specSizing != null) 'sizing ${spec.specSizing}',
-                    ].join(' · ')
-                  : 'No spec set — loads on this route are not penalised.',
-              style: context.mlText.bodyMedium.copyWith(
-                color: spec.hasSpec ? semantic.textBody : semantic.textFaint,
+      child: LayoutBuilder(
+        builder: (context, box) => box.maxWidth < stackBelow
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(children: [Expanded(child: route), button]),
+                  const SizedBox(height: 6),
+                  specText,
+                ],
+              )
+            : Row(
+                children: [
+                  Expanded(flex: 3, child: route),
+                  Expanded(flex: 4, child: specText),
+                  button,
+                ],
               ),
-            ),
-          ),
-          MlButton.ghost(
-            label: spec.hasSpec ? 'Edit spec' : 'Set spec',
-            icon: Icons.tune_rounded,
-            compact: true,
-            onPressed: () => _editSpec(context, ref),
-          ),
-        ],
       ),
     );
   }
