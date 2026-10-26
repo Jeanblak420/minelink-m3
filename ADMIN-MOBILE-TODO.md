@@ -1056,3 +1056,67 @@ Throwaway users per role, everything they touch deleted after (9.3 method).
         S25 had dropped off the network by then, so checked on the
         S25-matched emulator: My profile on one line on its own row.
         Throwaway users cleaned (seats 0/4/1, sweep empty, health 7/7).
+
+## 13. Jean, 2026-10-26: "test all on the s25ultra fully and properly"
+
+> "I specifically want u to test all on the s25ultra fully and properly and
+> then make notes where you go of what still needs to be done and then fix it
+> once done checking everything properly please. please don't use the
+> emulator now" — CtrlBridge left open as a fallback (paired, `--host
+> 192.168.88.108`; never needed — adb stayed up).
+
+- [x] 13.1 Installed dd38f377 on the S25 (hash = NAS copy). 14 throwaway
+      accounts: AB mine admin / management / security / load controller /
+      supervisor / no role, AB buyer admin / management, AB trans admin /
+      management / driver, and three temporary owner companies (mine,
+      transporter, buyer).
+- [x] 13.2 Every menu page walked on the S25 for every one of them — mine
+      admin 25, management 25, security 7, load controller 4, supervisor 7,
+      buyer admin 20, management 20, transporter admin 24, management 24,
+      driver 3 tabs, owners 25 / 19 / 14. No error text on any page.
+      (Two "NAV?" were the script's tap missing a drawer row; both pages
+      opened by hand.)
+- [x] 13.3 Dialog pass (open, then Cancel — nothing saved): record
+      production, add document, request transportation / buyers / products,
+      add user, contract spec, main gate anchor, account setup, messages,
+      workflow alerts, signature, add vehicle, log maintenance, log fuel, log
+      cost, route detail, request tracking, waybill edit, trip detail,
+      reconciliation export ("Nothing to export yet").
+- Found on the S25 and FIXED:
+  - [x] Notifications bell grey (`slate600`) at rest — read as disabled
+        beside the white icons — and no label for screen readers. Now the
+        bar's icon colour, amber only while unread; tooltip "Notifications".
+  - [x] Phone titles: short ones sat in the bar, long ones on the row below,
+        so the title jumped page to page. Every phone title now takes the
+        row (`phone_title_never_breaks_a_word_test` flipped to pin it).
+  - [x] A restricted role's home page titled by the OLD tab name: a guard's
+        read "Security", the menu "Security gate". `/home` now uses the
+        menu's name (`mlTabMenuNames`, moved to core and shared with the
+        navigation; `route_title_test`).
+  - [x] Employee register had its own heading (eyebrow, two-tone 46px serif)
+        and a shorthand caption. Standard page header, plain caption.
+  - [x] "10000.00 t Mined" (production) and "5000 / 5000 t" (order fill) —
+        ungrouped beside "5,000 t". `mlTons` / `mlTonsText` in ml_figures
+        (tested); route sheet "Tons available 5000" too.
+  - [x] Captions naming the signed-in person, not the company: "team
+        conversations for Walk MMG", "realtime updates for Walk SEC".
+  - [x] Employees card "Admin ·  · New this month" — blank number joined in.
+  - [x] Buyer Truck locations caption was developer text ("GPS samples you
+        are allowed to see … (plus future supplier rules)").
+  - [x] Empty Vehicles: "Add vehicle" at the top, "Register truck" below.
+  - [x] Two fields side by side in phone dialogs cut their labels at font 1.3
+        ("Commod…", "Pit / secti…", "Target Cr…", "Max mois…", "Odomet…").
+        New `MlFieldPair` stacks them when each half is too narrow for the
+        reader's text size — all 12 such pairs. Its first version used a
+        LayoutBuilder and threw inside AlertDialog (renders caught it);
+        `field_pair_in_dialog_test` runs it in a real AlertDialog.
+  - [x] Add document: first label clipped at the top by the scroll view.
+  - [x] Request buyers: "Mineral / product you s…" → "Product you supply".
+  - [x] Add user + profile in Title Case ("First Name", "Create User",
+        "Personal Information", "Update Profile", "Choose File").
+  - [x] Drivers: status badge "DRIVER ON …" — the "Remove" text button took
+        the room. Icon button, tooltip "Remove from <reg>".
+- Asked, not changed:
+  - [ ] The gate's quick "Mark arrived" / "Mark left" buttons act in one tap;
+        the search path asks "are you sure?" first. Not tapped (it would move
+        a real AB trip). Jean to decide whether the quick buttons confirm.
