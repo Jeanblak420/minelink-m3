@@ -1,6 +1,8 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_application_1/core/utils/ml_figures.dart';
 import 'package:flutter_application_1/features/portal/portal_colors.dart';
 import 'package:flutter_application_1/features/portal/providers/order_stockpile_provider.dart';
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
@@ -53,8 +55,10 @@ class OrderFillLine extends ConsumerWidget {
                   ),
                   Text(
                     cap != null
-                        ? '${fill.balanceTons.toStringAsFixed(0)} / ${cap.toStringAsFixed(0)} t'
-                        : '${fill.balanceTons.toStringAsFixed(0)} t',
+                        // Grouped like the mine's own stockpile card: it read
+                        // "5000 / 5000 t" beside "5,000 / 5,000 t" (S25 walk).
+                        ? '${NumberFormat('#,##0').format(fill.balanceTons)} / ${mlTons(cap, decimals: 0)}'
+                        : mlTons(fill.balanceTons, decimals: 0),
                     style: textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w800, color: accent),
                   ),

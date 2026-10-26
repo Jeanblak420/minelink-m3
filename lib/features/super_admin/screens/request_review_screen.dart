@@ -1,5 +1,6 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/utils/ml_figures.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
@@ -1005,7 +1006,7 @@ class _DetailPanel extends ConsumerWidget {
                 ],
               'buyer' => [
                   _kv('Mineral supplied', r.commodity),
-                  _kv('Tons available', r.tonsAvailable),
+                  _kv('Tons available', mlTonsText(r.tonsAvailable)),
                   _kv('Product specs', r.productSpecifications),
                   _kv('Payment terms', r.paymentTerms),
                   _kv(
@@ -1034,7 +1035,7 @@ class _DetailPanel extends ConsumerWidget {
                   _kv('Payment terms', r.paymentTerms),
                   _kv('Diesel', r.diesel),
                   _kv('Operational hours', hours.isEmpty ? '—' : hours),
-                  _kv('Tons available', r.tonsAvailable),
+                  _kv('Tons available', mlTonsText(r.tonsAvailable)),
                   _kv('Contract duration', r.contractDuration),
                   _kv('Number of Trucks Required', r.numSlots),
                   _kv('Seals', r.sealRequired ? 'Required' : 'Not required'),

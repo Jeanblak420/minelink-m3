@@ -89,4 +89,37 @@ void main() {
     expect(mlRand(-500).startsWith(mlMinus), isTrue);
     expect(mlRand(500).startsWith('R'), isTrue);
   });
+  // S25 walk, 2026-10-26: the production screen read "10000.00 t" beside a
+  // stockpile card's "5,000 t", and a route sheet "Tons available 5000".
+  group('mlTons', () {
+    test('groups thousands and keeps the weighbridge decimals', () {
+      expect(mlTons(10000), '10,000.00 t');
+      expect(mlTons(36.215), '36.22 t');
+    });
+
+    test('whole tons when asked', () {
+      expect(mlTons(5000, decimals: 0), '5,000 t');
+    });
+
+    test('a loss carries the minus sign, null is the em dash', () {
+      expect(mlTons(-771.32), '${mlMinus}771.32 t');
+      expect(mlTons(null), mlNoValue);
+    });
+  });
+
+  group('mlTonsText', () {
+    test('a typed plain number is grouped', () {
+      expect(mlTonsText('5000'), '5,000 t');
+      expect(mlTonsText('4,000'), '4,000 t');
+      expect(mlTonsText('1200t'), '1,200 t');
+      expect(mlTonsText('30.5'), '30.50 t');
+    });
+
+    test('anything else is shown as typed, and empty stays empty', () {
+      expect(mlTonsText('5000-6000'), '5000-6000');
+      expect(mlTonsText('about 4k'), 'about 4k');
+      expect(mlTonsText('  '), isNull);
+      expect(mlTonsText(null), isNull);
+    });
+  });
 }

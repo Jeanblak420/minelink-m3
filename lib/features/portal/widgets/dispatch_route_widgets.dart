@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/utils/ml_figures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/core/design/tokens/m3/ml_typography.dart';
 import 'package:flutter_application_1/core/utils/safe_ref.dart';
@@ -285,7 +286,7 @@ class _RouteDetailSheet extends ConsumerWidget {
                 'Route ID': route.routeNumber,
                 'Commodity': r.commodity,
                 'Distance': mlDistanceText(r.distance),
-                'Tons available': r.tonsAvailable,
+                'Tons available': mlTonsText(r.tonsAvailable),
                 'Number of Trucks Required': r.numSlots,
                 'Your price / ton': route.transporterPricePerTon != null
                     ? 'R ${route.transporterPricePerTon!.toStringAsFixed(2)}'

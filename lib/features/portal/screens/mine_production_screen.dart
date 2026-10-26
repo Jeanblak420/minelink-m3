@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/utils/ml_figures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -39,7 +40,7 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
 
   static final _dateFmt = DateFormat('dd MMM yyyy');
 
-  static String _t(double v) => '${v.toStringAsFixed(2)} t';
+  static String _t(double v) => mlTons(v);
 
   void _snack(String message) {
     // Every caller reaches here after an await, so the screen may already be
@@ -348,7 +349,7 @@ class _MineProductionScreenState extends ConsumerState<MineProductionScreen> {
           .addTons(pile.id, tons);
       ref.invalidateIfMounted(stockpilesProvider(companyId));
       _snack(
-        '${tons.toStringAsFixed(2)} t added to ${pile.name} — now '
+        '${mlTons(tons)} added to ${pile.name} — now '
         '${newBalance.toStringAsFixed(0)} t.',
       );
     } catch (e) {
@@ -396,13 +397,13 @@ class _ReportSection extends StatelessWidget {
             final tiles = [
               MlStatCard(
                 label: 'Mined',
-                value: '${mined.toStringAsFixed(2)} t',
+                value: mlTons(mined),
                 icon: Icons.terrain_outlined,
                 tone: MlTone.accent,
               ),
               MlStatCard(
                 label: 'Dispatched',
-                value: '${dispatched.toStringAsFixed(2)} t',
+                value: mlTons(dispatched),
                 icon: Icons.local_shipping_outlined,
                 tone: MlTone.transit,
               ),
@@ -421,7 +422,7 @@ class _ReportSection extends StatelessWidget {
                 // Nothing recorded means no loss to state. Printing
                 // `mined - dispatched` here reported "-771.32 t" IN GREEN on a
                 // window where the pit had recorded nothing at all.
-                value: loss == null ? '—' : '${loss.toStringAsFixed(2)} t',
+                value: loss == null ? '—' : mlTons(loss),
                 icon: Icons.trending_down_rounded,
                 tone: loss == null
                     ? MlTone.neutral
@@ -444,8 +445,8 @@ class _ReportSection extends StatelessWidget {
               MlSectionTitle(
                 'Daily — last ${mlCount(windowDays, 'day')}',
                 meta:
-                    '${mined.toStringAsFixed(2)} t mined · '
-                    '${dispatched.toStringAsFixed(2)} t dispatched',
+                    '${mlTons(mined)} mined · '
+                    '${mlTons(dispatched)} dispatched',
                 icon: Icons.calendar_view_day_outlined,
                 margin: EdgeInsets.zero,
                 action: MlButton.outline(
@@ -482,11 +483,8 @@ class _ReportSection extends StatelessWidget {
                             color: semantic.textBody,
                           ),
                         ),
-                        _mono(context, '${d.minedTons.toStringAsFixed(2)} t'),
-                        _mono(
-                          context,
-                          '${d.dispatchedTons.toStringAsFixed(2)} t',
-                        ),
+                        _mono(context, mlTons(d.minedTons)),
+                        _mono(context, mlTons(d.dispatchedTons)),
                         // ONE notion of measurable, the same one the two
                         // tiles above read. This cell used to subtract
                         // directly, so a mine that records no production
@@ -539,7 +537,7 @@ class _ReportSection extends StatelessWidget {
           borderRadius: BorderRadius.circular(MlTokens.rSm),
         ),
         child: Text(
-          v == null ? '—' : '${v > 0 ? '+' : ''}${v.toStringAsFixed(2)} t',
+          v == null ? '—' : '${v > 0 ? '+' : ''}${mlTons(v)}',
           style: context.mlText.code(
             color: colors.fg,
             size: 12,
@@ -753,29 +751,22 @@ class _RecordProductionDialogState
                 },
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _commodity,
-                      decoration: const InputDecoration(
-                        labelText: 'Commodity',
-                        hintText: 'e.g. Chrome ore',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
+              MlFieldPair(
+                first: TextField(
+                  controller: _commodity,
+                  decoration: const InputDecoration(
+                    labelText: 'Commodity',
+                    hintText: 'e.g. Chrome ore',
+                    border: OutlineInputBorder(),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      controller: _pit,
-                      decoration: const InputDecoration(
-                        labelText: 'Pit / section',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
+                ),
+                second: TextField(
+                  controller: _pit,
+                  decoration: const InputDecoration(
+                    labelText: 'Pit / section',
+                    border: OutlineInputBorder(),
                   ),
-                ],
+                ),
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String?>(
@@ -913,73 +904,59 @@ class _CreatePileDialogState extends ConsumerState<_CreatePileDialog> {
                 ),
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _mineral,
-                      decoration: const InputDecoration(
-                        labelText: 'Mineral',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
+              MlFieldPair(
+                first: TextField(
+                  controller: _mineral,
+                  decoration: const InputDecoration(
+                    labelText: 'Mineral',
+                    border: OutlineInputBorder(),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      controller: _opening,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      ],
-                      decoration: const InputDecoration(
-                        labelText: 'Opening tons',
-                        border: OutlineInputBorder(),
-                        suffixText: 't',
-                      ),
-                    ),
+                ),
+                second: TextField(
+                  controller: _opening,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                ],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: 'Opening tons',
+                    border: OutlineInputBorder(),
+                    suffixText: 't',
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _cr2o3,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      ],
-                      decoration: const InputDecoration(
-                        labelText: 'Cr₂O₃ %',
-                        border: OutlineInputBorder(),
-                        suffixText: '%',
-                      ),
-                    ),
+              MlFieldPair(
+                first: TextField(
+                  controller: _cr2o3,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      controller: _moisture,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      ],
-                      decoration: const InputDecoration(
-                        labelText: 'Moisture %',
-                        border: OutlineInputBorder(),
-                        suffixText: '%',
-                      ),
-                    ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: 'Cr₂O₃ %',
+                    border: OutlineInputBorder(),
+                    suffixText: '%',
                   ),
-                ],
+                ),
+                second: TextField(
+                  controller: _moisture,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: 'Moisture %',
+                    border: OutlineInputBorder(),
+                    suffixText: '%',
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
               TextField(

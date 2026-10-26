@@ -66,3 +66,32 @@ String mlKm(num? km) {
   }
   return '$buffer km';
 }
+
+
+/// A tonnage to the weighbridge's two decimals, grouped: `10,000.00 t`.
+///
+/// The production screen wrote `${v.toStringAsFixed(2)} t`, so a month's
+/// output read `10000.00 t` beside a stockpile card drawing `5,000 t` (S25
+/// walk, 2026-10-26). Same grouping as the tons-out and recon tables.
+///
+/// [decimals] 0 gives the stockpile cards' whole tons: `5,000 t`.
+String mlTons(num? tons, {int decimals = 2}) {
+  if (tons == null) return mlNoValue;
+  final sign = tons < 0 ? mlMinus : '';
+  final pattern = decimals == 0 ? '#,##0' : '#,##0.${'0' * decimals}';
+  return '$sign${NumberFormat(pattern).format(tons.abs())} t';
+}
+
+/// A tonnage the requester TYPED, as stored (`tons_available` is text), shown
+/// grouped when it is a plain number: `"5000"` → `5,000 t`. Anything else —
+/// "about 4k", "5000-6000" — is returned as typed, because rewriting what a
+/// person wrote is worse than showing it ungrouped. Null stays null so the
+/// detail rows that skip empty values still skip it.
+String? mlTonsText(String? typed) {
+  if (typed == null) return null;
+  final t = typed.trim();
+  if (t.isEmpty) return null;
+  final n = num.tryParse(t.replaceAll(RegExp(r'[\s,]|t$'), ''));
+  if (n == null) return t;
+  return mlTons(n, decimals: n == n.roundToDouble() ? 0 : 2);
+}
