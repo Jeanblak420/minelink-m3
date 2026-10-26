@@ -21,10 +21,8 @@ Future<bool> showQualityCertDialog(
 }) async {
   final saved = await showDialog<bool>(
     context: context,
-    builder: (_) => _QualityCertDialog(
-      row: row,
-      supplierCompanyId: supplierCompanyId,
-    ),
+    builder: (_) =>
+        _QualityCertDialog(row: row, supplierCompanyId: supplierCompanyId),
   );
   return saved == true;
 }
@@ -53,9 +51,11 @@ class _QualityCertDialogState extends ConsumerState<_QualityCertDialog> {
   void initState() {
     super.initState();
     _cr2o3 = TextEditingController(
-        text: widget.row.cr2o3Pct?.toStringAsFixed(2) ?? '');
+      text: widget.row.cr2o3Pct?.toStringAsFixed(2) ?? '',
+    );
     _moisture = TextEditingController(
-        text: widget.row.moisturePct?.toStringAsFixed(2) ?? '');
+      text: widget.row.moisturePct?.toStringAsFixed(2) ?? '',
+    );
     _sizing = TextEditingController(text: widget.row.sizing ?? '');
     _notes = TextEditingController(text: widget.row.certNotes ?? '');
   }
@@ -97,9 +97,13 @@ class _QualityCertDialogState extends ConsumerState<_QualityCertDialog> {
         sizing.isEmpty &&
         _files.isEmpty &&
         widget.row.certPath == null) {
-      messenger.showSnackBar(const SnackBar(
+      messenger.showSnackBar(
+        const SnackBar(
           content: Text(
-              'Enter at least one quality value or attach the certificate file.')));
+            'Enter at least one quality value or attach the certificate file.',
+          ),
+        ),
+      );
       return;
     }
 
@@ -131,7 +135,10 @@ class _QualityCertDialogState extends ConsumerState<_QualityCertDialog> {
     } catch (e) {
       if (mounted) setState(() => _saving = false);
       messenger.showSnackBar(
-          SnackBar(content: Text('Could not save the certificate. ${friendlyError(e)}')));
+        SnackBar(
+          content: Text('Could not save the certificate. ${friendlyError(e)}'),
+        ),
+      );
     }
   }
 
@@ -188,40 +195,35 @@ class _QualityCertDialogState extends ConsumerState<_QualityCertDialog> {
                 ),
               ],
               const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _cr2o3,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      ],
-                      decoration: const InputDecoration(
-                        labelText: 'Cr₂O₃ %',
-                        border: OutlineInputBorder(),
-                        suffixText: '%',
-                      ),
-                    ),
+              MlFieldPair(
+                first: TextField(
+                  controller: _cr2o3,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextField(
-                      controller: _moisture,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      ],
-                      decoration: const InputDecoration(
-                        labelText: 'Moisture %',
-                        border: OutlineInputBorder(),
-                        suffixText: '%',
-                      ),
-                    ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: 'Cr₂O₃ %',
+                    border: OutlineInputBorder(),
+                    suffixText: '%',
                   ),
-                ],
+                ),
+                second: TextField(
+                  controller: _moisture,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: 'Moisture %',
+                    border: OutlineInputBorder(),
+                    suffixText: '%',
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -246,7 +248,7 @@ class _QualityCertDialogState extends ConsumerState<_QualityCertDialog> {
                 label: r.certPath == null
                     ? 'Lab certificate (PDF or photo)'
                     : 'Replace certificate file (current: '
-                        '${r.certFileName ?? 'attached'})',
+                          '${r.certFileName ?? 'attached'})',
                 hint: 'Drop the lab certificate here or click to browse',
                 files: _files,
                 allowMultiple: false,

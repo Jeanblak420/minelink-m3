@@ -66,7 +66,10 @@ Future<void> showBuyersRequestDialog(
     title: 'Request buyers',
     blurb:
         'Ask the platform to connect you with more buyers for your minerals.',
-    productLabel: 'Mineral / product you supply',
+    // Shortened: at the S25's text size the field cut it to "Mineral /
+    // product you s…" (2026-10-26). "Tons available / month" is the longest
+    // label that fits, and this is shorter.
+    productLabel: 'Product you supply',
     productHint: 'e.g. Chrome 38/40',
     tonsLabel: 'Tons available / month',
     showDestination: false,

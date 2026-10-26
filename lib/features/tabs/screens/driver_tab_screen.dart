@@ -74,7 +74,7 @@ class DriverTabScreen extends ConsumerWidget {
       ],
       actions: [
         WorkspaceAction(
-          label: 'Update Profile',
+          label: 'Update profile',
           icon: Icons.person_outline,
           onPressed: () => context.go('/profile'),
           isPrimary: true,

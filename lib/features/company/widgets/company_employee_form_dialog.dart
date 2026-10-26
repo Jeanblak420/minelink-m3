@@ -187,7 +187,7 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
       // app offers, and "First Name" / "Last Name" went at the largest.
       insetPadding: DialogUtils.adaptiveInsetPadding(context),
       contentPadding: DialogUtils.adaptiveContentPadding(context),
-      title: Text(widget.isCreateMode ? 'Add User' : 'Edit User'),
+      title: Text(widget.isCreateMode ? 'Add user' : 'Edit user'),
       content: SizedBox(
         width: DialogUtils.contentMaxWidth(context, maxWidth: 420),
         child: SingleChildScrollView(
@@ -255,7 +255,7 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
                   controller: _firstNameController,
                   textCapitalization: TextCapitalization.words,
                   decoration: const InputDecoration(
-                    labelText: 'First Name',
+                    labelText: 'First name',
                     prefixIcon: Icon(Icons.person_outline),
                   ),
                   validator: (value) => _validateRequired(value, 'First name'),
@@ -265,7 +265,7 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
                   controller: _lastNameController,
                   textCapitalization: TextCapitalization.words,
                   decoration: const InputDecoration(
-                    labelText: 'Last Name',
+                    labelText: 'Last name',
                     prefixIcon: Icon(Icons.badge_outlined),
                   ),
                   validator: (value) => _validateRequired(value, 'Last name'),
@@ -305,7 +305,7 @@ class _CompanyEmployeeFormDialogState extends State<CompanyEmployeeFormDialog> {
         ),
         FilledButton(
           onPressed: _submit,
-          child: Text(widget.isCreateMode ? 'Create User' : 'Save Changes'),
+          child: Text(widget.isCreateMode ? 'Create user' : 'Save changes'),
         ),
       ],
     );

@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/core/design/tokens/m3/ml_shape.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/core/design/components/ml_field_pair.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/core/time/ml_time.dart';
 
@@ -68,7 +69,9 @@ class VehicleDetailsFields extends StatelessWidget {
     final year = int.tryParse(value.trim());
     if (year == null) return 'Enter a valid year';
     final now = MlTime.now().year;
-    if (year < 1950 || year > now + 2) return 'Year must be between 1950 and ${now + 2}';
+    if (year < 1950 || year > now + 2) {
+      return 'Year must be between 1950 and ${now + 2}';
+    }
     return null;
   }
 
@@ -101,11 +104,14 @@ class VehicleDetailsFields extends StatelessWidget {
     //
     // LayoutBuilder answers both: compare the width actually handed to these
     // fields against a threshold in the same scaled units the text grows in.
-    return LayoutBuilder(builder: (context, constraints) {
-      final stackFields =
-          constraints.maxWidth < 480 * MediaQuery.textScalerOf(context).scale(1);
-      return _build(context, scheme, stackFields);
-    });
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stackFields =
+            constraints.maxWidth <
+            480 * MediaQuery.textScalerOf(context).scale(1);
+        return _build(context, scheme, stackFields);
+      },
+    );
   }
 
   Widget _build(BuildContext context, ColorScheme scheme, bool stackFields) {
@@ -151,8 +157,8 @@ class VehicleDetailsFields extends StatelessWidget {
               expiryDate == null
                   ? 'Select date (optional)'
                   : '${expiryDate!.day.toString().padLeft(2, '0')}/'
-                      '${expiryDate!.month.toString().padLeft(2, '0')}/'
-                      '${expiryDate!.year}',
+                        '${expiryDate!.month.toString().padLeft(2, '0')}/'
+                        '${expiryDate!.year}',
             ),
           ),
         ),
@@ -202,7 +208,8 @@ class VehicleDetailsFields extends StatelessWidget {
             initialValue: sealPoints!.clamp(1, 4),
             decoration: const InputDecoration(
               labelText: 'Seal points *',
-              helperText: 'How many seals a sealed load must carry. The '
+              helperText:
+                  'How many seals a sealed load must carry. The '
                   'weighbridge accepts exactly this many — no more, no fewer.',
               // Enough lines for this sentence to survive a phone at the
               // largest text size the shell will install; helper text that
@@ -246,16 +253,17 @@ class VehicleDetailsFields extends StatelessWidget {
                         // the whole reason the menu is wider than the field.
                         Text(
                           option.description,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: scheme.onSurfaceVariant),
                         ),
                       ],
                     ),
                   ),
                 ),
             ],
-            onChanged: (v) { if (v != null) onSealPointsChanged!(v); },
+            onChanged: (v) {
+              if (v != null) onSealPointsChanged!(v);
+            },
           ),
         ],
         const SizedBox(height: 24),
@@ -267,9 +275,9 @@ class VehicleDetailsFields extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           'Helps identify the unit in fleet lists, operations, and compliance checks.',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
         ),
         const SizedBox(height: 12),
         if (stackFields) ...[
@@ -320,69 +328,53 @@ class VehicleDetailsFields extends StatelessWidget {
             validator: validateOdometer,
           ),
         ] else ...[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: makeController,
-                  decoration: const InputDecoration(
-                    labelText: 'Make',
-                    hintText: 'e.g. Opel',
-                    border: OutlineInputBorder(),
-                  ),
-                  textCapitalization: TextCapitalization.words,
-                ),
+          MlFieldPair(
+            first: TextFormField(
+              controller: makeController,
+              decoration: const InputDecoration(
+                labelText: 'Make',
+                hintText: 'e.g. Opel',
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextFormField(
-                  controller: typeController,
-                  decoration: const InputDecoration(
-                    labelText: 'Type / model',
-                    hintText: 'e.g. Astra J',
-                    border: OutlineInputBorder(),
-                  ),
-                  textCapitalization: TextCapitalization.words,
-                ),
+              textCapitalization: TextCapitalization.words,
+            ),
+            second: TextFormField(
+              controller: typeController,
+              decoration: const InputDecoration(
+                labelText: 'Type / model',
+                hintText: 'e.g. Astra J',
+                border: OutlineInputBorder(),
               ),
-            ],
+              textCapitalization: TextCapitalization.words,
+            ),
           ),
           const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: yearController,
-                  decoration: const InputDecoration(
-                    labelText: 'Year model',
-                    hintText: 'e.g. 2018',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  maxLength: 4,
-                  validator: validateYear,
-                ),
+          MlFieldPair(
+            first: TextFormField(
+              controller: yearController,
+              decoration: const InputDecoration(
+                labelText: 'Year model',
+                hintText: 'e.g. 2018',
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextFormField(
-                  controller: odometerController,
-                  decoration: const InputDecoration(
-                    labelText: 'Odometer',
-                    hintText: 'e.g. 250120',
-                    helperText: 'Kilometres',
-                    border: OutlineInputBorder(),
-                    counterText: '',
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  validator: validateOdometer,
-                ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              maxLength: 4,
+              validator: validateYear,
+            ),
+            second: TextFormField(
+              controller: odometerController,
+              decoration: const InputDecoration(
+                labelText: 'Odometer',
+                hintText: 'e.g. 250120',
+                helperText: 'Kilometres',
+                border: OutlineInputBorder(),
+                counterText: '',
               ),
-            ],
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: validateOdometer,
+            ),
           ),
         ],
       ],
@@ -419,9 +411,9 @@ class _SectionHeader extends StatelessWidget {
         Expanded(
           child: Text(
             title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
       ],

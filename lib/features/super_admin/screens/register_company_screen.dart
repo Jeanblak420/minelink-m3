@@ -16,7 +16,8 @@ class RegisterCompanyScreen extends ConsumerStatefulWidget {
   const RegisterCompanyScreen({super.key});
 
   @override
-  ConsumerState<RegisterCompanyScreen> createState() => _RegisterCompanyScreenState();
+  ConsumerState<RegisterCompanyScreen> createState() =>
+      _RegisterCompanyScreenState();
 }
 
 class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
@@ -122,11 +123,15 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
       ..writeln('Login email: $ownerEmail')
       ..writeln('Temporary password: $temporaryPassword')
       ..writeln()
-      ..writeln('Sign in with the MineLink app using the email and password above.')
+      ..writeln(
+        'Sign in with the MineLink app using the email and password above.',
+      )
       ..writeln()
       ..writeln('On first sign-in you will be asked to set a new password.')
       ..writeln('That password must be different from this temporary one.')
-      ..writeln('Your platform administrator will activate your subscription (token & seats) next.');
+      ..writeln(
+        'Your platform administrator will activate your subscription (token & seats) next.',
+      );
 
     final text = message.toString();
 
@@ -136,7 +141,10 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text('Company registered'),
         content: SingleChildScrollView(
-          child: SelectableText(text, style: const TextStyle(fontSize: 13, height: 1.4)),
+          child: SelectableText(
+            text,
+            style: const TextStyle(fontSize: 13, height: 1.4),
+          ),
         ),
         actions: [
           OutlinedButton.icon(
@@ -224,7 +232,8 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
                     labelText: 'Company name',
                     border: OutlineInputBorder(),
                   ),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Required' : null,
                   enabled: !_busy,
                 ),
                 const SizedBox(height: 12),
@@ -234,7 +243,8 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
                     labelText: 'WhatsApp number',
                     border: OutlineInputBorder(),
                   ),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Required' : null,
                   enabled: !_busy,
                 ),
                 const SizedBox(height: 12),
@@ -264,30 +274,23 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _ceoFirst,
-                        decoration: const InputDecoration(
-                          labelText: 'CEO first name',
-                          border: OutlineInputBorder(),
-                        ),
-                        enabled: !_busy,
-                      ),
+                MlFieldPair(
+                  first: TextFormField(
+                    controller: _ceoFirst,
+                    decoration: const InputDecoration(
+                      labelText: 'CEO first name',
+                      border: OutlineInputBorder(),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _ceoLast,
-                        decoration: const InputDecoration(
-                          labelText: 'CEO last name',
-                          border: OutlineInputBorder(),
-                        ),
-                        enabled: !_busy,
-                      ),
+                    enabled: !_busy,
+                  ),
+                  second: TextFormField(
+                    controller: _ceoLast,
+                    decoration: const InputDecoration(
+                      labelText: 'CEO last name',
+                      border: OutlineInputBorder(),
                     ),
-                  ],
+                    enabled: !_busy,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -304,7 +307,9 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
                 const SizedBox(height: 8),
                 SwitchListTile(
                   title: const Text('Generate temporary password'),
-                  subtitle: const Text('Turn off to set your own (min. 8 characters)'),
+                  subtitle: const Text(
+                    'Turn off to set your own (min. 8 characters)',
+                  ),
                   value: _genPassword,
                   onChanged: _busy
                       ? null

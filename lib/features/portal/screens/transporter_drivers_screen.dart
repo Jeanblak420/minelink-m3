@@ -357,10 +357,13 @@ class _AssignedDriverTileState extends ConsumerState<_AssignedDriverTile> {
       trailing: _busy
           ? const SizedBox(
               width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-          : TextButton.icon(
+          // An icon, not "Remove" in words: the word took ~90px of a phone
+          // row, and at the S25's text size the status badge on its own line
+          // still read "DRIVER ON …" (2026-10-26). The tooltip names it.
+          : IconButton(
               onPressed: _remove,
-              icon: const Icon(Icons.link_off_rounded, size: 16),
-              label: const Text('Remove'),
+              tooltip: 'Remove from ${d.registration}',
+              icon: const Icon(Icons.link_off_rounded),
             ),
     );
   }

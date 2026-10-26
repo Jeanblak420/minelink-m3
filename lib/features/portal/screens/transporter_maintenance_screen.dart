@@ -42,32 +42,36 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
     return maintAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => MlLoadFailure(
-          subject: 'the maintenance records',
-          error: e,
-          onRetry: () => ref.invalidate(fleetMaintenanceProvider(companyId)),
+        subject: 'the maintenance records',
+        error: e,
+        onRetry: () => ref.invalidate(fleetMaintenanceProvider(companyId)),
       ),
       data: (data) {
-        final open =
-            data.records.where((r) => r.isOpen).toList(growable: false);
-        final closed =
-            data.records.where((r) => !r.isOpen).toList(growable: false);
+        final open = data.records
+            .where((r) => r.isOpen)
+            .toList(growable: false);
+        final closed = data.records
+            .where((r) => !r.isOpen)
+            .toList(growable: false);
         final downCount = open.where((r) => r.takesOutOfService).length;
         final schedules = data.schedules;
-        final dueSoon =
-            schedules.where((s) => s.dueSoon).toList(growable: false);
+        final dueSoon = schedules
+            .where((s) => s.dueSoon)
+            .toList(growable: false);
         final fleet = fleetAsync.asData?.value ?? const <FleetVehicleStatus>[];
 
         return MlPageBody(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-// The action goes in the header's own slot, not a Row wrapped around
+              // The action goes in the header's own slot, not a Row wrapped around
               // it: a Row hands an unflexed action UNBOUNDED width (CLAUDE.md
               // 10.4) and squeezes the Expanded title to whatever is left. The
               // slot drops the action under the title instead.
               MlPageHeader(
                 title: 'Maintenance',
-                meta: '$downCount out of service · '
+                meta:
+                    '$downCount out of service · '
                     '${mlCount(dueSoon.length, 'service')} due soon',
                 description:
                     'Service schedules, breakdowns and vehicle downtime. '
@@ -82,44 +86,47 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 18),
-              LayoutBuilder(builder: (context, c) {
-                final cols = c.maxWidth > 620 ? 3 : 1;
-                const gap = 14.0;
-                final w = cols == 1
-                    ? c.maxWidth
-                    : (c.maxWidth - gap * (cols - 1)) / cols;
-                final tiles = [
-                  MlStatCard(
-                    label: 'In maintenance',
-                    value: '$downCount',
-                    icon: Icons.build_circle_outlined,
-                    tone: MlTone.warn,
-                  ),
-                  MlStatCard(
-                    label: 'Open records',
-                    value: '${open.length}',
-                    icon: Icons.pending_actions_outlined,
-                    tone: MlTone.atMine,
-                  ),
-                  MlStatCard(
-                    label: 'Services due soon',
-                    value: '${dueSoon.length}',
-                    icon: Icons.schedule_outlined,
-                    tone: dueSoon.isEmpty ? MlTone.done : MlTone.accent,
-                  ),
-                ];
-                return Wrap(
-                  spacing: gap,
-                  runSpacing: gap,
-                  children: [
-                    for (final t in tiles) SizedBox(width: w, child: t),
-                  ],
-                );
-              }),
+              LayoutBuilder(
+                builder: (context, c) {
+                  final cols = c.maxWidth > 620 ? 3 : 1;
+                  const gap = 14.0;
+                  final w = cols == 1
+                      ? c.maxWidth
+                      : (c.maxWidth - gap * (cols - 1)) / cols;
+                  final tiles = [
+                    MlStatCard(
+                      label: 'In maintenance',
+                      value: '$downCount',
+                      icon: Icons.build_circle_outlined,
+                      tone: MlTone.warn,
+                    ),
+                    MlStatCard(
+                      label: 'Open records',
+                      value: '${open.length}',
+                      icon: Icons.pending_actions_outlined,
+                      tone: MlTone.atMine,
+                    ),
+                    MlStatCard(
+                      label: 'Services due soon',
+                      value: '${dueSoon.length}',
+                      icon: Icons.schedule_outlined,
+                      tone: dueSoon.isEmpty ? MlTone.done : MlTone.accent,
+                    ),
+                  ];
+                  return Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: [
+                      for (final t in tiles) SizedBox(width: w, child: t),
+                    ],
+                  );
+                },
+              ),
               const SizedBox(height: 20),
               MlSectionTitle(
                 'Open maintenance',
-                meta: '${mlCount(open.length, 'record')} · '
+                meta:
+                    '${mlCount(open.length, 'record')} · '
                     '$downCount out of service',
                 icon: Icons.build_outlined,
                 action: MlButton.primary(
@@ -153,7 +160,8 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
               const SizedBox(height: 20),
               MlSectionTitle(
                 'Service schedules',
-                meta: '${mlCount(schedules.length, 'schedule')} · '
+                meta:
+                    '${mlCount(schedules.length, 'schedule')} · '
                     '${dueSoon.length} due soon',
                 icon: Icons.event_repeat_outlined,
                 action: MlButton.outline(
@@ -181,9 +189,13 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
                     schedule: s,
                     onDone: () =>
                         _completeScheduleDialog(context, ref, companyId, s),
-                    onEdit: () =>
-                        _scheduleDialog(context, ref, companyId, fleet,
-                            existing: s),
+                    onEdit: () => _scheduleDialog(
+                      context,
+                      ref,
+                      companyId,
+                      fleet,
+                      existing: s,
+                    ),
                     onToggleActive: () async {
                       await ref
                           .read(maintenanceServiceProvider)
@@ -206,8 +218,12 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
 
   // ---- dialogs -------------------------------------------------------------
 
-  Future<void> _openRecordDialog(BuildContext context, WidgetRef ref,
-      String companyId, List<FleetVehicleStatus> fleet) async {
+  Future<void> _openRecordDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String companyId,
+    List<FleetVehicleStatus> fleet,
+  ) async {
     if (fleet.isEmpty) return;
     final formKey = GlobalKey<FormState>();
     var vehicleId = fleet.first.vehicleId;
@@ -221,141 +237,147 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
 
     final saved = await showDialog<bool>(
       context: context,
-      builder: (ctx) => StatefulBuilder(builder: (ctx, setState) {
-        return AlertDialog(
-          title: const Text('Log maintenance'),
-          content: SizedBox(
-            width: 420,
-            child: Form(
-              key: formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DropdownButtonFormField<String>(
-                      // A DropdownButtonFormField lays its selected item out at its NATURAL
-                      // width and sizes to the WIDEST item in the list, so one long option
-                      // decides the control's width whatever is selected (CLAUDE.md §10.4).
-                      isExpanded: true,
-                      initialValue: vehicleId,
-                      decoration: const InputDecoration(labelText: 'Vehicle'),
-                      items: [
-                        for (final v in fleet)
-                          DropdownMenuItem(
-                            value: v.vehicleId,
-                            child: Text(v.registration),
-                          ),
-                      ],
-                      onChanged: (v) => vehicleId = v ?? vehicleId,
-                    ),
-                    const SizedBox(height: 10),
-                    DropdownButtonFormField<MaintenanceKind>(
-                      // A DropdownButtonFormField lays its selected item out at its NATURAL
-                      // width and sizes to the WIDEST item in the list, so one long option
-                      // decides the control's width whatever is selected (CLAUDE.md §10.4).
-                      isExpanded: true,
-                      initialValue: kind,
-                      decoration: const InputDecoration(labelText: 'Kind'),
-                      items: [
-                        for (final k in MaintenanceKind.values)
-                          DropdownMenuItem(value: k, child: Text(k.label)),
-                      ],
-                      onChanged: (v) => kind = v ?? kind,
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: title,
-                      decoration: const InputDecoration(
-                        labelText: 'What is wrong / being done? *',
-                        hintText: 'e.g. Gearbox overhaul',
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) {
+          return AlertDialog(
+            title: const Text('Log maintenance'),
+            content: SizedBox(
+              width: 420,
+              child: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        // A DropdownButtonFormField lays its selected item out at its NATURAL
+                        // width and sizes to the WIDEST item in the list, so one long option
+                        // decides the control's width whatever is selected (CLAUDE.md §10.4).
+                        isExpanded: true,
+                        initialValue: vehicleId,
+                        decoration: const InputDecoration(labelText: 'Vehicle'),
+                        items: [
+                          for (final v in fleet)
+                            DropdownMenuItem(
+                              value: v.vehicleId,
+                              child: Text(v.registration),
+                            ),
+                        ],
+                        onChanged: (v) => vehicleId = v ?? vehicleId,
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Give the record a title'
-                          : null,
-                    ),
-                    const SizedBox(height: 10),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: outOfService,
-                      onChanged: (v) => setState(() => outOfService = v),
-                      title: const Text('Truck out of service'),
-                      subtitle: const Text(
-                          'Removes it from Available until marked fixed'),
-                    ),
-                    if (outOfService)
-                      ListTile(
+                      const SizedBox(height: 10),
+                      DropdownButtonFormField<MaintenanceKind>(
+                        // A DropdownButtonFormField lays its selected item out at its NATURAL
+                        // width and sizes to the WIDEST item in the list, so one long option
+                        // decides the control's width whatever is selected (CLAUDE.md §10.4).
+                        isExpanded: true,
+                        initialValue: kind,
+                        decoration: const InputDecoration(labelText: 'Kind'),
+                        items: [
+                          for (final k in MaintenanceKind.values)
+                            DropdownMenuItem(value: k, child: Text(k.label)),
+                        ],
+                        onChanged: (v) => kind = v ?? kind,
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: title,
+                        decoration: const InputDecoration(
+                          labelText: 'What is wrong / being done? *',
+                          hintText: 'e.g. Gearbox overhaul',
+                        ),
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Give the record a title'
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+                      SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: Text(expectedBack == null
-                            ? 'Expected back (optional)'
-                            : 'Expected back: '
-                                '${MlTime.calendarDay(expectedBack!)}'),
-                        trailing: const Icon(Icons.calendar_month_outlined),
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: ctx,
-                            firstDate: MlTime.now(),
-                            lastDate:
-                                MlTime.now().add(const Duration(days: 365)),
-                            initialDate:
-                                MlTime.now().add(const Duration(days: 2)),
-                          );
-                          if (picked != null && ctx.mounted) {
-                            setState(() => expectedBack = picked);
-                          }
-                        },
-                      ),
-                    Row(children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: cost,
-                          keyboardType: TextInputType.number,
-                          decoration:
-                              const InputDecoration(labelText: 'Cost (R)'),
+                        value: outOfService,
+                        onChanged: (v) => setState(() => outOfService = v),
+                        title: const Text('Truck out of service'),
+                        subtitle: const Text(
+                          'Removes it from Available until marked fixed',
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: TextFormField(
+                      if (outOfService)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            expectedBack == null
+                                ? 'Expected back (optional)'
+                                : 'Expected back: '
+                                      '${MlTime.calendarDay(expectedBack!)}',
+                          ),
+                          trailing: const Icon(Icons.calendar_month_outlined),
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: ctx,
+                              firstDate: MlTime.now(),
+                              lastDate: MlTime.now().add(
+                                const Duration(days: 365),
+                              ),
+                              initialDate: MlTime.now().add(
+                                const Duration(days: 2),
+                              ),
+                            );
+                            if (picked != null && ctx.mounted) {
+                              setState(() => expectedBack = picked);
+                            }
+                          },
+                        ),
+                      MlFieldPair(
+                        first: TextFormField(
+                          controller: cost,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: 'Cost (R)',
+                          ),
+                        ),
+                        second: TextFormField(
                           controller: odo,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                              labelText: 'Odometer (km)'),
+                            labelText: 'Odometer (km)',
+                          ),
                         ),
                       ),
-                    ]),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: notes,
-                      maxLines: 2,
-                      decoration: const InputDecoration(labelText: 'Notes'),
-                    ),
-                  ],
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: notes,
+                        maxLines: 2,
+                        decoration: const InputDecoration(labelText: 'Notes'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                if (formKey.currentState?.validate() ?? false) {
-                  Navigator.pop(ctx, true);
-                }
-              },
-              child: const Text('Log maintenance'),
-            ),
-          ],
-        );
-      }),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  if (formKey.currentState?.validate() ?? false) {
+                    Navigator.pop(ctx, true);
+                  }
+                },
+                child: const Text('Log maintenance'),
+              ),
+            ],
+          );
+        },
+      ),
     );
 
     if (saved != true || !context.mounted) return;
     try {
-      await ref.read(maintenanceServiceProvider).openRecord(
+      await ref
+          .read(maintenanceServiceProvider)
+          .openRecord(
             vehicleId: vehicleId,
             kind: kind,
             title: title.text.trim(),
@@ -368,30 +390,37 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
       _refresh(ref, companyId);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Could not log. ${friendlyError(e)}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not log. ${friendlyError(e)}')),
+        );
       }
     }
   }
 
-  Future<void> _closeRecordDialog(BuildContext context, WidgetRef ref,
-      String companyId, MaintenanceRecord record) async {
+  Future<void> _closeRecordDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String companyId,
+    MaintenanceRecord record,
+  ) async {
     final notes = TextEditingController();
     final cost = TextEditingController(
-        text: record.costZar == null ? '' : '${record.costZar}');
+      text: record.costZar == null ? '' : '${record.costZar}',
+    );
     final odo = TextEditingController(
-        text: record.odometerKm == null ? '' : '${record.odometerKm}');
+      text: record.odometerKm == null ? '' : '${record.odometerKm}',
+    );
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-      // Cold-phone audit 2026-08-18: this dialog holds input fields and did
-      // not scroll, so at a large text size on a narrow phone its content
-      // overflowed the viewport and the fields below the fold could not be
-      // reached. Measured at 133px of clipped content on the token
-      // generator, which is the same shape. `scrollable` only engages when
-      // the content exceeds the space, so it is inert on a desktop.
-      scrollable: true,
+        // Cold-phone audit 2026-08-18: this dialog holds input fields and did
+        // not scroll, so at a large text size on a narrow phone its content
+        // overflowed the viewport and the fields below the fold could not be
+        // reached. Measured at 133px of clipped content on the token
+        // generator, which is the same shape. `scrollable` only engages when
+        // the content exceeds the space, so it is inert on a desktop.
+        scrollable: true,
         title: const Text('Mark fixed — return to service'),
         content: SizedBox(
           width: 420,
@@ -399,36 +428,34 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(record.takesOutOfService
-                  ? '${record.registration} goes straight back into the '
-                      'Available pool and can be assigned to routes again.'
-                  : 'Closes "${record.title}" on ${record.registration}.'),
+              Text(
+                record.takesOutOfService
+                    ? '${record.registration} goes straight back into the '
+                          'Available pool and can be assigned to routes again.'
+                    : 'Closes "${record.title}" on ${record.registration}.',
+              ),
               const SizedBox(height: 12),
-              Row(children: [
-                Expanded(
-                  child: TextField(
-                    controller: cost,
-                    keyboardType: TextInputType.number,
-                    decoration:
-                        const InputDecoration(labelText: 'Final cost (R)'),
+              MlFieldPair(
+                first: TextField(
+                  controller: cost,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Final cost (R)',
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: odo,
-                    keyboardType: TextInputType.number,
-                    decoration:
-                        const InputDecoration(labelText: 'Odometer (km)'),
-                  ),
+                second: TextField(
+                  controller: odo,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Odometer (km)'),
                 ),
-              ]),
+              ),
               const SizedBox(height: 10),
               TextField(
                 controller: notes,
                 maxLines: 2,
                 decoration: const InputDecoration(
-                    labelText: 'Closing notes (optional)'),
+                  labelText: 'Closing notes (optional)',
+                ),
               ),
             ],
           ),
@@ -448,7 +475,9 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
 
     if (confirmed != true || !context.mounted) return;
     try {
-      await ref.read(maintenanceServiceProvider).closeRecord(
+      await ref
+          .read(maintenanceServiceProvider)
+          .closeRecord(
             record.id,
             notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
             costZar: double.tryParse(cost.text.trim()),
@@ -456,175 +485,197 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
           );
       _refresh(ref, companyId);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              '${record.registration} is back in service and available for routes.'),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${record.registration} is back in service and available for routes.',
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Could not close. ${friendlyError(e)}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not close. ${friendlyError(e)}')),
+        );
       }
     }
   }
 
-  Future<void> _scheduleDialog(BuildContext context, WidgetRef ref,
-      String companyId, List<FleetVehicleStatus> fleet,
-      {ServiceSchedule? existing}) async {
+  Future<void> _scheduleDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String companyId,
+    List<FleetVehicleStatus> fleet, {
+    ServiceSchedule? existing,
+  }) async {
     if (fleet.isEmpty && existing == null) return;
     final formKey = GlobalKey<FormState>();
-    var vehicleId = existing?.vehicleId ??
-        (fleet.isEmpty ? '' : fleet.first.vehicleId);
+    var vehicleId =
+        existing?.vehicleId ?? (fleet.isEmpty ? '' : fleet.first.vehicleId);
     final name = TextEditingController(text: existing?.name ?? '');
     final dueKm = TextEditingController(
-        text:
-            existing?.dueOdometerKm == null ? '' : '${existing!.dueOdometerKm}');
+      text: existing?.dueOdometerKm == null ? '' : '${existing!.dueOdometerKm}',
+    );
     final repMonths = TextEditingController(
-        text:
-            existing?.repeatMonths == null ? '' : '${existing!.repeatMonths}');
+      text: existing?.repeatMonths == null ? '' : '${existing!.repeatMonths}',
+    );
     final repKm = TextEditingController(
-        text: existing?.repeatKm == null ? '' : '${existing!.repeatKm}');
-    final notifyDays =
-        TextEditingController(text: '${existing?.notifyDaysBefore ?? 7}');
+      text: existing?.repeatKm == null ? '' : '${existing!.repeatKm}',
+    );
+    final notifyDays = TextEditingController(
+      text: '${existing?.notifyDaysBefore ?? 7}',
+    );
     DateTime? dueDate = existing?.dueDate;
 
     final saved = await showDialog<bool>(
       context: context,
-      builder: (ctx) => StatefulBuilder(builder: (ctx, setState) {
-        return AlertDialog(
-          title:
-              Text(existing == null ? 'Add service schedule' : 'Edit schedule'),
-          content: SizedBox(
-            width: 420,
-            child: Form(
-              key: formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (fleet.isNotEmpty)
-                      DropdownButtonFormField<String>(
-                        // A DropdownButtonFormField lays its selected item out at its NATURAL
-                        // width and sizes to the WIDEST item in the list, so one long option
-                        // decides the control's width whatever is selected (CLAUDE.md §10.4).
-                        isExpanded: true,
-                        initialValue:
-                            fleet.any((v) => v.vehicleId == vehicleId)
-                                ? vehicleId
-                                : (fleet.isEmpty ? '' : fleet.first.vehicleId),
-                        decoration:
-                            const InputDecoration(labelText: 'Vehicle'),
-                        items: [
-                          for (final v in fleet)
-                            DropdownMenuItem(
-                              value: v.vehicleId,
-                              child: Text(v.registration),
-                            ),
-                        ],
-                        onChanged: (v) => vehicleId = v ?? vehicleId,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) {
+          return AlertDialog(
+            title: Text(
+              existing == null ? 'Add service schedule' : 'Edit schedule',
+            ),
+            content: SizedBox(
+              width: 420,
+              child: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (fleet.isNotEmpty)
+                        DropdownButtonFormField<String>(
+                          // A DropdownButtonFormField lays its selected item out at its NATURAL
+                          // width and sizes to the WIDEST item in the list, so one long option
+                          // decides the control's width whatever is selected (CLAUDE.md §10.4).
+                          isExpanded: true,
+                          initialValue:
+                              fleet.any((v) => v.vehicleId == vehicleId)
+                              ? vehicleId
+                              : (fleet.isEmpty ? '' : fleet.first.vehicleId),
+                          decoration: const InputDecoration(
+                            labelText: 'Vehicle',
+                          ),
+                          items: [
+                            for (final v in fleet)
+                              DropdownMenuItem(
+                                value: v.vehicleId,
+                                child: Text(v.registration),
+                              ),
+                          ],
+                          onChanged: (v) => vehicleId = v ?? vehicleId,
+                        ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: name,
+                        decoration: const InputDecoration(
+                          labelText: 'Schedule name *',
+                          hintText: 'e.g. Minor service',
+                        ),
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Name the schedule'
+                            : null,
                       ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: name,
-                      decoration: const InputDecoration(
-                        labelText: 'Schedule name *',
-                        hintText: 'e.g. Minor service',
-                      ),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Name the schedule'
-                          : null,
-                    ),
-                    const SizedBox(height: 10),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(dueDate == null
-                          ? 'Due date (optional)'
-                          : 'Due: '
-                              '${MlTime.calendarDay(dueDate!)}'),
-                      trailing: dueDate == null
-                          ? const Icon(Icons.calendar_month_outlined)
-                          : IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () => setState(() => dueDate = null),
+                      const SizedBox(height: 10),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          dueDate == null
+                              ? 'Due date (optional)'
+                              : 'Due: '
+                                    '${MlTime.calendarDay(dueDate!)}',
+                        ),
+                        trailing: dueDate == null
+                            ? const Icon(Icons.calendar_month_outlined)
+                            : IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () => setState(() => dueDate = null),
+                              ),
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: ctx,
+                            firstDate: MlTime.now(),
+                            lastDate: MlTime.now().add(
+                              const Duration(days: 365 * 3),
                             ),
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: ctx,
-                          firstDate: MlTime.now(),
-                          lastDate: MlTime.now()
-                              .add(const Duration(days: 365 * 3)),
-                          initialDate: dueDate ??
-                              MlTime.now().add(const Duration(days: 30)),
-                        );
-                        if (picked != null && ctx.mounted) {
-                          setState(() => dueDate = picked);
-                        }
-                      },
-                    ),
-                    TextFormField(
-                      controller: dueKm,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                          labelText: 'Due at odometer (km, optional)'),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(children: [
-                      Expanded(
-                        child: TextFormField(
+                            initialDate:
+                                dueDate ??
+                                MlTime.now().add(const Duration(days: 30)),
+                          );
+                          if (picked != null && ctx.mounted) {
+                            setState(() => dueDate = picked);
+                          }
+                        },
+                      ),
+                      TextFormField(
+                        controller: dueKm,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Due at odometer (km, optional)',
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      MlFieldPair(
+                        first: TextFormField(
                           controller: repMonths,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                              labelText: 'Repeat every (months)'),
+                            labelText: 'Repeat every (months)',
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: TextFormField(
+                        second: TextFormField(
                           controller: repKm,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                              labelText: 'Repeat every (km)'),
+                            labelText: 'Repeat every (km)',
+                          ),
                         ),
                       ),
-                    ]),
-                    TextFormField(
-                      controller: notifyDays,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                          labelText: 'Remind (days before due date)'),
-                    ),
-                  ],
+                      TextFormField(
+                        controller: notifyDays,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Remind (days before due date)',
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                if (!(formKey.currentState?.validate() ?? false)) return;
-                if (dueDate == null && dueKm.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
-                      content: Text('Set a due date and/or a due odometer.')));
-                  return;
-                }
-                Navigator.pop(ctx, true);
-              },
-              child: Text(existing == null ? 'Add schedule' : 'Save'),
-            ),
-          ],
-        );
-      }),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  if (!(formKey.currentState?.validate() ?? false)) return;
+                  if (dueDate == null && dueKm.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      const SnackBar(
+                        content: Text('Set a due date and/or a due odometer.'),
+                      ),
+                    );
+                    return;
+                  }
+                  Navigator.pop(ctx, true);
+                },
+                child: Text(existing == null ? 'Add schedule' : 'Save'),
+              ),
+            ],
+          );
+        },
+      ),
     );
 
     if (saved != true || !context.mounted) return;
     try {
-      await ref.read(maintenanceServiceProvider).upsertSchedule(
+      await ref
+          .read(maintenanceServiceProvider)
+          .upsertSchedule(
             vehicleId: vehicleId,
             name: name.text.trim(),
             dueDate: dueDate,
@@ -637,27 +688,32 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
       _refresh(ref, companyId);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Could not save. ${friendlyError(e)}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not save. ${friendlyError(e)}')),
+        );
       }
     }
   }
 
-  Future<void> _completeScheduleDialog(BuildContext context, WidgetRef ref,
-      String companyId, ServiceSchedule s) async {
+  Future<void> _completeScheduleDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String companyId,
+    ServiceSchedule s,
+  ) async {
     final cost = TextEditingController();
     final odo = TextEditingController();
     final notes = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-      // Cold-phone audit 2026-08-18: this dialog holds input fields and did
-      // not scroll, so at a large text size on a narrow phone its content
-      // overflowed the viewport and the fields below the fold could not be
-      // reached. Measured at 133px of clipped content on the token
-      // generator, which is the same shape. `scrollable` only engages when
-      // the content exceeds the space, so it is inert on a desktop.
-      scrollable: true,
+        // Cold-phone audit 2026-08-18: this dialog holds input fields and did
+        // not scroll, so at a large text size on a narrow phone its content
+        // overflowed the viewport and the fields below the fold could not be
+        // reached. Measured at 133px of clipped content on the token
+        // generator, which is the same shape. `scrollable` only engages when
+        // the content exceeds the space, so it is inert on a desktop.
+        scrollable: true,
         title: const Text('Log service done'),
         content: SizedBox(
           width: 420,
@@ -665,27 +721,23 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Logs "${s.name}" as done for ${s.registration} and rolls '
-                  'the schedule to its next due point.'),
+              Text(
+                'Logs "${s.name}" as done for ${s.registration} and rolls '
+                'the schedule to its next due point.',
+              ),
               const SizedBox(height: 12),
-              Row(children: [
-                Expanded(
-                  child: TextField(
-                    controller: cost,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Cost (R)'),
-                  ),
+              MlFieldPair(
+                first: TextField(
+                  controller: cost,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Cost (R)'),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: odo,
-                    keyboardType: TextInputType.number,
-                    decoration:
-                        const InputDecoration(labelText: 'Odometer (km)'),
-                  ),
+                second: TextField(
+                  controller: odo,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Odometer (km)'),
                 ),
-              ]),
+              ),
               const SizedBox(height: 10),
               TextField(
                 controller: notes,
@@ -710,7 +762,9 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
 
     if (confirmed != true || !context.mounted) return;
     try {
-      await ref.read(maintenanceServiceProvider).completeSchedule(
+      await ref
+          .read(maintenanceServiceProvider)
+          .completeSchedule(
             s.id,
             costZar: double.tryParse(cost.text.trim()),
             odometerKm: int.tryParse(odo.text.trim()),
@@ -719,19 +773,20 @@ class TransporterMaintenanceScreen extends ConsumerWidget {
       _refresh(ref, companyId);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Could not log. ${friendlyError(e)}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not log. ${friendlyError(e)}')),
+        );
       }
     }
   }
 }
 
 MlTone _kindTone(MaintenanceKind kind) => switch (kind) {
-      MaintenanceKind.breakdown => MlTone.error,
-      MaintenanceKind.repair => MlTone.warn,
-      MaintenanceKind.service => MlTone.accent,
-      MaintenanceKind.inspection => MlTone.neutral,
-    };
+  MaintenanceKind.breakdown => MlTone.error,
+  MaintenanceKind.repair => MlTone.warn,
+  MaintenanceKind.service => MlTone.accent,
+  MaintenanceKind.inspection => MlTone.neutral,
+};
 
 class _OpenRecordCard extends StatelessWidget {
   final MaintenanceRecord record;
@@ -753,7 +808,9 @@ class _OpenRecordCard extends StatelessWidget {
             children: [
               MlPlatePill(record.registration),
               MlStatusBadge(
-                  label: record.kind.label, tone: _kindTone(record.kind)),
+                label: record.kind.label,
+                tone: _kindTone(record.kind),
+              ),
               if (record.takesOutOfService)
                 const MlStatusBadge(label: 'OUT OF SERVICE', tone: MlTone.warn)
               else
@@ -761,11 +818,12 @@ class _OpenRecordCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Text(record.title,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w700)),
+          Text(
+            record.title,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 4),
           Text(
             [
@@ -780,16 +838,18 @@ class _OpenRecordCard extends StatelessWidget {
               if (record.costZar != null) mlRand(record.costZar, decimals: 2),
               if (record.odometerKm != null) mlKm(record.odometerKm),
             ].join(' · '),
-            style:
-                Theme.of(context).textTheme.bodySmall?.copyWith(color: muted),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: muted),
           ),
           if (record.notes != null) ...[
             const SizedBox(height: 6),
-            Text(record.notes!,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: muted)),
+            Text(
+              record.notes!,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: muted),
+            ),
           ],
           const SizedBox(height: 12),
           MlButton.go(
@@ -840,11 +900,12 @@ class _ScheduleCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Text(s.name,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w700)),
+          Text(
+            s.name,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 4),
           Text(
             [
@@ -857,8 +918,9 @@ class _ScheduleCard extends StatelessWidget {
               if (s.lastDoneAt != null)
                 'last done ${MlTime.calendarDay(s.lastDoneAt!)}',
             ].join(' · '),
-            style:
-                Theme.of(context).textTheme.bodySmall?.copyWith(color: muted),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: muted),
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -941,7 +1003,9 @@ class _HistorySectionState extends State<_HistorySection> {
                       MlPlatePill(r.registration, fontSize: 11),
                       const SizedBox(width: 10),
                       MlStatusBadge(
-                          label: r.kind.label, tone: _kindTone(r.kind)),
+                        label: r.kind.label,
+                        tone: _kindTone(r.kind),
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -956,10 +1020,9 @@ class _HistorySectionState extends State<_HistorySection> {
                           if (r.closedAt != null)
                             MlTime.calendarDay(r.closedAt!),
                         ].join(' · '),
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: muted),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: muted),
                       ),
                     ],
                   ),

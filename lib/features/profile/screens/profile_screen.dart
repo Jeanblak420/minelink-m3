@@ -541,7 +541,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           TextFormField(
             controller: _companyWhatsappController,
             decoration: const InputDecoration(
-              labelText: 'WhatsApp Number',
+              labelText: 'WhatsApp number',
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.phone),
             ),
@@ -713,7 +713,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       color: MlTokens.inkOnFill,
                       size: 30,
                     )
-                  : const Text('Update Profile'),
+                  : const Text('Update profile'),
             ),
           ),
           if (state.error != null) ...[
@@ -783,7 +783,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          const MlSectionTitle('Personal Information',
+          const MlSectionTitle('Personal information',
               icon: Icons.person_rounded,
               meta: 'Editable',
               margin: EdgeInsets.zero),
@@ -791,7 +791,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           TextFormField(
             controller: _firstNameController,
             decoration: const InputDecoration(
-              labelText: 'First Name',
+              labelText: 'First name',
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.person),
             ),
@@ -808,7 +808,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           TextFormField(
             controller: _lastNameController,
             decoration: const InputDecoration(
-              labelText: 'Last Name',
+              labelText: 'Last name',
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.person),
             ),
@@ -825,7 +825,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           TextFormField(
             controller: _employeeWhatsappController,
             decoration: const InputDecoration(
-              labelText: 'WhatsApp Number',
+              labelText: 'WhatsApp number',
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.phone),
             ),
@@ -848,7 +848,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Citizenship Status',
+                    'Citizenship status',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -908,7 +908,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             TextFormField(
               controller: _idNumberController,
               decoration: const InputDecoration(
-                labelText: 'ID Number',
+                labelText: 'ID number',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.badge),
                 hintText: 'Enter your South African ID number',
@@ -986,7 +986,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       color: MlTokens.inkOnFill,
                       size: 30,
                     )
-                  : const Text('Update Profile'),
+                  : const Text('Update profile'),
             ),
           ),
           if (state.error != null) ...[

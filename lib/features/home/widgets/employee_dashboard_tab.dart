@@ -135,7 +135,7 @@ class EmployeeDashboardTab extends ConsumerWidget {
             children: [
               ActionChip(
                 avatar: const Icon(Icons.person_outline, size: 18),
-                label: const Text('Update Profile'),
+                label: const Text('Update profile'),
                 onPressed: () => context.go('/profile'),
               ),
               ActionChip(

@@ -135,7 +135,7 @@ class _WaitingForRoleScreenState extends ConsumerState<WaitingForRoleScreen> {
                         _buildInfoRow('Company', company?.companyName ?? ''),
                         if (employee?.idNumber != null &&
                             employee!.idNumber!.isNotEmpty)
-                          _buildInfoRow('ID Number', employee.idNumber!),
+                          _buildInfoRow('ID number', employee.idNumber!),
                         if (employee?.passportOrWorkersPermit != null &&
                             employee!.passportOrWorkersPermit!.isNotEmpty)
                           _buildInfoRow(

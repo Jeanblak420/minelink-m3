@@ -34,13 +34,13 @@ class _DocumentUploadWidgetState extends ConsumerState<DocumentUploadWidget> {
   String get _documentTypeName {
     switch (widget.documentType) {
       case DocumentType.idDocument:
-        return 'ID Document';
+        return 'ID document';
       case DocumentType.passport:
-        return 'Passport';
+        return 'passport';
       case DocumentType.workVisa:
-        return 'Work Visa';
+        return 'work visa';
       case DocumentType.license:
-        return 'License Document';
+        return 'driving licence';
     }
   }
 
@@ -166,7 +166,7 @@ class _DocumentUploadWidgetState extends ConsumerState<DocumentUploadWidget> {
                           ),
                         )
                       : Icon(Icons.add_a_photo),
-                  label: Text(_isUploading ? 'Uploading...' : 'Choose File'),
+                  label: Text(_isUploading ? 'Uploading...' : 'Choose file'),
                   style: FilledButton.styleFrom(
                     backgroundColor: semantic.surfaceSunken,
                     foregroundColor: semantic.textStrong,

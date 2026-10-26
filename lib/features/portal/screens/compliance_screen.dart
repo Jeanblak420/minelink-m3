@@ -567,6 +567,10 @@ class _ComplianceDocDialogState extends ConsumerState<_ComplianceDocDialog> {
       content: SizedBox(
         width: 460,
         child: SingleChildScrollView(
+          // Room for the first field's floating label, which sits ABOVE its
+          // border: without it the scroll view clipped "This document is for"
+          // to a sliver on the S25 (2026-10-26).
+          padding: const EdgeInsets.only(top: 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

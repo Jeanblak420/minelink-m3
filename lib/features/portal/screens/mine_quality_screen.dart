@@ -195,7 +195,12 @@ class RouteSpecTile extends ConsumerWidget {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(children: [Expanded(child: route), button]),
+                  Row(
+                    children: [
+                      Expanded(child: route),
+                      button,
+                    ],
+                  ),
                   const SizedBox(height: 6),
                   specText,
                 ],
@@ -318,42 +323,35 @@ class _SpecDialogState extends ConsumerState<_SpecDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _cr2o3,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                    ],
-                    decoration: const InputDecoration(
-                      labelText: 'Target Cr₂O₃ %',
-                      border: OutlineInputBorder(),
-                      suffixText: '%',
-                    ),
-                  ),
+            MlFieldPair(
+              first: TextField(
+                controller: _cr2o3,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    controller: _moisture,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                    ],
-                    decoration: const InputDecoration(
-                      labelText: 'Max moisture %',
-                      border: OutlineInputBorder(),
-                      suffixText: '%',
-                    ),
-                  ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                ],
+                decoration: const InputDecoration(
+                  labelText: 'Target Cr₂O₃ %',
+                  border: OutlineInputBorder(),
+                  suffixText: '%',
                 ),
-              ],
+              ),
+              second: TextField(
+                controller: _moisture,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                ],
+                decoration: const InputDecoration(
+                  labelText: 'Max moisture %',
+                  border: OutlineInputBorder(),
+                  suffixText: '%',
+                ),
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
