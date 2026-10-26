@@ -146,9 +146,10 @@ class FleetManagementScreen extends ConsumerWidget {
         icon: Icons.local_shipping_outlined,
         title: 'No vehicles in your fleet yet.',
         message:
-            'Register your first truck to upload its truck pack, driver details and documents.',
+            'Add your first truck to upload its truck pack, driver details and documents.',
         action: MlButton.primary(
-          label: 'Register truck',
+          // Same words as the page's own button above it (S25 walk, 2026-10-26).
+          label: 'Add vehicle',
           icon: Icons.add_rounded,
           onPressed: () => _showAddVehicleDialog(context, ref, companyId),
         ),

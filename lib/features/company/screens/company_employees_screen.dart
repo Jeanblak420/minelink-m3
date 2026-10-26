@@ -1238,7 +1238,11 @@ class _RegisterRowState extends State<_RegisterRow> {
                     Text(
                       [
                         if (e.role != null) e.role!.label,
-                        e.whatsappNumber,
+                        // Skipped when blank: an employee with no number on
+                        // file read "Admin ·  · New this month" (S25 walk,
+                        // 2026-10-26).
+                        if (e.whatsappNumber.trim().isNotEmpty)
+                          e.whatsappNumber,
                         widget.tenure,
                         if (widget.docs > 0)
                           '${widget.docs} doc${widget.docs == 1 ? '' : 's'}',

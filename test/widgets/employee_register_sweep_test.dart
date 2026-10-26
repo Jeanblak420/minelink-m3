@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show FontLoader;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_application_1/core/design/components/ml_page_header.dart';
 
 import 'package:flutter_application_1/core/design/tokens/ml_tokens.dart';
 import 'package:flutter_application_1/features/auth/models/user_type.dart';
@@ -659,8 +660,8 @@ void main() {
   // (design-reference §5 rule 2). Offline took the red/error dot where
   // offline is inert (the profile already drew it faint). And the hero read
   // "Employee Register" under a shell bar reading "Employee register".
-  testWidgets('the editorial accent is THE accent, offline is inert, and the '
-      'title is sentence case', (tester) async {
+  testWidgets('the register is headed like every other page, and offline is '
+      'inert', (tester) async {
     tester.view.physicalSize = const Size(1600, 3600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -671,21 +672,14 @@ void main() {
       embedded: true,
     );
 
-    // The italic "register" span carries the accent ink, not the blue tone.
-    final hero = find.byWidgetPredicate((w) =>
-        w is RichText && w.text.toPlainText().startsWith('Employee '));
-    expect(hero, findsOneWidget);
-    final heroSpan = (hero.evaluate().single.widget as RichText).text as TextSpan;
-    final italic = heroSpan.children!
-        .whereType<TextSpan>()
-        .firstWhere((s) => s.style?.fontStyle == FontStyle.italic);
-    expect(italic.text, 'register', reason: 'the hero is title case again');
-    final blue = MlTone.transit.colors(Brightness.dark).fg;
-    expect(italic.style?.color, isNot(blue),
-        reason: 'the hero word is the in-transit blue — a second accent');
-    expect(find.text('Live employee register'), findsNothing); // it is a span
-    expect(find.textContaining('Live Employee Register'), findsNothing,
-        reason: '"Live Employee Register" is title case again');
+    // One standard page header, sentence case — not its own eyebrow and
+    // two-tone serif title (S25 walk, 2026-10-26).
+    expect(find.byType(MlPageHeader), findsOneWidget);
+    expect(find.text('Employee register'), findsOneWidget);
+    expect(find.textContaining('DIRECTORY'), findsNothing,
+        reason: 'the eyebrow is gone');
+    expect(find.textContaining('employee/user'), findsNothing,
+        reason: 'the caption is plain English');
 
     // The Offline stat's dot is not the fault colour.
     final red = MlTone.error.colors(Brightness.dark).fg;

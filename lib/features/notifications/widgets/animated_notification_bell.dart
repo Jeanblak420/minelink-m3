@@ -25,7 +25,9 @@ class _AnimatedNotificationBellState
   int _previousUnreadCount = 0;
 
   late Animation<double> _scaleAnimation;
-  late Animation<Color?> _colorAnimation;
+  /// 0 → 1 over the first half of a shake: how far the bell has turned from
+  /// the app bar's own icon colour towards amber.
+  late Animation<double> _alertTint;
 
   /// The 30-second re-shake, HELD so it can be cancelled.
   ///
@@ -96,15 +98,15 @@ class _AnimatedNotificationBellState
       ),
     ]).animate(_controller);
 
-    // Add color animation for the bell icon
-    _colorAnimation =
-        ColorTween(begin: MlTokens.slate600, end: MlTokens.amber700).animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
-            reverseCurve: Curves.easeIn,
-          ),
-        );
+    // The bell starts from the app bar's own icon colour, never a fixed
+    // grey. It was `slate600` at rest, which on the dark bar read as a
+    // disabled button beside the white chat and alerts icons (S25 walk,
+    // 2026-10-26). It only turns amber while there is something unread.
+    _alertTint = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+      reverseCurve: Curves.easeIn,
+    );
   }
 
   @override
@@ -166,12 +168,16 @@ class _AnimatedNotificationBellState
           child: RotationTransition(
             turns: _rotationAnimation,
             child: IconButton(
+              tooltip: 'Notifications',
               icon: AnimatedBuilder(
-                animation: _colorAnimation,
+                animation: _alertTint,
                 builder: (context, child) {
+                  final rest = IconTheme.of(context).color;
                   return Icon(
                     Icons.notifications,
-                    color: _colorAnimation.value,
+                    color: unreadCount > 0
+                        ? Color.lerp(rest, MlTokens.amber700, _alertTint.value)
+                        : rest,
                   );
                 },
               ),

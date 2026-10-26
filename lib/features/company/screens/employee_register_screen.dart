@@ -535,70 +535,17 @@ class _EmployeeRegisterScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(width: 26, height: 2, color: _p.blue),
-            const SizedBox(width: 10),
-            // IT WRAPS RATHER THAN TRUNCATING.
-            //
-            // At 412px the eyebrow read "FIXTURE HAULAGE (PTY) LTD · DIRECTO…"
-            // — the one word that says what the page IS, cut in half, while
-            // the company name it made room for appears twice more below and
-            // once in the shell's own bar. An eyebrow on two lines costs 18px;
-            // an eyebrow missing its noun costs the reader the label.
-            Expanded(
-              child: Text(
-                '${company.companyName.toUpperCase()} · DIRECTORY',
-                style: context.mlText.titleSmall.copyWith(
-                  color: _p.blue,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.6,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        RichText(
-          text: TextSpan(
-            style: context.mlText.figure(
-              color: _p.textStrong,
-              size: 46,
-              height: 1.05,
-            ),
-            children: [
-              const TextSpan(text: 'Employee '),
-              // Sentence case, as the shell bar above it already reads
-              // "Employee register" and every title on the reference does.
-              TextSpan(
-                text: 'register',
-                style: TextStyle(fontStyle: FontStyle.italic, color: _p.blue),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        RichText(
-          text: TextSpan(
-            style: context.mlText.bodyMedium.copyWith(
-              color: _p.textMuted,
-              height: 1.55,
-            ),
-            children: [
-              const TextSpan(
-                text: 'Live employee register · A read-only view of each '
-                    'employee/user registered under ',
-              ),
-              TextSpan(
-                text: company.companyName,
-                style: TextStyle(fontWeight: FontWeight.w800, color: _p.blue),
-              ),
-              const TextSpan(
-                text: '. Synced & updated automatically on every change and '
-                    'last seen / online / away status for each member.',
-              ),
-            ],
-          ),
+        // The same page header as every other page. This one had its own —
+        // a "COMPANY · DIRECTORY" eyebrow over a 46px two-tone serif title
+        // and a caption in shorthand ("employee/user … last seen / online /
+        // away") — and on the S25 it was the one page that looked like it
+        // came from another app (walk, 2026-10-26).
+        MlPageHeader(
+          title: 'Employee register',
+          description:
+              'Everyone with a login at ${company.companyName}, and when '
+              'each was last online. It updates by itself and is view-only.',
+          padding: EdgeInsets.zero,
         ),
         const SizedBox(height: 16),
         Wrap(

@@ -101,7 +101,9 @@ class CommunicationsHubScreen extends ConsumerWidget {
                   ),
                   MlCard.heroTitleRule(),
                   Text(
-                    'Live announcements and team conversations for ${access.currentUserName}.',
+                    // The company, not the person: it read "…for Walk MMG" (S25 walk,
+                    // 2026-10-26) under a card already headed with the company.
+                    'Announcements and team chats for everyone at this company.',
                     style: context.mlText.bodyLarge.copyWith(
                       color: MlSemantic.of(context).textMuted,
                     ),

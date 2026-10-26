@@ -36,8 +36,8 @@ class BuyerTruckLocationsScreen extends ConsumerWidget {
               meta: mlCount(snap.positions.length, 'truck reporting',
                   'trucks reporting'),
               description:
-                  'Latest GPS samples you are allowed to see: rows appear when a vehicle is on a trip '
-                  'linked to a transaction where your company is the buyer (plus future supplier rules).',
+                  'Live GPS for trucks on trips delivering to you. '
+                  'Tap a truck anywhere in the app to highlight it here.',
               padding: EdgeInsets.zero,
             ),
             const SizedBox(height: 20),

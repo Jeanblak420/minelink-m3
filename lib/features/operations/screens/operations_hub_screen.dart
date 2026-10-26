@@ -350,7 +350,7 @@ class _OperationsSummaryHeader extends StatelessWidget {
                   MlSectionTitle(
                     access.company.companyName,
                     subtitle:
-                        'Live operational records, entry forms, and realtime updates for ${access.operatorName}.',
+                        "Today's records and entry forms, updated live.",
                     margin: const EdgeInsets.only(bottom: 16),
                   ),
                   Wrap(
