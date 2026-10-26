@@ -43,82 +43,82 @@ void main() {
     const cases = <String, (String, String)>{
       '/super-admin': (
         'Global Admin · Dashboard',
-        'Full system overview · Live · updated just now'
+        'Full system overview · Live · updated just now',
       ),
       '/super-admin/insights/transporter': (
         'Organization insights',
-        'This month (South African time) · monthly rollups per company'
+        'This month (South African time) · monthly rollups per company',
       ),
       '/super-admin/insights/transporter/company/abc': (
         'Company workspace',
-        'Read-only mirror · filter & export where available'
+        'Read-only mirror · filter & export where available',
       ),
       '/super-admin/chat-links': (
         'Chat links',
-        'Link companies so their people can message each other'
+        'Link companies so their people can message each other',
       ),
       '/super-admin/organizations': (
         'Organizations',
-        'Every registered company, its seats and its token expiry'
+        'Every registered company, its seats and its token expiry',
       ),
       '/super-admin/register-company': (
         'Register company',
-        'Create a company and issue its first access token'
+        'Create a company and issue its first access token',
       ),
       '/super-admin/audit-logs': (
         'Audit logs',
-        'Who did what, and when · newest first'
+        'Who did what, and when · newest first',
       ),
       '/super-admin/requests/transportation': (
         'Requested routes',
-        'Route and transporter requests awaiting review'
+        'Route and transporter requests awaiting review',
       ),
       '/super-admin/requests/product': (
         'Requested product',
-        'Buyers asking for a product listing'
+        'Buyers asking for a product listing',
       ),
       '/super-admin/requests/buyer': (
         'Requested buyers',
-        'Mines asking for buyer connections and roster access'
+        'Mines asking for buyer connections and roster access',
       ),
       '/super-admin/token-requests': (
         'Token requests',
-        'Access tokens awaiting your approval'
+        'Access tokens awaiting your approval',
       ),
       '/super-admin/token-history': (
         'Token history',
-        'Every token ever issued, renewed or revoked'
+        'Every token ever issued, renewed or revoked',
       ),
       '/super-admin/notifications': (
         'Notifications',
-        'Platform alerts and token activity'
+        'Platform alerts and token activity',
       ),
       '/super-admin/account-security': (
         'Account security',
-        'Update your email sign-in password'
+        'Update your email sign-in password',
       ),
       '/super-admin/preferences': (
         'User preferences',
-        'Appearance, display & accessibility · saved to your account only'
+        'Appearance, display & accessibility · saved to your account only',
       ),
       '/super-admin/settings': (
         'Platform settings',
-        'Platform-wide configuration'
+        'Platform-wide configuration',
       ),
       '/super-admin/navigation-setup': (
         'Navigation setup',
-        "Adding a mine's own haul roads to turn-by-turn navigation"
+        "Adding a mine's own haul roads to turn-by-turn navigation",
       ),
       // "Request tracking logs", not "Request's Tracking Logs" — the
       // possessive was misplaced and the title case sat against every
       // sentence-case label on the console (Phase 3 pass, 2026-08-23).
       '/super-admin/request-tracking': (
         'Request tracking logs',
-        'Every request, and where it has got to'
+        'Every request, and where it has got to',
       ),
       '/super-admin/anything-unmapped': (
         'Platform Admin',
-        'Platform management'
+        'Platform management',
       ),
     };
 
@@ -132,13 +132,17 @@ void main() {
       // The insights rule matches this path too. The pre-merge table put the
       // leaderboard branch first with a comment saying why: otherwise the page
       // claims to be the overview it was opened from.
-      expect(_t('/super-admin/insights/transporter/leaderboard').title,
-          'Leaderboard');
+      expect(
+        _t('/super-admin/insights/transporter/leaderboard').title,
+        'Leaderboard',
+      );
     });
 
     test('a company workspace wins over the generic insights title', () {
-      expect(_t('/super-admin/insights/buyer/company/x').title,
-          'Company workspace');
+      expect(
+        _t('/super-admin/insights/buyer/company/x').title,
+        'Company workspace',
+      );
     });
 
     test('the console always has a subtitle; the portal never does', () {
@@ -241,8 +245,17 @@ void main() {
     const mine = MlPortalTabs(['Overview', 'Security', 'Controller'], 1);
     const buyer = MlPortalTabs(['Dashboard', 'Requests'], 0);
 
-    test('/home takes the label of the active tab', () {
-      expect(_t('/home', tabs: mine).title, 'Security');
+    test('/home takes the active tab, by the name the menu gives it', () {
+      // The tab is still called 'Security'; the menu calls the same place
+      // "Security gate", and the bar follows the menu (S25 walk, 2026-10-26).
+      expect(_t('/home', tabs: mine).title, 'Security gate');
+      expect(
+        _t(
+          '/home',
+          tabs: const MlPortalTabs(['Overview', 'Security', 'Controller'], 2),
+        ).title,
+        'Load controller',
+      );
       expect(_t('/home', tabs: buyer).title, 'Dashboard');
     });
 
@@ -258,10 +271,14 @@ void main() {
       // the shell over a title.
       expect(_t('/home').title, 'Workspace');
       expect(_t('/portal/mine').title, 'Overview');
-      expect(_t('/home', tabs: const MlPortalTabs(['Profile'], 5)).title,
-          'Workspace');
-      expect(_t('/home', tabs: const MlPortalTabs(['Profile'], -1)).title,
-          'Workspace');
+      expect(
+        _t('/home', tabs: const MlPortalTabs(['Profile'], 5)).title,
+        'Workspace',
+      );
+      expect(
+        _t('/home', tabs: const MlPortalTabs(['Profile'], -1)).title,
+        'Workspace',
+      );
     });
   });
 

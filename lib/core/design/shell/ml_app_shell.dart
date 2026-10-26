@@ -538,19 +538,13 @@ class _MlAppShellState extends State<MlAppShell> {
     // S25 Ultra (411dp, system font 1.3) "My profile" sat wrapped between the
     // back arrow and the chat icon, "My" over "profile", while the pages
     // either side carried theirs on the row below — the row reads better.
-    final titleNeedsOwnRow = compact &&
-        _titleBreaksBesideTheIcons(
-          _resolvedTitle,
-          style: compactTitleStyle,
-          scaler: textScaler,
-          room: MediaQuery.sizeOf(context).width -
-              // The leading box: drawer alone, or drawer + back.
-              (widget.leading != null ? 112 : 56) -
-              // Each action is a 48dp icon button, plus the trailing gap.
-              (widget.actions.length * 48 + 8) -
-              // `titleSpacing`, both sides of the title.
-              (leading == null ? 20 : 8) * 2,
-        );
+    //
+    // And from 2026-10-26 EVERY phone title takes that row. The measured rule
+    // left the short ones in the bar, and on the S25 walk the title jumped
+    // page to page: "Quality", "Buyers", "Trips" and "Tons out" beside the
+    // icons, "Production", "Stockpiles" and the rest on the row below. One
+    // place for the page's name is worth the 40px.
+    final titleNeedsOwnRow = compact && _resolvedTitle.trim().isNotEmpty;
     final ownRowStyle = compactTitleStyle;
     final ownRowLines = titleNeedsOwnRow
         ? _lineCount(
@@ -643,32 +637,6 @@ class _MlAppShellState extends State<MlAppShell> {
     );
   }
 
-  /// Whether [title], set in [style] at [scaler], could NOT sit on one line
-  /// in a column [room] wide.
-  ///
-  /// Measured rather than assumed, because the answer depends on the reader's
-  /// text scale, the number of actions in the bar and the longest word in
-  /// the title — three things no fixed breakpoint can know.
-  static bool _titleBreaksBesideTheIcons(
-    String title, {
-    required TextStyle? style,
-    required TextScaler scaler,
-    required double room,
-  }) {
-    if (title.trim().isEmpty) return false;
-    if (room <= 0) return true;
-    // Every word on its own: a word wider than the column is the one case
-    // Flutter resolves by breaking INSIDE it.
-    for (final word in title.split(RegExp(r'\s+'))) {
-      if (word.isEmpty) continue;
-      if (_measure(word, style: style, scaler: scaler).width > room) {
-        return true;
-      }
-    }
-    return _lineCount(title, style: style, scaler: scaler, maxWidth: room) >
-        1;
-  }
-
   /// How many lines [text] takes at [maxWidth], unbounded.
   static int _lineCount(
     String text, {
@@ -684,22 +652,6 @@ class _MlAppShellState extends State<MlAppShell> {
     final lines = painter.computeLineMetrics().length;
     painter.dispose();
     return math.max(1, lines);
-  }
-
-  static Size _measure(
-    String text, {
-    required TextStyle? style,
-    required TextScaler scaler,
-  }) {
-    final painter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      textDirection: TextDirection.ltr,
-      textScaler: scaler,
-      maxLines: 1,
-    )..layout();
-    final size = painter.size;
-    painter.dispose();
-    return size;
   }
 
   Widget _buildDrawer(MlChrome chrome) {

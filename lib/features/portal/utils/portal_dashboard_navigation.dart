@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/core/routing/ml_route_title.dart';
 import 'package:flutter_application_1/features/auth/providers/auth_state.dart';
 import 'package:flutter_application_1/features/company/providers/company_provider.dart';
 import 'package:flutter_application_1/features/employee/providers/employee_provider.dart';
@@ -8,28 +9,6 @@ import 'package:flutter_application_1/features/portal/providers/portal_tab_index
 import 'package:flutter_application_1/features/portal/providers/portal_workspace_provider.dart';
 import 'package:flutter_application_1/features/portal/utils/portal_company_resolution.dart';
 import 'package:go_router/go_router.dart';
-
-/// Labels that dashboards, cards and workflow notifications still ask for by
-/// their **old tab name**, mapped to the destination they mean in the nav tree.
-///
-/// The rebuild renamed several entries for accuracy — `Controller` was a
-/// person, not a place; `Security` was ambiguous between the gate and account
-/// security — and the callers were not all rewritten in the same change. This
-/// table is the seam. It shrinks as call sites move to routes and should reach
-/// empty; it is not a permanent indirection.
-const Map<String, String> _legacyTabLabels = {
-  'Overview': 'Dashboard',
-  'Controller': 'Load controller',
-  'Security': 'Security gate',
-  'Supervisor': 'Stockpiles',
-  'Fleet / routes': 'Routes & dispatches',
-  'Trucks On Route': 'Trucks on route',
-  'Tracking': 'Request tracking',
-  'Routes & Mines': 'Routes & mines',
-  'Driver': 'Drivers',
-  'Profile': 'My profile',
-  'Requests': 'Requests',
-};
 
 /// The route behind a sidebar label for this session, or null when this
 /// session's tree has no such destination.
@@ -46,7 +25,7 @@ String? portalNavRouteForLabel(WidgetRef ref, String label) {
         ? null
         : ref.read(employeeProvider).employee?.role,
   );
-  final target = _legacyTabLabels[label] ?? label;
+  final target = mlTabMenuNames[label] ?? label;
   for (final leaf in tree.expand((n) => n.leaves)) {
     if (leaf.label == target) return leaf.route;
   }

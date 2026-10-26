@@ -12,12 +12,12 @@
 //
 // The fix is Material 3's medium top app bar: when the title cannot sit
 // beside the icons on two lines without splitting a word, it drops onto its
-// own full-width row under them. Short titles keep the 72px bar.
+// own full-width row under them. Since 2026-10-26 every phone title does,
+// short ones included, so the page name is always in the same place.
 //
 // Sabotage: make `titleNeedsOwnRow` always false in `MlAppShell._buildTopBar`
-// and the first case fails — `controller` lands on two different lines. The
-// second case stays green under that sabotage, and FAILS if the fallback is
-// made unconditional, which is how the fix is proven not to have gone too far.
+// and every case fails — `controller` lands on two different lines and the
+// short title climbs back into the bar.
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -127,16 +127,18 @@ void main() {
         reason: 'on its own row it reads on one line');
   });
 
-  testWidgets('a short title stays beside the icons in the 72px bar',
+  testWidgets('a short title takes its own row too, so it never moves',
       (tester) async {
-    // The console's phone bar: drawer + back and TWO actions. `Overview`
-    // rather than `Dashboard`, which is also a bottom-nav label here.
+    // The console's phone bar: drawer + back and TWO actions — the most room
+    // a title ever gets beside the icons. Even here it goes below them: on
+    // the S25 walk (2026-10-26) the short titles stayed in the bar and the
+    // long ones dropped, so the page name jumped as you moved between pages.
     await tester.pumpWidget(_phone('Overview', scale: 1.0, actions: 2));
     await tester.pumpAndSettle();
 
     final titleRect = tester.getRect(find.text('Overview'));
-    expect(titleRect.bottom, lessThanOrEqualTo(MlTokens.appBarHeight),
-        reason: 'a title that fits keeps the small bar');
+    expect(titleRect.top, greaterThanOrEqualTo(MlTokens.appBarHeight - 1),
+        reason: 'every phone title sits on the row under the icons');
     expect(_lineTopsOf(tester, 'Overview', 0, 'Overview'.length),
         hasLength(1));
   });

@@ -145,9 +145,11 @@ void main() {
 
       final painted = tester.getSize(canvas).height;
       final bottomBar = tester.getSize(find.byType(NavigationBar)).height;
-      // 900 window − 72 app bar − the bottom bar. Anything materially short of
-      // that is the seam.
-      final available = 900 - 72 - bottomBar;
+      // 900 window − the app bar − the bottom bar. Anything materially short
+      // of that is the seam. The bar is MEASURED: on a phone the title has its
+      // own row under the icons (2026-10-26), so it is taller than the token.
+      final appBar = tester.getSize(find.byType(AppBar)).height;
+      final available = 900 - appBar - bottomBar;
       expect(painted, closeTo(available, 2),
           reason: 'the workspace canvas is ${painted.toStringAsFixed(0)}px tall '
               'in a ${available.toStringAsFixed(0)}px body, so '

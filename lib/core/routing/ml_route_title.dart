@@ -51,6 +51,28 @@ class MlRouteTitle {
       subtitle == null ? 'MlRouteTitle($title)' : 'MlRouteTitle($title, $subtitle)';
 }
 
+/// Old tab names that screens, cards and notifications still use, mapped to
+/// the name the menu gives the same destination.
+///
+/// The rebuild renamed several entries for accuracy — `Controller` was a
+/// person, not a place; `Security` was ambiguous between the gate and account
+/// security — and the callers were not all rewritten in the same change. This
+/// table is the seam. It shrinks as call sites move to routes and should reach
+/// empty; it is not a permanent indirection.
+const Map<String, String> mlTabMenuNames = {
+  'Overview': 'Dashboard',
+  'Controller': 'Load controller',
+  'Security': 'Security gate',
+  'Supervisor': 'Stockpiles',
+  'Fleet / routes': 'Routes & dispatches',
+  'Trucks On Route': 'Trucks on route',
+  'Tracking': 'Request tracking',
+  'Routes & Mines': 'Routes & mines',
+  'Driver': 'Drivers',
+  'Profile': 'My profile',
+  'Requests': 'Requests',
+};
+
 /// The portal sidebar's state, as much of it as a title needs.
 class MlPortalTabs {
   /// Tab labels in sidebar order.
@@ -63,8 +85,16 @@ class MlPortalTabs {
 
   static const empty = MlPortalTabs(<String>[], -1);
 
-  String? get homeLabel =>
-      homeIndex >= 0 && homeIndex < labels.length ? labels[homeIndex] : null;
+  /// The title of the tab `/home` is showing, by the name the MENU uses.
+  ///
+  /// Tab labels are the old names ("Security", "Controller", "Supervisor"),
+  /// so a guard's landing page read "Security" while the menu above it said
+  /// "Security gate" (S25 walk, 2026-10-26). [mlTabMenuNames] maps them.
+  String? get homeLabel {
+    if (homeIndex < 0 || homeIndex >= labels.length) return null;
+    final label = labels[homeIndex];
+    return mlTabMenuNames[label] ?? label;
+  }
 
   /// The org's landing tab: Overview on a mine or transporter, Dashboard on a
   /// buyer or an employee shell.
@@ -427,7 +457,7 @@ String _portalTitle(Uri uri, MlPortalTabs tabs) {
       // "Security gate", the rail's own label. Bare "Security" is ambiguous
       // between the mine's gate and account security — which is a real
       // destination one group away, titled "Account & security" — and
-      // `_legacyTabLabels` already had to map the old tab name 'Security' onto
+      // `mlTabMenuNames` already had to map the old tab name 'Security' onto
       // 'Security gate' for exactly that reason. Settled 2026-08-22.
       'security' => 'Security gate',
       'gate' => 'Gate control',

@@ -3434,7 +3434,10 @@ void main() {
         },
       );
       final tabs = tester.getRect(find.text('Snapshot'));
-      expect(tabs.top, lessThan(110),
+      // Pinned means just under the shell's bar — measured, because on a
+      // phone the bar carries the title on its own row (2026-10-26).
+      final bar = tester.getRect(find.byType(AppBar).first);
+      expect(tabs.top, lessThan(bar.bottom + 38),
           reason: 'the tab strip scrolled away with the header; it must pin');
       // The phone header (and its search button) has scrolled off the top.
       final search = find.byTooltip('Search assets, routes, users');
