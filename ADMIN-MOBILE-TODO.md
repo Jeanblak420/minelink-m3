@@ -1025,7 +1025,7 @@ Throwaway users per role, everything they touch deleted after (9.3 method).
       throttle), so a second person signing in within the hour shows under
       the first until then — a migration, not done without Jean's OK.
   - Renders: 37 updated, each only an intended change (2404a92).
-- [ ] 12.7 Ship and prove.
+- [x] 12.7 Ship and prove.
   - [x] Analyze clean; full suite 2916 passed (1 skipped, pre-existing);
         37 renders updated and checked.
   - [x] Cleanup: 5 throwaway users — device check-ins and employees deleted,
@@ -1034,6 +1034,25 @@ Throwaway users per role, everything they touch deleted after (9.3 method).
         column in public/auth/storage empty. The one check-in the Eli attempt
         wrote from the emulator deleted. Health probe 7/7.
   - [x] Release APK (511 entries, config present) to the NAS, hashes match.
-  - [ ] Walk the fixes on the S25: the pairing code from Jean had expired by
-        the time the list was done and the phone was not on the network —
-        needs a fresh code.
+  - [x] Walked the fixes on the S25 (fresh pairing 2026-10-25, APK a7ca5159
+        installed, throwaway users): transporter admin signs in, opens a page,
+        signs out; the no-role employee then lands on "Waiting for Role
+        Assignment" (the race fix holds). Transporter pages read Dashboard,
+        Routes & dispatches, Vehicles (captions "All vehicles", "Carrying a
+        load", "Ready to allocate"), Employees, Communications, My profile.
+        Mine admin: Stockpiles, Security gate, Load controller, Operations hub
+        ("The live working day — minerals, transactions, …"), Tons out ("Net
+        mass · last 24 hours"). Driver: chat icon beside the bell on
+        Dashboard/Trip/Profile, no floating button; opens Messages, Back
+        closes it. Device id: five sign-ins by four people made ONE check-in
+        row for the phone (would have been five).
+  - [x] FOUND on the S25: "My profile" wrapped onto two lines inside the top
+        bar ("My" over "profile") while neighbouring pages put their titles
+        on the row below. FIXED (26e527b): a phone title that needs a second
+        line beside the icons takes its own row. Test added to
+        phone_title_never_breaks_a_word_test (fails on the old rule); six
+        console renders updated (titles now on one line); analyze clean, rest
+        of suite green. New APK dd38f377 on the NAS (both copies match);
+        S25 had dropped off the network by then, so checked on the
+        S25-matched emulator: My profile on one line on its own row.
+        Throwaway users cleaned (seats 0/4/1, sweep empty, health 7/7).
